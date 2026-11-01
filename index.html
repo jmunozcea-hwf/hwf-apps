@@ -1490,7 +1490,7 @@ body.m-dash #crmMeta{display:none!important}
           <input id="cq" type="search" placeholder="Buscar cliente, comuna o dirección" aria-label="Buscar cliente">
         </div>
         <select id="cOrden" aria-label="Ordenar clientes">
-          <option value="falta">Mayor falta en octubre</option>
+          <option value="falta" id="npMesOrden">Mayor falta del mes</option>
           <option value="cerca">Más cerca de mí</option>
           <option value="nombre">Nombre</option>
           <option value="antiguo">Más tiempo sin comprar</option>
@@ -2415,7 +2415,7 @@ function pintarCRM() {
   const m = d && d.meta;
   if (m && m.meta) {
     const pct = Math.min(1, m.avance / m.meta), hoyActs = actividades().filter(a => String(a.fecha).slice(0, 10) === hoyISO() || new Date(a.fecha).toDateString() === new Date().toDateString());
-    $("crmMeta").innerHTML = `<div class="l1"><span class="hint">Meta octubre · ${esc(d.cartera)}</span><span class="hint">${d.clientes.length} clientes · ${hoyActs.filter(a => a.tipo === "Visita").length} visitas hoy</span></div>
+    $("crmMeta").innerHTML = `<div class="l1"><span class="hint">Meta ${(npMesTxt(), nombreMes())} · ${esc(d.cartera)}</span><span class="hint">${d.clientes.length} clientes · ${hoyActs.filter(a => a.tipo === "Visita").length} visitas hoy</span></div>
       <div class="l1"><span class="big num">${fmt(m.avance)} <span class="hint" style="font-size:.9rem">de ${fmt(m.meta)}</span></span><b class="num">${Math.round(pct * 100)}%</b></div>
       <div class="pbar"><i style="width:${Math.round(pct * 100)}%"></i></div>
       <div class="hint">${m.falta > 0 ? `Faltan <b>${fmt(m.falta)}</b>. ` : "Meta cumplida. "}Incluye ventas al ${fd2(m.fecha_corte)}${m.venta_app ? ` y ${fmt(m.venta_app)} en pedidos exportados desde la app` : ""}.</div>`;
@@ -2457,7 +2457,7 @@ async function pintarLista() {
       <div class="cli-top"><b>${esc(tc(c.nombre))}</b>${orden === "cerca" && isFinite(c._d) ? `<span class="dist">${distTxt(c._d)}</span>` : ""}</div>
       <div class="cli-sub">${esc([tc(c.direccion), tc(c.comuna)].filter(Boolean).join(", "))}</div>
       ${typeof prAlias === "function" && prAlias(c.codigo) ? `<div class="cli-alias">También: ${esc(prAlias(c.codigo))}</div>` : ""}
-      <div class="chips2">${falta > 0 ? `<span class="ch falta">Falta ${fmt(falta)}</span>` : Number(c.compra_habitual) > 0 ? '<span class="ch ok">Al día en octubre</span>' : ""}
+      <div class="chips2">${falta > 0 ? `<span class="ch falta">Falta ${fmt(falta)}</span>` : Number(c.compra_habitual) > 0 ? `<span class="ch ok">Al día en ${nombreMes()}</span>` : ""}
         ${Number(c.cotizacion_pendiente) > 0 ? `<span class="ch cot">NP Defontana ${fmt(Number(c.cotizacion_pendiente))}</span>` : ""}
         ${px ? `<span class="ch ${px < hoy ? "atr" : "prox"}">${px < hoy ? "Atrasado" : "Contactar"} ${fd2(px)}</span>` : ""}
         ${!tieneUb(c) ? '<span class="ch sinub">Sin ubicación</span>' : ""}</div></button>`;
@@ -2497,8 +2497,8 @@ function pintarFicha(cod) {
     </div>
     <div class="kpi3 num">
       <div><span>Compra habitual</span><b>${fmt(Number(c.compra_habitual || 0))}</b></div>
-      <div><span>Octubre</span><b>${fmt(Number(c.octubre || 0))}</b></div>
-      <div><span>Falta octubre</span><b style="color:${Number(c.falta_octubre) > 0 ? "#9A5B00" : "#1C7A4E"}">${fmt(Number(c.falta_octubre || 0))}</b></div>
+      <div><span>${npMesCap()}</span><b>${fmt(Number(c.octubre || 0))}</b></div>
+      <div><span>Falta ${nombreMes()}</span><b style="color:${Number(c.falta_octubre) > 0 ? "#9A5B00" : "#1C7A4E"}">${fmt(Number(c.falta_octubre || 0))}</b></div>
       <div><span>Compra 2026</span><b>${fmt(Number(c.compra_2026 || 0))}</b></div>
       <div><span>Última compra</span><b>${fd2(c.ultima_compra) || "—"}</b></div>
       <div><span>Meses con compra</span><b>${c.meses_compra || 0}</b></div>
@@ -3605,7 +3605,7 @@ candidatos = function () {
 /* ================================================================
    INICIO: BIENVENIDA, NOVEDADES Y MISIONES DEL DÍA
    ================================================================ */
-const APP_VERSION = "5.3";
+const APP_VERSION = "5.4";
 const APP_NOVEDADES = [
   "Navegación más simple: flechas ‹ › para pasar de apartado, desliza el dedo para cambiar y el botón atrás vuelve donde estabas.",
   "Nuevo apartado Nutrición: compara el alimento de la competencia con los nuestros, con 3 razones y la ración diaria equivalente para cada perro o gato. Incluye las fichas técnicas de toda la línea HWF.",
@@ -5396,6 +5396,12 @@ if (typeof syEstados === "function") { const _syEstadosCC = syEstados; syEstados
 setTimeout(ccSync, 2500);
 document.addEventListener("visibilitychange", () => { if (!document.hidden) ccSync(); });
 if (typeof APP_NOVEDADES !== "undefined" && Array.isArray(APP_NOVEDADES)) APP_NOVEDADES.unshift("Clientes: botón «Dar de baja» en la ficha, con el motivo. Los dados de baja se ven en Mis clientes → orden «Dados de baja» y se pueden reactivar.");
+
+/* ===== mes de los textos (patch_mes) ===== */
+const npMesCap = () => { const m = nombreMes() || ""; return m.charAt(0).toUpperCase() + m.slice(1); };
+function npMesTxt() { const o = document.getElementById("npMesOrden"); if (o) o.textContent = "Mayor falta en " + nombreMes(); }
+try { npMesTxt(); } catch (e) {} document.addEventListener("DOMContentLoaded", () => { try { npMesTxt(); } catch (e) {} });
+if (typeof APP_NOVEDADES !== "undefined" && Array.isArray(APP_NOVEDADES)) APP_NOVEDADES.unshift("Mis clientes: la meta, «Falta» y «Al día» ahora muestran el mes de los datos (ya no dice siempre octubre).");
 </script>
 </body>
 </html>
