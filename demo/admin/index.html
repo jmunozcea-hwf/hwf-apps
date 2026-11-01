@@ -3469,5 +3469,84 @@ function npBarrasMes(pend) {
   return `<div class="np-mesbar"><h3>Por mes</h3><div class="bars">${ks.map(k => `<div class="bar"><span class="lab">${npMesNom(k)}</span><span class="tr"><i style="width:${Math.round(t[k] / mx * 100)}%;background:#0B3146"></i></span><b class="num">${mm(t[k])}</b></div>`).join("")}</div></div>`;
 }
 </script>
+
+<script>
+/* ===== Comparación con el año anterior (común a HWF Admin y Nota de Pedido) =====
+   D.rows: [ci, pi, mes, día, cant, neto, costo, vend, año?]  (año vacío = D.anio)
+   yaCalc(D, Y, M, lim, incl, cart): mes M a la misma fecha (día ≤ lim), año a la fecha, mes completo del año anterior,
+   venta mensual de ambos años y detalle por cartera. Devuelve null si no hay ventas del año anterior. */
+const YA_MESES = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+function yaCalc(D, Y, M, lim, incl, cart) {
+  const A = Y - 1, an = r => r[8] || D.anio;
+  const o = { Y, A, M, lim, mesY: 0, mesA: 0, mesAfull: 0, ytdY: 0, ytdA: 0, anioA: 0, porMes: {}, cart: {}, hay: false };
+  for (let m = 1; m <= 12; m++) o.porMes[m] = [0, 0];
+  D.rows.forEach(r => {
+    const y = an(r); if (y !== Y && y !== A) return; if (!incl(r)) return;
+    const m = r[2], d = r[3], v = r[5], i = y === Y ? 0 : 1, c = cart(r) || "Sin cartera";
+    o.porMes[m][i] += v;
+    const k = o.cart[c] = o.cart[c] || { mY: 0, mA: 0, yY: 0, yA: 0 };
+    const enYtd = m < M || (m === M && d <= lim), enMes = m === M && d <= lim;
+    if (i === 0) { if (enMes) { o.mesY += v; k.mY += v; } if (enYtd) { o.ytdY += v; k.yY += v; } }
+    else { o.hay = true; o.anioA += v; if (m === M) o.mesAfull += v; if (enMes) { o.mesA += v; k.mA += v; } if (enYtd) { o.ytdA += v; k.yA += v; } }
+  });
+  return o.hay ? o : null;
+}
+function yaVar(a, b) { return b ? a / b - 1 : null; }
+function yaChip(v) { return v == null || !isFinite(v) ? '<i class="ya-ch">—</i>' : `<i class="ya-ch ${v >= 0 ? "up" : "down"}">${v >= 0 ? "▲" : "▼"} ${Math.abs(Math.round(v * 100))}%</i>`; }
+/* tarjeta HTML. f = formato de pesos (corto), mesN = nombre del mes, conCart = mostrar tabla por cartera */
+function yaHtml(o, f, mesN, conCart) {
+  const dd = String(o.lim).padStart(2, "0"), mm = String(o.M).padStart(2, "0"), max = Math.max(1, ...Object.values(o.porMes).flat());
+  const hastaM = m => m <= o.M;
+  const barras = Object.entries(o.porMes).map(([m, [y, a]]) => { m = Number(m);
+    return `<div class="ya-m" title="${YA_MESES[m - 1]} ${o.Y}: ${f(y)}${hastaM(m) && m === o.M ? " (a la fecha)" : ""} · ${o.A}: ${f(a)}">
+      <div class="ya-b"><i class="a" style="height:${(a / max * 100).toFixed(1)}%"></i>${hastaM(m) ? `<i class="y${m === o.M ? " cur" : ""}" style="height:${(y / max * 100).toFixed(1)}%"></i>` : '<i class="y" style="visibility:hidden"></i>'}</div><span>${YA_MESES[m - 1]}</span></div>`; }).join("");
+  const filas = Object.entries(o.cart).filter(([, k]) => k.mY || k.mA || k.yY || k.yA).sort((a, b) => b[1].yY - a[1].yY);
+  const tabla = conCart && filas.length > 1 ? `<div class="ya-tbl"><table><thead><tr><th>Cartera</th><th class="n">${mesN} ${o.Y}</th><th class="n">${o.A}</th><th class="n"></th><th class="n">Año ${o.Y}</th><th class="n">${o.A}</th><th class="n"></th></tr></thead><tbody>
+    ${filas.map(([c, k]) => `<tr><td>${c.replace(/[&<>"']/g, "")}</td><td class="n">${f(k.mY)}</td><td class="n">${f(k.mA)}</td><td class="n">${yaChip(yaVar(k.mY, k.mA))}</td><td class="n">${f(k.yY)}</td><td class="n">${f(k.yA)}</td><td class="n">${yaChip(yaVar(k.yY, k.yA))}</td></tr>`).join("")}</tbody></table></div>` : "";
+  const falta = Math.max(0, o.mesAfull - o.mesY);
+  return `<div class="ya"><h3>Comparación con ${o.A} <small>mismo período · al ${dd}-${mm}</small></h3>
+    <div class="ya-k">
+      <div><span>${mesN} a la fecha</span><b>${f(o.mesY)}</b><small>${o.A}: ${f(o.mesA)}</small>${yaChip(yaVar(o.mesY, o.mesA))}</div>
+      <div><span>Año a la fecha</span><b>${f(o.ytdY)}</b><small>${o.A}: ${f(o.ytdA)}</small>${yaChip(yaVar(o.ytdY, o.ytdA))}</div>
+      <div><span>${mesN} ${o.A} completo</span><b>${f(o.mesAfull)}</b><small>${falta ? `faltan ${f(falta)} para igualarlo` : "ya superado ✓"}</small></div>
+      <div><span>Año ${o.A} completo</span><b>${f(o.anioA)}</b><small>${o.anioA ? `${Math.round(o.ytdY / o.anioA * 100)}% ya vendido en ${o.Y}` : ""}</small></div>
+    </div>
+    <div class="ya-g">${barras}</div>
+    <div class="ya-ley"><span><i class="y"></i>${o.Y}</span><span><i class="a"></i>${o.A}</span></div>${tabla}</div>`;
+}
+const YA_CSS = `
+.ya{grid-column:1/-1;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:13px 14px;display:grid;gap:12px;min-width:0}
+.ya h3{margin:0;font-size:1rem;display:flex;justify-content:space-between;gap:8px;align-items:baseline;flex-wrap:wrap}
+.ya h3 small{font-weight:400;color:var(--muted);font-size:.8rem}
+.ya-k{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+@media (min-width:760px){.ya-k{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.ya-k div{border:1px solid var(--line);border-radius:10px;padding:9px 11px;display:grid;gap:2px;position:relative}
+.ya-k span{font-size:.78rem;color:var(--muted)}.ya-k b{font-size:1.2rem;font-variant-numeric:tabular-nums}.ya-k small{font-size:.76rem;color:var(--muted)}
+.ya-k .ya-ch{justify-self:start;margin-top:2px}
+.ya-ch{font-style:normal;font-size:.72rem;font-weight:800;padding:2px 7px;border-radius:999px;background:var(--sunk,#EEF2F5);color:var(--muted);white-space:nowrap}
+.ya-ch.up{background:#E3F4EA;color:#1C7A4E}.ya-ch.down{background:#FDECEA;color:#B42318}
+.ya-g{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:4px;align-items:end;height:150px}
+.ya-m{display:grid;grid-template-rows:1fr auto;height:100%;gap:3px;min-width:0}
+.ya-m span{font-size:.66rem;color:var(--muted);text-align:center}
+.ya-b{display:flex;align-items:flex-end;justify-content:center;gap:2px;height:100%}
+.ya-b i{display:block;width:42%;border-radius:3px 3px 0 0;min-height:1px}
+.ya-b i.a,.ya-ley i.a{background:#C9D3DB}.ya-b i.y,.ya-ley i.y{background:#13506F}.ya-b i.y.cur{background:#1C9A5B}
+.ya-ley{display:flex;gap:14px;font-size:.78rem;color:var(--muted)}.ya-ley span{display:flex;align-items:center;gap:5px}.ya-ley i{width:10px;height:10px;border-radius:2px;display:inline-block}
+.ya-tbl{overflow-x:auto}.ya-tbl table{width:100%;border-collapse:collapse;font-size:.84rem;font-variant-numeric:tabular-nums}
+.ya-tbl th,.ya-tbl td{padding:6px 6px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}.ya-tbl th{font-size:.72rem;color:var(--muted);text-transform:uppercase}
+.ya-tbl .n{text-align:right}
+`;
+
+document.head.insertAdjacentHTML("beforeend", "<style>" + YA_CSS + "</style>");
+const _pintarDashboardYA = pintarDashboard;
+pintarDashboard = function () {
+  _pintarDashboardYA.apply(this, arguments);
+  const s = $("s-res"), g = s && s.querySelector(".db-g"); if (!g || !A) return;
+  const ct = corte(), lim = A.enCorte ? ct.d : diasMes(Y, M);
+  const o = yaCalc(D, Y, M, lim, r => OPC.tienda || cartRow(r) !== "Tienda Hellywoof", cartRow); if (!o) return;
+  const nom = String(MESES[M] || ""), mesN = nom.charAt(0).toUpperCase() + nom.slice(1);
+  g.insertAdjacentHTML("afterbegin", yaHtml(o, mm, mesN, true));
+};
+</script>
 </body>
 </html>
