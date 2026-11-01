@@ -2680,7 +2680,7 @@ $("crmAgenda").addEventListener("click", e => { const b = e.target.closest("[dat
    VERSIÓN SIN PLATAFORMA: datos del CRM guardados en este equipo
    ================================================================ */
 const CRM_BASE = __dvGet("CRM_BASE") || {"clientes": [], "metas": []};
-const esTienda_ = v => /HELLYWOOF/.test(String(v || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase());
+const esTienda_ = v => /HELLYW/.test(String(v || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase());
 CRM_BASE.metas = CRM_BASE.metas.filter(x => !esTienda_(x.vendedor)); CRM_BASE.clientes = CRM_BASE.clientes.filter(x => !esTienda_(x.vendedor));
 const LKEY = "hwf-crm-local-v1";
 document.body.classList.add("local");
@@ -3582,7 +3582,7 @@ function rgEliminar(x) {
 /* ================================================================
    VENDEDORES SIN CARTERA ASIGNADA (trabajan con todos los clientes)
    ================================================================ */
-const VEND_EXTRA = ["Leslie", "Jorge", "Victor"];
+const VEND_EXTRA = ["Jorge"];
 const sinCartera = cart => VEND_EXTRA.includes(cart);
 const _mostrarAccesoV = mostrarAcceso;
 mostrarAcceso = function () {
@@ -4824,11 +4824,11 @@ function dbCalc() {
   const clientes = Object.values(cli).map(o => ({ ci: o.ci, nombre: D.clientes[o.ci][0], comuna: D.clientes[o.ci][1], cart: D.clientes[o.ci][2], mes: o.h[M] || 0, hab: hab(o), ult: o.ult }));
   const productos = Object.values(pro).map(o => { const t = o.h[M] || { v: 0, q: 0, c: 0 };
     return { pi: o.pi, nombre: D.productos[o.pi][0], cod: String(D.productos[o.pi][2]), mes: t.v, mesQ: t.q, mesC: t.c, q3: prev3.reduce((s, m) => s + (o.h[m] ? o.h[m].q : 0), 0) / Math.max(1, prev3.length) }; });
-  const metaOk = D.metaMes === M, metaDe = c => metaOk ? (D.metas[c] || 0) : 0;
+  const metaOk = D.metaMes === M, metaDe = c => metaOk ? (esTienda_(c) ? Object.keys(D.metas).filter(esTienda_).reduce((t, k) => t + (D.metas[k] || 0), 0) : (D.metas[c] || 0)) : 0;
   const cots = D.cots.filter(c => !yo || dbK(c[4]) === dbK(yo));
   const np = cots.reduce((t, c) => t + c[7], 0), npN = new Set(cots.map(c => c[0])).size;
   const npDe = c => D.cots.filter(x => dbK(x[4]) === dbK(c)).reduce((t, x) => t + x[7], 0);
-  const carts = [...new Set(D.vend.filter(v => v !== "Tienda Hellywoof").concat(Object.keys(vend)).concat(Object.keys(D.metas).filter(v => v !== "Tienda Hellywoof" || vend[v])))];
+  const carts = [...new Set(D.vend.filter(v => v !== "Tienda Hellywoof").concat(Object.keys(vend)).concat(Object.keys(D.metas).filter(v => !esTienda_(v))).concat(vend["Tienda Hellywoof"] || Object.keys(D.metas).some(esTienda_) ? ["Tienda Hellywoof"] : []))];
   const V = carts.map(c => { const o = vend[c] || { fa: 0, costo: 0, cli: new Set() }, n = npDe(c), meta = metaDe(c);
     const ncli = D.clientes.filter((x, i) => x[2] === c && dbCliY(D, Y).has(i)).length;
     return { v: c, fa: o.fa, np: n, avance: o.fa + n, meta, margen: o.fa ? 1 - o.costo / o.fa : 0, activos: o.cli.size, ncli }; }).filter(x => x.meta || x.fa || x.np);
