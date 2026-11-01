@@ -3605,7 +3605,7 @@ candidatos = function () {
 /* ================================================================
    INICIO: BIENVENIDA, NOVEDADES Y MISIONES DEL DÍA
    ================================================================ */
-const APP_VERSION = "5.2";
+const APP_VERSION = "5.3";
 const APP_NOVEDADES = [
   "Navegación más simple: flechas ‹ › para pasar de apartado, desliza el dedo para cambiar y el botón atrás vuelve donde estabas.",
   "Nuevo apartado Nutrición: compara el alimento de la competencia con los nuestros, con 3 razones y la ración diaria equivalente para cada perro o gato. Incluye las fichas técnicas de toda la línea HWF.",
@@ -5218,5 +5218,184 @@ if (SES && SES.local) {
 </script>
 
 <script>/* revisa si hay datos públicos nuevos (se aplican al abrir de nuevo) */setTimeout(function(){fetch("datos/publicos.json",{cache:"no-store"}).then(function(r){return r.ok?r.json():null}).then(function(p){if(!p||!p.version)return;var a=window.__PUB;if(a&&a.version>=p.version)return;try{localStorage.setItem("hwf-pub",JSON.stringify(p))}catch(e){}}).catch(function(){})},2500);</script>
+<style>
+/* ===== Baja de clientes ===== */
+.bj-blk{border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;background:var(--surface);display:grid;gap:8px}
+.bj-blk h3{margin:0}
+.bj-blk.baja{border-color:#F3B8B2;background:#FDECEA}
+.bj-blk.baja b{color:#B42318}
+.btn.bj-rojo{color:#B42318;border-color:#F3B8B2}
+.ch.baja{background:#FDECEA;color:#B42318}
+.cli.es-baja{opacity:.8;border-style:dashed}
+.bj-pend{font-size:.8rem;color:#9A5B00}
+</style>
+<script>
+/* ================================================================
+   CLIENTES: DAR DE BAJA CON MOTIVO + REGISTRO DE CAMBIOS (informe en HWF Admin)
+   ================================================================ */
+const CC_MOTIVOS = ["Cerró el local o dejó de operar", "Compra a otro distribuidor", "Precio o condiciones comerciales", "Problemas de pago o moroso",
+  "Cambio de dueño o de razón social", "Cliente duplicado", "Fuera de zona o de ruta", "No vende alimento para mascotas", "No quiere ser visitado", "Otro"];
+const CC_COLA = "hwf-cli-cambios-cola", CC_SRV = "hwf-cli-cambios-srv";
+const CC_CAMPOS = { contacto: "Contacto", telefono: "Teléfono", correo: "Correo", rut: "RUT", direccion: "Dirección", notas: "Notas", comuna: "Comuna", nombre: "Nombre", giro: "Giro" };
+let ccOcup = false;
+const ccCola = () => lsGet(CC_COLA, []);
+const ccSrv = () => lsGet(CC_SRV, { version: "", lista: [] });
+function ccTodos() { const ids = new Set(), out = []; ccCola().concat(ccSrv().lista || []).forEach(c => { if (c && !ids.has(c.id)) { ids.add(c.id); out.push(c); } }); return out; }
+/* estado de baja vigente de un cliente: manda el último evento Baja/Reactivación (de cualquier vendedor o de HWF Admin) */
+function ccEstados() {
+  const m = {};
+  ccTodos().filter(c => c.tipo === "Baja" || c.tipo === "Reactivación").sort((a, b) => String(a.fecha).localeCompare(String(b.fecha)))
+    .forEach(c => { m[c.codigo] = c.tipo === "Baja" ? c : null; });
+  return m;
+}
+let ccEstCache = null;
+function esBaja(cod) { if (!ccEstCache) ccEstCache = ccEstados(); return ccEstCache[cod] || null; }
+function ccRegistrar(tipo, c, extra) {
+  if (!c || !c.codigo) return;
+  const ev = Object.assign({ id: "CC-" + Date.now().toString(36).toUpperCase() + "-" + Math.random().toString(36).slice(2, 6).toUpperCase(), fecha: new Date().toISOString(),
+    vendedor: SES && SES.vendedor ? SES.vendedor.nombre : "", cartera: SES && SES.vendedor ? SES.vendedor.cartera || "" : "", codigo: c.codigo, cliente: c.nombre || "",
+    tipo, motivo: "", detalle: "", cambios: [] }, extra || {});
+  const q = ccCola(); q.push(ev); lsSet(CC_COLA, q); ccEstCache = null;
+  setTimeout(ccEnviar, 50);
+  return ev;
+}
+async function ccEnviar() {
+  const cfg = syCfg(), q = ccCola(); if (!cfg || !cfg.url || ccOcup || !q.length) return;
+  ccOcup = true;
+  try {
+    const r = await syLlamar(cfg, { accion: "clienteCambios", cambios: q.slice(0, 100) });
+    if (r && r.ok) {
+      const ok = new Set(r.guardados || []), enviados = q.filter(c => ok.has(c.id));
+      const s = ccSrv(); s.lista = (s.lista || []).concat(enviados.filter(c => !(s.lista || []).some(x => x.id === c.id))); lsSet(CC_SRV, s);
+      lsSet(CC_COLA, ccCola().filter(c => !ok.has(c.id)));
+    }
+  } finally { ccOcup = false; ccEstCache = null; }
+}
+async function ccBajar() {
+  const cfg = syCfg(); if (!cfg || !cfg.url) return false;
+  const s = ccSrv(), r = await syLlamar(cfg, { accion: "clientesCambios", version: s.version || "" });
+  if (!r || !r.ok || r.igual || !Array.isArray(r.cambios)) return false;
+  const antes = JSON.stringify(ccEstados());
+  lsSet(CC_SRV, { version: r.version, lista: r.cambios, bajado: new Date().toISOString() }); ccEstCache = null;
+  return JSON.stringify(ccEstados()) !== antes;
+}
+async function ccSync() { await ccEnviar(); const n = await ccBajar(); if (n && typeof pintarCRM === "function" && MODO !== "pedido") pintarCRM(); }
+
+/* ---- Registro automático de los cambios de clientes ---- */
+const _apiCC = api;
+api = async function (accion, datos) {
+  let antes = null;
+  if (accion === "clienteEditar" && datos && datos.cliente) antes = Object.assign({}, clientesLocal().find(c => c.codigo === datos.cliente.codigo) || {});
+  const r = await _apiCC(accion, datos);
+  try {
+    if (r && r.ok && accion === "clienteEditar" && antes && antes.codigo) {
+      const x = datos.cliente, cambios = Object.keys(x).filter(k => k !== "codigo" && String(x[k] == null ? "" : x[k]).trim() !== String(antes[k] == null ? "" : antes[k]).trim())
+        .map(k => ({ campo: CC_CAMPOS[k] || k, antes: antes[k] == null ? "" : String(antes[k]), despues: x[k] == null ? "" : String(x[k]) }));
+      if (cambios.length) ccRegistrar("Datos", antes, { cambios });
+    }
+    if (r && r.ok && accion === "clienteNuevo" && datos && datos.cliente) {
+      const x = datos.cliente;
+      ccRegistrar("Cliente nuevo", { codigo: r.codigo, nombre: x.nombre }, { detalle: "Creado desde la app de vendedores",
+        cambios: Object.keys(x).filter(k => String(x[k] || "").trim()).map(k => ({ campo: CC_CAMPOS[k] || k, antes: "", despues: String(x[k]) })) });
+    }
+    if (r && r.ok && accion === "actividad" && datos && datos.actividad && datos.actividad.guardarUbicacion && datos.actividad.lat != null) {
+      const a = datos.actividad, c = clientesLocal().find(k => k.codigo === a.cliente_codigo);
+      if (c) ccRegistrar("Ubicación", c, { detalle: `Ubicación del local guardada con GPS (precisión ${Math.round(a.precision || 0)} m)`,
+        cambios: [{ campo: "Ubicación", antes: "", despues: `${Number(a.lat).toFixed(6)}, ${Number(a.lng).toFixed(6)}` }] });
+    }
+  } catch (e) {}
+  return r;
+};
+if (typeof guardarDirNueva === "function") {
+  const _guardarDirNuevaCC = guardarDirNueva;
+  guardarDirNueva = function () {
+    const cod = S.cliCodigo, n0 = cod ? ((LDB().ed[cod] || {}).direcciones_entrega || []).length : 0;
+    _guardarDirNuevaCC.apply(this, arguments);
+    if (!cod) return;
+    const l = (LDB().ed[cod] || {}).direcciones_entrega || [];
+    if (l.length > n0) { const c = clientesLocal().find(k => k.codigo === cod); if (c) ccRegistrar("Dirección de entrega", c, { detalle: "Nueva dirección de entrega guardada en un pedido", cambios: [{ campo: "Dirección de entrega", antes: "", despues: l[l.length - 1] }] }); }
+  };
+}
+
+/* ---- Los dados de baja no aparecen en ruta, buscador del pedido ni misiones ---- */
+if (typeof misClientes === "function") { const _misClientesCC = misClientes; misClientes = function () { return _misClientesCC.apply(this, arguments).filter(c => !esBaja(c.codigo)); }; }
+if (typeof candidatos === "function") { const _candidatosCC = candidatos; candidatos = function () { return _candidatosCC.apply(this, arguments).filter(x => !esBaja((x.c || x).codigo)); }; }
+
+/* ---- Lista de clientes: oculta las bajas; orden "Dados de baja" ---- */
+$("cOrden").insertAdjacentHTML("beforeend", '<option value="baja">Dados de baja</option>');
+/* el listener original quedó con la función anterior: se reemplaza (fase de captura, corta el original) */
+$("cOrden").addEventListener("change", e => { e.stopImmediatePropagation(); pintarLista(); }, true);
+const _pintarListaCC = pintarLista;
+pintarLista = async function () {
+  const d = crmMio();
+  if (!d || d.sinCartera) return _pintarListaCC();
+  if ($("cOrden").value === "baja") {
+    const q = norm($("cq").value).split(/\s+/).filter(Boolean);
+    const l = d.clientes.filter(c => esBaja(c.codigo) && q.every(w => norm([c.nombre, c.comuna, c.direccion, c.codigo, c.contacto].join(" ")).includes(w)))
+      .sort((a, b) => String(esBaja(b.codigo).fecha).localeCompare(String(esBaja(a.codigo).fecha)));
+    const tot = d.clientes.filter(c => esBaja(c.codigo)).length;
+    $("crmEstado").textContent = tot ? `${l.length} de ${tot} clientes dados de baja` : "No hay clientes dados de baja.";
+    $("crmRows").innerHTML = l.map(c => { const b = esBaja(c.codigo);
+      return `<button type="button" class="cli es-baja" data-cli="${esc(c.codigo)}">
+        <div class="cli-top"><b>${esc(tc(c.nombre))}</b><span class="ch baja">De baja</span></div>
+        <div class="cli-sub">${esc([tc(c.direccion), tc(c.comuna)].filter(Boolean).join(", "))}</div>
+        <div class="cli-sub">${esc(b.motivo)} · ${fd2(String(b.fecha).slice(0, 10))}${b.vendedor ? " · " + esc(b.vendedor) : ""}</div></button>`; }).join("") || (tot ? '<p class="hint">Ningún cliente coincide con la búsqueda.</p>' : "");
+    return;
+  }
+  await _pintarListaCC();
+  const tot = d.clientes.filter(c => esBaja(c.codigo)).length; if (!tot) return;
+  let quitados = 0; $("crmRows").querySelectorAll("[data-cli]").forEach(b => { if (esBaja(b.dataset.cli)) { b.remove(); quitados++; } });
+  const m = $("crmEstado").textContent.match(/^(\d+) de (\d+) clientes(.*)$/);
+  if (m) $("crmEstado").textContent = `${+m[1] - quitados} de ${+m[2] - tot} clientes${m[3]} · ${tot} de baja`;
+  if (!$("crmRows").querySelector("[data-cli]")) $("crmRows").innerHTML = '<p class="hint">Ningún cliente coincide con la búsqueda.</p>';
+};
+
+/* ---- Ficha: dar de baja / reactivar ---- */
+const _pintarFichaCC = pintarFicha;
+pintarFicha = function (cod) {
+  _pintarFichaCC(cod);
+  const c = cliente(cod), f = $("crmFicha"); if (!c || !f || f.hidden) return;
+  const b = esBaja(cod), pend = ccCola().some(x => x.codigo === cod && (x.tipo === "Baja" || x.tipo === "Reactivación"));
+  const blk = document.createElement("div"); blk.className = "bj-blk" + (b ? " baja" : ""); blk.id = "bjBlk";
+  blk.innerHTML = b ? `<h3>Cliente dado de baja</h3><div><b>${esc(b.motivo)}</b>${b.detalle ? " · " + esc(b.detalle) : ""}</div>
+      <span class="hint">${fdt(b.fecha)}${b.vendedor ? " · por " + esc(b.vendedor) : ""}${pend ? ' · <span class="bj-pend">por enviar a HWF Admin</span>' : ""}</span>
+      <div><button class="btn" type="button" id="bjReact">Reactivar cliente</button></div>`
+    : `<h3>Estado del cliente</h3><span class="hint">Si el cliente ya no compra, dalo de baja indicando el motivo. Dejará de aparecer en tu lista, la ruta y el buscador del pedido, y HWF Admin verá el motivo.</span>
+      <div><button class="btn bj-rojo" type="button" id="bjBaja">Dar de baja</button></div>`;
+  const hist = [...f.querySelectorAll(".blk")].find(x => /Historial/.test((x.querySelector("h3") || {}).textContent || ""));
+  if (hist) hist.before(blk); else f.appendChild(blk);
+  if (b) {
+    const h2 = f.querySelector(".f-head h2"); if (h2) h2.insertAdjacentHTML("afterend", '<span class="ch baja" style="justify-self:start">De baja</span>');
+    $("bjReact").onclick = () => {
+      $("mEnvT").textContent = "Reactivar cliente";
+      abrirModal(`<div class="mform"><p class="hint" style="margin:0">${esc(tc(c.nombre))} vuelve a tu lista de clientes.</p>
+        <div class="f"><label for="bj_nota">Comentario (opcional)</label><textarea id="bj_nota" placeholder="Por qué se reactiva"></textarea></div></div>`,
+        [["Cancelar", "", cerrarModal], ["Reactivar", "primary", () => {
+          ccRegistrar("Reactivación", c, { motivo: "Reactivado", detalle: $("bj_nota").value.trim(), cambios: [{ campo: "Estado", antes: "De baja (" + b.motivo + ")", despues: "Activo" }] });
+          cerrarModal(); toast("Cliente reactivado."); pintarFicha(cod);
+        }]]);
+    };
+  } else $("bjBaja").onclick = () => {
+    $("mEnvT").textContent = "Dar de baja al cliente";
+    abrirModal(`<div class="mform"><p class="hint" style="margin:0">${esc(tc(c.nombre))}${c.comuna ? " · " + esc(tc(c.comuna)) : ""}</p>
+        <div class="f"><label for="bj_mot">Motivo de la baja</label><select id="bj_mot"><option value="">Elige un motivo…</option>${CC_MOTIVOS.map(m => `<option>${esc(m)}</option>`).join("")}</select></div>
+        <div class="f"><label for="bj_nota">Comentario <span id="bj_req">(opcional)</span></label><textarea id="bj_nota" placeholder="Detalle para HWF Admin: a quién le compra, desde cuándo, etc."></textarea></div></div>`,
+      [["Cancelar", "", cerrarModal], ["Dar de baja", "primary", () => {
+        const mot = $("bj_mot").value, nota = $("bj_nota").value.trim();
+        if (!mot) { $("mEnvErr").textContent = "Elige el motivo de la baja."; $("mEnvErr").hidden = false; return; }
+        if (mot === "Otro" && !nota) { $("mEnvErr").textContent = "Escribe el motivo en el comentario."; $("mEnvErr").hidden = false; return; }
+        ccRegistrar("Baja", c, { motivo: mot, detalle: nota, cambios: [{ campo: "Estado", antes: "Activo", despues: "De baja" }] });
+        cerrarModal(); toast("Cliente dado de baja. HWF Admin verá el motivo."); pintarFicha(cod);
+      }]]);
+    $("bj_mot").onchange = () => { $("mEnvErr").hidden = true; $("bj_req").textContent = $("bj_mot").value === "Otro" ? "(obligatorio)" : "(opcional)"; };
+  };
+};
+
+/* ---- Sincronización: al abrir, al volver a la app y junto con los estados de las notas ---- */
+if (typeof syEstados === "function") { const _syEstadosCC = syEstados; syEstados = async function () { await _syEstadosCC.apply(this, arguments); await ccSync(); }; }
+setTimeout(ccSync, 2500);
+document.addEventListener("visibilitychange", () => { if (!document.hidden) ccSync(); });
+if (typeof APP_NOVEDADES !== "undefined" && Array.isArray(APP_NOVEDADES)) APP_NOVEDADES.unshift("Clientes: botón «Dar de baja» en la ficha, con el motivo. Los dados de baja se ven en Mis clientes → orden «Dados de baja» y se pueden reactivar.");
+</script>
 </body>
 </html>
