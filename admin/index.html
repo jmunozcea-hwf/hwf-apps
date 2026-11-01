@@ -1121,10 +1121,10 @@ nav.bottom button span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis
 </style>
 <script>
 /* NP Defontana del mes (Y, M) acumuladas por día de la nota; tot = facturado acumulado + NP. Se dibujan hasta el último día con dato. */
-function npRitmo(cots, Y, M, n, real, lim) {
+function npRitmo(cots, Y, M, n, real, lim, ant) {
   const dia = new Array(n + 2).fill(0); let fin = lim, hay = 0;
-  (cots || []).forEach(c => { const m = String(c[1] || "").match(/(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})/); if (!m || +m[3] !== Y || +m[2] !== M) return;
-    const d = Math.min(n, Math.max(1, +m[1])); dia[d] += Number(c[7]) || 0; hay += Number(c[7]) || 0; if (d > fin) fin = d; });
+  (cots || []).forEach(c => { const m = String(c[1] || "").match(/(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})/); if (!m) return; const k = +m[3] * 12 + +m[2], km = Y * 12 + M; if (k !== km && !(ant && k < km)) return;
+    const d = k < km ? 1 : Math.min(n, Math.max(1, +m[1])); dia[d] += Number(c[7]) || 0; hay += Number(c[7]) || 0; if (d > fin) fin = d; });
   if (!hay) return null;
   let a = 0, ult = 0; const np = [], tot = [];
   for (let d = 1; d <= n; d++) { a += dia[d]; if (real[d - 1] != null) ult = real[d - 1]; np.push(d <= fin ? a : null); tot.push(d <= fin ? ult + a : null); }
@@ -3139,7 +3139,7 @@ function pintarDashboard() {
   const real = dias.map(d => { ac += X.dia[d]; return d <= X.lim ? ac : null; }), prev = dias.map(d => { acP += d <= X.dmP ? X.diaP[d] : 0; return acP; });
   const ds = [{ label: "Facturado", data: real, borderColor: "#1C9A5B", backgroundColor: "rgba(28,154,91,.12)", fill: true, tension: .25, pointRadius: 0, spanGaps: false },
     { label: MESES[M - 1] || "Mes anterior", data: prev, borderColor: "#9AA8B4", borderDash: [4, 4], pointRadius: 0, tension: .25 }];
-  { const R = npRitmo(X.cots, Y, M, X.dm, real, X.lim); if (R) ds.splice(1, 0, { label: "NP Defontana", data: R.np, borderColor: "#F0A818", borderWidth: 2, pointRadius: 0, tension: .25 },
+  { const R = npRitmo(X.cots, Y, M, X.dm, real, X.lim, Y * 100 + M >= Number(String(D.corte || "").slice(0, 7).replace("-", ""))); if (R) ds.splice(1, 0, { label: "NP Defontana", data: R.np, borderColor: "#F0A818", borderWidth: 2, pointRadius: 0, tension: .25 },
       { label: "Facturado + NP Defontana", data: R.tot, borderColor: "#6D28D9", borderWidth: 2.6, pointRadius: 0, tension: .25 }); }
   if (conMeta) ds.push({ label: "Ritmo para la meta", data: dias.map(d => A.meta * habiles(Y, M, 1, d) / Math.max(1, A.totales)), borderColor: "#0B3146", borderWidth: 1.5, pointRadius: 0, stepped: true });
   chart("cRitmo", { type: "line", data: { labels: dias, datasets: ds }, options: { maintainAspectRatio: false, animation: { duration: 250 }, interaction: { mode: "index", intersect: false },
@@ -3604,11 +3604,12 @@ function czNotas(cots) {
     const f = m ? new Date(+m[3], +m[2] - 1, +m[1]) : null; n.dias = f ? Math.max(0, Math.round((hoy - f) / 864e5)) : null; n.ym = m ? m[3] + "-" + m[2].padStart(2, "0") : ""; return n; })
     .sort((a, b) => (b.dias == null) - (a.dias == null) || (b.dias || 0) - (a.dias || 0));
 }
-function czHtml(cots, fmt, esc, conCartera, irAttr, ym, mesTxt) {
-  const T = czNotas(cots), L = ym ? T.filter(n => n.ym === ym) : T, O = ym ? T.filter(n => n.ym !== ym) : [];
+function czHtml(cots, fmt, esc, conCartera, irAttr, ym, mesTxt, ant) {
+  const T = czNotas(cots), enMes = n => n.ym === ym || (ant && n.ym && n.ym < ym), L = ym ? T.filter(enMes) : T, O = ym ? T.filter(n => !enMes(n)) : [];
+  const nAnt = ant ? L.filter(n => n.ym !== ym).length : 0;
   const otras = O.length ? `<p class="db-vacio" style="margin-top:6px">Otras pendientes de meses anteriores: ${O.length} ${O.length === 1 ? "nota" : "notas"} · ${fmt(O.reduce((s, n) => s + n.monto, 0))}</p>` : "";
   const tot = L.reduce((s, n) => s + n.monto, 0), viejas = L.filter(n => n.dias != null && n.dias > 7);
-  const cab = `<h3>NP Defontana <small>${mesTxt ? esc(mesTxt) + " · " : ""}pendientes de facturar</small>${irAttr ? `<button type="button" class="lk" ${irAttr}>Ver todas ›</button>` : ""}</h3>`;
+  const cab = `<h3>NP Defontana <small>${mesTxt ? esc(mesTxt) + " · " : ""}pendientes de facturar${nAnt ? ` · ${nAnt} de meses anteriores` : ""}</small>${irAttr ? `<button type="button" class="lk" ${irAttr}>Ver todas ›</button>` : ""}</h3>`;
   if (!L.length) return `<div class="db-c card cz">${cab}<p class="db-vacio">No hay notas de pedido pendientes${mesTxt ? " de " + esc(mesTxt) : ""} en Defontana.</p>${otras}</div>`;
   const porV = {}; L.forEach(n => { const k = n.cart || n.vend || "—"; const v = porV[k] = porV[k] || { n: 0, m: 0 }; v.n++; v.m += n.monto; });
   const V = Object.entries(porV).sort((a, b) => b[1].m - a[1].m), max = Math.max(1, ...V.map(x => x[1].m));
@@ -3631,7 +3632,7 @@ pintarDashboard = function () {
   const s = $("s-res"), g = s && s.querySelector(".db-g"); if (!g) return;
   const cots = COTS().filter(c => OPC.tienda || c[4] !== "Tienda Hellywoof");
   const ref = [...g.children].find(c => /Qué mirar hoy/.test(c.textContent)) || g.children[0];
-  const html = czHtml(cots, mm, esc, true, 'data-ir="mas:cots"', Y + "-" + String(M).padStart(2, "0"), String(MESES[M] || "").toLowerCase() + " " + Y);
+  const html = czHtml(cots, mm, esc, true, 'data-ir="mas:cots"', Y + "-" + String(M).padStart(2, "0"), String(MESES[M] || "").toLowerCase() + " " + Y, Y * 100 + M >= Number(String(D.corte || "").slice(0, 7).replace("-", "")));
   if (ref) ref.insertAdjacentHTML("afterend", html); else g.insertAdjacentHTML("beforeend", html);
 };
 try { if ($("s-res") && $("s-res").querySelector(".db-g") && !$("s-res").querySelector(".cz")) pintarDashboard(); } catch (e) {}
