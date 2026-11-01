@@ -5486,5 +5486,55 @@ pintarDash = function () {
 };
 if (typeof APP_NOVEDADES !== "undefined" && Array.isArray(APP_NOVEDADES)) APP_NOVEDADES.unshift("Dashboard: comparación con el año anterior (mes y año a la misma fecha, venta mensual de ambos años y por cartera).");
 </script>
+
+<script>
+/* Tarjeta «Cotizaciones Defontana» del Dashboard (HWF Admin y Nota de Pedido).
+   cots: [num, fecha dd/mm/aaaa, cliente, vendedor, cartera, cantidad, producto, monto neto] */
+const CZ_CSS = ".cz-tot{display:flex;gap:14px;flex-wrap:wrap;margin:0 0 8px}.cz-tot div{display:grid}.cz-tot b{font-size:1.15rem;font-variant-numeric:tabular-nums}.cz-tot span{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:700}"
+  + ".cz-v{display:grid;gap:6px;margin:4px 0 10px}.cz-v .t{display:flex;justify-content:space-between;gap:8px;font-size:.88rem}.cz-v .t b{font-variant-numeric:tabular-nums}"
+  + ".cz-bar{height:8px;border-radius:99px;background:var(--sunk);overflow:hidden}.cz-bar i{display:block;height:100%;background:#F0A818;border-radius:99px}"
+  + ".cz-dias{font-style:normal;font-size:.72rem;font-weight:800;padding:1px 7px;border-radius:999px;margin-left:6px}.cz-dias.ok{background:#E3F6EC;color:#1C7A4E}.cz-dias.warn{background:#FFF4DB;color:#9A5B00}.cz-dias.bad{background:#FDECEA;color:#B42318}";
+function czHoyCL() { const p = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Santiago", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date()); return new Date(p + "T00:00:00"); }
+function czNotas(cots) {
+  const o = {};
+  (cots || []).forEach(c => { const k = c[0]; const n = o[k] = o[k] || { num: k, fecha: c[1], cli: c[2], vend: c[3], cart: c[4], monto: 0, lineas: 0 }; n.monto += Number(c[7]) || 0; n.lineas++; });
+  const hoy = czHoyCL();
+  return Object.values(o).map(n => { const m = String(n.fecha || "").match(/(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})/);
+    const f = m ? new Date(+m[3], +m[2] - 1, +m[1]) : null; n.dias = f ? Math.max(0, Math.round((hoy - f) / 864e5)) : null; n.ym = m ? m[3] + "-" + m[2].padStart(2, "0") : ""; return n; })
+    .sort((a, b) => (b.dias == null) - (a.dias == null) || (b.dias || 0) - (a.dias || 0));
+}
+function czHtml(cots, fmt, esc, conCartera, irAttr, ym, mesTxt) {
+  const T = czNotas(cots), L = ym ? T.filter(n => n.ym === ym) : T, O = ym ? T.filter(n => n.ym !== ym) : [];
+  const otras = O.length ? `<p class="db-vacio" style="margin-top:6px">Otras pendientes de meses anteriores: ${O.length} ${O.length === 1 ? "nota" : "notas"} · ${fmt(O.reduce((s, n) => s + n.monto, 0))}</p>` : "";
+  const tot = L.reduce((s, n) => s + n.monto, 0), viejas = L.filter(n => n.dias != null && n.dias > 7);
+  const cab = `<h3>Cotizaciones Defontana <small>${mesTxt ? esc(mesTxt) + " · " : ""}pendientes de facturar</small>${irAttr ? `<button type="button" class="lk" ${irAttr}>Ver todas ›</button>` : ""}</h3>`;
+  if (!L.length) return `<div class="db-c card cz">${cab}<p class="db-vacio">No hay cotizaciones pendientes${mesTxt ? " de " + esc(mesTxt) : ""} en Defontana.</p>${otras}</div>`;
+  const porV = {}; L.forEach(n => { const k = n.cart || n.vend || "—"; const v = porV[k] = porV[k] || { n: 0, m: 0 }; v.n++; v.m += n.monto; });
+  const V = Object.entries(porV).sort((a, b) => b[1].m - a[1].m), max = Math.max(1, ...V.map(x => x[1].m));
+  const chip = d => d == null ? "" : `<i class="cz-dias ${d > 14 ? "bad" : d > 7 ? "warn" : "ok"}">${d} ${d === 1 ? "día" : "días"}</i>`;
+  const meses = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
+  const porM = {}; L.forEach(n => { const v = porM[n.ym] = porM[n.ym] || { n: 0, m: 0 }; v.n++; v.m += n.monto; });
+  const mTxt = Object.keys(porM).sort().reverse().map(k => `${k ? meses[+k.slice(5) - 1] + " " + k.slice(0, 4) : "sin fecha"}: ${porM[k].n} · ${fmt(porM[k].m)}`).join(" · ");
+  return `<div class="db-c card cz">${cab}
+    <div class="cz-tot"><div><b>${fmt(tot)}</b><span>neto pendiente</span></div><div><b>${L.length}</b><span>${L.length === 1 ? "nota" : "notas"}</span></div><div><b>${viejas.length}</b><span>con más de 7 días</span></div></div>
+    ${conCartera && V.length > 1 ? `<div class="cz-v">${V.map(([k, v]) => `<div><div class="t"><span>${esc(k)}</span><b>${fmt(v.m)} · ${v.n}</b></div><div class="cz-bar"><i style="width:${(v.m / max * 100).toFixed(1)}%"></i></div></div>`).join("")}</div>` : ""}
+    <div class="db-l">${L.slice(0, 8).map(n => `<div class="it" ${irAttr || ""}><span class="n">${esc(String(n.cli || "").toLowerCase().replace(/(^|\s)\S/g, t => t.toUpperCase()))}</span><span class="v">${fmt(n.monto)}</span><small>N° ${esc(n.num)} · ${esc(n.fecha || "")}${chip(n.dias)}${conCartera ? " · " + esc(n.cart || n.vend || "") : ""} · ${n.lineas} ${n.lineas === 1 ? "producto" : "productos"}</small></div>`).join("")}</div>
+    ${L.length > 8 ? `<p class="db-vacio">y ${L.length - 8} más…</p>` : ""}
+    ${ym ? "" : `<p class="db-vacio" style="margin-top:6px">Por mes: ${mTxt}</p>`}${otras}</div>`;
+}
+
+document.head.insertAdjacentHTML("beforeend", "<style>" + CZ_CSS + "</style>");
+const _pintarDashCZ = pintarDash;
+pintarDash = function () {
+  _pintarDashCZ.apply(this, arguments);
+  const box = $("crmDash"), g = box && box.querySelector(".db-g"); if (!g || !SES) return;
+  const D = DB.d; if (!D) return;
+  const yo = dbAlcance(), cots = (D.cots || []).filter(c => c[4] !== "Tienda Hellywoof" && (!yo || dbK(c[4]) === dbK(yo)));
+  const ref = [...g.children].find(c => /Qué mirar hoy/.test(c.textContent)) || g.children[0];
+  const [cY, cM] = String(D.corte || "").split("-").map(Number), html = czHtml(cots, dbMM, esc, !yo, "", cY + "-" + String(cM).padStart(2, "0"), String(MESES[cM - 1] || "") + " " + cY);
+  if (ref) ref.insertAdjacentHTML("afterend", html); else g.insertAdjacentHTML("beforeend", html);
+};
+if (typeof APP_NOVEDADES !== "undefined" && Array.isArray(APP_NOVEDADES)) APP_NOVEDADES.unshift("Dashboard: cotizaciones Defontana del mes pendientes de facturar, con días de antigüedad (también con «Solo mis datos»).");
+</script>
 </body>
 </html>
