@@ -1092,6 +1092,18 @@ nav.bottom button span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis
 .hw-card .hw-g b{display:block;font-variant-numeric:tabular-nums}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
+<script>
+/* NP Defontana del mes (Y, M) acumuladas por día de la nota; tot = facturado acumulado + NP. Se dibujan hasta el último día con dato. */
+function npRitmo(cots, Y, M, n, real, lim) {
+  const dia = new Array(n + 2).fill(0); let fin = lim, hay = 0;
+  (cots || []).forEach(c => { const m = String(c[1] || "").match(/(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})/); if (!m || +m[3] !== Y || +m[2] !== M) return;
+    const d = Math.min(n, Math.max(1, +m[1])); dia[d] += Number(c[7]) || 0; hay += Number(c[7]) || 0; if (d > fin) fin = d; });
+  if (!hay) return null;
+  let a = 0, ult = 0; const np = [], tot = [];
+  for (let d = 1; d <= n; d++) { a += dia[d]; if (real[d - 1] != null) ult = real[d - 1]; np.push(d <= fin ? a : null); tot.push(d <= fin ? ult + a : null); }
+  return { np, tot };
+}
+</script>
 </head>
 <body>
 <div class="lock" id="lock" hidden>
@@ -3083,7 +3095,7 @@ function pintarDashboard() {
     <div class="db-k num">${kpis}</div>
     <div class="db-g">
       <div class="card db-c"><h3>Qué mirar hoy <small>${al.length} ${al.length === 1 ? "aviso" : "avisos"}</small></h3><div class="alerts">${al.map(([t, i, x]) => `<div class="alert ${t}"><span class="ic">${i}</span><div>${x}</div></div>`).join("") || '<p class="db-vacio">Todo en orden.</p>'}</div></div>
-      <div class="card db-c"><h3>Ritmo del mes <small>facturado acumulado por día</small></h3><div class="chartbox sm"><canvas id="cRitmo"></canvas></div></div>
+      <div class="card db-c"><h3>Ritmo del mes <small>facturado y NP Defontana acumulados por día</small></h3><div class="chartbox sm"><canvas id="cRitmo"></canvas></div></div>
       <div class="card db-c"><h3>Vendedores <button type="button" class="lk" data-ir="ven">Ver todos ›</button></h3><div class="db-vr">${vendH || '<p class="db-vacio">Sin datos.</p>'}</div></div>
       <div class="card db-c"><h3>Venta mensual ${Y} <small>por cartera</small></h3><div class="chartbox sm"><canvas id="cMes"></canvas></div></div>
       <div class="card db-c"><h3>Mejores clientes del mes <button type="button" class="lk" data-ir="cli">Clientes ›</button></h3><div class="db-l">${topH || '<p class="db-vacio">Sin ventas este mes.</p>'}</div></div>
@@ -3100,6 +3112,8 @@ function pintarDashboard() {
   const real = dias.map(d => { ac += X.dia[d]; return d <= X.lim ? ac : null; }), prev = dias.map(d => { acP += d <= X.dmP ? X.diaP[d] : 0; return acP; });
   const ds = [{ label: "Facturado", data: real, borderColor: "#1C9A5B", backgroundColor: "rgba(28,154,91,.12)", fill: true, tension: .25, pointRadius: 0, spanGaps: false },
     { label: MESES[M - 1] || "Mes anterior", data: prev, borderColor: "#9AA8B4", borderDash: [4, 4], pointRadius: 0, tension: .25 }];
+  { const R = npRitmo(X.cots, Y, M, X.dm, real, X.lim); if (R) ds.splice(1, 0, { label: "NP Defontana", data: R.np, borderColor: "#F0A818", borderWidth: 2, pointRadius: 0, tension: .25 },
+      { label: "Facturado + NP Defontana", data: R.tot, borderColor: "#6D28D9", borderWidth: 2.6, pointRadius: 0, tension: .25 }); }
   if (conMeta) ds.push({ label: "Ritmo para la meta", data: dias.map(d => A.meta * habiles(Y, M, 1, d) / Math.max(1, A.totales)), borderColor: "#0B3146", borderWidth: 1.5, pointRadius: 0, stepped: true });
   chart("cRitmo", { type: "line", data: { labels: dias, datasets: ds }, options: { maintainAspectRatio: false, animation: { duration: 250 }, interaction: { mode: "index", intersect: false },
     plugins: { legend: { position: "bottom", labels: { boxWidth: 10, boxHeight: 10 } }, tooltip: { callbacks: { title: x => `Día ${x[0].label}`, label: x => x.raw == null ? null : `${x.dataset.label}: ${fmt(x.raw)}` } } },
