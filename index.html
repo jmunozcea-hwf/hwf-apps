@@ -4833,6 +4833,7 @@ function dbCalc() {
     const ncli = D.clientes.filter((x, i) => x[2] === c && dbCliY(D, Y).has(i)).length;
     return { v: c, fa: o.fa, np: n, avance: o.fa + n, meta, margen: o.fa ? 1 - o.costo / o.fa : 0, activos: o.cli.size, ncli }; }).filter(x => x.meta || x.fa || x.np);
   const meta = yo ? metaDe(yo) : V.reduce((t, x) => t + x.meta, 0);
+  { const sinT = V.filter(x => x.v !== "Tienda Hellywoof"); V.length = 0; V.push(...sinT); }  /* la tienda no es vendedor: no va en la lista */
   const totales = dbHab(Y, M, 1, dm), transc = dbHab(Y, M, 1, CD), restantes = Math.max(0, totales - transc);
   const proy = transc ? fa / transc * totales + np : fa + np;
   const stockDe = cod => D.stock && D.stock[cod] != null ? D.stock[cod] : null;
