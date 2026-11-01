@@ -3576,7 +3576,7 @@ candidatos = function () {
 /* ================================================================
    INICIO: BIENVENIDA, NOVEDADES Y MISIONES DEL DÍA
    ================================================================ */
-const APP_VERSION = "4.6";
+const APP_VERSION = "5.1";
 const APP_NOVEDADES = [
   "Navegación más simple: flechas ‹ › para pasar de apartado, desliza el dedo para cambiar y el botón atrás vuelve donde estabas.",
   "Nuevo apartado Nutrición: compara el alimento de la competencia con los nuestros, con 3 razones y la ración diaria equivalente para cada perro o gato. Incluye las fichas técnicas de toda la línea HWF.",
@@ -4735,7 +4735,7 @@ pintarInicio = function () {
   hero.querySelectorAll(".nums,.in-bar").forEach(e => e.remove());
   const yo = avK(SES.vendedor.cartera || SES.vendedor.nombre), x = avFilas().find(f => f.k === yo);
   const tot = x ? x.tot + avAppPost(SES.vendedor.cartera) : 0;
-  hero.insertAdjacentHTML("beforeend", `<button type="button" class="btn" id="inAv" style="justify-self:start;background:rgba(255,255,255,.14);color:#fff;border-color:rgba(255,255,255,.35)">${x && x.meta ? `Meta de ${nombreMes()}: ${avPct(tot, x.meta)}% · ` : ""}Ver avance de ventas ›</button>`);
+  hero.insertAdjacentHTML("beforeend", `<button type="button" class="btn" id="inAv" style="justify-self:start;background:rgba(255,255,255,.14);color:#fff;border-color:rgba(255,255,255,.35)">${x && x.meta ? `Meta de ${nombreMes()}: ${avPct(tot, x.meta)}% · ` : ""}Ver dashboard ›</button>`);
   $("inAv").onclick = () => setModo("avance");
 };
 document.addEventListener("visibilitychange", () => { if (!document.hidden && MODO === "avance") pintarAvance(); });
@@ -4898,13 +4898,13 @@ function pintarDash() {
       <div class="l"><span>Avance de ${MN}${yo ? " · " + esc(yo.split(" ")[0]) : " · equipo"}</span><span>${X.restantes} ${X.restantes === 1 ? "día hábil" : "días hábiles"} por delante</span></div>
       <div class="l"><span class="big">${dbMM(av)}</span>${conMeta ? `<span>de ${dbMM(X.meta)} · <b>${dbPct(av / X.meta)}</b></span>` : ""}</div>
       <div class="db-bar"><i style="width:${w(X.fa)}"></i><i class="np" style="left:${w(X.fa)};width:${w(X.np)}"></i>${conMeta ? `<s style="left:${(esp * 100).toFixed(1)}%"></s>` : ""}</div>
-      <div class="l"><span>Facturado ${dbMM(X.fa)} · NP Defontana ${dbMM(X.np)}${conMeta && av < X.meta ? ` · faltan ${dbMM(X.meta - av)}` : ""}</span><b>Ver avance ›</b></div>
+      <div class="l"><span>Facturado ${dbMM(X.fa)} · NP Defontana ${dbMM(X.np)}${conMeta && av < X.meta ? ` · faltan ${dbMM(X.meta - av)}` : ""}</span><b>Ver detalle ›</b></div>
     </button>
     <div class="db-k">${kpis}</div>
     <div class="db-g">
       <div class="db-c"><h3>Qué mirar hoy <small>${al.length} ${al.length === 1 ? "aviso" : "avisos"}</small></h3><div class="db-al">${al.map(([t, i, x]) => `<div class="${t}"><span>${i}</span><span>${x}</span></div>`).join("") || '<p class="db-vacio">Todo en orden.</p>'}</div></div>
       <div class="db-c"><h3>Ritmo del mes <small>facturado acumulado por día</small></h3>${dbLinea(ser, n)}</div>
-      <div class="db-c"><h3>Vendedores <button type="button" class="lk" data-ir="av">Avance ›</button></h3><div class="db-vr">${vendH || '<p class="db-vacio">Sin datos.</p>'}</div></div>
+      <div class="db-c"><h3>Vendedores </h3><div class="db-vr">${vendH || '<p class="db-vacio">Sin datos.</p>'}</div></div>
       <div class="db-c"><h3>Venta mensual ${X.Y} <small>${yo ? "tu cartera" : "por cartera"}</small></h3>${dbBarras(meses, grupos, (m, g) => X.porMes[m] ? (X.porMes[m][g.n] || 0) : 0)}</div>
       <div class="db-c"><h3>Mejores clientes del mes <button type="button" class="lk" data-ir="cli">Clientes ›</button></h3><div class="db-l">${topH || '<p class="db-vacio">Sin ventas este mes.</p>'}</div></div>
       <div class="db-c"><h3>Habituales sin compra <small>${sin.length} · ${dbMM(sin.reduce((t, c) => t + c.hab, 0))}/mes</small></h3><div class="db-l">${sinH || '<p class="db-vacio">Todos los habituales ya compraron.</p>'}</div></div>
@@ -5018,7 +5018,7 @@ exportarAhora = function () {
 /* ================================================================
    NAVEGACIÓN ENTRE APARTADOS (flechas, botón atrás, deslizar)
    ================================================================ */
-const NAV_ORDEN = [["inicio", "mInicio"], ["dash", "mDash"], ["avance", "mAvance"], ["pedido", "mPedido"], ["clientes", "mClientes"], ["agenda", "mAgenda"], ["ruta", "mRuta"], ["cobranza", "mCobranza"], ["embudo", "mEmbudo"], ["nut", "mNut"]].filter(([, id]) => $(id));
+const NAV_ORDEN = [["inicio", "mInicio"], ["dash", "mDash"], ["avance", "mAvance"], ["pedido", "mPedido"], ["clientes", "mClientes"], ["agenda", "mAgenda"], ["ruta", "mRuta"], ["cobranza", "mCobranza"], ["embudo", "mEmbudo"], ["nut", "mNut"]].filter(([m, id]) => $(id) && m !== "avance");
 const navScroll = {};
 let navDesdeHash = false, navPila = [], navPrimera = true, navUlt = null;
 const NAV_ICO = {
@@ -5135,6 +5135,12 @@ window.addEventListener("hashchange", () => {
 /* teclado (computador): Alt + ← / → */
 document.addEventListener("keydown", e => { if (!e.altKey || !SES || /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) return; if (e.key === "ArrowRight") { e.preventDefault(); navPaso(1); } if (e.key === "ArrowLeft") { e.preventDefault(); navPaso(-1); } });
 navPintar();
+
+
+/* ===== Sin apartado Avance: lo reemplaza el Dashboard ===== */
+{ const b = $("mAvance"); if (b) { b.hidden = true; b.style.display = "none"; } }
+const _setModoNoAv = setModo;
+setModo = function (m) { return _setModoNoAv(m === "avance" ? "dash" : m); };
 
 
 /* ===== Fecha y hora de actualización con los datos de Drive ===== */
