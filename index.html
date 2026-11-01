@@ -1167,13 +1167,21 @@ body.m-inicio #crmMeta{display:none!important}
 @media (max-width:620px){.modos{grid-template-columns:repeat(3,minmax(0,1fr))!important}.modos button{font-size:.88rem!important;min-height:42px}}
 body.m-cobranza #crmMeta{display:none!important}
 #crmCobranza{display:grid;gap:12px}
-.cx-hero{border-radius:16px;padding:16px 18px;background:linear-gradient(135deg,#5B2A0E,#9A4A12);color:#fff;display:grid;gap:10px}
-.cx-hero h2{margin:0;font-size:1.05rem;font-weight:800}
-.cx-k{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
-.cx-k div{background:rgba(255,255,255,.12);border-radius:10px;padding:8px 10px;min-width:0}
-.cx-k span{display:block;font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;opacity:.85;font-weight:700}
-.cx-k b{font-size:.95rem;font-variant-numeric:tabular-nums;white-space:nowrap}
-.cx-k small{display:block;font-size:.72rem;opacity:.85}
+.cx-hero{border-radius:18px;padding:16px;background:linear-gradient(135deg,#0B3146,#13506F);color:#fff;display:grid;gap:12px}
+.cx-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.cx-top h2{margin:0 0 2px;font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;opacity:.8}
+.cx-top b{display:block;font-size:1.9rem;line-height:1.1;font-weight:800;font-variant-numeric:tabular-nums}
+.cx-top small{display:block;font-size:.82rem;opacity:.8;margin-top:2px}
+.cx-act{flex:none;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.12);color:#fff;border-radius:999px;padding:7px 12px;font:inherit;font-size:.8rem;font-weight:700;cursor:pointer}
+.cx-act:disabled{opacity:.6}
+.cx-k{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.cx-k div{background:#fff;color:#0B3146;border-radius:12px;padding:10px 12px;min-width:0;box-shadow:inset 5px 0 0 #B42318;padding-left:15px}
+.cx-k div.s{box-shadow:inset 5px 0 0 #F0A818}
+.cx-k span{display:block;font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;font-weight:800;color:#B42318}
+.cx-k div.s span{color:#9A5B00}
+.cx-k b{display:block;font-size:1.15rem;font-weight:800;font-variant-numeric:tabular-nums;margin:2px 0}
+.cx-k small{display:block;font-size:.76rem;color:#5B6B78;line-height:1.3}
+@media (prefers-color-scheme:dark){.cx-k div{background:#12212C;color:#E8EEF2}.cx-k small{color:#9FB0BC}}
 .cx-info{font-size:.8rem;color:var(--muted);display:flex;gap:8px;justify-content:space-between;align-items:center;flex-wrap:wrap}
 .cx-chips{display:flex;gap:6px;flex-wrap:wrap}
 .cx-chips button{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 12px;font-weight:700;font-size:.82rem;cursor:pointer;color:var(--ink)}
@@ -3869,12 +3877,12 @@ function pintarCobranza() {
   if (q) cl = cl.filter(c => cxNorm(c.cli + " " + c.rut).includes(q));
   const s = lsGet(CXKEY, null);
   box.innerHTML = `
-    <div class="cx-hero"><h2>${verTodos && !cxCob ? "Cobranza de todos los vendedores" : `Mi cobranza${cxCob && verTodos ? " · " + esc(cxCob) : ""}`}</h2>
-      <div class="cx-k"><div><span>Por cobrar</span><b>${fmt(R.total)}</b><small>${R.nCli} ${R.nCli === 1 ? "cliente" : "clientes"}</small></div>
-        <div><span>Vencido</span><b>${fmt(R.venc)}</b><small>${R.nVenc} ${R.nVenc === 1 ? "cliente" : "clientes"}${R.v30 ? ` · ${fmt(R.v30)} +30 días` : ""}</small></div>
-        <div><span>Hoy y 7 días</span><b>${fmt(R.sem)}</b><small>${R.hoy ? `${fmt(R.hoy)} vence hoy` : "por vencer"}</small></div></div></div>
-    <div class="cx-info"><span>Informe Defontana del ${esc(C.emision || "—")}${C.hasta ? ` · documentos que vencen hasta el ${cxFecha(C.hasta)}` : ""}.${s && s.bajado ? "" : ""} Los días de atraso se recalculan cada día.</span>
-      <button class="btn" type="button" id="cxAct">Actualizar</button></div>
+    <div class="cx-hero"><div class="cx-top"><div><h2>${verTodos && !cxCob ? "Cobranza de todos los vendedores" : `Mi cobranza${cxCob && verTodos ? " · " + esc(cxCob) : ""}`}</h2>
+        <b>${fmt(R.total)}</b><small>por cobrar · ${R.nCli} ${R.nCli === 1 ? "cliente" : "clientes"}</small></div>
+        <button class="cx-act" type="button" id="cxAct">↻ Actualizar</button></div>
+      <div class="cx-k"><div><span>Vencido</span><b>${fmt(R.venc)}</b><small>${R.nVenc} ${R.nVenc === 1 ? "cliente" : "clientes"}</small>${R.v30 ? `<small>${fmt(R.v30)} con más de 30 días</small>` : ""}</div>
+        <div class="s"><span>Vence en 7 días</span><b>${fmt(R.sem)}</b><small>${R.hoy ? `${fmt(R.hoy)} vence hoy` : "incluye hoy"}</small></div></div></div>
+    <div class="cx-info"><span>Informe Defontana del ${esc(C.emision || "—")}${C.hasta ? ` · vencimientos hasta el ${cxFecha(C.hasta)}` : ""}. Los días de atraso se recalculan cada día.</span></div>
     ${verTodos ? `<div class="cx-chips" id="cxCobs"><button type="button" data-cob="" aria-pressed="${!cxCob}">Todos</button>${cobs.map(v => `<button type="button" data-cob="${esc(v)}" aria-pressed="${cxCob === v}">${esc(v.split(" ")[0])}</button>`).join("")}</div>` : ""}
     <div class="cx-chips" id="cxFil">${[["todos", "Todos"], ["venc", "Vencidos"], ["sem", "Vencen en 7 días"], ["cheq", "Cheques"]].map(([k, t]) => `<button type="button" data-f="${k}" aria-pressed="${cxFiltro === k}">${t} (${nF[k]})</button>`).join("")}</div>
     <div class="search"><input id="cxQ" type="search" placeholder="Buscar cliente o RUT" aria-label="Buscar cliente en cobranza" value="${esc(cxQ)}"></div>
