@@ -2680,6 +2680,8 @@ $("crmAgenda").addEventListener("click", e => { const b = e.target.closest("[dat
    VERSIÓN SIN PLATAFORMA: datos del CRM guardados en este equipo
    ================================================================ */
 const CRM_BASE = __dvGet("CRM_BASE") || {"clientes": [], "metas": []};
+const esTienda_ = v => /HELLYWOOF/.test(String(v || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase());
+CRM_BASE.metas = CRM_BASE.metas.filter(x => !esTienda_(x.vendedor)); CRM_BASE.clientes = CRM_BASE.clientes.filter(x => !esTienda_(x.vendedor));
 const LKEY = "hwf-crm-local-v1";
 document.body.classList.add("local");
 function LDB() { try { return JSON.parse(localStorage.getItem(LKEY) || "null") || { ed: {}, acts: [], nuevos: [] }; } catch (e) { return { ed: {}, acts: [], nuevos: [] }; } }
@@ -4706,6 +4708,7 @@ NUT.hwf.forEach(nuPrep); NUT.comp.forEach(nuPrep);
    AVANCE DE META: FACTURADO + NOTAS DE PEDIDO DEFONTANA (todos los vendedores)
    ================================================================ */
 const NP_VEND = __dvGet("NP_VEND") || {};
+Object.keys(NP_VEND).forEach(k => { if (esTienda_(k) || esTienda_(NP_VEND[k] && NP_VEND[k].v)) delete NP_VEND[k]; });
 const avK = s => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toUpperCase().replace(/[^A-Z ]/g, "").trim().split(" ")[0];
 function avFilas() {
   const vistos = new Set(), F = CRM_BASE.metas.map(m => { const k = avK(m.vendedor); vistos.add(k); const np = NP_VEND[k] || { m: 0, n: 0 };
@@ -4805,16 +4808,16 @@ function dbCalc() {
   const dm = new Date(Y, M, 0).getDate(), dmP = M > 1 ? new Date(Y, M - 1, 0).getDate() : 31;
   const dia = new Array(dm + 1).fill(0), diaP = new Array(dmP + 1).fill(0);
   const porMes = {}, cli = {}, pro = {}, cat = {}, vend = {};
-  let fa = 0, costo = 0, prevHasta = 0;
+  let fa = 0, costo = 0, prevHasta = 0, faT = 0;
   D.rows.forEach(r => {
-    if (anio(r) !== Y) return; const c = cart(r); if (c === "Tienda Hellywoof") return;
+    if (anio(r) !== Y) return; const c = cart(r), esT = c === "Tienda Hellywoof"; if (esT && yo) return;
     const [ci, pi, m, d, q, neto, cu] = r, cs = q * cu;
     const pm = porMes[m] = porMes[m] || {}; pm[c] = (pm[c] || 0) + neto;
     if (m === M) { const v = vend[c] = vend[c] || { v: c, fa: 0, costo: 0, cli: new Set() }; v.fa += neto; v.costo += cs; if (neto > 0) v.cli.add(ci); }
     if (yo && c !== yo) return;
-    const o = cli[ci] = cli[ci] || { ci, h: {}, ult: 0 }; o.h[m] = (o.h[m] || 0) + neto; if (neto > 0 && m * 100 + d > o.ult) o.ult = m * 100 + d;
+    if (!esT) { const o = cli[ci] = cli[ci] || { ci, h: {}, ult: 0 }; o.h[m] = (o.h[m] || 0) + neto; if (neto > 0 && m * 100 + d > o.ult) o.ult = m * 100 + d; }
     const p = pro[pi] = pro[pi] || { pi, h: {} }; const ph = p.h[m] = p.h[m] || { v: 0, q: 0, c: 0 }; ph.v += neto; ph.q += q; ph.c += cs;
-    if (m === M) { fa += neto; costo += cs; dia[d] += neto; const ca = D.cats[D.productos[pi][1]] || "Sin categoría"; cat[ca] = (cat[ca] || 0) + neto; }
+    if (m === M) { fa += neto; costo += cs; if (esT) faT += neto; dia[d] += neto; const ca = D.cats[D.productos[pi][1]] || "Sin categoría"; cat[ca] = (cat[ca] || 0) + neto; }
     else if (m === M - 1) { diaP[d] += neto; if (d <= CD) prevHasta += neto; }
   });
   const prev3 = [M - 3, M - 2, M - 1].filter(x => x >= 1), hab = o => prev3.reduce((t, m) => t + (o.h[m] || 0), 0) / Math.max(1, prev3.length);
@@ -4825,7 +4828,7 @@ function dbCalc() {
   const cots = D.cots.filter(c => !yo || dbK(c[4]) === dbK(yo));
   const np = cots.reduce((t, c) => t + c[7], 0), npN = new Set(cots.map(c => c[0])).size;
   const npDe = c => D.cots.filter(x => dbK(x[4]) === dbK(c)).reduce((t, x) => t + x[7], 0);
-  const carts = [...new Set(D.vend.filter(v => v !== "Tienda Hellywoof").concat(Object.keys(vend)).concat(Object.keys(D.metas).filter(v => v !== "Tienda Hellywoof")))];
+  const carts = [...new Set(D.vend.filter(v => v !== "Tienda Hellywoof").concat(Object.keys(vend)).concat(Object.keys(D.metas).filter(v => v !== "Tienda Hellywoof" || vend[v])))];
   const V = carts.map(c => { const o = vend[c] || { fa: 0, costo: 0, cli: new Set() }, n = npDe(c), meta = metaDe(c);
     const ncli = D.clientes.filter((x, i) => x[2] === c && dbCliY(D, Y).has(i)).length;
     return { v: c, fa: o.fa, np: n, avance: o.fa + n, meta, margen: o.fa ? 1 - o.costo / o.fa : 0, activos: o.cli.size, ncli }; }).filter(x => x.meta || x.fa || x.np);
@@ -4837,7 +4840,7 @@ function dbCalc() {
     .filter(x => x && (x.s <= 0 || x.dias < 15)).sort((a, b) => (a.s > 0) - (b.s > 0) || b.p.q3 - a.p.q3);
   const cob = (typeof cxTodos === "function" ? cxTodos() : []).filter(d => d.saldo > 0 && (!yo || dbK(d.cart) === dbK(yo)));
   const pr = typeof prTodos === "function" ? prTodos().filter(o => !yo || dbK(o.vendedor) === dbK(yo)) : [];
-  return { D, Y, M, CD, yo, dm, dmP, dia, diaP, porMes, fa, costo, prevHasta, np, npN, meta, proy, totales, transc, restantes, V, clientes, productos, cat, stock, cob, pr, stockDe, carts };
+  return { faT, D, Y, M, CD, yo, dm, dmP, dia, diaP, porMes, fa, costo, prevHasta, np, npN, meta, proy, totales, transc, restantes, V, clientes, productos, cat, stock, cob, pr, stockDe, carts };
 }
 const dbChip = (v, cls) => v == null || !isFinite(v) ? "" : `<i class="db-chip ${cls || (v >= 0 ? "up" : "down")}">${v >= 0 ? "▲" : "▼"} ${Math.abs(Math.round(v * 100))}%</i>`;
 /* --- gráficos SVG livianos --- */
@@ -4896,7 +4899,7 @@ function pintarDash() {
     K("av", "Facturado del mes", dbMM(X.fa), X.M > 1 ? `${MESES[X.M - 2]} a la misma fecha: ${dbMM(X.prevHasta)}` : "", dbChip(varP)),
     K("av", "Margen bruto", dbPct(mg), `${dbMM(X.fa - X.costo)} en el mes`),
     K("cli", "Clientes con compra", dbNf(con), `de ${dbNf(hab)} habituales (${dbPct(hab ? con / hab : 0)})`),
-    K("cli", "Venta por cliente", dbMM(con ? X.fa / con : 0), "promedio del mes"),
+    K("cli", "Venta por cliente", dbMM(con ? (X.fa - X.faT) / con : 0), "promedio del mes"),
     X.cob.length ? K("cob", "Por cobrar", dbMM(cobTot), `${dbMM(cobV)} vencido`, cobV ? `<i class="db-chip down">${dbPct(cobV / cobTot)}</i>` : "") : "",
     K("av", "NP Defontana", dbMM(X.np), `${X.npN} ${X.npN === 1 ? "nota pendiente" : "notas pendientes"}`),
     X.pr.length ? K("emb", "Prospectos activos", dbNf(prAct), `${dbNf(prCont)} ya contactados`) : "",
@@ -4934,7 +4937,7 @@ function pintarDash() {
   const meses = Array.from({ length: X.M }, (_, i) => i + 1), grupos = (yo ? [yo] : X.carts.filter(c => meses.some(m => X.porMes[m] && X.porMes[m][c]))).map(c => ({ n: c, c: dbColor(c) }));
   const cats = Object.entries(X.cat).filter(x => x[1] > 0).sort((a, b) => b[1] - a[1]), cTop = cats.slice(0, 7), otros = cats.slice(7).reduce((t, x) => t + x[1], 0); if (otros) cTop.push(["Otras", otros]);
   const act = DB.act || (typeof ACT_INFO !== "undefined" ? ACT_INFO : null);
-  box.innerHTML = `<div class="db-hd"><div><h2>Dashboard</h2><small>${mesT} ${X.Y} · ${yo ? esc(yo) : "todo el equipo (sin tienda)"} · datos al ${String(X.CD).padStart(2, "0")}-${String(X.M).padStart(2, "0")}</small></div></div>
+  box.innerHTML = `<div class="db-hd"><div><h2>Dashboard</h2><small>${mesT} ${X.Y} · ${yo ? esc(yo) : "todo el equipo" + (X.faT ? " (incluye tienda)" : "")} · datos al ${String(X.CD).padStart(2, "0")}-${String(X.M).padStart(2, "0")}</small></div></div>
     ${mi ? `<div class="db-sc" role="group" aria-label="Qué datos ver"><button type="button" data-sc="equipo" aria-pressed="${!yo}">Todo el equipo</button><button type="button" data-sc="mio" aria-pressed="${!!yo}">Solo mis datos</button></div>` : ""}
     <button type="button" class="db-av" data-ir="av">
       <div class="l"><span>Avance de ${MN}${yo ? " · " + esc(yo.split(" ")[0]) : " · equipo"}</span><span>${X.restantes} ${X.restantes === 1 ? "día hábil" : "días hábiles"} por delante</span></div>
@@ -5493,7 +5496,7 @@ pintarDash = function () {
   const D = DB.d; if (!D || !D.rows || !D.corte) return;
   const [Y, M, CD] = D.corte.split("-").map(Number), yo = dbAlcance();
   const cart = r => D.vend[r[7]] === "Tienda Hellywoof" ? "Tienda Hellywoof" : (D.clientes[r[0]] || [])[2];
-  const o = yaCalc(D, Y, M, CD, r => { const c = cart(r); return c !== "Tienda Hellywoof" && (!yo || c === yo); }, cart); if (!o) return;
+  const o = yaCalc(D, Y, M, CD, r => { const c = cart(r); return !yo || c === yo; }, cart); if (!o) return;
   const nom = String(MESES[M - 1] || ""), mesN = nom.charAt(0).toUpperCase() + nom.slice(1);
   g.insertAdjacentHTML("afterbegin", yaHtml(o, dbMM, mesN, !yo));
 };
