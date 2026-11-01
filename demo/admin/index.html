@@ -2,6 +2,17 @@
 <html lang="es">
 <head>
 <link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0B3146"><link rel="apple-touch-icon" href="icon-192.png"><link rel="icon" href="icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Admin DEMO"><script>
+/* ===== cierre de mes (patch_cierre) ===== */
+function admCierre() {
+  try {
+    const ct = corte(); let hoy;
+    try { hoy = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Santiago", year: "numeric", month: "2-digit" }).format(new Date()).split("-").map(Number); }
+    catch (e) { const d = new Date(); hoy = [d.getFullYear(), d.getMonth() + 1]; }
+    return hoy[0] * 100 + hoy[1] > ct.y * 100 + ct.m && Y * 100 + M === ct.y * 100 + ct.m ? ` · Cierre de ${MESES[ct.m].toLowerCase()}: el mes nuevo empieza con la primera venta o nota de pedido` : "";
+  } catch (e) { return ""; }
+}
+</script>
+<script>
 /* ===== días calendario desde hoy, en hora de Chile (patch_diashoy) ===== */
 function hoyCL() { try { const p = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Santiago", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date()).split("-").map(Number); return Date.UTC(p[0], p[1] - 1, p[2]); } catch (e) { const d = new Date(); return Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()); } }
 function diasDesde(y, m, d) { return Math.round((hoyCL() - Date.UTC(y, m - 1, d)) / 864e5); }
@@ -2699,7 +2710,7 @@ $("fileIn").addEventListener("change", async e => {
 /* ================= NAVEGACIÓN ================= */
 let TAB = "res";
 function meses() {
-  const ms = [...new Set(D.rows.map(r => (r[8] || D.anio) * 100 + r[2]))].sort((a, b) => b - a);
+  const ms = [...new Set(D.rows.map(r => (r[8] || D.anio) * 100 + r[2]).concat(D.corte ? [corte().y * 100 + corte().m] : []))].sort((a, b) => b - a);
   $("selMes").innerHTML = ms.map(k => `<option value="${k}">${MC[k % 100]} ${Math.floor(k / 100)}</option>`).join("");
   const ct = corte(); const def = ct.y * 100 + ct.m;
   if (!M || !ms.includes(Y * 100 + M)) { Y = Math.floor((ms.includes(def) ? def : ms[0]) / 100); M = (ms.includes(def) ? def : ms[0]) % 100; }
@@ -2708,7 +2719,7 @@ function meses() {
 $("selMes").onchange = e => { const k = Number(e.target.value); Y = Math.floor(k / 100); M = k % 100; refrescar(); };
 function refrescar() {
   calcular();
-  const ct = corte(); $("subT").textContent = `Ventas al ${String(ct.d).padStart(2, "0")}-${String(ct.m).padStart(2, "0")}-${ct.y}${IMP.acts.length || IMP.pedidos.length ? " · + datos de la app" : ""}`;
+  const ct = corte(); $("subT").textContent = `Ventas al ${String(ct.d).padStart(2, "0")}-${String(ct.m).padStart(2, "0")}-${ct.y}${admCierre()}${IMP.acts.length || IMP.pedidos.length ? " · + datos de la app" : ""}`;
   ({ res: pintarResumen, av: pintarAvance, ven: pintarVendedores, cli: pintarClientes, pro: pintarProductos, mas: pintarMas })[TAB]();
 }
 document.querySelector("nav.bottom").addEventListener("click", e => {
