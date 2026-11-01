@@ -2354,8 +2354,7 @@ function pintarCobranza() {
         <div class="warn"><span>Vencido</span><b>${mm(R.venc)}</b><small>${R.nVenc} clientes</small></div>
         <div class="bad"><span>Vencido +30 días</span><b>${mm(R.v30)}</b><small>${pct(R.total ? R.v30 / R.total : 0)} del total</small></div>
         <div class="sem"><span>Hoy y 7 días</span><b>${mm(R.sem)}</b><small>${mm(R.hoy)} vence hoy</small></div></div>
-      <div class="np-top"><label class="btn pri" style="cursor:pointer">Cargar informe de cobranza (PDF)<input type="file" id="cxPdf" accept="application/pdf,.pdf" hidden></label>
-        <button class="btn" type="button" id="cxXls">Exportar a Excel</button>
+      <div class="np-top"><button class="btn" type="button" id="cxXls">Exportar a Excel</button>
         ${SYC() ? `<button class="btn" type="button" id="cxEnv" ${cxOcup ? "disabled" : ""}>Enviar a vendedores</button>` : ""}</div>
       <p class="cx-env ${env[0]}" style="margin:0">${esc(env[1])} Carga cada día el “Informe de Cobranza Detallado” de Defontana en PDF; los días de atraso se recalculan solos.</p></div>
     <div class="card"><h2>Por vendedor <span class="muted">según cobrador en Defontana</span></h2><div class="tbl"><table><thead><tr><th>Vendedor</th><th class="r">Por cobrar</th><th class="r">Vencido</th><th class="r">+30 días</th><th class="r">Hoy y 7 días</th><th class="r">Clientes</th></tr></thead>
@@ -2370,7 +2369,7 @@ function pintarCobranza() {
         ${c.docs.map(d => `<div class="cx-doc"><span>${esc(d.tipo)} N° ${esc(d.num)} <span class="cx-est ${d.est}">${esc(d.dias > 0 ? `${d.dias} ${d.dias === 1 ? "día" : "días"} vencido` : CXC_EST[d.est])}</span></span><b class="num">${fmt(d.saldo)}</b>
           <small>Emitido ${cxFecha(d.fi)} · vence ${cxFecha(d.fv)} · ${cxTxtDias(d.dias)}${d.haber ? ` · abonado ${fmt(d.haber)} de ${fmt(d.debe)}` : ""}</small></div>`).join("")}</div>`).join("")
         || '<p class="muted" style="margin:0">No hay documentos con ese filtro.</p>'}</div></div>`;
-  $("cxPdf").onchange = e => { const f = e.target.files[0]; e.target.value = ""; if (f) cxCargarPdf(f); };
+  if ($("cxPdf")) $("cxPdf").onchange = e => { const f = e.target.files[0]; e.target.value = ""; if (f) cxCargarPdf(f); };
   $("cxXls").onclick = () => cxExportar(todos);
   if ($("cxEnv")) $("cxEnv").onclick = async () => { cxOcup = true; const s = store.get("adm-cxc", null) || { cobranza: C }; s.enviado = false; store.set("adm-cxc", s); pintarCobranza(); await cxEnviar(true); cxOcup = false; pintarCobranza(); };
   $("cxSegV").onclick = e => { const b = e.target.closest("[data-v]"); if (b) { cxVend = b.dataset.v; pintarCobranza(); } };
