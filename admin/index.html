@@ -1,7 +1,12 @@
 <!doctype html>
 <html lang="es">
 <head>
-<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0B3146"><link rel="apple-touch-icon" href="icon-192.png"><link rel="icon" href="icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="HWF Admin"><script>if("serviceWorker" in navigator)addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})});</script>
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0B3146"><link rel="apple-touch-icon" href="icon-192.png"><link rel="icon" href="icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="HWF Admin"><script>
+/* ===== días calendario desde hoy, en hora de Chile (patch_diashoy) ===== */
+function hoyCL() { try { const p = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Santiago", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date()).split("-").map(Number); return Date.UTC(p[0], p[1] - 1, p[2]); } catch (e) { const d = new Date(); return Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()); } }
+function diasDesde(y, m, d) { return Math.round((hoyCL() - Date.UTC(y, m - 1, d)) / 864e5); }
+</script>
+<script>if("serviceWorker" in navigator)addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})});</script>
 <script>/* datos públicos actualizables */window.__PUB=(function(){try{var p=JSON.parse(localStorage.getItem("hwf-pub")||"null");return p&&p.version&&p.version>"0000"?p:null}catch(e){return null}})();</script>
 <script>/* conexión inicial: sin código no hay datos */(function(){
 var CFGK="adm-sync",DVK="hwf-dv-admin",APP="admin",ESADM=true;
@@ -1606,7 +1611,7 @@ function COTS() {
     q.lin.forEach(x => { if (x.q > 0) out.push([q.n, q.f, q.cl, q.vd, q.cart, x.q, x.d, Math.round(x.q * x.pu)]); }); });
   return out;
 }
-const npDias = f => { const [d, m, y] = String(f).split("/").map(Number); return y ? Math.round((Date.now() - new Date(y, m - 1, d)) / 864e5) : 0; };
+const npDias = f => { const [d, m, y] = String(f).split("/").map(Number); return y ? diasDesde(y, m, d) : 0; };
 /* precios y costos de referencia desde las ventas */
 let NPPRE = null;
 function npPrecios() {
@@ -1779,7 +1784,7 @@ function naNeto(p) { const r = NAREV()[p.num]; return r && r.items ? r.items.red
 let naBusca = "", naVend = "", naFiltro = "pen", NAACT = null;
 const naFecha = p => `${String(p.d).padStart(2, "0")}-${String(p.m).padStart(2, "0")}-${p.y}`;
 const naFISO = s => s ? s.split("-").reverse().join("-") : "";
-const naDias = p => Math.max(0, Math.round((Date.now() - new Date(p.y, p.m - 1, p.d)) / 864e5));
+const naDias = p => Math.max(0, diasDesde(p.y, p.m, p.d));
 function naLista() {
   const q = norm(naBusca).split(" ").filter(Boolean);
   return IMP.pedidos.filter(p => (!naVend || p.cart === naVend) && q.every(w => norm([p.num, p.cliente, p.vend, p.comuna, p.rut].join(" ")).includes(w)))
