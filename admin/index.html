@@ -3594,8 +3594,8 @@ function czHtml(cots, fmt, esc, conCartera, irAttr, ym, mesTxt) {
   const T = czNotas(cots), L = ym ? T.filter(n => n.ym === ym) : T, O = ym ? T.filter(n => n.ym !== ym) : [];
   const otras = O.length ? `<p class="db-vacio" style="margin-top:6px">Otras pendientes de meses anteriores: ${O.length} ${O.length === 1 ? "nota" : "notas"} · ${fmt(O.reduce((s, n) => s + n.monto, 0))}</p>` : "";
   const tot = L.reduce((s, n) => s + n.monto, 0), viejas = L.filter(n => n.dias != null && n.dias > 7);
-  const cab = `<h3>Cotizaciones Defontana <small>${mesTxt ? esc(mesTxt) + " · " : ""}pendientes de facturar</small>${irAttr ? `<button type="button" class="lk" ${irAttr}>Ver todas ›</button>` : ""}</h3>`;
-  if (!L.length) return `<div class="db-c card cz">${cab}<p class="db-vacio">No hay cotizaciones pendientes${mesTxt ? " de " + esc(mesTxt) : ""} en Defontana.</p>${otras}</div>`;
+  const cab = `<h3>NP Defontana <small>${mesTxt ? esc(mesTxt) + " · " : ""}pendientes de facturar</small>${irAttr ? `<button type="button" class="lk" ${irAttr}>Ver todas ›</button>` : ""}</h3>`;
+  if (!L.length) return `<div class="db-c card cz">${cab}<p class="db-vacio">No hay notas de pedido pendientes${mesTxt ? " de " + esc(mesTxt) : ""} en Defontana.</p>${otras}</div>`;
   const porV = {}; L.forEach(n => { const k = n.cart || n.vend || "—"; const v = porV[k] = porV[k] || { n: 0, m: 0 }; v.n++; v.m += n.monto; });
   const V = Object.entries(porV).sort((a, b) => b[1].m - a[1].m), max = Math.max(1, ...V.map(x => x[1].m));
   const chip = d => d == null ? "" : `<i class="cz-dias ${d > 14 ? "bad" : d > 7 ? "warn" : "ok"}">${d} ${d === 1 ? "día" : "días"}</i>`;
