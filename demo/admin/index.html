@@ -674,6 +674,13 @@ svg.leaflet-image-layer.leaflet-interactive path {
 		print-color-adjust: exact;
 		}
 	}
+
+/* ===== NP Defontana por mes ===== */
+.np-mes{display:flex;justify-content:space-between;gap:10px;align-items:baseline;margin:10px 2px 2px;padding-bottom:4px;border-bottom:1px solid var(--line,#ddd);font-weight:700}
+.np-mes:first-child{margin-top:0}
+.np-mes small{font-weight:400;color:var(--muted,#667)}
+.np-mesbar{margin-top:6px}
+.np-mesbar h3{margin:6px 0 4px;font-size:.9rem}
 </style>
 <style>
 /* Panel de decisiones para administradores: encabezado de marca, contenido por secciones, navegación inferior fija. */
@@ -1591,17 +1598,18 @@ function pintarCots() {
   const L = npLista(), cuenta = { pen: 0, mod: 0, apr: 0, rec: 0 };
   L.forEach(q => cuenta[q.est]++);
   const vis = L.filter(q => npFiltro === "todas" || (npFiltro === "pen" ? q.est === "pen" || q.est === "mod" : q.est === npFiltro))
-    .sort((a, b) => (a.est === "mod" ? 0 : 1) - (b.est === "mod" ? 0 : 1) || b.t - a.t);
+    .sort((a, b) => npMesK(b.f).localeCompare(npMesK(a.f)) || (a.est === "mod" ? 0 : 1) - (b.est === "mod" ? 0 : 1) || b.t - a.t);
   const pend = L.filter(q => q.est === "pen" || q.est === "mod"), porV = {};
   pend.forEach(x => porV[x.cart] = (porV[x.cart] || 0) + x.t);
   const mx = Math.max(1, ...Object.values(porV));
   $("masBody").innerHTML = `<div class="card"><h2>Notas de pedido Defontana por revisar <span class="muted">${pend.length} · ${mm(pend.reduce((s, x) => s + x.t, 0))}</span></h2>
       <div class="bars">${Object.entries(porV).sort((a, b) => b[1] - a[1]).map(([v, t]) => `<div class="bar"><span class="lab">${esc(v)}</span><span class="tr"><i style="width:${Math.round(t / mx * 100)}%;background:${colorDe(v)}"></i></span><b class="num">${mm(t)}</b></div>`).join("")}</div>
+      ${npBarrasMes(pend)}
       <div class="np-top"><button class="btn pri" type="button" id="npUna" ${pend.length ? "" : "disabled"}>Revisar una por una</button><button class="btn" type="button" id="npXls">Exportar a Excel</button></div>
       <label class="np-chk"><input type="checkbox" id="npDrv" ${npDrive() ? "checked" : ""}> Al descargar, subir también a Google Drive</label></div>
     <div class="seg" id="npSeg">${[["pen", "Por revisar", cuenta.pen + cuenta.mod], ["apr", "Aprobadas", cuenta.apr], ["rec", "Rechazadas", cuenta.rec], ["todas", "Todas", L.length]]
       .map(([k, t, n]) => `<button type="button" data-f="${k}" aria-pressed="${npFiltro === k}">${t} (${n})</button>`).join("")}</div>
-    <div class="card"><div class="lst">${vis.map(x => `<button type="button" class="it e-${x.est}" data-np="${esc(x.n)}"><span class="n"><b>${esc(tc(x.cl))}</b><small>N° ${esc(x.n)} · ${esc(x.f)} (${npDias(x.f)} días) · ${esc(x.cart)} · ${x.lin.filter(l => l.q > 0).length} productos</small></span><span class="v num">${mm(x.t)}<br><span class="est ${x.est}">${NP_EST[x.est]}</span></span></button>`).join("") || '<p class="muted">No hay notas de pedido en esta vista.</p>'}</div></div>`;
+    <div class="card"><div class="lst">${npGrupos(vis, x => `<button type="button" class="it e-${x.est}" data-np="${esc(x.n)}"><span class="n"><b>${esc(tc(x.cl))}</b><small>N° ${esc(x.n)} · ${esc(x.f)} (${npDias(x.f)} días) · ${esc(x.cart)} · ${x.lin.filter(l => l.q > 0).length} productos</small></span><span class="v num">${mm(x.t)}<br><span class="est ${x.est}">${NP_EST[x.est]}</span></span></button>`) || '<p class="muted">No hay notas de pedido en esta vista.</p>'}</div></div>`;
   $("npSeg").onclick = e => { const b = e.target.closest("[data-f]"); if (b) { npFiltro = b.dataset.f; pintarCots(); } };
   $("masBody").querySelectorAll("[data-np]").forEach(b => b.onclick = () => npAbrir(b.dataset.np, vis.map(x => x.n)));
   $("npUna").onclick = () => { const orden = pend.slice().sort((a, b) => npDias(b.f) - npDias(a.f) || b.t - a.t).map(x => x.n); npAbrir(orden[0], orden); };
@@ -3429,6 +3437,21 @@ function ccExportar(l, bajas) {
   npDescargar(XLSX.write(wb, { bookType: "xlsx", type: "array" }), `Cambios de clientes HWF ${hoy.getFullYear()}-${p(hoy.getMonth() + 1)}-${p(hoy.getDate())}.xlsx`, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
 }
 setTimeout(() => { ccSync().then(n => { if (n && typeof navMarcar === "function") navMarcar(); }); }, 3000);
+
+/* ===== NP Defontana separadas por mes (patch_cotsmes) ===== */
+function npMesK(f) { const m = String(f || "").match(/(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})/); return m ? m[3] + "-" + m[2].padStart(2, "0") : "0000-00"; }
+function npMesNom(k) { return k === "0000-00" ? "Sin fecha" : MESES[Number(k.slice(5))] + " " + k.slice(0, 4); }
+function npGrupos(lista, fila) {
+  if (!lista.length) return "";
+  const g = {}; lista.forEach(x => (g[npMesK(x.f)] = g[npMesK(x.f)] || []).push(x));
+  return Object.keys(g).sort().reverse().map(k => `<div class="np-mes"><span>${npMesNom(k)}</span><small>${g[k].length} ${g[k].length === 1 ? "nota" : "notas"} · ${mm(g[k].reduce((s, x) => s + x.t, 0))}</small></div>${g[k].map(fila).join("")}`).join("");
+}
+function npBarrasMes(pend) {
+  const t = {}; pend.forEach(x => t[npMesK(x.f)] = (t[npMesK(x.f)] || 0) + x.t);
+  const ks = Object.keys(t).sort().reverse(); if (ks.length < 1) return "";
+  const mx = Math.max(1, ...Object.values(t));
+  return `<div class="np-mesbar"><h3>Por mes</h3><div class="bars">${ks.map(k => `<div class="bar"><span class="lab">${npMesNom(k)}</span><span class="tr"><i style="width:${Math.round(t[k] / mx * 100)}%;background:#0B3146"></i></span><b class="num">${mm(t[k])}</b></div>`).join("")}</div></div>`;
+}
 </script>
 </body>
 </html>
