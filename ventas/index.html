@@ -5622,5 +5622,24 @@ if (typeof APP_NOVEDADES !== "undefined" && Array.isArray(APP_NOVEDADES)) APP_NO
 .mgrid .val .lbl{display:inline;font-size:.64rem}
 .mgrid .val.zero{display:none}
 </style>
+<style>
+/* ===== pedfiltros: Productos solo con buscador y «Solo en el pedido» ===== */
+#fGrupo,#fOcasion,#fStock{display:none!important}
+.filters{grid-template-columns:minmax(0,1fr) auto!important;align-items:center}
+.filters .search,.filters .chips{grid-column:auto!important}
+.filters .chips{flex-wrap:nowrap}
+.filters #fSolo{min-height:44px;white-space:nowrap}
+</style>
+<script>/* pedfiltros: los filtros ocultos nunca filtran */
+(function () {
+  try {
+    if ($("fGrupo")) $("fGrupo").value = ""; if ($("fOcasion")) $("fOcasion").value = "";
+    if (typeof conStock !== "undefined" && conStock) { conStock = false; $("fStock").setAttribute("aria-pressed", false); }
+    if ($("q")) $("q").placeholder = "Buscar producto";
+    const s = $("fSolo"); if (s && s.firstChild && s.firstChild.nodeType === 3) s.firstChild.textContent = "En el pedido (";
+    if (typeof applyFilter === "function") applyFilter();
+  } catch (e) {}
+})();
+</script>
 </body>
 </html>
