@@ -1104,6 +1104,7 @@ function npRitmo(cots, Y, M, n, real, lim, ant) {
   return { np, tot };
 }
 </script>
+<script>/* hwfAutoAct: recarga sola cuando hay versión nueva */(function(){var h0=null,t0=0;function hs(t){var h=0;for(var i=0;i<t.length;i++)h=(h*31+t.charCodeAt(i))|0;return h}function chk(){if(Date.now()-t0<20000)return;t0=Date.now();fetch(location.pathname,{cache:"no-store"}).then(function(r){return r.ok?r.text():null}).then(function(t){if(!t)return;var h=hs(t);if(h0===null){h0=h;return}if(h!==h0){h0=h;location.reload()}}).catch(function(){})}window.addEventListener("load",function(){setTimeout(chk,1500)});document.addEventListener("visibilitychange",function(){if(document.visibilityState==="visible")chk()});window.addEventListener("focus",chk);setInterval(chk,600000)})();</script>
 </head>
 <body>
 <div class="lock" id="lock" hidden>
