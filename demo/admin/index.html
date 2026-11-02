@@ -3910,5 +3910,44 @@ const HC = hwfChat({
   montar: b => { const s = document.getElementById("btnBus") || document.getElementById("selMes"); s.parentNode.insertBefore(b, s); }
 });
 </script>
+
+<style>
+.top #btnSinc{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:10px;height:40px;padding:0 12px;font:inherit;font-weight:700;font-size:.88rem;cursor:pointer;white-space:nowrap}
+.top #btnSinc:hover{background:rgba(255,255,255,.2)}
+.top #btnSinc svg{width:18px;height:18px;flex:none}
+.top #btnSinc[disabled]{opacity:.8;cursor:wait}
+.top #btnSinc[disabled] svg{animation:sincGira 1s linear infinite}
+@keyframes sincGira{to{transform:rotate(360deg)}}
+@media (max-width:999px){.top #btnSinc{height:36px;padding:0 9px}.top #btnSinc .tx{display:none}}
+@media (prefers-reduced-motion:reduce){.top #btnSinc[disabled] svg{animation:none}}
+</style>
+<script>
+/* ===== Botón «Sincronizar»: todo de una vez ===== */
+(function () {
+  const ICO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 0 1-15.5 6.2M3 12A9 9 0 0 1 18.5 5.8"/><path d="M18.5 2v3.8h-3.8M5.5 22v-3.8h3.8"/></svg>';
+  const b = document.createElement("button"); b.type = "button"; b.id = "btnSinc"; b.title = "Sincronizar todo: notas, cobranza, prospectos, chat y datos de Drive";
+  b.innerHTML = ICO + '<span class="tx">Sincronizar</span>';
+  const ref = document.getElementById("hcBtn") || document.getElementById("btnBus") || document.getElementById("selMes"); ref.parentNode.insertBefore(b, ref);
+  const tx = t => { b.querySelector(".tx").textContent = t; };
+  b.onclick = async () => {
+    if (b.disabled) return;
+    const cfg = typeof SYC === "function" ? SYC() : null;
+    if (!cfg || !cfg.url) { toast("Primero conecta HWF Admin con el script (Más → Datos)."); return; }
+    if (!navigator.onLine) { toast("Sin conexión a internet."); return; }
+    b.disabled = true; tx("Sincronizando…");
+    try {
+      try { if (typeof sySync === "function") await sySync(true); } catch (e) {}
+      try { if (typeof HC !== "undefined" && HC.sync) await HC.sync(); } catch (e) {}
+      if (typeof refrescar === "function") try { refrescar(); } catch (e) {}
+      toast("✅ Notas, cobranza, prospectos y chat al día. Ahora los datos de Drive (2 a 4 minutos, no cierres la app)…");
+      tx("Leyendo Drive…");
+      if (typeof drvActualizar === "function") {
+        if (typeof navIrTab === "function" && typeof TAB !== "undefined" && TAB !== "res") navIrTab("res");
+        await drvActualizar();   /* si sale bien, recarga la app con los datos nuevos */
+      }
+    } finally { b.disabled = false; tx("Sincronizar"); }
+  };
+})();
+</script>
 </body>
 </html>
