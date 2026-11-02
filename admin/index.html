@@ -3758,8 +3758,14 @@ try { if (typeof TAB !== "undefined" && TAB === "res" && $("s-res") && !$("s-res
    Mensajes en la hoja "Chat" de la planilla vía el script (acciones chatEnviar / chatLeer). Sin conexión quedan en cola.
    hwfChat({ esAdmin, yo:()=>nombre, llamar:(datos)=>Promise<respuesta>, vendedores:()=>[nombres], toast:(txt)=>void, montar:(botón)=>void }) */
 function hwfChat(O) {
-  const K = "hwf-chat-v1", KL = "hwf-chat-leido", KC = "hwf-chat-cola";
+  /* cada app guarda su chat aparte: Nota de Pedido y HWF Admin comparten el navegador cuando se usan en el mismo teléfono */
+  const AP = O.esAdmin ? "adm" : "ven", K = "hwf-chat-" + AP, KL = "hwf-chat-leido-" + AP, KC = "hwf-chat-cola-" + AP;
   const ls = { g(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } }, s(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} } };
+  /* versión anterior (claves compartidas): los mensajes por enviar vuelven a la app que los escribió */
+  try { const vieja = ls.g("hwf-chat-cola", null);
+    if (vieja) { const mia = vieja.filter(m => m && (m.app === (O.esAdmin ? "admin" : "ventas"))), otra = vieja.filter(m => !mia.includes(m));
+      if (mia.length) ls.s(KC, ls.g(KC, []).concat(mia)); if (otra.length) ls.s("hwf-chat-cola", otra); else localStorage.removeItem("hwf-chat-cola");
+      localStorage.removeItem("hwf-chat-v1"); localStorage.removeItem("hwf-chat-leido"); } } catch (e) {}
   const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const $c = id => document.getElementById(id);
   let abierto = false, canal = null, ocup = false, sinConexion = false, prox = null, firma = "";
