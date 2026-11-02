@@ -3613,12 +3613,14 @@ try { if ($("s-res") && $("s-res").querySelector(".db-g") && !$("s-res").querySe
 <script>
 /* ===== Inventario: días calle por marca y producto, y estimado de compra (< 7 días) ===== */
 const INV_MARCAS = ["Agility+", "Agility", "Ownat", "Poema", "LindoCat", "Proterline", "Bestpet", "Sieger", "PuraNatura", "Ikai", "TurKat", "Clean Cat", "Cool&Clean", "Dog Chow", "Cat Chow", "Pedigree", "Whiskas", "Royal Canin", "Pro Plan", "Brit", "Nutribound", "Fit Formula", "Champion"];
-const INV_GEN = /^(LATAS?|ARENA|SNACK|CALDO|MOUSSE|ACEITE|SUPLEMENTO|PACK|SOBRES?|ALIMENTO|CALMANTE|OMEGA)$/;
+const INV_GEN = /^(LATAS?|ARENA|SNACK|CALDO|MOUSSE|ACEITE|SUPLEMENTO|PACK|SOBRES?|ALIMENTO|CALMANTE|OMEGA|GATOS?|PERROS?|CACHORRO|ADULTO|KITTEN|SENIOR|ARENAS?|HORNEADO)$/;
+const INV_ALIAS = [[/COOL\s*(&|AND|Y)?\s*CLEAN/, "Cool&Clean"], [/CLEAN\s*CAT/, "Clean Cat"], [/PURA\s*NATURA/, "PuraNatura"], [/DOG\s*EVOLUTION/, "Dog Evolution"], [/LINDO\s*CAT/, "LindoCat"], [/BEST\s*PET/, "Bestpet"], [/TUR\s*KAT/, "TurKat"]];
 function invMarca(n) {
   const u = String(n || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toUpperCase();
+  for (const [r, b] of INV_ALIAS) if (r.test(u)) return b;
   for (const b of INV_MARCAS) { const k = b.toUpperCase(); if (new RegExp("(^|[^A-Z])" + k.replace(/[+&]/g, "\\$&") + "(?![A-Z])").test(u)) return b; }
-  const w = u.split(/[^A-Z0-9&+]+/).filter(Boolean).find(x => !INV_GEN.test(x) && x.length > 2);
-  return w ? w.charAt(0) + w.slice(1).toLowerCase() : "Otras";
+  const w = u.split(/[^A-Z0-9&+]+/).filter(Boolean)[0] || "";
+  return w && !INV_GEN.test(w) && w.length > 2 ? w.charAt(0) + w.slice(1).toLowerCase() : "Otras marcas";
 }
 let invFiltro = "todos", invQ = "";
 function invDatos() {
@@ -3636,7 +3638,7 @@ function invDatos() {
     const comprar = dias != null && dias < 7 ? Math.max(0, Math.ceil(q - stock)) : 0;
     const nombre = p ? p.nombre : (D.stockNom && D.stockNom[cod]) || cod;
     if (!p && stock == null) return;
-    L.push({ cod, nombre, marca: invMarca(nombre), stock, q, dia, dias, comprar, monto: comprar * cu, cu });
+    L.push({ cod, nombre, marca: invMarca(nombre), stock, q, dia, dias, comprar, monto: comprar * cu, cu, v: p ? p.hab || 0 : 0 });
   });
   return L;
 }
@@ -3655,9 +3657,9 @@ function pintarInventario() {
   const dTxt = d => d == null ? "—" : !isFinite(d) ? "sin venta" : d < 1 ? "0" : nf(d);
   const pill = (d, q) => !(q > 0) ? `<span class="pill p-n">sin venta</span>` : `<span class="pill ${d < 7 ? "p-bad" : d < 15 ? "p-warn" : "p-ok"}">${dTxt(d)} ${dTxt(d) === "1" ? "día" : "días"}</span>`;
   const marcas = Object.entries(G).map(([k, l]) => { const st = l.reduce((t, x) => t + x.stock, 0), dia = l.reduce((t, x) => t + x.dia, 0);
-    l.sort((a, b) => (a.q > 0 ? a.dias : 1e9) - (b.q > 0 ? b.dias : 1e9) || b.q - a.q);
-    return { k, l, dias: dia > 0 ? st / dia : Infinity, urg: l.filter(x => x.comprar > 0), monto: l.reduce((t, x) => t + x.monto, 0) }; })
-    .sort((a, b) => b.urg.length - a.urg.length || a.dias - b.dias);
+    l.sort((a, b) => a.v - b.v || a.q - b.q || a.nombre.localeCompare(b.nombre, "es"));  /* de menos a más vendido */
+    return { k, l, v: l.reduce((t, x) => t + x.v, 0), dias: dia > 0 ? st / dia : Infinity, urg: l.filter(x => x.comprar > 0), monto: l.reduce((t, x) => t + x.monto, 0) }; })
+    .sort((a, b) => a.v - b.v || a.k.localeCompare(b.k, "es"));
   const fecha = D.stockFecha || BASE.stockFecha || "";
   s.innerHTML = `<div class="card"><h2>Inventario <span class="muted">stock ${esc(fecha || "sin fecha")} · venta promedio de ${A.prev3.map(m => MC[m]).join(", ") || MC[M]}</span></h2>
     <div class="kpis">
@@ -3670,7 +3672,7 @@ function pintarInventario() {
     <div class="seg" id="invSeg">${[["todos", "Todos"], ["urg", `Comprar ya (${urg.length})`], ["sin", `Sin stock (${sin.length})`], ["quieto", "Stock sin venta"]].map(([k, t]) => `<button type="button" data-f="${k}" aria-pressed="${invFiltro === k}">${t}</button>`).join("")}</div>
     <input id="invQ" type="search" placeholder="Buscar producto o marca" value="${esc(invQ)}" style="margin-top:8px;width:100%">
   </div>
-  ${marcas.map(g => `<div class="card"><h2>${esc(g.k)} <span class="muted">${g.l.length} productos · ${isFinite(g.dias) ? nf(g.dias) + " días calle" : "sin venta"}${g.urg.length ? ` · <b style="color:var(--bad)">comprar ${g.urg.length} (${mm(g.monto)})</b>` : ""}</span></h2>
+  ${marcas.map(g => `<div class="card"><h2>${esc(g.k)} <span class="muted">${mm(g.v)}/mes · ${g.l.length} ${g.l.length === 1 ? "producto" : "productos"} · ${isFinite(g.dias) ? nf(g.dias) + " días calle" : "sin venta"}${g.urg.length ? ` · <b style="color:var(--bad)">comprar ${g.urg.length} (${mm(g.monto)})</b>` : ""}</span></h2>
     <div class="tbl"><table><thead><tr><th>Producto</th><th class="r">Stock</th><th class="r">Venta/mes</th><th class="r">Días calle</th><th class="r">Comprar</th></tr></thead>
     <tbody>${g.l.map(x => `<tr><td><b>${esc(x.nombre)}</b><div class="muted" style="font-size:.74rem">${esc(x.cod)}</div></td><td class="r num">${nf(x.stock)}</td><td class="r num">${x.q ? (x.q < 10 ? x.q.toFixed(1).replace(".", ",") : nf(x.q)) : "—"}</td><td class="r">${pill(x.dias, x.q)}</td>
       <td class="r num">${x.comprar ? `<b>${nf(x.comprar)} u</b><div class="muted" style="font-size:.74rem">${mm(x.monto)}</div>` : "—"}</td></tr>`).join("")}</tbody></table></div></div>`).join("")
