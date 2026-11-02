@@ -3890,6 +3890,7 @@ function pintarCobranza() {
       ${c.docs.map(d => `<div class="cx-doc"><span>${esc(d.tipo)} N° ${esc(d.num)} <span class="cx-est ${d.est}">${esc(d.dias > 0 ? `${d.dias} ${d.dias === 1 ? "día" : "días"} vencido` : CXC_EST[d.est])}</span></span><span class="s">${fmt(d.saldo)}</span>
         <small>Vence ${cxFecha(d.fv)} · ${cxTxtDias(d.dias)}${d.haber ? ` · abonado ${fmt(d.haber)} de ${fmt(d.debe)}` : ""}${d.tipo === "Cheque" ? " · cheque por depositar" : ""}</small></div>`).join("")}
       <div class="cx-acc">${cxTel(c.tel) ? `<button class="btn" type="button" data-cx-tel="${i}">${ICO.tel}Llamar</button><button class="btn" type="button" data-cx-wa="${i}">${ICO.wa}Recordar por WhatsApp</button>` : ""}
+        <button class="btn" type="button" data-cx-img="${i}">${ICO.wa}Imagen para WhatsApp</button>
         ${cxCodigo(c.cli) ? `<button class="btn" type="button" data-cx-fi="${i}">Ficha y gestión</button>` : ""}</div></div>`).join("")
       || `<p class="hint">${todos.length ? "No hay documentos con ese filtro." : "No tienes documentos por cobrar en el último informe."}</p>`}`;
   $("cxAct").onclick = async () => { $("cxAct").disabled = true; $("cxAct").textContent = "Actualizando…"; const n = await cxBajar(); pintarCobranza(); toast(n ? "Cobranza actualizada con el último informe." : "Ya tienes el último informe de cobranza."); };
@@ -3899,6 +3900,8 @@ function pintarCobranza() {
   box.querySelectorAll("[data-cx-tel]").forEach(b => b.onclick = () => abrirExterno("tel:+" + cxTel(cl[+b.dataset.cxTel].tel)));
   box.querySelectorAll("[data-cx-wa]").forEach(b => b.onclick = () => { const c = cl[+b.dataset.cxWa]; abrirExterno("https://wa.me/" + cxTel(c.tel) + "?text=" + encodeURIComponent(cxMsg(c))); });
   box.querySelectorAll("[data-cx-fi]").forEach(b => b.onclick = () => abrirFicha(cxCodigo(cl[+b.dataset.cxFi].cli)));
+  box.querySelectorAll("[data-cx-img]").forEach(b => b.onclick = () => cxImagen(cl[+b.dataset.cxImg]));
+  box.querySelectorAll(".cx-cli").forEach((el, i) => { const t = el.querySelector(".t"); if (t && cl[i]) { t.style.cursor = "pointer"; t.title = "Generar imagen para WhatsApp"; t.onclick = () => cxImagen(cl[i]); } });
 }
 /* ficha del cliente: deuda arriba de los botones */
 const _pintarFichaCx = pintarFicha;
@@ -5707,6 +5710,53 @@ pintarRuta = function () {
   if (!$("crmRuta") || !SES || !RUTA || !$("rPros") || $("rProsZ")) return;
   const b = document.createElement("button"); b.className = "btn"; b.type = "button"; b.id = "rProsZ"; b.textContent = "Ruta de prospectos por zona"; $("rPros").after(b); b.onclick = rutaSoloPr;
 };
+</script>
+
+<script>
+/* ---------- Cobranza: imagen del estado de cuenta para WhatsApp ---------- */
+function cxCanvas(c) {
+  const W = 1080, P = 64, docs = c.docs.slice().sort((a, b) => b.dias - a.dias), RH = 112, H = 560 + docs.length * RH + 230;
+  const cv = document.createElement("canvas"); cv.width = W; cv.height = H; const x = cv.getContext("2d");
+  const F = (s, w) => `${w || 400} ${s}px Inter, "Segoe UI", Roboto, Arial, sans-serif`;
+  const txt = (t, X, Y, s, w, col, al) => { x.font = F(s, w); x.fillStyle = col || "#0B3146"; x.textAlign = al || "left"; x.fillText(t, X, Y); };
+  const fit = (t, s, w, max) => { x.font = F(s, w); let u = String(t); while (x.measureText(u).width > max && u.length > 4) u = u.slice(0, -2); return u === String(t) ? u : u + "…"; };
+  const rr = (X, Y, w, h, r, col) => { x.fillStyle = col; x.beginPath(); x.roundRect ? x.roundRect(X, Y, w, h, r) : x.rect(X, Y, w, h); x.fill(); };
+  x.fillStyle = "#F3F6F8"; x.fillRect(0, 0, W, H);
+  const g = x.createLinearGradient(0, 0, W, 300); g.addColorStop(0, "#0B3146"); g.addColorStop(1, "#13506F"); x.fillStyle = g; x.fillRect(0, 0, W, 300);
+  txt("hwf", P, 112, 92, 800, "#fff"); txt("HWF Mascotas · Distribuidora", P, 160, 30, 500, "rgba(255,255,255,.8)");
+  txt("Estado de cuenta", W - P, 100, 34, 700, "#fff", "right");
+  const hoy = new Date(); txt(`al ${String(hoy.getDate()).padStart(2, "0")}-${String(hoy.getMonth() + 1).padStart(2, "0")}-${hoy.getFullYear()}`, W - P, 146, 28, 400, "rgba(255,255,255,.8)", "right");
+  txt(fit(tc(c.cli), 46, 800, W - 2 * P), P, 236, 46, 800, "#fff"); if (c.rut) txt("RUT " + c.rut, P, 278, 28, 400, "rgba(255,255,255,.8)");
+  const tot = c.saldo, venc = c.venc || 0;
+  rr(P, 330, (W - 2 * P - 24) / 2, 150, 20, "#fff"); rr(P + (W - 2 * P + 24) / 2, 330, (W - 2 * P - 24) / 2, 150, 20, venc ? "#FDECEA" : "#E3F4EA");
+  txt("TOTAL PENDIENTE", P + 30, 378, 24, 700, "#5B6B78"); txt(fmt(tot), P + 30, 446, 54, 800, "#0B3146");
+  const X2 = P + (W - 2 * P + 24) / 2 + 30; txt(venc ? "VENCIDO" : "AL DÍA", X2, 378, 24, 700, venc ? "#B42318" : "#1C7A4E"); txt(venc ? fmt(venc) : "Sin vencidos", X2, 446, venc ? 54 : 40, 800, venc ? "#B42318" : "#1C7A4E");
+  let y = 540; txt("Documento", P, y, 24, 700, "#5B6B78"); txt("Vence", 600, y, 24, 700, "#5B6B78"); txt("Saldo", W - P, y, 24, 700, "#5B6B78", "right");
+  y += 18; docs.forEach(d => {
+    rr(P, y, W - 2 * P, RH - 14, 16, "#fff");
+    const col = d.dias > 30 ? "#B42318" : d.dias > 0 ? "#B4400B" : d.dias === 0 ? "#9A5B00" : "#1C7A4E"; rr(P, y, 10, RH - 14, 5, col);
+    txt(`${d.tipo} N° ${d.num}`, P + 30, y + 44, 32, 700); txt(d.dias > 0 ? `${d.dias} ${d.dias === 1 ? "día" : "días"} vencido` : d.dias === 0 ? "Vence hoy" : `Vence en ${-d.dias} ${d.dias === -1 ? "día" : "días"}`, P + 30, y + 80, 24, 600, col);
+    txt(cxFecha(d.fv), 600, y + 58, 30, 500); txt(fmt(d.saldo), W - P - 24, y + 58, 34, 800, "#0B3146", "right"); y += RH;
+  });
+  y += 30; x.fillStyle = "#D5DEE5"; x.fillRect(P, y, W - 2 * P, 2);
+  const v = SES && SES.vendedor ? SES.vendedor.nombre : ""; txt(v ? `Consultas: ${v} · HWF` : "Consultas: HWF", P, y + 60, 28, 600, "#0B3146");
+  txt("Si ya realizó el pago, por favor envíenos el comprobante. ¡Gracias!", P, y + 104, 26, 400, "#5B6B78");
+  return cv;
+}
+function cxImagen(c) {
+  if (!c) return; const cv = cxCanvas(c), nombre = "estado-cuenta-" + String(c.cli).toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 40) + ".png";
+  $("mEnvT").textContent = "Estado de cuenta · " + tc(c.cli);
+  abrirModal(`<div style="display:grid;gap:10px"><img src="${cv.toDataURL("image/png")}" alt="Estado de cuenta" style="width:100%;border-radius:12px;border:1px solid var(--line)">
+    <p class="hint" style="margin:0">En el teléfono, «Enviar» abre las apps para compartir: elige WhatsApp y el chat del cliente.</p></div>`,
+    [["Cerrar", "", cerrarModal], ["Descargar", "", () => { const a = document.createElement("a"); a.href = cv.toDataURL("image/png"); a.download = nombre; a.click(); }],
+     ["Enviar por WhatsApp", "primary", () => cv.toBlob(async bl => {
+        const f = new File([bl], nombre, { type: "image/png" }), msg = cxMsg(c);
+        try { if (navigator.canShare && navigator.canShare({ files: [f] })) { await navigator.share({ files: [f], text: msg }); return; } } catch (e) { if (e && e.name === "AbortError") return; }
+        const a = document.createElement("a"); a.href = URL.createObjectURL(bl); a.download = nombre; a.click();
+        const t = cxTel(c.tel); abrirExterno((t ? "https://wa.me/" + t : "https://wa.me/") + "?text=" + encodeURIComponent(msg));
+        toast("Imagen descargada: adjúntala en el chat de WhatsApp.");
+      }, "image/png")]]);
+}
 </script>
 </body>
 </html>
