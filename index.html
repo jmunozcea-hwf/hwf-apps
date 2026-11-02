@@ -150,6 +150,10 @@ button,input,select,textarea{font:inherit;color:inherit}
 .list-head{padding:10px 12px;font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600}
 .list-head .r,.row .r{text-align:right}
 .rows{display:grid;gap:8px}
+.mbox{border:1px solid var(--line);border-radius:16px;padding:10px;display:grid;gap:8px;background:var(--sunk,#F3F6F8)}
+.mbox>h3{margin:2px 4px 0;font-size:1rem;display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.mbox>h3 small{font-weight:600;color:var(--muted);font-size:.78rem}
+
 .row{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:10px 12px}
 .row.on{border-color:var(--accent);box-shadow:inset 3px 0 0 var(--accent)}
 .thumb{width:72px;height:72px;border-radius:8px;background:var(--sunk);object-fit:contain;display:block}
@@ -1779,6 +1783,26 @@ function toggleDir(){ $("wrapDirDesp").hidden = $("c_tipo").value==="Retiro en b
 let filtered=[], shown=0, solo=false;
 const norm = s => (s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
 const IDX = PRODS.map(p=>norm(p.d+" "+p.s+" "+p.g+" "+p.pr));
+
+/* ---------- Marcas: agrupar el catálogo por marca y ordenar por venta (de menos a más) ---------- */
+const PM_MARCAS = ["Agility+", "Agility", "Dog Evolution", "Ownat", "Poema", "LindoCat", "Proterline", "Bestpet", "Sieger", "PuraNatura", "Ikai", "TurKat", "Clean Cat", "Cool&Clean"];
+const PM_GEN = /^(latas?|arena|snack|caldo|mousse|aceite|suplemento|pack|sobres?|alimento|calmante|omega|horneado)$/;
+function pmMarca(n) {
+  const u = norm(n);
+  for (const b of PM_MARCAS) { const k = norm(b).replace(/[+&]/g, "\\$&"); if (new RegExp("(^|[^a-z])" + k + "(?![a-z])").test(u)) return b; }
+  const w = u.split(/[^a-z0-9&+]+/).filter(Boolean)[0] || "";
+  return w && !PM_GEN.test(w) && w.length > 2 ? w.charAt(0).toUpperCase() + w.slice(1) : "Otras marcas";
+}
+let PM_VENTA = null;
+function pmVenta(c) {
+  if (!PM_VENTA) { PM_VENTA = {}; try { const H = (SUG && SUG.h) || {}; Object.values(H).forEach(l => (l || []).forEach(x => { PM_VENTA[x[0]] = (PM_VENTA[x[0]] || 0) + (Number(x[1]) || 0); })); } catch (e) { PM_VENTA = null; return 0; } }
+  const p = byCode[c]; return (PM_VENTA[c] || 0) * (p ? Number(p.p) || 0 : 0);
+}
+function pmOrdenar(l) {
+  const G = {}; l.forEach(p => { const m = pmMarca(p.d); (G[m] = G[m] || []).push(p); });
+  return Object.entries(G).map(([m, ps]) => ({ m, ps: ps.sort((a, b) => pmVenta(a.i) - pmVenta(b.i) || a.d.localeCompare(b.d, "es")), v: ps.reduce((t, p) => t + pmVenta(p.i), 0) }))
+    .sort((a, b) => a.v - b.v || a.m.localeCompare(b.m, "es"));
+}
 function applyFilter(){
   const terms=norm($("q").value).split(/\s+/).filter(Boolean), g=$("fGrupo").value, o=$("fOcasion").value;
   filtered=PRODS.filter((p,k)=>(!g||p.g===g)&&(!conStock||stockDe(p.i)>0)&&(!o||!!p.pr)&&(!solo||line(p.i).q>0)&&terms.every(t=>IDX[k].includes(t)));
@@ -1810,8 +1834,8 @@ function rowHTML(p){
 }
 function renderMore(){
   if(shown>=filtered.length) return;
-  const frag=filtered.slice(shown,shown+BATCH).map(rowHTML).join("");
-  $("rows").insertAdjacentHTML("beforeend",frag); shown+=BATCH;
+  const frag=pmOrdenar(filtered).map(g=>`<section class="mbox"><h3>${esc(g.m)}<small>${g.ps.length} ${g.ps.length===1?"producto":"productos"}</small></h3>${g.ps.map(rowHTML).join("")}</section>`).join("");
+  $("rows").insertAdjacentHTML("beforeend",frag); shown=filtered.length;
 }
 new IntersectionObserver(es=>{if(es[0].isIntersecting)renderMore()},{rootMargin:"800px"}).observe($("sentinel"));
 
@@ -5562,5 +5586,6 @@ pintarDash = function () {
 };
 if (typeof APP_NOVEDADES !== "undefined" && Array.isArray(APP_NOVEDADES)) APP_NOVEDADES.unshift("Dashboard: cotizaciones Defontana del mes pendientes de facturar, con días de antigüedad (también con «Solo mis datos»).");
 </script>
+<script>try { PM_VENTA = null; applyFilter(); } catch (e) {}</script>
 </body>
 </html>
