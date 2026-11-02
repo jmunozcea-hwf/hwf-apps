@@ -1,4 +1,5 @@
 {
+ "id": "/hwf-apps/ventas/",
  "name": "Nota de Pedido HWF",
  "short_name": "Nota Pedido",
  "start_url": "./",

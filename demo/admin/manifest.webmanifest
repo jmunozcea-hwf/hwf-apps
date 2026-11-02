@@ -1,4 +1,5 @@
 {
+ "id": "/hwf-apps/demo/admin/",
  "name": "HWF Admin DEMO",
  "short_name": "Admin DEMO",
  "start_url": "./",
