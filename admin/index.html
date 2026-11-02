@@ -1302,7 +1302,7 @@ let D = store.get("adm-ventas", null) || BASE;
 let IMP = store.get("adm-imp", { acts: [], pedidos: [], archivos: [] });
 let METAS = store.get("adm-metas", null) || { mes: BASE.metaMes, anio: BASE.anio, metas: BASE.metas };
 const COTS_BASE = () => store.get("adm-cots", null) || BASE.cots;
-let OPC = store.get("adm-opc", { tienda: false });
+let OPC = store.get("adm-opc", { tienda: true }); if (!OPC.t2) { OPC.tienda = true; OPC.t2 = 1; store.set("adm-opc", OPC); }
 const CARTERAS = () => Object.keys(METAS.metas).filter(v => OPC.tienda || v !== "Tienda Hellywoof");
 
 let M, Y; // mes y año en pantalla
