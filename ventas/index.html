@@ -1835,7 +1835,7 @@ function rowHTML(p){
 }
 function renderMore(){
   if(shown>=filtered.length) return;
-  const frag=pmOrdenar(filtered).map(g=>`<section class="mbox"><h3>${esc(g.m)}<small>${g.ps.length} ${g.ps.length===1?"producto":"productos"}</small></h3>${g.ps.map(rowHTML).join("")}</section>`).join("");
+  const frag=pmOrdenar(filtered).map(g=>`<section class="mbox"><h3>${esc(g.m)}<small>${g.ps.length} ${g.ps.length===1?"producto":"productos"}</small></h3><div class="mgrid">${g.ps.map(rowHTML).join("")}</div></section>`).join("");
   $("rows").insertAdjacentHTML("beforeend",frag); shown=filtered.length;
 }
 new IntersectionObserver(es=>{if(es[0].isIntersecting)renderMore()},{rootMargin:"800px"}).observe($("sentinel"));
@@ -5588,5 +5588,39 @@ pintarDash = function () {
 if (typeof APP_NOVEDADES !== "undefined" && Array.isArray(APP_NOVEDADES)) APP_NOVEDADES.unshift("Dashboard: cotizaciones Defontana del mes pendientes de facturar, con días de antigüedad (también con «Solo mis datos»).");
 </script>
 <script>try { PM_VENTA = null; applyFilter(); } catch (e) {}</script>
+<style>
+/* ===== Pedido: productos en tarjetas (cuadrados) dentro de cada marca ===== */
+.mbox{padding:12px}
+.mbox>h3{font-size:1.05rem}
+.mgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+@media (min-width:620px){.mgrid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (min-width:900px){.mgrid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.mgrid .row.cols{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"img img" "info info" "price price" "dsc del" "qty qty" "val val";
+  gap:6px;padding:8px;align-content:start;border-radius:14px;height:100%}
+.mgrid .row.on{box-shadow:inset 0 3px 0 var(--accent);border-color:var(--accent)}
+.list-head{display:none!important}
+.mgrid .thumb{grid-area:img}.mgrid .info{grid-area:info}.mgrid .price{grid-area:price}.mgrid .dsc{grid-area:dsc}.mgrid .qty{grid-area:qty}.mgrid .val{grid-area:val}.mgrid .del{grid-area:del}
+.mgrid .thumb{width:100%;height:96px;border-radius:10px;justify-self:stretch}
+.mgrid .info{gap:2px}
+.mgrid .desc{font-size:.86rem;line-height:1.22;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;min-height:3.66em}
+.mgrid .codes{font-size:.72rem;gap:6px}
+.mgrid .tags{gap:4px}
+.mgrid .tags .tag{display:none}
+.mgrid .tags .tag.promo{display:inline-block}
+.mgrid .price{text-align:left;grid-template-columns:auto auto;justify-content:start;align-items:baseline;column-gap:6px}
+.mgrid .price .net{font-weight:800;font-size:1rem}
+.mgrid .price .lst{text-decoration:line-through;color:var(--muted);font-size:.78rem}
+.mgrid .price .umv{grid-column:1/-1;font-size:.7rem;color:var(--muted)}
+.mgrid .dsc{justify-content:flex-start;font-size:.78rem}
+.mgrid .dsc .lbl{display:inline;font-size:.66rem;letter-spacing:.02em}
+.mgrid .dsc input{width:52px;padding:6px;min-height:36px}
+.mgrid .del{width:36px;height:36px;align-self:center}
+.mgrid .qty{justify-self:stretch}
+.mgrid .qty button{width:40px;flex:none}
+.mgrid .qty input{width:auto;flex:1;min-width:0;min-height:40px}
+.mgrid .val{text-align:left;font-size:.86rem;display:flex;justify-content:space-between;align-items:baseline;gap:6px}
+.mgrid .val .lbl{display:inline;font-size:.64rem}
+.mgrid .val.zero{display:none}
+</style>
 </body>
 </html>
