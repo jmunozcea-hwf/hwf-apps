@@ -3719,5 +3719,38 @@ function invIndice() {
 }
 try { if (typeof TAB !== "undefined" && TAB === "res" && $("s-res") && !$("s-res").hidden) pintarDashboard(); } catch (e) {}
 </script>
+<style>
+/* ===== navsimple: navegación ajustada y simple ===== */
+.top .t{min-width:0}
+.top h1{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.top .sub{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nav-pasos{display:none!important}
+@media (max-width:999px){
+  .top-in{padding-top:8px!important;padding-bottom:8px!important;gap:10px!important}
+  .top img{width:38px!important}
+  .top h1{font-size:1.02rem!important;line-height:1.2}
+  .top .sub{font-size:.72rem!important}
+  .top select{min-height:36px!important;padding:6px 8px!important;font-size:.85rem}
+  #masSeg{display:flex!important;flex-wrap:nowrap!important;gap:6px;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;padding:8px 2px!important;margin:0 -2px;grid-template-columns:none!important}
+  #masSeg::-webkit-scrollbar{display:none}
+  #masSeg button{flex:none;display:inline-flex!important;flex-direction:row!important;align-items:center;gap:6px;min-height:36px!important;padding:6px 12px!important;border-radius:999px!important;font-size:.82rem!important;font-weight:600;line-height:1;white-space:nowrap;position:relative}
+  #masSeg button svg{width:16px!important;height:16px!important}
+  #masSeg button .bdg{position:static!important;min-width:16px;height:16px;font-size:.62rem;padding:0 4px}
+  nav.bottom button{min-height:52px!important;padding:6px 1px 7px!important;font-size:.66rem!important;gap:3px!important}
+  nav.bottom button svg{width:20px;height:20px}
+}
+@media (min-width:1000px){
+  nav.bottom{padding:12px 10px!important}
+  nav.bottom .in{gap:2px!important}
+  nav.bottom button{min-height:40px!important;padding:8px 12px!important;gap:10px!important;font-size:.9rem!important;font-weight:600!important;color:var(--muted)!important;border-radius:10px!important;line-height:1.2}
+  nav.bottom button svg{width:20px!important;height:20px!important;flex:none}
+  nav.bottom button[aria-selected="true"]{background:var(--sunk)!important;color:var(--navy)!important;font-weight:700!important}
+  nav.bottom button[aria-selected="true"] svg{stroke:var(--navy)}
+  .side-sub{margin:0 0 6px 21px!important;padding-left:10px!important;gap:1px!important}
+  .side-sub button{min-height:34px!important;padding:6px 10px!important;font-size:.86rem!important;font-weight:600!important}
+  .side-sub button svg{width:16px!important;height:16px!important}
+  .side-sub button.on{background:var(--sunk)!important;color:var(--navy)!important;font-weight:700!important}
+}
+</style>
 </body>
 </html>
