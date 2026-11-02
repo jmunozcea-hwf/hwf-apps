@@ -3061,7 +3061,7 @@ function pintarDashboard() {
     K("mas:napp", "Notas de la app", nf(X.nappPen), "por revisar", X.nappPen ? `<i class="chip warn">revisar</i>` : ""),
     hw && (hw.v || hw.meta) ? K("av", "Tienda Hellywoof", mm(hw.v), hw.meta ? `${pct(hw.v / hw.meta)} de ${mm(hw.meta)}` : "facturado del mes") : "",
     X.pr.length ? K("mas:embudo", "Prospectos activos", nf(prAct), `${nf(prCont)} ya contactados`) : "",
-    K("pro:stock", "Sin stock o por agotarse", nf(X.stock.length), "productos que se venden", X.stock.length ? `<i class="chip warn">stock</i>` : "")
+    (typeof invIndice === "function" && invIndice()) ? (I => K("inv", "Días de inventario", isFinite(I.dias) ? nf(I.dias) + " días" : "—", `${mm(I.valor)} a costo · ${I.urg} ${I.urg === 1 ? "producto" : "productos"} bajo 7 días`, `<i class="chip ${I.dias < 7 ? "down" : I.dias < 15 ? "warn" : "up"}">${I.urg ? "comprar" : "ok"}</i>`))(invIndice()) : K("pro:stock", "Sin stock o por agotarse", nf(X.stock.length), "productos que se venden", X.stock.length ? `<i class="chip warn">stock</i>` : "")
   ].join("");
   const vend = A.vend.slice().sort((a, b) => (b.meta ? b.avance / b.meta : 0) - (a.meta ? a.avance / a.meta : 0) || b.avance - a.avance);
   const vendH = vend.map(v => { const r = v.meta ? v.avance / v.meta : 0;
@@ -3681,6 +3681,17 @@ function pintarInventario() {
   $("invSeg").onclick = e => { const b = e.target.closest("[data-f]"); if (b) { invFiltro = b.dataset.f; pintarInventario(); } };
   $("invQ").oninput = () => { invQ = $("invQ").value; clearTimeout(pintarInventario.t); pintarInventario.t = setTimeout(() => { pintarInventario(); const i = $("invQ"); i.focus(); i.setSelectionRange(i.value.length, i.value.length); }, 250); };
 }
+</script>
+
+<script>
+/* índice total de días de inventario para el Dashboard */
+function invIndice() {
+  try { const L = invDatos().filter(x => x.stock != null); if (!L.length) return null;
+    const valor = L.reduce((t, x) => t + x.stock * x.cu, 0), diario = L.reduce((t, x) => t + x.dia * x.cu, 0);
+    return { dias: diario > 0 ? valor / diario : Infinity, valor, urg: L.filter(x => x.q > 0 && x.dias < 7).length };
+  } catch (e) { return null; }
+}
+try { if (typeof TAB !== "undefined" && TAB === "res" && $("s-res") && !$("s-res").hidden) pintarDashboard(); } catch (e) {}
 </script>
 </body>
 </html>
