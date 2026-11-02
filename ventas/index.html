@@ -4067,6 +4067,7 @@ const prNum = t => { const n = String(t || "").replace(/\D/g, ""); return !n ? "
 const prMovil = o => { const w = prNum(o.whatsapp) || prNum(o.telefono); return /^569\d{8}$/.test(w) ? w : ""; };
 const prMapa = o => { const la = String(o.latitud).replace(",", "."), lo = String(o.longitud).replace(",", ".");
   return "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(la && lo ? la + "," + lo : o.nombre + " " + o.comuna) + (o.place_id ? "&query_place_id=" + encodeURIComponent(o.place_id) : ""); };
+const prWeb = o => { let u = String(o.web || "").trim(); if (!u) return ""; if (!/^https?:\/\//i.test(u)) u = "https://" + u; return u; };
 const prIG = o => { const u = String(o.instagram || "").replace(/^@/, "").trim(); return u ? "https://instagram.com/" + encodeURIComponent(u) : ""; };
 const prFecha = s => { const m = /^(\d{4})-(\d\d)-(\d\d)/.exec(s || ""); return m ? `${m[3]}-${m[2]}-${m[1]}` : ""; };
 function prHoyISO() { const d = new Date(), z = n => String(n).padStart(2, "0"); return `${d.getFullYear()}-${z(d.getMonth() + 1)}-${z(d.getDate())}`; }
@@ -4164,7 +4165,8 @@ function pintarEmbudo() {
           ${mov ? `<button class="btn" type="button" data-pr-wa="${esc(o.id)}">${ICO.wa}WhatsApp</button>` : ""}
           ${tel ? `<button class="btn" type="button" data-pr-tel="${esc(o.id)}">${ICO.tel}Llamar</button>` : ""}
           <button class="btn" type="button" data-pr-map="${esc(o.id)}">Mapa</button>
-          ${prIG(o) ? `<button class="btn" type="button" data-pr-ig="${esc(o.id)}">Instagram</button>` : ""}
+          ${prWeb(o) ? `<button class="btn" type="button" data-pr-web="${esc(o.id)}">Web</button>` : `<button class="btn" type="button" data-pr-bweb="${esc(o.id)}">Buscar web</button>`}
+          ${prIG(o) ? `<button class="btn" type="button" data-pr-ig="${esc(o.id)}">Instagram</button>` : `<button class="btn" type="button" data-pr-big="${esc(o.id)}">Buscar Instagram</button>`}
           ${i < 3 || i === 7 || prCliDe(o) ? `<button class="btn" type="button" data-pr-np="${esc(o.id)}">Hacer nota de pedido</button>` : ""}
         </div></div>`; }).join("") || `<p class="hint">${todos.length ? "No hay prospectos con ese filtro." : "No tienes prospectos asignados en el embudo."}</p>`}`;
   const by = id => prTodos().find(o => o.id === id);
@@ -4178,6 +4180,9 @@ function pintarEmbudo() {
   box.querySelectorAll("[data-pr-tel]").forEach(b => b.onclick = () => { const o = by(b.dataset.prTel); abrirExterno("tel:+" + (prNum(o.telefono) || prNum(o.whatsapp))); });
   box.querySelectorAll("[data-pr-map]").forEach(b => b.onclick = () => abrirExterno(prMapa(by(b.dataset.prMap))));
   box.querySelectorAll("[data-pr-ig]").forEach(b => b.onclick = () => abrirExterno(prIG(by(b.dataset.prIg))));
+  box.querySelectorAll("[data-pr-web]").forEach(b => b.onclick = () => abrirExterno(prWeb(by(b.dataset.prWeb))));
+  box.querySelectorAll("[data-pr-bweb]").forEach(b => b.onclick = () => { const o = by(b.dataset.prBweb); abrirExterno("https://www.google.com/search?q=" + encodeURIComponent([o.nombre, o.comuna, "Chile"].join(" "))); });
+  box.querySelectorAll("[data-pr-big]").forEach(b => b.onclick = () => { const o = by(b.dataset.prBig); abrirExterno("https://www.google.com/search?q=" + encodeURIComponent("site:instagram.com " + [o.nombre, o.comuna].join(" "))); });
   box.querySelectorAll("[data-pr-np]").forEach(b => b.onclick = () => prNota(by(b.dataset.prNp)));
   box.querySelectorAll("[data-pr-vin]").forEach(b => b.onclick = () => prVincular(by(b.dataset.prVin)));
   box.querySelectorAll("[data-pr-fi]").forEach(b => b.onclick = () => { const c = prCliDe(by(b.dataset.prFi)); if (c) abrirFicha(c.codigo); });
@@ -5687,6 +5692,47 @@ $("rows").addEventListener("click", e => {
 }, true);
 if (typeof notaEnBlanco === "function") { const _notaEnBlancoMb = notaEnBlanco; notaEnBlanco = function () { pmSel = null; return _notaEnBlancoMb.apply(this, arguments); }; }
 try { applyFilter(); } catch (e) {}
+</script>
+
+<script>
+/* ---------- ruta solo de prospectos, por zona ---------- */
+function rutaSoloPr() {
+  if (!RUTA) return;
+  const act = prMios().filter(x => x.etapa !== "Descartado" && prIdx(x.etapa) < 6).map(x => ({ x, pt: prPunto(x) })).filter(y => y.pt);
+  if (!act.length) { toast("No tienes prospectos activos con dirección o comuna conocida."); return; }
+  const Z = {}; act.forEach(y => { const z = y.x.zona || y.x.comuna || "Sin zona"; (Z[z] = Z[z] || { n: 0, c: {} }).n++; Z[z].c[y.x.comuna || "—"] = 1; });
+  const zs = Object.keys(Z).sort((a, b) => a.localeCompare(b, "es"));
+  $("mEnvT").textContent = "Ruta de prospectos por zona";
+  abrirModal(`<div class="pr-form">
+      <p class="hint" style="margin:0">Elige la zona: la ruta queda solo con prospectos (sin clientes), ordenada por cercanía. Puedes quitar los que no quieras visitar.</p>
+      <label class="hint" style="margin:0">Zona<select id="rzZ" style="width:100%;margin-top:4px">${zs.map(z => `<option value="${esc(z)}">${esc(z)} · ${Z[z].n} ${Z[z].n === 1 ? "prospecto" : "prospectos"} (${esc(Object.keys(Z[z].c).join(", "))})</option>`).join("")}</select></label>
+      <div class="pr-lst" id="rzL"></div></div>`,
+    [["Cancelar", "", cerrarModal], ["Armar ruta", "primary", () => {
+      const ids = [...$("rzL").querySelectorAll("input:checked")].map(i => i.value);
+      if (!ids.length) { toast("Marca al menos un prospecto."); return; }
+      lsSet(RPKEY, { fecha: today(), ids });
+      RUTA.excl = RUTA.excl.filter(k => !ids.includes(k));
+      if (!RUTA.planes.length) { RUTA.planes = [[]]; RUTA.sel = 0; }
+      RUTA.planes[RUTA.sel] = ids.slice();
+      const r = paradas(); RUTA.planes[RUTA.sel] = dosOpt(RUTA.o, r).map(x => x.c.codigo); lsSet(RKEY, RUTA);
+      cerrarModal(); pintarRuta(); toast(`Ruta con ${ids.length} ${ids.length === 1 ? "prospecto" : "prospectos"} de la zona.`);
+    }]]);
+  const lista = () => {
+    const z = $("rzZ").value, l = act.filter(y => (y.x.zona || y.x.comuna || "Sin zona") === z);
+    /* los más cercanos entre sí: parte del más cercano al origen y va sumando el vecino más próximo */
+    const orden = []; let p = RUTA.o, resto = l.slice();
+    while (resto.length) { let bi = 0, bd = Infinity; resto.forEach((y, i) => { const d = distM(p, y.pt); if (d < bd) { bd = d; bi = i; } }); const y = resto.splice(bi, 1)[0]; y.d = distM(RUTA.o, y.pt); orden.push(y); p = y.pt; }
+    $("rzL").innerHTML = orden.map((y, i) => `<label><input type="checkbox" value="${esc(y.x.id)}" ${i < 15 ? "checked" : ""}>
+      <span><b>${esc(y.x.nombre)}</b><br><small>${esc(y.x.comuna)} · ${esc(y.x.segmento || "")} · ${distTxt(y.d)}${y.pt.tipo === "comuna" ? " (aprox.)" : ""} · ${esc(PR_CORTO[prIdx(y.x.etapa)])}</small></span></label>`).join("");
+  };
+  $("rzZ").onchange = lista; lista();
+}
+const _pintarRutaZ = pintarRuta;
+pintarRuta = function () {
+  _pintarRutaZ();
+  if (!$("crmRuta") || !SES || !RUTA || !$("rPros") || $("rProsZ")) return;
+  const b = document.createElement("button"); b.className = "btn"; b.type = "button"; b.id = "rProsZ"; b.textContent = "Ruta de prospectos por zona"; $("rPros").after(b); b.onclick = rutaSoloPr;
+};
 </script>
 </body>
 </html>

@@ -2554,7 +2554,7 @@ function prAbrirAdm(id) {
   const o = prTodos().find(x => x.id === id); if (!o) return;
   const vends = Object.keys(PR_VEND_MAIL);
   abrirSheet(`<div class="hd"><div><span class="muted">${esc(o.id)} · ${esc(o.segmento)} · ${esc(o.comuna)}, ${esc(o.region)}</span><h2>${esc(o.nombre)}</h2>
-      <span class="muted" style="font-size:.85rem">${esc(o.direccion)}${o.telefono ? " · tel. " + esc(o.telefono) : ""}${o.instagram ? " · " + esc(o.instagram) : ""}${o.cliente ? "<br>Cliente vinculado: <b>" + esc(o.cliente) + "</b>" : ""}${o.creado_por ? "<br>Creado por " + esc(o.creado_por) : ""}</span></div><button class="x" type="button" aria-label="Cerrar">×</button></div>
+      <span class="muted" style="font-size:.85rem">${esc(o.direccion)}${o.telefono ? " · tel. " + esc(o.telefono) : ""}${prIG(o) ? ` · <a href="${esc(prIG(o))}" target="_blank" rel="noopener">${esc(o.instagram)}</a>` : ""}${o.web ? ` · <a href="${esc(/^https?:/i.test(o.web) ? o.web : "https://" + o.web)}" target="_blank" rel="noopener">web</a>` : ""}${o.cliente ? "<br>Cliente vinculado: <b>" + esc(o.cliente) + "</b>" : ""}${o.creado_por ? "<br>Creado por " + esc(o.creado_por) : ""}</span></div><button class="x" type="button" aria-label="Cerrar">×</button></div>
     <div class="card pr-form">
       <div><label for="prEt">Etapa</label><select id="prEt">${PR_ETAPAS.map(e => `<option ${e === o.etapa ? "selected" : ""}>${esc(e)}</option>`).join("")}</select></div>
       <div><label for="prVd">Vendedor</label><select id="prVd">${vends.map(v => `<option ${v === o.vendedor ? "selected" : ""}>${esc(v)}</option>`).join("")}</select></div>
