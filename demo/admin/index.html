@@ -1131,6 +1131,7 @@ function npRitmo(cots, Y, M, n, real, lim, ant) {
   <section class="sec" id="s-ven" hidden></section>
   <section class="sec" id="s-cli" hidden></section>
   <section class="sec" id="s-pro" hidden></section>
+  <section class="sec" id="s-inv" hidden></section>
   <section class="sec" id="s-mas" hidden>
     <div class="seg" id="masSeg">
       <button type="button" data-m="cots" aria-pressed="true">NP Defontana</button>
@@ -1149,6 +1150,7 @@ function npRitmo(cots, Y, M, n, real, lim, ant) {
   <button type="button" data-t="ven" aria-selected="false"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2.2"><circle cx="9" cy="8" r="4"/><path d="M2 21c1-4 4-6 7-6s6 2 7 6M17 11a3 3 0 1 0 0-6M22 21c-.6-2.6-2-4.3-4-5"/></svg>Vendedores</button>
   <button type="button" data-t="cli" aria-selected="false"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2.2"><path d="M3 21V9l9-6 9 6v12z"/><path d="M9 21v-6h6v6"/></svg>Clientes</button>
   <button type="button" data-t="pro" aria-selected="false"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2.2"><path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="m3 8 9 5 9-5M12 13v8"/></svg>Productos</button>
+  <button type="button" data-t="inv" aria-selected="false"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2.2"><path d="M3 7h18v13H3z"/><path d="M3 7l2-4h14l2 4M9 11h6"/></svg><span>Inventario</span></button>
   <button type="button" data-t="mas" aria-selected="false"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2.2"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg>Más</button>
 </div></nav>
 
@@ -2727,12 +2729,12 @@ $("selMes").onchange = e => { const k = Number(e.target.value); Y = Math.floor(k
 function refrescar() {
   calcular();
   const ct = corte(); $("subT").textContent = `Ventas al ${String(ct.d).padStart(2, "0")}-${String(ct.m).padStart(2, "0")}-${ct.y}${admCierre()}${IMP.acts.length || IMP.pedidos.length ? " · + datos de la app" : ""}`;
-  ({ res: pintarResumen, av: pintarAvance, ven: pintarVendedores, cli: pintarClientes, pro: pintarProductos, mas: pintarMas })[TAB]();
+  ({ res: pintarResumen, av: pintarAvance, ven: pintarVendedores, cli: pintarClientes, pro: pintarProductos, inv: () => pintarInventario(), mas: pintarMas })[TAB]();
 }
 document.querySelector("nav.bottom").addEventListener("click", e => {
   const b = e.target.closest("[data-t]"); if (!b) return; TAB = b.dataset.t;
   document.querySelectorAll("nav.bottom [data-t]").forEach(x => x.setAttribute("aria-selected", x === b));
-  ["res", "av", "ven", "cli", "pro", "mas"].forEach(k => $("s-" + k).hidden = k !== TAB);
+  ["res", "av", "ven", "cli", "pro", "inv", "mas"].forEach(k => $("s-" + k) && ($("s-" + k).hidden = k !== TAB));
   refrescar(); window.scrollTo({ top: 0 });
 });
 
@@ -2868,7 +2870,7 @@ pintarAvance = function () {
 };
 
 /* ================= NAVEGACIÓN (atrás, deslizar, menú Más) ================= */
-const NAV_TABS = ["res", "av", "ven", "cli", "pro", "mas"].filter(t => document.querySelector(`nav.bottom [data-t="${t}"]`));
+const NAV_TABS = ["res", "av", "ven", "cli", "pro", "inv", "mas"].filter(t => document.querySelector(`nav.bottom [data-t="${t}"]`));
 const NAV_TNOM = { res: "Resumen", av: "Avance", ven: "Vendedores", cli: "Clientes", pro: "Productos", mas: "Más" };
 const NAV_MAS = [...$("masSeg").querySelectorAll("[data-m]")].map(b => b.dataset.m);
 const NAV_MNOM = { zonas: "Zonas", terreno: "Terreno", cots: "NP Defontana", napp: "NP App", bonif: "Bonificados", cobranza: "Cobranza", embudo: "Embudo", cambios: "Cambios clientes", datos: "Datos" };
@@ -3606,6 +3608,76 @@ pintarDashboard = function () {
   if (ref) ref.insertAdjacentHTML("afterend", html); else g.insertAdjacentHTML("beforeend", html);
 };
 try { if ($("s-res") && $("s-res").querySelector(".db-g") && !$("s-res").querySelector(".cz")) pintarDashboard(); } catch (e) {}
+</script>
+
+<script>
+/* ===== Inventario: días calle por marca y producto, y estimado de compra (< 7 días) ===== */
+const INV_MARCAS = ["Agility+", "Agility", "Ownat", "Poema", "LindoCat", "Proterline", "Bestpet", "Sieger", "PuraNatura", "Ikai", "TurKat", "Clean Cat", "Cool&Clean", "Dog Chow", "Cat Chow", "Pedigree", "Whiskas", "Royal Canin", "Pro Plan", "Brit", "Nutribound", "Fit Formula", "Champion"];
+const INV_GEN = /^(LATAS?|ARENA|SNACK|CALDO|MOUSSE|ACEITE|SUPLEMENTO|PACK|SOBRES?|ALIMENTO|CALMANTE|OMEGA)$/;
+function invMarca(n) {
+  const u = String(n || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toUpperCase();
+  for (const b of INV_MARCAS) { const k = b.toUpperCase(); if (new RegExp("(^|[^A-Z])" + k.replace(/[+&]/g, "\\$&") + "(?![A-Z])").test(u)) return b; }
+  const w = u.split(/[^A-Z0-9&+]+/).filter(Boolean).find(x => !INV_GEN.test(x) && x.length > 2);
+  return w ? w.charAt(0) + w.slice(1).toLowerCase() : "Otras";
+}
+let invFiltro = "todos", invQ = "";
+function invDatos() {
+  const ms = A.prev3.length ? A.prev3 : [M], porCod = {};
+  A.productos.forEach(p => { porCod[String(p.cod).replace(/'/g, "").trim()] = p; });
+  const st = D.stock || BASE.stock || {}, cods = new Set(Object.keys(porCod).concat(Object.keys(st)));
+  const L = [];
+  cods.forEach(cod => {
+    const p = porCod[cod], s = stockDe(cod), stock = s == null ? null : Math.max(0, Number(s) || 0);
+    const q = p ? ms.reduce((t, m) => t + (p.hist[m] ? p.hist[m].q : 0), 0) / ms.length : 0;
+    if (!p && !(stock > 0)) return;
+    const cq = p ? ms.reduce((t, m) => t + (p.hist[m] ? p.hist[m].q : 0), 0) : 0, cc = p ? ms.reduce((t, m) => t + (p.hist[m] ? p.hist[m].c : 0), 0) : 0;
+    const cu = cq > 0 ? cc / cq : (p && p.ytdQ ? p.ytdC / p.ytdQ : 0);
+    const dia = q / 30, dias = stock == null ? null : dia > 0 ? stock / dia : Infinity;
+    const comprar = dias != null && dias < 7 ? Math.max(0, Math.ceil(q - stock)) : 0;
+    const nombre = p ? p.nombre : (D.stockNom && D.stockNom[cod]) || cod;
+    if (!p && stock == null) return;
+    L.push({ cod, nombre, marca: invMarca(nombre), stock, q, dia, dias, comprar, monto: comprar * cu, cu });
+  });
+  return L;
+}
+function pintarInventario() {
+  const s = $("s-inv"); if (!s) return;
+  const L = invDatos(), conDato = L.filter(x => x.stock != null);
+  const urg = conDato.filter(x => x.dias < 7 && x.q > 0), sin = conDato.filter(x => x.stock <= 0 && x.q > 0);
+  const valor = conDato.reduce((t, x) => t + x.stock * x.cu, 0), compraTot = urg.reduce((t, x) => t + x.monto, 0);
+  const qn = invQ.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+  let F = conDato.filter(x => x.q > 0 || x.stock > 0);
+  if (invFiltro === "urg") F = F.filter(x => x.dias < 7 && x.q > 0);
+  if (invFiltro === "sin") F = F.filter(x => x.stock <= 0 && x.q > 0);
+  if (invFiltro === "quieto") F = F.filter(x => x.stock > 0 && x.q === 0);
+  if (qn) F = F.filter(x => (x.nombre + " " + x.marca + " " + x.cod).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().includes(qn));
+  const G = {}; F.forEach(x => (G[x.marca] = G[x.marca] || []).push(x));
+  const dTxt = d => d == null ? "—" : !isFinite(d) ? "sin venta" : d < 1 ? "0" : nf(d);
+  const pill = (d, q) => !(q > 0) ? `<span class="pill p-n">sin venta</span>` : `<span class="pill ${d < 7 ? "p-bad" : d < 15 ? "p-warn" : "p-ok"}">${dTxt(d)} ${dTxt(d) === "1" ? "día" : "días"}</span>`;
+  const marcas = Object.entries(G).map(([k, l]) => { const st = l.reduce((t, x) => t + x.stock, 0), dia = l.reduce((t, x) => t + x.dia, 0);
+    l.sort((a, b) => (a.q > 0 ? a.dias : 1e9) - (b.q > 0 ? b.dias : 1e9) || b.q - a.q);
+    return { k, l, dias: dia > 0 ? st / dia : Infinity, urg: l.filter(x => x.comprar > 0), monto: l.reduce((t, x) => t + x.monto, 0) }; })
+    .sort((a, b) => b.urg.length - a.urg.length || a.dias - b.dias);
+  const fecha = D.stockFecha || BASE.stockFecha || "";
+  s.innerHTML = `<div class="card"><h2>Inventario <span class="muted">stock ${esc(fecha || "sin fecha")} · venta promedio de ${A.prev3.map(m => MC[m]).join(", ") || MC[M]}</span></h2>
+    <div class="kpis">
+      <div class="kpi"><span>Comprar ya (menos de 7 días)</span><b class="num" style="color:var(--bad)">${urg.length}</b><small>${urg.length ? "estimado " + mm(compraTot) + " a costo" : "ningún producto bajo 7 días"}</small></div>
+      <div class="kpi"><span>Sin stock y con venta</span><b class="num">${sin.length}</b><small>productos</small></div>
+      <div class="kpi"><span>Inventario a costo</span><b class="num">${mm(valor)}</b><small>${conDato.filter(x => x.stock > 0).length} productos con stock</small></div>
+    </div>
+    <p class="muted" style="font-size:.8rem;margin:8px 0 0">Días calle = stock ÷ venta diaria (promedio mensual de los últimos 3 meses cerrados ÷ 30). Compra estimada = unidades para cubrir 30 días de venta, al costo de la venta.</p></div>
+  <div class="card">
+    <div class="seg" id="invSeg">${[["todos", "Todos"], ["urg", `Comprar ya (${urg.length})`], ["sin", `Sin stock (${sin.length})`], ["quieto", "Stock sin venta"]].map(([k, t]) => `<button type="button" data-f="${k}" aria-pressed="${invFiltro === k}">${t}</button>`).join("")}</div>
+    <input id="invQ" type="search" placeholder="Buscar producto o marca" value="${esc(invQ)}" style="margin-top:8px;width:100%">
+  </div>
+  ${marcas.map(g => `<div class="card"><h2>${esc(g.k)} <span class="muted">${g.l.length} productos · ${isFinite(g.dias) ? nf(g.dias) + " días calle" : "sin venta"}${g.urg.length ? ` · <b style="color:var(--bad)">comprar ${g.urg.length} (${mm(g.monto)})</b>` : ""}</span></h2>
+    <div class="tbl"><table><thead><tr><th>Producto</th><th class="r">Stock</th><th class="r">Venta/mes</th><th class="r">Días calle</th><th class="r">Comprar</th></tr></thead>
+    <tbody>${g.l.map(x => `<tr><td><b>${esc(x.nombre)}</b><div class="muted" style="font-size:.74rem">${esc(x.cod)}</div></td><td class="r num">${nf(x.stock)}</td><td class="r num">${x.q ? (x.q < 10 ? x.q.toFixed(1).replace(".", ",") : nf(x.q)) : "—"}</td><td class="r">${pill(x.dias, x.q)}</td>
+      <td class="r num">${x.comprar ? `<b>${nf(x.comprar)} u</b><div class="muted" style="font-size:.74rem">${mm(x.monto)}</div>` : "—"}</td></tr>`).join("")}</tbody></table></div></div>`).join("")
+    || `<div class="card"><p class="muted">No hay productos con ese filtro.</p></div>`}`;
+  $("invSeg").onclick = e => { const b = e.target.closest("[data-f]"); if (b) { invFiltro = b.dataset.f; pintarInventario(); } };
+  $("invQ").oninput = () => { invQ = $("invQ").value; clearTimeout(pintarInventario.t); pintarInventario.t = setTimeout(() => { pintarInventario(); const i = $("invQ"); i.focus(); i.setSelectionRange(i.value.length, i.value.length); }, 250); };
+}
 </script>
 </body>
 </html>
