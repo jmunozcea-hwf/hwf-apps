@@ -5615,5 +5615,52 @@ if (typeof APP_NOVEDADES !== "undefined" && Array.isArray(APP_NOVEDADES)) APP_NO
   } catch (e) {}
 })();
 </script>
+<style>
+/* ===== Pedido: tarjetas de marca ===== */
+.mbt-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+@media (min-width:620px){.mbt-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (min-width:900px){.mbt-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.mbt{all:unset;box-sizing:border-box;cursor:pointer;display:grid;grid-template-rows:auto auto auto 1fr;gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:10px;min-height:100%}
+.mbt:hover,.mbt:focus-visible{border-color:var(--accent);box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 25%,transparent)}
+.mbt.on{border-color:var(--accent);box-shadow:inset 0 3px 0 var(--accent)}
+.mbt .fotos{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;background:var(--sunk);border-radius:12px;padding:6px;height:84px}
+.mbt .fotos img{width:100%;height:100%;object-fit:contain;border-radius:6px;min-width:0}
+.mbt b{font-size:1.02rem;line-height:1.2;margin-top:4px}
+.mbt small{color:var(--muted);font-size:.78rem}
+.mbt .en{align-self:end;justify-self:start;font-size:.74rem;font-weight:800;color:#1C7A4E;background:#E3F4EA;border-radius:999px;padding:2px 8px}
+.mbt .ver{align-self:end;font-size:.8rem;font-weight:700;color:var(--accent)}
+.mb-volver{all:unset;cursor:pointer;font-weight:700;color:var(--accent);padding:8px 2px;display:inline-flex;gap:6px;align-items:center;min-height:40px}
+.mb-sel{display:grid;gap:8px}
+</style>
+<script>
+/* ================= Pedido: tarjetas de marca ================= */
+let pmSel = null;
+function pmFoto(p) { return p.img ? (String(p.img).startsWith("http") ? p.img : IMG_PRE + p.img + ".jpg?s=small&f=webp") : blank; }
+function pmTile(g) {
+  const en = g.ps.filter(p => line(p.i).q > 0), neto = en.reduce((t, p) => t + unit(p) * line(p.i).q, 0);
+  const fotos = g.ps.filter(p => p.img).slice(-3).concat(g.ps.filter(p => !p.img)).slice(0, 3);
+  return `<button type="button" class="mbt${en.length ? " on" : ""}" data-mb="${esc(g.m)}" aria-label="Ver productos ${esc(g.m)}">
+    <span class="fotos">${fotos.map(p => `<img src="${pmFoto(p)}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src=blank">`).join("")}</span>
+    <b>${esc(g.m)}</b><small>${g.ps.length} ${g.ps.length === 1 ? "producto" : "productos"}</small>
+    ${en.length ? `<span class="en">${en.length} en el pedido · ${fmt(neto)}</span>` : '<span class="ver">Ver productos ›</span>'}</button>`;
+}
+function pmBox(g) { return `<section class="mbox"><h3>${esc(g.m)}<small>${g.ps.length} ${g.ps.length === 1 ? "producto" : "productos"}</small></h3><div class="mgrid">${g.ps.map(rowHTML).join("")}</div></section>`; }
+renderMore = function () {
+  if (shown >= filtered.length) return;
+  const G = pmOrdenar(filtered), busca = !!$("q").value.trim() || (typeof solo !== "undefined" && solo);
+  let html;
+  if (busca) html = G.map(pmBox).join("");
+  else if (pmSel && G.some(g => g.m === pmSel)) html = `<div class="mb-sel"><button type="button" class="mb-volver" data-mbv>← Todas las marcas</button>${pmBox(G.find(g => g.m === pmSel))}</div>`;
+  else { pmSel = null; html = `<div class="mbt-grid">${G.map(pmTile).join("")}</div>`; }
+  $("rows").insertAdjacentHTML("beforeend", html); shown = filtered.length;
+};
+function pmIr(m) { pmSel = m; applyFilter(); const f = document.querySelector(".filters"); if (f) window.scrollTo({ top: f.getBoundingClientRect().top + scrollY - 80, behavior: "smooth" }); }
+$("rows").addEventListener("click", e => {
+  const t = e.target.closest("[data-mb]"); if (t) { e.stopPropagation(); pmIr(t.dataset.mb); return; }
+  const v = e.target.closest("[data-mbv]"); if (v) { e.stopPropagation(); pmIr(null); }
+}, true);
+if (typeof notaEnBlanco === "function") { const _notaEnBlancoMb = notaEnBlanco; notaEnBlanco = function () { pmSel = null; return _notaEnBlancoMb.apply(this, arguments); }; }
+try { applyFilter(); } catch (e) {}
+</script>
 </body>
 </html>
