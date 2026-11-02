@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="es-CL">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0B3146">
+<title>Instalar Nota de Pedido</title>
+<link rel="icon" href="../ventas/icon-192.png">
+<style>
+:root{--bg:#F3F6F8;--surface:#fff;--ink:#0F1E29;--muted:#5B6874;--line:#DAE1E7;--navy:#0B3146;--ok:#1C7A4E;--okbg:#E3F4EA}
+@media (prefers-color-scheme:dark){:root{--bg:#0E171E;--surface:#16222B;--ink:#E8EEF2;--muted:#9AA8B4;--line:#26343F;--navy:#80C8CD;--ok:#7FD3A6;--okbg:#173327}}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+a{color:var(--navy)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.45}
+.wrap{max-width:720px;margin:0 auto;padding:20px 16px 48px;display:grid;gap:16px}
+header{background:#0B3146;color:#fff;border-radius:18px;padding:20px}
+header h1{margin:0 0 4px;font-size:1.45rem}
+header p{margin:0;opacity:.9}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px;display:grid;gap:12px}
+.card h2{margin:0;font-size:1.1rem}
+.app{display:grid;grid-template-columns:56px 1fr;gap:12px;align-items:center}
+.app img{width:56px;height:56px;border-radius:14px}
+.app b{display:block;font-size:1.05rem}
+.app small{color:var(--muted)}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+a.btn,button.btn{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:10px 16px;border-radius:12px;font:inherit;font-weight:700;text-decoration:none;cursor:pointer;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+a.btn.pri,button.btn.pri{background:#0B3146;border-color:#0B3146;color:#fff}
+ol{margin:0;padding-left:20px;display:grid;gap:6px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tabs button{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:8px 14px;font:inherit;font-weight:600;cursor:pointer;min-height:40px}
+.tabs button[aria-pressed="true"]{background:#0B3146;border-color:#0B3146;color:#fff}
+.ok{background:var(--okbg);color:var(--ok);border-radius:10px;padding:10px 12px;font-weight:600}
+.muted{color:var(--muted);font-size:.9rem;margin:0}
+.aviso{border-color:#F0A818;background:color-mix(in srgb,#F0A818 10%,var(--surface))}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Nota de Pedido</h1>
+    <p>Instala o reinstala Nota de Pedido en tu celular o computador.</p>
+  </header>
+
+  <section class="card aviso">
+    <h2>¿Instalaste Nota de Pedido antes del 02-11-2026?</h2>
+    <p class="muted" style="margin:0">Desde el 02-11-2026 cada app tiene su propio link, para que no se mezclen. Borra el ícono antiguo de <b>Nota de Pedido</b> de tu pantalla de inicio y vuelve a instalarla desde aquí. Tu conexión y tus datos se mantienen.</p>
+  </section>
+
+  <section class="card">
+    <h2>1. Abre la app</h2>
+    <div class="app"><img src="../ventas/icon-192.png" alt=""><div><b>Nota de Pedido</b><small>Para vendedores: pedidos, clientes, ruta, cobranza y dashboard.</small></div></div>
+    <div class="btns"><a class="btn pri" href="../ventas/">Abrir Nota de Pedido</a></div>
+  </section>
+
+  <section class="card">
+    <h2>2. Agrégala a la pantalla de inicio</h2>
+    <div class="tabs" role="group" aria-label="Tipo de equipo">
+      <button type="button" data-t="and" aria-pressed="true">Android</button>
+      <button type="button" data-t="ios" aria-pressed="false">iPhone</button>
+      <button type="button" data-t="pc" aria-pressed="false">Computador</button>
+    </div>
+    <ol data-p="and"><li>Abre la app con el botón de arriba, en <b>Chrome</b>.</li><li>Toca el menú <b>⋮</b> (arriba a la derecha).</li><li>Elige <b>«Instalar app»</b> o <b>«Agregar a la pantalla principal»</b>.</li></ol>
+    <ol data-p="ios" hidden><li>Abre la app con el botón de arriba, en <b>Safari</b>.</li><li>Toca <b>Compartir</b> (el cuadrado con la flecha hacia arriba).</li><li>Elige <b>«Agregar a inicio»</b> y luego <b>Agregar</b>.</li></ol>
+    <ol data-p="pc" hidden><li>Abre la app con el botón de arriba, en <b>Chrome</b> o <b>Edge</b>.</li><li>En la barra de direcciones, toca el ícono de <b>instalar</b> (pantalla con flecha).</li><li>Confirma con <b>Instalar</b>.</li></ol>
+    <p class="muted">La primera vez la app pide el <b>código de conexión</b> (empieza con <b>HWF1:</b>). Te lo envía HWF por WhatsApp o correo.</p>
+  </section>
+
+  <section class="card">
+    <h2>3. ¿No ves la versión nueva?</h2>
+    <p class="muted" style="margin:0">Las apps se actualizan solas. Si una sigue mostrando la versión anterior, toca este botón y vuelve a abrirla. <b>No se borra</b> la conexión, tus pedidos ni tus datos.</p>
+    <div class="btns"><button class="btn pri" type="button" id="forzar">Forzar versión nueva</button></div>
+    <div class="ok" id="okMsg" hidden></div>
+    <p class="muted">Si aún así no cambia: elimina el ícono de la app del inicio y vuelve a instalarla desde esta página (paso 1 y 2).</p>
+  </section>
+</div>
+<script>
+/* la Nota de Pedido instalada antes del cambio abre esta página: sigue funcionando yendo a ventas/ */
+document.querySelector(".tabs").onclick = function (e) {
+  var b = e.target.closest("[data-t]"); if (!b) return;
+  document.querySelectorAll(".tabs button").forEach(function (x) { x.setAttribute("aria-pressed", x === b); });
+  document.querySelectorAll("ol[data-p]").forEach(function (o) { o.hidden = o.dataset.p !== b.dataset.t; });
+};
+(function () { var ua = navigator.userAgent; var t = /iPhone|iPad|iPod/.test(ua) ? "ios" : /Android/.test(ua) ? "and" : "pc"; var b = document.querySelector('[data-t="' + t + '"]'); if (b) b.click(); })();
+/* quita el caché de las apps (no toca la conexión ni los datos guardados) */
+document.getElementById("forzar").onclick = async function () {
+  var btn = this; btn.disabled = true; btn.textContent = "Actualizando…";
+  var n = 0;
+  try { if ("serviceWorker" in navigator) { var regs = await navigator.serviceWorker.getRegistrations(); for (var i = 0; i < regs.length; i++) { await regs[i].unregister(); n++; } } } catch (e) {}
+  try { if (window.caches) { var ks = await caches.keys(); for (var j = 0; j < ks.length; j++) await caches.delete(ks[j]); } } catch (e) {}
+  var m = document.getElementById("okMsg"); m.hidden = false;
+  m.textContent = "Listo. Cierra la app por completo y vuelve a abrirla: cargará la versión nueva.";
+  btn.textContent = "Forzar versión nueva"; btn.disabled = false;
+};
+</script>
+</body>
+</html>
