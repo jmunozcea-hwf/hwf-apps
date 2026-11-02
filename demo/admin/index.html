@@ -1133,11 +1133,8 @@ function npRitmo(cots, Y, M, n, real, lim, ant) {
   <section class="sec" id="s-pro" hidden></section>
   <section class="sec" id="s-mas" hidden>
     <div class="seg" id="masSeg">
-      <button type="button" data-m="zonas" aria-pressed="true">Zonas</button>
-      <button type="button" data-m="terreno" aria-pressed="false">Terreno</button>
-      <button type="button" data-m="cots" aria-pressed="false">NP Defontana</button>
+      <button type="button" data-m="cots" aria-pressed="true">NP Defontana</button>
       <button type="button" data-m="napp" aria-pressed="false">NP App</button>
-      <button type="button" data-m="bonif" aria-pressed="false">Bonificados</button>
       <button type="button" data-m="cobranza" aria-pressed="false">Cobranza</button>
       <button type="button" data-m="embudo" aria-pressed="false">Embudo</button>
       <button type="button" data-m="cambios" aria-pressed="false">Cambios clientes</button>
@@ -1149,7 +1146,6 @@ function npRitmo(cots, Y, M, n, real, lim, ant) {
 
 <nav class="bottom"><div class="in" role="tablist">
   <button type="button" data-t="res" aria-selected="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2.2"><path d="M3 13h8V3H3zM13 21h8V11h-8zM3 21h8v-6H3zM13 3v6h8V3z"/></svg><span>Dashboard</span></button>
-  <button type="button" data-t="av" aria-selected="false"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2.2"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span>Avance</span></button>
   <button type="button" data-t="ven" aria-selected="false"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2.2"><circle cx="9" cy="8" r="4"/><path d="M2 21c1-4 4-6 7-6s6 2 7 6M17 11a3 3 0 1 0 0-6M22 21c-.6-2.6-2-4.3-4-5"/></svg>Vendedores</button>
   <button type="button" data-t="cli" aria-selected="false"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2.2"><path d="M3 21V9l9-6 9 6v12z"/><path d="M9 21v-6h6v6"/></svg>Clientes</button>
   <button type="button" data-t="pro" aria-selected="false"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2.2"><path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="m3 8 9 5 9-5M12 13v8"/></svg>Productos</button>
@@ -1543,7 +1539,7 @@ function listaPro() {
 }
 
 /* ================= MÁS: ZONAS, TERRENO, NOTAS DE PEDIDO DEFONTANA, DATOS ================= */
-let vistaMas = "zonas", MAPA = null;
+let vistaMas = "cots", MAPA = null;
 $("masSeg").onclick = e => { const b = e.target.closest("[data-m]"); if (!b) return; vistaMas = b.dataset.m; $("masSeg").querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x === b)); pintarMas(); };
 function pintarMas() { ({ zonas: pintarZonas, terreno: pintarTerreno, cots: pintarCots, napp: pintarNApp, bonif: pintarBonif, cobranza: pintarCobranza, embudo: pintarEmbudo, cambios: pintarCambios, datos: pintarDatos })[vistaMas](); }
 function pintarZonas() {
@@ -2923,7 +2919,7 @@ $("masSeg").onclick = e => {
   const top = $("masSeg").getBoundingClientRect().top + window.scrollY - 4;
   window.scrollTo({ top: y != null ? y : Math.min(window.scrollY, top) });
 };
-function navIrTab(t) { const b = document.querySelector(`nav.bottom [data-t="${t}"]`); if (b && TAB !== t) b.click(); }
+function navIrTab(t) { if (t === "av") t = "ven"; const b = document.querySelector(`nav.bottom [data-t="${t}"]`); if (b && TAB !== t) b.click(); }
 function navIrMas(m) { const b = $("masSeg").querySelector(`[data-m="${m}"]`); if (b && vistaMas !== m) b.click(); }
 function navPaso(d) {
   navDir = d;
