@@ -5784,5 +5784,161 @@ function cxImagen(c) {
       }, "image/png")]]);
 }
 </script>
+<script>
+/* ===== Chat interno HWF (común a Nota de Pedido y HWF Admin) =====
+   Canales: "equipo" (todos) y "v:<vendedor>" (conversación privada del vendedor con HWF Admin).
+   Mensajes en la hoja "Chat" de la planilla vía el script (acciones chatEnviar / chatLeer). Sin conexión quedan en cola.
+   hwfChat({ esAdmin, yo:()=>nombre, llamar:(datos)=>Promise<respuesta>, vendedores:()=>[nombres], toast:(txt)=>void, montar:(botón)=>void }) */
+function hwfChat(O) {
+  const K = "hwf-chat-v1", KL = "hwf-chat-leido", KC = "hwf-chat-cola";
+  const ls = { g(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } }, s(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} } };
+  const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const $c = id => document.getElementById(id);
+  let abierto = false, canal = null, ocup = false, sinConexion = false, prox = null, firma = "";
+  const yo = () => String(O.yo() || "").trim();
+  const miCanal = () => "v:" + yo();
+  const datos = () => ls.g(K, { ult: "", msgs: [] });
+  function todos() {
+    const d = datos(), ids = new Set(d.msgs.map(m => m.id));
+    return d.msgs.concat(ls.g(KC, []).filter(m => !ids.has(m.id)).map(m => Object.assign({ _pend: true }, m))).sort((a, b) => String(a.fecha).localeCompare(String(b.fecha)));
+  }
+  const nombreCanal = c => c === "equipo" ? "Equipo HWF" : O.esAdmin ? c.slice(2) : "HWF Admin";
+  function noLeidos(c) { const l = ls.g(KL, {})[c] || ""; return todos().filter(m => (!c || m.canal === c) && String(m.fecha) > l && m.de !== yo() && (O.esAdmin || m.canal === "equipo" || m.canal === miCanal())).length; }
+  function totalNoLeidos() { return canales().reduce((t, c) => t + noLeidos(c), 0); }
+  function marcarLeido(c) { const ms = todos().filter(m => m.canal === c); if (!ms.length) return; const L = ls.g(KL, {}); L[c] = String(ms[ms.length - 1].fecha); ls.s(KL, L); }
+  function canales() {
+    const s = new Set(O.esAdmin ? ["equipo"] : [miCanal(), "equipo"]);
+    todos().forEach(m => { if (O.esAdmin || m.canal === "equipo" || m.canal === miCanal()) s.add(m.canal); });
+    if (O.esAdmin && O.vendedores) O.vendedores().forEach(v => v && s.add("v:" + v));
+    const ult = c => { const ms = todos().filter(m => m.canal === c); return ms.length ? String(ms[ms.length - 1].fecha) : ""; };
+    return [...s].sort((a, b) => (b === "equipo") - (a === "equipo") || ult(b).localeCompare(ult(a)) || a.localeCompare(b, "es"));
+  }
+  /* ---------- servidor ---------- */
+  async function sync() {
+    if (ocup || !yo()) return; ocup = true;
+    try {
+      for (const m of ls.g(KC, [])) {
+        const r = await O.llamar({ accion: "chatEnviar", mensaje: m });
+        if (!r || !r.ok) { sinConexion = !r || r.red || !r.ok; break; }
+        sinConexion = false; ls.s(KC, ls.g(KC, []).filter(x => x.id !== m.id));
+        const d = datos(); if (r.mensaje && !d.msgs.some(x => x.id === r.mensaje.id)) { d.msgs.push(r.mensaje); ls.s(K, d); }
+      }
+      const d = datos(), r = await O.llamar({ accion: "chatLeer", desde: d.ult || "", canales: O.esAdmin ? null : ["equipo", miCanal()] });
+      if (r && r.ok && Array.isArray(r.mensajes)) {
+        sinConexion = false;
+        const d2 = datos(), ids = new Set(d2.msgs.map(m => m.id)), nuevos = r.mensajes.filter(m => !ids.has(m.id));
+        if (nuevos.length) { d2.msgs = d2.msgs.concat(nuevos).slice(-1500); avisar(nuevos); }
+        if (r.ult && r.ult > (d2.ult || "")) d2.ult = r.ult;
+        ls.s(K, d2);
+      } else sinConexion = true;
+    } catch (e) { sinConexion = true; } finally { ocup = false; pintar(); programar(); }
+  }
+  function programar() { clearTimeout(prox); prox = setTimeout(() => { if (!document.hidden) sync(); else programar(); }, abierto ? 12000 : 60000); }
+  function avisar(nuevos) {
+    const otros = nuevos.filter(m => m.de !== yo() && !(abierto && canal === m.canal) && (O.esAdmin || m.canal === "equipo" || m.canal === miCanal()));
+    if (!otros.length || !O.toast) return; const m = otros[otros.length - 1];
+    O.toast(`💬 ${m.de}${m.canal === "equipo" ? " (Equipo)" : ""}: ${String(m.texto).slice(0, 80)}`);
+  }
+  /* ---------- interfaz ---------- */
+  const css = `
+.hc-btn{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;font:inherit}
+.hc-btn .hc-bdg{position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:#B42318;color:#fff;font-size:.66rem;font-weight:800;display:grid;place-items:center;line-height:1}
+.hc-fab{position:fixed;right:16px;bottom:calc(20px + env(safe-area-inset-bottom,0px));z-index:1500;width:54px;height:54px;border-radius:50%;border:0;background:#0B3146;color:#fff;box-shadow:0 6px 18px rgba(0,0,0,.25)}
+.hc-fab svg{width:26px;height:26px}
+.hc-pan{position:fixed;z-index:2000;inset:0;background:var(--surface,#fff);color:var(--ink,#0F1E29);display:grid;grid-template-rows:auto 1fr auto;font-family:inherit}
+@media (min-width:760px){.hc-pan{inset:auto 20px 20px auto;width:400px;height:min(620px,calc(100vh - 40px));border-radius:16px;border:1px solid var(--line,#DAE1E7);box-shadow:0 18px 50px rgba(0,0,0,.28);overflow:hidden}}
+.hc-hd{display:flex;align-items:center;gap:8px;padding:12px 14px;background:#0B3146;color:#fff;padding-top:calc(12px + env(safe-area-inset-top,0px))}
+@media (min-width:760px){.hc-hd{padding-top:12px}}
+.hc-hd b{flex:1;font-size:1.02rem;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hc-hd small{display:block;font-weight:400;opacity:.8;font-size:.74rem}
+.hc-hd button{border:0;background:rgba(255,255,255,.14);color:#fff;border-radius:10px;min-width:38px;height:38px;font-size:1.1rem;cursor:pointer}
+.hc-body{overflow:auto;padding:12px;display:flex;flex-direction:column;gap:6px;background:var(--bg,#F3F6F8)}
+.hc-ch{all:unset;box-sizing:border-box;cursor:pointer;display:grid;grid-template-columns:40px 1fr auto;gap:10px;align-items:center;padding:10px;border-radius:12px;background:var(--surface,#fff);border:1px solid var(--line,#DAE1E7)}
+.hc-ch .av{width:40px;height:40px;border-radius:50%;background:#13506F;color:#fff;display:grid;place-items:center;font-weight:800}
+.hc-ch .av.eq{background:#1C9A5B}
+.hc-ch b{display:block;font-size:.95rem}.hc-ch small{display:block;color:var(--muted,#5B6874);font-size:.8rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hc-ch .n{min-width:22px;height:22px;border-radius:999px;background:#B42318;color:#fff;font-size:.72rem;font-weight:800;display:grid;place-items:center;padding:0 6px}
+.hc-m{max-width:82%;padding:8px 11px;border-radius:14px;background:var(--surface,#fff);border:1px solid var(--line,#DAE1E7);align-self:flex-start;white-space:pre-wrap;word-wrap:break-word;font-size:.93rem;line-height:1.35}
+.hc-m.yo{align-self:flex-end;background:#0B3146;color:#fff;border-color:#0B3146}
+.hc-m .de{display:block;font-size:.72rem;font-weight:800;color:#13506F;margin-bottom:2px}
+.hc-m .t{display:block;font-size:.66rem;opacity:.7;margin-top:3px;text-align:right}
+.hc-dia{align-self:center;font-size:.72rem;color:var(--muted,#5B6874);background:var(--sunk,#E9EEF2);border-radius:999px;padding:2px 10px;margin:6px 0}
+.hc-vacio{color:var(--muted,#5B6874);text-align:center;margin:auto;font-size:.9rem;padding:20px}
+.hc-f{display:flex;gap:8px;padding:10px;border-top:1px solid var(--line,#DAE1E7);background:var(--surface,#fff);padding-bottom:calc(10px + env(safe-area-inset-bottom,0px))}
+.hc-f textarea{flex:1;resize:none;font:inherit;font-size:.95rem;border:1px solid var(--line,#DAE1E7);border-radius:12px;padding:10px;min-height:44px;max-height:120px;background:var(--bg,#fff);color:inherit}
+.hc-f button{border:0;border-radius:12px;background:#0B3146;color:#fff;font-weight:700;padding:0 16px;min-height:44px;cursor:pointer}
+.hc-aviso{font-size:.74rem;text-align:center;color:#9A5B00;background:#FFF4E0;padding:4px 8px}
+`;
+  document.head.insertAdjacentHTML("beforeend", "<style>" + css + "</style>");
+  const ICO = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg>';
+  const btn = document.createElement("button"); btn.type = "button"; btn.className = "hc-btn"; btn.id = "hcBtn"; btn.setAttribute("aria-label", "Chat interno");
+  btn.innerHTML = ICO + '<i class="hc-bdg" hidden></i>';
+  O.montar(btn);
+  const pan = document.createElement("div"); pan.className = "hc-pan"; pan.id = "hcPan"; pan.hidden = true; pan.setAttribute("role", "dialog"); pan.setAttribute("aria-label", "Chat interno");
+  document.body.appendChild(pan);
+  btn.onclick = () => abrir();
+  const hora = f => { const d = new Date(f); return isNaN(d) ? "" : d.toLocaleTimeString("es-CL", { hour: "2-digit", minute: "2-digit" }); };
+  const dia = f => { const d = new Date(f); if (isNaN(d)) return ""; const h = new Date(), ay = new Date(Date.now() - 864e5);
+    return d.toDateString() === h.toDateString() ? "Hoy" : d.toDateString() === ay.toDateString() ? "Ayer" : d.toLocaleDateString("es-CL", { weekday: "short", day: "numeric", month: "short" }); };
+  function abrir(c) {
+    if (!yo()) { O.toast && O.toast("Inicia sesión para usar el chat."); return; }
+    abierto = true; pan.hidden = false;
+    const cs = canales(); canal = c || (O.esAdmin ? null : (cs.length === 1 ? cs[0] : null));
+    pintar(); sync();
+  }
+  function cerrar() { abierto = false; pan.hidden = true; pintar(); programar(); }
+  function pintar() {
+    const n = totalNoLeidos(), b = btn.querySelector(".hc-bdg"); b.hidden = !n; b.textContent = n > 99 ? "99+" : n;
+    if (!abierto) return;
+    const aviso = sinConexion ? '<div class="hc-aviso">Sin conexión con HWF: los mensajes se enviarán cuando vuelva.</div>' : "";
+    if (!canal) {
+      firma = "";
+      pan.innerHTML = `<div class="hc-hd"><b>Chat HWF<small>${esc(yo())}</small></b><button type="button" data-x aria-label="Cerrar">✕</button></div>
+        <div class="hc-body">${aviso}${canales().map(c => { const ms = todos().filter(m => m.canal === c), u = ms[ms.length - 1], k = noLeidos(c), nm = nombreCanal(c);
+          return `<button type="button" class="hc-ch" data-c="${esc(c)}"><span class="av${c === "equipo" ? " eq" : ""}">${c === "equipo" ? "👥" : esc(nm.split(/\s+/).slice(0, 2).map(x => x[0]).join("").toUpperCase())}</span>
+            <span><b>${esc(nm)}</b><small>${u ? esc((u.de === yo() ? "Tú" : u.de === "HWF Admin" ? "Admin" : u.de.split(" ")[0]) + ": " + u.texto) : c === "equipo" ? "Mensajes para todo el equipo" : "Sin mensajes"}</small></span>${k ? `<span class="n">${k}</span>` : "<span></span>"}</button>`; }).join("")}</div><div></div>`;
+      pan.querySelector("[data-x]").onclick = cerrar;
+      pan.querySelectorAll("[data-c]").forEach(x => x.onclick = () => { canal = x.dataset.c; pintar(); });
+      return;
+    }
+    const ms = todos().filter(m => m.canal === canal); let ultDia = "";
+    /* sin cambios: no se redibuja (no se pierde lo que se está escribiendo ni el scroll) */
+    const sig = canal + "|" + ms.map(m => m.id + (m._pend ? "p" : "")).join(",") + "|" + sinConexion;
+    if (sig === firma && $c("hcLista")) { marcarLeido(canal); const b3 = btn.querySelector(".hc-bdg"), n3 = totalNoLeidos(); b3.hidden = !n3; b3.textContent = n3; return; }
+    firma = sig; const foco = document.activeElement && document.activeElement.id === "hcTx";
+    const lista = ms.map(m => { const d = dia(m.fecha), sep = d !== ultDia ? `<div class="hc-dia">${esc(d)}</div>` : ""; ultDia = d; const mio = m.de === yo();
+      return sep + `<div class="hc-m${mio ? " yo" : ""}">${!mio && (canal === "equipo" || O.esAdmin) ? `<span class="de">${esc(m.de)}</span>` : ""}${esc(m.texto)}<span class="t">${m._pend ? "⏳ por enviar" : hora(m.fecha)}</span></div>`; }).join("");
+    const borrador = $c("hcTx") ? $c("hcTx").value : "";
+    pan.innerHTML = `<div class="hc-hd"><button type="button" data-v aria-label="Volver">‹</button><b>${esc(nombreCanal(canal))}<small>${canal === "equipo" ? "Todo el equipo y HWF Admin" : O.esAdmin ? "Conversación privada" : "Conversación privada con administración"}</small></b><button type="button" data-x aria-label="Cerrar">✕</button></div>
+      <div class="hc-body" id="hcLista">${aviso}${lista || '<p class="hc-vacio">Aún no hay mensajes. Escribe el primero.</p>'}</div>
+      <form class="hc-f" id="hcF"><textarea id="hcTx" rows="1" placeholder="Escribe un mensaje" aria-label="Mensaje"></textarea><button type="submit">Enviar</button></form>`;
+    const tx = $c("hcTx"); tx.value = borrador; if (foco) tx.focus();
+    pan.querySelector("[data-x]").onclick = cerrar; pan.querySelector("[data-v]").onclick = () => { canal = null; pintar(); };
+    $c("hcF").onsubmit = e => { e.preventDefault(); const t = tx.value.trim(); if (!t) return; tx.value = ""; enviar(t); };
+    tx.onkeydown = e => { if (e.key === "Enter" && !e.shiftKey && innerWidth >= 760) { e.preventDefault(); $c("hcF").requestSubmit(); } };
+    const L = $c("hcLista"); L.scrollTop = L.scrollHeight; marcarLeido(canal);
+    const b2 = btn.querySelector(".hc-bdg"), n2 = totalNoLeidos(); b2.hidden = !n2; b2.textContent = n2;
+  }
+  function enviar(t) {
+    const m = { id: "CH-" + Date.now().toString(36).toUpperCase() + "-" + Math.random().toString(36).slice(2, 6).toUpperCase(), fecha: new Date().toISOString(),
+      canal, de: yo(), texto: t.slice(0, 1000), app: O.esAdmin ? "admin" : "ventas" };
+    const c = ls.g(KC, []); c.push(m); ls.s(KC, c); pintar(); setTimeout(() => { const i = $c("hcTx"); if (i) i.focus(); }, 0); sync();
+  }
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) sync(); });
+  setTimeout(sync, 3000);
+  return { abrir, sync, noLeidos: totalNoLeidos };
+}
+
+/* Nota de Pedido: el vendedor conectado; botón flotante (más arriba en Pedido para no tapar la barra de totales) */
+document.head.insertAdjacentHTML("beforeend", "<style>body:not(.crm-on) .hc-fab{bottom:calc(168px + env(safe-area-inset-bottom,0px))}@media (min-width:760px){body:not(.crm-on) .hc-fab{bottom:96px}}body.locked .hc-fab,#auth:not([hidden]) ~ .hc-fab{display:none}</style>");
+const HC = hwfChat({
+  esAdmin: false,
+  yo: () => (typeof SES !== "undefined" && SES && SES.vendedor ? SES.vendedor.nombre : ""),
+  llamar: d => { const c = typeof syCfg === "function" ? syCfg() : null; return c && c.url ? syLlamar(c, d) : Promise.resolve({ ok: false, red: true }); },
+  toast: t => { if (typeof toast === "function") toast(t); },
+  montar: b => { b.classList.add("hc-fab"); document.body.appendChild(b); }
+});
+if (typeof APP_NOVEDADES !== "undefined" && Array.isArray(APP_NOVEDADES)) APP_NOVEDADES.unshift("Chat interno (botón 💬 abajo a la derecha): conversación privada con HWF Admin y grupo «Equipo HWF».");
+</script>
 </body>
 </html>
