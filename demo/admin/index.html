@@ -1135,7 +1135,8 @@ function npRitmo(cots, Y, M, n, real, lim, ant) {
   <section class="sec" id="s-inv" hidden></section>
   <section class="sec" id="s-mas" hidden>
     <div class="seg" id="masSeg">
-      <button type="button" data-m="cots" aria-pressed="true">NP Defontana</button>
+      <button type="button" data-m="plan" aria-pressed="true">Plan 80 MM</button>
+      <button type="button" data-m="cots" aria-pressed="false">NP Defontana</button>
       <button type="button" data-m="napp" aria-pressed="false">NP App</button>
       <button type="button" data-m="cobranza" aria-pressed="false">Cobranza</button>
       <button type="button" data-m="embudo" aria-pressed="false">Embudo</button>
@@ -1542,9 +1543,9 @@ function listaPro() {
 }
 
 /* ================= MÁS: ZONAS, TERRENO, NOTAS DE PEDIDO DEFONTANA, DATOS ================= */
-let vistaMas = "cots", MAPA = null;
+let vistaMas = "plan", MAPA = null;
 $("masSeg").onclick = e => { const b = e.target.closest("[data-m]"); if (!b) return; vistaMas = b.dataset.m; $("masSeg").querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x === b)); pintarMas(); };
-function pintarMas() { ({ zonas: pintarZonas, terreno: pintarTerreno, cots: pintarCots, napp: pintarNApp, bonif: pintarBonif, cobranza: pintarCobranza, embudo: pintarEmbudo, cambios: pintarCambios, datos: pintarDatos })[vistaMas](); }
+function pintarMas() { ({ plan: () => pintarPlan(), zonas: pintarZonas, terreno: pintarTerreno, cots: pintarCots, napp: pintarNApp, bonif: pintarBonif, cobranza: pintarCobranza, embudo: pintarEmbudo, cambios: pintarCambios, datos: pintarDatos })[vistaMas](); }
 function pintarZonas() {
   const z = Object.entries(A.comMes).map(([k, o]) => ({ k, mes: o[M] || 0, ytd: A.ytd.reduce((s, m) => s + (o[m] || 0), 0), hab: A.prev3.length ? A.prev3.reduce((s, m) => s + (o[m] || 0), 0) / A.prev3.length : 0,
     n: A.clientes.filter(c => (c.comuna || "Sin comuna") === k).length })).filter(x => x.ytd).sort((a, b) => b.ytd - a.ytd);
@@ -2874,8 +2875,9 @@ pintarAvance = function () {
 const NAV_TABS = ["res", "av", "ven", "cli", "pro", "inv", "mas"].filter(t => document.querySelector(`nav.bottom [data-t="${t}"]`));
 const NAV_TNOM = { res: "Resumen", av: "Avance", ven: "Vendedores", cli: "Clientes", pro: "Productos", mas: "Más" };
 const NAV_MAS = [...$("masSeg").querySelectorAll("[data-m]")].map(b => b.dataset.m);
-const NAV_MNOM = { zonas: "Zonas", terreno: "Terreno", cots: "NP Defontana", napp: "NP App", bonif: "Bonificados", cobranza: "Cobranza", embudo: "Embudo", cambios: "Cambios clientes", datos: "Datos" };
+const NAV_MNOM = { plan: "Plan 80 MM", zonas: "Zonas", terreno: "Terreno", cots: "NP Defontana", napp: "NP App", bonif: "Bonificados", cobranza: "Cobranza", embudo: "Embudo", cambios: "Cambios clientes", datos: "Datos" };
 const NAV_MICO = {
+  plan: '<path d="M4 19h16"/><path d="M6 15l4-4 3 3 5-6"/><path d="M15 8h3v3"/>',
   zonas: '<path d="M9 4 3 6.5v13.5l6-2.5 6 2.5 6-2.5V4l-6 2.5z"/><path d="M9 4v13.5M15 6.5V20"/>',
   terreno: '<path d="M12 21s-6-5.6-6-10.5a6 6 0 0 1 12 0C18 15.4 12 21 12 21z"/><circle cx="12" cy="10.5" r="2.2"/>',
   cots: '<path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5M10 13h6M10 17h6"/>',
@@ -3766,6 +3768,136 @@ try { if (typeof TAB !== "undefined" && TAB === "res" && $("s-res") && !$("s-res
     } finally { b.disabled = false; tx("Sincronizar"); }
   };
 })();
+</script>
+
+<script>
+/* Plan de crecimiento HWF sin presupuesto de marketing (presentación del 02-11-2026): de 65 a 80 MM mensuales.
+   Cálculo común para HWF Admin y Nota de Pedido a partir de las ventas (D.rows: [cliente, producto, mes, día, cant, neto, costo, vendedor, año?]). */
+const PLAN = { meta: 80000000, base: 65000000, cuotaMin: 4, cuotaMax: 6,
+  pasos: [["1–30", "Ordenar la base", ["Lista de dormidos desde Defontana", "Clasificación A, B y C", "WhatsApp Business y catálogo", "Reunión con 2 marcas principales"]],
+          ["31–60", "Activar la venta", ["Oferta de surtido en cada visita", "Cuotas de prospección por vendedor", "Programa de referidos", "Calendario fijo de rutas"]],
+          ["61–90", "Consolidar", ["Capacitación en nutrición", "Hellywoof como laboratorio", "Revisión de días calle", "Ajustar según resultados"]]],
+  palancas: ["Exprimir la cartera actual: reactivar dormidos, ampliar surtido y clasificar A/B/C", "Que las marcas paguen el marketing: muestras, POP, rebates, lanzamientos, capacitación y contenido",
+    "Reparto propio como ventaja: frecuencia fija, pedido mínimo bajo y calendario de rutas", "Prospección dirigida con cuotas: 4 a 6 clientes nuevos al mes por vendedor",
+    "Herramientas digitales gratis: WhatsApp Business, referidos B2B y ficha de Google", "Vendedores asesores y Hellywoof como laboratorio", "Crecer sin ahogar la caja: condiciones por cliente y días calle bajo control"] };
+const PL_N = s => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+function plTipos(nombre) {
+  const n = PL_N(nombre), t = new Set(), gato = /\bgatos?\b|\bcats?\b|kitten|katze|felin/.test(n);
+  if (/snack|premio|galleta|cookie|churu|treat|salchick|horneado|\bbite\b|stick/.test(n)) t.add("snack");
+  else if (/arena|carbon|clean ?cat|coolandclean|cool ?& ?clean|lindocat|turkat|sanitari/.test(n)) t.add("arena");
+  else if (/\blatas?\b|sobre|pouch|mousse|caldo|\bpate\b|pura ?natura/.test(n)) t.add("humedo");
+  else if (/shampoo|jabon|collar|correa|leash|placa|cortau|juguete|\bball\b|rope|peps|bebedero|comedero|cepillo|pipeta|antipulga|aceite/.test(n)) t.add("higiene");
+  else if (/pendon|despacho|ejemplo/.test(n)) t.add("otro");
+  else t.add(gato ? "seco_gato" : "seco_perro");
+  if (gato) t.add("gato");
+  return t;
+}
+function plOfrecer(c) {
+  const t = c.tipos, o = [], seco = t.has("seco_perro") || t.has("seco_gato");
+  if (t.has("seco_perro") && !t.has("snack")) o.push("Snacks y premios");
+  if (t.has("gato") && !t.has("arena")) o.push("Arena sanitaria");
+  if (seco && !t.has("humedo")) o.push("Húmedo (latas y sobres)");
+  if (c.marcas.size === 1) o.push("Otra línea (económica o premium)");
+  if (!t.has("higiene") && o.length < 2) o.push("Higiene y accesorios");
+  return o;
+}
+/* o: { cartDe(r) → cartera de la línea, incluye(cartera) → bool } */
+function planCalc(D, o) {
+  const [Y, M, CD] = String(D.corte || "").split("-").map(Number), dia = 864e5, hoy = Date.UTC(Y, M - 1, CD), ini = Date.UTC(Y, M - 1, 1);
+  const yr = r => r[8] || D.anio, m3 = [1, 2, 3].map(k => { let y = Y, m = M - k; if (m < 1) { m += 12; y--; } return y * 100 + m; });
+  const C = {};
+  D.rows.forEach(r => {
+    if (!(r[5] > 0)) return; const cart = o.cartDe(r); if (!o.incluye(cart)) return;
+    const y = yr(r), t = Date.UTC(y, r[2] - 1, r[3]), ym = y * 100 + r[2]; if (t > hoy) return;
+    const c = C[r[0]] = C[r[0]] || { ci: r[0], cart, f: new Set(), ult: 0, prim: Infinity, v12: 0, v3: 0, vMes: 0, tipos: new Set(), marcas: new Set(), pMes: new Set(), p3: {} };
+    if (t >= c.ult) { c.ult = t; c.cart = cart; } if (t < c.prim) c.prim = t; c.f.add(t);
+    if (hoy - t < 365 * dia) c.v12 += r[5];
+    if (m3.includes(ym)) { c.v3 += r[5]; (c.p3[ym] = c.p3[ym] || new Set()).add(r[1]); }
+    if (t >= ini) { c.vMes += r[5]; c.pMes.add(r[1]); }
+    if (hoy - t < 183 * dia) { const p = D.productos[r[1]]; if (p) { plTipos(p[0]).forEach(x => c.tipos.add(x)); c.marcas.add(p[1]); } }
+  });
+  const L = Object.values(C);
+  L.forEach(c => {
+    c.nombre = (D.clientes[c.ci] || [""])[0]; c.diasSin = Math.round((hoy - c.ult) / dia); c.hab = c.v12 / 12;
+    const fs = [...c.f], ant = fs.filter(t => t < ini), mes = fs.filter(t => t >= ini);
+    c.nuevo = mes.length > 0 && !ant.length;
+    c.reac = mes.length > 0 && ant.length > 0 && Math.min(...mes) - Math.max(...ant) >= 60 * dia;
+    c.ofrecer = plOfrecer(c);
+  });
+  const abc = L.filter(c => c.v3 > 0).sort((a, b) => b.v3 - a.v3), tot = abc.reduce((s, c) => s + c.v3, 0); let acc = 0;
+  abc.forEach(c => { c.abc = acc < tot * 0.8 ? "A" : acc < tot * 0.95 ? "B" : "C"; acc += c.v3; });
+  L.forEach(c => { if (!c.abc) c.abc = "C"; });
+  const dorm = L.filter(c => c.diasSin >= 30 && c.diasSin <= 365 && c.v12 > 0).sort((a, b) => b.hab - a.hab);
+  const con = L.filter(c => c.vMes > 0), vMes = con.reduce((s, c) => s + c.vMes, 0);
+  const n3 = m3.reduce((s, ym) => s + L.filter(c => c.p3[ym]).length, 0), v3 = L.reduce((s, c) => s + c.v3, 0);
+  const l3 = L.reduce((s, c) => s + Object.values(c.p3).reduce((a, x) => a + x.size, 0), 0);
+  return { Y, M, CD, L, dorm, d30: dorm.filter(c => c.diasSin < 60), d60: dorm.filter(c => c.diasSin >= 60 && c.diasSin < 90), d90: dorm.filter(c => c.diasSin >= 90),
+    reac: L.filter(c => c.reac), nuevos: L.filter(c => c.nuevo), A: L.filter(c => c.abc === "A" && c.v3 > 0), B: L.filter(c => c.abc === "B"), Cc: L.filter(c => c.abc === "C" && c.v3 > 0),
+    vMes, con: con.length, ticket: con.length ? vMes / con.length : 0, ticket3: n3 ? v3 / n3 : 0, lin: con.length ? con.reduce((s, c) => s + c.pMes.size, 0) / con.length : 0, lin3: n3 ? l3 / n3 : 0, v3 };
+}
+const PL_CSS = ".pl h3 small{font-weight:400;color:var(--muted)}.pl-k{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin:6px 0 10px}"
+  + ".pl-k div{border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--surface)}.pl-k span{display:block;font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:700}"
+  + ".pl-k b{display:block;font-size:1.1rem;font-variant-numeric:tabular-nums}.pl-k small{color:var(--muted);font-size:.74rem}"
+  + ".pl-bar{height:10px;border-radius:99px;background:var(--sunk,#EEF2F5);overflow:hidden;margin:4px 0}.pl-bar i{display:block;height:100%;background:#13506F;border-radius:99px}"
+  + ".pl-l{display:grid;gap:6px}.pl-l .it{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 10px;border-top:1px dashed var(--line);padding-top:6px}"
+  + ".pl-l .it small{grid-column:1/-1;color:var(--muted)}.pl-l .acc{grid-column:1/-1;display:flex;gap:6px;flex-wrap:wrap}.pl-l .acc button{font:inherit;font-size:.78rem;padding:4px 10px;border-radius:99px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}"
+  + ".pl-tag{display:inline-block;font-size:.7rem;font-weight:800;padding:1px 7px;border-radius:99px;margin-left:6px}.pl-tag.A{background:#E3F4EA;color:#1C7A4E}.pl-tag.B{background:#FFF4DB;color:#9A5B00}.pl-tag.C{background:#EEF2F5;color:#5B6B78}"
+  + ".pl-tag.d{background:#FDECEA;color:#B42318}.pl-step{background:#FFF8E6;border:1px solid #F3D48A;border-radius:10px;padding:8px 10px;font-size:.88rem;margin:4px 0 10px;color:#5B4300}"
+  + "@media (prefers-color-scheme:dark){.pl-step{background:#2A2210;border-color:#5B4300;color:#F3D48A}}";
+
+document.head.insertAdjacentHTML("beforeend", "<style>" + PL_CSS + ".pl-chk label{display:flex;gap:8px;align-items:flex-start;padding:4px 0;font-size:.9rem}.pl-chk label.ok span{text-decoration:line-through;color:var(--muted)}</style>");
+const PL_T = "Tienda Hellywoof", PLCHK = "adm-plan-chk";
+function plDatos() { return planCalc(D, { cartDe: cartRow, incluye: c => c !== PL_T }); }
+function plProy(P) { const t = habiles(P.Y, P.M, 1, P.CD), T = habiles(P.Y, P.M, 1, diasMes(P.Y, P.M)); return t ? P.vMes / t * T : P.vMes; }
+function plDiasCalle(P) { try { const s = (typeof cxTodos === "function" ? cxTodos() : []).reduce((t, d) => t + Math.max(0, d.saldo || 0), 0); return P.v3 ? s / (P.v3 / 91) : null; } catch (e) { return null; } }
+function pintarPlan() {
+  const P = plDatos(), proy = plProy(P), falta = Math.max(0, PLAN.meta - proy), dc = plDiasCalle(P), di = typeof invIndice === "function" ? invIndice() : null;
+  const vends = [...new Set(P.L.map(c => c.cart))].filter(Boolean).sort();
+  const fila = v => { const l = P.L.filter(c => c.cart === v), cnt = f => l.filter(f).length, vm = l.reduce((s, c) => s + c.vMes, 0), n = cnt(c => c.nuevo);
+    return `<tr><td><b>${esc(v)}</b></td><td class="r num">${mm(vm)}</td><td class="r num">${cnt(c => c.vMes > 0)}</td><td class="r num">${cnt(c => c.v12 > 0 && c.diasSin >= 30 && c.diasSin < 60)}</td>
+      <td class="r num">${cnt(c => c.v12 > 0 && c.diasSin >= 60 && c.diasSin < 90)}</td><td class="r num">${cnt(c => c.v12 > 0 && c.diasSin >= 90 && c.diasSin <= 365)}</td><td class="r num">${cnt(c => c.reac)}</td>
+      <td class="r"><span class="pill ${n >= PLAN.cuotaMin ? "p-ok" : n ? "p-warn" : "p-n"}">${n} / ${PLAN.cuotaMin}–${PLAN.cuotaMax}</span></td><td class="r num">${cnt(c => c.abc === "A" && c.v3 > 0)} · ${cnt(c => c.abc === "B")} · ${cnt(c => c.abc === "C" && c.v3 > 0)}</td></tr>`; };
+  const varP = (a, b) => b ? `${a >= b ? "▲" : "▼"} ${Math.abs(Math.round((a / b - 1) * 100))}%` : "";
+  const chk = (() => { try { return JSON.parse(localStorage.getItem(PLCHK) || "{}"); } catch (e) { return {}; } })();
+  const it = c => `<div class="it"><b>${esc(tc(c.nombre))}<span class="pl-tag ${c.abc}">${c.abc}</span></b><span class="v">${mm(c.hab)}/mes</span><small>${esc(c.cart)} · <span class="pl-tag d">${c.diasSin} días</span></small></div>`;
+  const surt = P.L.filter(c => (c.abc === "A" || c.abc === "B") && c.ofrecer.length && c.diasSin < 60).sort((a, b) => b.v3 - a.v3).slice(0, 12);
+  $("masBody").innerHTML = `<div class="card pl"><h2>Plan de crecimiento <span class="muted">de 65 a 80 MM al mes sin presupuesto de marketing</span></h2>
+    <div class="pl-k"><div><span>Venta del mes a la fecha</span><b>${mm(P.vMes)}</b><small>${String(P.CD).padStart(2, "0")}-${String(P.M).padStart(2, "0")} · sin tienda</small></div>
+      <div><span>Proyección de cierre</span><b>${mm(proy)}</b><small>${Math.round(proy / PLAN.meta * 100)}% de 80 MM</small></div>
+      <div><span>Brecha a 80 MM</span><b style="color:${falta ? "var(--bad)" : "var(--ok)"}">${falta ? mm(falta) : "cumplida"}</b><small>base de referencia 65 MM</small></div>
+      <div><span>Días calle (cobranza)</span><b>${dc == null ? "—" : Math.round(dc) + " días"}</b><small>por cobrar ÷ venta diaria · mantener o bajar</small></div>
+      ${di ? `<div><span>Días de inventario</span><b>${isFinite(di.dias) ? Math.round(di.dias) + " días" : "—"}</b><small>${di.urg} productos bajo 7 días</small></div>` : ""}</div>
+    <div class="pl-bar"><i style="width:${Math.min(100, proy / PLAN.meta * 100).toFixed(1)}%"></i></div>
+    <div class="pl-step"><b>Primer paso esta semana:</b> contactar a los ${P.d60.length + P.d90.length} clientes sin compra hace 60 días o más (lista abajo y en el Dashboard de cada vendedor) antes del viernes.</div></div>
+  <div class="card"><h2>Indicadores <span class="muted">seguimiento semanal</span></h2><div class="tbl"><table><thead><tr><th>Indicador</th><th class="r">Hoy</th><th class="r">Referencia</th><th>Meta</th></tr></thead><tbody>
+    <tr><td>Venta total (proyección)</td><td class="r num">${mm(proy)}</td><td class="r num">65 MM</td><td>80 MM al mes</td></tr>
+    <tr><td>Clientes reactivados este mes</td><td class="r num">${P.reac.length}</td><td class="r num">${P.d60.length + P.d90.length} dormidos 60+</td><td>1 de cada 4 dormidos en 60 días</td></tr>
+    <tr><td>Ticket promedio por cliente (mes a la fecha)</td><td class="r num">${mm(P.ticket)}</td><td class="r num">${mm(P.ticket3)} ${varP(P.ticket, P.ticket3)}</td><td>+10%</td></tr>
+    <tr><td>Productos distintos por cliente</td><td class="r num">${P.lin.toFixed(1).replace(".", ",")}</td><td class="r num">${P.lin3.toFixed(1).replace(".", ",")}</td><td>+1 línea promedio</td></tr>
+    <tr><td>Clientes nuevos por vendedor</td><td class="r num">${(P.nuevos.length / Math.max(1, vends.length)).toFixed(1).replace(".", ",")}</td><td class="r num">${P.nuevos.length} en total</td><td>4 a 6 al mes</td></tr>
+    <tr><td>Días calle promedio</td><td class="r num">${dc == null ? "—" : Math.round(dc)}</td><td class="r num"></td><td>Mantener o bajar</td></tr>
+    </tbody></table></div><p class="muted" style="font-size:.78rem;margin:6px 0 0">Referencias: ticket y productos por cliente = promedio de los 3 meses cerrados. El mes en curso va a la fecha.</p></div>
+  <div class="card"><h2>Por vendedor</h2><div class="tbl"><table><thead><tr><th>Vendedor</th><th class="r">Venta mes</th><th class="r">Clientes</th><th class="r">30–59 d</th><th class="r">60–89 d</th><th class="r">90+ d</th><th class="r">Reactivados</th><th class="r">Nuevos / cuota</th><th class="r">A · B · C</th></tr></thead>
+    <tbody>${vends.map(fila).join("")}</tbody></table></div></div>
+  <div class="card pl"><h2>Reactivar <span class="muted">${P.dorm.length} clientes sin compra hace 30 días o más · los que más compraban primero</span></h2><div class="pl-l">${P.dorm.slice(0, 20).map(it).join("") || '<p class="muted">Sin clientes dormidos.</p>'}</div></div>
+  <div class="card pl"><h2>Ampliar surtido <span class="muted">clientes A y B · qué ofrecer</span></h2><div class="pl-l">${surt.map(c => `<div class="it"><b>${esc(tc(c.nombre))}<span class="pl-tag ${c.abc}">${c.abc}</span></b><span class="v">${mm(c.v3 / 3)}/mes</span><small>${esc(c.cart)} · ofrecer <b>${c.ofrecer.slice(0, 3).map(esc).join("</b> · <b>")}</b></small></div>`).join("") || '<p class="muted">Sin oportunidades.</p>'}</div></div>
+  <div class="card pl-chk"><h2>Plan de 90 días <span class="muted">marca lo que ya está hecho (queda en este equipo)</span></h2>
+    ${PLAN.pasos.map(([d, t, l], i) => `<p style="margin:8px 0 2px"><b>Días ${d} · ${esc(t)}</b></p>${l.map((x, j) => { const k = i + "-" + j; return `<label class="${chk[k] ? "ok" : ""}"><input type="checkbox" data-plk="${k}" ${chk[k] ? "checked" : ""}><span>${esc(x)}</span></label>`; }).join("")}`).join("")}</div>
+  <div class="card"><h2>Las 7 palancas <span class="muted">cero gasto en publicidad</span></h2><ol style="margin:0;padding-left:20px;display:grid;gap:4px">${PLAN.palancas.map(x => `<li>${esc(x)}</li>`).join("")}</ol></div>`;
+  $("masBody").querySelectorAll("[data-plk]").forEach(c => c.onchange = () => { const o = (() => { try { return JSON.parse(localStorage.getItem(PLCHK) || "{}"); } catch (e) { return {}; } })(); o[c.dataset.plk] = c.checked; try { localStorage.setItem(PLCHK, JSON.stringify(o)); } catch (e) {} c.closest("label").classList.toggle("ok", c.checked); });
+}
+const _pintarDashboardPL = pintarDashboard;
+pintarDashboard = function () {
+  _pintarDashboardPL.apply(this, arguments);
+  const s = $("s-res"), g = s && s.querySelector(".db-g"); if (!g) return;
+  try { const P = plDatos(), proy = plProy(P), d60 = P.d60.length + P.d90.length;
+    g.insertAdjacentHTML("afterbegin", `<div class="card db-c pl"><h3>Plan 80 MM <button type="button" class="lk" data-ir="mas:plan">Ver plan ›</button></h3>
+      <div class="pl-bar"><i style="width:${Math.min(100, proy / PLAN.meta * 100).toFixed(1)}%"></i></div>
+      <div class="pl-k"><div><span>Proyección</span><b>${mm(proy)}</b><small>${Math.round(proy / PLAN.meta * 100)}% de 80 MM</small></div><div><span>Dormidos 60+ días</span><b>${d60}</b><small>${P.reac.length} reactivados este mes</small></div>
+        <div><span>Clientes nuevos</span><b>${P.nuevos.length}</b><small>cuota 4–6 por vendedor</small></div></div></div>`);
+  } catch (e) { console.warn("plan", e); }
+};
+try { if (typeof TAB !== "undefined" && TAB === "res" && $("s-res") && !$("s-res").hidden) pintarDashboard(); } catch (e) {}
 </script>
 </body>
 </html>

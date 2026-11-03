@@ -5759,5 +5759,118 @@ function cxImagen(c) {
 }
 </script>
 <script>/* chat interno eliminado (02-11-2026): limpia lo guardado */try{["hwf-chat-adm","hwf-chat-leido-adm","hwf-chat-cola-adm","hwf-chat-ven","hwf-chat-leido-ven","hwf-chat-cola-ven","hwf-chat-v1","hwf-chat-leido","hwf-chat-cola"].forEach(function(k){localStorage.removeItem(k)})}catch(e){}</script>
+
+<script>
+/* Plan de crecimiento HWF sin presupuesto de marketing (presentación del 02-11-2026): de 65 a 80 MM mensuales.
+   Cálculo común para HWF Admin y Nota de Pedido a partir de las ventas (D.rows: [cliente, producto, mes, día, cant, neto, costo, vendedor, año?]). */
+const PLAN = { meta: 80000000, base: 65000000, cuotaMin: 4, cuotaMax: 6,
+  pasos: [["1–30", "Ordenar la base", ["Lista de dormidos desde Defontana", "Clasificación A, B y C", "WhatsApp Business y catálogo", "Reunión con 2 marcas principales"]],
+          ["31–60", "Activar la venta", ["Oferta de surtido en cada visita", "Cuotas de prospección por vendedor", "Programa de referidos", "Calendario fijo de rutas"]],
+          ["61–90", "Consolidar", ["Capacitación en nutrición", "Hellywoof como laboratorio", "Revisión de días calle", "Ajustar según resultados"]]],
+  palancas: ["Exprimir la cartera actual: reactivar dormidos, ampliar surtido y clasificar A/B/C", "Que las marcas paguen el marketing: muestras, POP, rebates, lanzamientos, capacitación y contenido",
+    "Reparto propio como ventaja: frecuencia fija, pedido mínimo bajo y calendario de rutas", "Prospección dirigida con cuotas: 4 a 6 clientes nuevos al mes por vendedor",
+    "Herramientas digitales gratis: WhatsApp Business, referidos B2B y ficha de Google", "Vendedores asesores y Hellywoof como laboratorio", "Crecer sin ahogar la caja: condiciones por cliente y días calle bajo control"] };
+const PL_N = s => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+function plTipos(nombre) {
+  const n = PL_N(nombre), t = new Set(), gato = /\bgatos?\b|\bcats?\b|kitten|katze|felin/.test(n);
+  if (/snack|premio|galleta|cookie|churu|treat|salchick|horneado|\bbite\b|stick/.test(n)) t.add("snack");
+  else if (/arena|carbon|clean ?cat|coolandclean|cool ?& ?clean|lindocat|turkat|sanitari/.test(n)) t.add("arena");
+  else if (/\blatas?\b|sobre|pouch|mousse|caldo|\bpate\b|pura ?natura/.test(n)) t.add("humedo");
+  else if (/shampoo|jabon|collar|correa|leash|placa|cortau|juguete|\bball\b|rope|peps|bebedero|comedero|cepillo|pipeta|antipulga|aceite/.test(n)) t.add("higiene");
+  else if (/pendon|despacho|ejemplo/.test(n)) t.add("otro");
+  else t.add(gato ? "seco_gato" : "seco_perro");
+  if (gato) t.add("gato");
+  return t;
+}
+function plOfrecer(c) {
+  const t = c.tipos, o = [], seco = t.has("seco_perro") || t.has("seco_gato");
+  if (t.has("seco_perro") && !t.has("snack")) o.push("Snacks y premios");
+  if (t.has("gato") && !t.has("arena")) o.push("Arena sanitaria");
+  if (seco && !t.has("humedo")) o.push("Húmedo (latas y sobres)");
+  if (c.marcas.size === 1) o.push("Otra línea (económica o premium)");
+  if (!t.has("higiene") && o.length < 2) o.push("Higiene y accesorios");
+  return o;
+}
+/* o: { cartDe(r) → cartera de la línea, incluye(cartera) → bool } */
+function planCalc(D, o) {
+  const [Y, M, CD] = String(D.corte || "").split("-").map(Number), dia = 864e5, hoy = Date.UTC(Y, M - 1, CD), ini = Date.UTC(Y, M - 1, 1);
+  const yr = r => r[8] || D.anio, m3 = [1, 2, 3].map(k => { let y = Y, m = M - k; if (m < 1) { m += 12; y--; } return y * 100 + m; });
+  const C = {};
+  D.rows.forEach(r => {
+    if (!(r[5] > 0)) return; const cart = o.cartDe(r); if (!o.incluye(cart)) return;
+    const y = yr(r), t = Date.UTC(y, r[2] - 1, r[3]), ym = y * 100 + r[2]; if (t > hoy) return;
+    const c = C[r[0]] = C[r[0]] || { ci: r[0], cart, f: new Set(), ult: 0, prim: Infinity, v12: 0, v3: 0, vMes: 0, tipos: new Set(), marcas: new Set(), pMes: new Set(), p3: {} };
+    if (t >= c.ult) { c.ult = t; c.cart = cart; } if (t < c.prim) c.prim = t; c.f.add(t);
+    if (hoy - t < 365 * dia) c.v12 += r[5];
+    if (m3.includes(ym)) { c.v3 += r[5]; (c.p3[ym] = c.p3[ym] || new Set()).add(r[1]); }
+    if (t >= ini) { c.vMes += r[5]; c.pMes.add(r[1]); }
+    if (hoy - t < 183 * dia) { const p = D.productos[r[1]]; if (p) { plTipos(p[0]).forEach(x => c.tipos.add(x)); c.marcas.add(p[1]); } }
+  });
+  const L = Object.values(C);
+  L.forEach(c => {
+    c.nombre = (D.clientes[c.ci] || [""])[0]; c.diasSin = Math.round((hoy - c.ult) / dia); c.hab = c.v12 / 12;
+    const fs = [...c.f], ant = fs.filter(t => t < ini), mes = fs.filter(t => t >= ini);
+    c.nuevo = mes.length > 0 && !ant.length;
+    c.reac = mes.length > 0 && ant.length > 0 && Math.min(...mes) - Math.max(...ant) >= 60 * dia;
+    c.ofrecer = plOfrecer(c);
+  });
+  const abc = L.filter(c => c.v3 > 0).sort((a, b) => b.v3 - a.v3), tot = abc.reduce((s, c) => s + c.v3, 0); let acc = 0;
+  abc.forEach(c => { c.abc = acc < tot * 0.8 ? "A" : acc < tot * 0.95 ? "B" : "C"; acc += c.v3; });
+  L.forEach(c => { if (!c.abc) c.abc = "C"; });
+  const dorm = L.filter(c => c.diasSin >= 30 && c.diasSin <= 365 && c.v12 > 0).sort((a, b) => b.hab - a.hab);
+  const con = L.filter(c => c.vMes > 0), vMes = con.reduce((s, c) => s + c.vMes, 0);
+  const n3 = m3.reduce((s, ym) => s + L.filter(c => c.p3[ym]).length, 0), v3 = L.reduce((s, c) => s + c.v3, 0);
+  const l3 = L.reduce((s, c) => s + Object.values(c.p3).reduce((a, x) => a + x.size, 0), 0);
+  return { Y, M, CD, L, dorm, d30: dorm.filter(c => c.diasSin < 60), d60: dorm.filter(c => c.diasSin >= 60 && c.diasSin < 90), d90: dorm.filter(c => c.diasSin >= 90),
+    reac: L.filter(c => c.reac), nuevos: L.filter(c => c.nuevo), A: L.filter(c => c.abc === "A" && c.v3 > 0), B: L.filter(c => c.abc === "B"), Cc: L.filter(c => c.abc === "C" && c.v3 > 0),
+    vMes, con: con.length, ticket: con.length ? vMes / con.length : 0, ticket3: n3 ? v3 / n3 : 0, lin: con.length ? con.reduce((s, c) => s + c.pMes.size, 0) / con.length : 0, lin3: n3 ? l3 / n3 : 0, v3 };
+}
+const PL_CSS = ".pl h3 small{font-weight:400;color:var(--muted)}.pl-k{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin:6px 0 10px}"
+  + ".pl-k div{border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--surface)}.pl-k span{display:block;font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:700}"
+  + ".pl-k b{display:block;font-size:1.1rem;font-variant-numeric:tabular-nums}.pl-k small{color:var(--muted);font-size:.74rem}"
+  + ".pl-bar{height:10px;border-radius:99px;background:var(--sunk,#EEF2F5);overflow:hidden;margin:4px 0}.pl-bar i{display:block;height:100%;background:#13506F;border-radius:99px}"
+  + ".pl-l{display:grid;gap:6px}.pl-l .it{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 10px;border-top:1px dashed var(--line);padding-top:6px}"
+  + ".pl-l .it small{grid-column:1/-1;color:var(--muted)}.pl-l .acc{grid-column:1/-1;display:flex;gap:6px;flex-wrap:wrap}.pl-l .acc button{font:inherit;font-size:.78rem;padding:4px 10px;border-radius:99px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}"
+  + ".pl-tag{display:inline-block;font-size:.7rem;font-weight:800;padding:1px 7px;border-radius:99px;margin-left:6px}.pl-tag.A{background:#E3F4EA;color:#1C7A4E}.pl-tag.B{background:#FFF4DB;color:#9A5B00}.pl-tag.C{background:#EEF2F5;color:#5B6B78}"
+  + ".pl-tag.d{background:#FDECEA;color:#B42318}.pl-step{background:#FFF8E6;border:1px solid #F3D48A;border-radius:10px;padding:8px 10px;font-size:.88rem;margin:4px 0 10px;color:#5B4300}"
+  + "@media (prefers-color-scheme:dark){.pl-step{background:#2A2210;border-color:#5B4300;color:#F3D48A}}";
+
+document.head.insertAdjacentHTML("beforeend", "<style>" + PL_CSS + "</style>");
+function plTelDe(nombre) { try { const k = cxNorm(nombre), c = clientesLocal().find(x => cxNorm(x.nombre) === k); return c ? cxTel(c.telefono || c.whatsapp || "") : ""; } catch (e) { return ""; } }
+function plHtml(P, yo) {
+  const mm = dbMM, nf = dbNf, d60 = P.d60.length + P.d90.length, nuevos = P.nuevos.length;
+  const it = (c, extra) => { const tel = plTelDe(c.nombre);
+    return `<div class="it"><b>${esc(tc(c.nombre))}<span class="pl-tag ${c.abc}">${c.abc}</span></b><span class="v">${mm(c.hab)}/mes</span>
+      <small>${extra}${yo ? "" : " · " + esc(c.cart)}</small>
+      <div class="acc"><button type="button" data-ir="cli:${encodeURIComponent(c.nombre)}">Ficha</button>${tel ? `<button type="button" data-pl-wa="${esc(tel)}" data-pl-n="${esc(tc(c.nombre))}">WhatsApp</button><button type="button" data-pl-tel="${esc(tel)}">Llamar</button>` : ""}</div></div>`; };
+  const dorm = P.dorm.slice(0, 8).map(c => it(c, `<span class="pl-tag d">${c.diasSin} días sin compra</span> · compraba ${mm(c.hab)} al mes`)).join("");
+  const surt = P.L.filter(c => (c.abc === "A" || c.abc === "B") && c.ofrecer.length && c.diasSin < 60).sort((a, b) => b.v3 - a.v3).slice(0, 6)
+    .map(c => it(c, "Ofrecer: <b>" + c.ofrecer.slice(0, 2).map(esc).join("</b> · <b>") + "</b>")).join("");
+  const cuota = yo ? `${nuevos} de ${PLAN.cuotaMin} a ${PLAN.cuotaMax}` : `${nuevos} en el mes`;
+  return `<div class="db-c card pl"><h3>Plan 80 MM <small>${yo ? "mi parte" : "todo el equipo"}</small></h3>
+    ${d60 ? `<div class="pl-step"><b>Primer paso:</b> contacta a tus ${d60} ${d60 === 1 ? "cliente" : "clientes"} sin compra hace 60 días o más antes del viernes, con una oferta de regreso, y anota el motivo (precio, quiebre, competencia o cerró).</div>` : ""}
+    <div class="pl-k"><div><span>Sin compra 30–59 días</span><b>${nf(P.d30.length)}</b></div><div><span>60–89 días</span><b>${nf(P.d60.length)}</b></div><div><span>90+ días</span><b>${nf(P.d90.length)}</b></div>
+      <div><span>Reactivados este mes</span><b>${nf(P.reac.length)}</b><small>meta: 1 de cada 4 en 60 días</small></div>
+      <div><span>Clientes nuevos</span><b>${cuota}</b><small>con primera factura este mes</small></div>
+      <div><span>Clientes A · B · C</span><b>${P.A.length} · ${P.B.length} · ${P.Cc.length}</b><small>A: visita semanal · B: quincenal · C: WhatsApp</small></div></div>
+    ${dorm ? `<p class="db-vacio" style="margin:8px 0 2px"><b>Reactivar</b> (los que más compraban primero)</p><div class="pl-l">${dorm}</div>` : ""}
+    ${surt ? `<p class="db-vacio" style="margin:10px 0 2px"><b>Ampliar surtido</b> en tus clientes A y B</p><div class="pl-l">${surt}</div>` : ""}
+  </div>`;
+}
+const _pintarDashPL = pintarDash;
+pintarDash = function () {
+  _pintarDashPL.apply(this, arguments);
+  const box = $("crmDash"), g = box && box.querySelector(".db-g"); if (!g || !SES || !DB || !DB.d) return;
+  try {
+    const D = DB.d, yo = dbAlcance(), T = "Tienda Hellywoof", cart = r => D.vend[r[7]] === T ? T : (D.clientes[r[0]] || [])[2];
+    const P0 = planCalc(D, { cartDe: cart, incluye: c => c !== T }), f = l => yo ? l.filter(c => dbK(c.cart) === dbK(yo)) : l;  /* A/B/C con la base de todo el equipo */
+    const P = Object.assign({}, P0); ["L", "dorm", "d30", "d60", "d90", "reac", "nuevos", "A", "B", "Cc"].forEach(k => P[k] = f(P0[k]));
+    g.insertAdjacentHTML("afterbegin", plHtml(P, yo));
+    g.querySelectorAll("[data-pl-wa]").forEach(b => b.onclick = e => { e.stopPropagation(); abrirExterno("https://wa.me/" + b.dataset.plWa + "?text=" + encodeURIComponent(`Hola, le saluda ${SES.vendedor.nombre} de HWF. Hace un tiempo que no conversamos: ¿cómo va el stock de alimento? Esta semana tengo una oferta especial para ${b.dataset.plN}.`)); });
+    g.querySelectorAll("[data-pl-tel]").forEach(b => b.onclick = e => { e.stopPropagation(); abrirExterno("tel:+" + b.dataset.plTel); });
+  } catch (e) { console.warn("plan", e); }
+};
+if (typeof APP_NOVEDADES !== "undefined" && Array.isArray(APP_NOVEDADES)) APP_NOVEDADES.unshift("Dashboard: tarjeta «Plan 80 MM» con tus clientes dormidos para reactivar, A/B/C, ofertas de surtido y cuota de clientes nuevos.");
+</script>
 </body>
 </html>
