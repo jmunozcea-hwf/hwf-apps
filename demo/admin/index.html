@@ -4099,10 +4099,23 @@ async function apBajar() {
   const cfg = typeof SYC === "function" ? SYC() : null; if (!cfg || !cfg.url || apBajando) return false;
   apBajando = true;
   try {
-    const desde = apLunes() < apMesIni() ? apLunes() : apMesIni();
-    const r = await syCall(cfg, { accion: "ranking", desde });
-    if (r && r.ok) store.set(AP_KEY, { filas: r.filas || [], bajado: new Date().toISOString(), error: "" });
-    else if (r && (!r.red || !store.get(AP_KEY, null))) store.set(AP_KEY, Object.assign({ filas: [] }, store.get(AP_KEY, {}), { error: (r && r.error) || "error", bajado: new Date().toISOString() }));
+    const desde = apLunes() < apMesIni() ? apLunes() : apMesIni(), s0 = store.get(AP_KEY, null);
+    let r = s0 && s0.viejo && Date.now() - s0.viejo < 3600e3 ? null : await syCall(cfg, { accion: "ranking", desde });
+    if (r && r.ok) { store.set(AP_KEY, { filas: r.filas || [], bajado: new Date().toISOString(), error: "" }); return true; }
+    if (!r || /desconocida/i.test(r.error || "")) {
+      /* script antiguo de la planilla: los puntajes llegan por el canal «v:puntajes» (acción chatLeer) */
+      const d0 = new Date(desde + "T12:00:00"); d0.setDate(d0.getDate() - 1);
+      const c = await syCall(cfg, { accion: "chatLeer", desde: s0 && s0.ult && s0.ult.slice(0, 10) >= apIso(d0) ? s0.ult : apIso(d0), canales: ["v:puntajes"] });
+      if (c && c.ok) {
+        const M = {}; ((s0 && s0.filas) || []).forEach(f => { M[f[0] + "|" + f[1]] = f; });
+        (c.mensajes || []).forEach(m => { let o; try { o = JSON.parse(m.texto); } catch (e) { return; } if (!o || !o.pt || !o.f || !o.v) return;
+          const k = o.f + "|" + o.v, a = M[k]; if (!a || (Number(o.pts) || 0) >= (Number(a[2]) || 0)) M[k] = [o.f, o.v, Number(o.pts) || 0, Number(o.max) || 0, Number(o.ok) || 0, Number(o.n) || 0]; });
+        store.set(AP_KEY, { filas: Object.values(M).filter(f => f[0] >= apIso(d0)), bajado: new Date().toISOString(), error: "", ult: c.ult || "", viejo: (s0 && s0.viejo && !r) ? s0.viejo : Date.now() });
+        return true;
+      }
+      r = c;
+    }
+    if (r && (!r.red || !s0)) store.set(AP_KEY, Object.assign({ filas: [] }, s0 || {}, { error: r.error || "error", bajado: new Date().toISOString() }));
     return true;
   } finally { apBajando = false; }
 }

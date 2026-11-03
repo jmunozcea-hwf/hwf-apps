@@ -6321,5 +6321,40 @@ document.addEventListener("visibilitychange", () => { if (!document.hidden && SE
 setInterval(() => { if (SES && !document.hidden) { ptGuardarHoy(); ptSincronizar(); } }, 5 * 60 * 1000);
 if (typeof APP_NOVEDADES !== "undefined" && Array.isArray(APP_NOVEDADES)) APP_NOVEDADES.unshift("Inicio: puntaje por tus misiones del día y ranking del equipo de hoy, la semana y el mes.");
 </script>
+
+<script>
+/* ================= Puntaje: respaldo con el script antiguo (canal «v:puntajes») ================= */
+const PTC_CANAL = "v:puntajes", PTC_VIEJO = "hwf-pt-viejo", PTC_T = "hwf-pt-chat-t";
+const ptcSlug = s => String(s).normalize("NFD").replace(/[^A-Za-z0-9]+/g, "").slice(0, 30) || "x";
+const ptcViejo = () => Date.now() - (lsGet(PTC_VIEJO, 0) || 0) < 60 * 60 * 1000;
+const _syLlamarPtc = syLlamar;
+syLlamar = async function (cfg, d) {
+  d = d || {};
+  if (d.accion !== "puntaje" && d.accion !== "ranking") return _syLlamarPtc.apply(this, arguments);
+  if (!ptcViejo()) {
+    const r = await _syLlamarPtc.apply(this, arguments);
+    if (!(r && !r.ok && /desconocida/i.test(r.error || ""))) return r;
+    lsSet(PTC_VIEJO, Date.now());
+  }
+  if (d.accion === "puntaje") {
+    const p = d.puntaje || {}, T = lsGet(PTC_T, {}), hoy = today();
+    /* no llenar la hoja: un registro cada 20 min como máximo, salvo que se cumpla una misión nueva o sea un día anterior */
+    if (p.fecha === hoy && T.f === hoy && T.v === p.vendedor && Date.now() - (T.t || 0) < 20 * 60 * 1000 && (Number(p.cumplidas) || 0) <= (T.ok || 0)) return { ok: false, espera: true };
+    const texto = JSON.stringify({ pt: 1, f: p.fecha, v: p.vendedor, pts: Number(p.puntos) || 0, max: Number(p.max) || 0, ok: Number(p.cumplidas) || 0, n: Number(p.misiones) || 0 });
+    const r = await _syLlamarPtc.call(this, cfg, { accion: "chatEnviar", mensaje: { id: "CH-PT-" + String(p.fecha).replace(/-/g, "") + "-" + ptcSlug(p.vendedor) + "-" + (Number(p.puntos) || 0), canal: PTC_CANAL, de: p.vendedor, texto, app: "pt" } });
+    if (r && r.ok && p.fecha === hoy) lsSet(PTC_T, { f: hoy, v: p.vendedor, t: Date.now(), ok: Number(p.cumplidas) || 0 });
+    return r && r.ok ? { ok: true } : (r || { ok: false });
+  }
+  /* ranking: lee el canal y deja el mejor puntaje por vendedor y día; se suma a lo ya bajado */
+  const desde = String(d.desde || today()), d0 = new Date(desde + "T12:00:00"); d0.setDate(d0.getDate() - 1);
+  const r = await _syLlamarPtc.call(this, cfg, { accion: "chatLeer", desde: isoD(d0), canales: [PTC_CANAL] });
+  if (!r || !r.ok) return r || { ok: false };
+  const M = {};
+  ((lsGet(PT_RK, null) || {}).filas || []).forEach(f => { M[f[0] + "|" + f[1]] = f; });
+  (r.mensajes || []).forEach(m => { let o; try { o = JSON.parse(m.texto); } catch (e) { return; } if (!o || !o.pt || !o.f || !o.v || o.f < desde) return;
+    const k = o.f + "|" + o.v, ant = M[k]; if (!ant || (Number(o.pts) || 0) >= (Number(ant[2]) || 0)) M[k] = [o.f, o.v, Number(o.pts) || 0, Number(o.max) || 0, Number(o.ok) || 0, Number(o.n) || 0]; });
+  return { ok: true, filas: Object.values(M).filter(f => f[0] >= desde) };
+};
+</script>
 </body>
 </html>
