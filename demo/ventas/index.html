@@ -6011,5 +6011,19 @@ pintarFicha = function (cod) {
   } else head.after(blk);                      /* de baja: aviso con motivo y «Reactivar», arriba */
 };
 </script>
+
+<script>
+/* ================= Enviar → nota en blanco para un cliente nuevo ================= */
+const _exportarAhoraBlanco = exportarAhora;
+exportarAhora = function () {
+  const id = S.id;
+  const r = _exportarAhoraBlanco.apply(this, arguments);
+  if (lsGet(SYCOLA, {})[id]) {   /* se envió (o quedó en cola): dejar todo nuevo */
+    try { notaEnBlanco(); } catch (e) {}
+    if (typeof pintarClienteSel === "function") try { pintarClienteSel(); } catch (e) {}
+  }
+  return r;
+};
+</script>
 </body>
 </html>
