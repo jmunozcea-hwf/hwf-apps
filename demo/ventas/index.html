@@ -5991,5 +5991,25 @@ setModo = function (m) {
   if (ag) { const det = $("cliAg"); det.open = true; det.dataset.tocado = "1"; requestAnimationFrame(() => det.scrollIntoView({ block: "start", behavior: "smooth" })); }
 };
 </script>
+<style>
+/* ===== Ficha: «Dar de baja» rojo y arriba ===== */
+.bj-top{display:flex;justify-content:flex-end;margin:-2px 0 2px}
+.btn.bj-top-btn{background:#D92D20;border-color:#D92D20;color:#fff;font-weight:700;min-height:38px;padding:6px 14px}
+.btn.bj-top-btn:hover,.btn.bj-top-btn:focus-visible{background:#B42318;border-color:#B42318;color:#fff}
+</style>
+<script>
+/* ================= Ficha: «Dar de baja» rojo y al comienzo ================= */
+const _pintarFichaBjTop = pintarFicha;
+pintarFicha = function (cod) {
+  _pintarFichaBjTop.apply(this, arguments);
+  const f = $("crmFicha"), head = f && f.querySelector(".f-head"), blk = $("bjBlk"); if (!head || !blk) return;
+  const btn = $("bjBaja");
+  if (btn) {                                   /* activo: solo el botón rojo, arriba */
+    const top = document.createElement("div"); top.className = "bj-top"; top.id = "bjTop";
+    btn.classList.remove("bj-rojo"); btn.classList.add("bj-top-btn"); top.appendChild(btn);
+    head.after(top); blk.remove();
+  } else head.after(blk);                      /* de baja: aviso con motivo y «Reactivar», arriba */
+};
+</script>
 </body>
 </html>
