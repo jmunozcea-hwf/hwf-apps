@@ -5855,6 +5855,7 @@ function plHtml(P, yo) {
       <div><span>Clientes A · B · C</span><b>${P.A.length} · ${P.B.length} · ${P.Cc.length}</b><small>A: visita semanal · B: quincenal · C: WhatsApp</small></div></div>
     ${dorm ? `<p class="db-vacio" style="margin:8px 0 2px"><b>Reactivar</b> (los que más compraban primero)</p><div class="pl-l">${dorm}</div>` : ""}
     ${surt ? `<p class="db-vacio" style="margin:10px 0 2px"><b>Ampliar surtido</b> en tus clientes A y B</p><div class="pl-l">${surt}</div>` : ""}
+    ${plExtra(P, yo)}
   </div>`;
 }
 const _pintarDashPL = pintarDash;
@@ -5871,6 +5872,47 @@ pintarDash = function () {
   } catch (e) { console.warn("plan", e); }
 };
 if (typeof APP_NOVEDADES !== "undefined" && Array.isArray(APP_NOVEDADES)) APP_NOVEDADES.unshift("Dashboard: tarjeta «Plan 80 MM» con tus clientes dormidos para reactivar, A/B/C, ofertas de surtido y cuota de clientes nuevos.");
+</script>
+
+<script>
+document.head.insertAdjacentHTML("beforeend", "<style>.pl details{border-top:1px solid var(--line);padding:8px 0 0;margin-top:8px}.pl summary{cursor:pointer;font-weight:700;list-style:none}.pl summary::-webkit-details-marker{display:none}.pl summary::after{content:' ▾';color:var(--muted)}.pl details[open] summary::after{content:' ▴'}.pl table{width:100%;border-collapse:collapse;font-size:.84rem;margin-top:6px}.pl td,.pl th{padding:5px 4px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}.pl th{font-size:.7rem;color:var(--muted);text-transform:uppercase}.pl td.r{text-align:right;white-space:nowrap}.pl-chk label{display:flex;gap:8px;align-items:flex-start;padding:3px 0;font-size:.88rem}.pl-chk label.ok span{text-decoration:line-through;color:var(--muted)}</style>");
+const PLVCHK = "hwf-plan-chk";
+function plExtra(P, yo) {
+  const mm = dbMM, L = P.L, con = L.filter(c => c.vMes > 0), vMes = con.reduce((s, c) => s + c.vMes, 0);
+  const n3 = L.reduce((s, c) => s + Object.keys(c.p3).length, 0), v3 = L.reduce((s, c) => s + c.v3, 0), l3 = L.reduce((s, c) => s + Object.values(c.p3).reduce((a, x) => a + x.size, 0), 0);
+  const tk = con.length ? vMes / con.length : 0, tk3 = n3 ? v3 / n3 : 0, ln = con.length ? con.reduce((s, c) => s + c.pMes.size, 0) / con.length : 0, ln3 = n3 ? l3 / n3 : 0;
+  const D = DB.d, metas = D.metas || {}, meta = yo ? (metas[yo] || 0) : PLAN.meta, d60 = P.d60.length + P.d90.length;
+  const pv = (a, b) => b ? ` (${a >= b ? "▲" : "▼"} ${Math.abs(Math.round((a / b - 1) * 100))}%)` : "";
+  const chk = (() => { try { return JSON.parse(localStorage.getItem(PLVCHK) || "{}"); } catch (e) { return {}; } })();
+  const f1 = x => x.toFixed(1).replace(".", ",");
+  return `<details><summary>Mis indicadores</summary><table><tr><th>Indicador</th><th class="r">Hoy</th><th>Meta</th></tr>
+      <tr><td>Venta del mes a la fecha</td><td class="r">${mm(vMes)}</td><td>${meta ? mm(meta) + (yo ? " (mi meta)" : " (equipo)") : "—"}</td></tr>
+      <tr><td>Reactivados este mes</td><td class="r">${P.reac.length} de ${d60}</td><td>1 de cada 4 dormidos en 60 días</td></tr>
+      <tr><td>Ticket promedio por cliente</td><td class="r">${mm(tk)}</td><td>+10% sobre ${mm(tk3)}${pv(tk, tk3)}</td></tr>
+      <tr><td>Productos distintos por cliente</td><td class="r">${f1(ln)}</td><td>+1 sobre ${f1(ln3)}</td></tr>
+      <tr><td>Clientes nuevos</td><td class="r">${P.nuevos.length}</td><td>${PLAN.cuotaMin} a ${PLAN.cuotaMax} al mes${yo ? "" : " por vendedor"}</td></tr></table>
+      <p class="db-vacio" style="margin:4px 0 0">El mes en curso va a la fecha; ticket y productos se comparan con el promedio de los 3 meses cerrados.</p></details>
+    <details><summary>Qué ofrecer según lo que compra</summary><table><tr><th>Si compra…</th><th>Ofrécele…</th><th>Argumento</th></tr>
+      <tr><td>Alimento para perro</td><td>Snacks y premios</td><td>Alta rotación y mejor margen</td></tr>
+      <tr><td>Alimento para gato</td><td>Arena sanitaria</td><td>Compra recurrente del mismo cliente final</td></tr>
+      <tr><td>Alimento seco</td><td>Húmedo y sobres</td><td>Ticket adicional sin cambiar de marca</td></tr>
+      <tr><td>Una sola marca</td><td>Línea económica y premium</td><td>Cubre todo el rango de precio del barrio</td></tr>
+      <tr><td>Solo alimento</td><td>Higiene y accesorios</td><td>El dueño de mascota compra todo en un lugar</td></tr></table></details>
+    <details><summary>Cómo atender A, B y C</summary><table>
+      <tr><td><span class="pl-tag A">A</span></td><td>Concentran la mayor parte de la venta: visita fija semanal, prioridad en despacho, primeros en ofertas y lanzamientos. Pídeles referidos.</td></tr>
+      <tr><td><span class="pl-tag B">B</span></td><td>Medianos con potencial: visita quincenal y seguimiento por WhatsApp. Objetivo: subirlos a A con más surtido.</td></tr>
+      <tr><td><span class="pl-tag C">C</span></td><td>Pequeños u ocasionales: pedido por WhatsApp o teléfono, catálogo digital y despacho en el día de ruta. El tiempo que se ahorra va a prospectar.</td></tr></table></details>
+    <details class="pl-chk"><summary>Plan de 90 días</summary>${PLAN.pasos.map(([d, t, l], i) => `<p style="margin:8px 0 2px"><b>Días ${d} · ${esc(t)}</b></p>${l.map((x, j) => { const k = i + "-" + j; return `<label class="${chk[k] ? "ok" : ""}"><input type="checkbox" data-plvk="${k}" ${chk[k] ? "checked" : ""}><span>${esc(x)}</span></label>`; }).join("")}`).join("")}</details>
+    <details><summary>Las 7 palancas</summary><ol style="margin:6px 0 0;padding-left:20px;display:grid;gap:4px;font-size:.88rem">${PLAN.palancas.map(x => `<li>${esc(x)}</li>`).join("")}</ol>
+      <p class="db-vacio" style="margin:6px 0 0">Condiciones: cliente nuevo al contado o a 15 días; A hasta 30 días. Sin pedidos nuevos si hay deuda vencida; cobra en la misma visita.</p></details>`;
+}
+const _pintarDashPL2 = pintarDash;
+pintarDash = function () {
+  _pintarDashPL2.apply(this, arguments);
+  const box = $("crmDash"); if (!box) return;
+  box.querySelectorAll("[data-plvk]").forEach(c => c.onchange = e => { e.stopPropagation(); let o = {}; try { o = JSON.parse(localStorage.getItem(PLVCHK) || "{}"); } catch (x) {} o[c.dataset.plvk] = c.checked;
+    try { localStorage.setItem(PLVCHK, JSON.stringify(o)); } catch (x) {} c.closest("label").classList.toggle("ok", c.checked); });
+};
 </script>
 </body>
 </html>
