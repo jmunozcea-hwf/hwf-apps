@@ -3925,5 +3925,174 @@ pintarDashboard = function () {
 };
 try { if (typeof TAB !== "undefined" && TAB === "res" && $("s-res") && !$("s-res").hidden) pintarDashboard(); } catch (e) {}
 </script>
+
+<script>
+/* ===== Días calle (cobranza) — núcleo común de Nota de Pedido y HWF Admin =====
+   Con la información libre de Defontana:
+   - DSO (countback) = cuántos días de ventas recientes (con IVA), contando hacia atrás desde el corte, hacen falta para sumar
+                       lo que se debe hoy. Más fiel que saldo ÷ ventas × 90 cuando las compras son irregulares.  (InfCobranzaDetallado + ventas)
+   - Edad de la deuda = días desde la emisión, ponderados por saldo                   (InfCobranzaDetallado)
+   - Atraso            = días pasados del vencimiento, ponderados por saldo           (InfCobranzaDetallado)
+   - Plazo otorgado    = días entre emisión y vencimiento, ponderados por monto        (InfCobranzaDetallado)
+   - Días de pago reales = fecha de pago − emisión, ponderados por monto pagado        (historial que arma el script:
+                           una factura que desaparece del informe —o baja su saldo— se toma como pagada en esa carga)
+   dcCalc(o): o = { docs (cxTodos), rows, clientes, vend, anio, corte "aaaa-mm-dd", pagos [[rut, cli, cob, fi, fp, monto, tipo]], cart (opcional) } */
+const DC_VENTANA = 90, DC_IVA = 1.19, DC_PAGOS_DIAS = 180;
+const dcN = s => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toUpperCase().replace(/[^A-Z0-9]+/g, " ").trim();
+const dcR = s => String(s || "").replace(/[^0-9kK]/g, "").toUpperCase();
+const dcD = iso => { const [y, m, d] = String(iso || "").slice(0, 10).split("-").map(Number); return y ? new Date(y, m - 1, d) : null; };
+const dcDif = (a, b) => (a && b) ? Math.round((a - b) / 864e5) : null;
+const dcK2 = s => dcN(s).split(" ").slice(0, 2).join(" ");
+function dcCalc(o) {
+  const hoy = (() => { const h = new Date(); return new Date(h.getFullYear(), h.getMonth(), h.getDate()); })();
+  const fc = dcD(o.corte) || hoy, desde = new Date(fc.getTime() - (DC_VENTANA - 1) * 864e5), desdeP = new Date(hoy.getTime() - DC_PAGOS_DIAS * 864e5);
+  const cartF = o.cart ? dcK2(o.cart) : "", enCart = c => !cartF || dcK2(c) === cartF;
+  const nuevo = () => ({ saldo: 0, venc: 0, v30: 0, sEdad: 0, sAtr: 0, debe: 0, sPlazo: 0, ventas: 0, pago: 0, sPago: 0, nPag: 0, docs: 0, dia: {} });
+  const T = nuevo(), V = {}, C = {};
+  const cli = (k, nom, cart, rut) => C[k] = C[k] || Object.assign(nuevo(), { k, nom, cart, rut: rut || "" });
+  /* ventas de los últimos 90 días hasta la fecha de corte, con IVA */
+  const cartCli = {};
+  (o.clientes || []).forEach((c, i) => { cartCli[i] = c[2]; });
+  (o.rows || []).forEach(r => {
+    const y = r[8] || o.anio, f = new Date(y, r[2] - 1, r[3]); if (f > fc) return;
+    const c = o.clientes[r[0]]; if (!c || c[2] === "Tienda Hellywoof" || !enCart(c[2])) return;
+    const v = (+r[5] || 0) * DC_IVA, k = dcN(c[0]), atras = dcDif(fc, f), en90 = f >= desde;
+    const add = x => { if (en90) x.ventas += v; x.dia[atras] = (x.dia[atras] || 0) + v; };
+    add(T); add(V[c[2]] = V[c[2]] || nuevo()); add(cli(k, c[0], c[2]));
+  });
+  /* documentos abiertos */
+  (o.docs || []).forEach(d => {
+    if (!enCart(d.cart) || !(d.saldo > 0)) return;
+    const fi = dcD(d.fi), fv = dcD(d.fv), edad = Math.max(0, dcDif(hoy, fi) || 0), atr = Math.max(0, d.dias || 0), plazo = Math.max(0, dcDif(fv, fi) || 0), monto = d.debe > 0 ? d.debe : d.saldo;
+    const k = dcN(d.cli), add = x => { x.saldo += d.saldo; if (d.dias > 0) x.venc += d.saldo; if (d.dias > 30) x.v30 += d.saldo; x.sEdad += d.saldo * edad; x.sAtr += d.saldo * atr; x.docs++;
+      if (d.tipo !== "Cheque") { x.debe += monto; x.sPlazo += monto * plazo; } };
+    add(T); add(V[d.cart] = V[d.cart] || nuevo()); add(cli(k, d.cli, d.cart, d.rut));
+  });
+  /* pagos detectados por el script */
+  const CXV = typeof CXC_VEND !== "undefined" ? CXC_VEND : [];
+  (o.pagos || []).forEach(p => {
+    const [rut, nom, cob, fi, fp, monto, tipo] = p, f1 = dcD(fi), f2 = dcD(fp); if (!f1 || !f2 || f2 < desdeP || tipo === "Cheque" || !(monto > 0)) return;
+    const cart = (CXV.find(v => dcK2(v) === dcK2(cob))) || (cob ? String(cob).toLowerCase().replace(/(^|\s)\S/g, m => m.toUpperCase()) : "Sin cobrador");
+    if (!enCart(cart)) return;
+    const dd = Math.max(0, dcDif(f2, f1)), add = x => { x.pago += monto; x.sPago += monto * dd; x.nPag++; };
+    add(T); add(V[cart] = V[cart] || nuevo()); add(cli(dcN(nom), nom, cart, rut));
+  });
+  /* countback: días hacia atrás hasta que las ventas cubren el saldo */
+  const cb = x => { if (!(x.saldo > 0)) return 0; const ds = Object.keys(x.dia).map(Number).sort((a, b) => a - b); let acc = 0;
+    for (const d of ds) { const v = x.dia[d]; if (v <= 0) { acc += v; continue; } if (acc + v >= x.saldo) return d + (x.saldo - acc) / v; acc += v; }
+    return null; };
+  const fin = x => Object.assign(x, {
+    dso: cb(x),
+    edad: x.saldo ? x.sEdad / x.saldo : 0, atraso: x.saldo ? x.sAtr / x.saldo : 0,
+    plazo: x.debe ? x.sPlazo / x.debe : null, real: x.pago ? x.sPago / x.pago : null });
+  fin(T);
+  const vend = Object.entries(V).map(([v, x]) => Object.assign(fin(x), { v })).filter(x => x.saldo || x.ventas || x.pago).sort((a, b) => b.saldo - a.saldo);
+  const clientes = Object.values(C).map(fin).filter(x => x.saldo > 0 || x.pago > 0).sort((a, b) => b.saldo - a.saldo);
+  [T].concat(vend, clientes).forEach(x => delete x.dia);
+  return { T, vend, clientes, corte: fc, ventana: DC_VENTANA, conPagos: (o.pagos || []).length > 0 };
+}
+/* días calle de referencia de una fila: reales si hay pagos, si no el DSO contable */
+const dcRef = x => x.real != null ? x.real : x.dso != null ? x.dso : (x.saldo > 0 ? x.edad : null);
+function dcSem(x) { const ref = dcRef(x), pl = x.plazo == null ? 30 : x.plazo; if (ref == null) return "na"; return ref <= pl + 5 ? "ok" : ref <= pl + 20 ? "warn" : "bad"; }
+const DC_SEM = { ok: "dentro del plazo", warn: "algo lento", bad: "lento", na: "sin ventas recientes" };
+const dcF = v => v == null ? "—" : Math.round(v).toLocaleString("es-CL");
+const DC_CSS = `
+.dc-card{display:grid;gap:10px}.dc-card h2,.dc-card h3{margin:0;display:flex;justify-content:space-between;gap:8px;align-items:baseline;flex-wrap:wrap}
+.dc-card h2 small,.dc-card h3 small{color:var(--muted,#5B6874);font-weight:500;font-size:.8rem}
+.dc-k{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+@media (min-width:700px){.dc-k{grid-template-columns:repeat(3,minmax(0,1fr))}}@media (min-width:1100px){.dc-k.ad{grid-template-columns:repeat(5,minmax(0,1fr))}}
+.dc-k>div{border:1px solid var(--line,#DAE1E7);border-radius:12px;padding:9px 11px;display:grid;gap:1px;background:var(--surface,#fff)}
+.dc-k span{font-size:.66rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted,#5B6874);font-weight:700}
+.dc-k b{font-size:1.35rem;font-variant-numeric:tabular-nums}.dc-k b i{font-style:normal;font-size:.8rem;font-weight:600;color:var(--muted,#5B6874)}
+.dc-k small{color:var(--muted,#5B6874);font-size:.76rem;line-height:1.25}
+.dc-k>div.main{background:#0B3146;color:#fff;border-color:#0B3146}.dc-k>div.main span,.dc-k>div.main small,.dc-k>div.main b i{color:rgba(255,255,255,.8)}
+.dc-tw{overflow:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--line,#DAE1E7);border-radius:12px}
+.dc-t{width:100%;border-collapse:collapse;font-size:.84rem;font-variant-numeric:tabular-nums;background:var(--surface,#fff)}
+.dc-t th,.dc-t td{padding:7px 9px;border-bottom:1px solid var(--line,#DAE1E7);text-align:right;white-space:nowrap}
+.dc-t th:first-child,.dc-t td:first-child{text-align:left;white-space:normal;min-width:150px}
+.dc-t th{font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted,#5B6874);background:var(--sunk,#F1F4F7);position:sticky;top:0;cursor:pointer;user-select:none}
+.dc-t th[data-s].on::after{content:" ▾"}.dc-t tr:last-child td{border-bottom:0}.dc-t td small{display:block;color:var(--muted,#5B6874);font-size:.74rem}
+.dc-t tr.tot td{font-weight:800;background:var(--sunk,#F1F4F7)}
+.dc-p{display:inline-block;min-width:44px;text-align:center;border-radius:999px;padding:2px 8px;font-weight:800}
+.dc-p.ok{background:#E3F6EC;color:#1C7A4E}.dc-p.warn{background:#FFF4DB;color:#9A5B00}.dc-p.bad{background:#FDECEA;color:#B42318}.dc-p.na{background:var(--sunk,#F1F4F7);color:var(--muted,#5B6874)}
+.dc-f{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.dc-f input,.dc-f select{font:inherit;font-size:.88rem;padding:7px 10px;border:1px solid var(--line,#DAE1E7);border-radius:10px;background:var(--surface,#fff);color:inherit;min-height:38px}
+.dc-f input{flex:1;min-width:160px}
+.dc-n{color:var(--muted,#5B6874);font-size:.78rem;line-height:1.4;margin:0}
+.dc-dist{display:flex;height:14px;border-radius:7px;overflow:hidden;background:var(--sunk,#F1F4F7)}.dc-dist i{display:block;height:100%}
+.dc-ley{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:.78rem;color:var(--muted,#5B6874)}.dc-ley span::before{content:"";display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:5px;background:var(--c)}
+.dc-mas{border:0;background:none;color:var(--accent,#13506F);font:inherit;font-weight:700;cursor:pointer;padding:6px 0;justify-self:start}
+`;
+/* tarjeta resumida (app de ventas) */
+function dcHtmlVentas(R, mm, esc, titulo) {
+  const T = R.T, ref = dcRef(T), top = R.clientes.filter(c => c.saldo > 0 && dcRef(c) != null).sort((a, b) => dcRef(b) - dcRef(a)).slice(0, 8);
+  return `<section class="dc-card cx-card" style="margin:12px 0"><h3>Días calle <small>${esc(titulo || "")}</small></h3>
+    <div class="dc-k">
+      <div class="main"><span>Días calle</span><b>${dcF(ref)} <i>días</i></b><small>${T.real != null ? `promedio real de pago (${T.nPag} pagos, ${DC_PAGOS_DIAS} días)` : "días de ventas que suman lo que te deben"}</small></div>
+      <div><span>Plazo otorgado</span><b>${dcF(T.plazo)} <i>días</i></b><small>promedio de las facturas abiertas</small></div>
+      <div><span>Atraso promedio</span><b>${dcF(T.atraso)} <i>días</i></b><small>${mm(T.venc)} vencido</small></div>
+    </div>
+    ${top.length ? `<div class="dc-tw"><table class="dc-t"><thead><tr><th>Clientes más lentos</th><th>Días calle</th><th>Plazo</th><th>Saldo</th></tr></thead><tbody>
+      ${top.map(c => `<tr><td>${esc(c.nom)}</td><td><span class="dc-p ${dcSem(c)}">${dcF(dcRef(c))}</span></td><td>${dcF(c.plazo)}</td><td>${mm(c.saldo)}</td></tr>`).join("")}</tbody></table></div>` : ""}
+    <p class="dc-n">Días calle = cuántos días tarda en promedio un peso vendido en volver como pago. Verde: dentro del plazo · amarillo: hasta 20 días más · rojo: más lento.</p></section>`;
+}
+/* resumen detallado (HWF Admin) */
+let dcOrden = "saldo", dcQ = "", dcV = "", dcTodos = false;
+function dcHtmlAdmin(R, mm, esc) {
+  const T = R.T, refT = dcRef(T);
+  const col = (k, t) => `<th data-s="${k}" class="${dcOrden === k ? "on" : ""}">${t}</th>`;
+  const fila = (x, nom, sub) => `<td>${esc(nom)}${sub ? `<small>${esc(sub)}</small>` : ""}</td><td><span class="dc-p ${dcSem(x)}">${dcF(dcRef(x))}</span></td><td>${dcF(x.dso)}</td><td>${dcF(x.real)}${x.nPag ? `<small>${x.nPag} pagos</small>` : ""}</td>
+    <td>${dcF(x.plazo)}</td><td>${dcF(x.edad)}</td><td>${dcF(x.atraso)}</td><td>${mm(x.saldo)}</td><td>${mm(x.venc)}</td><td>${mm(x.ventas)}</td>`;
+  const cab = `${col("ref", "Días calle")}${col("dso", "DSO")}${col("real", "Pago real")}${col("plazo", "Plazo")}${col("edad", "Edad deuda")}${col("atraso", "Atraso")}${col("saldo", "Saldo")}${col("venc", "Vencido")}${col("ventas", "Ventas 90 d")}`;
+  const ord = l => l.slice().sort((a, b) => { const g = x => dcOrden === "ref" ? dcRef(x) : x[dcOrden]; return (g(b) == null ? -1 : g(b)) - (g(a) == null ? -1 : g(a)); });
+  /* distribución de la deuda por días calle */
+  const tr = [["Hasta 30", c => dcRef(c) <= 30, "#1C9A5B"], ["31 a 45", c => dcRef(c) > 30 && dcRef(c) <= 45, "#F0A818"], ["46 a 60", c => dcRef(c) > 45 && dcRef(c) <= 60, "#E07B24"], ["61 a 90", c => dcRef(c) > 60 && dcRef(c) <= 90, "#C2410C"], ["Más de 90", c => dcRef(c) > 90, "#B42318"], ["Sin dato", c => dcRef(c) == null, "#9AA8B4"]]
+    .map(([n, f, c]) => { const l = R.clientes.filter(x => x.saldo > 0 && f(x)); return { n, c, v: l.reduce((t, x) => t + x.saldo, 0), k: l.length }; });
+  const q = dcN(dcQ), vends = R.vend.map(x => x.v);
+  let cl = R.clientes.filter(c => (!dcV || c.cart === dcV) && (!q || dcN(c.nom + " " + c.rut).includes(q)));
+  cl = ord(cl); const nCl = cl.length; if (!dcTodos) cl = cl.slice(0, 25);
+  const lentos = R.clientes.filter(c => c.saldo > 0 && dcSem(c) === "bad").sort((a, b) => b.saldo - a.saldo);
+  return `<div class="card dc-card" id="dcBox"><h2>Días calle <small>ventas del año al ${R.corte.toLocaleDateString("es-CL")} · pagos detectados de los últimos ${DC_PAGOS_DIAS} días</small></h2>
+    <div class="dc-k ad num">
+      <div class="main"><span>Días calle de la empresa</span><b>${dcF(refT)} <i>días</i></b><small>${T.real != null ? "promedio real de pago" : "DSO contable (aún no hay pagos registrados)"}</small></div>
+      <div><span>DSO contable</span><b>${dcF(T.dso)} <i>días</i></b><small>${mm(T.saldo)} por cobrar = ventas de los últimos ${dcF(T.dso)} días · simple: ${dcF(T.ventas ? T.saldo / T.ventas * R.ventana : null)}</small></div>
+      <div><span>Pago real</span><b>${dcF(T.real)} <i>días</i></b><small>${T.nPag ? `${T.nPag} pagos por ${mm(T.pago)}` : "se arma con cada carga de cobranza"}</small></div>
+      <div><span>Plazo otorgado</span><b>${dcF(T.plazo)} <i>días</i></b><small>emisión → vencimiento, ponderado</small></div>
+      <div><span>Edad · atraso</span><b>${dcF(T.edad)} · ${dcF(T.atraso)} <i>días</i></b><small>deuda abierta, ponderado por saldo</small></div>
+    </div>
+    <div><div class="dc-dist">${tr.map(t => t.v ? `<i style="width:${t.v / Math.max(1, T.saldo) * 100}%;background:${t.c}" title="${t.n}: ${mm(t.v)}"></i>` : "").join("")}</div>
+      <div class="dc-ley" style="margin-top:6px">${tr.map(t => `<span style="--c:${t.c}">${t.n}: ${mm(t.v)} (${t.k})</span>`).join("")}</div></div>
+    <h3>Por vendedor</h3>
+    <div class="dc-tw"><table class="dc-t"><thead><tr><th>Vendedor</th>${cab}</tr></thead><tbody>
+      ${ord(R.vend).map(x => `<tr>${fila(x, x.v, "")}</tr>`).join("")}<tr class="tot">${fila(T, "Total", "")}</tr></tbody></table></div>
+    ${lentos.length ? `<p class="dc-n"><b>${lentos.length} clientes pagan más de 20 días después de su plazo</b> y suman ${mm(lentos.reduce((t, c) => t + c.saldo, 0))} por cobrar: ${lentos.slice(0, 5).map(c => esc(c.nom)).join(", ")}${lentos.length > 5 ? "…" : ""}.</p>` : ""}
+    <h3>Por cliente <small>${nCl} clientes</small></h3>
+    <div class="dc-f"><input type="search" id="dcQ" placeholder="Buscar cliente o RUT" value="${esc(dcQ)}"><select id="dcV"><option value="">Todos los vendedores</option>${vends.map(v => `<option${v === dcV ? " selected" : ""}>${esc(v)}</option>`).join("")}</select></div>
+    <div class="dc-tw"><table class="dc-t"><thead><tr><th>Cliente</th>${cab}</tr></thead><tbody>
+      ${cl.map(x => `<tr>${fila(x, x.nom, x.cart + (x.rut ? " · " + x.rut : ""))}</tr>`).join("") || `<tr><td colspan="10">Sin clientes.</td></tr>`}</tbody></table></div>
+    ${nCl > 25 ? `<button type="button" class="dc-mas" id="dcMas">${dcTodos ? "Ver menos" : `Ver los ${nCl} clientes`}</button>` : ""}
+    <p class="dc-n"><b>Días calle</b>: pago real si ya hay pagos registrados del cliente, si no el DSO contable. <b>DSO</b> = cuántos días de ventas (con IVA), contando hacia atrás desde el corte, suman lo que se debe hoy; si el cliente no compró lo suficiente en el año, se usa la edad de su deuda. «Simple» = saldo ÷ ventas de ${R.ventana} días × ${R.ventana}.
+      <b>Pago real</b> = días entre la emisión y el pago, ponderado por monto: el script lo registra cuando una factura sale del informe de cobranza (o baja su saldo) entre una carga y la siguiente.
+      <b>Plazo</b> = días entre emisión y vencimiento. <b>Edad</b> y <b>atraso</b> = días desde la emisión y desde el vencimiento de lo que sigue abierto, ponderados por saldo.
+      Colores: verde dentro del plazo, amarillo hasta 20 días más, rojo más lento. Toca un encabezado para ordenar.</p></div>`;
+}
+function dcEnlazar(box, repintar) {
+  if (!box) return;
+  box.querySelectorAll(".dc-t th[data-s]").forEach(th => th.onclick = () => { dcOrden = th.dataset.s; repintar(); });
+  const q = box.querySelector("#dcQ"); if (q) q.oninput = () => { dcQ = q.value; const p = q.selectionStart; repintar(); const n = document.getElementById("dcQ"); if (n) { n.focus(); n.setSelectionRange(p, p); } };
+  const v = box.querySelector("#dcV"); if (v) v.onchange = () => { dcV = v.value; repintar(); };
+  const m = box.querySelector("#dcMas"); if (m) m.onclick = () => { dcTodos = !dcTodos; repintar(); };
+}
+if (typeof module !== "undefined" && module.exports) module.exports = { dcCalc, dcRef, dcSem };
+
+document.head.insertAdjacentHTML("beforeend", "<style>" + DC_CSS + "</style>");
+function dcPintarAdmin() {
+  const mb = $("masBody"); if (!mb) return;
+  const R = dcCalc({ docs: cxTodos(), rows: D.rows || [], clientes: D.clientes || [], anio: D.anio, corte: D.corte, pagos: (window.__dvGet && __dvGet("CXC_PAGOS")) || [] });
+  const html = dcHtmlAdmin(R, mm, esc), old = $("dcBox");
+  if (old) old.outerHTML = html; else { const c = mb.querySelector(".card"); if (c) c.insertAdjacentHTML("afterend", html); else mb.insertAdjacentHTML("afterbegin", html); }
+  dcEnlazar($("dcBox"), dcPintarAdmin);
+}
+{ const _pc = pintarCobranza; pintarCobranza = function () { const r = _pc.apply(this, arguments); try { dcPintarAdmin(); } catch (e) { console.error(e); } return r; }; }
+</script>
 </body>
 </html>
