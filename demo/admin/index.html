@@ -1136,6 +1136,7 @@ function npRitmo(cots, Y, M, n, real, lim, ant) {
   <section class="sec" id="s-mas" hidden>
     <div class="seg" id="masSeg">
       <button type="button" data-m="plan" aria-pressed="true">Plan 80 MM</button>
+      <button type="button" data-m="ranking" aria-pressed="false">Ranking</button>
       <button type="button" data-m="cots" aria-pressed="false">NP Defontana</button>
       <button type="button" data-m="napp" aria-pressed="false">NP App</button>
       <button type="button" data-m="cobranza" aria-pressed="false">Cobranza</button>
@@ -1545,7 +1546,7 @@ function listaPro() {
 /* ================= MÁS: ZONAS, TERRENO, NOTAS DE PEDIDO DEFONTANA, DATOS ================= */
 let vistaMas = "plan", MAPA = null;
 $("masSeg").onclick = e => { const b = e.target.closest("[data-m]"); if (!b) return; vistaMas = b.dataset.m; $("masSeg").querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x === b)); pintarMas(); };
-function pintarMas() { ({ plan: () => pintarPlan(), zonas: pintarZonas, terreno: pintarTerreno, cots: pintarCots, napp: pintarNApp, bonif: pintarBonif, cobranza: pintarCobranza, embudo: pintarEmbudo, cambios: pintarCambios, datos: pintarDatos })[vistaMas](); }
+function pintarMas() { ({ plan: () => pintarPlan(), ranking: () => pintarRanking(), zonas: pintarZonas, terreno: pintarTerreno, cots: pintarCots, napp: pintarNApp, bonif: pintarBonif, cobranza: pintarCobranza, embudo: pintarEmbudo, cambios: pintarCambios, datos: pintarDatos })[vistaMas](); }
 function pintarZonas() {
   const z = Object.entries(A.comMes).map(([k, o]) => ({ k, mes: o[M] || 0, ytd: A.ytd.reduce((s, m) => s + (o[m] || 0), 0), hab: A.prev3.length ? A.prev3.reduce((s, m) => s + (o[m] || 0), 0) / A.prev3.length : 0,
     n: A.clientes.filter(c => (c.comuna || "Sin comuna") === k).length })).filter(x => x.ytd).sort((a, b) => b.ytd - a.ytd);
@@ -2875,8 +2876,9 @@ pintarAvance = function () {
 const NAV_TABS = ["res", "av", "ven", "cli", "pro", "inv", "mas"].filter(t => document.querySelector(`nav.bottom [data-t="${t}"]`));
 const NAV_TNOM = { res: "Resumen", av: "Avance", ven: "Vendedores", cli: "Clientes", pro: "Productos", mas: "Más" };
 const NAV_MAS = [...$("masSeg").querySelectorAll("[data-m]")].map(b => b.dataset.m);
-const NAV_MNOM = { plan: "Plan 80 MM", zonas: "Zonas", terreno: "Terreno", cots: "NP Defontana", napp: "NP App", bonif: "Bonificados", cobranza: "Cobranza", embudo: "Embudo", cambios: "Cambios clientes", datos: "Datos" };
+const NAV_MNOM = { plan: "Plan 80 MM", ranking: "Ranking", zonas: "Zonas", terreno: "Terreno", cots: "NP Defontana", napp: "NP App", bonif: "Bonificados", cobranza: "Cobranza", embudo: "Embudo", cambios: "Cambios clientes", datos: "Datos" };
 const NAV_MICO = {
+  ranking: '<path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4"/>',
   plan: '<path d="M4 19h16"/><path d="M6 15l4-4 3 3 5-6"/><path d="M15 8h3v3"/>',
   zonas: '<path d="M9 4 3 6.5v13.5l6-2.5 6 2.5 6-2.5V4l-6 2.5z"/><path d="M9 4v13.5M15 6.5V20"/>',
   terreno: '<path d="M12 21s-6-5.6-6-10.5a6 6 0 0 1 12 0C18 15.4 12 21 12 21z"/><circle cx="12" cy="10.5" r="2.2"/>',
@@ -4141,6 +4143,148 @@ sySync = async function () { const r = await _sySyncAP.apply(this, arguments); i
 setTimeout(() => apBajar().then(ok => { if (ok) try { apPintar(); } catch (e) {} }), 1500);
 setInterval(() => { if (!document.hidden) apBajar().then(ok => { if (ok) try { apPintar(); } catch (e) {} }); }, 5 * 60 * 1000);
 try { apPintar(); } catch (e) {}
+</script>
+
+<script>
+/* ===== Ranking detallado del equipo de ventas (puntaje por misiones del día) ===== */
+const RK_KEY = "adm-ranking", RK_DEMO = /DEMO/.test(document.title);
+let rkPer = "sem", rkSel = { v: "", f: "" }, rkBajando = false;
+document.head.insertAdjacentHTML("beforeend", `<style>
+.rk{display:grid;gap:14px}.rk h2,.rk h3{margin:0;display:flex;justify-content:space-between;gap:8px;align-items:baseline;flex-wrap:wrap}
+.rk h3 small,.rk h2 small{color:var(--muted);font-weight:500;font-size:.82rem}
+.rk-seg{display:flex;flex-wrap:wrap;gap:4px;background:var(--sunk);border-radius:12px;padding:4px}
+.rk-seg button{border:0;background:none;font:inherit;font-weight:700;font-size:.86rem;color:var(--muted);padding:8px 12px;border-radius:9px;cursor:pointer;min-height:38px}
+.rk-seg button[aria-pressed="true"]{background:var(--surface);color:var(--navy);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.rk-k{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}@media (min-width:900px){.rk-k{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.rk-k>div{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--surface);display:grid;gap:2px}
+.rk-k span{font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700}.rk-k b{font-size:1.35rem;font-variant-numeric:tabular-nums}
+.rk-k small{color:var(--muted);font-size:.78rem}
+.rk-tw{overflow:auto;border:1px solid var(--line);border-radius:12px}
+.rk-t{width:100%;border-collapse:collapse;font-size:.86rem;font-variant-numeric:tabular-nums;background:var(--surface)}
+.rk-t th,.rk-t td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+.rk-t th:nth-child(-n+2),.rk-t td:nth-child(-n+2){text-align:left}.rk-t th{font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);background:var(--sunk);position:sticky;top:0}
+.rk-t tr:last-child td{border-bottom:0}.rk-t td small{display:block;color:var(--muted);font-size:.74rem}.rk-t tr.sel td{background:#EEF5FB}
+.rk-t tbody tr[data-v]{cursor:pointer}.rk-t tbody tr[data-v]:hover td{background:var(--sunk)}
+.rk-pos{font-weight:800;font-size:1rem}.rk-up{color:#1C7A4E;font-weight:700}.rk-down{color:#B42318;font-weight:700}
+.rk-bar{display:inline-block;width:70px;height:7px;border-radius:99px;background:var(--sunk);vertical-align:middle;margin-right:6px;overflow:hidden}.rk-bar i{display:block;height:100%;background:#F0A818}
+.rk-hm th.c small{display:block;font-weight:600;text-transform:none}.rk-hm td.c{min-width:34px;text-align:center;font-size:.76rem;font-weight:700;cursor:pointer;padding:6px 4px}.rk-hm th.c{text-align:center;padding:6px 4px;min-width:34px}
+.rk-hm td.c.dom{opacity:.45}.rk-hm td.c.on{outline:2px solid var(--navy);outline-offset:-2px}
+.rk-det{display:grid;gap:6px}.rk-det .m{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 10px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.rk-det .m b{font-variant-numeric:tabular-nums}.rk-det .m .bar{grid-column:1/-1;height:6px;border-radius:99px;background:var(--sunk);overflow:hidden}.rk-det .m .bar i{display:block;height:100%;background:#1C9A5B}
+.rk-n{color:var(--muted);font-size:.8rem;line-height:1.45;margin:0}
+.rk-act{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:7px 12px;font:inherit;font-weight:700;cursor:pointer}
+</style>`);
+const rkIso = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+const rkD = f => new Date(f + "T12:00:00");
+const rkAdd = (f, n) => { const d = rkD(f); d.setDate(d.getDate() + n); return rkIso(d); };
+const rkLunes = f => { const d = rkD(f); d.setDate(d.getDate() - (d.getDay() + 6) % 7); return rkIso(d); };
+const rkHoy = () => rkIso(new Date());
+const rkEquipo = () => CARTERAS().filter(v => v !== "Tienda Hellywoof");
+const RK_TIPOS = [["Pedidos del día", /^(vende|toma tus pedidos)/i], ["Cobranza", /^cobra/i], ["Ruta", /ruta/i], ["Clientes con compra pendiente", /compra pendiente/i],
+  ["Notas Defontana", /defontana|^cierra/i], ["Prospectos", /prospecto/i], ["Contactos agendados", /agendad/i], ["Corregir rechazadas", /rechazad/i], ["Enviar pendientes", /^env[ií]a/i]];
+const rkTipo = t => (RK_TIPOS.find(([, re]) => re.test(t)) || ["Otras"])[0];
+function rkDetalle(s) { return String(s || "").split(" | ").map(x => { const i = x.lastIndexOf(": "); return i < 0 ? null : { t: x.slice(0, i), p: Number(x.slice(i + 2)) || 0 }; }).filter(Boolean); }
+function rkPeriodo(p) {
+  const hoy = rkHoy(), lun = rkLunes(hoy), mi = hoy.slice(0, 8) + "01";
+  const mesAnt = (() => { const d = rkD(mi); d.setMonth(d.getMonth() - 1); return rkIso(d); })(), finMesAnt = rkAdd(mi, -1);
+  return ({ hoy: { a: hoy, b: hoy, t: "Hoy", pa: rkAdd(hoy, -1), pb: rkAdd(hoy, -1) }, ayer: { a: rkAdd(hoy, -1), b: rkAdd(hoy, -1), t: "Ayer", pa: rkAdd(hoy, -2), pb: rkAdd(hoy, -2) },
+    sem: { a: lun, b: hoy, t: "Esta semana", pa: rkAdd(lun, -7), pb: rkAdd(hoy, -7) }, sant: { a: rkAdd(lun, -7), b: rkAdd(lun, -1), t: "Semana pasada", pa: rkAdd(lun, -14), pb: rkAdd(lun, -8) },
+    mes: { a: mi, b: hoy, t: "Este mes", pa: mesAnt, pb: rkAdd(mesAnt, Math.max(0, Math.round((rkD(hoy) - rkD(mi)) / 864e5))) }, mant: { a: mesAnt, b: finMesAnt, t: "Mes pasado", pa: "", pb: "" } })[p];
+}
+function rkFilas() {
+  const s = store.get(RK_KEY, null), filas = ((s && s.filas) || []).map(r => ({ f: r[0], v: r[1], pts: +r[2] || 0, max: +r[3] || 0, ok: +r[4] || 0, n: +r[5] || 0, det: r[6] || "" }));
+  if (RK_DEMO && !filas.length) {   /* demo: puntajes simulados */
+    const hoy = rkHoy(), ini = (() => { const d = rkD(hoy.slice(0, 8) + "01"); d.setMonth(d.getMonth() - 1); return rkIso(d); })();
+    const MIS = ["Toma tus pedidos del día", "Cobra lo vencido o que vence hoy", "Arma tu ruta del día", "Contacta a 3 clientes con compra pendiente", "Cierra 5 notas de pedido Defontana", "Contacta 1 prospecto agendado"];
+    rkEquipo().forEach((v, i) => { for (let f = ini; f <= hoy; f = rkAdd(f, 1)) { if (rkD(f).getDay() === 0) continue;
+      let sd = [...(v + f)].reduce((a, c) => (a * 31 + c.charCodeAt(0)) % 99991, 11 + i); const rnd = () => (sd = (sd * 48271) % 2147483647) / 2147483647;
+      const det = MIS.map(t => { const x = rnd() < 0.55 + i * 0.07 ? 1 : rnd(); const p = Math.round(10 * x) + (x >= 1 ? 5 : 0); return { t, p: f === hoy ? Math.round(p * 0.5) : p }; });
+      filas.push({ f, v, pts: det.reduce((s, x) => s + x.p, 0), max: MIS.length * 15, ok: det.filter(x => x.p >= 15).length, n: MIS.length, det: det.map(x => x.t + ": " + x.p).join(" | ") }); } });
+  }
+  return filas;
+}
+async function rkBajar(forzar) {
+  if (rkBajando || RK_DEMO) return false; const cfg = SYC(); if (!cfg || !cfg.url) return false;
+  const s = store.get(RK_KEY, null); if (!forzar && s && Date.now() - (s.t || 0) < 3 * 60 * 1000) return false;
+  rkBajando = true;
+  try { const d = rkD(rkHoy().slice(0, 8) + "01"); d.setMonth(d.getMonth() - 1);
+    const r = await syCall(cfg, { accion: "ranking", desde: rkIso(d) });
+    if (r && r.ok && Array.isArray(r.filas)) { store.set(RK_KEY, { t: Date.now(), filas: r.filas }); return true; }
+    if (r && r.error) store.set(RK_KEY, Object.assign({}, s || {}, { t: Date.now(), error: r.error })); return false;
+  } catch (e) { return false; } finally { rkBajando = false; }
+}
+function rkAgrupar(filas, a, b) {
+  const T = {}; rkEquipo().forEach(v => T[v] = { v, pts: 0, max: 0, ok: 0, n: 0, dias: 0, mejor: null, tipos: {} });
+  filas.filter(r => r.f >= a && r.f <= b).forEach(r => { const o = T[r.v] = T[r.v] || { v: r.v, pts: 0, max: 0, ok: 0, n: 0, dias: 0, mejor: null, tipos: {} };
+    o.pts += r.pts; o.max += r.max; o.ok += r.ok; o.n += r.n; if (r.pts > 0) o.dias++; if (!o.mejor || r.pts > o.mejor.pts) o.mejor = r;
+    rkDetalle(r.det).forEach(x => { const k = rkTipo(x.t), t = o.tipos[k] = o.tipos[k] || { s: 0, c: 0 }; t.s += x.p; t.c++; }); });
+  const l = Object.values(T).sort((x, y) => y.pts - x.pts || x.v.localeCompare(y.v)); let pos = 0, ant = null;
+  l.forEach((x, i) => { if (x.pts !== ant) { pos = i + 1; ant = x.pts; } x.pos = pos; }); return l;
+}
+const rkMed = p => p === 1 ? "🥇" : p === 2 ? "🥈" : p === 3 ? "🥉" : p + "°";
+const rkPct = (a, b) => b ? Math.round(a / b * 100) + "%" : "—";
+const rkF = f => { const d = rkD(f); return d.toLocaleDateString("es-CL", { weekday: "short", day: "numeric", month: "short" }); };
+function pintarRanking() {
+  const mb = $("masBody"); if (!mb) return;
+  const P = rkPeriodo(rkPer), filas = rkFilas(), L = rkAgrupar(filas, P.a, P.b), prev = P.pa ? rkAgrupar(filas, P.pa, P.pb) : [], pv = Object.fromEntries(prev.map(x => [x.v, x]));
+  const s = store.get(RK_KEY, null), tot = L.reduce((t, x) => t + x.pts, 0), totMax = L.reduce((t, x) => t + x.max, 0), activos = L.filter(x => x.dias).length;
+  const mx = Math.max(1, ...L.map(x => x.pts)), lider = L[0];
+  /* mapa de calor: días del período (hoy/ayer: últimos 14 días) */
+  const hA = P.a === P.b ? rkAdd(P.b, -13) : P.a, dias = []; for (let f = hA; f <= P.b; f = rkAdd(f, 1)) dias.push(f);
+  const idx = {}; filas.forEach(r => idx[r.v + "|" + r.f] = r); const hmMax = Math.max(1, ...filas.filter(r => r.f >= hA && r.f <= P.b).map(r => r.pts));
+  const col = p => { const a = Math.min(1, p / hmMax); return `rgba(240,168,24,${(0.12 + a * 0.78).toFixed(2)})`; };
+  const tipos = RK_TIPOS.map(t => t[0]).concat(["Otras"]).filter(k => L.some(x => x.tipos[k]));
+  if (!rkSel.v && lider && lider.mejor) rkSel = { v: lider.v, f: lider.mejor.f };
+  const sel = idx[rkSel.v + "|" + rkSel.f], det = sel ? rkDetalle(sel.det) : [];
+  mb.innerHTML = `<div class="card rk"><h2>Ranking del equipo de ventas <small>puntos por las misiones del día de Nota de Pedido${s && s.t ? ` · actualizado ${new Date(s.t).toLocaleTimeString("es-CL", { hour: "2-digit", minute: "2-digit" })}` : ""}</small></h2>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between">
+      <div class="rk-seg" role="group" aria-label="Período">${[["hoy", "Hoy"], ["ayer", "Ayer"], ["sem", "Esta semana"], ["sant", "Semana pasada"], ["mes", "Este mes"], ["mant", "Mes pasado"]].map(([k, t]) => `<button type="button" data-rp="${k}" aria-pressed="${rkPer === k}">${t}</button>`).join("")}</div>
+      ${RK_DEMO ? "" : `<button type="button" class="rk-act" id="rkAct">↻ Actualizar</button>`}</div>
+    ${s && s.error && !filas.length ? `<p class="rk-n" style="color:var(--bad)">El script de Google aún no tiene el ranking (${esc(s.error)}). Se activa al instalar la actualización automática del script en la planilla «HWF Notas de pedido».</p>` : ""}
+    <div class="rk-k num">
+      <div><span>Líder · ${esc(P.t.toLowerCase())}</span><b>${lider && lider.pts ? esc(lider.v.split(" ")[0]) : "—"}</b><small>${lider && lider.pts ? lider.pts.toLocaleString("es-CL") + " puntos" : "sin puntos todavía"}</small></div>
+      <div><span>Puntos del equipo</span><b>${tot.toLocaleString("es-CL")}</b><small>${P.pa ? `período anterior: ${prev.reduce((t, x) => t + x.pts, 0).toLocaleString("es-CL")}` : "&nbsp;"}</small></div>
+      <div><span>Cumplimiento del equipo</span><b>${rkPct(tot, totMax)}</b><small>de los puntos posibles</small></div>
+      <div><span>Vendedores con puntos</span><b>${activos} de ${L.length}</b><small>${esc(rkF(P.a))}${P.a !== P.b ? " a " + esc(rkF(P.b)) : ""}</small></div>
+    </div>
+    <h3>Posiciones <small>toca un vendedor para ver su mejor día</small></h3>
+    <div class="rk-tw"><table class="rk-t"><thead><tr><th>#</th><th>Vendedor</th><th>Puntos</th><th>% del máximo</th><th>Días con puntos</th><th>Promedio/día</th><th>Misiones cumplidas</th><th>Mejor día</th><th>vs anterior</th></tr></thead><tbody>
+      ${L.map(x => { const a = pv[x.v], d = a ? x.pts - a.pts : null;
+        return `<tr data-v="${esc(x.v)}" class="${rkSel.v === x.v ? "sel" : ""}"><td class="rk-pos">${rkMed(x.pos)}</td><td><b>${esc(x.v)}</b></td><td><span class="rk-bar"><i style="width:${Math.round(x.pts / mx * 100)}%"></i></span>${x.pts.toLocaleString("es-CL")}</td>
+        <td>${rkPct(x.pts, x.max)}</td><td>${x.dias}</td><td>${x.dias ? Math.round(x.pts / x.dias) : "—"}</td><td>${x.n ? `${x.ok} de ${x.n}` : "—"}<small>${rkPct(x.ok, x.n)}</small></td>
+        <td>${x.mejor && x.mejor.pts ? `${x.mejor.pts} pts<small>${esc(rkF(x.mejor.f))}</small>` : "—"}</td><td>${d == null ? "—" : `<span class="${d >= 0 ? "rk-up" : "rk-down"}">${d >= 0 ? "▲" : "▼"} ${Math.abs(d).toLocaleString("es-CL")}</span>`}</td></tr>`; }).join("")}</tbody></table></div>
+    <h3>Puntos por día <small>${P.a === P.b ? "últimos 14 días" : esc(P.t.toLowerCase())} · toca un día para ver el detalle</small></h3>
+    <div class="rk-tw"><table class="rk-t rk-hm"><thead><tr><th></th><th>Vendedor</th>${dias.map(f => `<th class="c" title="${esc(rkF(f))}">${rkD(f).getDate()}<small>${"DLMMJVS"[rkD(f).getDay()]}</small></th>`).join("")}</tr></thead><tbody>
+      ${L.map(x => `<tr><td class="rk-pos">${rkMed(x.pos)}</td><td><b>${esc(x.v.split(" ")[0])}</b></td>${dias.map(f => { const r = idx[x.v + "|" + f], dom = rkD(f).getDay() === 0;
+        return `<td class="c${dom ? " dom" : ""}${rkSel.v === x.v && rkSel.f === f ? " on" : ""}" data-hv="${esc(x.v)}" data-hf="${f}" style="${r && r.pts ? `background:${col(r.pts)}` : ""}" title="${esc(x.v)} · ${esc(rkF(f))}: ${r ? r.pts : 0} pts">${r && r.pts ? r.pts : "·"}</td>`; }).join("")}</tr>`).join("")}</tbody></table></div>
+    ${tipos.length ? `<h3>Promedio por tipo de misión <small>puntos por día (máx. 15) · ${esc(P.t.toLowerCase())}</small></h3>
+    <div class="rk-tw"><table class="rk-t"><thead><tr><th>#</th><th>Vendedor</th>${tipos.map(k => `<th>${esc(k)}</th>`).join("")}</tr></thead><tbody>
+      ${L.map(x => `<tr><td class="rk-pos">${rkMed(x.pos)}</td><td><b>${esc(x.v.split(" ")[0])}</b></td>${tipos.map(k => { const t = x.tipos[k]; if (!t) return "<td>—</td>"; const v = t.s / t.c;
+        return `<td><span class="pill ${v >= 12 ? "p-ok" : v >= 6 ? "p-warn" : "p-n"}">${v.toFixed(1)}</span><small>${t.c} ${t.c === 1 ? "día" : "días"}</small></td>`; }).join("")}</tr>`).join("")}</tbody></table></div>` : ""}
+    <h3>Detalle del día <small>${sel ? `${esc(sel.v)} · ${esc(rkF(sel.f))} · ${sel.pts} de ${sel.max} puntos · ${sel.ok} de ${sel.n} misiones` : "elige un vendedor o un día"}</small></h3>
+    ${det.length ? `<div class="rk-det">${det.map(m => `<div class="m"><span>${esc(m.t)}</span><b>${m.p} pts</b><span class="bar"><i style="width:${Math.round(m.p / 15 * 100)}%"></i></span></div>`).join("")}</div>` : `<p class="rk-n">Sin detalle para ese día.</p>`}
+    <p class="rk-n">Cada misión del día da hasta 10 puntos según el avance, más 5 de bono al completarla (máx. 15). Vale el mejor puntaje del día de cada vendedor; la semana va de lunes a domingo.
+      «% del máximo» compara con los puntos posibles según las misiones que tuvo cada uno. «vs anterior» compara con el mismo tramo del período anterior. Datos de la hoja «Puntajes»${RK_DEMO ? " (en la demo son simulados)" : ""}.</p>
+  </div>`;
+  mb.querySelectorAll("[data-rp]").forEach(b => b.onclick = () => { rkPer = b.dataset.rp; rkSel = { v: "", f: "" }; pintarRanking(); });
+  mb.querySelectorAll("tr[data-v]").forEach(tr => tr.onclick = () => { const x = L.find(y => y.v === tr.dataset.v); rkSel = { v: tr.dataset.v, f: x && x.mejor ? x.mejor.f : P.b }; pintarRanking(); });
+  mb.querySelectorAll("[data-hv]").forEach(td => td.onclick = () => { rkSel = { v: td.dataset.hv, f: td.dataset.hf }; pintarRanking(); });
+  const ac = $("rkAct"); if (ac) ac.onclick = async () => { ac.disabled = true; ac.textContent = "Actualizando…"; await rkBajar(true); pintarRanking(); };
+  rkBajar(false).then(ok => { if (ok && typeof vistaMas !== "undefined" && vistaMas === "ranking" && $("masBody")) pintarRanking(); });
+}
+/* tarjeta en el Dashboard: top 3 de la semana */
+{ const _pdRk = pintarDashboard; pintarDashboard = function () {
+  const r = _pdRk.apply(this, arguments);
+  try { const g = document.querySelector("#s-res .db-g"); if (!g) return r; const P = rkPeriodo("sem"), L = rkAgrupar(rkFilas(), P.a, P.b).filter(x => x.pts > 0).slice(0, 3);
+    g.insertAdjacentHTML("afterbegin", `<div class="card db-c"><h3>Ranking del equipo <button type="button" class="lk" id="rkIr">Ver detalle ›</button></h3><div class="db-l">
+      ${L.map(x => `<button type="button" data-rkv="${esc(x.v)}"><span class="n">${rkMed(x.pos)} ${esc(x.v)}</span><span class="v">${x.pts.toLocaleString("es-CL")} pts</span><small>esta semana · ${rkPct(x.pts, x.max)} del máximo · ${x.dias} ${x.dias === 1 ? "día" : "días"}</small></button>`).join("") || '<p class="db-vacio">Aún no hay puntajes esta semana.</p>'}</div></div>`);
+    const ir = () => { if (TAB !== "mas") navIrTab("mas"); navIrMas("ranking"); };
+    $("rkIr").onclick = ir; g.querySelectorAll("[data-rkv]").forEach(b => b.onclick = e => { e.stopPropagation(); rkSel = { v: "", f: "" }; rkPer = "sem"; ir(); });
+    rkBajar(false).then(ok => { if (ok && TAB === "res") pintarDashboard(); });
+  } catch (e) { console.error(e); }
+  return r;
+}; }
+try { if (typeof TAB !== "undefined" && TAB === "res") pintarDashboard(); if (typeof TAB !== "undefined" && TAB === "mas" && vistaMas === "ranking") pintarRanking(); } catch (e) {}
 </script>
 </body>
 </html>
