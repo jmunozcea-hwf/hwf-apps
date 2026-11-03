@@ -3799,7 +3799,7 @@ try { if (typeof TAB !== "undefined" && TAB === "res" && $("s-res") && !$("s-res
 <script>
 /* Plan de crecimiento HWF sin presupuesto de marketing (presentación del 02-11-2026): de 65 a 80 MM mensuales.
    Cálculo común para HWF Admin y Nota de Pedido a partir de las ventas (D.rows: [cliente, producto, mes, día, cant, neto, costo, vendedor, año?]). */
-const PLAN = { meta: 80000000, base: 65000000, cuotaMin: 4, cuotaMax: 6,
+const PLAN = { meta: 80000000, base: 65000000, cuotaMin: 4, cuotaMax: 6, excluir: [/\bpro ?pets?\b/, /\byanez\b/],  /* clientes fuera del plan (pedido de Jorge 03-11): Propets y Yañez */
   pasos: [["1–30", "Ordenar la base", ["Lista de dormidos desde Defontana", "Clasificación A, B y C", "WhatsApp Business y catálogo", "Reunión con 2 marcas principales"]],
           ["31–60", "Activar la venta", ["Oferta de surtido en cada visita", "Cuotas de prospección por vendedor", "Programa de referidos", "Calendario fijo de rutas"]],
           ["61–90", "Consolidar", ["Capacitación en nutrición", "Hellywoof como laboratorio", "Revisión de días calle", "Ajustar según resultados"]]],
@@ -3831,9 +3831,9 @@ function plOfrecer(c) {
 function planCalc(D, o) {
   const [Y, M, CD] = String(D.corte || "").split("-").map(Number), dia = 864e5, hoy = Date.UTC(Y, M - 1, CD), ini = Date.UTC(Y, M - 1, 1);
   const yr = r => r[8] || D.anio, m3 = [1, 2, 3].map(k => { let y = Y, m = M - k; if (m < 1) { m += 12; y--; } return y * 100 + m; });
-  const C = {};
+  const C = {}, exc = {}, fuera = ci => { if (ci in exc) return exc[ci]; const n = PL_N((D.clientes[ci] || [""])[0]); return exc[ci] = PLAN.excluir.some(re => re.test(n)); };
   D.rows.forEach(r => {
-    if (!(r[5] > 0)) return; const cart = o.cartDe(r); if (!o.incluye(cart)) return;
+    if (!(r[5] > 0)) return; const cart = o.cartDe(r); if (!o.incluye(cart) || fuera(r[0])) return;
     const y = yr(r), t = Date.UTC(y, r[2] - 1, r[3]), ym = y * 100 + r[2]; if (t > hoy) return;
     const c = C[r[0]] = C[r[0]] || { ci: r[0], cart, f: new Set(), ult: 0, prim: Infinity, v12: 0, v3: 0, vMes: 0, tipos: new Set(), marcas: new Set(), pMes: new Set(), p3: {} };
     if (t >= c.ult) { c.ult = t; c.cart = cart; } if (t < c.prim) c.prim = t; c.f.add(t);
@@ -3857,7 +3857,7 @@ function planCalc(D, o) {
   const con = L.filter(c => c.vMes > 0), vMes = con.reduce((s, c) => s + c.vMes, 0);
   const n3 = m3.reduce((s, ym) => s + L.filter(c => c.p3[ym]).length, 0), v3 = L.reduce((s, c) => s + c.v3, 0);
   const l3 = L.reduce((s, c) => s + Object.values(c.p3).reduce((a, x) => a + x.size, 0), 0);
-  return { Y, M, CD, L, dorm, d30: dorm.filter(c => c.diasSin < 60), d60: dorm.filter(c => c.diasSin >= 60 && c.diasSin < 90), d90: dorm.filter(c => c.diasSin >= 90),
+  return { excl: Object.keys(exc).filter(k => exc[k]).map(k => (D.clientes[k] || [""])[0]), Y, M, CD, L, dorm, d30: dorm.filter(c => c.diasSin < 60), d60: dorm.filter(c => c.diasSin >= 60 && c.diasSin < 90), d90: dorm.filter(c => c.diasSin >= 90),
     reac: L.filter(c => c.reac), nuevos: L.filter(c => c.nuevo), A: L.filter(c => c.abc === "A" && c.v3 > 0), B: L.filter(c => c.abc === "B"), Cc: L.filter(c => c.abc === "C" && c.v3 > 0),
     vMes, con: con.length, ticket: con.length ? vMes / con.length : 0, ticket3: n3 ? v3 / n3 : 0, lin: con.length ? con.reduce((s, c) => s + c.pMes.size, 0) / con.length : 0, lin3: n3 ? l3 / n3 : 0, v3 };
 }
@@ -3894,7 +3894,7 @@ function pintarPlan() {
       <div><span>Días calle (cobranza)</span><b>${dc == null ? "—" : Math.round(dc) + " días"}</b><small>por cobrar ÷ venta diaria · mantener o bajar</small></div>
       ${di ? `<div><span>Días de inventario</span><b>${isFinite(di.dias) ? Math.round(di.dias) + " días" : "—"}</b><small>${di.urg} productos bajo 7 días</small></div>` : ""}</div>
     <div class="pl-bar"><i style="width:${Math.min(100, proy / PLAN.meta * 100).toFixed(1)}%"></i></div>
-    <div class="pl-step"><b>Primer paso esta semana:</b> contactar a los ${P.d60.length + P.d90.length} clientes sin compra hace 60 días o más (lista abajo y en el Dashboard de cada vendedor) antes del viernes.</div></div>
+    ${P.excl.length ? `<p class="muted" style="font-size:.8rem;margin:0 0 6px">Fuera del plan: ${P.excl.map(n => esc(tc(n))).join(", ")}.</p>` : ""}<div class="pl-step"><b>Primer paso esta semana:</b> contactar a los ${P.d60.length + P.d90.length} clientes sin compra hace 60 días o más (lista abajo y en el Dashboard de cada vendedor) antes del viernes.</div></div>
   <div class="card"><h2>Indicadores <span class="muted">seguimiento semanal</span></h2><div class="tbl"><table><thead><tr><th>Indicador</th><th class="r">Hoy</th><th class="r">Referencia</th><th>Meta</th></tr></thead><tbody>
     <tr><td>Venta total (proyección)</td><td class="r num">${mm(proy)}</td><td class="r num">65 MM</td><td>80 MM al mes</td></tr>
     <tr><td>Clientes reactivados este mes</td><td class="r num">${P.reac.length}</td><td class="r num">${P.d60.length + P.d90.length} dormidos 60+</td><td>1 de cada 4 dormidos en 60 días</td></tr>
