@@ -6027,10 +6027,13 @@ exportarAhora = function () {
 </script>
 <style>
 /* ===== fotos del mismo porte ===== */
-.thumb{aspect-ratio:1/1;object-fit:contain!important;object-position:center;background:#fff!important;box-sizing:border-box;padding:4px;border:1px solid var(--line)}
+.thumb{aspect-ratio:1/1;object-fit:contain!important;object-position:center;background:#fff!important;box-sizing:border-box;padding:4px;border:0!important;border-radius:10px}
 .mgrid .thumb{width:132px!important;height:132px!important;max-width:100%;justify-self:center!important;align-self:start;padding:6px}
 @media (min-width:620px){.mgrid .thumb{width:150px!important;height:150px!important}}
-.mbt .fotos{height:auto!important;background:#fff!important;border:1px solid var(--line)}
+.mbt .fotos{height:auto!important;background:#fff!important;border:0}
 .mbt .fotos img{aspect-ratio:1/1;height:auto!important;object-fit:contain!important;background:#fff}
+/* fondo de la foto «transparente»: el blanco/gris claro de la foto se funde con el blanco de la tarjeta */
+:root:not([data-theme="dark"]) .thumb,:root:not([data-theme="dark"]) .mbt .fotos img{mix-blend-mode:multiply;filter:brightness(1.03)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .thumb,:root:not([data-theme="light"]) .mbt .fotos img{mix-blend-mode:normal;filter:none}}
 </style></body>
 </html>
