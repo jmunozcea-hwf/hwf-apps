@@ -4068,5 +4068,79 @@ function dcPintarAdmin() {
 }
 { const _pc = pintarCobranza; pintarCobranza = function () { const r = _pc.apply(this, arguments); try { dcPintarAdmin(); } catch (e) { console.error(e); } return r; }; }
 </script>
+<style>
+/* ===== Dashboard: puntos del equipo ===== */
+.ap-top{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.ap-top h3{margin:0}
+.ap-seg{display:inline-flex;background:var(--sunk,#EEF2F5);border-radius:999px;padding:3px;gap:2px}
+.ap-seg button{all:unset;cursor:pointer;font-size:.8rem;font-weight:700;padding:5px 11px;border-radius:999px;color:var(--muted)}
+.ap-seg button[aria-pressed="true"]{background:var(--surface,#fff);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.ap-l{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:7px}
+.ap-l li{display:grid;grid-template-columns:34px minmax(0,1fr) auto;align-items:center;gap:2px 8px}
+.ap-l .pos{font-weight:800;text-align:center}
+.ap-l .nom{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ap-l .pts{font-weight:800;font-variant-numeric:tabular-nums}
+.ap-l .bar{grid-column:2/4;height:6px;background:var(--sunk,#EEF2F5);border-radius:99px;overflow:hidden}
+.ap-l .bar i{display:block;height:100%;background:#F28C28;border-radius:99px}
+.ap-l small{grid-column:2/4;color:var(--muted);font-size:.76rem}
+.ap-msg{margin:10px 0 0;color:var(--muted);font-size:.88rem}
+.ap-msg.err{color:#B42318}
+</style>
+<script>
+/* ================= Dashboard: puntos del equipo (hoja «Puntajes») ================= */
+const AP_KEY = "adm-ranking"; let apVista = store.get("adm-ranking-vista", "dia"), apBajando = false;
+function apIso(d) { return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
+function apHoy() { return apIso(new Date()); }
+function apLunes() { const d = new Date(); d.setDate(d.getDate() - ((d.getDay() + 6) % 7)); return apIso(d); }
+function apMesIni() { const d = new Date(); return apIso(new Date(d.getFullYear(), d.getMonth(), 1)); }
+async function apBajar() {
+  const cfg = typeof SYC === "function" ? SYC() : null; if (!cfg || !cfg.url || apBajando) return false;
+  apBajando = true;
+  try {
+    const desde = apLunes() < apMesIni() ? apLunes() : apMesIni();
+    const r = await syCall(cfg, { accion: "ranking", desde });
+    if (r && r.ok) store.set(AP_KEY, { filas: r.filas || [], bajado: new Date().toISOString(), error: "" });
+    else if (r && (!r.red || !store.get(AP_KEY, null))) store.set(AP_KEY, Object.assign({ filas: [] }, store.get(AP_KEY, {}), { error: (r && r.error) || "error", bajado: new Date().toISOString() }));
+    return true;
+  } finally { apBajando = false; }
+}
+function apRanking() {
+  const s = store.get(AP_KEY, null), hoy = apHoy(), desde = apVista === "dia" ? hoy : apVista === "sem" ? apLunes() : apMesIni(), T = {};
+  ((s && s.filas) || []).forEach(r => { const f = String(r[0]), v = String(r[1]), p = Number(r[2]) || 0; if (f < desde || f > hoy) return;
+    const o = T[v] = T[v] || { v, pts: 0, dias: 0, ok: 0, n: 0 }; o.pts += p; if (p > 0) o.dias++; o.ok += Number(r[4]) || 0; o.n += Number(r[5]) || 0; });
+  const l = Object.values(T).sort((a, b) => b.pts - a.pts || a.v.localeCompare(b.v));
+  let pos = 0, ant = null; l.forEach((x, i) => { if (x.pts !== ant) { pos = i + 1; ant = x.pts; } x.pos = pos; });
+  return l;
+}
+function apCardHTML() {
+  const s = store.get(AP_KEY, null), cfg = typeof SYC === "function" ? SYC() : null, l = apRanking(), mx = Math.max(1, ...l.map(x => x.pts));
+  const med = p => p === 1 ? "🥇" : p === 2 ? "🥈" : p === 3 ? "🥉" : p + "°";
+  const tit = { dia: "Hoy", sem: "Esta semana", mes: new Date().toLocaleDateString("es-CL", { month: "long" }).replace(/^./, c => c.toUpperCase()) }[apVista];
+  let cuerpo;
+  if (!cfg || !cfg.url) cuerpo = '<p class="ap-msg">Sin conexión con el script de Google: conecta HWF Admin para ver los puntos.</p>';
+  else if (s && s.error && !(s.filas || []).length) cuerpo = /desconocida/i.test(s.error)
+    ? '<p class="ap-msg err">El script de la planilla todavía no guarda puntajes: falta actualizar el script de Google (Código.gs) con la versión nueva. Mientras tanto los puntos solo se ven en el teléfono de cada vendedor.</p>'
+    : `<p class="ap-msg err">No se pudo leer el ranking: ${esc(s.error)}</p>`;
+  else if (!s) cuerpo = '<p class="ap-msg">Cargando puntos…</p>';
+  else if (!l.length) cuerpo = `<p class="ap-msg">Sin puntos ${apVista === "dia" ? "hoy" : "en este período"} todavía. Se suman cuando los vendedores avanzan sus misiones del día en Nota de Pedido.</p>`;
+  else cuerpo = `<ol class="ap-l">${l.map(x => `<li><span class="pos">${med(x.pos)}</span><span class="nom">${esc(x.v)}</span><span class="pts">${x.pts.toLocaleString("es-CL")} pts</span>
+      <span class="bar"><i style="width:${Math.round(x.pts / mx * 100)}%"></i></span><small>${apVista === "dia" ? `${x.ok} de ${x.n} misiones cumplidas` : `${x.dias} ${x.dias === 1 ? "día" : "días"} con puntos · ${x.ok} misiones cumplidas`}</small></li>`).join("")}</ol>`;
+  return `<div class="card db-c" id="apCard"><div class="ap-top"><div><h3>🏆 Puntos del equipo</h3><span class="muted" style="font-size:.8rem">${tit} · misiones del día${s && s.bajado ? " · act. " + new Date(s.bajado).toLocaleTimeString("es-CL", { hour: "2-digit", minute: "2-digit" }) : ""}</span></div>
+    <div class="ap-seg" role="group" aria-label="Período">${[["dia", "Hoy"], ["sem", "Semana"], ["mes", "Mes"]].map(([k, t]) => `<button type="button" data-ap="${k}" aria-pressed="${apVista === k}">${t}</button>`).join("")}</div></div>${cuerpo}</div>`;
+}
+function apPintar() {
+  const s = $("s-res"), g = s && s.querySelector(".db-g"); if (!g) return;
+  const viejo = $("apCard"); if (viejo) viejo.remove();
+  const pl = g.querySelector(".card.pl"); if (pl) pl.insertAdjacentHTML("afterend", apCardHTML()); else g.insertAdjacentHTML("afterbegin", apCardHTML());
+  $("apCard").querySelectorAll("[data-ap]").forEach(b => b.onclick = () => { apVista = b.dataset.ap; store.set("adm-ranking-vista", apVista); apPintar(); });
+}
+const _pintarDashboardAP = pintarDashboard;
+pintarDashboard = function () { _pintarDashboardAP.apply(this, arguments); try { apPintar(); } catch (e) { console.warn("puntos", e); } };
+const _sySyncAP = sySync;
+sySync = async function () { const r = await _sySyncAP.apply(this, arguments); if (await apBajar()) try { apPintar(); } catch (e) {} return r; };
+setTimeout(() => apBajar().then(ok => { if (ok) try { apPintar(); } catch (e) {} }), 1500);
+setInterval(() => { if (!document.hidden) apBajar().then(ok => { if (ok) try { apPintar(); } catch (e) {} }); }, 5 * 60 * 1000);
+try { apPintar(); } catch (e) {}
+</script>
 </body>
 </html>
