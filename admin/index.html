@@ -3989,7 +3989,7 @@ function dcCalc(o) {
   const vend = Object.entries(V).map(([v, x]) => Object.assign(fin(x), { v })).filter(x => x.saldo || x.ventas || x.pago).sort((a, b) => b.saldo - a.saldo);
   const clientes = Object.values(C).map(fin).filter(x => x.saldo > 0 || x.pago > 0).sort((a, b) => b.saldo - a.saldo);
   [T].concat(vend, clientes).forEach(x => delete x.dia);
-  return { T, vend, clientes, corte: fc, ventana: DC_VENTANA, conPagos: (o.pagos || []).length > 0 };
+  return { T, vend, clientes, corte: fc, ventana: DC_VENTANA, conPagos: (o.pagos || []).length > 0, fuente: o.fuente || "cobranza" };
 }
 /* días calle de referencia de una fila: reales si hay pagos, si no el DSO contable */
 const dcRef = x => x.real != null ? x.real : x.dso != null ? x.dso : (x.saldo > 0 ? x.edad : null);
@@ -4051,7 +4051,7 @@ function dcHtmlAdmin(R, mm, esc) {
   let cl = R.clientes.filter(c => (!dcV || c.cart === dcV) && (!q || dcN(c.nom + " " + c.rut).includes(q)));
   cl = ord(cl); const nCl = cl.length; if (!dcTodos) cl = cl.slice(0, 25);
   const lentos = R.clientes.filter(c => c.saldo > 0 && dcSem(c) === "bad").sort((a, b) => b.saldo - a.saldo);
-  return `<div class="card dc-card" id="dcBox"><h2>Días calle <small>ventas del año al ${R.corte.toLocaleDateString("es-CL")} · pagos detectados de los últimos ${DC_PAGOS_DIAS} días</small></h2>
+  return `<div class="card dc-card" id="dcBox"><h2>Días calle <small>ventas del año al ${R.corte.toLocaleDateString("es-CL")} · ${R.fuente === "mayor" ? "pagos del Libro Mayor" : "pagos detectados en la cobranza"} de los últimos ${DC_PAGOS_DIAS} días</small></h2>
     <div class="dc-k ad num">
       <div class="main"><span>Días calle de la empresa</span><b>${dcF(refT)} <i>días</i></b><small>${T.real != null ? "promedio real de pago" : "DSO contable (aún no hay pagos registrados)"}</small></div>
       <div><span>DSO contable</span><b>${dcF(T.dso)} <i>días</i></b><small>${mm(T.saldo)} por cobrar = ventas de los últimos ${dcF(T.dso)} días · simple: ${dcF(T.ventas ? T.saldo / T.ventas * R.ventana : null)}</small></div>
@@ -4071,7 +4071,7 @@ function dcHtmlAdmin(R, mm, esc) {
       ${cl.map(x => `<tr>${fila(x, x.nom, x.cart + (x.rut ? " · " + x.rut : ""))}</tr>`).join("") || `<tr><td colspan="10">Sin clientes.</td></tr>`}</tbody></table></div>
     ${nCl > 25 ? `<button type="button" class="dc-mas" id="dcMas">${dcTodos ? "Ver menos" : `Ver los ${nCl} clientes`}</button>` : ""}
     <p class="dc-n"><b>Días calle</b>: pago real si ya hay pagos registrados del cliente, si no el DSO contable. <b>DSO</b> = cuántos días de ventas (con IVA), contando hacia atrás desde el corte, suman lo que se debe hoy; si el cliente no compró lo suficiente en el año, se usa la edad de su deuda. «Simple» = saldo ÷ ventas de ${R.ventana} días × ${R.ventana}.
-      <b>Pago real</b> = días entre la emisión y el pago, ponderado por monto: el script lo registra cuando una factura sale del informe de cobranza (o baja su saldo) entre una carga y la siguiente.
+      <b>Pago real</b> = días entre la emisión y el pago, ponderado por monto: ${R.fuente === "mayor" ? "fechas exactas de factura y de cada pago según el Libro Mayor de Defontana (cuenta de clientes; sin notas de crédito)" : "el script lo registra cuando una factura sale del informe de cobranza (o baja su saldo) entre una carga y la siguiente"}.
       <b>Plazo</b> = días entre emisión y vencimiento. <b>Edad</b> y <b>atraso</b> = días desde la emisión y desde el vencimiento de lo que sigue abierto, ponderados por saldo.
       Colores: verde dentro del plazo, amarillo hasta 20 días más, rojo más lento. Toca un encabezado para ordenar.</p></div>`;
 }
@@ -4087,7 +4087,7 @@ if (typeof module !== "undefined" && module.exports) module.exports = { dcCalc, 
 document.head.insertAdjacentHTML("beforeend", "<style>" + DC_CSS + "</style>");
 function dcPintarAdmin() {
   const mb = $("masBody"); if (!mb) return;
-  const R = dcCalc({ docs: cxTodos(), rows: D.rows || [], clientes: D.clientes || [], anio: D.anio, corte: D.corte, pagos: (window.__dvGet && __dvGet("CXC_PAGOS")) || [] });
+  const R = dcCalc({ docs: cxTodos(), rows: D.rows || [], clientes: D.clientes || [], anio: D.anio, corte: D.corte, pagos: (window.__dvGet && __dvGet("CXC_PAGOS")) || [], fuente: (window.__dvGet && __dvGet("CXC_PAGOS_FUENTE")) || "cobranza" });
   const html = dcHtmlAdmin(R, mm, esc), old = $("dcBox");
   if (old) old.outerHTML = html; else { const c = mb.querySelector(".card"); if (c) c.insertAdjacentHTML("afterend", html); else mb.insertAdjacentHTML("afterbegin", html); }
   dcEnlazar($("dcBox"), dcPintarAdmin);
