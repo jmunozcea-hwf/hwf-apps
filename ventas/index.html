@@ -6241,5 +6241,111 @@ document.head.insertAdjacentHTML("beforeend", "<style>" + DC_CSS + "</style>");
 }; }
 if (typeof APP_NOVEDADES !== "undefined" && Array.isArray(APP_NOVEDADES)) APP_NOVEDADES.unshift("Cobranza: días calle de tu cartera (cuánto tardan en pagarte), plazo, atraso y tus clientes más lentos.");
 </script>
+
+<script>
+/* ===== Puntaje y ranking del equipo (misiones del día) ===== */
+const PT_KEY = "hwf-puntos", PT_RK = "hwf-ranking", PT_ENV = "hwf-puntos-env";
+let ptVista = (() => { try { return localStorage.getItem("hwf-pt-vista") || "dia"; } catch (e) { return "dia"; } })(), ptBajando = false;
+const ptDemo = /DEMO/.test(document.title);
+document.head.insertAdjacentHTML("beforeend", `<style>
+.pt-card{border-radius:16px;padding:14px;background:linear-gradient(135deg,#FFF8E6,#FFFFFF);border:1px solid #F3D58A;display:grid;gap:10px}
+.pt-top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.pt-top h3{margin:0;font-size:1.05rem}.pt-top small{color:var(--muted);font-weight:600;font-size:.8rem}
+.pt-seg{display:flex;background:rgba(11,49,70,.07);border-radius:10px;padding:3px;gap:3px}
+.pt-seg button{border:0;background:none;font:inherit;font-weight:700;font-size:.84rem;color:var(--muted);padding:7px 12px;border-radius:8px;cursor:pointer;min-height:36px}
+.pt-seg button[aria-pressed="true"]{background:#fff;color:#0B3146;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.pt-yo{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;align-items:center;background:#0B3146;color:#fff;border-radius:12px;padding:10px 12px}
+.pt-yo b.n{font-size:1.9rem;line-height:1;font-variant-numeric:tabular-nums}.pt-yo small{color:rgba(255,255,255,.8);font-size:.8rem;line-height:1.3}
+.pt-l{display:grid;gap:6px;margin:0;padding:0;list-style:none}
+.pt-l li{display:grid;grid-template-columns:30px minmax(0,1fr) auto;gap:2px 10px;align-items:center;padding:7px 8px;border-radius:10px;background:#fff;border:1px solid var(--line)}
+.pt-l li.yo{border-color:#0B3146;box-shadow:inset 0 0 0 1px #0B3146}
+.pt-l .pos{font-weight:800;text-align:center;font-size:1.05rem}.pt-l .nom{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pt-l .pts{font-weight:800;font-variant-numeric:tabular-nums}.pt-l .bar{grid-column:2/4;height:6px;border-radius:99px;background:var(--sunk,#EEF1F4);overflow:hidden}
+.pt-l .bar i{display:block;height:100%;background:#F0A818;border-radius:99px}.pt-l li.yo .bar i{background:#0B3146}
+.pt-l small{grid-column:2/4;color:var(--muted);font-size:.76rem}
+.pt-reg{font-size:.78rem;color:var(--muted);margin:0}.pt-reg summary{cursor:pointer;font-weight:700;color:#0B3146}
+</style>`);
+const ptLunes = f => { const d = new Date(f + "T12:00:00"), w = (d.getDay() + 6) % 7; d.setDate(d.getDate() - w); return isoD(d); };
+const ptMesIni = f => f.slice(0, 8) + "01";
+function ptCalcHoy() {
+  let mis = []; try { mis = misiones(); } catch (e) { return null; }
+  let pts = 0, max = 0, ok = 0; const det = [];
+  mis.forEach(x => { const r = x.n ? Math.min(1, x.h / x.n) : 0, done = x.n > 0 && x.h >= x.n, p = Math.round(10 * r) + (done ? 5 : 0);
+    pts += p; max += 15; if (done) ok++; det.push(`${x.t}: ${p}`); });
+  return { pts, max, ok, n: mis.length, det: det.join(" | ") };
+}
+function ptGuardarHoy() {
+  if (!SES || (typeof sinCartera === "function" && sinCartera(SES.vendedor.cartera))) return null;
+  const c = ptCalcHoy(); if (!c) return null;
+  const hoy = today(), yo = SES.vendedor.nombre, P = lsGet(PT_KEY, {}), k = yo + "|" + hoy, prev = P[k];
+  if (!prev || c.pts > prev.pts) P[k] = { v: yo, f: hoy, pts: c.pts, max: c.max, ok: c.ok, n: c.n, det: c.det };
+  else if (prev) { prev.max = Math.max(prev.max, c.max); }
+  Object.keys(P).forEach(x => { if (x.split("|")[1] < ptMesIni(isoD(new Date(Date.now() - 62 * 864e5)))) delete P[x]; });
+  lsSet(PT_KEY, P); return Object.assign({ hoy: c }, P[k]);
+}
+async function ptSincronizar(forzar) {
+  if (ptBajando || !SES) return; const cfg = typeof syCfg === "function" ? syCfg() : null;
+  if (!cfg || !cfg.url || ptDemo) return;
+  ptBajando = true;
+  try {
+    const yo = SES.vendedor.nombre, hoy = today(), P = lsGet(PT_KEY, {}), E = lsGet(PT_ENV, {});
+    for (const k of Object.keys(P).filter(k => k.startsWith(yo + "|")).sort().slice(-7)) {
+      const x = P[k]; if (E[k] === x.pts && !forzar) continue;
+      const r = await syLlamar(cfg, { accion: "puntaje", puntaje: { vendedor: yo, fecha: x.f, puntos: x.pts, max: x.max, cumplidas: x.ok, misiones: x.n, detalle: x.det } });
+      if (r && r.ok) E[k] = x.pts;
+    }
+    lsSet(PT_ENV, E);
+    const R = lsGet(PT_RK, null);
+    if (forzar || !R || Date.now() - (R.t || 0) > 5 * 60 * 1000) {
+      const r = await syLlamar(cfg, { accion: "ranking", desde: ptLunes(hoy) < ptMesIni(hoy) ? ptLunes(hoy) : ptMesIni(hoy) });
+      if (r && r.ok && Array.isArray(r.filas)) { lsSet(PT_RK, { t: Date.now(), filas: r.filas }); if (MODO === "inicio") ptPintarRanking(); }
+    }
+  } catch (e) {} finally { ptBajando = false; }
+}
+function ptEquipo() { return (CRM_BASE.metas || []).map(m => m.vendedor).filter(v => v && v !== "Tienda Hellywoof" && !(typeof sinCartera === "function" && sinCartera(v))); }
+function ptFilas() {
+  const filas = ((lsGet(PT_RK, null) || {}).filas || []).map(r => ({ f: r[0], v: r[1], pts: r[2] }));
+  const P = lsGet(PT_KEY, {}); Object.values(P).forEach(x => { const i = filas.findIndex(r => r.f === x.f && r.v === x.v); if (i < 0) filas.push({ f: x.f, v: x.v, pts: x.pts }); else filas[i].pts = Math.max(filas[i].pts, x.pts); });
+  if (ptDemo) {   /* demo: el resto del equipo se simula */
+    const hoy = today(), d0 = new Date(ptMesIni(hoy) + "T12:00:00");
+    ptEquipo().filter(v => !SES || v !== SES.vendedor.nombre).forEach((v, i) => {
+      for (const d = new Date(d0); isoD(d) <= hoy; d.setDate(d.getDate() + 1)) { if (d.getDay() === 0) continue;
+        const f = isoD(d), s = [...(v + f)].reduce((a, c) => (a * 31 + c.charCodeAt(0)) % 9973, 7), base = 35 + i * 6;
+        filas.push({ f, v, pts: Math.max(0, Math.round(base + (s % 40) - (f === hoy ? 25 : 0))) }); } });
+  }
+  return filas;
+}
+function ptRanking(vista) {
+  const hoy = today(), desde = vista === "dia" ? hoy : vista === "sem" ? ptLunes(hoy) : ptMesIni(hoy), T = {};
+  ptEquipo().forEach(v => T[v] = { v, pts: 0, dias: 0 });
+  ptFilas().filter(r => r.f >= desde && r.f <= hoy).forEach(r => { const o = T[r.v] = T[r.v] || { v: r.v, pts: 0, dias: 0 }; o.pts += r.pts; if (r.pts > 0) o.dias++; });
+  const l = Object.values(T).sort((a, b) => b.pts - a.pts || a.v.localeCompare(b.v));
+  let pos = 0, ant = null; l.forEach((x, i) => { if (x.pts !== ant) { pos = i + 1; ant = x.pts; } x.pos = pos; });
+  return l;
+}
+function ptPintarRanking() {
+  const box = $("crmInicio"); if (!box || !SES) return;
+  const viejo = $("ptCard"); if (viejo) viejo.remove();
+  if (typeof sinCartera === "function" && sinCartera(SES.vendedor.cartera) && !ptEquipo().length) return;
+  const me = ptGuardarHoy(), yo = SES.vendedor.nombre, l = ptRanking(ptVista), mx = Math.max(1, ...l.map(x => x.pts)), mio = l.find(x => x.v === yo);
+  const med = p => p === 1 ? "🥇" : p === 2 ? "🥈" : p === 3 ? "🥉" : p + "°";
+  const tit = { dia: "Hoy", sem: "Esta semana", mes: new Date().toLocaleDateString("es-CL", { month: "long" }).replace(/^./, c => c.toUpperCase()) }[ptVista];
+  const html = `<section class="pt-card" id="ptCard" aria-label="Ranking del equipo">
+    <div class="pt-top"><div><h3>🏆 Ranking del equipo</h3><small>${tit} · puntos por misiones del día</small></div>
+      <div class="pt-seg" role="group" aria-label="Período">${[["dia", "Hoy"], ["sem", "Semana"], ["mes", "Mes"]].map(([k, t]) => `<button type="button" data-pt="${k}" aria-pressed="${ptVista === k}">${t}</button>`).join("")}</div></div>
+    ${me ? `<div class="pt-yo"><b class="n">${me.hoy.pts}</b><div><b>Tus puntos de hoy</b><small>${me.hoy.ok} de ${me.hoy.n} misiones cumplidas · máximo posible ${me.hoy.max}${me.pts > me.hoy.pts ? ` · tu mejor marca de hoy: ${me.pts}` : ""}${mio ? ` · vas ${mio.pos}° ${ptVista === "dia" ? "hoy" : ptVista === "sem" ? "en la semana" : "en el mes"}` : ""}</small></div></div>` : ""}
+    <ol class="pt-l">${l.map(x => `<li class="${x.v === yo ? "yo" : ""}"><span class="pos">${med(x.pos)}</span><span class="nom">${esc(x.v)}${x.v === yo ? " · tú" : ""}</span><span class="pts">${x.pts.toLocaleString("es-CL")} pts</span>
+      <span class="bar"><i style="width:${Math.round(x.pts / mx * 100)}%"></i></span>${ptVista !== "dia" ? `<small>${x.dias} ${x.dias === 1 ? "día" : "días"} con puntos</small>` : ""}</li>`).join("")}</ol>
+    <details class="pt-reg"><summary>¿Cómo se ganan puntos?</summary>Cada misión del día da hasta 10 puntos según tu avance, más 5 de bono al completarla (máximo 15 por misión).
+      Vale el mejor puntaje que alcances en el día; la semana (lunes a domingo) y el mes suman los días. El ranking se actualiza cada 5 minutos con conexión.${ptDemo ? " En la demo el resto del equipo es simulado." : ""}</details>
+  </section>`;
+  box.insertAdjacentHTML("afterbegin", html);
+  box.querySelectorAll("[data-pt]").forEach(b => b.onclick = () => { ptVista = b.dataset.pt; try { localStorage.setItem("hwf-pt-vista", ptVista); } catch (e) {} ptPintarRanking(); });
+}
+{ const _piPt = pintarInicio; pintarInicio = function () { const r = _piPt.apply(this, arguments); try { ptPintarRanking(); ptSincronizar(); } catch (e) { console.error(e); } return r; }; }
+document.addEventListener("visibilitychange", () => { if (!document.hidden && SES) ptSincronizar(); });
+setInterval(() => { if (SES && !document.hidden) { ptGuardarHoy(); ptSincronizar(); } }, 5 * 60 * 1000);
+if (typeof APP_NOVEDADES !== "undefined" && Array.isArray(APP_NOVEDADES)) APP_NOVEDADES.unshift("Inicio: puntaje por tus misiones del día y ranking del equipo de hoy, la semana y el mes.");
+</script>
 </body>
 </html>
