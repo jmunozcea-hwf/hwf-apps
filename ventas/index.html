@@ -6366,7 +6366,7 @@ syLlamar = async function (cfg, d) {
     const p = d.puntaje || {}, T = lsGet(PTC_T, {}), hoy = today();
     /* no llenar la hoja: un registro cada 20 min como máximo, salvo que se cumpla una misión nueva o sea un día anterior */
     if (p.fecha === hoy && T.f === hoy && T.v === p.vendedor && Date.now() - (T.t || 0) < 20 * 60 * 1000 && (Number(p.cumplidas) || 0) <= (T.ok || 0)) return { ok: false, espera: true };
-    const texto = JSON.stringify({ pt: 1, f: p.fecha, v: p.vendedor, pts: Number(p.puntos) || 0, max: Number(p.max) || 0, ok: Number(p.cumplidas) || 0, n: Number(p.misiones) || 0 });
+    const texto = JSON.stringify({ pt: 1, f: p.fecha, v: p.vendedor, pts: Number(p.puntos) || 0, max: Number(p.max) || 0, ok: Number(p.cumplidas) || 0, n: Number(p.misiones) || 0, det: String(p.detalle || "").slice(0, 500) });
     const r = await _syLlamarPtc.call(this, cfg, { accion: "chatEnviar", mensaje: { id: "CH-PT-" + String(p.fecha).replace(/-/g, "") + "-" + ptcSlug(p.vendedor) + "-" + (Number(p.puntos) || 0), canal: PTC_CANAL, de: p.vendedor, texto, app: "pt" } });
     if (r && r.ok && p.fecha === hoy) lsSet(PTC_T, { f: hoy, v: p.vendedor, t: Date.now(), ok: Number(p.cumplidas) || 0 });
     return r && r.ok ? { ok: true } : (r || { ok: false });
@@ -6378,7 +6378,7 @@ syLlamar = async function (cfg, d) {
   const M = {};
   ((lsGet(PT_RK, null) || {}).filas || []).forEach(f => { M[f[0] + "|" + f[1]] = f; });
   (r.mensajes || []).forEach(m => { let o; try { o = JSON.parse(m.texto); } catch (e) { return; } if (!o || !o.pt || !o.f || !o.v || o.f < desde) return;
-    const k = o.f + "|" + o.v, ant = M[k]; if (!ant || (Number(o.pts) || 0) >= (Number(ant[2]) || 0)) M[k] = [o.f, o.v, Number(o.pts) || 0, Number(o.max) || 0, Number(o.ok) || 0, Number(o.n) || 0]; });
+    const k = o.f + "|" + o.v, ant = M[k]; if (!ant || (Number(o.pts) || 0) >= (Number(ant[2]) || 0)) M[k] = [o.f, o.v, Number(o.pts) || 0, Number(o.max) || 0, Number(o.ok) || 0, Number(o.n) || 0, String(o.det || "")]; });
   return { ok: true, filas: Object.values(M).filter(f => f[0] >= desde) };
 };
 </script>
