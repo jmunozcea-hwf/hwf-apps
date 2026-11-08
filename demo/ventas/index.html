@@ -7,6 +7,45 @@
 <script>/* datos públicos actualizables */window.__PUB=(function(){try{var p=JSON.parse(localStorage.getItem("hwf-pub")||"null");return p&&p.version&&p.version>"0000"?p:null}catch(e){return null}})();</script>
 
 
+<script>/* carteras: reasignaciones aplicadas a los datos de Drive antes de que la app los lea */
+window.CART_FIJAS = { "Angélica Carvajal": "Claudia Hamame", "Víctor Moreno": "Genérico" };
+window.cartReglas = function () { var R = null; try { R = JSON.parse(localStorage.getItem("hwf-carteras") || "null"); } catch (e) {}
+  R = R || {}; var v = {}, k; for (k in CART_FIJAS) v[k] = CART_FIJAS[k]; for (k in (R.vend || {})) v[k] = R.vend[k]; for (k in v) if (!v[k]) delete v[k];
+  return { vend: v, cli: R.cli || {} }; };
+window.cartNorm = function (s) { return String(s == null ? "" : s).normalize("NFD").replace(/[̀-ͯ]/g, "").toUpperCase().replace(/[^A-Z0-9]+/g, " ").trim(); };
+window.cartAplicar = function (d) {
+  var R = cartReglas(), V = R.vend, C = R.cli, n = 0;
+  var fin = function (x) { var i = 0; while (V[x] && i++ < 5) x = V[x]; return x; };
+  var cam = function (x) { if (typeof x === "string" && V[x]) { n++; return fin(x); } return x; };
+  var suma = function (a, b) { if (typeof a === "number" && typeof b === "number") return a + b; if (a && b && typeof a === "object" && typeof b === "object" && !Array.isArray(a)) { for (var k in b) a[k] = k in a ? suma(a[k], b[k]) : b[k]; return a; } return a != null ? a : b; };
+  var walk = function (o) {
+    if (Array.isArray(o)) {
+      for (var i = 0; i < o.length; i++) o[i] = walk(o[i]);
+      /* listas de metas [{vendedor, meta, venta_base…}]: juntar duplicados */
+      if (o.length && o[0] && typeof o[0] === "object" && !Array.isArray(o[0]) && "vendedor" in o[0] && "meta" in o[0]) {
+        var vis = {}, out = []; o.forEach(function (x) { if (x && vis[x.vendedor]) { for (var k in x) if (k !== "vendedor" && typeof x[k] === "number") vis[x.vendedor][k] = (vis[x.vendedor][k] || 0) + x[k]; } else { if (x) vis[x.vendedor] = x; out.push(x); } });
+        return out; }
+      return o;
+    }
+    if (o && typeof o === "object") {
+      for (var k in o) { if (!Object.prototype.hasOwnProperty.call(o, k)) continue; var v = walk(o[k]), nk = cam(k);
+        if (nk !== k) { delete o[k]; o[nk] = nk in o ? suma(o[nk], v) : v; } else o[k] = v; }
+      /* paquete de Admin: lista de vendedores sin duplicados y ventas reindexadas */
+      if (Array.isArray(o.vend) && Array.isArray(o.rows) && o.vend.every(function (x) { return typeof x === "string"; })) {
+        var u = [], map = o.vend.map(function (x) { var j = u.indexOf(x); if (j < 0) { u.push(x); j = u.length - 1; } return j; });
+        if (u.length !== o.vend.length) { o.rows.forEach(function (r) { if (r && typeof r[7] === "number" && map[r[7]] != null) r[7] = map[r[7]]; }); o.vend = u; } }
+      /* reasignación por cliente: objetos {nombre, vendedor} (Nota de Pedido) y filas [nombre, comuna, cartera, dir] (Admin) */
+      if (typeof o.nombre === "string" && "vendedor" in o && C[cartNorm(o.nombre)]) { o.vendedor = C[cartNorm(o.nombre)]; n++; }
+      if (Array.isArray(o.clientes)) o.clientes.forEach(function (c) { if (Array.isArray(c) && typeof c[0] === "string" && typeof c[2] === "string" && C[cartNorm(c[0])]) { c[2] = C[cartNorm(c[0])]; n++; } });
+      return o;
+    }
+    return cam(o);
+  };
+  walk(d); return n;
+};
+(function () { ["hwf-dv-app", "hwf-dv-admin", "hwf-dv-dash"].forEach(function (key) { try { var p = JSON.parse(localStorage.getItem(key) || "null"); if (!p || !p.d) return;
+  var s0 = JSON.stringify(p.d); cartAplicar(p.d); if (JSON.stringify(p.d) !== s0) localStorage.setItem(key, JSON.stringify(p)); } catch (e) {} }); })();
+</script>
 <script>/* datos vivos de Drive */window.__DV=(function(){try{var p=JSON.parse(localStorage.getItem("hwf-dv-app")||"null");return p&&p.v&&p.d&&p.v>"2026-10-29 09:00:00"?p:null}catch(e){return null}})();window.__dvGet=function(n){return window.__DV&&Object.prototype.hasOwnProperty.call(window.__DV.d,n)?window.__DV.d[n]:null};</script>
 
 <meta charset="utf-8">
@@ -3589,7 +3628,7 @@ function rgEliminar(x) {
 /* ================================================================
    VENDEDORES SIN CARTERA ASIGNADA (trabajan con todos los clientes)
    ================================================================ */
-const VEND_EXTRA = [];
+const VEND_EXTRA = ["Genérico"];
 const sinCartera = cart => VEND_EXTRA.includes(cart);
 const _mostrarAccesoV = mostrarAcceso;
 mostrarAcceso = function () {
@@ -6662,6 +6701,35 @@ document.head.insertAdjacentHTML("beforeend", "<style>" + CAL_CSS + "</style>");
   try { lsSet("hwf-nav-pista", true); } catch (e) {}
   /* menos pasos: en Pedido primero Cliente → Entrega → Productos; «Mis notas de pedido» queda al final */
   const rg = document.getElementById("regNotas"), sec = document.querySelector(".sections"); if (rg && sec) sec.after(rg); })();
+</script>
+
+<script>
+/* ================= Carteras: reglas centrales ================= */
+/* ---- reglas de cartera desde el registro central (código «CARTERA») ---- */
+function cartLeer(cambios) {
+  const E = {};
+  (cambios || []).forEach(c => { if (!c || c.codigo !== "CARTERA") return; let o; try { o = JSON.parse(c.detalle); } catch (e) { return; }
+    if (!o || !o.cart || !o.de) return; const k = o.tipo + "|" + o.de, a = E[k]; if (!a || String(o.t || "") >= String(a.t || "")) E[k] = o; });
+  const R = { vend: {}, cli: {} }; Object.values(E).forEach(o => { if (o.tipo === "cli") R.cli[cartNorm(o.de)] = o.borrado ? "" : o.a; else R.vend[o.de] = o.borrado ? "" : o.a; });
+  Object.keys(R.cli).forEach(k => { if (!R.cli[k]) delete R.cli[k]; }); return R;
+}
+
+let cartOcup = false;
+async function cartBajar() {
+  const cfg = typeof syCfg === "function" ? syCfg() : null; if (!cfg || !cfg.url || cartOcup || /DEMO/.test(document.title)) return; cartOcup = true;
+  try { const r = await syLlamar(cfg, { accion: "clientesCambios", version: lsGet("hwf-carteras-ver", "") || "" });
+    if (!r || !r.ok || r.igual || !Array.isArray(r.__todos || r.cambios)) return;
+    const R = cartLeer(r.__todos || r.cambios), antes = JSON.stringify(lsGet("hwf-carteras", null) || {});
+    lsSet("hwf-carteras", R); lsSet("hwf-carteras-ver", r.version || "");
+    if (JSON.stringify(R) !== antes) toast("Hay cambios de cartera: se aplican al abrir de nuevo la app.");
+  } catch (e) {} finally { cartOcup = false; }
+}
+/* las filas «CARTERA» no son cambios de clientes; se guardan aparte antes de filtrarlas */
+const _syLlamarCart = syLlamar;
+syLlamar = async function (cfg, d) { const r = await _syLlamarCart.apply(this, arguments);
+  if (d && d.accion === "clientesCambios" && r && Array.isArray(r.cambios)) { r.__todos = r.cambios; r.cambios = r.cambios.filter(c => c && c.codigo !== "CARTERA"); } return r; };
+document.addEventListener("visibilitychange", () => { if (!document.hidden) cartBajar(); });
+setTimeout(cartBajar, 4000);
 </script>
 </body>
 </html>
