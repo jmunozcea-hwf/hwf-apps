@@ -6592,14 +6592,14 @@ const CAL_clientes = () => clientesLocal().map(c => tc(c.nombre)).sort(), CAL_ad
    (acción «clienteCambios», código «EVENTO», detalle JSON); sirve con el script v11 de la planilla y con el nuevo.
    Cada app define antes: CAL_call(datos) → respuesta del script, CAL_get(k, def), CAL_set(k, v), CAL_quien(), CAL_toast(m),
    CAL_clientes() → nombres de clientes (sugerencias), CAL_admin (true en HWF Admin). */
-const CAL_TIPOS = ["Feria", "Activación de producto", "Capacitación", "Reunión", "Otra"];
+const CAL_TIPOS = ["Feria", "Activación", "Capacitación", "Reunión", "Otra"];
 const CAL_K = "hwf-cal", CAL_V = "hwf-cal-ver";
 const calEsc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const calHoy = () => { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
 function calLeer(cambios) {
   const E = {};
   (cambios || []).forEach(c => { if (!c || c.codigo !== "EVENTO") return; let o; try { o = JSON.parse(c.detalle); } catch (e) { return; }
-    if (!o || !o.ev || !o.id) return; const a = E[o.id]; if (!a || String(o.t || "") >= String(a.t || "")) E[o.id] = o; });
+    if (!o || !o.ev || !o.id) return; if (o.tipo === "Activación de producto") o.tipo = "Activación"; const a = E[o.id]; if (!a || String(o.t || "") >= String(a.t || "")) E[o.id] = o; });
   return E;
 }
 let calOcup = false;
@@ -6613,7 +6613,7 @@ async function calBajar() {
     CAL_set(CAL_K, E); CAL_set(CAL_V, r.version || ""); return true;
   } catch (e) { return false; } finally { calOcup = false; }
 }
-const calLista = () => Object.values(CAL_get(CAL_K, {})).filter(e => !e.borrado).sort((a, b) => (a.fecha + (a.hora || "")).localeCompare(b.fecha + (b.hora || "")));
+const calLista = () => Object.values(CAL_get(CAL_K, {})).filter(e => !e.borrado).map(e => { if (e.tipo === "Activación de producto") e.tipo = "Activación"; return e; }).sort((a, b) => (a.fecha + (a.hora || "")).localeCompare(b.fecha + (b.hora || "")));
 async function calGuardar(o) {
   o.t = new Date().toISOString(); o.por = o.por || CAL_quien(); o.ev = 1;
   const r = await CAL_call({ accion: "clienteCambios", cambios: [{ id: "CC-EV-" + String(o.id).replace(/[^A-Za-z0-9]/g, "") + "-" + Date.now(), fecha: o.t, vendedor: CAL_quien(), cartera: "",
@@ -6650,7 +6650,6 @@ function calForm(o, alGuardar) {
   const nuevo = !CAL_get(CAL_K, {})[o.id], w = document.createElement("div"); w.className = "cal-modal";
   w.innerHTML = `<form class="cal-box"><h3>${nuevo ? "Nueva actividad del equipo" : "Editar actividad"}</h3>
     <label>Tipo<select name="tipo">${CAL_TIPOS.map(t => `<option${t === o.tipo ? " selected" : ""}>${t}</option>`).join("")}</select></label>
-    <label>Título<input name="titulo" required maxlength="120" value="${calEsc(o.titulo)}" placeholder="Ej.: Feria de mascotas Rancagua"></label>
     <div class="cal-2"><label>Fecha<input name="fecha" type="date" required value="${calEsc(o.fecha)}"></label><label>Hora (opcional)<input name="hora" type="time" value="${calEsc(o.hora)}"></label></div>
     <label>Lugar<input name="lugar" maxlength="150" value="${calEsc(o.lugar)}" placeholder="Dirección o local"></label>
     <label>Cliente (opcional)<input name="cliente" list="calCli" maxlength="150" value="${calEsc(o.cliente)}"><datalist id="calCli">${CAL_clientes().slice(0, 600).map(n => `<option value="${calEsc(n)}"></option>`).join("")}</datalist></label>
@@ -6664,8 +6663,9 @@ function calForm(o, alGuardar) {
     else { const p = w.querySelector(".cal-err"); p.hidden = false; p.textContent = "No se pudo guardar: " + ((r && r.error) || "sin conexión"); b.disabled = false; b.textContent = "Guardar"; } };
   if (!nuevo) w.querySelector(".cal-del").onclick = () => { if (confirm("¿Eliminar esta actividad del calendario del equipo?")) enviar(Object.assign({}, o, { borrado: true })); };
   f.onsubmit = e => { e.preventDefault(); const v = Object.fromEntries(new FormData(f).entries());
-    if (!String(v.titulo).trim() || !v.fecha) return; enviar(Object.assign({}, o, { tipo: v.tipo, titulo: v.titulo.trim(), fecha: v.fecha, hora: v.hora, lugar: v.lugar.trim(), cliente: v.cliente.trim(), nota: v.nota.trim(), borrado: false })); };
-  setTimeout(() => f.titulo.focus(), 50);
+    if (!v.fecha) return; const tit = [v.tipo, v.cliente.trim() || v.lugar.trim()].filter(Boolean).join(" · ");   /* sin campo «Título» (pedido de Jorge 08-11-2026) */
+    enviar(Object.assign({}, o, { tipo: v.tipo, titulo: tit, fecha: v.fecha, hora: v.hora, lugar: v.lugar.trim(), cliente: v.cliente.trim(), nota: v.nota.trim(), borrado: false })); };
+  setTimeout(() => f.fecha.focus(), 50);
 }
 function calMontar(box, repintar) {
   box.innerHTML = calCardHtml();
