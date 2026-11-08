@@ -1568,7 +1568,7 @@ function pintarVentas() {
   const dias = []; for (let d = 1; d <= new Date(R.y, R.m, 0).getDate(); d++) { const f = isoD(new Date(R.y, R.m - 1, d)); if (!diaTienda(f) && !R.dia[d]) continue; dias.push({ d, f, v: R.dia[d] || 0, a: R.anot[f] || [] }); }
   let acum = 0, acEsp = 0; const metaDia = R.totD ? R.meta / R.totD : 0;
   const filas = dias.map(x => { if (diaTienda(x.f) && x.d <= R.d) acEsp += metaDia; acum += x.v; const futuro = x.d > R.d, an = x.a.reduce((s, z) => s + (Number(z.monto) || 0), 0);
-    return `<tr class="${x.f === hoyISO() ? "hoy" : ""}"><td>${esc(new Date(x.f + "T12:00:00").toLocaleDateString("es-CL", { weekday: "short", day: "numeric" }))}</td><td>${futuro ? "" : fmt(x.v)}</td><td>${futuro ? "" : fmt(acum)}</td><td>${fmt(metaDia * (diaTienda(x.f) ? 1 : 0))}</td><td class="${futuro ? "" : acum - acEsp < 0 ? "neg" : "pos"}">${futuro ? "" : (acum - acEsp >= 0 ? "+" : "") + mm(acum - acEsp)}</td><td>${x.a.length ? x.a.length + " · " + fmt(an) : ""}</td></tr>`; }).join("");
+    return `<tr class="${x.f === hoyISO() ? "hoy" : ""}"><td>${esc(new Date(x.f + "T12:00:00").toLocaleDateString("es-CL", { weekday: "short", day: "numeric" }))}</td><td>${futuro ? "" : fmt(x.v)}</td><td>${futuro ? "" : fmt(acum)}</td><td>${fmt(metaDia * (diaTienda(x.f) ? 1 : 0))}</td><td class="${futuro ? "" : acum - acEsp < 0 ? "neg" : "pos"}">${futuro ? "" : (acum - acEsp >= 0 ? "+" : "") + mm(acum - acEsp)}</td></tr>`; }).join("");
   const top = Object.entries(R.prod).sort((a, b) => b[1].v - a[1].v).slice(0, 10);
   box.innerHTML = `<div class="t-card"><h2>Ventas de ${MESES[R.m - 1]} ${R.y} <small>al ${String(R.d).padStart(2, "0")}-${String(R.m).padStart(2, "0")} · Defontana</small></h2>
       <div class="t-bar"><i style="width:${Math.min(100, pct * 100).toFixed(1)}%"></i><s style="left:${Math.min(100, epct * 100).toFixed(1)}%" title="esperado a la fecha"></s></div>
@@ -1579,11 +1579,10 @@ function pintarVentas() {
         <div class="t-kpi"><span>Necesario por día</span><b>${mm(R.porDia)}</b><small>${R.restD} días restantes</small></div>
         <div class="t-kpi"><span>Mismo período ${R.y - 1}</span><b>${mm(R.vAntMismo)}</b><small>${R.vAntMismo ? (R.vMes >= R.vAntMismo ? "+" : "") + Math.round((R.vMes / R.vAntMismo - 1) * 100) + "% · mes completo " + mm(R.vAntMes) : "sin datos"}</small></div></div></div>
     <div class="t-card"><h2>Registro de venta diaria <small>Defontana · acumulado vs lo esperado según la meta</small></h2>
-      <div class="t-row"><button type="button" class="t-btn" id="vAnotar">+ Anotar venta de hoy</button><span class="t-vacio" style="font-size:.8rem">Las ventas anotadas cuentan para tu misión y el ranking; las oficiales llegan de Defontana.</span></div>
-      <div class="t-tw"><table class="t-t"><thead><tr><th>Día</th><th>Venta</th><th>Acumulado</th><th>Meta del día</th><th>Desviación acum.</th><th>Anotadas</th></tr></thead><tbody>${filas}</tbody></table></div></div>
+      <p class="t-vacio" style="font-size:.8rem">Las ventas se actualizan solas cuando se sincronizan los datos de Drive (Defontana).</p>
+      <div class="t-tw"><table class="t-t"><thead><tr><th>Día</th><th>Venta</th><th>Acumulado</th><th>Meta del día</th><th>Desviación acum.</th></tr></thead><tbody>${filas}</tbody></table></div></div>
     <div class="t-card"><h2>Productos más vendidos del mes</h2><div class="t-tw"><table class="t-t"><thead><tr><th>Producto</th><th>Unidades</th><th>Venta</th><th>Margen</th></tr></thead><tbody>
       ${top.map(([i, o]) => `<tr><td>${esc((R.D.productos[i] || ["?"])[0])}</td><td>${Math.round(o.q)}</td><td>${fmt(o.v)}</td><td>${o.v ? Math.round((1 - o.c / o.v) * 100) + "%" : "–"}</td></tr>`).join("") || '<tr><td colspan="4" class="t-vacio">Sin ventas este mes.</td></tr>'}</tbody></table></div></div>`;
-  $("vAnotar").onclick = anotarVenta;
 }
 function anotarVenta() {
   if (!SES) return pedirTurno();
@@ -1629,7 +1628,6 @@ function prodDelDia() {
   const f = hoyISO(), h = [...f].reduce((s, c) => s * 31 + c.charCodeAt(0) >>> 0, 7); return L[h % L.length];
 }
 const MISIONES = () => [
-  { k: "ventas", t: "Anota las ventas del día", n: 8, d: "Cada boleta con «+ Anotar venta»" },
   { k: "nut", t: "Recomienda con Nutrición", n: 3, d: "Compara el alimento de un cliente con los nuestros" },
   { k: "ofrecer", t: "Ofrece el producto del día", n: 5, d: prodDelDia() || "Producto destacado" },
   { k: "stock", t: "Revisa el stock bajo", n: 1, d: "Ve a Stock y marca «revisado»" }];
@@ -1638,7 +1636,6 @@ function misSumar(k, n) { if (!turno() || !diaTienda(new Date())) return; const 
   Object.keys(M).forEach(x => { if (x.slice(0, 10) < isoD(new Date(Date.now() - 70 * 864e5))) delete M[x]; }); lsSet(MISK, M); guardarPuntos(); }
 function puntosHoy() { const e = misEstado(); let pts = 0, max = 0, ok = 0; const det = [];
   MISIONES().forEach(m => { const h = e[m.k] || 0, r = Math.min(1, h / m.n), p = Math.round(10 * r) + (h >= m.n ? 5 : 0); pts += p; max += 15; if (h >= m.n) ok++; det.push(`${m.t}: ${p}`); });
-  const A = (lsGet(ANOK, {})[hoyISO()] || []).filter(x => x.v === turno()); det.push("Ventas anotadas: " + fmt(A.reduce((s, x) => s + x.monto, 0)) + " (" + A.length + ")");
   return { pts, max, ok, n: MISIONES().length, det: det.join(" | ") }; }
 let envT = null;
 function guardarPuntos() { if (!turno()) return; const c = puntosHoy(), R = lsGet(RKK + "-loc", {}), k = turno() + "|" + hoyISO();
@@ -1658,7 +1655,7 @@ async function enviarPuntos() {
 function pintarInicio() {
   const box = $("sInicio"), R = resumen(), t = turno(), habil = diaTienda(new Date()), e = misEstado(), c = puntosHoy();
   const mis = MISIONES().map(m => { const h = e[m.k] || 0, p = Math.min(100, Math.round(h / m.n * 100)), ok = h >= m.n;
-    const bt = m.k === "ventas" ? `<button type="button" class="t-btn" data-ac="ventas">+ Venta</button>` : m.k === "ofrecer" ? `<button type="button" class="t-btn" data-ac="ofrecer">+1</button>` : m.k === "nut" ? `<button type="button" class="t-btn sec" data-ac="nut">Ir</button>` : `<button type="button" class="t-btn sec" data-ac="stock">Ir</button>`;
+    const bt = m.k === "ofrecer" ? `<button type="button" class="t-btn" data-ac="ofrecer">+1</button>` : m.k === "nut" ? `<button type="button" class="t-btn sec" data-ac="nut">Ir</button>` : `<button type="button" class="t-btn sec" data-ac="stock">Ir</button>`;
     return `<div class="t-mis ${ok ? "ok" : ""}"><div class="t-ring" style="--p:${p}"><span>${ok ? "✓" : h + "/" + m.n}</span></div><div><b>${esc(m.t)}</b><small>${esc(m.d)}</small></div>${bt}</div>`; }).join("");
   box.innerHTML = `<div class="t-card"><h2>${t ? "Hola, " + esc(t) : "Sin jornada iniciada"} <small>${esc(new Date().toLocaleDateString("es-CL", { weekday: "long", day: "numeric", month: "long" }))}</small></h2>
       ${R ? `<div class="t-bar"><i style="width:${Math.min(100, R.vMes / R.meta * 100).toFixed(1)}%"></i><s style="left:${Math.min(100, R.esperado / R.meta * 100).toFixed(1)}%"></s></div>
@@ -1666,7 +1663,7 @@ function pintarInicio() {
         <div class="t-kpi"><span>Necesario por día</span><b>${mm(R.porDia)}</b><small>${R.restD} días de tienda</small></div><div class="t-kpi"><span>Mis puntos hoy</span><b>${c.pts}</b><small>de ${c.max}</small></div></div>` : '<p class="t-vacio">Cargando datos…</p>'}</div>
     <div class="t-card"><h2>Misiones del día <small>${habil ? c.ok + " de " + c.n + " cumplidas" : "hoy no hay (feriado irrenunciable)"}</small></h2>${habil ? (t ? mis : '<button type="button" class="t-btn" id="iTurno">Iniciar jornada</button>') : '<p class="t-vacio">La tienda no suma puntos hoy.</p>'}</div>`;
   box.querySelectorAll("[data-ac]").forEach(b => b.onclick = () => { const a = b.dataset.ac;
-    if (a === "ventas") anotarVenta(); else if (a === "ofrecer") { misSumar("ofrecer", 1); toast("¡Bien! Producto del día ofrecido."); pintarInicio(); } else ir(a); });
+    if (a === "ofrecer") { misSumar("ofrecer", 1); toast("¡Bien! Producto del día ofrecido."); pintarInicio(); } else ir(a); });
   if ($("iTurno")) $("iTurno").onclick = pedirTurno;
 }
 
@@ -1688,8 +1685,8 @@ function pintarRank() {
   const L = Object.values(T).sort((a, b) => b.pts - a.pts || b.venta - a.venta), med = ["🥇", "🥈", "🥉"];
   $("sRank").innerHTML = `<div class="t-card"><h2>Ranking de la tienda <small>puntos por las misiones del día</small></h2>
     <div class="t-seg">${[["hoy", "Hoy"], ["sem", "Esta semana"], ["mes", "Este mes"]].map(([k, t]) => `<button type="button" data-rv="${k}" aria-pressed="${rkVista === k}">${t}</button>`).join("")}</div>
-    <div class="t-tw"><table class="t-t"><thead><tr><th>#</th><th>Nombre</th><th>Puntos</th><th>Días</th><th>Ventas anotadas</th></tr></thead><tbody>
-    ${L.map((x, i) => `<tr><td>${x.pts ? med[i] || i + 1 : "–"}</td><td><b>${esc(x.v)}</b></td><td>${x.pts}</td><td>${x.dias}</td><td>${fmt(x.venta)}</td></tr>`).join("")}</tbody></table></div>
+    <div class="t-tw"><table class="t-t"><thead><tr><th>#</th><th>Nombre</th><th>Puntos</th><th>Días</th></tr></thead><tbody>
+    ${L.map((x, i) => `<tr><td>${x.pts ? med[i] || i + 1 : "–"}</td><td><b>${esc(x.v)}</b></td><td>${x.pts}</td><td>${x.dias}</td></tr>`).join("")}</tbody></table></div>
     <p class="t-vacio" style="font-size:.8rem">Cuentan todos los días de tienda (abre también feriados, salvo los irrenunciables). Los puntos se suben solos al script de Google.</p></div>`;
   $("sRank").querySelectorAll("[data-rv]").forEach(b => b.onclick = () => { rkVista = b.dataset.rv; pintarRank(); });
 }
@@ -1736,8 +1733,8 @@ function pintarAdm() {
       ${R ? `<div class="t-kpis"><div class="t-kpi"><span>Venta ${MESES[R.m - 1]}</span><b>${mm(R.vMes)}</b><small>meta ${mm(R.meta)} · ${Math.round(R.vMes / R.meta * 100)}%</small></div>
         <div class="t-kpi ${R.desv < 0 ? "bad" : "ok"}"><span>Desviación a la fecha</span><b>${R.desv >= 0 ? "+" : ""}${mm(R.desv)}</b></div><div class="t-kpi"><span>Proyección</span><b>${mm(R.proy)}</b></div><div class="t-kpi"><span>Necesario por día</span><b>${mm(R.porDia)}</b></div></div>` : ""}
       <div class="t-seg">${[["hoy", "Hoy"], ["sem", "Esta semana"], ["mes", "Este mes"], ["mant", "Mes pasado"]].map(([k, t]) => `<button type="button" data-av="${k}" aria-pressed="${admVista === k}">${t}</button>`).join("")}</div>
-      <div class="t-tw"><table class="t-t"><thead><tr><th>Persona</th><th>Puntos</th><th>% del máximo</th><th>Días</th><th>Misiones</th><th>Ventas anotadas</th><th>Última jornada</th></tr></thead><tbody>
-      ${T.map(x => `<tr><td><b>${esc(x.u)}</b></td><td>${x.pts}</td><td>${x.max ? Math.round(x.pts / x.max * 100) + "%" : "–"}</td><td>${x.dias}</td><td>${x.ok} de ${x.n || 0}</td><td>${x.cant} · ${fmt(x.monto)}</td><td>${esc(x.ult)}</td></tr>`).join("")}</tbody></table></div></div>
+      <div class="t-tw"><table class="t-t"><thead><tr><th>Persona</th><th>Puntos</th><th>% del máximo</th><th>Días</th><th>Misiones</th><th>Última jornada</th></tr></thead><tbody>
+      ${T.map(x => `<tr><td><b>${esc(x.u)}</b></td><td>${x.pts}</td><td>${x.max ? Math.round(x.pts / x.max * 100) + "%" : "–"}</td><td>${x.dias}</td><td>${x.ok} de ${x.n || 0}</td><td>${esc(x.ult)}</td></tr>`).join("")}</tbody></table></div></div>
     <div class="t-card"><h2>Detalle por jornada</h2><div class="t-tw"><table class="t-t"><thead><tr><th>Día</th><th>Persona</th><th>Puntos</th><th>Detalle</th></tr></thead><tbody>
       ${L.map(x => `<tr><td>${esc(x.f)}</td><td>${esc(x.v.replace(TAG, ""))}</td><td>${x.pts}</td><td style="text-align:left;white-space:normal;font-size:.78rem">${esc(x.det || "")}</td></tr>`).join("") || '<tr><td colspan="4" class="t-vacio">Sin jornadas en este período.</td></tr>'}</tbody></table></div>
       <div class="t-row"><button type="button" class="t-btn sec" id="admAct">↻ Actualizar</button><button type="button" class="t-btn sec" id="admSal">Cerrar acceso</button></div></div>`;
