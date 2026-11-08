@@ -4819,5 +4819,12 @@ const diaHabil = f => { const d = f instanceof Date ? f : new Date(String(f).sli
 
 { const _rkMH = rkFilas; rkFilas = function () { return _rkMH.apply(this, arguments).filter(r => diaHabil(r.f)); }; }
 </script>
+
+<script>/* dosapps: borrar la copia del Dashboard que guarda Nota de Pedido (usa estos mismos datos) */
+(function () { try { var dvVer = function (s) { var m = /^\{"v":"([^"]*)"/.exec(String(s || "").slice(0, 80)); return m ? m[1] : ""; };
+  var a = localStorage.getItem("hwf-dv-admin"), d = localStorage.getItem("hwf-dv-dash");
+  if (a && d && dvVer(a) >= dvVer(d)) localStorage.removeItem("hwf-dv-dash");
+} catch (e) {} })();
+</script>
 </body>
 </html>

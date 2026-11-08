@@ -20,6 +20,14 @@
   };
 })();</script>
 <script>if("serviceWorker" in navigator)addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})});</script>
+<script>/* dosapps: no duplicar el Dashboard si HWF Admin está en el mismo teléfono */
+(function () { var dvVer = function (s) { var m = /^\{"v":"([^"]*)"/.exec(String(s || "").slice(0, 80)); return m ? m[1] : ""; };
+  var S = Storage.prototype, set = S.setItem;
+  S.setItem = function (k, v) {
+    if (k === "hwf-dv-dash") { try { var a = this.getItem("hwf-dv-admin"); if (a && /"BASE":/.test(a.slice(0, 400)) && dvVer(a) >= dvVer(v)) return; } catch (e) {} }
+    return set.apply(this, arguments); };
+})();</script>
+
 
 <script>/* DEMO: guarda todo con prefijo propio */(function(){var P="hwf-demo:",S=Storage.prototype,g=S.getItem,s=S.setItem,r=S.removeItem;S.getItem=function(k){return g.call(this,P+k)};S.setItem=function(k,v){return s.call(this,P+k,v)};S.removeItem=function(k){return r.call(this,P+k)};})();</script>
 <script>/* datos públicos actualizables */window.__PUB=(function(){try{var p=JSON.parse(localStorage.getItem("hwf-pub")||"null");return p&&p.version&&p.version>"0000"?p:null}catch(e){return null}})();</script>
@@ -6862,6 +6870,15 @@ const proxHabil = () => { const d = new Date(); do { d.setDate(d.getDate() + 1);
         if (hs) { const sec = hs.parentElement, fer = FER.has(isoD(new Date()));
           sec.innerHTML = `<h3>Misiones del día <small>${fer ? "feriado" : "fin de semana"}</small></h3><p class="in-vacio">Hoy no hay misiones ni puntos: ${fer ? "es feriado" : "no es día hábil"}. Vuelven el ${esc(proxHabil())}.</p>`; } } } catch (e) {}
     return r; }; }
+</script>
+
+<script>/* dosapps: Dashboard desde los datos de HWF Admin (mismo teléfono) */
+(function () { try { var dvVer = function (s) { var m = /^\{"v":"([^"]*)"/.exec(String(s || "").slice(0, 80)); return m ? m[1] : ""; };
+  var s = localStorage.getItem("hwf-dv-admin"); if (!s || dvVer(s) < DB.v) return;
+  var a = JSON.parse(s); if (!a || !a.d || !a.d.BASE || !a.d.BASE.rows) return;
+  DB = { v: a.v, d: a.d.BASE, act: a.d.ACT_INFO || null }; localStorage.removeItem(DB_KEY);
+  if (typeof MODO !== "undefined" && MODO === "dash" && typeof pintarDash === "function") pintarDash();
+} catch (e) {} })();
 </script>
 </body>
 </html>
