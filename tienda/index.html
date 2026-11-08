@@ -1762,9 +1762,10 @@ function esperadoDia(P, f) { const [y, m] = f.split("-").map(Number); let tot = 
 function puntajeDia(P, f, mis) {
   const o = P.G[f] || { venta: 0, sacos: 0, tickets: 0 }, esp = esperadoDia(P, f), r = esp ? o.venta / esp : 0, sEsp = P.sacosDia * pesoDe(P, f);
   const c = { f, quien: quienDia(f), venta: o.venta, esp, cumpl: r, sacos: o.sacos, tickets: o.tickets, ticket: o.ticket || 0, sku: o.sku || 0 };
-  let pts = 50 * Math.min(1.2, r), max = 50; pts += 15 * Math.min(1, sEsp ? o.sacos / sEsp : 0); max += 15;
-  if (P.conTickets && o.tickets) { pts += 10 * Math.min(1, P.ticketBase ? o.ticket / P.ticketBase : 0) + 10 * Math.min(1, P.skuBase ? o.sku / P.skuBase : 0); max += 20; }
-  if (mis) { pts += 15 * (mis.max ? mis.pts / mis.max : 0); } max += 15; c.mis = mis ? mis.pts : 0; c.misMax = mis ? mis.max : 0;
+  /* solo venta diaria ponderada (50%), ticket promedio (25%) y SKU por ticket (25%); sin misiones ni sacos (pedido de Jorge 08-11-2026) */
+  let pts = 50 * Math.min(1.2, r), max = 50;
+  if (P.conTickets && o.tickets) { pts += 25 * Math.min(1.2, P.ticketBase ? o.ticket / P.ticketBase : 0) + 25 * Math.min(1.2, P.skuBase ? o.sku / P.skuBase : 0); max += 50; }
+  c.mis = 0; c.misMax = 0;
   c.score = Math.round(pts / max * 100 * 10) / 10; return c;
 }
 function rankCalc(ini, fin) {
@@ -1779,11 +1780,11 @@ function rankCalc(ini, fin) {
 }
 function tablaRank(L, P) {
   const med = ["🥇", "🥈", "🥉"];
-  return `<div class="t-tw"><table class="t-t"><thead><tr><th>#</th><th>Nombre</th><th>Puntaje/día</th><th>Días</th><th>Venta</th><th>Cumplimiento ponderado</th><th>Sacos grandes</th>${P && P.conTickets ? "<th>Ticket prom.</th><th>SKU/ticket</th>" : ""}<th>Misiones</th></tr></thead><tbody>
-    ${L.map((x, i) => `<tr><td>${x.dias ? med[i] || i + 1 : "–"}</td><td><b>${esc(x.u)}</b></td><td><b>${x.dias ? x.score.toFixed(1) : "–"}</b></td><td>${x.dias}</td><td>${mm(x.venta)}</td><td class="${x.cumpl < 1 ? "neg" : "pos"}">${x.dias ? Math.round(x.cumpl * 100) + "%" : "–"}</td><td>${Math.round(x.sacos)}</td>
-      ${P && P.conTickets ? `<td>${x.ticket ? fmt(x.ticket) : "–"}</td><td>${x.sku ? x.sku.toFixed(1) : "–"}</td>` : ""}<td>${x.misMax ? Math.round(x.mis / x.misMax * 100) + "%" : "–"}</td></tr>`).join("")}</tbody></table></div>`;
+  return `<div class="t-tw"><table class="t-t"><thead><tr><th>#</th><th>Nombre</th><th>Puntaje/día</th><th>Días</th><th>Venta</th><th>Cumplimiento ponderado</th>${P && P.conTickets ? "<th>Ticket prom.</th><th>SKU/ticket</th>" : ""}</tr></thead><tbody>
+    ${L.map((x, i) => `<tr><td>${x.dias ? med[i] || i + 1 : "–"}</td><td><b>${esc(x.u)}</b></td><td><b>${x.dias ? x.score.toFixed(1) : "–"}</b></td><td>${x.dias}</td><td>${mm(x.venta)}</td><td class="${x.cumpl < 1 ? "neg" : "pos"}">${x.dias ? Math.round(x.cumpl * 100) + "%" : "–"}</td>
+      ${P && P.conTickets ? `<td>${x.ticket ? fmt(x.ticket) : "–"}</td><td>${x.sku ? x.sku.toFixed(1) : "–"}</td>` : ""}</tr>`).join("")}</tbody></table></div>`;
 }
-const RANK_NOTA = P => `<p class="t-vacio" style="font-size:.78rem">Puntaje por día trabajado (máx. 100): 50 venta del día ponderada (venta ÷ lo esperado ese día según el peso histórico del día de la semana y la meta del mes) · 15 sacos de 10 kg o más · ${P && P.conTickets ? "10 ticket promedio · 10 SKU por ticket · " : ""}15 misiones de la app.${P && !P.conTickets ? " Ticket promedio y SKU por ticket se activan cuando el informe de ventas incluya el «Número del Documento»." : ""} Días: la jornada registrada en este computador; sin registro, lunes a viernes Francisco y fines de semana y feriados Benjamín. Las ventas cuentan hasta la última sincronización (${P ? esc(P.corte) : "—"}).</p>`;
+const RANK_NOTA = P => `<p class="t-vacio" style="font-size:.78rem">Puntaje por día trabajado: 100 = justo lo esperado, hasta 120 si se supera. 50% venta del día ponderada (venta ÷ lo esperado ese día según el peso histórico del día de la semana y la meta del mes) · 25% ticket promedio · 25% SKU promedio por ticket (vs el promedio de la tienda).${P && !P.conTickets ? " Mientras el informe de ventas no traiga el «Número del Documento», el puntaje es solo la venta ponderada." : ""} Días: la jornada registrada en este computador; sin registro, lunes a viernes Francisco y fines de semana y feriados Benjamín. Las ventas cuentan hasta la última sincronización (${P ? esc(P.corte) : "—"}).</p>`;
 
 /* ================= ranking de la tienda ================= */
 let rkVista = "mes";
@@ -1848,8 +1849,8 @@ function pintarAdm() {
         <div class="t-kpi ${R.desv < 0 ? "bad" : "ok"}"><span>Desviación a la fecha</span><b>${R.desv >= 0 ? "+" : ""}${mm(R.desv)}</b></div><div class="t-kpi"><span>Proyección</span><b>${mm(R.proy)}</b></div><div class="t-kpi"><span>Necesario por día</span><b>${mm(R.porDia)}</b></div></div>` : ""}
       <div class="t-seg">${[["hoy", "Hoy"], ["sem", "Esta semana"], ["mes", "Este mes"], ["mant", "Mes pasado"]].map(([k, t]) => `<button type="button" data-av="${k}" aria-pressed="${admVista === k}">${t}</button>`).join("")}</div>
       ${tablaRank(RK.L, RK.P)}${RANK_NOTA(RK.P)}</div>
-    <div class="t-card"><h2>Puntaje por día</h2><div class="t-tw"><table class="t-t"><thead><tr><th>Día</th><th>Persona</th><th>Puntaje</th><th>Venta</th><th>Esperado</th><th>Cumpl.</th><th>Sacos</th><th>Misiones</th></tr></thead><tbody>
-      ${RK.dias.slice().reverse().map(x => `<tr><td>${esc(x.f)}</td><td>${esc(x.quien)}</td><td><b>${x.score.toFixed(1)}</b></td><td>${mm(x.venta)}</td><td>${mm(x.esp)}</td><td class="${x.cumpl < 1 ? "neg" : "pos"}">${Math.round(x.cumpl * 100)}%</td><td>${Math.round(x.sacos)}</td><td>${x.misMax ? x.mis + "/" + x.misMax : "–"}</td></tr>`).join("") || '<tr><td colspan="8" class="t-vacio">Sin días en este período.</td></tr>'}</tbody></table></div></div>
+    <div class="t-card"><h2>Puntaje por día</h2><div class="t-tw"><table class="t-t"><thead><tr><th>Día</th><th>Persona</th><th>Puntaje</th><th>Venta</th><th>Esperado</th><th>Cumpl.</th><th>Ticket</th><th>SKU/ticket</th></tr></thead><tbody>
+      ${RK.dias.slice().reverse().map(x => `<tr><td>${esc(x.f)}</td><td>${esc(x.quien)}</td><td><b>${x.score.toFixed(1)}</b></td><td>${mm(x.venta)}</td><td>${mm(x.esp)}</td><td class="${x.cumpl < 1 ? "neg" : "pos"}">${Math.round(x.cumpl * 100)}%</td><td>${x.tickets ? fmt(x.ticket) : "–"}</td><td>${x.tickets ? x.sku.toFixed(1) : "–"}</td></tr>`).join("") || '<tr><td colspan="8" class="t-vacio">Sin días en este período.</td></tr>'}</tbody></table></div></div>
     <div class="t-card"><h2>Detalle por jornada</h2><div class="t-tw"><table class="t-t"><thead><tr><th>Día</th><th>Persona</th><th>Puntos</th><th>Detalle</th></tr></thead><tbody>
       ${L.map(x => `<tr><td>${esc(x.f)}</td><td>${esc(x.v.replace(TAG, ""))}</td><td>${x.pts}</td><td style="text-align:left;white-space:normal;font-size:.78rem">${esc(x.det || "")}</td></tr>`).join("") || '<tr><td colspan="4" class="t-vacio">Sin jornadas en este período.</td></tr>'}</tbody></table></div>
       <div class="t-row"><button type="button" class="t-btn sec" id="admAct">↻ Actualizar</button><button type="button" class="t-btn sec" id="admSal">Cerrar acceso</button></div></div>`;
