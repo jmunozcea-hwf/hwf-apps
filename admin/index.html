@@ -4658,7 +4658,12 @@ setTimeout(() => cartBajar().then(c => { if (c) toast("Hay cambios de cartera: r
 
 <script>/* sinangelica: cada respuesta del script pasa por las reglas de cartera (cobranza, prospectos, notas…) */
 { const _f = syCall; syCall = async function (cfg, d) { const r = await _f.apply(this, arguments);
-    try { if (r && r.ok && d && d.accion !== "clienteCambios" && typeof cartAplicar === "function") cartAplicar(r); } catch (e) {} return r; }; }
+    try { if (r && r.ok && d && !/^(clienteCambios|clientesCambios|ranking|puntaje|chatLeer)$/.test(d.accion) && typeof cartAplicar === "function") cartAplicar(r); } catch (e) {} return r; }; }
+</script>
+
+<script>/* sinangelica: fuera del ranking los vendedores eliminados */
+const RK_FUERA = /^(ang[eé]lica|v[ií]ctor|jorge)\b/i;
+{ const _rkFilasSA = rkFilas; rkFilas = function () { return _rkFilasSA.apply(this, arguments).filter(r => !RK_FUERA.test(String((r && (r.v || r[1])) || ""))); }; }
 </script>
 </body>
 </html>
