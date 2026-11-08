@@ -1435,10 +1435,10 @@ main{max-width:1100px;margin:0 auto;padding:12px 16px;display:grid;gap:12px}
 .t-mis.ok{border-color:#9ED5B5;background:#F1FAF4}.t-ring{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--hw) calc(var(--p)*1%),var(--sunk,#EEF2F5) 0);font-weight:800;font-size:.78rem}
 .t-ring span{background:var(--surface,#fff);width:38px;height:38px;border-radius:50%;display:grid;place-items:center}
 .t-mis small{display:block;color:var(--muted,#5B6874);font-size:.78rem}
-.t-nav{position:fixed;left:0;right:0;bottom:0;z-index:50;background:var(--surface,#fff);border-top:1px solid var(--line,#DAE1E7);display:grid;grid-template-columns:repeat(6,1fr);padding-bottom:env(safe-area-inset-bottom)}
-.t-nav button{border:0;background:none;font:inherit;font-size:.72rem;font-weight:700;color:var(--muted,#5B6874);padding:8px 2px;display:grid;justify-items:center;gap:2px;cursor:pointer;min-height:56px}
+.t-nav{position:fixed;left:0;right:0;bottom:0;z-index:50;background:var(--surface,#fff);border-top:1px solid var(--line,#DAE1E7);display:grid;grid-template-columns:repeat(7,1fr);padding-bottom:env(safe-area-inset-bottom)}
+.t-nav button{border:0;background:none;font:inherit;font-size:.66rem;font-weight:700;color:var(--muted,#5B6874);padding:8px 2px;display:grid;justify-items:center;gap:2px;cursor:pointer;min-height:56px}
 .t-nav button span{font-size:1.2rem}.t-nav button[aria-current="true"]{color:var(--hw)}
-@media (min-width:900px){.t-nav{position:sticky;top:0;bottom:auto;grid-template-columns:repeat(6,auto);justify-content:center;gap:6px}body{padding-bottom:0}}
+@media (min-width:900px){.t-nav{position:sticky;top:0;bottom:auto;grid-template-columns:repeat(8,auto)!important;justify-content:center;gap:6px}body{padding-bottom:0}}
 .t-ov{position:fixed;inset:0;z-index:2147483000;background:linear-gradient(135deg,var(--hw),var(--hw2));display:flex;align-items:center;justify-content:center;padding:20px}
 .t-ov .c{background:#fff;color:#0F1E29;border-radius:18px;padding:22px;max-width:440px;width:100%;display:grid;gap:12px;box-shadow:0 20px 50px rgba(0,0,0,.35)}
 .t-ov h1{margin:0;font-size:1.3rem}.t-ov p{margin:0;color:#5B6874;font-size:.92rem}
@@ -1452,15 +1452,21 @@ main{max-width:1100px;margin:0 auto;padding:12px 16px;display:grid;gap:12px}
 .t-seg{display:flex;gap:4px;background:var(--sunk,#EEF2F5);border-radius:10px;padding:4px;flex-wrap:wrap}.t-seg button{border:0;background:none;font:inherit;font-weight:700;font-size:.82rem;padding:7px 10px;border-radius:8px;cursor:pointer;color:var(--muted,#5B6874)}
 .t-seg button[aria-pressed="true"]{background:var(--surface,#fff);color:var(--ink,#0F1E29)}
 [data-nadd]{display:none!important}
+.d-bars{display:grid;gap:6px}.d-bar{display:grid;grid-template-columns:86px minmax(0,1fr) 92px;gap:8px;align-items:center;font-size:.8rem}
+.d-bar .tr{display:grid;gap:2px}.d-bar .tr i{display:block;height:9px;border-radius:5px;background:var(--hw)}.d-bar .tr i.ly{background:#C9B3DD}.d-bar .tr i.mt{height:3px;background:#F28C28}
+.d-bar b{text-align:right;font-variant-numeric:tabular-nums}
+#sDash .t-row select{width:100%;max-width:100%;min-width:0!important;flex:1 1 220px;box-sizing:border-box}
+main,.t-card{min-width:0;max-width:100%}#sDash .t-t td:first-child{white-space:normal;min-width:120px;max-width:200px}html,body{overflow-x:hidden}.d-ley{display:flex;gap:12px;flex-wrap:wrap;font-size:.76rem;color:var(--muted,#5B6874)}.d-ley span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;vertical-align:-1px;background:var(--hw)}
+.d-ley .ly::before{background:#C9B3DD}.d-ley .mt::before{background:#F28C28;height:3px;vertical-align:3px}
 .modal[hidden],.toast[hidden],[hidden]{display:none!important}
 </style></head><body>
 <div class="t-top"><div><h1>🐾 Tienda Hellywoof</h1><small id="tAct">Datos de Drive: —</small></div><button type="button" class="t-turno" id="tTurno">Turno: —</button></div>
 <nav class="t-nav" id="tNav">
-  <button type="button" data-s="inicio"><span>🏠</span>Inicio</button><button type="button" data-s="ventas"><span>💰</span>Ventas</button>
+  <button type="button" data-s="inicio"><span>🏠</span>Inicio</button><button type="button" data-s="ventas"><span>💰</span>Ventas</button><button type="button" data-s="dash"><span>📊</span>Dashboard</button>
   <button type="button" data-s="plan"><span>📈</span>Plan</button><button type="button" data-s="stock"><span>📦</span>Stock</button>
   <button type="button" data-s="nut"><span>🐶</span>Nutrición</button><button type="button" data-s="rank"><span>🏆</span>Ranking</button><button type="button" data-s="adm" id="navAdm" hidden><span>🔑</span>Avances</button></nav>
 <main>
-  <section class="t-sec" id="sInicio"></section><section class="t-sec" id="sVentas" hidden></section><section class="t-sec" id="sPlan" hidden></section>
+  <section class="t-sec" id="sInicio"></section><section class="t-sec" id="sVentas" hidden></section><section class="t-sec" id="sDash" hidden></section><section class="t-sec" id="sPlan" hidden></section>
   <section class="t-sec" id="sStock" hidden></section><section class="t-sec" id="sNut" hidden><div id="crmNut"></div></section><section class="t-sec" id="sRank" hidden></section><section class="t-sec" id="sAdm" hidden></section>
 </main>
 <div class="modal" id="mEnv" hidden><div class="mcard" role="dialog" aria-modal="true" aria-labelledby="mEnvT"><h2 id="mEnvT"></h2><div id="mEnvBody"></div><p class="amsg bad" id="mEnvErr" hidden></p><div class="mbtns" id="mEnvBtns"></div></div></div>
@@ -1592,6 +1598,67 @@ function anotarVenta() {
       const A = lsGet(ANOK, {}), f = hoyISO(); (A[f] = A[f] || []).push({ v: turno(), monto: m, nota: $("avN").value.trim(), t: Date.now() }); lsSet(ANOK, A);
       misSumar("ventas", 1); cerrarModal(); toast("Venta anotada: " + fmt(m)); pintarTodo(); }]], "Anotar venta");
   setTimeout(() => $("avM") && $("avM").focus(), 50);
+}
+
+/* ================= dashboard comparativo (diario, semanal, mensual, anual, YTD, YTG) ================= */
+let dashVista = "mensual", dashCat = "", dashProd = "";
+const pasaFiltro = (D, r) => (!dashCat || (D.productos[r[0]] || [])[1] === dashCat) && (!dashProd || String(r[0]) === dashProd);
+function ventaPorDia() { const D = DATA(), V = {}; if (!D) return V; D.rows.forEach(r => { if (!pasaFiltro(D, r)) return; const f = `${r[6]}-${String(r[1]).padStart(2, "0")}-${String(r[2]).padStart(2, "0")}`; V[f] = (V[f] || 0) + r[4]; }); return V; }
+const sumaRango = (V, a, b) => { let s = 0; for (const f in V) if (f >= a && f <= b) s += V[f]; return s; };
+const menos1 = f => `${Number(f.slice(0, 4)) - 1}${f.slice(4)}`;
+function metaRango(a, b) { let s = 0; for (let d = new Date(a + "T12:00:00"); isoD(d) <= b; d.setDate(d.getDate() + 1)) { const f = isoD(d); if (!diaTienda(f)) continue;
+    const y = d.getFullYear(), m = d.getMonth() + 1; if (y * 100 + m < PLAN[0].ym) continue; const n = diasTienda(y, m); s += n ? metaDe(y, m) / n : 0; } return s; }
+function pintarDash() {
+  const D = DATA(), box = $("sDash"); if (!D) { box.innerHTML = '<div class="t-card"><p class="t-vacio">Aún no hay datos.</p></div>'; return; }
+  const V = ventaPorDia(), corte = D.corte, c = new Date(corte + "T12:00:00"), Y = c.getFullYear(), filas = [];
+  const iniPlan = `${PLAN[0].y}-${String(PLAN[0].m).padStart(2, "0")}-01`;
+  const fl = (et, a, b, extra) => { const v = sumaRango(V, a, b), ly = sumaRango(V, menos1(a), menos1(b)), mt = a >= iniPlan ? metaRango(a, b) : 0;   /* meta solo en períodos completos dentro del plan */ filas.push(Object.assign({ et, a, b, v, ly, mt }, extra || {})); };
+  if (dashVista === "diario") { for (let i = 13; i >= 0; i--) { const d = new Date(c); d.setDate(c.getDate() - i); const f = isoD(d); fl(d.toLocaleDateString("es-CL", { weekday: "short", day: "numeric", month: "short" }), f, f); } }
+  else if (dashVista === "semanal") { const lun = new Date(c); lun.setDate(c.getDate() - ((c.getDay() + 6) % 7)); for (let i = 11; i >= 0; i--) { const a = new Date(lun); a.setDate(lun.getDate() - 7 * i); const b = new Date(a); b.setDate(a.getDate() + 6);
+      fl("sem " + a.toLocaleDateString("es-CL", { day: "numeric", month: "short" }), isoD(a), isoD(b) > corte ? corte : isoD(b)); } }
+  else if (dashVista === "mensual") { for (let m = 1; m <= 12; m++) { const a = `${Y}-${String(m).padStart(2, "0")}-01`, b = isoD(new Date(Y, m, 0)); if (a > corte) break; fl(MC[m - 1] + " " + Y, a, b > corte ? corte : b); } }
+  else if (dashVista === "anual") { [Y - 1, Y].forEach(y => fl(String(y) + (y === Y ? " (al " + corte.slice(8) + "-" + corte.slice(5, 7) + ")" : ""), `${y}-01-01`, y === Y ? corte : `${y}-12-31`)); }
+  else if (dashVista === "ytd") { fl("YTD " + Y, `${Y}-01-01`, corte); fl("Mes en curso", corte.slice(0, 8) + "01", corte); }
+  else if (dashVista === "ytg") { const man = isoD(new Date(c.getTime() + 864e5)), fin = `${Y}-12-31`, mt = metaRango(man, fin), ly = sumaRango(V, menos1(man), menos1(fin));
+    let dias = 0; for (let d = new Date(man + "T12:00:00"); isoD(d) <= fin; d.setDate(d.getDate() + 1)) if (diaTienda(isoD(d))) dias++;
+    filas.push({ et: "Resto de " + Y, a: man, b: fin, v: 0, ly, mt, ytg: true, dias }); }
+  const mx = Math.max(1, ...filas.map(x => Math.max(x.v, x.ly, x.mt)));
+  const base = dashVista === "anual" ? filas.slice(-1) : dashVista === "ytd" ? filas.slice(0, 1) : filas;   /* anual: el año en curso; YTD: sin repetir el mes */
+  const tot = base.reduce((t, x) => ({ v: t.v + x.v, ly: t.ly + x.ly, mt: t.mt + x.mt, vm: t.vm + (x.mt ? x.v : 0) }), { v: 0, ly: 0, mt: 0, vm: 0 });
+  const pc = (a, b) => b ? `<span class="${a >= b ? "pos" : "neg"}">${a >= b ? "+" : ""}${Math.round((a / b - 1) * 100)}%</span>` : "–";
+  const yt = filas[0] && filas[0].ytg ? filas[0] : null;
+  box.innerHTML = `<div class="t-card"><h2>Dashboard de ventas Hellywoof <small>datos de Defontana al ${esc(corte.split("-").reverse().join("-"))}</small></h2>
+      <div class="t-seg">${[["diario", "Diario"], ["semanal", "Semanal"], ["mensual", "Mensual"], ["anual", "Anual"], ["ytd", "YTD"], ["ytg", "YTG"]].map(([k, t]) => `<button type="button" data-dv="${k}" aria-pressed="${dashVista === k}">${t}</button>`).join("")}</div>
+      <div class="t-row"><select id="dCat" style="flex:1;min-width:150px;border:1px solid var(--line);border-radius:10px;padding:9px"><option value="">Todas las categorías</option>${[...new Set(D.productos.map(p => p[1]).filter(Boolean))].sort().map(c => `<option ${c === dashCat ? "selected" : ""}>${esc(c)}</option>`).join("")}</select>
+        <select id="dProd" style="flex:2;min-width:200px;border:1px solid var(--line);border-radius:10px;padding:9px"><option value="">Todos los productos</option>${D.productos.map((p, i) => [p, i]).filter(([p]) => !dashCat || p[1] === dashCat).sort((a, b) => a[0][0].localeCompare(b[0][0], "es")).map(([p, i]) => `<option value="${i}" ${String(i) === dashProd ? "selected" : ""}>${esc(p[0])}</option>`).join("")}</select></div>
+      ${yt ? `<div class="t-kpis"><div class="t-kpi"><span>Meta por vender (plan)</span><b>${mm(yt.mt)}</b><small>${esc(yt.a.split("-").reverse().join("-"))} al 31-12</small></div>
+        <div class="t-kpi"><span>Mismo período ${Y - 1}</span><b>${mm(yt.ly)}</b><small>${yt.ly ? (yt.mt >= yt.ly ? "+" : "") + Math.round((yt.mt / yt.ly - 1) * 100) + "% para cumplir" : ""}</small></div>
+        <div class="t-kpi"><span>Necesario por día</span><b>${mm(yt.dias ? yt.mt / yt.dias : 0)}</b><small>${yt.dias} días de tienda</small></div>
+        <div class="t-kpi"><span>Año ${Y} vendido (YTD)</span><b>${mm(sumaRango(V, Y + "-01-01", corte))}</b><small>vs ${mm(sumaRango(V, (Y - 1) + "-01-01", menos1(corte)))} en ${Y - 1}</small></div></div>`
+      : `<div class="t-kpis"><div class="t-kpi"><span>Venta del período</span><b>${mm(tot.v)}</b></div><div class="t-kpi"><span>Año anterior</span><b>${mm(tot.ly)}</b><small>${pc(tot.v, tot.ly)}</small></div>
+        <div class="t-kpi"><span>Meta (plan)</span><b>${tot.mt ? mm(tot.mt) : "–"}</b><small>${tot.mt ? pc(tot.vm, tot.mt) + " vs meta (" + mm(tot.vm) + " vendido en esos días)" : "el plan parte en nov-2026"}</small></div></div>`}
+      <div class="d-ley"><span>${yt ? "" : Y}</span><span class="ly">${Y - 1}</span><span class="mt">Meta del plan</span></div>
+      <div class="d-bars">${filas.map(x => `<div class="d-bar"><span>${esc(x.et)}</span><div class="tr">${x.ytg ? "" : `<i style="width:${(x.v / mx * 100).toFixed(1)}%"></i>`}<i class="ly" style="width:${(x.ly / mx * 100).toFixed(1)}%"></i>${x.mt ? `<i class="mt" style="width:${(x.mt / mx * 100).toFixed(1)}%"></i>` : ""}</div><b>${x.ytg ? mm(x.mt) : mm(x.v)}</b></div>`).join("")}</div></div>
+    <div class="t-card"><h2>Detalle</h2><div class="t-tw"><table class="t-t"><thead><tr><th>Período</th><th>${yt ? "Meta" : "Venta"}</th><th>${Y - 1}</th><th>vs año ant.</th>${yt ? "" : "<th>Meta</th><th>vs meta</th>"}</tr></thead><tbody>
+      ${filas.map(x => yt ? `<tr><td>${esc(x.et)}</td><td>${mm(x.mt)}</td><td>${mm(x.ly)}</td><td>${pc(x.mt, x.ly)}</td></tr>`
+        : `<tr><td>${esc(x.et)}</td><td>${mm(x.v)}</td><td>${mm(x.ly)}</td><td>${pc(x.v, x.ly)}</td><td>${x.mt ? mm(x.mt) : "–"}</td><td>${x.mt ? pc(x.v, x.mt) : "–"}</td></tr>`).join("")}
+      ${!yt && filas.length > 1 && dashVista !== "anual" && dashVista !== "ytd" ? `<tr class="hito"><td>Total</td><td>${mm(tot.v)}</td><td>${mm(tot.ly)}</td><td>${pc(tot.v, tot.ly)}</td><td>${tot.mt ? mm(tot.mt) : "–"}</td><td>${tot.mt ? pc(tot.vm, tot.mt) : "–"}</td></tr>` : ""}</tbody></table></div>
+      <p class="t-vacio" style="font-size:.78rem">YTD: del 1 de enero al último día sincronizado. YTG: lo que falta del año según el plan (meta diaria de cada mes por los días de tienda que quedan). La meta existe desde noviembre 2026 (plan escalonado).</p></div>`;
+  /* detalle por categoría y producto del período mostrado (en YTG: lo vendido en el año) */
+  const pa = yt ? `${Y}-01-01` : filas[0].a, pb = yt ? corte : filas[filas.length - 1].b, C = {}, Pp = {};
+  D.rows.forEach(r => { if (!pasaFiltro(D, r)) return; const f = `${r[6]}-${String(r[1]).padStart(2, "0")}-${String(r[2]).padStart(2, "0")}`, cur = f >= pa && f <= pb, ant = f >= menos1(pa) && f <= menos1(pb); if (!cur && !ant) return;
+    const p = D.productos[r[0]] || ["?", ""], k = p[1] || "Sin categoría", oc = C[k] = C[k] || { v: 0, ly: 0, q: 0 }, op = Pp[r[0]] = Pp[r[0]] || { n: p[0], c: k, v: 0, ly: 0, q: 0 };
+    if (cur) { oc.v += r[4]; oc.q += r[3]; op.v += r[4]; op.q += r[3]; } else { oc.ly += r[4]; op.ly += r[4]; } });
+  const tC = Object.entries(C).sort((a, b) => b[1].v - a[1].v), tP = Object.values(Pp).sort((a, b) => b.v - a.v).slice(0, 25), tv = tC.reduce((t, [, o]) => t + o.v, 0);
+  box.insertAdjacentHTML("beforeend", `<div class="t-card"><h2>Por categoría <small>${esc(pa.split("-").reverse().join("-"))} al ${esc(pb.split("-").reverse().join("-"))} vs mismo período ${Y - 1}</small></h2>
+      <div class="t-tw"><table class="t-t"><thead><tr><th>Categoría</th><th>Venta</th><th>% del total</th><th>${Y - 1}</th><th>vs año ant.</th><th>Unidades</th></tr></thead><tbody>
+      ${tC.map(([k, o]) => `<tr><td>${esc(k)}</td><td>${mm(o.v)}</td><td>${tv ? Math.round(o.v / tv * 100) + "%" : "–"}</td><td>${mm(o.ly)}</td><td>${pc(o.v, o.ly)}</td><td>${Math.round(o.q)}</td></tr>`).join("") || '<tr><td colspan="6" class="t-vacio">Sin ventas.</td></tr>'}</tbody></table></div></div>
+    <div class="t-card"><h2>Por producto <small>los 25 más vendidos del período</small></h2>
+      <div class="t-tw"><table class="t-t"><thead><tr><th>Producto</th><th>Categoría</th><th>Venta</th><th>${Y - 1}</th><th>vs año ant.</th><th>Unidades</th></tr></thead><tbody>
+      ${tP.map(o => `<tr><td>${esc(o.n)}</td><td>${esc(o.c)}</td><td>${mm(o.v)}</td><td>${mm(o.ly)}</td><td>${pc(o.v, o.ly)}</td><td>${Math.round(o.q)}</td></tr>`).join("") || '<tr><td colspan="6" class="t-vacio">Sin ventas.</td></tr>'}</tbody></table></div></div>`);
+  box.querySelectorAll("[data-dv]").forEach(b => b.onclick = () => { dashVista = b.dataset.dv; pintarDash(); });
+  $("dCat").onchange = e => { dashCat = e.target.value; dashProd = ""; pintarDash(); };
+  $("dProd").onchange = e => { dashProd = e.target.value; pintarDash(); };
 }
 
 /* ================= plan ================= */
@@ -1742,11 +1809,11 @@ function pintarRank() {
 
 /* ================= navegación ================= */
 let vista = "inicio", MODO = "inicio";
-const SEC = { inicio: "sInicio", ventas: "sVentas", plan: "sPlan", stock: "sStock", nut: "sNut", rank: "sRank", adm: "sAdm" };
+const SEC = { inicio: "sInicio", ventas: "sVentas", dash: "sDash", plan: "sPlan", stock: "sStock", nut: "sNut", rank: "sRank", adm: "sAdm" };
 function ir(s) { if (s === "adm") bajarRanking(); vista = MODO = s; Object.entries(SEC).forEach(([k, id]) => $(id).hidden = k !== s); document.querySelectorAll("#tNav [data-s]").forEach(b => b.setAttribute("aria-current", b.dataset.s === s));
   pintar(s); window.scrollTo({ top: 0 }); if (s === "rank") bajarRanking(); }
 const setModo = ir;
-function pintar(s) { try { ({ inicio: pintarInicio, ventas: pintarVentas, plan: pintarPlan, stock: pintarStock, nut: () => { if (SES || esAdmin()) { if (!SES) SES = { vendedor: { nombre: "Administración", usuario: "admin" } }; pintarNut(); } else $("crmNut").innerHTML = '<p class="t-vacio">Inicia la jornada para usar Nutrición.</p>'; }, rank: pintarRank, adm: pintarAdm })[s](); } catch (e) { console.error(e); } }
+function pintar(s) { try { ({ inicio: pintarInicio, ventas: pintarVentas, plan: pintarPlan, stock: pintarStock, nut: () => { if (SES || esAdmin()) { if (!SES) SES = { vendedor: { nombre: "Administración", usuario: "admin" } }; pintarNut(); } else $("crmNut").innerHTML = '<p class="t-vacio">Inicia la jornada para usar Nutrición.</p>'; }, rank: pintarRank, adm: pintarAdm, dash: pintarDash })[s](); } catch (e) { console.error(e); } }
 function pintarTodo() { const D = DATA(), t = turno(); $("tTurno").textContent = "Turno: " + (t || "—") + " · cambiar"; $("tAct").textContent = "Datos de Drive: " + ((D && D.act && D.act.drive) || "—"); pintar(vista); }
 $("tNav").onclick = e => { const b = e.target.closest("[data-s]"); if (b) ir(b.dataset.s); };
 $("tTurno").onclick = () => { if (confirm("¿Cambiar quién está en la jornada de hoy? (o entrar como administración)")) { localStorage.removeItem(TURK); refrescarSES(); pedirTurno(); } };
@@ -1763,7 +1830,7 @@ function entrarAdmin() {
       lsSet(ADMK, { hasta: Date.now() + 8 * 3600 * 1000 }); refrescarSES(); cerrarModal(); modoAdmin(); ir("adm"); toast("Acceso de administración abierto."); }]], "Acceso administración");
   setTimeout(() => $("adK") && $("adK").focus(), 50);
 }
-function modoAdmin() { $("navAdm").hidden = !esAdmin(); $("tNav").style.gridTemplateColumns = esAdmin() ? "repeat(7,1fr)" : ""; }
+function modoAdmin() { $("navAdm").hidden = !esAdmin(); $("tNav").style.gridTemplateColumns = esAdmin() ? "repeat(8,1fr)" : ""; }
 let admVista = "mes";
 function pintarAdm() {
   if (!esAdmin()) { $("sAdm").innerHTML = '<div class="t-card"><p class="t-vacio">Acceso cerrado.</p><button type="button" class="t-btn" id="admIn">Entrar como administración</button></div>'; $("admIn").onclick = entrarAdmin; return; }
