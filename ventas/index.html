@@ -6832,7 +6832,7 @@ const ptLimpiaFilas = L => Array.isArray(L) ? L.filter(r => !ptBorrado(Array.isA
 <script>/* geoauto: pedir la ubicación al abrir y mantenerla al día */
 (function () {
   let ult = 0, aviso = false;
-  const bloqueado = () => { if (aviso || document.getElementById("geoAv")) return; aviso = true;
+  const bloqueado = () => { return; /* sin aviso en pantalla (pedido de Jorge 08-11-2026) */ if (aviso || document.getElementById("geoAv")) return; aviso = true;
     const ios = /iPhone|iPad/i.test(navigator.userAgent);
     const d = document.createElement("div"); d.id = "geoAv";
     d.style.cssText = "position:fixed;left:12px;right:12px;bottom:calc(76px + env(safe-area-inset-bottom));z-index:9000;background:#0B3146;color:#fff;border-radius:14px;padding:12px 14px;font:500 13.5px/1.4 system-ui;box-shadow:0 10px 30px rgba(0,0,0,.3);display:flex;gap:10px;align-items:flex-start";
