@@ -6632,5 +6632,36 @@ if (!CAL_DEMO) setTimeout(calSync, 3000);
 try { if (typeof MODO !== "undefined" && MODO === "inicio") calPintarV(); } catch (e) {}
 document.head.insertAdjacentHTML("beforeend", "<style>" + CAL_CSS + "</style>");
 </script>
+<style>
+/* ===== ux-v1: barra abajo, íconos, menos texto ===== */
+.nav-pasos,.nav-pista{display:none!important}
+@media (max-width:759px){
+  body{padding-bottom:calc(66px + env(safe-area-inset-bottom,0px))!important}
+  .nav-ap{position:fixed!important;left:0!important;right:0!important;bottom:0!important;top:auto!important;margin:0!important;padding:3px 4px calc(3px + env(safe-area-inset-bottom,0px))!important;
+    z-index:70!important;background:var(--surface)!important;border-top:1px solid var(--line)!important;box-shadow:0 -4px 16px rgba(11,25,35,.10)!important;backdrop-filter:none!important}
+  .nav-ap .modos{background:none!important;padding:0!important;gap:0!important;margin:0!important}
+  .nav-ap .modos button{min-height:56px!important;padding:6px 0 5px!important;font-size:.62rem!important;gap:3px!important;border-radius:12px!important;font-weight:600}
+  .nav-ap .modos button svg{width:23px!important;height:23px!important}
+  .nav-ap .modos button[aria-selected="true"]{background:color-mix(in srgb,#2E6F8E 12%,transparent)!important;color:#0B3146!important;box-shadow:none!important}
+  .bar{bottom:calc(62px + env(safe-area-inset-bottom,0px))!important}
+  .toast{bottom:calc(150px + env(safe-area-inset-bottom,0px))!important}
+  .dv-ban{bottom:calc(74px + env(safe-area-inset-bottom,0px))!important}
+  .head{padding:10px 14px!important;gap:8px 12px!important;border-radius:14px!important}
+  .head .logo,.logo{width:52px!important}
+  .head .btn{min-height:38px!important;padding:6px 12px!important;font-size:.85rem!important}
+  .head .meta strong{font-size:.95rem}
+  .head .brand .eyebrow{display:none!important}
+  .rg-tabs{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:6px!important}
+  .rg-tab{padding:7px 6px!important;font-size:.72rem!important;border-radius:10px!important}
+  #rgSync,#regNotas>.hint{display:none!important}
+}
+</style>
+<script>/* ux-v1: nombres cortos en la barra */
+(function () { const C = { inicio: "Inicio", dash: "Panel", pedido: "Pedido", clientes: "Clientes", ruta: "Ruta", cobranza: "Cobros", embudo: "Embudo", nut: "Nutrición", agenda: "Agenda" };
+  document.querySelectorAll(".nav-ap .modos [data-modo]").forEach(b => { const s = b.querySelector("span"), n = C[b.dataset.modo]; if (s && n) s.textContent = n; b.title = n || b.title; b.setAttribute("aria-label", n || b.title); });
+  try { lsSet("hwf-nav-pista", true); } catch (e) {}
+  /* menos pasos: en Pedido primero Cliente → Entrega → Productos; «Mis notas de pedido» queda al final */
+  const rg = document.getElementById("regNotas"), sec = document.querySelector(".sections"); if (rg && sec) sec.after(rg); })();
+</script>
 </body>
 </html>

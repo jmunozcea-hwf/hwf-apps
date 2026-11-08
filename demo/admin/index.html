@@ -4477,5 +4477,22 @@ if (!CAL_DEMO) setTimeout(calSync, 3000);
 try { calPintarA(); } catch (e) {}
 document.head.insertAdjacentHTML("beforeend", "<style>" + CAL_CSS + "</style>");
 </script>
+<style>
+/* ===== ux-v1: «Más» como cuadrícula de íconos en el teléfono ===== */
+@media (max-width:999px){
+  #masSeg{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:6px!important;overflow:visible!important;padding:8px 0!important;margin:0!important}
+  #masSeg button{display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center;gap:4px!important;min-height:58px!important;padding:8px 2px!important;
+    border-radius:12px!important;font-size:.66rem!important;font-weight:600;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #masSeg button span{max-width:100%;overflow:hidden;text-overflow:ellipsis}
+  #masSeg button svg{width:22px!important;height:22px!important}
+  #masSeg button .bdg{position:absolute!important;top:4px;right:6px}
+}
+</style>
+<script>/* ux-v1: nombres cortos en «Más» (el nombre completo queda en el título del botón) */
+(function () { const C = { plan: "Plan 80MM", ranking: "Ranking", zonas: "Zonas", terreno: "Terreno", cots: "NP Defont.", napp: "NP App", bonif: "Bonific.", cobranza: "Cobranza", embudo: "Embudo", cambios: "Cambios", datos: "Datos" };
+  const corto = () => { if (!matchMedia("(max-width:999px)").matches) return;
+    document.querySelectorAll("#masSeg [data-m]").forEach(b => { const s = b.querySelector("span"), n = C[b.dataset.m]; if (s && n) { b.title = b.title || s.textContent; s.textContent = n; } }); };
+  corto(); })();
+</script>
 </body>
 </html>
