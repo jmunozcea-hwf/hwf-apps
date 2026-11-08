@@ -1458,10 +1458,10 @@ main{max-width:1100px;margin:0 auto;padding:12px 16px;display:grid;gap:12px}
 <nav class="t-nav" id="tNav">
   <button type="button" data-s="inicio"><span>🏠</span>Inicio</button><button type="button" data-s="ventas"><span>💰</span>Ventas</button>
   <button type="button" data-s="plan"><span>📈</span>Plan</button><button type="button" data-s="stock"><span>📦</span>Stock</button>
-  <button type="button" data-s="nut"><span>🐶</span>Nutrición</button><button type="button" data-s="rank"><span>🏆</span>Ranking</button></nav>
+  <button type="button" data-s="nut"><span>🐶</span>Nutrición</button><button type="button" data-s="rank"><span>🏆</span>Ranking</button><button type="button" data-s="adm" id="navAdm" hidden><span>🔑</span>Avances</button></nav>
 <main>
   <section class="t-sec" id="sInicio"></section><section class="t-sec" id="sVentas" hidden></section><section class="t-sec" id="sPlan" hidden></section>
-  <section class="t-sec" id="sStock" hidden></section><section class="t-sec" id="sNut" hidden><div id="crmNut"></div></section><section class="t-sec" id="sRank" hidden></section>
+  <section class="t-sec" id="sStock" hidden></section><section class="t-sec" id="sNut" hidden><div id="crmNut"></div></section><section class="t-sec" id="sRank" hidden></section><section class="t-sec" id="sAdm" hidden></section>
 </main>
 <div class="modal" id="mEnv" hidden><div class="mcard" role="dialog" aria-modal="true" aria-labelledby="mEnvT"><h2 id="mEnvT"></h2><div id="mEnvBody"></div><p class="amsg bad" id="mEnvErr" hidden></p><div class="mbtns" id="mEnvBtns"></div></div></div>
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
@@ -1483,10 +1483,9 @@ function cerrarModal() { $("mEnv").hidden = true; }
 $("mEnv").addEventListener("click", e => { if (e.target === $("mEnv")) cerrarModal(); });
 const MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
 const MC = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
-/* feriados de Chile; la tienda abre todos los días (también vende los domingos) salvo feriados */
-const FER = new Set(["2026-01-01","2026-04-03","2026-04-04","2026-05-01","2026-05-21","2026-06-21","2026-06-29","2026-07-16","2026-08-15","2026-09-18","2026-09-19","2026-10-12","2026-10-31","2026-11-01","2026-12-08","2026-12-25",
-  "2027-01-01","2027-03-26","2027-03-27","2027-05-01","2027-05-21","2027-06-21","2027-06-28","2027-07-16","2027-08-15","2027-09-18","2027-09-19","2027-10-11","2027-10-31","2027-11-01","2027-12-08","2027-12-25"]);
-const diaTienda = d => { d = d instanceof Date ? d : new Date(String(d) + "T12:00:00"); return !FER.has(isoD(d)); };
+/* la tienda abre todos los días, también feriados, salvo los irrenunciables del comercio (1-ene, 1-may, 18 y 19-sep, 25-dic) */
+const IRREN = new Set(["01-01", "05-01", "09-18", "09-19", "12-25"]);
+const diaTienda = d => { d = d instanceof Date ? d : new Date(String(d) + "T12:00:00"); return !IRREN.has(isoD(d).slice(5)); };
 const diasTienda = (y, m, hasta) => { let n = 0; const fin = new Date(y, m, 0).getDate(); for (let d = 1; d <= Math.min(fin, hasta || fin); d++) if (diaTienda(new Date(y, m - 1, d))) n++; return n; };
 const USUARIOS = ["Francisco", "Benjamín", "Genérico"], TAG = " (Tienda)";
 
@@ -1531,8 +1530,8 @@ let SES = null; const refrescarSES = () => { const v = turno(); SES = v ? { vend
 function pedirTurno() {
   const o = document.createElement("div"); o.className = "t-ov"; o.id = "tOv";
   o.innerHTML = `<div class="c"><h1>¿Quién inicia la jornada hoy?</h1><p>${esc(new Date().toLocaleDateString("es-CL", { weekday: "long", day: "numeric", month: "long" }))}. Todo lo de hoy (misiones, puntos y ventas anotadas) queda a tu nombre.</p>
-    ${USUARIOS.map(u => `<button type="button" class="q" data-u="${esc(u)}">👤 ${esc(u)}</button>`).join("")}</div>`;
-  document.body.appendChild(o); o.onclick = e => { const b = e.target.closest("[data-u]"); if (!b) return; lsSet(TURK, { f: hoyISO(), v: b.dataset.u }); o.remove(); refrescarSES(); pintarTodo(); toast("Buena jornada, " + b.dataset.u + "."); };
+    ${USUARIOS.map(u => `<button type="button" class="q" data-u="${esc(u)}">👤 ${esc(u)}</button>`).join("")}<button type="button" class="q" data-adm style="font-size:.9rem;color:#5B6874">🔑 Acceso administración (revisar avances)</button></div>`;
+  document.body.appendChild(o); o.onclick = e => { if (e.target.closest("[data-adm]")) { o.remove(); return entrarAdmin(); } const b = e.target.closest("[data-u]"); if (!b) return; lsSet(TURK, { f: hoyISO(), v: b.dataset.u }); o.remove(); refrescarSES(); pintarTodo(); toast("Buena jornada, " + b.dataset.u + "."); };
 }
 function pantallaConexion(msg) {
   const o = document.createElement("div"); o.className = "t-ov"; o.id = "tGate";
@@ -1665,7 +1664,7 @@ function pintarInicio() {
       ${R ? `<div class="t-bar"><i style="width:${Math.min(100, R.vMes / R.meta * 100).toFixed(1)}%"></i><s style="left:${Math.min(100, R.esperado / R.meta * 100).toFixed(1)}%"></s></div>
       <div class="t-kpis"><div class="t-kpi"><span>Venta ${MESES[R.m - 1]}</span><b>${mm(R.vMes)}</b><small>de ${mm(R.meta)}</small></div><div class="t-kpi ${R.desv < 0 ? "bad" : "ok"}"><span>Desviación</span><b>${R.desv >= 0 ? "+" : ""}${mm(R.desv)}</b><small>vs lo esperado a la fecha</small></div>
         <div class="t-kpi"><span>Necesario por día</span><b>${mm(R.porDia)}</b><small>${R.restD} días de tienda</small></div><div class="t-kpi"><span>Mis puntos hoy</span><b>${c.pts}</b><small>de ${c.max}</small></div></div>` : '<p class="t-vacio">Cargando datos…</p>'}</div>
-    <div class="t-card"><h2>Misiones del día <small>${habil ? c.ok + " de " + c.n + " cumplidas" : "hoy no hay (feriado)"}</small></h2>${habil ? (t ? mis : '<button type="button" class="t-btn" id="iTurno">Iniciar jornada</button>') : '<p class="t-vacio">La tienda no suma puntos hoy.</p>'}</div>`;
+    <div class="t-card"><h2>Misiones del día <small>${habil ? c.ok + " de " + c.n + " cumplidas" : "hoy no hay (feriado irrenunciable)"}</small></h2>${habil ? (t ? mis : '<button type="button" class="t-btn" id="iTurno">Iniciar jornada</button>') : '<p class="t-vacio">La tienda no suma puntos hoy.</p>'}</div>`;
   box.querySelectorAll("[data-ac]").forEach(b => b.onclick = () => { const a = b.dataset.ac;
     if (a === "ventas") anotarVenta(); else if (a === "ofrecer") { misSumar("ofrecer", 1); toast("¡Bien! Producto del día ofrecido."); pintarInicio(); } else ir(a); });
   if ($("iTurno")) $("iTurno").onclick = pedirTurno;
@@ -1676,9 +1675,9 @@ let rkVista = "mes";
 async function bajarRanking() {
   const c = syCfg(); if (!c) return; const d0 = new Date(); d0.setDate(1); d0.setMonth(d0.getMonth() - 1);
   let r = await syLlamar(c, { accion: "ranking", desde: isoD(d0) }); let F = null;
-  if (r && r.ok && Array.isArray(r.filas)) F = r.filas.map(x => ({ f: x[0], v: x[1], pts: +x[2] || 0, det: x[6] || "" }));
-  else { const cc = await syLlamar(c, { accion: "clientesCambios", version: "" }); if (cc && cc.ok && Array.isArray(cc.cambios)) F = cc.cambios.filter(x => x && x.codigo === "PUNTAJE").map(x => { try { const o = JSON.parse(x.detalle); return { f: o.f, v: o.v, pts: +o.pts || 0, det: o.det || "" }; } catch (e) { return null; } }).filter(Boolean); }
-  if (F) { lsSet(RKK, F.filter(x => /\(Tienda\)\s*$/.test(x.v))); if (vista === "rank") pintarRank(); }
+  if (r && r.ok && Array.isArray(r.filas)) F = r.filas.map(x => ({ f: x[0], v: x[1], pts: +x[2] || 0, max: +x[3] || 0, ok: +x[4] || 0, n: +x[5] || 0, det: x[6] || "" }));
+  else { const cc = await syLlamar(c, { accion: "clientesCambios", version: "" }); if (cc && cc.ok && Array.isArray(cc.cambios)) F = cc.cambios.filter(x => x && x.codigo === "PUNTAJE").map(x => { try { const o = JSON.parse(x.detalle); return { f: o.f, v: o.v, pts: +o.pts || 0, max: +o.max || 0, ok: +o.ok || 0, n: +o.n || 0, det: o.det || "" }; } catch (e) { return null; } }).filter(Boolean); }
+  if (F) { lsSet(RKK, F.filter(x => /\(Tienda\)\s*$/.test(x.v))); if (vista === "rank") pintarRank(); if (vista === "adm") pintarAdm(); }
 }
 function pintarRank() {
   const loc = Object.values(lsGet(RKK + "-loc", {})), srv = lsGet(RKK, []), M = {};
@@ -1691,22 +1690,60 @@ function pintarRank() {
     <div class="t-seg">${[["hoy", "Hoy"], ["sem", "Esta semana"], ["mes", "Este mes"]].map(([k, t]) => `<button type="button" data-rv="${k}" aria-pressed="${rkVista === k}">${t}</button>`).join("")}</div>
     <div class="t-tw"><table class="t-t"><thead><tr><th>#</th><th>Nombre</th><th>Puntos</th><th>Días</th><th>Ventas anotadas</th></tr></thead><tbody>
     ${L.map((x, i) => `<tr><td>${x.pts ? med[i] || i + 1 : "–"}</td><td><b>${esc(x.v)}</b></td><td>${x.pts}</td><td>${x.dias}</td><td>${fmt(x.venta)}</td></tr>`).join("")}</tbody></table></div>
-    <p class="t-vacio" style="font-size:.8rem">Cuentan los días de tienda (todos, salvo feriados de Chile). Los puntos se suben solos al script de Google.</p></div>`;
+    <p class="t-vacio" style="font-size:.8rem">Cuentan todos los días de tienda (abre también feriados, salvo los irrenunciables). Los puntos se suben solos al script de Google.</p></div>`;
   $("sRank").querySelectorAll("[data-rv]").forEach(b => b.onclick = () => { rkVista = b.dataset.rv; pintarRank(); });
 }
 
 /* ================= navegación ================= */
 let vista = "inicio", MODO = "inicio";
-const SEC = { inicio: "sInicio", ventas: "sVentas", plan: "sPlan", stock: "sStock", nut: "sNut", rank: "sRank" };
-function ir(s) { vista = MODO = s; Object.entries(SEC).forEach(([k, id]) => $(id).hidden = k !== s); document.querySelectorAll("#tNav [data-s]").forEach(b => b.setAttribute("aria-current", b.dataset.s === s));
+const SEC = { inicio: "sInicio", ventas: "sVentas", plan: "sPlan", stock: "sStock", nut: "sNut", rank: "sRank", adm: "sAdm" };
+function ir(s) { if (s === "adm") bajarRanking(); vista = MODO = s; Object.entries(SEC).forEach(([k, id]) => $(id).hidden = k !== s); document.querySelectorAll("#tNav [data-s]").forEach(b => b.setAttribute("aria-current", b.dataset.s === s));
   pintar(s); window.scrollTo({ top: 0 }); if (s === "rank") bajarRanking(); }
 const setModo = ir;
-function pintar(s) { try { ({ inicio: pintarInicio, ventas: pintarVentas, plan: pintarPlan, stock: pintarStock, nut: () => { if (SES) pintarNut(); else $("crmNut").innerHTML = '<p class="t-vacio">Inicia la jornada para usar Nutrición.</p>'; }, rank: pintarRank })[s](); } catch (e) { console.error(e); } }
+function pintar(s) { try { ({ inicio: pintarInicio, ventas: pintarVentas, plan: pintarPlan, stock: pintarStock, nut: () => { if (SES || esAdmin()) { if (!SES) SES = { vendedor: { nombre: "Administración", usuario: "admin" } }; pintarNut(); } else $("crmNut").innerHTML = '<p class="t-vacio">Inicia la jornada para usar Nutrición.</p>'; }, rank: pintarRank, adm: pintarAdm })[s](); } catch (e) { console.error(e); } }
 function pintarTodo() { const D = DATA(), t = turno(); $("tTurno").textContent = "Turno: " + (t || "—") + " · cambiar"; $("tAct").textContent = "Datos de Drive: " + ((D && D.act && D.act.drive) || "—"); pintar(vista); }
 $("tNav").onclick = e => { const b = e.target.closest("[data-s]"); if (b) ir(b.dataset.s); };
-$("tTurno").onclick = () => { if (confirm("¿Cambiar quién está en la jornada de hoy?")) { localStorage.removeItem(TURK); refrescarSES(); pedirTurno(); } };
+$("tTurno").onclick = () => { if (confirm("¿Cambiar quién está en la jornada de hoy? (o entrar como administración)")) { localStorage.removeItem(TURK); refrescarSES(); pedirTurno(); } };
 /* compatibilidad con el módulo de Nutrición de Nota de Pedido (sin pedido) */
 const byCode = {}; const line = () => ({ q: 0 }); const setQty = () => {};
+/* ================= acceso de administración (solo revisa: no suma puntos) ================= */
+const ADMK = "admin";
+const esAdmin = () => { const a = lsGet(ADMK, null); return !!(a && a.hasta > Date.now()); };
+function entrarAdmin() {
+  abrirModal(`<div class="mform"><p class="t-vacio" style="margin:0">Para revisar los avances de la tienda escribe la clave del script de Google (archivo Config.gs). Queda abierto 8 horas en este computador.</p>
+    <div class="f"><label for="adK">Clave</label><input id="adK" type="password" autocomplete="off"></div></div>`,
+    [["Cancelar", "", () => { cerrarModal(); if (!turno()) pedirTurno(); }], ["Entrar", "primary", () => { const c = cfg();
+      if (!c || $("adK").value.trim() !== c.clave) { $("mEnvErr").textContent = "Clave incorrecta."; $("mEnvErr").hidden = false; return; }
+      lsSet(ADMK, { hasta: Date.now() + 8 * 3600 * 1000 }); refrescarSES(); cerrarModal(); modoAdmin(); ir("adm"); toast("Acceso de administración abierto."); }]], "Acceso administración");
+  setTimeout(() => $("adK") && $("adK").focus(), 50);
+}
+function modoAdmin() { $("navAdm").hidden = !esAdmin(); $("tNav").style.gridTemplateColumns = esAdmin() ? "repeat(7,1fr)" : ""; }
+let admVista = "mes";
+function pintarAdm() {
+  if (!esAdmin()) { $("sAdm").innerHTML = '<div class="t-card"><p class="t-vacio">Acceso cerrado.</p><button type="button" class="t-btn" id="admIn">Entrar como administración</button></div>'; $("admIn").onclick = entrarAdmin; return; }
+  const loc = Object.values(lsGet(RKK + "-loc", {})), M = {};
+  lsGet(RKK, []).concat(loc).forEach(x => { const k = x.v + "|" + x.f; if (!M[k] || x.pts > M[k].pts) M[k] = x; });
+  const d = new Date(), hoy = hoyISO(), lun = new Date(d); lun.setDate(d.getDate() - ((d.getDay() + 6) % 7));
+  const pm = new Date(d.getFullYear(), d.getMonth() - 1, 1), finPm = new Date(d.getFullYear(), d.getMonth(), 0);
+  const [a, b] = { hoy: [hoy, hoy], sem: [isoD(lun), hoy], mes: [hoy.slice(0, 8) + "01", hoy], mant: [isoD(pm), isoD(finPm)] }[admVista];
+  const L = Object.values(M).filter(x => x.f >= a && x.f <= b && /\(Tienda\)\s*$/.test(x.v)).sort((x, y) => y.f.localeCompare(x.f) || x.v.localeCompare(y.v));
+  const venta = x => { const m = /Ventas anotadas: \$([\d.]+) \((\d+)\)/.exec(x.det || ""); return m ? [Number(m[1].replace(/\./g, "")), Number(m[2])] : [0, 0]; };
+  const T = USUARIOS.map(u => { const l = L.filter(x => x.v === u + TAG); const vs = l.map(venta);
+    return { u, dias: l.length, pts: l.reduce((s, x) => s + x.pts, 0), max: l.reduce((s, x) => s + (x.max || 60), 0), ok: l.reduce((s, x) => s + (x.ok || 0), 0), n: l.reduce((s, x) => s + (x.n || 4), 0),
+      monto: vs.reduce((s, v) => s + v[0], 0), cant: vs.reduce((s, v) => s + v[1], 0), ult: l[0] ? l[0].f : "" }; }).sort((x, y) => y.pts - x.pts);
+  const R = resumen();
+  $("sAdm").innerHTML = `<div class="t-card"><h2>Avances de la tienda <small>vista de administración · no suma puntos</small></h2>
+      ${R ? `<div class="t-kpis"><div class="t-kpi"><span>Venta ${MESES[R.m - 1]}</span><b>${mm(R.vMes)}</b><small>meta ${mm(R.meta)} · ${Math.round(R.vMes / R.meta * 100)}%</small></div>
+        <div class="t-kpi ${R.desv < 0 ? "bad" : "ok"}"><span>Desviación a la fecha</span><b>${R.desv >= 0 ? "+" : ""}${mm(R.desv)}</b></div><div class="t-kpi"><span>Proyección</span><b>${mm(R.proy)}</b></div><div class="t-kpi"><span>Necesario por día</span><b>${mm(R.porDia)}</b></div></div>` : ""}
+      <div class="t-seg">${[["hoy", "Hoy"], ["sem", "Esta semana"], ["mes", "Este mes"], ["mant", "Mes pasado"]].map(([k, t]) => `<button type="button" data-av="${k}" aria-pressed="${admVista === k}">${t}</button>`).join("")}</div>
+      <div class="t-tw"><table class="t-t"><thead><tr><th>Persona</th><th>Puntos</th><th>% del máximo</th><th>Días</th><th>Misiones</th><th>Ventas anotadas</th><th>Última jornada</th></tr></thead><tbody>
+      ${T.map(x => `<tr><td><b>${esc(x.u)}</b></td><td>${x.pts}</td><td>${x.max ? Math.round(x.pts / x.max * 100) + "%" : "–"}</td><td>${x.dias}</td><td>${x.ok} de ${x.n || 0}</td><td>${x.cant} · ${fmt(x.monto)}</td><td>${esc(x.ult)}</td></tr>`).join("")}</tbody></table></div></div>
+    <div class="t-card"><h2>Detalle por jornada</h2><div class="t-tw"><table class="t-t"><thead><tr><th>Día</th><th>Persona</th><th>Puntos</th><th>Detalle</th></tr></thead><tbody>
+      ${L.map(x => `<tr><td>${esc(x.f)}</td><td>${esc(x.v.replace(TAG, ""))}</td><td>${x.pts}</td><td style="text-align:left;white-space:normal;font-size:.78rem">${esc(x.det || "")}</td></tr>`).join("") || '<tr><td colspan="4" class="t-vacio">Sin jornadas en este período.</td></tr>'}</tbody></table></div>
+      <div class="t-row"><button type="button" class="t-btn sec" id="admAct">↻ Actualizar</button><button type="button" class="t-btn sec" id="admSal">Cerrar acceso</button></div></div>`;
+  $("sAdm").querySelectorAll("[data-av]").forEach(x => x.onclick = () => { admVista = x.dataset.av; pintarAdm(); });
+  $("admAct").onclick = () => bajarRanking(); $("admSal").onclick = () => { localStorage.removeItem(ADMK); modoAdmin(); ir("inicio"); if (!turno()) pedirTurno(); };
+}
 </script>
 <script>
 /* ================================================================
@@ -1999,10 +2036,10 @@ NUT.hwf.forEach(nuPrep); NUT.comp.forEach(nuPrep);
 /* catálogo de nutrición más reciente (datos públicos) */
 fetch("../datos/publicos.json", { cache: "no-cache" }).then(r => r.json()).then(p => { if (p && p.nut && Array.isArray(p.nut.hwf) && p.nut.hwf.length) { NUT.hwf = p.nut.hwf.map(nuPrep); if (Array.isArray(p.nut.comp)) NUT.comp = p.nut.comp.map(nuPrep); if (vista === "nut") pintar("nut"); } }).catch(() => {});
 function arrancar() {
-  refrescarSES(); ir("inicio"); pintarTodo(); if (!turno()) pedirTurno();
+  refrescarSES(); modoAdmin(); ir(esAdmin() ? "adm" : "inicio"); pintarTodo(); if (!turno() && !esAdmin()) pedirTurno();
   bajar(true).then(n => { if (n) pintarTodo(); }); bajarRanking(); try { nuSync(); } catch (e) {}
   setInterval(() => { if (!document.hidden) { bajar(true).then(n => { if (n) pintarTodo(); }); enviarPuntos(); } }, 10 * 60 * 1000);
-  document.addEventListener("visibilitychange", () => { if (!document.hidden) { if (!turno()) { refrescarSES(); if (!$("tOv")) pedirTurno(); } enviarPuntos(); } });
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) { if (!turno() && !esAdmin()) { refrescarSES(); if (!$("tOv")) pedirTurno(); } enviarPuntos(); } });
 }
 if (!syCfg() || !DATA()) pantallaConexion(); else arrancar();
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
