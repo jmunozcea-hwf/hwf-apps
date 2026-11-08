@@ -6782,5 +6782,19 @@ try { if (SES && SES.vendedor && SES.vendedor.nombre === "Jorge") { SES.vendedor
 const RK_FUERA = /^(ang[eé]lica|v[ií]ctor|jorge)\b/i;
 { const _ptFilasSA = ptFilas; ptFilas = function () { return _ptFilasSA.apply(this, arguments).filter(r => !RK_FUERA.test(String(r.v || ""))); }; }
 </script>
+
+<script>/* avance2: el avance de ventas al comienzo del Panel */
+{ const _pdAv2 = pintarDash;
+  pintarDash = function () {
+    const r = _pdAv2.apply(this, arguments);
+    try { const dash = $("crmDash"), av = $("crmAvance"); if (!dash || !av || dash.hidden) return r;
+      dash.prepend(av); av.hidden = false; av.classList.add("av2"); pintarAvance();
+      dash.querySelectorAll(".db-av").forEach(e => e.remove());
+    } catch (e) { console.error(e); }
+    return r; }; }
+/* al salir del Panel, el avance se esconde con él */
+{ const _smAv2 = setModo; setModo = function (m) { const r = _smAv2.apply(this, arguments); const av = $("crmAvance"); if (av && m !== "dash" && m !== "avance") av.hidden = true; return r; }; }
+document.head.insertAdjacentHTML("beforeend", "<style>#crmAvance.av2{display:grid;gap:12px;margin-bottom:14px}</style>");
+</script>
 </body>
 </html>

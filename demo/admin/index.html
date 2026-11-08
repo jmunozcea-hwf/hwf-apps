@@ -4639,5 +4639,23 @@ setTimeout(() => cartBajar().then(c => { if (c) toast("Hay cambios de cartera: r
 const RK_FUERA = /^(ang[eé]lica|v[ií]ctor|jorge)\b/i;
 { const _rkFilasSA = rkFilas; rkFilas = function () { return _rkFilasSA.apply(this, arguments).filter(r => !RK_FUERA.test(String((r && (r.v || r[1])) || ""))); }; }
 </script>
+
+<script>/* avance2: «Avance por vendedor» en el Dashboard, bajo el avance del equipo */
+{ const _pdbAv2 = pintarDashboard;
+  pintarDashboard = function () {
+    const r = _pdbAv2.apply(this, arguments);
+    try { const s = $("s-res"); if (!s || !A) return r; avAjustar();
+      const F = avFilas(), esp = A.enCorte && A.totales ? A.transcurridos / A.totales : 0; if (!F.length) return r;
+      const T = F.reduce((t, x) => ({ v: "Total equipo", meta: t.meta + x.meta, fa: t.fa + x.fa, np: t.np + x.np, nnp: t.nnp + x.nnp, ap: t.ap + x.ap, tot: t.tot + x.tot }), { meta: 0, fa: 0, np: 0, nnp: 0, ap: 0, tot: 0 });
+      const old = $("avVend"); if (old) old.remove();
+      const html = `<div class="card" id="avVend" style="grid-column:1/-1"><h2>Avance por vendedor <span class="muted">facturado + notas de pedido Defontana${T.ap ? " + notas app" : ""} · ${A.enCorte ? `${A.restantes} ${A.restantes === 1 ? "día hábil" : "días hábiles"} por delante` : "mes cerrado"}</span></h2>
+        <div class="av-l">${F.map(x => avFila(x, esp)).join("")}${avFila(T, esp, "tot")}</div>
+        <div class="av-ley" style="margin-top:8px"><span class="fa">Facturado</span><span class="np">Notas de pedido Defontana pendientes</span>${T.ap ? '<span class="ap">Notas de la app después del corte</span>' : ""}</div></div>`;
+      const av = s.querySelector(".db-av"), anchor = av ? (av.closest(".card,.db-c") || av) : null;
+      if (anchor) anchor.insertAdjacentHTML("afterend", html); else { const g = s.querySelector(".db-g"); if (g) g.insertAdjacentHTML("afterbegin", html); else s.insertAdjacentHTML("afterbegin", html); }
+    } catch (e) { console.error(e); }
+    return r; }; }
+setTimeout(() => { try { if (A && $("s-res") && !$("s-res").hidden && !$("avVend")) pintarDashboard(); } catch (e) {} }, 0);
+</script>
 </body>
 </html>
