@@ -4830,5 +4830,24 @@ const ptLimpiaFilas = L => Array.isArray(L) ? L.filter(r => !ptBorrado(Array.isA
     try { if (d && d.accion === "ranking" && r && Array.isArray(r.filas)) r.filas = ptLimpiaFilas(r.filas); } catch (e) {}
     return r; }; }
 </script>
+
+<script>/* bajasfuera: clientes dados de baja fuera de sugerencias, proyecciones y planes */
+function bajasNombres() { try { return new Set((ccBajasVigentes().map(b => b.cliente)).filter(Boolean).map(n => PL_N(n).trim())); } catch (e) { return new Set(); } }
+{ const _pcBF = planCalc; let marca = "";
+  planCalc = function () {
+    try { const B = [...bajasNombres()], k = B.join("|");
+      if (k !== marca) { PLAN.excluir = PLAN.excluir.filter(re => !re.__baja);
+        B.forEach(n => { const re = new RegExp("^\\s*" + n.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\s*$"); re.__baja = 1; PLAN.excluir.push(re); }); marca = k; } } catch (e) {}
+    return _pcBF.apply(this, arguments); }; }
+
+{ const _calcBF = calcular;
+  calcular = function () {
+    const r = _calcBF.apply(this, arguments);
+    try { const B = bajasNombres(); if (B.size && typeof A === "object" && A) {
+        const es = c => c && B.has(PL_N(c.nombre != null ? c.nombre : (D.clientes[c.ci] || [""])[0]).trim());
+        if (Array.isArray(A.clientes)) A.clientes = A.clientes.filter(c => !es(c));
+        Object.keys(A).forEach(k => { if (Array.isArray(A[k])) A[k].forEach(x => { if (x && Array.isArray(x.sinCompra)) x.sinCompra = x.sinCompra.filter(c => !es(c)); }); }); } } catch (e) { console.error(e); }
+    return r; }; }
+</script>
 </body>
 </html>

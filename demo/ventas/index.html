@@ -6833,5 +6833,15 @@ const CLI_ELIMINADOS = new Set(["NV-MW8CIA5O"]);   /* «Jorgr», prueba (08-11-2
   if (d.nuevos.length !== n) { CLI_ELIMINADOS.forEach(k => { if (d.ed) delete d.ed[k]; }); setLDB(d); } } } catch (e) {} })();
 { const _clElim = clientesLocal; clientesLocal = function () { return _clElim.apply(this, arguments).filter(c => !CLI_ELIMINADOS.has(c.codigo)); }; }
 </script>
+
+<script>/* bajasfuera: clientes dados de baja fuera de sugerencias, proyecciones y planes */
+function bajasNombres() { try { return new Set((Object.values(ccEstados()).filter(Boolean).map(b => b.cliente)).filter(Boolean).map(n => PL_N(n).trim())); } catch (e) { return new Set(); } }
+{ const _pcBF = planCalc; let marca = "";
+  planCalc = function () {
+    try { const B = [...bajasNombres()], k = B.join("|");
+      if (k !== marca) { PLAN.excluir = PLAN.excluir.filter(re => !re.__baja);
+        B.forEach(n => { const re = new RegExp("^\\s*" + n.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\s*$"); re.__baja = 1; PLAN.excluir.push(re); }); marca = k; } } catch (e) {}
+    return _pcBF.apply(this, arguments); }; }
+</script>
 </body>
 </html>
