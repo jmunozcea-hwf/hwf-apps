@@ -6748,6 +6748,8 @@ syLlamar = async function (cfg, d) { const r = await _syLlamarCart.apply(this, a
   if (d && d.accion === "clientesCambios" && r && Array.isArray(r.cambios)) { r.__todos = r.cambios; r.cambios = r.cambios.filter(c => c && c.codigo !== "CARTERA"); } return r; };
 document.addEventListener("visibilitychange", () => { if (!document.hidden) cartBajar(); });
 setTimeout(cartBajar, 4000);
+/* vendedores eliminados: una sesión abierta como «Jorge» pasa a «Genérico» */
+try { if (SES && SES.vendedor && SES.vendedor.nombre === "Jorge") { SES.vendedor = Object.assign({}, SES.vendedor, { nombre: "Genérico", usuario: "genérico", cartera: "Genérico" }); guardarSesion(SES); location.reload(); } } catch (e) {}
 </script>
 </body>
 </html>
