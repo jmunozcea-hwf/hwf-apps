@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="es">
-<head><!-- patch_claves -->
+<head><!-- clavevieja --><!-- patch_claves -->
 <link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0B3146"><link rel="apple-touch-icon" href="icon-192.png"><link rel="icon" href="icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Admin DEMO"><script>/* espacio de almacenamiento: liberar respaldos re-descargables antes de perder datos nuevos */
 (function () {
   var S = Storage.prototype, set = S.setItem, rem = S.removeItem;
@@ -4223,7 +4223,7 @@ function pintarRanking() {
     <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between">
       <div class="rk-seg" role="group" aria-label="Período">${[["hoy", "Hoy"], ["ayer", "Ayer"], ["sem", "Esta semana"], ["sant", "Semana pasada"], ["mes", "Este mes"], ["mant", "Mes pasado"]].map(([k, t]) => `<button type="button" data-rp="${k}" aria-pressed="${rkPer === k}">${t}</button>`).join("")}</div>
       ${RK_DEMO ? "" : `<button type="button" class="rk-act" id="rkAct">↻ Actualizar</button>`}</div>
-    ${s && s.error && !filas.length ? `<p class="rk-n" style="color:var(--bad)">El script de Google aún no tiene el ranking (${esc(s.error)}). Se activa al instalar la actualización automática del script en la planilla «HWF Notas de pedido».</p>` : ""}
+    ${s && s.error && !filas.length && !/clave/i.test(s.error) ? `<p class="rk-n" style="color:var(--bad)">No se pudo leer el ranking (${esc(s.error)}). Toca «Actualizar» en unos minutos.</p>` : ""}
     <div class="rk-k num">
       <div><span>Líder · ${esc(P.t.toLowerCase())}</span><b>${lider && lider.pts ? esc(lider.v.split(" ")[0]) : "—"}</b><small>${lider && lider.pts ? lider.pts.toLocaleString("es-CL") + " puntos" : "sin puntos todavía"}</small></div>
       <div><span>Puntos del equipo</span><b>${tot.toLocaleString("es-CL")}</b><small>${P.pa ? `período anterior: ${prev.reduce((t, x) => t + x.pts, 0).toLocaleString("es-CL")}` : "&nbsp;"}</small></div>

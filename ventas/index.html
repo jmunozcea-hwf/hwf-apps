@@ -6799,5 +6799,17 @@ const RK_FUERA = /^(ang[eé]lica|v[ií]ctor|jorge)\b/i;
 { const _smAv2 = setModo; setModo = function (m) { const r = _smAv2.apply(this, arguments); const av = $("crmAvance"); if (av && m !== "dash" && m !== "avance") av.hidden = true; return r; }; }
 document.head.insertAdjacentHTML("beforeend", "<style>#crmAvance.av2{display:grid;gap:12px;margin-bottom:14px}</style>");
 </script>
+
+<script>/* clavevieja: clave guardada que ya no coincide con la del script → volver a conectar */
+{ const _f = syLlamar; let avisado = false;
+  syLlamar = async function (cfg, d) { const r = await _f.apply(this, arguments);
+    try { if (r && r.ok === false && (r.clave === false || /clave no coincide/i.test(String(r.error || ""))) && !window.HWF_DEMO && !avisado) { avisado = true;
+        localStorage.removeItem("hwf-sync-cfg"); localStorage.setItem("hwf-reconectar", "1");
+        alert("La clave guardada en esta app ya no es la del script de Google. Vuelve a conectar con el link, el código HWF1 o la URL y la clave.");
+        location.reload(); } } catch (e) {}
+    return r; }; }
+/* aviso en la pantalla de conexión después de borrar una clave vieja */
+addEventListener("load", function () { setTimeout(function () { try { if (localStorage.getItem("hwf-reconectar") && document.getElementById("hwfGe")) { document.getElementById("hwfGe").textContent = "La clave anterior ya no sirve: conecta de nuevo."; localStorage.removeItem("hwf-reconectar"); } } catch (e) {} }, 300); });
+</script>
 </body>
 </html>

@@ -4252,7 +4252,7 @@ function pintarRanking() {
     <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between">
       <div class="rk-seg" role="group" aria-label="Período">${[["hoy", "Hoy"], ["ayer", "Ayer"], ["sem", "Esta semana"], ["sant", "Semana pasada"], ["mes", "Este mes"], ["mant", "Mes pasado"]].map(([k, t]) => `<button type="button" data-rp="${k}" aria-pressed="${rkPer === k}">${t}</button>`).join("")}</div>
       ${RK_DEMO ? "" : `<button type="button" class="rk-act" id="rkAct">↻ Actualizar</button>`}</div>
-    ${s && s.error && !filas.length ? `<p class="rk-n" style="color:var(--bad)">El script de Google aún no tiene el ranking (${esc(s.error)}). Se activa al instalar la actualización automática del script en la planilla «HWF Notas de pedido».</p>` : ""}
+    ${s && s.error && !filas.length && !/clave/i.test(s.error) ? `<p class="rk-n" style="color:var(--bad)">No se pudo leer el ranking (${esc(s.error)}). Toca «Actualizar» en unos minutos.</p>` : ""}
     <div class="rk-k num">
       <div><span>Líder · ${esc(P.t.toLowerCase())}</span><b>${lider && lider.pts ? esc(lider.v.split(" ")[0]) : "—"}</b><small>${lider && lider.pts ? lider.pts.toLocaleString("es-CL") + " puntos" : "sin puntos todavía"}</small></div>
       <div><span>Puntos del equipo</span><b>${tot.toLocaleString("es-CL")}</b><small>${P.pa ? `período anterior: ${prev.reduce((t, x) => t + x.pts, 0).toLocaleString("es-CL")}` : "&nbsp;"}</small></div>
@@ -4805,6 +4805,18 @@ function cliContacto(ci) {
   return `<div class="cli-ct" style="margin-top:6px;display:grid;gap:6px">${lin ? `<span class="muted" style="font-size:.8rem">${esc(lin)}</span>` : ""}
     <div style="display:flex;gap:6px;flex-wrap:wrap">${tel ? `<a style="${b}" href="tel:${esc(tel)}">📞 ${esc(tel)}</a><a style="${b}" target="_blank" rel="noopener" href="https://wa.me/${wa}">WhatsApp</a>` : ""}${mail ? `<a style="${b}" href="mailto:${esc(mail)}">✉ ${esc(mail)}</a>` : ""}</div></div>`;
 }
+</script>
+
+<script>/* clavevieja: clave guardada que ya no coincide con la del script → volver a conectar */
+{ const _f = syCall; let avisado = false;
+  syCall = async function (cfg, d) { const r = await _f.apply(this, arguments);
+    try { if (r && r.ok === false && (r.clave === false || /clave no coincide/i.test(String(r.error || ""))) && !window.HWF_DEMO && !avisado) { avisado = true;
+        localStorage.removeItem("adm-sync"); localStorage.setItem("hwf-reconectar", "1");
+        alert("La clave guardada en esta app ya no es la del script de Google. Vuelve a conectar con el link, el código HWF1 o la URL y la clave.");
+        location.reload(); } } catch (e) {}
+    return r; }; }
+/* aviso en la pantalla de conexión después de borrar una clave vieja */
+addEventListener("load", function () { setTimeout(function () { try { if (localStorage.getItem("hwf-reconectar") && document.getElementById("hwfGe")) { document.getElementById("hwfGe").textContent = "La clave anterior ya no sirve: conecta de nuevo."; localStorage.removeItem("hwf-reconectar"); } } catch (e) {} }, 300); });
 </script>
 </body>
 </html>
