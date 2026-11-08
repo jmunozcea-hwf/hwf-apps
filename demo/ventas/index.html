@@ -4382,7 +4382,7 @@ function prCrear() {
         <div class="f"><label for="pnE">Etapa</label><select id="pnE">${PR_ETAPAS.slice(0, 4).map((e, i) => `<option ${i === 0 ? "selected" : ""}>${esc(e)}</option>`).join("")}</select></div>
         <div class="f"><label for="pnP">Próximo contacto</label><input id="pnP" type="date"></div></div>
       <div class="f"><label for="pnO">Notas</label><textarea id="pnO" placeholder="Quién atiende, proveedor actual, marcas que vende…"></textarea></div>
-      <label class="pr-chk"><input id="pnG" type="checkbox"> Estoy en el local: guardar mi ubicación</label>
+      <label class="pr-chk"><input id="pnG" type="checkbox" checked> Estoy en el local: guardar mi ubicación</label>
     </div>`,
     [["Cancelar", "", cerrarModal], ["Crear prospecto", "primary", async ev => {
       const nombre = $("pnN").value.trim().replace(/\s+/g, " "), comuna = $("pnC").value.trim().replace(/\s+/g, " ");
@@ -6527,7 +6527,7 @@ $("btnNuevoCli").onclick = function () {
   $("n_nombre").insertAdjacentHTML("afterend", dl("ucNom", L.nombres) + '<small class="hint" id="ucDup" hidden></small>');
   $("n_comuna").insertAdjacentHTML("afterend", dl("ucCom", L.com));
   $("n_dir").insertAdjacentHTML("afterend", dl("ucDir", L.dir) + '<small class="hint">Escribe calle y número; si ya existe en los informes de Drive, elígela de la lista.</small>');
-  $("n_tel").closest(".f").insertAdjacentHTML("afterend", `<label class="f" style="display:flex;gap:8px;align-items:center;flex-direction:row"><input type="checkbox" id="ucGps" style="width:20px;height:20px">
+  $("n_tel").closest(".f").insertAdjacentHTML("afterend", `<label class="f" style="display:flex;gap:8px;align-items:center;flex-direction:row"><input type="checkbox" id="ucGps" checked style="width:20px;height:20px">
     <span>Estoy en el local: guardar mi ubicación GPS como ubicación del cliente</span></label>`);
   $("n_nombre").addEventListener("input", () => { const v = norm($("n_nombre").value).trim(), m = v.length >= 4 ? clientesLocal().find(c => norm(c.nombre).trim() === v) : null;
     $("ucDup").hidden = !m; if (m) $("ucDup").textContent = `Ya existe «${tc(m.nombre)}» (${m.codigo}${m.vendedor ? " · " + m.vendedor : ""}). Revisa antes de crear otro.`; });
@@ -6811,6 +6811,20 @@ const ptLimpiaFilas = L => Array.isArray(L) ? L.filter(r => !ptBorrado(Array.isA
   if (document.readyState === "complete") setTimeout(arranque, 1200); else addEventListener("load", () => setTimeout(arranque, 1200));
   document.addEventListener("visibilitychange", () => { if (!document.hidden) pedir(false); });
 })();
+</script>
+
+<script>/* geocliente: una visita no se guarda sin esperar el GPS */
+{ const _gaGC = guardarActividad;
+  guardarActividad = async function (ev, c, posFn, solo) {
+    const t = $("a_tipo"), visita = solo || (t && t.value === "Visita");
+    if (visita && !posFn()) {
+      const b = ev && ev.currentTarget; const txt = b ? b.textContent : ""; if (b) { b.disabled = true; b.textContent = "Esperando GPS…"; }
+      try { const p = await Promise.race([ubicar(), new Promise((_, no) => setTimeout(() => no(new Error("tiempo")), 12000))]);
+        if (b) { b.disabled = false; b.textContent = txt; }
+        return _gaGC.call(this, { currentTarget: b }, c, () => p, solo); }
+      catch (e) { if (b) { b.disabled = false; b.textContent = txt; } toast("No llegó la ubicación: la visita se guarda sin GPS."); return _gaGC.call(this, { currentTarget: b }, c, posFn, solo); }
+    }
+    return _gaGC.apply(this, arguments); }; }
 </script>
 </body>
 </html>
