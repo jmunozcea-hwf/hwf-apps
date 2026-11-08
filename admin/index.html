@@ -4719,5 +4719,52 @@ document.head.insertAdjacentHTML("beforeend", `<style>
 #lcCard .lc-bt{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}#lcCard .lc-bt .btn{min-height:38px;padding:6px 12px;font-size:.85rem;text-decoration:none;color:inherit}
 </style>`);
 </script>
+
+<script>/* datosauto: Más → Datos sin importar archivos; todo llega solo desde Drive */
+{ const _pdDA = pintarDatos;
+  const DA_INF = [["Ventas", "informe de ventas de Defontana (.xls), p. ej. «HWF SALES …»: el más nuevo manda en cada mes"],
+    ["Notas de pedido Defontana", "informe de Cotizaciones pendientes (.xls)"],
+    ["Direcciones de clientes", "informe de datos de clientes (.xls)"],
+    ["Cobranza", "InfCobranzaDetallado (.csv)"],
+    ["Inventario", "Informe_Inventario (.xlsx o .csv)"],
+    ["Costos", "Informe_MayorAuxiliar (.xlsx o .csv)"],
+    ["Días calle", "Libro Mayor (.csv)"],
+    ["Metas", "META y el mes, p. ej. «META DICIEMBRE» (.xlsx)"]];
+  let daMsg = "";
+  pintarDatos = function () {
+    const r = _pdDA.apply(this, arguments);
+    try {
+      const b = $("masBody"); if (!b) return r;
+      b.querySelectorAll(".card").forEach(c => { const t = (c.querySelector("h2") || {}).textContent || "";
+        if (/^Importar información|^Estado de los datos/.test(t)) c.remove(); });
+      const ct = corte(), nCot = new Set(COTS().map(c => c[0])).size, cfg = SYC();
+      const metaT = Object.entries(METAS.metas).filter(([k]) => OPC.tienda || k !== "Tienda Hellywoof").reduce((s, [, x]) => s + x, 0);
+      const html = `<div class="card" id="daCard"><h2>Datos automáticos desde Drive</h2>
+        <p class="muted" style="margin:0 0 10px;font-size:.88rem">No hay que importar nada: el script de Google revisa la carpeta <b>META</b> de Drive cada 2 horas (7 a 21 h, todos los días) y actualiza las dos apps solo. Basta con subir ahí los informes nuevos de Defontana.</p>
+        <div class="lst">
+          <div class="it"><span class="n"><b>Datos de Drive del</b><small>app actualizada el ${esc(ACT_INFO.app || "—")}</small></span><span class="v num">${esc(ACT_INFO.drive || "—")}</span></div>
+          <div class="it"><span class="n"><b>Ventas</b><small>al ${String(ct.d).padStart(2, "0")}-${String(ct.m).padStart(2, "0")}-${ct.y}</small></span><span class="v num">${nf(D.rows.length)} líneas</span></div>
+          <div class="it"><span class="n"><b>Metas</b><small>${MESES[METAS.mes]} ${METAS.anio}</small></span><span class="v num">${mm(metaT)}</span></div>
+          <div class="it"><span class="n"><b>Notas de pedido Defontana</b><small>pendientes</small></span><span class="v num">${nCot}</span></div></div>
+        <div class="tools" style="margin-top:12px;flex-wrap:wrap"><button class="btn pri" type="button" id="daBtn"${cfg && cfg.url ? "" : " disabled"}>⟳ Actualizar ahora desde Drive</button>
+          <a class="btn" target="_blank" rel="noopener" href="https://drive.google.com/drive/folders/1vlPyYYTLr8FZkNahpGnnJhI27tPydTSm" style="text-decoration:none;color:inherit">Abrir carpeta META</a></div>
+        <div id="daMsg" class="muted" style="margin-top:8px;font-size:.85rem">${cfg && cfg.url ? daMsg : "Primero conecta esta app con el script de Google (más abajo)."}</div>
+        <details style="margin-top:10px"><summary style="cursor:pointer;font-weight:600">Qué informes subir a META</summary>
+          <ul style="margin:8px 0 0;padding-left:18px;font-size:.85rem;color:var(--muted)">${DA_INF.map(([a, x]) => `<li><b>${a}</b>: ${x}</li>`).join("")}</ul>
+          <p class="muted" style="margin:6px 0 0;font-size:.8rem">Si hay varios del mismo tipo, se usa el más reciente. Los antiguos se pueden borrar.</p></details></div>`;
+      const lc = $("lcCard"); if (lc) lc.insertAdjacentHTML("afterend", html); else b.insertAdjacentHTML("afterbegin", html);
+      $("daBtn").onclick = async () => {
+        const bt = $("daBtn"); bt.disabled = true; bt.textContent = "Actualizando… (2 a 4 min, no cierres la app)";
+        daMsg = ""; try { await drvActualizar(); } catch (e) {}
+        daMsg = (typeof drvMsg === "string" ? drvMsg : "").replace(/<[^>]+>/g, "");
+        const m = $("daMsg"); if (m) m.textContent = daMsg; const b2 = $("daBtn"); if (b2 && !drvOcup) { b2.disabled = false; b2.textContent = "⟳ Actualizar ahora desde Drive"; } };
+      /* «Borrar datos importados» solo si quedó algo importado a mano en este equipo */
+      const imp = ["adm-ventas", "adm-metas", "adm-cots", "adm-imp"].some(k => { try { return localStorage.getItem(k) != null; } catch (e) { return false; } });
+      const rb = $("btnReset"); if (rb && !imp) { const t = rb.closest(".tools"); if (t) t.hidden = true; }
+      else if (rb) rb.textContent = "Borrar datos importados a mano (usar solo los de Drive)";
+    } catch (e) { console.error(e); }
+    return r;
+  }; }
+</script>
 </body>
 </html>
