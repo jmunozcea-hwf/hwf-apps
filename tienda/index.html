@@ -1768,7 +1768,9 @@ function puntajeDia(P, f, mis) {
   c.mis = 0; c.misMax = 0;
   c.score = Math.round(pts / max * 100 * 10) / 10; return c;
 }
+const RANK_DESDE = "2026-11-09";   /* puntaje reiniciado: cuenta desde el 9-11-2026 y cada mes parte de cero (pedido de Jorge) */
 function rankCalc(ini, fin) {
+  if (ini < RANK_DESDE) ini = RANK_DESDE;
   const P = diasMetricas(); if (!P) return { L: [], dias: [] };
   const misM = {}; lsGet(RKK, []).concat(Object.values(lsGet(RKK + "-loc", {}))).forEach(x => { const k = x.f + "|" + x.v; if (!misM[k] || x.pts > misM[k].pts) misM[k] = x; });
   const dias = []; for (let d = new Date(ini + "T12:00:00"); isoD(d) <= fin; d.setDate(d.getDate() + 1)) { const f = isoD(d); if (!diaTienda(f) || f > P.corte || (f === P.corte && !(P.G[f] && P.G[f].venta))) continue;   /* el día del corte sin ventas aún no cuenta */
@@ -1800,8 +1802,8 @@ function pintarRank() {
   const pm = new Date(d.getFullYear(), d.getMonth() - 1, 1), finPm = new Date(d.getFullYear(), d.getMonth(), 0);
   const [a, b] = { sem: [isoD(lun), hoy], mes: [hoy.slice(0, 8) + "01", hoy], mant: [isoD(pm), isoD(finPm)] }[rkVista] || [hoy.slice(0, 8) + "01", hoy];
   const R = rankCalc(a, b);
-  $("sRank").innerHTML = `<div class="t-card"><h2>Ranking de la tienda <small>puntaje proporcional por día trabajado</small></h2>
-    <div class="t-seg">${[["sem", "Esta semana"], ["mes", "Este mes"], ["mant", "Mes pasado"]].map(([k, t]) => `<button type="button" data-rv="${k}" aria-pressed="${rkVista === k}">${t}</button>`).join("")}</div>
+  $("sRank").innerHTML = `<div class="t-card"><h2>Ranking de la tienda <small>puntaje proporcional por día trabajado · se reinicia el 1 de cada mes</small></h2>
+    <div class="t-seg">${[["mes", "Este mes"], ["sem", "Esta semana"], ["mant", "Mes pasado"]].map(([k, t]) => `<button type="button" data-rv="${k}" aria-pressed="${rkVista === k}">${t}</button>`).join("")}</div>
     ${tablaRank(R.L, R.P)}${RANK_NOTA(R.P)}</div>`;
   $("sRank").querySelectorAll("[data-rv]").forEach(b => b.onclick = () => { rkVista = b.dataset.rv; pintarRank(); });
 }
