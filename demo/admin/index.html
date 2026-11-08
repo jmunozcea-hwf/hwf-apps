@@ -1562,7 +1562,7 @@ function detalleCliente(ci) {
   const lp = Object.entries(prods).sort((a, b) => b[1].v - a[1].v).slice(0, 12);
   const cots = COTS().filter(q => norm(q[2]) === norm(c.nombre));
   const acts = IMP.acts.filter(a => norm(a.cliente) === norm(c.nombre)).sort((a, b) => b.t - a.t).slice(0, 10);
-  abrirSheet(`<div class="hd"><div><span class="muted">${esc(c.cart)} · ${esc(c.comuna)}</span><h2>${esc(tc(c.nombre))}</h2>${D.clientes[ci][3] ? `<span class="muted" style="font-size:.85rem">${esc(D.clientes[ci][3])}</span>` : ""}</div><button class="x" type="button" aria-label="Cerrar">×</button></div>
+  abrirSheet(`<div class="hd"><div><span class="muted">${esc(c.cart)} · ${esc(c.comuna)}</span><h2>${esc(tc(c.nombre))}</h2>${D.clientes[ci][3] ? `<span class="muted" style="font-size:.85rem">${esc(D.clientes[ci][3])}</span>` : ""}${cliContacto(ci)}</div><button class="x" type="button" aria-label="Cerrar">×</button></div>
     <div class="kpis num"><div class="kpi"><span>${MESES[M]}</span><b>${mm(c.mes)}</b></div><div class="kpi"><span>Habitual</span><b>${mm(c.hab)}</b><small>${A.prev3.map(m => MC[m]).join("-")}</small></div><div class="kpi"><span>Año ${Y}</span><b>${mm(c.ytd)}</b></div></div>
     <div class="card"><h2>Compras por mes</h2><div class="chartbox" style="height:190px"><canvas id="sCli"></canvas></div></div>
     <div class="card"><h2>Productos que compra <span class="muted">año</span></h2><div class="lst">${lp.map(([pi, p]) => `<div class="it"><span class="n"><b>${esc(D.productos[pi][0])}</b><small>${nf(p.q)} unidades · última ${String(p.ult % 100).padStart(2, "0")}-${MC[Math.floor(p.ult / 100)]}</small></span><span class="v num">${mm(p.v)}</span></div>`).join("")}</div></div>
@@ -4764,6 +4764,18 @@ function ckDec(t) { t = String(t || "").replace(/\s+/g, ""); try { t = decodeURI
     } catch (e) { console.error(e); }
     return r;
   }; }
+</script>
+
+<script>/* clicontacto: RUT, teléfono, correo, pago y región del cliente (informe HWF SALES) */
+function cliContacto(ci) {
+  const c = D.clientes[ci] || [], rut = c[4] || "", tel = String(c[5] || ""), mail = c[6] || "", con = c[7] || "", pago = c[8] || "", reg = c[9] || "";
+  if (!rut && !tel && !mail && !pago) return "";
+  const wa = tel.replace(/\D/g, "").replace(/^(9\d{8})$/, "56$1");
+  const lin = [rut ? "RUT " + rut : "", con ? "Contacto: " + con : "", reg, pago ? "Pago: " + String(pago).toLowerCase() : ""].filter(Boolean).join(" · ");
+  const b = "display:inline-flex;align-items:center;gap:4px;padding:6px 10px;border:1px solid var(--line);border-radius:10px;text-decoration:none;color:inherit;font-size:.82rem;font-weight:600";
+  return `<div class="cli-ct" style="margin-top:6px;display:grid;gap:6px">${lin ? `<span class="muted" style="font-size:.8rem">${esc(lin)}</span>` : ""}
+    <div style="display:flex;gap:6px;flex-wrap:wrap">${tel ? `<a style="${b}" href="tel:${esc(tel)}">📞 ${esc(tel)}</a><a style="${b}" target="_blank" rel="noopener" href="https://wa.me/${wa}">WhatsApp</a>` : ""}${mail ? `<a style="${b}" href="mailto:${esc(mail)}">✉ ${esc(mail)}</a>` : ""}</div></div>`;
+}
 </script>
 </body>
 </html>

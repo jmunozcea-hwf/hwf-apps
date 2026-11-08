@@ -2560,7 +2560,7 @@ function pintarFicha(cod) {
   const dAqui = AQUI && tieneUb(c) ? distM(AQUI, { lat: Number(c.lat), lng: Number(c.lng) }) : null;
   $("crmFicha").innerHTML = `
     <button class="back" type="button" id="fBack">← Mis clientes</button>
-    <div class="f-head"><span class="hint">${esc(c.codigo)}${c.rut ? " · RUT " + esc(c.rut) : ""}</span><h2>${esc(tc(c.nombre))}</h2>
+    <div class="f-head"><span class="hint">${esc(c.codigo)}${c.rut ? " · RUT " + esc(c.rut) : ""}</span><h2>${esc(tc(c.nombre))}</h2>${c.region || c.condicion_pago || c.contacto ? `<span class="hint">${esc([c.contacto ? "Contacto: " + c.contacto : "", c.region, c.condicion_pago ? "Pago: " + String(c.condicion_pago).toLowerCase() : ""].filter(Boolean).join(" · "))}</span>` : ""}<!-- clicontacto -->
       <span class="hint">${esc([tc(c.direccion), tc(c.comuna)].filter(Boolean).join(", ")) || "Sin dirección registrada"}${dAqui != null ? ` · a ${distTxt(dAqui)} de ti` : ""}</span></div>
     <div class="acc">
       <button class="btn primary" type="button" data-act="Visita">${ICO.visita}Registrar visita</button>

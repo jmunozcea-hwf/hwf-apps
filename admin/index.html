@@ -51,14 +51,14 @@ function pinta(){
  if(document.getElementById("hwfGate"))return;
  var s=document.createElement("style");s.textContent="#hwfGate{position:fixed;inset:0;z-index:2147483000;background:#0B3146;color:#fff;display:flex;align-items:center;justify-content:center;padding:20px;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}#hwfGate .c{background:#fff;color:#0F1E29;border-radius:18px;padding:22px;max-width:440px;width:100%;display:grid;gap:12px;box-shadow:0 20px 50px rgba(0,0,0,.35)}#hwfGate h1{margin:0;font-size:1.3rem}#hwfGate p{margin:0;color:#5B6874;font-size:.92rem;line-height:1.4}#hwfGate textarea{width:100%;box-sizing:border-box;min-height:96px;border:1px solid #DAE1E7;border-radius:12px;padding:10px;font:inherit;font-size:.9rem}#hwfGate button{border:0;border-radius:12px;padding:13px;font:inherit;font-weight:700;background:#0B3146;color:#fff;cursor:pointer;min-height:48px}#hwfGate button[disabled]{opacity:.6}#hwfGate .e{color:#B42318;font-size:.88rem;min-height:1em}";
  document.head.appendChild(s);
- var g=document.createElement("div");g.id="hwfGate";g.innerHTML='<div class="c"><h1>HWF Admin</h1><p>'+(ESADM?'Abre el <b>link de conexión</b> de HWF Admin o pega aquí el link o el código (empieza con <b>HWF1:</b>). Si no lo tienes: en el script de Google ejecuta <b>enviarLinksConexion</b> y te llega por correo.':'Abre el <b>link</b> que te envió HWF y la app se conecta sola. O pega aquí el link o el código (empieza con <b>HWF1:</b>). Se pide una sola vez.')+'</p><textarea id="hwfGc" placeholder="Pega el link o el código HWF1:…" autocomplete="off" autocapitalize="off" spellcheck="false"></textarea><div class="e" id="hwfGe"></div><button type="button" id="hwfGb">Conectar</button></div>';
+ var g=document.createElement("div");g.id="hwfGate";g.innerHTML='<div class="c"><h1>HWF Admin</h1><p>'+(ESADM?'Abre el <b>link de conexión</b> de HWF Admin o pega aquí el link o el código (empieza con <b>HWF1:</b>). Si no lo tienes: en el script de Google ejecuta <b>enviarLinksConexion</b> y te llega por correo.':'Abre el <b>link</b> que te envió HWF y la app se conecta sola. O pega aquí el link o el código (empieza con <b>HWF1:</b>). Se pide una sola vez.')+'</p><textarea id="hwfGc" placeholder="Pega el link o el código HWF1:…" autocomplete="off" autocapitalize="off" spellcheck="false"></textarea><details id="hwfGm" style="font-size:.9rem"><summary style="cursor:pointer;font-weight:600;color:#0B3146">¿No tienes link ni código? Conectar con URL y clave</summary><div style="display:grid;gap:8px;margin-top:8px"><input id="hwfGu" type="url" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off" autocapitalize="off" spellcheck="false" style="border:1px solid #DAE1E7;border-radius:12px;padding:11px;font:inherit;font-size:.9rem"><input id="hwfGk" type="text" placeholder="Clave (la de Config.gs)" autocomplete="off" autocapitalize="off" spellcheck="false" style="border:1px solid #DAE1E7;border-radius:12px;padding:11px;font:inherit;font-size:.9rem"><p style="font-size:.8rem;margin:0">La URL: Apps Script → Implementar → Gestionar implementaciones (termina en /exec). La clave: archivo Config.gs.</p></div></details><div class="e" id="hwfGe"></div><!-- gatemanual --><button type="button" id="hwfGb">Conectar</button></div>';
  document.body.appendChild(g);
  document.getElementById("hwfGb").onclick=async function(){
-  var b=this,e=document.getElementById("hwfGe"),c=dec(document.getElementById("hwfGc").value);
+  var b=this,e=document.getElementById("hwfGe"),c=dec(document.getElementById("hwfGc").value);if(!c){var gu=(document.getElementById("hwfGu")||{}).value||"",gk=(document.getElementById("hwfGk")||{}).value||"";gu=gu.trim();gk=gk.trim();if(/^https:\/\/script\.google(usercontent)?\.com\/.+\/exec$/.test(gu)&&gk.length>=4)c={url:gu,clave:gk};else if(gu||gk){e.textContent="Revisa la URL (debe terminar en /exec) y la clave.";return}}
   if(!c){e.textContent="No es un link ni un código válido. Cópialo completo (desde https:// o desde HWF1: hasta el final).";return}
   b.disabled=true;b.textContent="Descargando datos…";e.textContent="";
   try{var r=await pide(c,{accion:"datos",app:APP,version:""});
-   if(!r||!r.ok){throw new Error(r&&r.clave===false?"El código no corresponde a HWF.":(r&&r.error)||"El servidor no respondió.")}
+   if(!r||!r.ok){throw new Error(r&&r.clave===false?"La clave o el código no coinciden con los del script de HWF.":(r&&r.error)||"El servidor no respondió.")}
    if(!r.paquete){throw new Error("Todavía no hay datos publicados. Intenta en unos minutos.")}
    localStorage.setItem(DVK,JSON.stringify({v:r.version,d:r.paquete}));
    if(!ESADM){try{var a=await pide(c,{accion:"datos",app:"admin",version:""});if(a&&a.ok&&a.paquete&&a.paquete.BASE)localStorage.setItem("hwf-dv-dash",JSON.stringify({v:a.version,d:a.paquete.BASE,act:a.paquete.ACT_INFO||null}))}catch(x){}}
@@ -1592,7 +1592,7 @@ function detalleCliente(ci) {
   const lp = Object.entries(prods).sort((a, b) => b[1].v - a[1].v).slice(0, 12);
   const cots = COTS().filter(q => norm(q[2]) === norm(c.nombre));
   const acts = IMP.acts.filter(a => norm(a.cliente) === norm(c.nombre)).sort((a, b) => b.t - a.t).slice(0, 10);
-  abrirSheet(`<div class="hd"><div><span class="muted">${esc(c.cart)} · ${esc(c.comuna)}</span><h2>${esc(tc(c.nombre))}</h2>${D.clientes[ci][3] ? `<span class="muted" style="font-size:.85rem">${esc(D.clientes[ci][3])}</span>` : ""}</div><button class="x" type="button" aria-label="Cerrar">×</button></div>
+  abrirSheet(`<div class="hd"><div><span class="muted">${esc(c.cart)} · ${esc(c.comuna)}</span><h2>${esc(tc(c.nombre))}</h2>${D.clientes[ci][3] ? `<span class="muted" style="font-size:.85rem">${esc(D.clientes[ci][3])}</span>` : ""}${cliContacto(ci)}</div><button class="x" type="button" aria-label="Cerrar">×</button></div>
     <div class="kpis num"><div class="kpi"><span>${MESES[M]}</span><b>${mm(c.mes)}</b></div><div class="kpi"><span>Habitual</span><b>${mm(c.hab)}</b><small>${A.prev3.map(m => MC[m]).join("-")}</small></div><div class="kpi"><span>Año ${Y}</span><b>${mm(c.ytd)}</b></div></div>
     <div class="card"><h2>Compras por mes</h2><div class="chartbox" style="height:190px"><canvas id="sCli"></canvas></div></div>
     <div class="card"><h2>Productos que compra <span class="muted">año</span></h2><div class="lst">${lp.map(([pi, p]) => `<div class="it"><span class="n"><b>${esc(D.productos[pi][0])}</b><small>${nf(p.q)} unidades · última ${String(p.ult % 100).padStart(2, "0")}-${MC[Math.floor(p.ult / 100)]}</small></span><span class="v num">${mm(p.v)}</span></div>`).join("")}</div></div>
@@ -4793,6 +4793,18 @@ function ckDec(t) { t = String(t || "").replace(/\s+/g, ""); try { t = decodeURI
     } catch (e) { console.error(e); }
     return r;
   }; }
+</script>
+
+<script>/* clicontacto: RUT, teléfono, correo, pago y región del cliente (informe HWF SALES) */
+function cliContacto(ci) {
+  const c = D.clientes[ci] || [], rut = c[4] || "", tel = String(c[5] || ""), mail = c[6] || "", con = c[7] || "", pago = c[8] || "", reg = c[9] || "";
+  if (!rut && !tel && !mail && !pago) return "";
+  const wa = tel.replace(/\D/g, "").replace(/^(9\d{8})$/, "56$1");
+  const lin = [rut ? "RUT " + rut : "", con ? "Contacto: " + con : "", reg, pago ? "Pago: " + String(pago).toLowerCase() : ""].filter(Boolean).join(" · ");
+  const b = "display:inline-flex;align-items:center;gap:4px;padding:6px 10px;border:1px solid var(--line);border-radius:10px;text-decoration:none;color:inherit;font-size:.82rem;font-weight:600";
+  return `<div class="cli-ct" style="margin-top:6px;display:grid;gap:6px">${lin ? `<span class="muted" style="font-size:.8rem">${esc(lin)}</span>` : ""}
+    <div style="display:flex;gap:6px;flex-wrap:wrap">${tel ? `<a style="${b}" href="tel:${esc(tel)}">📞 ${esc(tel)}</a><a style="${b}" target="_blank" rel="noopener" href="https://wa.me/${wa}">WhatsApp</a>` : ""}${mail ? `<a style="${b}" href="mailto:${esc(mail)}">✉ ${esc(mail)}</a>` : ""}</div></div>`;
+}
 </script>
 </body>
 </html>
