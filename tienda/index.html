@@ -1531,7 +1531,7 @@ function pedirTurno() {
   const o = document.createElement("div"); o.className = "t-ov"; o.id = "tOv";
   o.innerHTML = `<div class="c"><h1>¿Quién inicia la jornada hoy?</h1><p>${esc(new Date().toLocaleDateString("es-CL", { weekday: "long", day: "numeric", month: "long" }))}. Todo lo de hoy (misiones, puntos y ventas anotadas) queda a tu nombre.</p>
     ${USUARIOS.map(u => `<button type="button" class="q" data-u="${esc(u)}">👤 ${esc(u)}</button>`).join("")}<button type="button" class="q" data-adm style="font-size:.9rem;color:#5B6874">🔑 Acceso administración (revisar avances)</button></div>`;
-  document.body.appendChild(o); o.onclick = e => { if (e.target.closest("[data-adm]")) { o.remove(); return entrarAdmin(); } const b = e.target.closest("[data-u]"); if (!b) return; lsSet(TURK, { f: hoyISO(), v: b.dataset.u }); o.remove(); refrescarSES(); pintarTodo(); toast("Buena jornada, " + b.dataset.u + "."); };
+  document.body.appendChild(o); o.onclick = e => { if (e.target.closest("[data-adm]")) { o.remove(); return entrarAdmin(); } const b = e.target.closest("[data-u]"); if (!b) return; lsSet(TURK, { f: hoyISO(), v: b.dataset.u }); { const Hh = lsGet("turnos", {}); Hh[hoyISO()] = b.dataset.u; lsSet("turnos", Hh); } o.remove(); refrescarSES(); pintarTodo(); toast("Buena jornada, " + b.dataset.u + "."); };
 }
 function pantallaConexion(msg) {
   const o = document.createElement("div"); o.className = "t-ov"; o.id = "tGate";
@@ -1667,6 +1667,59 @@ function pintarInicio() {
   if ($("iTurno")) $("iTurno").onclick = pedirTurno;
 }
 
+/* ================= puntaje de la tienda (base 100 por día trabajado) =================
+   50 venta del día ponderada (venta / esperado para ese día según el peso histórico de cada día de la semana y la meta del mes)
+   15 sacos grandes (10 kg o más) · 10 ticket promedio · 10 SKU por ticket (si el informe trae el n° de documento) · 15 misiones de la app.
+   Día → persona: la jornada registrada en este computador; si no hay, lunes a viernes Francisco, fines de semana y feriados Benjamín. */
+const FERCL = new Set(["2026-01-01","2026-04-03","2026-04-04","2026-05-01","2026-05-21","2026-06-21","2026-06-29","2026-07-16","2026-08-15","2026-09-18","2026-09-19","2026-10-12","2026-10-31","2026-11-01","2026-12-08","2026-12-25",
+  "2027-01-01","2027-03-26","2027-03-27","2027-05-01","2027-05-21","2027-06-21","2027-06-28","2027-07-16","2027-08-15","2027-09-18","2027-09-19","2027-10-11","2027-10-31","2027-11-01","2027-12-08","2027-12-25"]);
+const finSemana = f => { const d = new Date(f + "T12:00:00"), w = d.getDay(); return w === 0 || w === 6 || FERCL.has(f); };
+const quienDia = f => (lsGet("turnos", {})[f]) || (finSemana(f) ? "Benjamín" : "Francisco");
+const kgDe = n => { const m = /(\d+(?:[.,]\d+)?)\s*K(?:G|ILOS?)\b/i.exec(String(n || "")); return m ? Number(m[1].replace(",", ".")) : 0; };
+let puntCache = null, puntClave = "";
+function diasMetricas() {
+  const D = DATA(); if (!D) return null; const clave = D.v + "|" + D.rows.length; if (puntCache && puntClave === clave) return puntCache;
+  const G = {}, big = D.productos.map(p => kgDe(p[0]) >= 10);
+  D.rows.forEach(r => { const f = `${r[6]}-${String(r[1]).padStart(2, "0")}-${String(r[2]).padStart(2, "0")}`, o = G[f] = G[f] || { venta: 0, sacos: 0, docs: {} };
+    o.venta += r[4]; if (big[r[0]] && r[3] > 0) o.sacos += r[3]; if (r[7]) { const d = o.docs[r[7]] = o.docs[r[7]] || new Set(); d.add(r[0]); } });
+  Object.values(G).forEach(o => { const n = Object.keys(o.docs).length; o.tickets = n; o.ticket = n ? o.venta / n : 0; o.sku = n ? Object.values(o.docs).reduce((s, x) => s + x.size, 0) / n : 0; delete o.docs; });
+  /* pesos por día de la semana (feriado = domingo) con las últimas 12 semanas antes del corte */
+  const corte = D.corte, c0 = new Date(corte + "T12:00:00"), ini = isoD(new Date(c0.getTime() - 84 * 864e5)), sum = Array(7).fill(0), cnt = Array(7).fill(0);
+  let sv = 0, ss = 0, st = 0, sk = 0, nd = 0, nt = 0;
+  Object.entries(G).forEach(([f, o]) => { if (f < ini || f > corte || !diaTienda(f)) return; const w = FERCL.has(f) ? 0 : new Date(f + "T12:00:00").getDay(); sum[w] += o.venta; cnt[w]++; sv += o.venta; ss += o.sacos; nd++;
+    if (o.tickets) { st += o.ticket; sk += o.sku; nt++; } });
+  const prom = nd ? sv / nd : 1, peso = sum.map((x, i) => cnt[i] ? x / cnt[i] / prom : 1);
+  puntCache = { G, peso, sacosDia: nd ? ss / nd : 0, ticketBase: nt ? st / nt : 0, skuBase: nt ? sk / nt : 0, corte, conTickets: nt > 0 }; puntClave = clave; return puntCache;
+}
+const pesoDe = (P, f) => P.peso[FERCL.has(f) ? 0 : new Date(f + "T12:00:00").getDay()];
+function esperadoDia(P, f) { const [y, m] = f.split("-").map(Number); let tot = 0; const fin = new Date(y, m, 0).getDate();
+  for (let d = 1; d <= fin; d++) { const g = isoD(new Date(y, m - 1, d)); if (diaTienda(g)) tot += pesoDe(P, g); } return tot ? metaDe(y, m) * pesoDe(P, f) / tot : 0; }
+function puntajeDia(P, f, mis) {
+  const o = P.G[f] || { venta: 0, sacos: 0, tickets: 0 }, esp = esperadoDia(P, f), r = esp ? o.venta / esp : 0, sEsp = P.sacosDia * pesoDe(P, f);
+  const c = { f, quien: quienDia(f), venta: o.venta, esp, cumpl: r, sacos: o.sacos, tickets: o.tickets, ticket: o.ticket || 0, sku: o.sku || 0 };
+  let pts = 50 * Math.min(1.2, r), max = 50; pts += 15 * Math.min(1, sEsp ? o.sacos / sEsp : 0); max += 15;
+  if (P.conTickets && o.tickets) { pts += 10 * Math.min(1, P.ticketBase ? o.ticket / P.ticketBase : 0) + 10 * Math.min(1, P.skuBase ? o.sku / P.skuBase : 0); max += 20; }
+  if (mis) { pts += 15 * (mis.max ? mis.pts / mis.max : 0); } max += 15; c.mis = mis ? mis.pts : 0; c.misMax = mis ? mis.max : 0;
+  c.score = Math.round(pts / max * 100 * 10) / 10; return c;
+}
+function rankCalc(ini, fin) {
+  const P = diasMetricas(); if (!P) return { L: [], dias: [] };
+  const misM = {}; lsGet(RKK, []).concat(Object.values(lsGet(RKK + "-loc", {}))).forEach(x => { const k = x.f + "|" + x.v; if (!misM[k] || x.pts > misM[k].pts) misM[k] = x; });
+  const dias = []; for (let d = new Date(ini + "T12:00:00"); isoD(d) <= fin; d.setDate(d.getDate() + 1)) { const f = isoD(d); if (!diaTienda(f) || f > P.corte || (f === P.corte && !(P.G[f] && P.G[f].venta))) continue;   /* el día del corte sin ventas aún no cuenta */
+    const q = quienDia(f); dias.push(puntajeDia(P, f, misM[f + "|" + q + TAG])); }
+  const L = USUARIOS.map(u => { const l = dias.filter(x => x.quien === u), n = l.length, sv = l.reduce((s, x) => s + x.venta, 0), se = l.reduce((s, x) => s + x.esp, 0), tk = l.filter(x => x.tickets);
+    return { u, dias: n, venta: sv, cumpl: se ? sv / se : 0, sacos: l.reduce((s, x) => s + x.sacos, 0), ticket: tk.length ? tk.reduce((s, x) => s + x.ticket, 0) / tk.length : 0, sku: tk.length ? tk.reduce((s, x) => s + x.sku, 0) / tk.length : 0,
+      mis: l.reduce((s, x) => s + x.mis, 0), misMax: l.reduce((s, x) => s + x.misMax, 0), score: n ? l.reduce((s, x) => s + x.score, 0) / n : 0 }; }).sort((a, b) => b.score - a.score);
+  return { L, dias, P };
+}
+function tablaRank(L, P) {
+  const med = ["🥇", "🥈", "🥉"];
+  return `<div class="t-tw"><table class="t-t"><thead><tr><th>#</th><th>Nombre</th><th>Puntaje/día</th><th>Días</th><th>Venta</th><th>Cumplimiento ponderado</th><th>Sacos grandes</th>${P && P.conTickets ? "<th>Ticket prom.</th><th>SKU/ticket</th>" : ""}<th>Misiones</th></tr></thead><tbody>
+    ${L.map((x, i) => `<tr><td>${x.dias ? med[i] || i + 1 : "–"}</td><td><b>${esc(x.u)}</b></td><td><b>${x.dias ? x.score.toFixed(1) : "–"}</b></td><td>${x.dias}</td><td>${mm(x.venta)}</td><td class="${x.cumpl < 1 ? "neg" : "pos"}">${x.dias ? Math.round(x.cumpl * 100) + "%" : "–"}</td><td>${Math.round(x.sacos)}</td>
+      ${P && P.conTickets ? `<td>${x.ticket ? fmt(x.ticket) : "–"}</td><td>${x.sku ? x.sku.toFixed(1) : "–"}</td>` : ""}<td>${x.misMax ? Math.round(x.mis / x.misMax * 100) + "%" : "–"}</td></tr>`).join("")}</tbody></table></div>`;
+}
+const RANK_NOTA = P => `<p class="t-vacio" style="font-size:.78rem">Puntaje por día trabajado (máx. 100): 50 venta del día ponderada (venta ÷ lo esperado ese día según el peso histórico del día de la semana y la meta del mes) · 15 sacos de 10 kg o más · ${P && P.conTickets ? "10 ticket promedio · 10 SKU por ticket · " : ""}15 misiones de la app.${P && !P.conTickets ? " Ticket promedio y SKU por ticket se activan cuando el informe de ventas incluya el «Número del Documento»." : ""} Días: la jornada registrada en este computador; sin registro, lunes a viernes Francisco y fines de semana y feriados Benjamín. Las ventas cuentan hasta la última sincronización (${P ? esc(P.corte) : "—"}).</p>`;
+
 /* ================= ranking de la tienda ================= */
 let rkVista = "mes";
 async function bajarRanking() {
@@ -1677,17 +1730,13 @@ async function bajarRanking() {
   if (F) { lsSet(RKK, F.filter(x => /\(Tienda\)\s*$/.test(x.v))); if (vista === "rank") pintarRank(); if (vista === "adm") pintarAdm(); }
 }
 function pintarRank() {
-  const loc = Object.values(lsGet(RKK + "-loc", {})), srv = lsGet(RKK, []), M = {};
-  srv.concat(loc).forEach(x => { if (!diaTienda(x.f)) return; const k = x.v + "|" + x.f; if (!M[k] || x.pts > M[k].pts) M[k] = x; });
-  const hoy = hoyISO(), d = new Date(); const lun = new Date(d); lun.setDate(d.getDate() - ((d.getDay() + 6) % 7)); const ini = { hoy, sem: isoD(lun), mes: hoy.slice(0, 8) + "01" }[rkVista];
-  const T = {}; USUARIOS.forEach(u => T[u + TAG] = { v: u, pts: 0, dias: 0, venta: 0 });
-  Object.values(M).filter(x => x.f >= ini && x.f <= hoy).forEach(x => { const o = T[x.v]; if (!o) return; o.pts += x.pts; o.dias++; const m = /Ventas anotadas: \$([\d.]+)/.exec(x.det || ""); if (m) o.venta += Number(m[1].replace(/\./g, "")); });
-  const L = Object.values(T).sort((a, b) => b.pts - a.pts || b.venta - a.venta), med = ["🥇", "🥈", "🥉"];
-  $("sRank").innerHTML = `<div class="t-card"><h2>Ranking de la tienda <small>puntos por las misiones del día</small></h2>
-    <div class="t-seg">${[["hoy", "Hoy"], ["sem", "Esta semana"], ["mes", "Este mes"]].map(([k, t]) => `<button type="button" data-rv="${k}" aria-pressed="${rkVista === k}">${t}</button>`).join("")}</div>
-    <div class="t-tw"><table class="t-t"><thead><tr><th>#</th><th>Nombre</th><th>Puntos</th><th>Días</th></tr></thead><tbody>
-    ${L.map((x, i) => `<tr><td>${x.pts ? med[i] || i + 1 : "–"}</td><td><b>${esc(x.v)}</b></td><td>${x.pts}</td><td>${x.dias}</td></tr>`).join("")}</tbody></table></div>
-    <p class="t-vacio" style="font-size:.8rem">Cuentan todos los días de tienda (abre también feriados, salvo los irrenunciables). Los puntos se suben solos al script de Google.</p></div>`;
+  const hoy = hoyISO(), d = new Date(), lun = new Date(d); lun.setDate(d.getDate() - ((d.getDay() + 6) % 7));
+  const pm = new Date(d.getFullYear(), d.getMonth() - 1, 1), finPm = new Date(d.getFullYear(), d.getMonth(), 0);
+  const [a, b] = { sem: [isoD(lun), hoy], mes: [hoy.slice(0, 8) + "01", hoy], mant: [isoD(pm), isoD(finPm)] }[rkVista] || [hoy.slice(0, 8) + "01", hoy];
+  const R = rankCalc(a, b);
+  $("sRank").innerHTML = `<div class="t-card"><h2>Ranking de la tienda <small>puntaje proporcional por día trabajado</small></h2>
+    <div class="t-seg">${[["sem", "Esta semana"], ["mes", "Este mes"], ["mant", "Mes pasado"]].map(([k, t]) => `<button type="button" data-rv="${k}" aria-pressed="${rkVista === k}">${t}</button>`).join("")}</div>
+    ${tablaRank(R.L, R.P)}${RANK_NOTA(R.P)}</div>`;
   $("sRank").querySelectorAll("[data-rv]").forEach(b => b.onclick = () => { rkVista = b.dataset.rv; pintarRank(); });
 }
 
@@ -1728,13 +1777,14 @@ function pintarAdm() {
   const T = USUARIOS.map(u => { const l = L.filter(x => x.v === u + TAG); const vs = l.map(venta);
     return { u, dias: l.length, pts: l.reduce((s, x) => s + x.pts, 0), max: l.reduce((s, x) => s + (x.max || 60), 0), ok: l.reduce((s, x) => s + (x.ok || 0), 0), n: l.reduce((s, x) => s + (x.n || 4), 0),
       monto: vs.reduce((s, v) => s + v[0], 0), cant: vs.reduce((s, v) => s + v[1], 0), ult: l[0] ? l[0].f : "" }; }).sort((x, y) => y.pts - x.pts);
-  const R = resumen();
+  const R = resumen(), RK = rankCalc(a, b);
   $("sAdm").innerHTML = `<div class="t-card"><h2>Avances de la tienda <small>vista de administración · no suma puntos</small></h2>
       ${R ? `<div class="t-kpis"><div class="t-kpi"><span>Venta ${MESES[R.m - 1]}</span><b>${mm(R.vMes)}</b><small>meta ${mm(R.meta)} · ${Math.round(R.vMes / R.meta * 100)}%</small></div>
         <div class="t-kpi ${R.desv < 0 ? "bad" : "ok"}"><span>Desviación a la fecha</span><b>${R.desv >= 0 ? "+" : ""}${mm(R.desv)}</b></div><div class="t-kpi"><span>Proyección</span><b>${mm(R.proy)}</b></div><div class="t-kpi"><span>Necesario por día</span><b>${mm(R.porDia)}</b></div></div>` : ""}
       <div class="t-seg">${[["hoy", "Hoy"], ["sem", "Esta semana"], ["mes", "Este mes"], ["mant", "Mes pasado"]].map(([k, t]) => `<button type="button" data-av="${k}" aria-pressed="${admVista === k}">${t}</button>`).join("")}</div>
-      <div class="t-tw"><table class="t-t"><thead><tr><th>Persona</th><th>Puntos</th><th>% del máximo</th><th>Días</th><th>Misiones</th><th>Última jornada</th></tr></thead><tbody>
-      ${T.map(x => `<tr><td><b>${esc(x.u)}</b></td><td>${x.pts}</td><td>${x.max ? Math.round(x.pts / x.max * 100) + "%" : "–"}</td><td>${x.dias}</td><td>${x.ok} de ${x.n || 0}</td><td>${esc(x.ult)}</td></tr>`).join("")}</tbody></table></div></div>
+      ${tablaRank(RK.L, RK.P)}${RANK_NOTA(RK.P)}</div>
+    <div class="t-card"><h2>Puntaje por día</h2><div class="t-tw"><table class="t-t"><thead><tr><th>Día</th><th>Persona</th><th>Puntaje</th><th>Venta</th><th>Esperado</th><th>Cumpl.</th><th>Sacos</th><th>Misiones</th></tr></thead><tbody>
+      ${RK.dias.slice().reverse().map(x => `<tr><td>${esc(x.f)}</td><td>${esc(x.quien)}</td><td><b>${x.score.toFixed(1)}</b></td><td>${mm(x.venta)}</td><td>${mm(x.esp)}</td><td class="${x.cumpl < 1 ? "neg" : "pos"}">${Math.round(x.cumpl * 100)}%</td><td>${Math.round(x.sacos)}</td><td>${x.misMax ? x.mis + "/" + x.misMax : "–"}</td></tr>`).join("") || '<tr><td colspan="8" class="t-vacio">Sin días en este período.</td></tr>'}</tbody></table></div></div>
     <div class="t-card"><h2>Detalle por jornada</h2><div class="t-tw"><table class="t-t"><thead><tr><th>Día</th><th>Persona</th><th>Puntos</th><th>Detalle</th></tr></thead><tbody>
       ${L.map(x => `<tr><td>${esc(x.f)}</td><td>${esc(x.v.replace(TAG, ""))}</td><td>${x.pts}</td><td style="text-align:left;white-space:normal;font-size:.78rem">${esc(x.det || "")}</td></tr>`).join("") || '<tr><td colspan="4" class="t-vacio">Sin jornadas en este período.</td></tr>'}</tbody></table></div>
       <div class="t-row"><button type="button" class="t-btn sec" id="admAct">↻ Actualizar</button><button type="button" class="t-btn sec" id="admSal">Cerrar acceso</button></div></div>`;
