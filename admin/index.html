@@ -1557,7 +1557,7 @@ function pintarClientes() {
   const vistas = { sin: "Habituales sin compra", bajo: "Bajo su habitual", dorm: "Dormidos +60 días", top: "Top del año", nuevos: "Nuevos " + Y, todos: "Todos" };
   const carts = [...new Set(A.clientes.map(c => c.cart))];
   $("s-cli").innerHTML = `<div class="seg" id="cliSeg">${Object.entries(vistas).map(([k, t]) => `<button type="button" data-k="${k}" aria-pressed="${k === vistaCli}">${t}</button>`).join("")}</div>
-    <div class="tools"><input id="cliQ" type="search" placeholder="Buscar cliente o comuna" aria-label="Buscar cliente"><select id="cliV" aria-label="Cartera"><option value="">Todas las carteras</option>${carts.map(c => `<option>${esc(c)}</option>`).join("")}</select></div>
+    <div class="tools"><input id="cliQ" type="search" placeholder="Buscar cliente, fantasía, RUT o dirección" aria-label="Buscar cliente"><select id="cliV" aria-label="Cartera"><option value="">Todas las carteras</option>${carts.map(c => `<option>${esc(c)}</option>`).join("")}</select></div>
     <div class="card"><h2 id="cliT"></h2><div class="lst" id="cliL"></div></div>
     <div class="card"><h2>Concentración de la venta del año</h2><div class="chartbox" style="height:200px"><canvas id="cPar"></canvas></div><p class="muted" id="parTxt" style="margin:8px 0 0;font-size:.85rem"></p></div>`;
   $("cliSeg").onclick = e => { const b = e.target.closest("[data-k]"); if (!b) return; vistaCli = b.dataset.k; $("cliSeg").querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x === b)); listaCli(); };
@@ -1574,7 +1574,7 @@ function pintarClientes() {
 function listaCli() {
   const q = norm($("cliQ").value), v = $("cliV").value, ct = corte();
   const corteN = ct.m * 100 + ct.d, dias = f => f ? Math.round((new Date(Y, ct.m - 1, ct.d) - new Date(Y, Math.floor(f / 100) - 1, f % 100)) / 864e5) : 999;
-  let l = A.clientes.filter(c => (!v || c.cart === v) && (!q || norm(c.nombre + " " + c.comuna).includes(q)));
+  let l = A.clientes.filter(c => (!v || c.cart === v) && (!q || norm(c.nombre + " " + c.comuna + " " + cliBusca(c.ci, c.nombre)).includes(q)));
   let t, val;
   if (vistaCli === "sin") { l = l.filter(c => c.hab > 0 && c.mes <= 0).sort((a, b) => b.hab - a.hab); t = `${l.length} clientes · ${mm(l.reduce((s, c) => s + c.hab, 0))} de compra habitual`; val = c => mm(c.hab) + "<small>habitual</small>"; }
   else if (vistaCli === "bajo") { l = l.filter(c => c.hab > 0 && c.mes > 0 && c.mes < c.hab * .6).sort((a, b) => (b.hab - b.mes) - (a.hab - a.mes)); t = `${l.length} clientes compran menos del 60% de lo habitual`; val = c => mm(c.mes) + `<small>de ${mm(c.hab)}</small>`; }
@@ -4801,12 +4801,13 @@ function ckDec(t) { t = String(t || "").replace(/\s+/g, ""); try { t = decodeURI
 
 <script>/* clicontacto: RUT, teléfono, correo, pago y región del cliente (informe HWF SALES) */
 function cliContacto(ci) {
+  const fz = cliFantasia((D.clientes[ci] || [""])[0]);
   const c = D.clientes[ci] || [], rut = c[4] || "", tel = String(c[5] || ""), mail = c[6] || "", con = c[7] || "", pago = c[8] || "", reg = c[9] || "";
-  if (!rut && !tel && !mail && !pago) return "";
+  if (!rut && !tel && !mail && !pago && !fz) return "";
   const wa = tel.replace(/\D/g, "").replace(/^(9\d{8})$/, "56$1");
   const lin = [rut ? "RUT " + rut : "", con ? "Contacto: " + con : "", reg, pago ? "Pago: " + String(pago).toLowerCase() : ""].filter(Boolean).join(" · ");
   const b = "display:inline-flex;align-items:center;gap:4px;padding:6px 10px;border:1px solid var(--line);border-radius:10px;text-decoration:none;color:inherit;font-size:.82rem;font-weight:600";
-  return `<div class="cli-ct" style="margin-top:6px;display:grid;gap:6px">${lin ? `<span class="muted" style="font-size:.8rem">${esc(lin)}</span>` : ""}
+  return `<div class="cli-ct" style="margin-top:6px;display:grid;gap:6px">${fz ? `<b style="font-size:.9rem">«${esc(fz)}»</b>` : ""}${lin ? `<span class="muted" style="font-size:.8rem">${esc(lin)}</span>` : ""}
     <div style="display:flex;gap:6px;flex-wrap:wrap">${tel ? `<a style="${b}" href="tel:${esc(tel)}">📞 ${esc(tel)}</a><a style="${b}" target="_blank" rel="noopener" href="https://wa.me/${wa}">WhatsApp</a>` : ""}${mail ? `<a style="${b}" href="mailto:${esc(mail)}">✉ ${esc(mail)}</a>` : ""}</div></div>`;
 }
 </script>
@@ -4866,6 +4867,19 @@ const diaHabil = f => { const d = f instanceof Date ? f : new Date(String(f).sli
   var a = localStorage.getItem("hwf-dv-admin"), d = localStorage.getItem("hwf-dv-dash");
   if (a && d && dvVer(a) >= dvVer(d)) localStorage.removeItem("hwf-dv-dash");
 } catch (e) {} })();
+</script>
+
+<script>/* patch_fantasia: nombre de fantasía desde el registro central y búsqueda por RUT/fantasía/dirección */
+let cfzCache = null, cfzClave = "";
+function cliFantasias() {
+  let L = []; try { L = typeof ccLista === "function" ? ccLista() : []; } catch (e) {}
+  const k = L.length + "|" + ((L[L.length - 1] || {}).id || ""); if (cfzCache && k === cfzClave) return cfzCache;
+  const M = {}; L.slice().sort((a, b) => String(a.fecha).localeCompare(String(b.fecha))).forEach(c => { if (!c || (c.tipo !== "Datos" && c.tipo !== "Cliente nuevo")) return;
+    (c.cambios || []).forEach(x => { if (x && x.campo === "Nombre de fantasía") M[norm(c.cliente || "")] = String(x.despues || ""); }); });
+  cfzCache = M; cfzClave = k; return M;
+}
+function cliFantasia(nombre) { return cliFantasias()[norm(nombre || "")] || ""; }
+function cliBusca(ci, nombre) { const c = D.clientes[ci] || []; return [cliFantasia(nombre || c[0]), c[3], c[4], String(c[4] || "").replace(/[^0-9kK]/g, ""), c[5], c[6], c[7]].filter(Boolean).join(" "); }
 </script>
 </body>
 </html>

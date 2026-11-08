@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="es">
-<head><!-- clavevieja --><!-- patch_claves -->
+<head><!-- patch_fantasia --><!-- clavevieja --><!-- patch_claves -->
 <link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0B3146"><link rel="apple-touch-icon" href="icon-192.png"><link rel="icon" href="icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Pedido DEMO"><script>/* espacio de almacenamiento: liberar respaldos re-descargables antes de perder datos nuevos */
 (function () {
   var S = Storage.prototype, set = S.setItem, rem = S.removeItem;
@@ -93,7 +93,7 @@ function npRitmo(cots, Y, M, n, real, lim, ant) {
 }
 </script>
 <script>/* hwfAutoAct: recarga sola cuando hay versión nueva */(function(){var h0=null,t0=0;function hs(t){var h=0;for(var i=0;i<t.length;i++)h=(h*31+t.charCodeAt(i))|0;return h}function chk(){if(Date.now()-t0<20000)return;t0=Date.now();fetch(location.pathname,{cache:"no-store"}).then(function(r){return r.ok?r.text():null}).then(function(t){if(!t)return;var h=hs(t);if(h0===null){h0=h;return}if(h!==h0){h0=h;location.reload()}}).catch(function(){})}window.addEventListener("load",function(){setTimeout(chk,1500)});document.addEventListener("visibilitychange",function(){if(document.visibilityState==="visible")chk()});window.addEventListener("focus",chk);setInterval(chk,600000)})();</script>
-</head>
+<style>.cli-fant{display:block;font-weight:600;color:var(--muted,#5B6874);font-size:.86em;margin-top:2px}.cli-top .cli-fant{display:inline;font-size:.82em}</style></head>
 <body>
 <title>Nota de Pedido HWF · DEMO</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1549,7 +1549,7 @@ body.m-dash #crmMeta{display:none!important}
       <div class="crm-tools">
         <div class="search">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-          <input id="cq" type="search" placeholder="Buscar cliente, comuna o dirección" aria-label="Buscar cliente">
+          <input id="cq" type="search" placeholder="Buscar cliente, fantasía, RUT o dirección" aria-label="Buscar cliente">
         </div>
         <select id="cOrden" aria-label="Ordenar clientes">
           <option value="falta" id="npMesOrden">Mayor falta del mes</option>
@@ -2519,7 +2519,7 @@ async function pintarLista() {
   if (!d) { $("crmRows").innerHTML = ""; return; }
   if (d.sinCartera) { $("crmEstado").textContent = "Aún no tienes una cartera de clientes asignada. Pídele al administrador que te la asigne en la plataforma."; $("crmRows").innerHTML = ""; return; }
   const q = norm($("cq").value).split(/\s+/).filter(Boolean), orden = $("cOrden").value;
-  let l = d.clientes.filter(c => { const t = norm([c.nombre, c.comuna, c.direccion, c.codigo, c.contacto, typeof prAlias === "function" ? prAlias(c.codigo) : ""].join(" ")); return q.every(w => t.includes(w)); });
+  let l = d.clientes.filter(c => { const t = norm([c.nombre, c.fantasia, c.rut, String(c.rut || "").replace(/[^0-9kK]/g, ""), c.comuna, c.direccion, c.codigo, c.contacto, typeof prAlias === "function" ? prAlias(c.codigo) : ""].join(" ")); return q.every(w => t.includes(w)); });
   if (orden === "cerca") {
     if (!AQUI || Date.now() - AQUI.t > 120000) {
       $("crmEstado").textContent = "Buscando tu ubicación…";
@@ -2537,7 +2537,7 @@ async function pintarLista() {
   $("crmRows").innerHTML = l.length ? l.map(c => {
     const px = proxContacto(c.codigo), falta = Number(c.falta_octubre || 0);
     return `<button type="button" class="cli" data-cli="${esc(c.codigo)}">
-      <div class="cli-top"><b>${esc(tc(c.nombre))}</b>${orden === "cerca" && isFinite(c._d) ? `<span class="dist">${distTxt(c._d)}</span>` : ""}</div>
+      <div class="cli-top"><b>${esc(tc(c.nombre))}${c.fantasia ? ` <span class="cli-fant">«${esc(c.fantasia)}»</span>` : ""}</b>${orden === "cerca" && isFinite(c._d) ? `<span class="dist">${distTxt(c._d)}</span>` : ""}</div>
       <div class="cli-sub">${esc([tc(c.direccion), tc(c.comuna)].filter(Boolean).join(", "))}</div>
       ${typeof prAlias === "function" && prAlias(c.codigo) ? `<div class="cli-alias">También: ${esc(prAlias(c.codigo))}</div>` : ""}
       <div class="chips2">${falta > 0 ? `<span class="ch falta">Falta ${fmt(falta)}</span>` : Number(c.compra_habitual) > 0 ? `<span class="ch ok">Al día en ${nombreMes()}</span>` : ""}
@@ -2568,7 +2568,7 @@ function pintarFicha(cod) {
   const dAqui = AQUI && tieneUb(c) ? distM(AQUI, { lat: Number(c.lat), lng: Number(c.lng) }) : null;
   $("crmFicha").innerHTML = `
     <button class="back" type="button" id="fBack">← Mis clientes</button>
-    <div class="f-head"><span class="hint">${esc(c.codigo)}${c.rut ? " · RUT " + esc(c.rut) : ""}</span><h2>${esc(tc(c.nombre))}</h2>${c.region || c.condicion_pago || c.contacto ? `<span class="hint">${esc([c.contacto ? "Contacto: " + c.contacto : "", c.region, c.condicion_pago ? "Pago: " + String(c.condicion_pago).toLowerCase() : ""].filter(Boolean).join(" · "))}</span>` : ""}<!-- clicontacto -->
+    <div class="f-head"><span class="hint">${esc(c.codigo)}${c.rut ? " · RUT " + esc(c.rut) : ""}</span><h2>${esc(tc(c.nombre))}</h2>${c.fantasia ? `<b class="cli-fant">«${esc(c.fantasia)}»</b>` : ""}${c.region || c.condicion_pago || c.contacto ? `<span class="hint">${esc([c.contacto ? "Contacto: " + c.contacto : "", c.region, c.condicion_pago ? "Pago: " + String(c.condicion_pago).toLowerCase() : ""].filter(Boolean).join(" · "))}</span>` : ""}<!-- clicontacto -->
       <span class="hint">${esc([tc(c.direccion), tc(c.comuna)].filter(Boolean).join(", ")) || "Sin dirección registrada"}${dAqui != null ? ` · a ${distTxt(dAqui)} de ti` : ""}</span></div>
     <div class="acc">
       <button class="btn primary" type="button" data-act="Visita">${ICO.visita}Registrar visita</button>
@@ -2593,6 +2593,7 @@ function pintarFicha(cod) {
       <button class="btn" type="button" id="fUbic">Guardar mi ubicación actual como la del local</button></div>
     <div class="blk"><h3>Datos de contacto</h3>
       <div class="grid">
+        <div class="f span2"><label for="e_fant">Nombre de fantasía</label><input id="e_fant" value="${esc(c.fantasia || "")}" placeholder="Como se conoce el local (ej.: Pet Shop Don Tito)"></div>
         <div class="f"><label for="e_contacto">Contacto</label><input id="e_contacto" value="${esc(c.contacto || "")}"></div>
         <div class="f"><label for="e_tel">Teléfono</label><input id="e_tel" type="tel" inputmode="tel" value="${esc(c.telefono || "")}" placeholder="+56 9 ..."></div>
         <div class="f"><label for="e_mail">Correo</label><input id="e_mail" type="email" value="${esc(c.correo || "")}"></div>
@@ -2613,7 +2614,7 @@ function pintarFicha(cod) {
   $("fWa").onclick = () => wa && abrirExterno("https://wa.me/" + wa);
   $("fUbic").onclick = () => abrirActividad(c, "Visita", true);
   $("fGuardar").onclick = async () => {
-    const datos = { codigo: c.codigo, contacto: $("e_contacto").value.trim(), telefono: $("e_tel").value.trim(), correo: $("e_mail").value.trim(),
+    const datos = { codigo: c.codigo, fantasia: $("e_fant").value.trim(), contacto: $("e_contacto").value.trim(), telefono: $("e_tel").value.trim(), correo: $("e_mail").value.trim(),
                     rut: $("e_rut").value.trim(), direccion: $("e_dir").value.trim(), notas: $("e_notas").value.trim() };
     $("fGuardar").disabled = true;
     const r = await api("clienteEditar", { token: SES.token, cliente: datos });
@@ -2703,13 +2704,14 @@ $("btnNuevoCli").onclick = () => {
   $("mEnvT").textContent = "Nuevo cliente";
   abrirModal(`<div class="mform">
       <div class="f"><label for="n_nombre">Nombre o razón social</label><input id="n_nombre"></div>
+      <div class="f"><label for="n_fant">Nombre de fantasía</label><input id="n_fant" placeholder="Como se conoce el local"></div>
       <div class="f"><label for="n_rut">RUT</label><input id="n_rut"></div>
       <div class="f"><label for="n_dir">Dirección</label><input id="n_dir"></div>
       <div class="f"><label for="n_comuna">Comuna</label><input id="n_comuna"></div>
       <div class="f"><label for="n_contacto">Contacto</label><input id="n_contacto"></div>
       <div class="f"><label for="n_tel">Teléfono</label><input id="n_tel" type="tel" inputmode="tel"></div></div>`,
     [["Cancelar", "", cerrarModal], ["Crear cliente", "primary", async ev => {
-      const x = { nombre: $("n_nombre").value.trim(), rut: $("n_rut").value.trim(), direccion: $("n_dir").value.trim(), comuna: $("n_comuna").value.trim(),
+      const x = { nombre: $("n_nombre").value.trim(), fantasia: ($("n_fant") ? $("n_fant").value.trim() : ""), rut: $("n_rut").value.trim(), direccion: $("n_dir").value.trim(), comuna: $("n_comuna").value.trim(),
                   contacto: $("n_contacto").value.trim(), telefono: $("n_tel").value.trim() };
       if (!x.nombre) { $("mEnvErr").textContent = "Escribe el nombre del cliente."; $("mEnvErr").hidden = false; return; }
       ev.currentTarget.disabled = true;
@@ -3204,7 +3206,7 @@ function pintarClienteSel() {
 }
 function buscarCliente() {
   const q = norm($("csQ").value).split(/\s+/).filter(Boolean), l = misClientes();
-  const res = l.filter(c => { const t = norm([c.nombre, c.rut, c.comuna, c.direccion, c.codigo].join(" ")); return q.every(w => t.includes(w)); })
+  const res = l.filter(c => { const t = norm([c.nombre, c.fantasia, c.rut, String(c.rut || "").replace(/[^0-9kK]/g, ""), c.comuna, c.direccion, c.codigo, c.contacto].join(" ")); return q.every(w => t.includes(w)); })
     .sort((a, b) => q.length ? a.nombre.localeCompare(b.nombre, "es") : (Number(b.falta_octubre) || 0) - (Number(a.falta_octubre) || 0)).slice(0, q.length ? 30 : 8);
   $("csRes").innerHTML = (q.length ? "" : `<p class="hint" style="margin:0">${l.length ? "Tus clientes con más compra pendiente. Escribe para buscar entre los " + l.length + "." : "Elige un vendedor para ver su cartera."}</p>`) +
     (res.map(c => `<button type="button" class="cli" data-cs="${esc(c.codigo)}"><div class="cli-top"><b>${esc(tc(c.nombre))}</b>${Number(c.falta_octubre) > 0 ? `<span class="dist">falta ${fmt(Number(c.falta_octubre))}</span>` : ""}</div>
@@ -5334,7 +5336,7 @@ if (SES && SES.local) {
 const CC_MOTIVOS = ["Cerró el local o dejó de operar", "Compra a otro distribuidor", "Precio o condiciones comerciales", "Problemas de pago o moroso",
   "Cambio de dueño o de razón social", "Cliente duplicado", "Fuera de zona o de ruta", "No vende alimento para mascotas", "No quiere ser visitado", "Otro"];
 const CC_COLA = "hwf-cli-cambios-cola", CC_SRV = "hwf-cli-cambios-srv";
-const CC_CAMPOS = { contacto: "Contacto", telefono: "Teléfono", correo: "Correo", rut: "RUT", direccion: "Dirección", notas: "Notas", comuna: "Comuna", nombre: "Nombre", giro: "Giro" };
+const CC_CAMPOS = { fantasia: "Nombre de fantasía", contacto: "Contacto", telefono: "Teléfono", correo: "Correo", rut: "RUT", direccion: "Dirección", notas: "Notas", comuna: "Comuna", nombre: "Nombre", giro: "Giro" };
 let ccOcup = false;
 const ccCola = () => lsGet(CC_COLA, []);
 const ccSrv = () => lsGet(CC_SRV, { version: "", lista: [] });
@@ -5429,7 +5431,7 @@ pintarLista = async function () {
   if (!d || d.sinCartera) return _pintarListaCC();
   if ($("cOrden").value === "baja") {
     const q = norm($("cq").value).split(/\s+/).filter(Boolean);
-    const l = d.clientes.filter(c => esBaja(c.codigo) && q.every(w => norm([c.nombre, c.comuna, c.direccion, c.codigo, c.contacto].join(" ")).includes(w)))
+    const l = d.clientes.filter(c => esBaja(c.codigo) && q.every(w => norm([c.nombre, c.fantasia, c.rut, String(c.rut || "").replace(/[^0-9kK]/g, ""), c.comuna, c.direccion, c.codigo, c.contacto].join(" ")).includes(w)))
       .sort((a, b) => String(esBaja(b.codigo).fecha).localeCompare(String(esBaja(a.codigo).fecha)));
     const tot = d.clientes.filter(c => esBaja(c.codigo)).length;
     $("crmEstado").textContent = tot ? `${l.length} de ${tot} clientes dados de baja` : "No hay clientes dados de baja.";
