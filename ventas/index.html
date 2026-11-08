@@ -6867,5 +6867,12 @@ const ptLimpiaFilas = L => Array.isArray(L) ? L.filter(r => !ptBorrado(Array.isA
     }
     return _gaGC.apply(this, arguments); }; }
 </script>
+
+<script>/* clielim: clientes eliminados por HWF (no se muestran ni quedan en el teléfono) */
+const CLI_ELIMINADOS = new Set(["NV-MW8CIA5O"]);   /* «Jorgr», prueba (08-11-2026) */
+(function () { try { const d = LDB(); if (d && Array.isArray(d.nuevos)) { const n = d.nuevos.length; d.nuevos = d.nuevos.filter(c => !CLI_ELIMINADOS.has(c.codigo));
+  if (d.nuevos.length !== n) { CLI_ELIMINADOS.forEach(k => { if (d.ed) delete d.ed[k]; }); setLDB(d); } } } catch (e) {} })();
+{ const _clElim = clientesLocal; clientesLocal = function () { return _clElim.apply(this, arguments).filter(c => !CLI_ELIMINADOS.has(c.codigo)); }; }
+</script>
 </body>
 </html>
