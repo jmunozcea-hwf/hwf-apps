@@ -6093,11 +6093,6 @@ exportarAhora = function () {
 :root:not([data-theme="dark"]) .thumb,:root:not([data-theme="dark"]) .mbt .fotos img{mix-blend-mode:multiply;filter:brightness(1.03)}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .thumb,:root:not([data-theme="light"]) .mbt .fotos img{mix-blend-mode:normal;filter:none}}
 </style>
-<script>/* ===== Sin avance en Inicio ni Dashboard ===== */
-document.head.insertAdjacentHTML("beforeend", "<style>#inAv,#crmDash .db-av{display:none!important}</style>");
-{ const _pi = pintarInicio; pintarInicio = function () { const r = _pi.apply(this, arguments); const b = document.getElementById("inAv"); if (b) b.remove(); return r; }; }
-{ const _pd = pintarDash; pintarDash = function () { const r = _pd.apply(this, arguments); document.querySelectorAll("#crmDash .db-av").forEach(e => e.remove()); return r; }; }
-</script>
 
 <script>
 /* ===== Días calle (cobranza) — núcleo común de Nota de Pedido y HWF Admin =====
