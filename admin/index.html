@@ -4276,5 +4276,96 @@ syCall = async function (cfg, d) {
   return { ok: true, filas: filas.filter(f => !desde || f[0] >= desde) };
 };
 </script>
+<style>
+/* ===== Productos visibles en la app de ventas ===== */
+.pra>summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.pra>summary::-webkit-details-marker{display:none}
+.pra>summary h2{margin:0}
+.pra .pra-res{font-size:.8rem;color:var(--muted)}
+.pra .pra-tools{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 8px}
+.pra .pra-tools input{flex:1 1 220px;min-height:40px;border:1px solid var(--line);border-radius:10px;padding:0 12px;font:inherit;background:var(--surface);color:var(--ink)}
+.pra .pra-seg{display:inline-flex;gap:4px}
+.pra .pra-seg button{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px;font:inherit;font-size:.82rem;font-weight:700;cursor:pointer;color:var(--muted)}
+.pra .pra-seg button[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.pra-l{display:grid;gap:6px;max-height:560px;overflow:auto}
+.pra-it{display:grid;grid-template-columns:48px minmax(0,1fr) auto;gap:10px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:6px 8px}
+.pra-it.off{opacity:.6;border-style:dashed}
+.pra-it img{width:48px;height:48px;object-fit:contain;background:#fff;border-radius:8px}
+.pra-it b{display:block;font-size:.9rem;line-height:1.25;overflow:hidden;text-overflow:ellipsis}
+.pra-it small{color:var(--muted);font-size:.76rem}
+.pra-tg{border:0;border-radius:999px;padding:7px 12px;min-width:92px;font:inherit;font-size:.8rem;font-weight:800;cursor:pointer;background:#E3F4EA;color:#1C7A4E}
+.pra-tg.off{background:#FDECEA;color:#B42318}
+.pra-tg:disabled{opacity:.5;cursor:wait}
+</style>
+<script>
+/* ================= Productos visibles en la app de ventas ================= */
+const PRA_KEY = "adm-prod-estado", PRA_VER = "adm-prod-ver", PRA_IMG = "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_";
+let praFiltro = "todos", praAbierto = false, praOcup = false;
+const praEstado = () => store.get(PRA_KEY, {});
+const praOn = i => { const e = praEstado()[i]; return !(e && e.on === false); };
+const praImg = i => { const p = ((window.__PUB && window.__PUB.prods) || []).find(x => x.i === i); return p && p.img ? (String(p.img).startsWith("http") ? p.img : PRA_IMG + p.img + ".jpg?s=small&f=webp") : ""; };
+function praLeer(cambios) {
+  const E = {};
+  (cambios || []).forEach(c => { if (!c || c.codigo !== "PRODUCTO") return; let o; try { o = JSON.parse(c.detalle); } catch (e) { return; }
+    if (!o || !o.pr || !o.i) return; const a = E[o.i]; if (!a || String(o.t || "") >= String(a.t || "")) E[o.i] = { on: o.on !== false, t: o.t || "" }; });
+  return E;
+}
+const _syCallPra = syCall;
+syCall = async function (cfg, d) {   /* las filas «PRODUCTO» no son cambios de clientes */
+  const r = await _syCallPra.apply(this, arguments);
+  if (d && d.accion === "clientesCambios" && r && Array.isArray(r.cambios)) r.cambios = r.cambios.filter(c => c && c.codigo !== "PRODUCTO");
+  return r;
+};
+async function praBajar() {
+  const cfg = SYC(); if (!cfg || !cfg.url || praOcup) return false;
+  praOcup = true;
+  try {
+    const r = await _syCallPra(cfg, { accion: "clientesCambios", version: store.get(PRA_VER, "") || "" });
+    if (!r || !r.ok || r.igual || !Array.isArray(r.cambios)) return false;
+    const E = praLeer(r.cambios); Object.entries(praEstado()).forEach(([k, v]) => { if (v.pend && (!E[k] || String(E[k].t) < String(v.t))) E[k] = v; });
+    store.set(PRA_KEY, E); store.set(PRA_VER, r.version || ""); return true;
+  } catch (e) { return false; } finally { praOcup = false; }
+}
+async function praCambiar(i, on, btn) {
+  const cfg = SYC(); if (!cfg || !cfg.url) { toast("Sin conexión con el script de Google: no se puede guardar."); return; }
+  const p = CAT_APP.find(x => x[0] === i), t = new Date().toISOString();
+  if (btn) btn.disabled = true;
+  const r = await _syCallPra(cfg, { accion: "clienteCambios", cambios: [{ id: "CC-PR-" + String(i).replace(/[^A-Za-z0-9]/g, "") + "-" + Date.now(), fecha: t, vendedor: "HWF Admin", cartera: "",
+    codigo: "PRODUCTO", cliente: i + " · " + (p ? p[1] : ""), tipo: "Datos", motivo: on ? "Producto activado en la app de ventas" : "Producto desactivado en la app de ventas",
+    detalle: JSON.stringify({ pr: 1, i, on, t }), cambios: [{ campo: "Visible en la app de ventas", antes: on ? "No" : "Sí", despues: on ? "Sí" : "No" }] }] });
+  if (r && r.ok) { const E = praEstado(); E[i] = { on, t }; store.set(PRA_KEY, E); store.set(PRA_VER, ""); toast((p ? p[1] : i) + (on ? ": visible en la app de ventas." : ": oculto en la app de ventas.")); }
+  else toast("No se pudo guardar: " + ((r && r.error) || "sin respuesta del script"));
+  praPintar();
+}
+function praPintar() {
+  const box = $("praBox"); if (!box) return;
+  const q = norm(($("praQ") || {}).value || ""), off = CAT_APP.filter(p => !praOn(p[0])).length;
+  const l = CAT_APP.filter(p => (praFiltro === "todos" || (praFiltro === "off" ? !praOn(p[0]) : praOn(p[0]))) && (!q || norm(p[0] + " " + p[1] + " " + p[2]).includes(q)));
+  $("praRes").textContent = `${CAT_APP.length - off} ${CAT_APP.length - off === 1 ? "visible" : "visibles"} · ${off} ${off === 1 ? "oculto" : "ocultos"}`;
+  $("praL").innerHTML = l.map(p => { const on = praOn(p[0]), im = praImg(p[0]);
+    return `<div class="pra-it${on ? "" : " off"}">${im ? `<img src="${esc(im)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.visibility='hidden'">` : "<span></span>"}
+      <div><b>${esc(p[1])}</b><small>${esc(p[0])} · ${esc(p[2])}${p[6] ? " · " + fmt(p[6]) : ""}</small></div>
+      <button type="button" class="pra-tg${on ? "" : " off"}" data-pra="${esc(p[0])}" aria-pressed="${on}" title="${on ? "Ocultar en la app de ventas" : "Mostrar en la app de ventas"}">${on ? "✓ Visible" : "Oculto"}</button></div>`; }).join("") || '<p class="muted">Ningún producto coincide.</p>';
+}
+const _pintarProductosPra = pintarProductos;
+pintarProductos = function () {
+  const r = _pintarProductosPra.apply(this, arguments);
+  const s = $("s-pro"); if (!s) return r;
+  s.insertAdjacentHTML("afterbegin", `<details class="card pra" id="praBox"${praAbierto ? " open" : ""}><summary><h2>Productos visibles en la app de ventas</h2><span class="pra-res" id="praRes"></span></summary>
+    <p class="muted" style="margin:8px 0 0;font-size:.85rem">Los productos ocultos no aparecen en la sección Pedido de Nota de Pedido (se actualiza en los teléfonos al abrir la app). Las fotos, precios y descripciones se editan en la planilla «HWF Maestro de productos» de Drive.</p>
+    <div class="pra-tools"><input id="praQ" type="search" placeholder="Buscar producto, código o categoría" aria-label="Buscar producto">
+      <div class="pra-seg" role="group" aria-label="Filtro">${[["todos", "Todos"], ["on", "Visibles"], ["off", "Ocultos"]].map(([k, t]) => `<button type="button" data-praf="${k}" aria-pressed="${praFiltro === k}">${t}</button>`).join("")}</div></div>
+    <div class="pra-l" id="praL"></div></details>`);
+  $("praBox").addEventListener("toggle", e => { praAbierto = e.currentTarget.open; if (praAbierto) praBajar().then(ok => ok && praPintar()); });
+  $("praQ").oninput = praPintar;
+  $("praBox").addEventListener("click", e => {
+    const f = e.target.closest("[data-praf]"); if (f) { praFiltro = f.dataset.praf; $("praBox").querySelectorAll("[data-praf]").forEach(b => b.setAttribute("aria-pressed", b === f)); praPintar(); return; }
+    const b = e.target.closest("[data-pra]"); if (b) praCambiar(b.dataset.pra, !praOn(b.dataset.pra), b);
+  });
+  praPintar();
+  return r;
+};
+setTimeout(() => praBajar().then(ok => { if (ok && $("praBox")) praPintar(); }), 3000);
+</script>
 </body>
 </html>

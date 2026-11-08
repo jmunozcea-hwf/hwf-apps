@@ -6376,5 +6376,51 @@ syLlamar = async function (cfg, d) {
   return { ok: true, filas: Object.values(M).filter(f => f[0] >= desde) };
 };
 </script>
+
+<script>
+/* ================= Productos activos/inactivos (HWF Admin) ================= */
+const PRA_KEY = "hwf-prod-estado", PRA_VER = "hwf-prod-ver";
+const praEstado = () => lsGet(PRA_KEY, {});
+const praOff = i => { const e = praEstado()[i]; return !!(e && e.on === false); };
+function praLeer(cambios) {
+  const E = {};
+  (cambios || []).forEach(c => { if (!c || c.codigo !== "PRODUCTO") return; let o; try { o = JSON.parse(c.detalle); } catch (e) { return; }
+    if (!o || !o.pr || !o.i) return; const a = E[o.i]; if (!a || String(o.t || "") >= String(a.t || "")) E[o.i] = { on: o.on !== false, t: o.t || "" }; });
+  return E;
+}
+const _syLlamarPra = syLlamar;
+syLlamar = async function (cfg, d) {
+  const r = await _syLlamarPra.apply(this, arguments);
+  if (d && d.accion === "clientesCambios" && r && Array.isArray(r.cambios)) r.cambios = r.cambios.filter(c => c && c.codigo !== "PRODUCTO");
+  return r;
+};
+let praOcup = false;
+async function praBajar() {
+  const cfg = typeof syCfg === "function" ? syCfg() : null; if (!cfg || !cfg.url || praOcup) return;
+  praOcup = true;
+  try {
+    const r = await _syLlamarPra(cfg, { accion: "clientesCambios", version: lsGet(PRA_VER, "") || "" });
+    if (!r || !r.ok || r.igual || !Array.isArray(r.cambios)) return;
+    const antes = JSON.stringify(praEstado()), E = praLeer(r.cambios);
+    lsSet(PRA_KEY, E); lsSet(PRA_VER, r.version || "");
+    if (JSON.stringify(E) !== antes) try { applyFilter(); } catch (e) {}
+  } catch (e) {} finally { praOcup = false; }
+}
+const _applyFilterPra = applyFilter;
+applyFilter = function () {
+  const r = _applyFilterPra.apply(this, arguments);
+  const E = praEstado(); if (!Object.keys(E).length) return r;
+  const n0 = filtered.length; filtered = filtered.filter(p => !praOff(p.i) || line(p.i).q > 0);
+  const tot = PRODS.filter(p => !praOff(p.i)).length;
+  if (filtered.length !== n0) { $("rows").innerHTML = ""; shown = 0; renderMore();
+    if (!filtered.length) $("rows").innerHTML = '<div class="empty">No hay productos que coincidan con la búsqueda.</div>'; }
+  const cnt = $("count"); if (cnt) cnt.textContent = `${fmtN(filtered.length)} de ${fmtN(tot)} productos`;
+  return r;
+};
+document.addEventListener("visibilitychange", () => { if (!document.hidden) praBajar(); });
+setInterval(() => { if (!document.hidden) praBajar(); }, 10 * 60 * 1000);
+setTimeout(praBajar, 2500);
+try { applyFilter(); } catch (e) {}
+</script>
 </body>
 </html>
