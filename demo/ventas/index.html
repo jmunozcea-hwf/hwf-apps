@@ -1,7 +1,25 @@
 <!doctype html>
 <html lang="es">
 <head>
-<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0B3146"><link rel="apple-touch-icon" href="icon-192.png"><link rel="icon" href="icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Pedido DEMO"><script>if("serviceWorker" in navigator)addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})});</script>
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0B3146"><link rel="apple-touch-icon" href="icon-192.png"><link rel="icon" href="icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Pedido DEMO"><script>/* espacio de almacenamiento: liberar respaldos re-descargables antes de perder datos nuevos */
+(function () {
+  var S = Storage.prototype, set = S.setItem, rem = S.removeItem;
+  var PRESC = ["hwf-dv-dash", "hwf-crm-v1", "hwf-pt-cc", "adm-pt-chat", "hwf-ranking", "adm-ranking", "hwf-cli-cambios-srv", "adm-cc", "hwf-carteras-ver", "hwf-prod-ver", "adm-prod-ver", "hwf-cal-ver", "hwf-pub"];
+  var avisar = function (k) { window.__hwfEspacio = k; var f = function () { if (document.getElementById("hwfEsp")) return; var d = document.createElement("div"); d.id = "hwfEsp";
+    d.style.cssText = "position:fixed;left:12px;right:12px;top:12px;z-index:2147483600;background:#B42318;color:#fff;border-radius:12px;padding:12px 14px;font:600 14px system-ui;box-shadow:0 8px 24px rgba(0,0,0,.25)";
+    d.textContent = "⚠ No hay espacio en este equipo para guardar los datos nuevos de Drive. Cierra la otra app HWF en este navegador o borra los datos del sitio y vuelve a conectar."; document.body.appendChild(d); };
+    if (document.body) f(); else document.addEventListener("DOMContentLoaded", f); };
+  S.setItem = function (k, v) {
+    try { return set.call(this, k, v); } catch (e) {
+      if (!(e && (e.name === "QuotaExceededError" || e.code === 22 || e.code === 1014))) throw e;
+      var self = this, borrados = 0;
+      for (var i = 0; i < self.length; i++) { var key = self.key(i); if (key === k) continue;
+        for (var j = 0; j < PRESC.length; j++) if (key === PRESC[j] || key === "hwf-demo:" + PRESC[j]) { rem.call(self, key); borrados++; i--; break; } }
+      try { return set.call(this, k, v); } catch (e2) { if (/^(hwf-demo:)?hwf-dv-/.test(String(k))) avisar(k); throw e2; }
+    }
+  };
+})();</script>
+<script>if("serviceWorker" in navigator)addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})});</script>
 
 <script>/* DEMO: guarda todo con prefijo propio */(function(){var P="hwf-demo:",S=Storage.prototype,g=S.getItem,s=S.setItem,r=S.removeItem;S.getItem=function(k){return g.call(this,P+k)};S.setItem=function(k,v){return s.call(this,P+k,v)};S.removeItem=function(k){return r.call(this,P+k)};})();</script>
 <script>/* datos públicos actualizables */window.__PUB=(function(){try{var p=JSON.parse(localStorage.getItem("hwf-pub")||"null");return p&&p.version&&p.version>"0000"?p:null}catch(e){return null}})();</script>
