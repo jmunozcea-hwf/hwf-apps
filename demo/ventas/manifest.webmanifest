@@ -1,7 +1,7 @@
 {
  "id": "/hwf-apps/demo/",
- "name": "Nota de Pedido DEMO",
- "short_name": "Pedido DEMO",
+ "name": "Ventas HWF DEMO",
+ "short_name": "Ventas DEMO",
  "start_url": "./",
  "scope": "./",
  "display": "standalone",

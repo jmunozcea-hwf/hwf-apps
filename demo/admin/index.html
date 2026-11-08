@@ -68,7 +68,7 @@ window.cartAplicar = function (d) {
       if (Array.isArray(o.vend) && Array.isArray(o.rows) && o.vend.every(function (x) { return typeof x === "string"; })) {
         var u = [], map = o.vend.map(function (x) { var j = u.indexOf(x); if (j < 0) { u.push(x); j = u.length - 1; } return j; });
         if (u.length !== o.vend.length) { o.rows.forEach(function (r) { if (r && typeof r[7] === "number" && map[r[7]] != null) r[7] = map[r[7]]; }); o.vend = u; } }
-      /* reasignación por cliente: objetos {nombre, vendedor} (Nota de Pedido) y filas [nombre, comuna, cartera, dir] (Admin) */
+      /* reasignación por cliente: objetos {nombre, vendedor} (app Ventas) y filas [nombre, comuna, cartera, dir] (Admin) */
       if (typeof o.nombre === "string" && "vendedor" in o && C[cartNorm(o.nombre)]) { o.vendedor = C[cartNorm(o.nombre)]; n++; }
       if (Array.isArray(o.clientes)) o.clientes.forEach(function (c) { if (Array.isArray(c) && typeof c[0] === "string" && typeof c[2] === "string" && C[cartNorm(c[0])]) { c[2] = C[cartNorm(c[0])]; n++; } });
       return o;
@@ -1614,7 +1614,7 @@ function pintarZonas() {
 }
 function pintarTerreno() {
   const acts = IMP.acts.slice().sort((a, b) => b.t - a.t);
-  if (!acts.length) { $("masBody").innerHTML = `<div class="card"><h2>Actividad en terreno</h2><p class="muted" style="margin:0">Aún no hay datos. Pide a cada vendedor que toque <b>"Exportar mi CRM a Excel"</b> en la app Nota de Pedido (Mis clientes) y te mande el archivo. Luego impórtalo en <b>Más → Datos</b>.</p></div>`; return; }
+  if (!acts.length) { $("masBody").innerHTML = `<div class="card"><h2>Actividad en terreno</h2><p class="muted" style="margin:0">Aún no hay datos. Pide a cada vendedor que toque <b>"Exportar mi CRM a Excel"</b> en la app Ventas (Mis clientes) y te mande el archivo. Luego impórtalo en <b>Más → Datos</b>.</p></div>`; return; }
   const hace7 = Date.now() - 7 * 864e5, hace30 = Date.now() - 30 * 864e5;
   const por = CARTERAS().filter(v => v !== "Tienda Hellywoof").map(v => { const a = acts.filter(x => x.cart === v); return { v, v7: a.filter(x => x.tipo === "Visita" && x.t > hace7).length, v30: a.filter(x => x.tipo === "Visita" && x.t > hace30).length,
     otras: a.filter(x => x.tipo !== "Visita" && x.t > hace7).length, lejos: a.filter(x => x.tipo === "Visita" && x.dist !== "" && x.dist != null && Number(x.dist) > 300).length, ult: a[0] ? a[0].t : 0 }; });
@@ -1853,7 +1853,7 @@ function pintarNApp() {
   const mx = Math.max(1, ...Object.values(porV)), carts = [...new Set(todos.map(p => p.cart))].sort();
   $("masBody").innerHTML = `<div class="card"><h2>Notas de pedido de la app por revisar <span class="muted">${pend.length} · ${mm(pend.reduce((s, p) => s + naNeto(p), 0))} neto</span></h2>
       ${pend.length ? `<div class="bars">${Object.entries(porV).sort((a, b) => b[1] - a[1]).map(([v, t]) => `<div class="bar"><span class="lab">${esc(v)}</span><span class="tr"><i style="width:${Math.round(t / mx * 100)}%;background:${colorDe(v)}"></i></span><b class="num">${mm(t)}</b></div>`).join("")}</div>` : ""}
-      <p class="muted" style="margin:0;font-size:.88rem">Son las notas que generan los vendedores en la app Nota de Pedido. Pídeles que te envíen el Excel y cárgalo aquí.</p>
+      <p class="muted" style="margin:0;font-size:.88rem">Son las notas que generan los vendedores en la app Ventas. Pídeles que te envíen el Excel y cárgalo aquí.</p>
       <div class="np-top"><button class="btn pri" type="button" id="naUna" ${pend.length ? "" : "disabled"}>Revisar una por una</button><button class="btn" type="button" id="naImp">Importar notas de pedido</button><button class="btn" type="button" id="naXls" ${L.length ? "" : "disabled"}>Exportar a Excel</button></div>
       <label class="np-chk"><input type="checkbox" id="naDrv" ${npDrive() ? "checked" : ""}> Al descargar, subir también a Google Drive</label></div>
     ${todos.length ? `<input class="na-busca" id="naQ" type="search" placeholder="Buscar por cliente, N° o vendedor" value="${esc(naBusca)}">
@@ -2074,7 +2074,7 @@ pintarNApp = function () {
   _pintarNApp();
   const c = $("masBody").querySelector(".card"); if (!c) return;
   const d = document.createElement("div"); d.className = "sy-st"; d.id = "syEst"; c.appendChild(d); syPintarEst();
-  const t = c.querySelector("p.muted"); if (t && SYC()) t.textContent = "Llegan solas desde la app Nota de Pedido cada vez que un vendedor exporta una nota. También puedes importar Excel.";
+  const t = c.querySelector("p.muted"); if (t && SYC()) t.textContent = "Llegan solas desde la app Ventas cada vez que un vendedor exporta una nota. También puedes importar Excel.";
 };
 /* tarjeta en Datos */
 const _pintarDatos = pintarDatos;
@@ -2237,7 +2237,7 @@ function pintarBonif() {
         <div class="t"><b>${esc(tc(n.p.cliente))}</b><span class="est ${n.e}">${NA_EST[n.e]}</span></div>
         <small class="muted">N° ${esc(n.p.num)} · ${naFecha(n.p)} · ${esc(n.p.vend)}</small>
         ${n.ls.map(l => `<div class="bn-l"><span>${esc(l.prod)}</span><b class="num">${nf(l.q)} gratis</b><small>${l.promo ? l.promo + " · " : ""}${fmt(l.val)} a precio lista</small><span class="ap ${l.ap}">${l.ap === "proveedor" ? "Proveedor" : "Propio"}</span></div>`).join("")}</div>`).join("")
-      || '<p class="muted" style="margin:0">Todavía no hay notas con unidades gratis. Aparecen aquí cuando un vendedor usa la promoción X + Y en la app Nota de Pedido.</p>'}</div></div>`;
+      || '<p class="muted" style="margin:0">Todavía no hay notas con unidades gratis. Aparecen aquí cuando un vendedor usa la promoción X + Y en la app Ventas.</p>'}</div></div>`;
   $("bnSegAp").onclick = e => { const b = e.target.closest("[data-ap]"); if (b) { bnAp = b.dataset.ap; pintarBonif(); } else if (e.target.closest("#bnRec")) { bnConRec = !bnConRec; pintarBonif(); } };
   if ($("bnSegV")) $("bnSegV").onclick = e => { const b = e.target.closest("[data-v]"); if (b) { bnVend = b.dataset.v; pintarBonif(); } };
   $("masBody").querySelectorAll("[data-bn]").forEach(d => d.onclick = () => naAbrir(d.dataset.bn, lista.map(n => n.p.num)));
@@ -3477,7 +3477,7 @@ function pintarCambios() {
         <div><span>Datos modificados</span><b>${cnt("Datos")}</b><small>${cnt("Ubicación")} ubicaciones · ${cnt("Dirección de entrega")} dir. entrega</small></div>
         <div><span>Clientes nuevos</span><b>${cnt("Cliente nuevo")}</b><small>creados por vendedores</small></div></div>
       <div class="np-top"><button class="btn pri" type="button" id="ccXls">Exportar a Excel</button>${cfg && cfg.url ? '<button class="btn" type="button" id="ccAct">Actualizar</button>' : ""}</div>
-      <p class="muted" style="margin:0;font-size:.85rem">${cfg && cfg.url ? (s.bajado ? "Actualizado " + ccFecha(s.bajado) + " ·" : "Aún no se ha bajado el informe.") : "Sin conexión con el script: conéctalo en Más → Datos."} Cada cambio que un vendedor hace en un cliente desde la Nota de Pedido queda registrado aquí y en la hoja “Cambios clientes” de la planilla.</p></div>
+      <p class="muted" style="margin:0;font-size:.85rem">${cfg && cfg.url ? (s.bajado ? "Actualizado " + ccFecha(s.bajado) + " ·" : "Aún no se ha bajado el informe.") : "Sin conexión con el script: conéctalo en Más → Datos."} Cada cambio que un vendedor hace en un cliente desde la app Ventas queda registrado aquí y en la hoja “Cambios clientes” de la planilla.</p></div>
     ${motL.length ? `<div class="card"><h2>Bajas por motivo <span class="muted">${cnt("Baja")}</span></h2><div class="cc-mot">${motL.map(([m, n]) => `<span>${esc(m)}</span><span><i class="cc-bar" style="width:${Math.round(n / maxM * 100)}%"></i></span><b class="num">${n}</b>`).join("")}</div></div>` : ""}
     ${porV.length ? `<div class="card"><h2>Por vendedor</h2><div class="tbl"><table><thead><tr><th>Vendedor</th>${CC_TIPOS.map(t => `<th class="n">${esc(t)}</th>`).join("")}<th class="n">Total</th></tr></thead><tbody>${porV.map(([v, c]) => `<tr><td>${esc(v)}</td>${c.map(x => `<td class="n">${x || "·"}</td>`).join("")}<td class="n"><b>${c.reduce((a, b) => a + b, 0)}</b></td></tr>`).join("")}</tbody></table></div></div>` : ""}
     <div class="card"><h2>Bajas vigentes <span class="muted">${bajas.length}</span></h2>
@@ -3544,7 +3544,7 @@ function npBarrasMes(pend) {
 </script>
 
 <script>
-/* ===== Comparación con el año anterior (común a HWF Admin y Nota de Pedido) =====
+/* ===== Comparación con el año anterior (común a HWF Admin y app Ventas) =====
    D.rows: [ci, pi, mes, día, cant, neto, costo, vend, año?]  (año vacío = D.anio)
    yaCalc(D, Y, M, lim, incl, cart): mes M a la misma fecha (día ≤ lim), año a la fecha, mes completo del año anterior,
    venta mensual de ambos años y detalle por cartera. Devuelve null si no hay ventas del año anterior. */
@@ -3623,7 +3623,7 @@ pintarDashboard = function () {
 </script>
 
 <script>
-/* Tarjeta «Cotizaciones Defontana» del Dashboard (HWF Admin y Nota de Pedido).
+/* Tarjeta «Cotizaciones Defontana» del Dashboard (HWF Admin y app Ventas).
    cots: [num, fecha dd/mm/aaaa, cliente, vendedor, cartera, cantidad, producto, monto neto] */
 const CZ_CSS = ".cz-tot{display:flex;gap:14px;flex-wrap:wrap;margin:0 0 8px}.cz-tot div{display:grid}.cz-tot b{font-size:1.15rem;font-variant-numeric:tabular-nums}.cz-tot span{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:700}"
   + ".cz-v{display:grid;gap:6px;margin:4px 0 10px}.cz-v .t{display:flex;justify-content:space-between;gap:8px;font-size:.88rem}.cz-v .t b{font-variant-numeric:tabular-nums}"
@@ -3831,7 +3831,7 @@ try { if (typeof TAB !== "undefined" && TAB === "res" && $("s-res") && !$("s-res
 
 <script>
 /* Plan de crecimiento HWF sin presupuesto de marketing (presentación del 02-11-2026): de 65 a 80 MM mensuales.
-   Cálculo común para HWF Admin y Nota de Pedido a partir de las ventas (D.rows: [cliente, producto, mes, día, cant, neto, costo, vendedor, año?]). */
+   Cálculo común para HWF Admin y app Ventas a partir de las ventas (D.rows: [cliente, producto, mes, día, cant, neto, costo, vendedor, año?]). */
 const PLAN = { meta: 80000000, base: 65000000, cuotaMin: 4, cuotaMax: 6, excluir: [/\bpro ?pets?\b/, /\byanez\b/],  /* clientes fuera del plan (pedido de Jorge 03-11): Propets y Yañez */
   pasos: [["1–30", "Ordenar la base", ["Lista de dormidos desde Defontana", "Clasificación A, B y C", "WhatsApp Business y catálogo", "Reunión con 2 marcas principales"]],
           ["31–60", "Activar la venta", ["Oferta de surtido en cada visita", "Cuotas de prospección por vendedor", "Programa de referidos", "Calendario fijo de rutas"]],
@@ -3960,7 +3960,7 @@ try { if (typeof TAB !== "undefined" && TAB === "res" && $("s-res") && !$("s-res
 </script>
 
 <script>
-/* ===== Días calle (cobranza) — núcleo común de Nota de Pedido y HWF Admin =====
+/* ===== Días calle (cobranza) — núcleo común de app Ventas y HWF Admin =====
    Con la información libre de Defontana:
    - DSO (countback) = cuántos días de ventas recientes (con IVA), contando hacia atrás desde el corte, hacen falta para sumar
                        lo que se debe hoy. Más fiel que saldo ÷ ventas × 90 cuando las compras son irregulares.  (InfCobranzaDetallado + ventas)
@@ -4219,7 +4219,7 @@ function pintarRanking() {
   const tipos = RK_TIPOS.map(t => t[0]).concat(["Otras"]).filter(k => L.some(x => x.tipos[k]));
   if (!rkSel.v && lider && lider.mejor) rkSel = { v: lider.v, f: lider.mejor.f };
   const sel = idx[rkSel.v + "|" + rkSel.f], det = sel ? rkDetalle(sel.det) : [];
-  mb.innerHTML = `<div class="card rk"><h2>Ranking del equipo de ventas <small>puntos por las misiones del día de Nota de Pedido${s && s.t ? ` · actualizado ${new Date(s.t).toLocaleTimeString("es-CL", { hour: "2-digit", minute: "2-digit" })}` : ""}</small></h2>
+  mb.innerHTML = `<div class="card rk"><h2>Ranking del equipo de ventas <small>puntos por las misiones del día de app Ventas${s && s.t ? ` · actualizado ${new Date(s.t).toLocaleTimeString("es-CL", { hour: "2-digit", minute: "2-digit" })}` : ""}</small></h2>
     <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between">
       <div class="rk-seg" role="group" aria-label="Período">${[["hoy", "Hoy"], ["ayer", "Ayer"], ["sem", "Esta semana"], ["sant", "Semana pasada"], ["mes", "Este mes"], ["mant", "Mes pasado"]].map(([k, t]) => `<button type="button" data-rp="${k}" aria-pressed="${rkPer === k}">${t}</button>`).join("")}</div>
       ${RK_DEMO ? "" : `<button type="button" class="rk-act" id="rkAct">↻ Actualizar</button>`}</div>
@@ -4383,7 +4383,7 @@ pintarProductos = function () {
   const r = _pintarProductosPra.apply(this, arguments);
   const s = $("s-pro"); if (!s) return r;
   s.insertAdjacentHTML("afterbegin", `<details class="card pra" id="praBox"${praAbierto ? " open" : ""}><summary><h2>Productos visibles en la app de ventas</h2><span class="pra-res" id="praRes"></span></summary>
-    <p class="muted" style="margin:8px 0 0;font-size:.85rem">Los productos ocultos no aparecen en la sección Pedido de Nota de Pedido (se actualiza en los teléfonos al abrir la app). Las fotos, precios y descripciones se editan en la planilla «HWF Maestro de productos» de Drive.</p>
+    <p class="muted" style="margin:8px 0 0;font-size:.85rem">Los productos ocultos no aparecen en la sección Pedido de app Ventas (se actualiza en los teléfonos al abrir la app). Las fotos, precios y descripciones se editan en la planilla «HWF Maestro de productos» de Drive.</p>
     <div class="pra-tools"><input id="praQ" type="search" placeholder="Buscar producto, código o categoría" aria-label="Buscar producto">
       <div class="pra-seg" role="group" aria-label="Filtro">${[["todos", "Todos"], ["on", "Visibles"], ["off", "Ocultos"]].map(([k, t]) => `<button type="button" data-praf="${k}" aria-pressed="${praFiltro === k}">${t}</button>`).join("")}</div></div>
     <div class="pra-l" id="praL"></div></details>`);
@@ -4409,7 +4409,7 @@ syCall = async function (cfg, d) { const r = await _syCallCal.apply(this, argume
 const CAL_call = d => CAL_DEMO ? calDemoCall(d) : (SYC() && SYC().url ? _syCallCal(SYC(), d) : Promise.resolve({ ok: false, error: "Sin conexión con el script de Google." }));
 const CAL_get = (k, d) => store.get(k, d), CAL_set = (k, v) => store.set(k, v), CAL_quien = () => "HWF Admin", CAL_toast = m => toast(m);
 const CAL_clientes = () => ((typeof A !== "undefined" && A && A.clientes) || []).map(c => tc(c.nombre || c.nom || "")).filter(Boolean).sort(), CAL_admin = true;
-/* ===== Calendario del equipo (común a Nota de Pedido y HWF Admin) =====
+/* ===== Calendario del equipo (común a app Ventas y HWF Admin) =====
    Ferias, activaciones de producto, capacitaciones y otras actividades extra. Se guarda en el registro central del script
    (acción «clienteCambios», código «EVENTO», detalle JSON); sirve con el script v11 de la planilla y con el nuevo.
    Cada app define antes: CAL_call(datos) → respuesta del script, CAL_get(k, def), CAL_set(k, v), CAL_quien(), CAL_toast(m),
@@ -4617,7 +4617,7 @@ function cartCard() {
       <label>Pasan a<select id="cartA">${V.map(opt).join("")}</select></label><button type="button" id="cartVB">Reasignar cartera completa</button></div>
     ${listaV ? `<div><b style="font-size:.85rem">Carteras reasignadas</b><ul class="cart-l">${listaV}</ul></div>` : ""}
     ${listaC ? `<div><b style="font-size:.85rem">Clientes reasignados</b><ul class="cart-l">${listaC}</ul></div>` : ""}
-    <p class="muted" style="margin:0;font-size:.8rem">Se aplica a clientes, metas, ventas y cobranza en HWF Admin y en Nota de Pedido (los teléfonos lo toman al abrir la app). Defontana sigue con el vendedor original.</p></div>`;
+    <p class="muted" style="margin:0;font-size:.8rem">Se aplica a clientes, metas, ventas y cobranza en HWF Admin y en app Ventas (los teléfonos lo toman al abrir la app). Defontana sigue con el vendedor original.</p></div>`;
 }
 const _pintarVendedoresCart = pintarVendedores;
 pintarVendedores = function () {
@@ -4676,7 +4676,7 @@ function lcCard() {
       <div class="lc-bt"><button type="button" class="btn" data-lc-cp="${esc(l)}">Copiar link</button><a class="btn" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(t + ": abre este link en tu teléfono (solo una vez) y la app queda conectada: " + l)}">Enviar por WhatsApp</a></div></div></div>`;
   return `<div class="card" id="lcCard"><h2>Conectar teléfonos <span class="muted">sin copiar códigos</span></h2>
     <p class="muted" style="margin:0 0 10px;font-size:.85rem">Abre el link (o escanea el QR con la cámara) <b>una sola vez</b> en el teléfono: la app se conecta sola. Envíalo solo a personas de HWF: quien lo tenga puede ver los datos.</p>
-    ${blk("Nota de Pedido (vendedores)", "Para los teléfonos de los vendedores", v)}${blk("HWF Admin", "Solo para administración", a)}
+    ${blk("app Ventas (vendedores)", "Para los teléfonos de los vendedores", v)}${blk("HWF Admin", "Solo para administración", a)}
     <p class="muted" style="margin:10px 0 0;font-size:.78rem">iPhone: abre el link en Safari, espera que se conecte y recién ahí «Compartir → Agregar a inicio».</p></div>`;
 }
 const _pintarDatosLC = pintarDatos;
@@ -4764,7 +4764,7 @@ function ckDec(t) { t = String(t || "").replace(/\s+/g, ""); try { t = decodeURI
       $("ckPega").addEventListener("input", e => { const c = ckDec(e.target.value); if (!c) return;
         $("syUrl").value = c.url; $("syClave").value = c.clave; e.target.value = ""; toast("Código leído. Probando la conexión…"); $("syGuardar").click(); });
       const lab = card.querySelector('label[for="syCodigo"]');
-      if (lab) lab.textContent = "Código para los vendedores (si no usan el link de arriba): lo pegan en la pantalla de conexión de Nota de Pedido.";
+      if (lab) lab.textContent = "Código para los vendedores (si no usan el link de arriba): lo pegan en la pantalla de conexión de app Ventas.";
     } catch (e) { console.error(e); }
     return r;
   }; }
@@ -4821,7 +4821,7 @@ const diaHabil = f => { const d = f instanceof Date ? f : new Date(String(f).sli
 { const _rkMH = rkFilas; rkFilas = function () { return _rkMH.apply(this, arguments).filter(r => diaHabil(r.f)); }; }
 </script>
 
-<script>/* dosapps: borrar la copia del Dashboard que guarda Nota de Pedido (usa estos mismos datos) */
+<script>/* dosapps: borrar la copia del Dashboard que guarda app Ventas (usa estos mismos datos) */
 (function () { try { var dvVer = function (s) { var m = /^\{"v":"([^"]*)"/.exec(String(s || "").slice(0, 80)); return m ? m[1] : ""; };
   var a = localStorage.getItem("hwf-dv-admin"), d = localStorage.getItem("hwf-dv-dash");
   if (a && d && dvVer(a) >= dvVer(d)) localStorage.removeItem("hwf-dv-dash");

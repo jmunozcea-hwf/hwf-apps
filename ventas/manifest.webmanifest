@@ -1,7 +1,7 @@
 {
  "id": "/hwf-apps/",
- "name": "Nota de Pedido HWF",
- "short_name": "Nota Pedido",
+ "name": "Ventas HWF",
+ "short_name": "Ventas",
  "start_url": "./",
  "scope": "./",
  "display": "standalone",

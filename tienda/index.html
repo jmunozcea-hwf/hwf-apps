@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="es-CL"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Tienda Hellywoof</title><meta name="theme-color" content="#5B2A86"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon-192.png">
-<script>/* espacio propio en el almacenamiento del sitio (no choca con Nota de Pedido ni HWF Admin en el mismo equipo) */
+<script>/* espacio propio en el almacenamiento del sitio (no choca con app Ventas ni HWF Admin en el mismo equipo) */
 (function () { var S = Storage.prototype, g = S.getItem, s = S.setItem, r = S.removeItem, P = "hwf-tda:";
   var k = function (x) { x = String(x); return x.indexOf(P) === 0 ? x : P + x; };
   S.getItem = function (x) { return g.call(this, k(x)); }; S.setItem = function (x, v) { return s.call(this, k(x), v); }; S.removeItem = function (x) { return r.call(this, k(x)); }; })();
@@ -1629,8 +1629,7 @@ function pintarDash() {
   const yt = filas[0] && filas[0].ytg ? filas[0] : null;
   box.innerHTML = `<div class="t-card"><h2>Dashboard de ventas Hellywoof <small>datos de Defontana al ${esc(corte.split("-").reverse().join("-"))}</small></h2>
       <div class="t-seg">${[["diario", "Diario"], ["semanal", "Semanal"], ["mensual", "Mensual"], ["anual", "Anual"], ["ytd", "YTD"], ["ytg", "YTG"]].map(([k, t]) => `<button type="button" data-dv="${k}" aria-pressed="${dashVista === k}">${t}</button>`).join("")}</div>
-      <div class="t-row"><select id="dCat" style="flex:1;min-width:150px;border:1px solid var(--line);border-radius:10px;padding:9px"><option value="">Todas las categorías</option>${[...new Set(D.productos.map(p => p[1]).filter(Boolean))].sort().map(c => `<option ${c === dashCat ? "selected" : ""}>${esc(c)}</option>`).join("")}</select>
-        <select id="dProd" style="flex:2;min-width:200px;border:1px solid var(--line);border-radius:10px;padding:9px"><option value="">Todos los productos</option>${D.productos.map((p, i) => [p, i]).filter(([p]) => !dashCat || p[1] === dashCat).sort((a, b) => a[0][0].localeCompare(b[0][0], "es")).map(([p, i]) => `<option value="${i}" ${String(i) === dashProd ? "selected" : ""}>${esc(p[0])}</option>`).join("")}</select></div>
+      <div class="t-row"><select id="dProd" style="flex:2;min-width:200px;border:1px solid var(--line);border-radius:10px;padding:9px"><option value="">Todos los productos</option>${D.productos.map((p, i) => [p, i]).sort((a, b) => a[0][0].localeCompare(b[0][0], "es")).map(([p, i]) => `<option value="${i}" ${String(i) === dashProd ? "selected" : ""}>${esc(p[0])}</option>`).join("")}</select></div>
       ${yt ? `<div class="t-kpis"><div class="t-kpi"><span>Meta por vender (plan)</span><b>${mm(yt.mt)}</b><small>${esc(yt.a.split("-").reverse().join("-"))} al 31-12</small></div>
         <div class="t-kpi"><span>Mismo período ${Y - 1}</span><b>${mm(yt.ly)}</b><small>${yt.ly ? (yt.mt >= yt.ly ? "+" : "") + Math.round((yt.mt / yt.ly - 1) * 100) + "% para cumplir" : ""}</small></div>
         <div class="t-kpi"><span>Necesario por día</span><b>${mm(yt.dias ? yt.mt / yt.dias : 0)}</b><small>${yt.dias} días de tienda</small></div>
@@ -1657,7 +1656,6 @@ function pintarDash() {
       <div class="t-tw"><table class="t-t"><thead><tr><th>Producto</th><th>Categoría</th><th>Venta</th><th>${Y - 1}</th><th>vs año ant.</th><th>Unidades</th></tr></thead><tbody>
       ${tP.map(o => `<tr><td>${esc(o.n)}</td><td>${esc(o.c)}</td><td>${mm(o.v)}</td><td>${mm(o.ly)}</td><td>${pc(o.v, o.ly)}</td><td>${Math.round(o.q)}</td></tr>`).join("") || '<tr><td colspan="6" class="t-vacio">Sin ventas.</td></tr>'}</tbody></table></div></div>`);
   box.querySelectorAll("[data-dv]").forEach(b => b.onclick = () => { dashVista = b.dataset.dv; pintarDash(); });
-  $("dCat").onchange = e => { dashCat = e.target.value; dashProd = ""; pintarDash(); };
   $("dProd").onchange = e => { dashProd = e.target.value; pintarDash(); };
 }
 
@@ -1817,7 +1815,7 @@ function pintar(s) { try { ({ inicio: pintarInicio, ventas: pintarVentas, plan: 
 function pintarTodo() { const D = DATA(), t = turno(); $("tTurno").textContent = "Turno: " + (t || "—") + " · cambiar"; $("tAct").textContent = "Datos de Drive: " + ((D && D.act && D.act.drive) || "—"); pintar(vista); }
 $("tNav").onclick = e => { const b = e.target.closest("[data-s]"); if (b) ir(b.dataset.s); };
 $("tTurno").onclick = () => { if (confirm("¿Cambiar quién está en la jornada de hoy? (o entrar como administración)")) { localStorage.removeItem(TURK); refrescarSES(); pedirTurno(); } };
-/* compatibilidad con el módulo de Nutrición de Nota de Pedido (sin pedido) */
+/* compatibilidad con el módulo de Nutrición de app Ventas (sin pedido) */
 const byCode = {}; const line = () => ({ q: 0 }); const setQty = () => {};
 /* ================= acceso de administración (solo revisa: no suma puntos) ================= */
 const ADMK = "admin";

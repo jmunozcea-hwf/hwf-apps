@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="es">
 <head><!-- patch_fantasia --><!-- clavevieja --><!-- patch_claves -->
-<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0B3146"><link rel="apple-touch-icon" href="icon-192.png"><link rel="icon" href="icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Pedido DEMO"><script>/* espacio de almacenamiento: liberar respaldos re-descargables antes de perder datos nuevos */
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0B3146"><link rel="apple-touch-icon" href="icon-192.png"><link rel="icon" href="icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Ventas DEMO"><script>/* espacio de almacenamiento: liberar respaldos re-descargables antes de perder datos nuevos */
 (function () {
   var S = Storage.prototype, set = S.setItem, rem = S.removeItem;
   var PRESC = ["hwf-dv-dash", "hwf-crm-v1", "hwf-pt-cc", "adm-pt-chat", "hwf-ranking", "adm-ranking", "hwf-cli-cambios-srv", "adm-cc", "hwf-carteras-ver", "hwf-prod-ver", "adm-prod-ver", "hwf-cal-ver", "hwf-pub"];
@@ -60,7 +60,7 @@ window.cartAplicar = function (d) {
       if (Array.isArray(o.vend) && Array.isArray(o.rows) && o.vend.every(function (x) { return typeof x === "string"; })) {
         var u = [], map = o.vend.map(function (x) { var j = u.indexOf(x); if (j < 0) { u.push(x); j = u.length - 1; } return j; });
         if (u.length !== o.vend.length) { o.rows.forEach(function (r) { if (r && typeof r[7] === "number" && map[r[7]] != null) r[7] = map[r[7]]; }); o.vend = u; } }
-      /* reasignación por cliente: objetos {nombre, vendedor} (Nota de Pedido) y filas [nombre, comuna, cartera, dir] (Admin) */
+      /* reasignación por cliente: objetos {nombre, vendedor} (app Ventas) y filas [nombre, comuna, cartera, dir] (Admin) */
       if (typeof o.nombre === "string" && "vendedor" in o && C[cartNorm(o.nombre)]) { o.vendedor = C[cartNorm(o.nombre)]; n++; }
       if (Array.isArray(o.clientes)) o.clientes.forEach(function (c) { if (Array.isArray(c) && typeof c[0] === "string" && typeof c[2] === "string" && C[cartNorm(c[0])]) { c[2] = C[cartNorm(c[0])]; n++; } });
       return o;
@@ -95,7 +95,7 @@ function npRitmo(cots, Y, M, n, real, lim, ant) {
 <script>/* hwfAutoAct: recarga sola cuando hay versión nueva */(function(){var h0=null,t0=0;function hs(t){var h=0;for(var i=0;i<t.length;i++)h=(h*31+t.charCodeAt(i))|0;return h}function chk(){if(Date.now()-t0<20000)return;t0=Date.now();fetch(location.pathname,{cache:"no-store"}).then(function(r){return r.ok?r.text():null}).then(function(t){if(!t)return;var h=hs(t);if(h0===null){h0=h;return}if(h!==h0){h0=h;location.reload()}}).catch(function(){})}window.addEventListener("load",function(){setTimeout(chk,1500)});document.addEventListener("visibilitychange",function(){if(document.visibilityState==="visible")chk()});window.addEventListener("focus",chk);setInterval(chk,600000)})();</script>
 <style>.cli-fant{display:block;font-weight:600;color:var(--muted,#5B6874);font-size:.86em;margin-top:2px}.cli-top .cli-fant{display:inline;font-size:.82em}</style></head>
 <body>
-<title>Nota de Pedido HWF · DEMO</title>
+<title>Ventas HWF · DEMO</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Figtree:wght@400;500;600;700&display=swap">
 <style>
@@ -3323,7 +3323,7 @@ function syPayload() {
   return { id: S.id, num: S.num, emision: S.emision, y, m, d, vend: SES ? SES.vendedor.nombre : "", cart: SES ? SES.vendedor.cartera : "", codCliente: cp ? cp.codigo : (S.cliCodigo || ""),
     cliente: c.razon || "", rut: c.rut || "", giro: c.giro || "", contacto: c.contacto || "", fono: c.fono || "", mail: c.mail || "", dir: c.dir || "", comuna: c.comuna || "",
     entrega: c.entrega || "", despacho: c.tipo || "", dirEnt: c.tipo === "Retiro en bodega" ? "Retiro en bodega" : (c.dirdesp || ""), obs: c.obs || "",
-    items, neto: t.neto, iva: t.iva, total: t.total, envio: t.neto >= ENVIO_GRATIS ? "Gratis" : "Según tarifa", enviado: new Date().toISOString(), app: "Nota de Pedido" };
+    items, neto: t.neto, iva: t.iva, total: t.total, envio: t.neto >= ENVIO_GRATIS ? "Gratis" : "Según tarifa", enviado: new Date().toISOString(), app: "app Ventas" };
 }
 function syEncolar() {
   const q = lsGet(SYCOLA, {}), p = syPayload(); q[p.id] = p; lsSet(SYCOLA, q);
@@ -5505,7 +5505,7 @@ if (typeof APP_NOVEDADES !== "undefined" && Array.isArray(APP_NOVEDADES)) APP_NO
 </script>
 
 <script>
-/* ===== Comparación con el año anterior (común a HWF Admin y Nota de Pedido) =====
+/* ===== Comparación con el año anterior (común a HWF Admin y app Ventas) =====
    D.rows: [ci, pi, mes, día, cant, neto, costo, vend, año?]  (año vacío = D.anio)
    yaCalc(D, Y, M, lim, incl, cart): mes M a la misma fecha (día ≤ lim), año a la fecha, mes completo del año anterior,
    venta mensual de ambos años y detalle por cartera. Devuelve null si no hay ventas del año anterior. */
@@ -5588,7 +5588,7 @@ if (typeof APP_NOVEDADES !== "undefined" && Array.isArray(APP_NOVEDADES)) APP_NO
 </script>
 
 <script>
-/* Tarjeta «Cotizaciones Defontana» del Dashboard (HWF Admin y Nota de Pedido).
+/* Tarjeta «Cotizaciones Defontana» del Dashboard (HWF Admin y app Ventas).
    cots: [num, fecha dd/mm/aaaa, cliente, vendedor, cartera, cantidad, producto, monto neto] */
 const CZ_CSS = ".cz-tot{display:flex;gap:14px;flex-wrap:wrap;margin:0 0 8px}.cz-tot div{display:grid}.cz-tot b{font-size:1.15rem;font-variant-numeric:tabular-nums}.cz-tot span{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:700}"
   + ".cz-v{display:grid;gap:6px;margin:4px 0 10px}.cz-v .t{display:flex;justify-content:space-between;gap:8px;font-size:.88rem}.cz-v .t b{font-variant-numeric:tabular-nums}"
@@ -5830,7 +5830,7 @@ function cxImagen(c) {
 
 <script>
 /* Plan de crecimiento HWF sin presupuesto de marketing (presentación del 02-11-2026): de 65 a 80 MM mensuales.
-   Cálculo común para HWF Admin y Nota de Pedido a partir de las ventas (D.rows: [cliente, producto, mes, día, cant, neto, costo, vendedor, año?]). */
+   Cálculo común para HWF Admin y app Ventas a partir de las ventas (D.rows: [cliente, producto, mes, día, cant, neto, costo, vendedor, año?]). */
 const PLAN = { meta: 80000000, base: 65000000, cuotaMin: 4, cuotaMax: 6, excluir: [/\bpro ?pets?\b/, /\byanez\b/],  /* clientes fuera del plan (pedido de Jorge 03-11): Propets y Yañez */
   pasos: [["1–30", "Ordenar la base", ["Lista de dormidos desde Defontana", "Clasificación A, B y C", "WhatsApp Business y catálogo", "Reunión con 2 marcas principales"]],
           ["31–60", "Activar la venta", ["Oferta de surtido en cada visita", "Cuotas de prospección por vendedor", "Programa de referidos", "Calendario fijo de rutas"]],
@@ -6105,7 +6105,7 @@ exportarAhora = function () {
 </style>
 
 <script>
-/* ===== Días calle (cobranza) — núcleo común de Nota de Pedido y HWF Admin =====
+/* ===== Días calle (cobranza) — núcleo común de app Ventas y HWF Admin =====
    Con la información libre de Defontana:
    - DSO (countback) = cuántos días de ventas recientes (con IVA), contando hacia atrás desde el corte, hacen falta para sumar
                        lo que se debe hoy. Más fiel que saldo ÷ ventas × 90 cuando las compras son irregulares.  (InfCobranzaDetallado + ventas)
@@ -6568,7 +6568,7 @@ syLlamar = async function (cfg, d) { const r = await _syLlamarCal.apply(this, ar
 const CAL_call = d => CAL_DEMO ? calDemoCall(d) : (syCfg() && syCfg().url ? _syLlamarCal(syCfg(), d) : Promise.resolve({ ok: false, error: "La app no está conectada con HWF." }));
 const CAL_get = (k, d) => lsGet(k, d), CAL_set = (k, v) => lsSet(k, v), CAL_quien = () => (SES && SES.vendedor ? SES.vendedor.nombre : ""), CAL_toast = m => toast(m);
 const CAL_clientes = () => clientesLocal().map(c => tc(c.nombre)).sort(), CAL_admin = false;
-/* ===== Calendario del equipo (común a Nota de Pedido y HWF Admin) =====
+/* ===== Calendario del equipo (común a app Ventas y HWF Admin) =====
    Ferias, activaciones de producto, capacitaciones y otras actividades extra. Se guarda en el registro central del script
    (acción «clienteCambios», código «EVENTO», detalle JSON); sirve con el script v11 de la planilla y con el nuevo.
    Cada app define antes: CAL_call(datos) → respuesta del script, CAL_get(k, def), CAL_set(k, v), CAL_quien(), CAL_toast(m),

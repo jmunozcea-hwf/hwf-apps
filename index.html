@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="manifest" href="ventas/manifest.webmanifest"><!-- misma identidad que la Nota de Pedido instalada antes en la raíz: Chrome la actualiza a su nuevo alcance -->
+<link rel="manifest" href="ventas/manifest.webmanifest"><!-- misma identidad que la app Ventas instalada antes en la raíz: Chrome la actualiza a su nuevo alcance -->
 <meta name="theme-color" content="#0B3146">
 <title>Instalar apps HWF</title>
 <link rel="icon" href="ventas/icon-192.png">
@@ -41,23 +41,23 @@ ol{margin:0;padding-left:20px;display:grid;gap:6px}
   <header>
     <h1>Apps HWF</h1>
     <p>Instala o reinstala las apps en tu celular o computador. Cada app tiene su propio link:</p>
-    <p style="margin-top:8px;font-size:.9rem;opacity:.95">Nota de Pedido: <b>jmunozcea-hwf.github.io/hwf-apps/ventas/</b><br>HWF Admin: <b>jmunozcea-hwf.github.io/hwf-apps/admin/</b></p>
+    <p style="margin-top:8px;font-size:.9rem;opacity:.95">app Ventas: <b>jmunozcea-hwf.github.io/hwf-apps/ventas/</b><br>HWF Admin: <b>jmunozcea-hwf.github.io/hwf-apps/admin/</b></p>
   </header>
 
   <section class="card aviso">
-    <h2>¿Instalaste Nota de Pedido antes del 02-11-2026?</h2>
-    <p class="muted" style="margin:0">Desde el 02-11-2026 cada app tiene su propio link, para que no se mezclen. Borra el ícono antiguo de <b>Nota de Pedido</b> de tu pantalla de inicio y vuelve a instalarla desde aquí. Tu conexión y tus datos se mantienen.</p>
+    <h2>¿Instalaste app Ventas antes del 02-11-2026?</h2>
+    <p class="muted" style="margin:0">Desde el 02-11-2026 cada app tiene su propio link, para que no se mezclen. Borra el ícono antiguo de <b>Ventas HWF</b> de tu pantalla de inicio y vuelve a instalarla desde aquí. Tu conexión y tus datos se mantienen.</p>
   </section>
 
   <section class="card">
     <h2>1. Elige tu app</h2>
-    <div class="app"><img src="ventas/icon-192.png" alt=""><div><b>Nota de Pedido</b><small>Para vendedores: pedidos, clientes, ruta, cobranza y dashboard.</small></div></div>
-    <div class="btns"><a class="btn pri" href="ventas/">Abrir Nota de Pedido</a></div>
+    <div class="app"><img src="ventas/icon-192.png" alt=""><div><b>Ventas HWF</b><small>Para vendedores: pedidos, clientes, ruta, cobranza y dashboard.</small></div></div>
+    <div class="btns"><a class="btn pri" href="ventas/">Abrir app Ventas</a></div>
     <div class="app"><img src="admin/icon-192.png" alt=""><div><b>HWF Admin</b><small>Para administración: dashboard, notas, cobranza, embudo e informes.</small></div></div>
     <div class="btns"><a class="btn pri" href="admin/">Abrir HWF Admin</a></div>
     <div class="app"><img src="tienda/icon-192.png" alt=""><div><b>Tienda Hellywoof</b><small>Para la tienda: ventas y meta del mes, plan de crecimiento, stock de la tienda, nutrición y ranking de Francisco, Benjamín y Genérico.</small></div></div>
     <div class="btns"><a class="btn pri" href="tienda/">Abrir Tienda Hellywoof</a></div>
-    <p class="muted">Demos con datos ficticios: <a href="demo/ventas/">Nota de Pedido DEMO</a> · <a href="demo/admin/">HWF Admin DEMO</a></p>
+    <p class="muted">Demos con datos ficticios: <a href="demo/ventas/">Ventas DEMO</a> · <a href="demo/admin/">HWF Admin DEMO</a></p>
   </section>
 
   <section class="card">
@@ -82,7 +82,7 @@ ol{margin:0;padding-left:20px;display:grid;gap:6px}
   </section>
 </div>
 <script>
-/* la Nota de Pedido instalada antes del cambio abre esta página: sigue funcionando yendo a ventas/ */
+/* la app Ventas instalada antes del cambio abre esta página: sigue funcionando yendo a ventas/ */
 if (window.matchMedia && matchMedia("(display-mode: standalone)").matches || navigator.standalone) location.replace("ventas/" + location.search);
 document.querySelector(".tabs").onclick = function (e) {
   var b = e.target.closest("[data-t]"); if (!b) return;
