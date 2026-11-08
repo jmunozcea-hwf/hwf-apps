@@ -4777,5 +4777,17 @@ function cliContacto(ci) {
     <div style="display:flex;gap:6px;flex-wrap:wrap">${tel ? `<a style="${b}" href="tel:${esc(tel)}">📞 ${esc(tel)}</a><a style="${b}" target="_blank" rel="noopener" href="https://wa.me/${wa}">WhatsApp</a>` : ""}${mail ? `<a style="${b}" href="mailto:${esc(mail)}">✉ ${esc(mail)}</a>` : ""}</div></div>`;
 }
 </script>
+
+<script>/* ptreinicio: noviembre 2026 cuenta desde el día 9 */
+const PT_BORRADOS = [["2026-11-01", "2026-11-08"]];   /* puntos que no cuentan (noviembre parte el 9) */
+const ptBorrado = f => { f = String(f || "").slice(0, 10); return PT_BORRADOS.some(([a, b]) => f >= a && f <= b); };
+const ptLimpiaFilas = L => Array.isArray(L) ? L.filter(r => !ptBorrado(Array.isArray(r) ? r[0] : r && (r.f || r.fecha))) : L;
+
+(function () { try { const s = store.get(RK_KEY, null); if (s && Array.isArray(s.filas)) { const L = ptLimpiaFilas(s.filas); if (L.length !== s.filas.length) { s.filas = L; store.set(RK_KEY, s); } } } catch (e) {} })();
+{ const _rkFilasRI = rkFilas; rkFilas = function () { return _rkFilasRI.apply(this, arguments).filter(r => !ptBorrado(r.f)); }; }
+{ const _scRI = syCall; syCall = async function (cfg, d) { const r = await _scRI.apply(this, arguments);
+    try { if (d && d.accion === "ranking" && r && Array.isArray(r.filas)) r.filas = ptLimpiaFilas(r.filas); } catch (e) {}
+    return r; }; }
+</script>
 </body>
 </html>

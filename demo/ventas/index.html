@@ -6770,5 +6770,47 @@ const RK_FUERA = /^(ang[eé]lica|v[ií]ctor|jorge)\b/i;
 { const _smAv2 = setModo; setModo = function (m) { const r = _smAv2.apply(this, arguments); const av = $("crmAvance"); if (av && m !== "dash" && m !== "avance") av.hidden = true; return r; }; }
 document.head.insertAdjacentHTML("beforeend", "<style>#crmAvance.av2{display:grid;gap:12px;margin-bottom:14px}</style>");
 </script>
+
+<script>/* ptreinicio: noviembre 2026 cuenta desde el día 9 */
+const PT_BORRADOS = [["2026-11-01", "2026-11-08"]];   /* puntos que no cuentan (noviembre parte el 9) */
+const ptBorrado = f => { f = String(f || "").slice(0, 10); return PT_BORRADOS.some(([a, b]) => f >= a && f <= b); };
+const ptLimpiaFilas = L => Array.isArray(L) ? L.filter(r => !ptBorrado(Array.isArray(r) ? r[0] : r && (r.f || r.fecha))) : L;
+
+(function () { try {   /* limpiar lo guardado en el teléfono */
+  const P = JSON.parse(localStorage.getItem(PT_KEY) || "null"); if (P && typeof P === "object") { let n = 0; Object.keys(P).forEach(k => { if (ptBorrado(P[k] && P[k].f)) { delete P[k]; n++; } }); if (n) localStorage.setItem(PT_KEY, JSON.stringify(P)); }
+  const R = JSON.parse(localStorage.getItem(PT_RK) || "null"); if (R && Array.isArray(R.filas)) { const L = ptLimpiaFilas(R.filas); if (L.length !== R.filas.length) { R.filas = L; localStorage.setItem(PT_RK, JSON.stringify(R)); } }
+} catch (e) {} })();
+{ const _ptFilasRI = ptFilas; ptFilas = function () { return _ptFilasRI.apply(this, arguments).filter(r => !ptBorrado(r.f)); }; }
+{ const _slRI = syLlamar; syLlamar = async function (cfg, d) {
+    if (d && d.accion === "puntaje" && d.puntaje && ptBorrado(d.puntaje.fecha)) return { ok: true, omitido: true };   /* no volver a subirlos */
+    const r = await _slRI.apply(this, arguments);
+    try { if (d && d.accion === "ranking" && r && Array.isArray(r.filas)) r.filas = ptLimpiaFilas(r.filas); } catch (e) {}
+    return r; }; }
+</script>
+
+<script>/* geoauto: pedir la ubicación al abrir y mantenerla al día */
+(function () {
+  let ult = 0, aviso = false;
+  const bloqueado = () => { if (aviso || document.getElementById("geoAv")) return; aviso = true;
+    const ios = /iPhone|iPad/i.test(navigator.userAgent);
+    const d = document.createElement("div"); d.id = "geoAv";
+    d.style.cssText = "position:fixed;left:12px;right:12px;bottom:calc(76px + env(safe-area-inset-bottom));z-index:9000;background:#0B3146;color:#fff;border-radius:14px;padding:12px 14px;font:500 13.5px/1.4 system-ui;box-shadow:0 10px 30px rgba(0,0,0,.3);display:flex;gap:10px;align-items:flex-start";
+    d.innerHTML = `<span style="font-size:20px">📍</span><span style="flex:1"><b>Activa la ubicación para HWF.</b> ${ios ? "Ajustes → Privacidad → Localización → Safari (o la app HWF) → «Al usar la app»." : "Toca el candado o ⓘ junto a la dirección → Permisos → Ubicación → Permitir. Revisa también que el GPS del teléfono esté encendido."} Sirve para «cerca de mí», la ruta del día y ubicar clientes.</span><button type="button" style="background:none;border:0;color:#fff;font-size:20px;line-height:1;cursor:pointer" aria-label="Cerrar">×</button>`;
+    d.querySelector("button").onclick = () => d.remove(); document.body.appendChild(d); };
+  const pedir = (forzar) => {
+    if (window.HWF_DEMO || !navigator.geolocation && !(window.NATIVO && NATIVO.ubicacion)) return;
+    if (!forzar && Date.now() - ult < 10 * 60 * 1000) return; ult = Date.now();
+    try { ubicar().then(() => { const a = document.getElementById("geoAv"); if (a) a.remove(); }).catch(e => { if (e && (e.code === 1 || /deneg|denied|permis/i.test(String(e.message || e)))) bloqueado(); }); } catch (e) {}
+  };
+  const arranque = () => {
+    if (navigator.permissions && navigator.permissions.query) {
+      navigator.permissions.query({ name: "geolocation" }).then(p => { if (p.state === "denied") bloqueado(); else pedir(true);
+        p.onchange = () => { if (p.state === "granted") pedir(true); else if (p.state === "denied") bloqueado(); }; }).catch(() => pedir(true));
+    } else pedir(true);
+  };
+  if (document.readyState === "complete") setTimeout(arranque, 1200); else addEventListener("load", () => setTimeout(arranque, 1200));
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) pedir(false); });
+})();
+</script>
 </body>
 </html>
