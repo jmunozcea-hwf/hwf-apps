@@ -53,7 +53,7 @@ if(document.body)pinta();else document.addEventListener("DOMContentLoaded",pinta
 })();</script>
 
 <script>/* carteras: reasignaciones aplicadas a los datos de Drive antes de que la app los lea */
-window.CART_FIJAS = { "Angélica Carvajal": "Claudia Hamame", "Víctor Moreno": "Genérico" };
+window.CART_FIJAS = { "Angélica Carvajal": "Claudia Hamame", "Víctor Moreno": "Genérico", "Angélica": "Claudia", "ANGELICA CARVAJAL": "CLAUDIA HAMAME" };   /* sinangelica */
 window.cartReglas = function () { var R = null; try { R = JSON.parse(localStorage.getItem("hwf-carteras") || "null"); } catch (e) {}
   R = R || {}; var v = {}, k; for (k in CART_FIJAS) v[k] = CART_FIJAS[k]; for (k in (R.vend || {})) v[k] = R.vend[k]; for (k in v) if (!v[k]) delete v[k];
   return { vend: v, cli: R.cli || {} }; };
@@ -88,7 +88,7 @@ window.cartAplicar = function (d) {
   };
   walk(d); return n;
 };
-(function () { ["hwf-dv-app", "hwf-dv-admin", "hwf-dv-dash"].forEach(function (key) { try { var p = JSON.parse(localStorage.getItem(key) || "null"); if (!p || !p.d) return;
+(function () { ["hwf-dv-app", "hwf-dv-admin", "hwf-dv-dash", "hwf-cxc", "adm-cxc", "hwf-prosp", "adm-prosp", "adm-ventas", "hwf-crm-v1", "adm-cots", "adm-metas"].forEach(function (key) { try { var p = JSON.parse(localStorage.getItem(key) || "null"); if (!p || !p.d) return;
   var s0 = JSON.stringify(p.d); cartAplicar(p.d); if (JSON.stringify(p.d) !== s0) localStorage.setItem(key, JSON.stringify(p)); } catch (e) {} }); })();
 </script>
 <script>/* datos vivos de Drive */window.__DV=(function(){try{var p=JSON.parse(localStorage.getItem("hwf-dv-app")||"null");return p&&p.v&&p.d&&p.v>"0000-00-00 00:00:00"?p:null}catch(e){return null}})();window.__dvGet=function(n){return window.__DV&&Object.prototype.hasOwnProperty.call(window.__DV.d,n)?window.__DV.d[n]:null};</script>
@@ -3879,7 +3879,7 @@ applyFilter();
    CUENTAS POR COBRAR (Informe de Cobranza Detallado de Defontana)
    Los días de atraso se calculan con la fecha del equipo: el estado cambia solo cada día.
    ================================================================ */
-const CXC_VEND = ["Claudia Hamame", "Angélica Carvajal", "Diego Muñoz Cea", "Matías Espinoza", "Genérico"];
+const CXC_VEND = ["Claudia Hamame", "Diego Muñoz Cea", "Matías Espinoza", "Genérico"];
 const cxNorm = s => String(s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase().replace(/[^A-Z0-9]+/g, " ").trim();
 const cx2 = s => cxNorm(s).split(" ").slice(0, 2).join(" ");
 function cxCart(cob) { const v = CXC_VEND.find(v => cx2(v) === cx2(cob)); return v || (cob ? String(cob).toLowerCase().replace(/(^|\s)\S/g, m => m.toUpperCase()) : "Sin cobrador"); }
@@ -4299,7 +4299,7 @@ syEstados = async function () { await _syEstadosPr(); await prSync(); };
 /* ================================================================
    EMBUDO: CREAR PROSPECTO · VINCULAR CON CLIENTE · PROSPECTOS EN LA RUTA
    ================================================================ */
-const PR_MAIL = { DIEGO: "diego@hwf.cl", CLAUDIA: "claudia@hwf.cl", MATIAS: "matias@hwf.cl", ANGELICA: "angelica@hwf.cl", VICTOR: "victor@hwf.cl", JORGE: "jorge@hwf.cl" };
+const PR_MAIL = { DIEGO: "diego@hwf.cl", CLAUDIA: "claudia@hwf.cl", MATIAS: "matias@hwf.cl", VICTOR: "victor@hwf.cl", JORGE: "jorge@hwf.cl" };
 const PR_SEG = ["Pet shop", "Veterinaria", "Farmacia veterinaria", "Pet shop + veterinaria", "Peluquería canina", "Tienda de alimentos", "Agrícola / forrajería", "Distribuidora", "Otro"];
 const PR_OHIG = new Set(["RANCAGUA", "MACHALI", "GRANEROS", "CODEGUA", "MOSTAZAL", "SAN FRANCISCO DE MOSTAZAL", "DONIHUE", "COLTAUCO", "COINCO", "OLIVAR", "REQUINOA", "RENGO", "MALLOA",
   "QUINTA DE TILCOCO", "SAN VICENTE", "SAN VICENTE DE TAGUA TAGUA", "PICHIDEGUA", "PEUMO", "LAS CABRAS", "SAN FERNANDO", "CHIMBARONGO", "PLACILLA", "NANCAGUA", "CHEPICA", "SANTA CRUZ",
@@ -6771,6 +6771,11 @@ document.addEventListener("visibilitychange", () => { if (!document.hidden) cart
 setTimeout(cartBajar, 4000);
 /* vendedores eliminados: una sesión abierta como «Jorge» pasa a «Genérico» */
 try { if (SES && SES.vendedor && SES.vendedor.nombre === "Jorge") { SES.vendedor = Object.assign({}, SES.vendedor, { nombre: "Genérico", usuario: "genérico", cartera: "Genérico" }); guardarSesion(SES); location.reload(); } } catch (e) {}
+</script>
+
+<script>/* sinangelica: cada respuesta del script pasa por las reglas de cartera (cobranza, prospectos, notas…) */
+{ const _f = syLlamar; syLlamar = async function (cfg, d) { const r = await _f.apply(this, arguments);
+    try { if (r && r.ok && d && d.accion !== "clienteCambios" && typeof cartAplicar === "function") cartAplicar(r); } catch (e) {} return r; }; }
 </script>
 </body>
 </html>

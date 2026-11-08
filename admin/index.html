@@ -69,7 +69,7 @@ if(document.body)pinta();else document.addEventListener("DOMContentLoaded",pinta
 })();</script>
 
 <script>/* carteras: reasignaciones aplicadas a los datos de Drive antes de que la app los lea */
-window.CART_FIJAS = { "Angélica Carvajal": "Claudia Hamame", "Víctor Moreno": "Genérico" };
+window.CART_FIJAS = { "Angélica Carvajal": "Claudia Hamame", "Víctor Moreno": "Genérico", "Angélica": "Claudia", "ANGELICA CARVAJAL": "CLAUDIA HAMAME" };   /* sinangelica */
 window.cartReglas = function () { var R = null; try { R = JSON.parse(localStorage.getItem("hwf-carteras") || "null"); } catch (e) {}
   R = R || {}; var v = {}, k; for (k in CART_FIJAS) v[k] = CART_FIJAS[k]; for (k in (R.vend || {})) v[k] = R.vend[k]; for (k in v) if (!v[k]) delete v[k];
   return { vend: v, cli: R.cli || {} }; };
@@ -104,7 +104,7 @@ window.cartAplicar = function (d) {
   };
   walk(d); return n;
 };
-(function () { ["hwf-dv-app", "hwf-dv-admin", "hwf-dv-dash"].forEach(function (key) { try { var p = JSON.parse(localStorage.getItem(key) || "null"); if (!p || !p.d) return;
+(function () { ["hwf-dv-app", "hwf-dv-admin", "hwf-dv-dash", "hwf-cxc", "adm-cxc", "hwf-prosp", "adm-prosp", "adm-ventas", "hwf-crm-v1", "adm-cots", "adm-metas"].forEach(function (key) { try { var p = JSON.parse(localStorage.getItem(key) || "null"); if (!p || !p.d) return;
   var s0 = JSON.stringify(p.d); cartAplicar(p.d); if (JSON.stringify(p.d) !== s0) localStorage.setItem(key, JSON.stringify(p)); } catch (e) {} }); })();
 </script>
 <script>/* datos vivos de Drive */window.__DV=(function(){try{var p=JSON.parse(localStorage.getItem("hwf-dv-admin")||"null");return p&&p.v&&p.d&&p.v>"0000-00-00 00:00:00"?p:null}catch(e){return null}})();window.__dvGet=function(n){return window.__DV&&Object.prototype.hasOwnProperty.call(window.__DV.d,n)?window.__DV.d[n]:null};</script>
@@ -1346,7 +1346,7 @@ const pct = x => isFinite(x) ? Math.round(x * 100) + "%" : "—";
 const nf = n => Math.round(Number(n) || 0).toLocaleString("es-CL");
 const MESES = ["", "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 const MC = ["", "Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
-const COLOR = { "Claudia Hamame": "#0B3146", "Angélica Carvajal": "#E07A2E", "Diego Muñoz Cea": "#2E8B57", "Matías Espinoza": "#8E44AD", "Tienda Hellywoof": "#4FA6AD", "Genérico": "#95A5A6" };
+const COLOR = { "Claudia Hamame": "#0B3146", "Diego Muñoz Cea": "#2E8B57", "Matías Espinoza": "#8E44AD", "Tienda Hellywoof": "#4FA6AD", "Genérico": "#95A5A6" };
 const colorDe = v => COLOR[v] || "#7F8C8D";
 const tc = s => String(s || "").toLowerCase().replace(/(^|[\s.(/-])\S/g, t => t.toUpperCase()).replace(/\bSpa\b/, "SpA").replace(/\bE\.i\.r\.l\.?/i, "E.I.R.L.").replace(/\bLtda\b/i, "Ltda");
 const norm = s => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toUpperCase().replace(/[^A-Z0-9]+/g, " ").trim();
@@ -2291,7 +2291,7 @@ function bnExportar(L) {
    CUENTAS POR COBRAR (Informe de Cobranza Detallado de Defontana)
    Los días de atraso se calculan con la fecha del equipo: el estado cambia solo cada día.
    ================================================================ */
-const CXC_VEND = ["Claudia Hamame", "Angélica Carvajal", "Diego Muñoz Cea", "Matías Espinoza", "Genérico"];
+const CXC_VEND = ["Claudia Hamame", "Diego Muñoz Cea", "Matías Espinoza", "Genérico"];
 const cxNorm = s => String(s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase().replace(/[^A-Z0-9]+/g, " ").trim();
 const cx2 = s => cxNorm(s).split(" ").slice(0, 2).join(" ");
 function cxCart(cob) { const v = CXC_VEND.find(v => cx2(v) === cx2(cob)); return v || (cob ? String(cob).toLowerCase().replace(/(^|\s)\S/g, m => m.toUpperCase()) : "Sin cobrador"); }
@@ -2539,7 +2539,7 @@ function prConteo(l) { const c = PR_ETAPAS.map(() => 0); l.forEach(o => c[prIdx(
 
 /* ---------- Embudo de ventas (Más → Embudo) ---------- */
 const PR_BASE = {"cols": ["id", "nombre", "region", "zona", "comuna", "direccion", "telefono", "whatsapp", "email", "instagram", "facebook", "web", "segmento", "vendedor", "vendedor_email", "etapa", "proximo_contacto", "latitud", "longitud", "place_id", "notas", "actualizado"], "filas": []};
-const PR_VEND_MAIL = { "Diego": "diego@hwf.cl", "Claudia": "claudia@hwf.cl", "Matías": "matias@hwf.cl", "Angélica": "angelica@hwf.cl", "Victor": "victor@hwf.cl", "Jorge": "jorge@hwf.cl" };
+const PR_VEND_MAIL = { "Diego": "diego@hwf.cl", "Claudia": "claudia@hwf.cl", "Matías": "matias@hwf.cl", "Victor": "victor@hwf.cl", "Jorge": "jorge@hwf.cl" };
 let prVend = "", prReg = "", prFiltro = -1, prQ = "";
 function prTodos() {
   const s = store.get("adm-prosp", null), cola = store.get("adm-prosp-cola", {});
@@ -4630,7 +4630,7 @@ function cartVendedores() {
 function cartCard() {
   const R = cartReglas(), raw = store.get("hwf-carteras", null) || { vend: {}, cli: {} }, V = cartVendedores(), opt = v => `<option>${esc(v)}</option>`;
   const nombres = ((BASE && BASE.clientes) || []).map(c => c[0]).filter(Boolean);
-  const listaV = Object.entries(R.vend).map(([de, a]) => `<li><span><b>${esc(de)}</b> → ${esc(a)}${CART_FIJAS[de] && !(de in (raw.vend || {})) ? " <small>(fija)</small>" : ""}</span>${CART_FIJAS[de] && !(de in (raw.vend || {})) ? "" : `<button type="button" data-cart-del-v="${esc(de)}">Anular</button>`}</li>`).join("");
+  const listaV = Object.entries(R.vend).filter(([de]) => de.indexOf(" ") > 0 && de !== de.toUpperCase()).map(([de, a]) => `<li><span><b>${esc(de)}</b> → ${esc(a)}${CART_FIJAS[de] && !(de in (raw.vend || {})) ? " <small>(fija)</small>" : ""}</span>${CART_FIJAS[de] && !(de in (raw.vend || {})) ? "" : `<button type="button" data-cart-del-v="${esc(de)}">Anular</button>`}</li>`).join("");
   const listaC = Object.entries(R.cli).map(([k, a]) => { const n = nombres.find(x => cartNorm(x) === k) || k; return `<li><span>${esc(tc(n))} → <b>${esc(a)}</b></span><button type="button" data-cart-del-c="${esc(n)}">Anular</button></li>`; }).join("");
   return `<div class="card cart-card" id="cartCard"><h2>Carteras <span class="muted">reasignar clientes entre vendedores</span></h2>
     <div class="cart-f"><label>Cliente<input id="cartCli" list="cartCliL" placeholder="Buscar cliente"><datalist id="cartCliL">${nombres.slice(0, 2000).map(n => `<option value="${esc(n)}"></option>`).join("")}</datalist></label>
@@ -4654,6 +4654,11 @@ pintarVendedores = function () {
   return r;
 };
 setTimeout(() => cartBajar().then(c => { if (c) toast("Hay cambios de cartera: recarga para aplicarlos."); }), 4000);
+</script>
+
+<script>/* sinangelica: cada respuesta del script pasa por las reglas de cartera (cobranza, prospectos, notas…) */
+{ const _f = syCall; syCall = async function (cfg, d) { const r = await _f.apply(this, arguments);
+    try { if (r && r.ok && d && d.accion !== "clienteCambios" && typeof cartAplicar === "function") cartAplicar(r); } catch (e) {} return r; }; }
 </script>
 </body>
 </html>

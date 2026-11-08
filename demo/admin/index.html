@@ -42,7 +42,7 @@ function diasDesde(y, m, d) { return Math.round((hoyCL() - Date.UTC(y, m - 1, d)
 
 
 <script>/* carteras: reasignaciones aplicadas a los datos de Drive antes de que la app los lea */
-window.CART_FIJAS = { "Angélica Carvajal": "Claudia Hamame", "Víctor Moreno": "Genérico" };
+window.CART_FIJAS = { "Angélica Carvajal": "Claudia Hamame", "Víctor Moreno": "Genérico", "Angélica": "Claudia", "ANGELICA CARVAJAL": "CLAUDIA HAMAME" };   /* sinangelica */
 window.cartReglas = function () { var R = null; try { R = JSON.parse(localStorage.getItem("hwf-carteras") || "null"); } catch (e) {}
   R = R || {}; var v = {}, k; for (k in CART_FIJAS) v[k] = CART_FIJAS[k]; for (k in (R.vend || {})) v[k] = R.vend[k]; for (k in v) if (!v[k]) delete v[k];
   return { vend: v, cli: R.cli || {} }; };
@@ -77,7 +77,7 @@ window.cartAplicar = function (d) {
   };
   walk(d); return n;
 };
-(function () { ["hwf-dv-app", "hwf-dv-admin", "hwf-dv-dash"].forEach(function (key) { try { var p = JSON.parse(localStorage.getItem(key) || "null"); if (!p || !p.d) return;
+(function () { ["hwf-dv-app", "hwf-dv-admin", "hwf-dv-dash", "hwf-cxc", "adm-cxc", "hwf-prosp", "adm-prosp", "adm-ventas", "hwf-crm-v1", "adm-cots", "adm-metas"].forEach(function (key) { try { var p = JSON.parse(localStorage.getItem(key) || "null"); if (!p || !p.d) return;
   var s0 = JSON.stringify(p.d); cartAplicar(p.d); if (JSON.stringify(p.d) !== s0) localStorage.setItem(key, JSON.stringify(p)); } catch (e) {} }); })();
 </script>
 <script>/* datos vivos de Drive */window.__DV=(function(){try{var p=JSON.parse(localStorage.getItem("hwf-dv-admin")||"null");return p&&p.v&&p.d&&p.v>"2026-10-29 09:00:00"?p:null}catch(e){return null}})();window.__dvGet=function(n){return window.__DV&&Object.prototype.hasOwnProperty.call(window.__DV.d,n)?window.__DV.d[n]:null};</script>
@@ -4604,7 +4604,7 @@ function cartVendedores() {
 function cartCard() {
   const R = cartReglas(), raw = store.get("hwf-carteras", null) || { vend: {}, cli: {} }, V = cartVendedores(), opt = v => `<option>${esc(v)}</option>`;
   const nombres = ((BASE && BASE.clientes) || []).map(c => c[0]).filter(Boolean);
-  const listaV = Object.entries(R.vend).map(([de, a]) => `<li><span><b>${esc(de)}</b> → ${esc(a)}${CART_FIJAS[de] && !(de in (raw.vend || {})) ? " <small>(fija)</small>" : ""}</span>${CART_FIJAS[de] && !(de in (raw.vend || {})) ? "" : `<button type="button" data-cart-del-v="${esc(de)}">Anular</button>`}</li>`).join("");
+  const listaV = Object.entries(R.vend).filter(([de]) => de.indexOf(" ") > 0 && de !== de.toUpperCase()).map(([de, a]) => `<li><span><b>${esc(de)}</b> → ${esc(a)}${CART_FIJAS[de] && !(de in (raw.vend || {})) ? " <small>(fija)</small>" : ""}</span>${CART_FIJAS[de] && !(de in (raw.vend || {})) ? "" : `<button type="button" data-cart-del-v="${esc(de)}">Anular</button>`}</li>`).join("");
   const listaC = Object.entries(R.cli).map(([k, a]) => { const n = nombres.find(x => cartNorm(x) === k) || k; return `<li><span>${esc(tc(n))} → <b>${esc(a)}</b></span><button type="button" data-cart-del-c="${esc(n)}">Anular</button></li>`; }).join("");
   return `<div class="card cart-card" id="cartCard"><h2>Carteras <span class="muted">reasignar clientes entre vendedores</span></h2>
     <div class="cart-f"><label>Cliente<input id="cartCli" list="cartCliL" placeholder="Buscar cliente"><datalist id="cartCliL">${nombres.slice(0, 2000).map(n => `<option value="${esc(n)}"></option>`).join("")}</datalist></label>
@@ -4628,6 +4628,11 @@ pintarVendedores = function () {
   return r;
 };
 setTimeout(() => cartBajar().then(c => { if (c) toast("Hay cambios de cartera: recarga para aplicarlos."); }), 4000);
+</script>
+
+<script>/* sinangelica: cada respuesta del script pasa por las reglas de cartera (cobranza, prospectos, notas…) */
+{ const _f = syCall; syCall = async function (cfg, d) { const r = await _f.apply(this, arguments);
+    try { if (r && r.ok && d && d.accion !== "clienteCambios" && typeof cartAplicar === "function") cartAplicar(r); } catch (e) {} return r; }; }
 </script>
 </body>
 </html>
