@@ -4240,26 +4240,39 @@ try { if (typeof TAB !== "undefined" && TAB === "res") pintarDashboard(); if (ty
 </script>
 
 <script>
-/* ================= Ranking: respaldo con el script antiguo (canal «v:puntajes») ================= */
+/* ================= Ranking: respaldo con el script antiguo de la planilla =================
+   1) «ranking» (hoja «Puntajes»)  2) chat «v:puntajes» (chatLeer)  3) registro de cambios, código «PUNTAJE» (script v11). */
 const AP_CACHE = "adm-pt-chat";
+const apDesc = r => r && !r.ok && /desconocida/i.test(r.error || "");
 const _syCallAP = syCall;
 syCall = async function (cfg, d) {
+  if (d && d.accion === "clientesCambios") {   /* los puntajes no son cambios de clientes: fuera del informe */
+    const r = await _syCallAP.apply(this, arguments);
+    if (r && Array.isArray(r.cambios)) r.cambios = r.cambios.filter(c => c && c.codigo !== "PUNTAJE");
+    return r;
+  }
   if (!d || d.accion !== "ranking") return _syCallAP.apply(this, arguments);
   const C = store.get(AP_CACHE, { filas: [], ult: "", viejo: 0 });
   if (!C.viejo || Date.now() - C.viejo > 3600e3) {
     const r = await _syCallAP.apply(this, arguments);
-    if (!(r && !r.ok && /desconocida/i.test(r.error || ""))) return r;
+    if (!apDesc(r)) return r;
     C.viejo = Date.now();
   }
   const desde = String(d.desde || ""), d0 = new Date((desde || new Date().toISOString().slice(0, 10)) + "T12:00:00"); d0.setDate(d0.getDate() - 1);
-  const ini = d0.toISOString().slice(0, 10), pedir = C.ult && C.ini && C.ini <= ini ? C.ult : ini;
-  const c = await _syCallAP.call(this, cfg, { accion: "chatLeer", desde: pedir, canales: ["v:puntajes"] });
-  if (!c || !c.ok) return c || { ok: false };
+  const ini = d0.toISOString().slice(0, 10), nIni = C.ini && C.ini <= ini ? C.ini : ini;
   const M = {}; (C.filas || []).forEach(f => { M[f[0] + "|" + f[1]] = f; });
-  (c.mensajes || []).forEach(m => { let o; try { o = JSON.parse(m.texto); } catch (e) { return; } if (!o || !o.pt || !o.f || !o.v) return;
-    const k = o.f + "|" + o.v, a = M[k]; if (!a || (Number(o.pts) || 0) >= (Number(a[2]) || 0)) M[k] = [o.f, o.v, Number(o.pts) || 0, Number(o.max) || 0, Number(o.ok) || 0, Number(o.n) || 0, String(o.det || "")]; });
-  const nIni = C.ini && C.ini <= ini ? C.ini : ini, filas = Object.values(M).filter(f => f[0] >= nIni);
-  store.set(AP_CACHE, { filas, ult: c.ult || pedir, ini: nIni, viejo: C.viejo });
+  const suma = o => { if (!o || !o.pt || !o.f || !o.v) return; const k = o.f + "|" + o.v, a = M[k];
+    if (!a || (Number(o.pts) || 0) >= (Number(a[2]) || 0)) M[k] = [o.f, o.v, Number(o.pts) || 0, Number(o.max) || 0, Number(o.ok) || 0, Number(o.n) || 0, String(o.det || "")]; };
+  let c = C.modo === "cc" ? null : await _syCallAP.call(this, cfg, { accion: "chatLeer", desde: C.ult && C.ini && C.ini <= ini ? C.ult : ini, canales: ["v:puntajes"] });
+  if (c && c.ok) { (c.mensajes || []).forEach(m => { try { suma(JSON.parse(m.texto)); } catch (e) {} }); C.ult = c.ult || C.ult; }
+  else if (C.modo === "cc" || apDesc(c)) {
+    C.modo = "cc";
+    c = await _syCallAP.call(this, cfg, { accion: "clientesCambios", version: C.ccv || "" });
+    if (!c || !c.ok) return c || { ok: false };
+    if (!c.igual) { C.ccv = c.version || ""; (c.cambios || []).filter(x => x && x.codigo === "PUNTAJE").forEach(x => { try { suma(JSON.parse(x.detalle)); } catch (e) {} }); }
+  } else return c || { ok: false };
+  const filas = Object.values(M).filter(f => f[0] >= nIni);
+  store.set(AP_CACHE, Object.assign(C, { filas, ini: nIni }));
   return { ok: true, filas: filas.filter(f => !desde || f[0] >= desde) };
 };
 </script>

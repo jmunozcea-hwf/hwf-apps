@@ -6323,36 +6323,56 @@ if (typeof APP_NOVEDADES !== "undefined" && Array.isArray(APP_NOVEDADES)) APP_NO
 </script>
 
 <script>
-/* ================= Puntaje: respaldo con el script antiguo (canal «v:puntajes») ================= */
-const PTC_CANAL = "v:puntajes", PTC_VIEJO = "hwf-pt-viejo", PTC_T = "hwf-pt-chat-t";
+/* ================= Puntaje: respaldo con el script antiguo de la planilla =================
+   1) «puntaje»/«ranking» (script nuevo, hoja «Puntajes»)  2) chat «v:puntajes» (script con chat)
+   3) registro de cambios de clientes, código «PUNTAJE» (script v11, que solo tiene clienteCambios/clientesCambios). */
+const PTC_CANAL = "v:puntajes", PTC_VIEJO = "hwf-pt-viejo", PTC_T = "hwf-pt-chat-t", PTC_MODO = "hwf-pt-modo", PTC_CC = "hwf-pt-cc";
 const ptcSlug = s => String(s).normalize("NFD").replace(/[^A-Za-z0-9]+/g, "").slice(0, 30) || "x";
 const ptcViejo = () => Date.now() - (lsGet(PTC_VIEJO, 0) || 0) < 60 * 60 * 1000;
+const ptcDesc = r => r && !r.ok && /desconocida/i.test(r.error || "");
+const ptcFila = o => [o.f, o.v, Number(o.pts) || 0, Number(o.max) || 0, Number(o.ok) || 0, Number(o.n) || 0, String(o.det || "")];
 const _syLlamarPtc = syLlamar;
 syLlamar = async function (cfg, d) {
   d = d || {};
+  if (d.accion === "clientesCambios") {   /* los puntajes guardados como «cambios» no son cambios de clientes */
+    const r = await _syLlamarPtc.apply(this, arguments);
+    if (r && Array.isArray(r.cambios)) r.cambios = r.cambios.filter(c => c && c.codigo !== "PUNTAJE");
+    return r;
+  }
   if (d.accion !== "puntaje" && d.accion !== "ranking") return _syLlamarPtc.apply(this, arguments);
   if (!ptcViejo()) {
     const r = await _syLlamarPtc.apply(this, arguments);
-    if (!(r && !r.ok && /desconocida/i.test(r.error || ""))) return r;
+    if (!ptcDesc(r)) return r;
     lsSet(PTC_VIEJO, Date.now());
   }
+  const cc = lsGet(PTC_MODO, "") === "cc";
   if (d.accion === "puntaje") {
-    const p = d.puntaje || {}, T = lsGet(PTC_T, {}), hoy = today();
-    /* no llenar la hoja: un registro cada 20 min como máximo, salvo que se cumpla una misión nueva o sea un día anterior */
-    if (p.fecha === hoy && T.f === hoy && T.v === p.vendedor && Date.now() - (T.t || 0) < 20 * 60 * 1000 && (Number(p.cumplidas) || 0) <= (T.ok || 0)) return { ok: false, espera: true };
-    const texto = JSON.stringify({ pt: 1, f: p.fecha, v: p.vendedor, pts: Number(p.puntos) || 0, max: Number(p.max) || 0, ok: Number(p.cumplidas) || 0, n: Number(p.misiones) || 0, det: String(p.detalle || "").slice(0, 500) });
-    const r = await _syLlamarPtc.call(this, cfg, { accion: "chatEnviar", mensaje: { id: "CH-PT-" + String(p.fecha).replace(/-/g, "") + "-" + ptcSlug(p.vendedor) + "-" + (Number(p.puntos) || 0), canal: PTC_CANAL, de: p.vendedor, texto, app: "pt" } });
-    if (r && r.ok && p.fecha === hoy) lsSet(PTC_T, { f: hoy, v: p.vendedor, t: Date.now(), ok: Number(p.cumplidas) || 0 });
+    const p = d.puntaje || {}, T = lsGet(PTC_T, {}), hoy = today(), espera = (cc ? 60 : 20) * 60 * 1000;
+    /* no llenar la hoja: un registro cada 20 min (60 en el registro de cambios), salvo misión nueva cumplida o día anterior */
+    if (p.fecha === hoy && T.f === hoy && T.v === p.vendedor && Date.now() - (T.t || 0) < espera && (Number(p.cumplidas) || 0) <= (T.ok || 0)) return { ok: false, espera: true };
+    const o = { pt: 1, f: p.fecha, v: p.vendedor, pts: Number(p.puntos) || 0, max: Number(p.max) || 0, ok: Number(p.cumplidas) || 0, n: Number(p.misiones) || 0, det: String(p.detalle || "").slice(0, 500) };
+    const id = String(p.fecha).replace(/-/g, "") + "-" + ptcSlug(p.vendedor) + "-" + o.pts;
+    let r = null;
+    if (!cc) { r = await _syLlamarPtc.call(this, cfg, { accion: "chatEnviar", mensaje: { id: "CH-PT-" + id, canal: PTC_CANAL, de: p.vendedor, texto: JSON.stringify(o), app: "pt" } }); if (ptcDesc(r)) { lsSet(PTC_MODO, "cc"); r = null; } }
+    if (!r) r = await _syLlamarPtc.call(this, cfg, { accion: "clienteCambios", cambios: [{ id: "CC-PT-" + id, fecha: new Date().toISOString(), vendedor: p.vendedor, cartera: (SES && SES.vendedor.cartera) || "",
+      codigo: "PUNTAJE", cliente: "Puntaje misiones del día (no es un cliente)", tipo: "Datos", motivo: "Puntaje " + o.pts + " pts", detalle: JSON.stringify(o), cambios: [] }] });
+    if (r && r.ok && p.fecha === hoy) lsSet(PTC_T, { f: hoy, v: p.vendedor, t: Date.now(), ok: o.ok });
     return r && r.ok ? { ok: true } : (r || { ok: false });
   }
-  /* ranking: lee el canal y deja el mejor puntaje por vendedor y día; se suma a lo ya bajado */
+  /* ranking: el mejor puntaje por vendedor y día; se suma a lo ya bajado */
   const desde = String(d.desde || today()), d0 = new Date(desde + "T12:00:00"); d0.setDate(d0.getDate() - 1);
-  const r = await _syLlamarPtc.call(this, cfg, { accion: "chatLeer", desde: isoD(d0), canales: [PTC_CANAL] });
-  if (!r || !r.ok) return r || { ok: false };
-  const M = {};
-  ((lsGet(PT_RK, null) || {}).filas || []).forEach(f => { M[f[0] + "|" + f[1]] = f; });
-  (r.mensajes || []).forEach(m => { let o; try { o = JSON.parse(m.texto); } catch (e) { return; } if (!o || !o.pt || !o.f || !o.v || o.f < desde) return;
-    const k = o.f + "|" + o.v, ant = M[k]; if (!ant || (Number(o.pts) || 0) >= (Number(ant[2]) || 0)) M[k] = [o.f, o.v, Number(o.pts) || 0, Number(o.max) || 0, Number(o.ok) || 0, Number(o.n) || 0, String(o.det || "")]; });
+  const M = {}; ((lsGet(PT_RK, null) || {}).filas || []).forEach(f => { M[f[0] + "|" + f[1]] = f; });
+  const suma = o => { if (!o || !o.pt || !o.f || !o.v || o.f < desde) return; const k = o.f + "|" + o.v, a = M[k]; if (!a || (Number(o.pts) || 0) >= (Number(a[2]) || 0)) M[k] = ptcFila(o); };
+  let r = cc ? null : await _syLlamarPtc.call(this, cfg, { accion: "chatLeer", desde: isoD(d0), canales: [PTC_CANAL] });
+  if (r && r.ok) (r.mensajes || []).forEach(m => { try { suma(JSON.parse(m.texto)); } catch (e) {} });
+  else if (cc || ptcDesc(r)) {
+    if (!cc) lsSet(PTC_MODO, "cc");
+    const C = lsGet(PTC_CC, { v: "", l: [] });
+    r = await _syLlamarPtc.call(this, cfg, { accion: "clientesCambios", version: C.v || "" });
+    if (!r || !r.ok) return r || { ok: false };
+    if (!r.igual) { C.v = r.version || ""; C.l = (r.cambios || []).filter(c => c && c.codigo === "PUNTAJE").map(c => c.detalle).slice(-1500); lsSet(PTC_CC, C); }
+    C.l.forEach(t => { try { suma(JSON.parse(t)); } catch (e) {} });
+  } else return r || { ok: false };
   return { ok: true, filas: Object.values(M).filter(f => f[0] >= desde) };
 };
 </script>
