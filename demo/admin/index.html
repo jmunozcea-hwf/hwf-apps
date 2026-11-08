@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="es">
-<head>
+<head><!-- patch_claves -->
 <link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0B3146"><link rel="apple-touch-icon" href="icon-192.png"><link rel="icon" href="icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Admin DEMO"><script>/* espacio de almacenamiento: liberar respaldos re-descargables antes de perder datos nuevos */
 (function () {
   var S = Storage.prototype, set = S.setItem, rem = S.removeItem;
@@ -4733,6 +4733,34 @@ document.head.insertAdjacentHTML("beforeend", `<style>
       const imp = ["adm-ventas", "adm-metas", "adm-cots", "adm-imp"].some(k => { try { return localStorage.getItem(k) != null; } catch (e) { return false; } });
       const rb = $("btnReset"); if (rb && !imp) { const t = rb.closest(".tools"); if (t) t.hidden = true; }
       else if (rb) rb.textContent = "Borrar datos importados a mano (usar solo los de Drive)";
+    } catch (e) { console.error(e); }
+    return r;
+  }; }
+</script>
+
+<script>/* patch_claves: conexión con un solo campo (link o código HWF1); URL y clave a la vista solo si se piden */
+function ckDec(t) { t = String(t || "").replace(/\s+/g, ""); try { t = decodeURIComponent(t); } catch (e) {}
+  const m = t.match(/HWF1:([A-Za-z0-9+\/=_-]+)/); if (!m) return null;
+  try { const o = JSON.parse(decodeURIComponent(escape(atob(m[1].replace(/-/g, "+").replace(/_/g, "/"))))); return o.u && o.c ? { url: o.u, clave: o.c } : null; } catch (e) { return null; } }
+{ const _pdCk = pintarDatos;
+  pintarDatos = function () {
+    const r = _pdCk.apply(this, arguments);
+    try {
+      const u = $("syUrl"), card = u && u.closest(".card"); if (!card) return r;
+      const cfg = SYC(), h2 = card.querySelector("h2"), p = card.querySelector("p.muted"), f = u.closest(".sy-f");
+      if (h2) h2.innerHTML = `Conexión con el script de Google ${cfg && cfg.url ? '<span class="muted" style="color:#1C7A4E">✅ conectada</span>' : '<span class="muted">sin conectar</span>'}`;
+      if (p) p.textContent = cfg && cfg.url ? "Con esto llegan solos los datos de Drive, las notas de los vendedores y la cobranza." : "Pega el link de conexión o el código HWF1 (te llega por correo al ejecutar enviarLinksConexion en el script de Google). También puedes escribir la URL y la clave a mano.";
+      const pg = document.createElement("div"); pg.className = "sy-f";
+      pg.innerHTML = `<label for="ckPega">${cfg && cfg.url ? "Cambiar de conexión: pega otro link o código" : "Link o código de conexión"}</label><textarea id="ckPega" rows="2" placeholder="https://…/#c=HWF1:…  o  HWF1:…" autocomplete="off" autocapitalize="off" spellcheck="false" style="width:100%;box-sizing:border-box"></textarea>`;
+      if (f) {
+        f.parentNode.insertBefore(pg, f);
+        if (cfg && cfg.url) { const d = document.createElement("details"); d.innerHTML = '<summary style="cursor:pointer;font-weight:600;margin:6px 0">Ver URL y clave</summary>'; f.parentNode.insertBefore(d, f); d.appendChild(f);
+          const g = $("syGuardar"); if (g) g.textContent = "Probar conexión"; }
+      }
+      $("ckPega").addEventListener("input", e => { const c = ckDec(e.target.value); if (!c) return;
+        $("syUrl").value = c.url; $("syClave").value = c.clave; e.target.value = ""; toast("Código leído. Probando la conexión…"); $("syGuardar").click(); });
+      const lab = card.querySelector('label[for="syCodigo"]');
+      if (lab) lab.textContent = "Código para los vendedores (si no usan el link de arriba): lo pegan en la pantalla de conexión de Nota de Pedido.";
     } catch (e) { console.error(e); }
     return r;
   }; }
