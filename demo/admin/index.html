@@ -42,7 +42,7 @@ function diasDesde(y, m, d) { return Math.round((hoyCL() - Date.UTC(y, m - 1, d)
 
 
 <script>/* carteras: reasignaciones aplicadas a los datos de Drive antes de que la app los lea */
-window.CART_FIJAS = { "Angélica Carvajal": "Claudia Hamame", "Víctor Moreno": "Genérico", "Angélica": "Claudia", "ANGELICA CARVAJAL": "CLAUDIA HAMAME" };   /* sinangelica */
+window.CART_FIJAS = { "Angélica Carvajal": "Claudia Hamame", "Víctor Moreno": "Genérico", "Angélica": "Claudia", "ANGELICA CARVAJAL": "CLAUDIA HAMAME", "ANGELICA CARVAJAL CAMPOS": "CLAUDIA HAMAME VELARDE" };   /* sinangelica */
 window.cartReglas = function () { var R = null; try { R = JSON.parse(localStorage.getItem("hwf-carteras") || "null"); } catch (e) {}
   R = R || {}; var v = {}, k; for (k in CART_FIJAS) v[k] = CART_FIJAS[k]; for (k in (R.vend || {})) v[k] = R.vend[k]; for (k in v) if (!v[k]) delete v[k];
   return { vend: v, cli: R.cli || {} }; };
