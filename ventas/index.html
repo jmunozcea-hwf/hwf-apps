@@ -6801,6 +6801,8 @@ const RK_FUERA = /^(ang[eé]lica|v[ií]ctor|jorge)\b/i;
 <script>/* avance2: el avance de ventas al comienzo del Panel */
 { const _pdAv2 = pintarDash;
   pintarDash = function () {
+    /* sacar el avance antes de redibujar el Panel: si no, se borra con él y luego setModo falla (auditoría 08-11-2026) */
+    try { const d0 = $("crmDash"), a0 = $("crmAvance"); if (d0 && a0 && d0.contains(a0)) d0.parentNode.insertBefore(a0, d0); } catch (e) {}
     const r = _pdAv2.apply(this, arguments);
     try { const dash = $("crmDash"), av = $("crmAvance"); if (!dash || !av || dash.hidden) return r;
       dash.prepend(av); av.hidden = false; av.classList.add("av2"); pintarAvance();
