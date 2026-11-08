@@ -6884,5 +6884,21 @@ function bajasNombres() { try { return new Set((Object.values(ccEstados()).filte
         B.forEach(n => { const re = new RegExp("^\\s*" + n.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\s*$"); re.__baja = 1; PLAN.excluir.push(re); }); marca = k; } } catch (e) {}
     return _pcBF.apply(this, arguments); }; }
 </script>
+
+<script>/* misionhabil: misiones y puntos solo en días hábiles (feriados de Chile) */
+["2027-01-01","2027-03-26","2027-03-27","2027-05-01","2027-05-21","2027-06-21","2027-06-28","2027-07-16","2027-08-15","2027-09-18","2027-09-19","2027-10-11","2027-10-31","2027-11-01","2027-12-08","2027-12-25"].forEach(f => FER.add(f));   /* feriados de Chile 2027 */
+const diaHabil = f => { const d = f instanceof Date ? f : new Date(String(f).slice(0, 10) + "T12:00:00"); const w = d.getDay(), k = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; return w > 0 && w < 6 && !FER.has(k); };
+
+const proxHabil = () => { const d = new Date(); do { d.setDate(d.getDate() + 1); } while (!diaHabil(d)); return d.toLocaleDateString("es-CL", { weekday: "long", day: "numeric", month: "long" }); };
+{ const _misMH = misiones; misiones = function () { return diaHabil(new Date()) ? _misMH.apply(this, arguments) : []; }; }
+{ const _pgMH = ptGuardarHoy; ptGuardarHoy = function () { return diaHabil(new Date()) ? _pgMH.apply(this, arguments) : null; }; }
+{ const _pfMH = ptFilas; ptFilas = function () { return _pfMH.apply(this, arguments).filter(r => diaHabil(r.f)); }; }
+{ const _piMH = pintarInicio; pintarInicio = function () {
+    const r = _piMH.apply(this, arguments);
+    try { if (!diaHabil(new Date())) { const hs = [...document.querySelectorAll("#crmInicio .in-sec h3")].find(x => /^Misiones del día/.test(x.textContent));
+        if (hs) { const sec = hs.parentElement, fer = FER.has(isoD(new Date()));
+          sec.innerHTML = `<h3>Misiones del día <small>${fer ? "feriado" : "fin de semana"}</small></h3><p class="in-vacio">Hoy no hay misiones ni puntos: ${fer ? "es feriado" : "no es día hábil"}. Vuelven el ${esc(proxHabil())}.</p>`; } } } catch (e) {}
+    return r; }; }
+</script>
 </body>
 </html>

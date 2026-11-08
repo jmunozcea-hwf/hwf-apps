@@ -4849,5 +4849,12 @@ function bajasNombres() { try { return new Set((ccBajasVigentes().map(b => b.cli
         Object.keys(A).forEach(k => { if (Array.isArray(A[k])) A[k].forEach(x => { if (x && Array.isArray(x.sinCompra)) x.sinCompra = x.sinCompra.filter(c => !es(c)); }); }); } } catch (e) { console.error(e); }
     return r; }; }
 </script>
+
+<script>/* misionhabil: el ranking cuenta solo días hábiles (feriados de Chile) */
+["2027-01-01","2027-03-26","2027-03-27","2027-05-01","2027-05-21","2027-06-21","2027-06-28","2027-07-16","2027-08-15","2027-09-18","2027-09-19","2027-10-11","2027-10-31","2027-11-01","2027-12-08","2027-12-25"].forEach(f => FER.add(f));   /* feriados de Chile 2027 */
+const diaHabil = f => { const d = f instanceof Date ? f : new Date(String(f).slice(0, 10) + "T12:00:00"); const w = d.getDay(), k = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; return w > 0 && w < 6 && !FER.has(k); };
+
+{ const _rkMH = rkFilas; rkFilas = function () { return _rkMH.apply(this, arguments).filter(r => diaHabil(r.f)); }; }
+</script>
 </body>
 </html>
