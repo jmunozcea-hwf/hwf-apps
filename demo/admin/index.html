@@ -4640,7 +4640,7 @@ setTimeout(() => cartBajar().then(c => { if (c) toast("Hay cambios de cartera: r
 </script>
 
 <script>/* sinangelica: fuera del ranking los vendedores eliminados */
-const RK_FUERA = /^(ang[eé]lica|v[ií]ctor|jorge)\b/i;
+const RK_FUERA = /^(ang[eé]lica|v[ií]ctor|jorge)\b|\(tienda\)\s*$/i;   /* fuera: vendedores eliminados y los de la Tienda Hellywoof (tienen su propio ranking) */
 { const _rkFilasSA = rkFilas; rkFilas = function () { return _rkFilasSA.apply(this, arguments).filter(r => !RK_FUERA.test(String((r && (r.v || r[1])) || ""))); }; }
 </script>
 

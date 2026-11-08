@@ -6796,7 +6796,7 @@ try { if (SES && SES.vendedor && SES.vendedor.nombre === "Jorge") { SES.vendedor
 </script>
 
 <script>/* sinangelica: fuera del ranking los vendedores eliminados */
-const RK_FUERA = /^(ang[eé]lica|v[ií]ctor|jorge)\b/i;
+const RK_FUERA = /^(ang[eé]lica|v[ií]ctor|jorge)\b|\(tienda\)\s*$/i;   /* fuera: vendedores eliminados y los de la Tienda Hellywoof (tienen su propio ranking) */
 { const _ptFilasSA = ptFilas; ptFilas = function () { return _ptFilasSA.apply(this, arguments).filter(r => !RK_FUERA.test(String(r.v || ""))); }; }
 </script>
 
