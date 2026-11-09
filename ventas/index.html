@@ -7009,5 +7009,17 @@ ptPintarRanking = function () {
     <small>${["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"][m - 1]} · objetivos del mes${mio >= 0 ? " · vas " + (mio + 1) + "° con " + R.L[mio].score.toFixed(0) + " puntos" : ""}</small></div></div>${rkdHtml(R, yo)}</section>`);
 };
 </script>
+
+<script>/* patch_iconos: íconos emoji como en la app de la tienda */
+(function () {
+  const ICO = { inicio: "🏠", dash: "📊", avance: "📈", pedido: "📝", clientes: "👥", agenda: "📅", ruta: "🗺️", cobranza: "💵", embudo: "🎯", nut: "🐶" };
+  const aplicar = () => { try { ((typeof NAV_ORDEN !== "undefined" ? NAV_ORDEN : []).map(([m, id]) => [document.getElementById(id), m])).forEach(([b, k]) => { if (!b || !ICO[k]) return; const s = b.querySelector("svg"), e = b.querySelector(".emo");
+      if (e) return; const sp = document.createElement("span"); sp.className = "emo"; sp.setAttribute("aria-hidden", "true"); sp.textContent = ICO[k];
+      if (s) s.replaceWith(sp); else b.insertBefore(sp, b.firstChild); }); } catch (e) {} };
+  document.head.insertAdjacentHTML("beforeend", "<style>.emo{font-size:1.3rem;line-height:1.1;display:block;margin:0 auto 2px;font-family:'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif}#masSeg .emo{font-size:1.45rem}</style>");
+  aplicar(); setTimeout(aplicar, 600); setTimeout(aplicar, 2000);
+  let pend = false; new MutationObserver(() => { if (pend) return; pend = true; requestAnimationFrame(() => { pend = false; aplicar(); }); }).observe(document.body, { childList: true, subtree: true });
+})();
+</script>
 </body>
 </html>

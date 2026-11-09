@@ -4927,5 +4927,17 @@ pintarRanking = function () {
   mb.querySelectorAll("[data-rkd]").forEach(b => b.onclick = () => { rkdMes = Number(b.dataset.rkd); pintarRanking(); });
 };
 </script>
+
+<script>/* patch_iconos: íconos emoji como en la app de la tienda */
+(function () {
+  const ICO = { res: "📊", ven: "🧑‍💼", cli: "🏪", pro: "🛍️", inv: "📦", mas: "🧰", plan: "📈", ranking: "🏆", zonas: "🗺️", terreno: "🚶", cots: "📄", napp: "📲", bonif: "🎁", cobranza: "💵", embudo: "🎯", cambios: "🔄", datos: "🗄️", adm: "🔑" };
+  const aplicar = () => { try { ([...document.querySelectorAll("nav.bottom [data-t]")].map(b => [b, b.dataset.t]).concat([...document.querySelectorAll("#masSeg [data-m]")].map(b => [b, b.dataset.m]))).forEach(([b, k]) => { if (!b || !ICO[k]) return; const s = b.querySelector("svg"), e = b.querySelector(".emo");
+      if (e) return; const sp = document.createElement("span"); sp.className = "emo"; sp.setAttribute("aria-hidden", "true"); sp.textContent = ICO[k];
+      if (s) s.replaceWith(sp); else b.insertBefore(sp, b.firstChild); }); } catch (e) {} };
+  document.head.insertAdjacentHTML("beforeend", "<style>.emo{font-size:1.3rem;line-height:1.1;display:block;margin:0 auto 2px;font-family:'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif}#masSeg .emo{font-size:1.45rem}</style>");
+  aplicar(); setTimeout(aplicar, 600); setTimeout(aplicar, 2000);
+  let pend = false; new MutationObserver(() => { if (pend) return; pend = true; requestAnimationFrame(() => { pend = false; aplicar(); }); }).observe(document.body, { childList: true, subtree: true });
+})();
+</script>
 </body>
 </html>
