@@ -3696,8 +3696,8 @@ const APP_VERSION = "5.5";
 const APP_NOVEDADES = [
   "Navegación más simple: flechas ‹ › para pasar de apartado, desliza el dedo para cambiar y el botón atrás vuelve donde estabas.",
   "Nuevo apartado Nutrición: compara el alimento de la competencia con los nuestros, con 3 razones y la ración diaria equivalente para cada perro o gato. Incluye las fichas técnicas de toda la línea HWF.",
-  "Embudo: crea prospectos nuevos y vincula un prospecto con su cliente de la cartera (la app los reconoce como el mismo). En Ruta, agrega prospectos a la ruta del día.",
-  "Nueva pestaña Embudo: tus prospectos de Maule y O'Higgins por etapa, con próximo contacto, WhatsApp y nota de pedido directa.",
+  "Prospectos: crea prospectos nuevos y vincula un prospecto con su cliente de la cartera (la app los reconoce como el mismo). En Ruta, agrega prospectos a la ruta del día.",
+  "Nueva pestaña Prospectos: tus prospectos de Maule y O'Higgins por etapa, con próximo contacto, WhatsApp y nota de pedido directa.",
   "Margen de la nota al lado del total. Lo gratis del proveedor no baja el margen; lo gratis propio sí.",
   "Cliente moroso: al hacer una nota se muestran las facturas vencidas del cliente y la nota llega marcada a HWF Admin.",
   "Nueva pestaña Cobranza: lo que tus clientes deben, vencido y por vencer, con recordatorio por WhatsApp. Se actualiza cada día.",
@@ -4151,7 +4151,7 @@ async function prEnviar() {
       const c2 = lsGet(PRCOLA, {}); if (JSON.stringify(c2[id]) === JSON.stringify(cola[id])) delete c2[id]; lsSet(PRCOLA, c2);
       if (r.prospecto) { const s = lsGet(PRKEY, null) || { version: "", lista: prDeBase(PR_BASE) };
         const k = s.lista.findIndex(x => x.id === r.prospecto.id); if (k >= 0) s.lista[k] = r.prospecto; else s.lista.push(r.prospecto); lsSet(PRKEY, s);
-        if (r.duplicado) toast(`«${r.prospecto.nombre}» ya estaba en el embudo; se usó el existente.`); }
+        if (r.duplicado) toast(`«${r.prospecto.nombre}» ya estaba en Prospectos; se usó el existente.`); }
     }
   } finally { prOcup = false; }
 }
@@ -4163,7 +4163,7 @@ function prGuardar(id, cambio) {
 }
 /* pestaña */
 const bE = document.createElement("button");
-bE.type = "button"; bE.setAttribute("role", "tab"); bE.id = "mEmbudo"; bE.setAttribute("aria-selected", "false"); bE.textContent = "Embudo";
+bE.type = "button"; bE.setAttribute("role", "tab"); bE.id = "mEmbudo"; bE.setAttribute("aria-selected", "false"); bE.textContent = "Prospectos";
 $("mCobranza").after(bE);
 const dE = document.createElement("div"); dE.id = "crmEmbudo"; dE.hidden = true; $("crmCobranza").after(dE);
 const _setModoPr = setModo;
@@ -4190,9 +4190,9 @@ function pintarEmbudo() {
   const vencen = base.filter(o => o.proximo_contacto && o.proximo_contacto <= hoy && o.etapa !== "Descartado").length;
   const avanz = base.filter(o => prIdx(o.etapa) >= 3 && o.etapa !== "Descartado").length, pend = Object.keys(lsGet(PRCOLA, {})).length, s = lsGet(PRKEY, null);
   box.innerHTML = `
-    <div class="pr-hero"><h2>${verTodos && !prVend ? "Embudo de todos los vendedores" : "Mi embudo de ventas"}${prVend ? " · " + esc(prVend) : ""} <small style="font-weight:600;opacity:.85">${base.length} prospectos · ${avanz} con nota de pedido o más</small></h2>
+    <div class="pr-hero"><h2>${verTodos && !prVend ? "Prospectos de todos los vendedores" : "Mis prospectos"}${prVend ? " · " + esc(prVend) : ""} <small style="font-weight:600;opacity:.85">${base.length} prospectos · ${avanz} con nota de pedido o más</small></h2>
       <div class="pr-fun">${PR_ETAPAS.map((e, i) => `<button type="button" data-et="${i}" aria-pressed="${prFiltro === i}"><span>${esc(PR_CORTO[i])}</span><i style="width:${Math.round(cnt[i] / max * 100)}%;${i === 7 ? "opacity:.5" : ""}"></i><b>${cnt[i]}</b></button>`).join("")}</div></div>
-    <div class="pr-info"><span>${s && s.bajado ? "Sincronizado con HWF Admin" : "Prospectos del embudo Maule y O'Higgins"}${pend ? ` · <span class="pr-pend">${pend} ${pend === 1 ? "cambio" : "cambios"} por enviar</span>` : ""}</span><span class="pr-bt"><button class="btn primary" type="button" id="prNuevo">＋ Crear prospecto</button><button class="btn" type="button" id="prAct">Actualizar</button></span></div>
+    <div class="pr-info"><span>${s && s.bajado ? "Sincronizado con HWF Admin" : "Prospectos de Maule y O'Higgins"}${pend ? ` · <span class="pr-pend">${pend} ${pend === 1 ? "cambio" : "cambios"} por enviar</span>` : ""}</span><span class="pr-bt"><button class="btn primary" type="button" id="prNuevo">＋ Crear prospecto</button><button class="btn" type="button" id="prAct">Actualizar</button></span></div>
     ${verTodos && vends.length > 1 ? `<div class="pr-chips" id="prVends"><button type="button" data-v="" aria-pressed="${!prVend}">Todos</button>${vends.map(v => `<button type="button" data-v="${esc(v)}" aria-pressed="${prVend === v}">${esc(v)}</button>`).join("")}</div>` : ""}
     <div class="pr-chips" id="prFil"><button type="button" data-f="-1" aria-pressed="${prFiltro === -1}">Activos</button><button type="button" data-f="-2" aria-pressed="${prFiltro === -2}">Contactar hoy (${vencen})</button>${prFiltro >= 0 ? `<button type="button" data-f="${prFiltro}" aria-pressed="true">${esc(PR_CORTO[prFiltro])} ✕</button>` : ""}</div>
     <div class="search"><input id="prQ" type="search" placeholder="Buscar prospecto, comuna o rubro" aria-label="Buscar prospecto" value="${esc(prQ)}"></div>
@@ -4212,9 +4212,9 @@ function pintarEmbudo() {
           ${prWeb(o) ? `<button class="btn" type="button" data-pr-web="${esc(o.id)}">Web</button>` : `<button class="btn" type="button" data-pr-bweb="${esc(o.id)}">Buscar web</button>`}
           ${prIG(o) ? `<button class="btn" type="button" data-pr-ig="${esc(o.id)}">Instagram</button>` : `<button class="btn" type="button" data-pr-big="${esc(o.id)}">Buscar Instagram</button>`}
           ${i < 3 || i === 7 || prCliDe(o) ? `<button class="btn" type="button" data-pr-np="${esc(o.id)}">Hacer nota de pedido</button>` : ""}
-        </div></div>`; }).join("") || `<p class="hint">${todos.length ? "No hay prospectos con ese filtro." : "No tienes prospectos asignados en el embudo."}</p>`}`;
+        </div></div>`; }).join("") || `<p class="hint">${todos.length ? "No hay prospectos con ese filtro." : "No tienes prospectos asignados."}</p>`}`;
   const by = id => prTodos().find(o => o.id === id);
-  $("prAct").onclick = async () => { $("prAct").disabled = true; $("prAct").textContent = "Actualizando…"; await prSync(); toast("Embudo actualizado."); };
+  $("prAct").onclick = async () => { $("prAct").disabled = true; $("prAct").textContent = "Actualizando…"; await prSync(); toast("Prospectos actualizados."); };
   box.querySelectorAll("[data-et]").forEach(b => b.onclick = () => { const i = +b.dataset.et; prFiltro = prFiltro === i ? -1 : i; pintarEmbudo(); });
   $("prFil").onclick = e => { const b = e.target.closest("[data-f]"); if (!b) return; const f = +b.dataset.f; prFiltro = f >= 0 ? -1 : f; pintarEmbudo(); };
   if ($("prVends")) $("prVends").onclick = e => { const b = e.target.closest("[data-v]"); if (b) { prVend = b.dataset.v; pintarEmbudo(); } };
@@ -4239,7 +4239,7 @@ function prEditar(o) {
   $("mEnvT").textContent = o.nombre;
   const sug = (() => { const d = new Date(); d.setDate(d.getDate() + 7); const z = n => String(n).padStart(2, "0"); return `${d.getFullYear()}-${z(d.getMonth() + 1)}-${z(d.getDate())}`; })();
   abrirModal(`<div class="pr-form">
-      <div class="f"><label for="prEt">Etapa del embudo</label><select id="prEt">${PR_ETAPAS.map(e => `<option ${e === o.etapa ? "selected" : ""}>${esc(e)}</option>`).join("")}</select></div>
+      <div class="f"><label for="prEt">Etapa</label><select id="prEt">${PR_ETAPAS.map(e => `<option ${e === o.etapa ? "selected" : ""}>${esc(e)}</option>`).join("")}</select></div>
       <div class="f"><label for="prPx">Próximo contacto</label><input id="prPx" type="date" value="${esc(o.proximo_contacto || "")}"><small class="hint">Sugerido: en una semana (${prFecha(sug)}).</small></div>
       <div class="f"><label for="prNt">Notas</label><textarea id="prNt" placeholder="Qué conversaron, proveedor actual, marcas que vende, volumen…">${esc(o.notas || "")}</textarea></div>
     </div>`,
@@ -4271,7 +4271,7 @@ misiones = function () {
   const nuevos = mios.filter(o => prIdx(o.etapa) === 0 && !o.proximo_contacto).slice(0, 3);
   const lista = agenda.length ? agenda : nuevos, h = lista.filter(o => o._pend || (o.cambio_por && o.actualizado === hoy)).length;
   if (lista.length) M.push({ t: agenda.length ? `Contacta ${agenda.length === 1 ? "1 prospecto agendado" : `${agenda.length} prospectos agendados`}` : `Contacta ${lista.length} prospectos nuevos`,
-    d: lista.slice(0, 3).map(o => `${o.nombre} (${o.comuna})`).join(" · "), h, n: lista.length, txt: `${h}/${lista.length}`, b: "Ver embudo", f: () => { prFiltro = agenda.length ? -2 : 0; setModo("embudo"); } });
+    d: lista.slice(0, 3).map(o => `${o.nombre} (${o.comuna})`).join(" · "), h, n: lista.length, txt: `${h}/${lista.length}`, b: "Ver prospectos", f: () => { prFiltro = agenda.length ? -2 : 0; setModo("embudo"); } });
   return M;
 };
 /* sincronizar junto con los estados de las notas */
@@ -4349,9 +4349,9 @@ function prConfirmarVinculo(o, c) {
   const et = prIdx(sugEt) > prIdx(o.etapa) || o.etapa === "Descartado" ? sugEt : o.etapa;
   $("mEnvT").textContent = "Vincular con cliente";
   abrirModal(`<div class="pr-form">
-      <p style="margin:0"><b>${esc(o.nombre)}</b> (embudo) es el cliente <b>${esc(tc(c.nombre))}</b>${c.comuna ? " de " + esc(tc(c.comuna)) : ""}.</p>
+      <p style="margin:0"><b>${esc(o.nombre)}</b> (prospecto) es el cliente <b>${esc(tc(c.nombre))}</b>${c.comuna ? " de " + esc(tc(c.comuna)) : ""}.</p>
       ${otro ? `<p class="pr-pend" style="margin:0">Ojo: «${esc(otro.nombre)}» ya está vinculado a este cliente. Si es el mismo local, descarta uno de los dos.</p>` : ""}
-      <div class="f"><label for="prVe">Etapa del embudo</label><select id="prVe">${PR_ETAPAS.map(e => `<option ${e === et ? "selected" : ""}>${esc(e)}</option>`).join("")}</select>
+      <div class="f"><label for="prVe">Etapa</label><select id="prVe">${PR_ETAPAS.map(e => `<option ${e === et ? "selected" : ""}>${esc(e)}</option>`).join("")}</select>
         ${compra ? `<small class="hint">Ya compró este año (${fmt(Number(c.compra_2026))}${c.ultima_compra ? ", última compra " + esc(fd2(c.ultima_compra)) : ""}).</small>` : ""}</div>
       <p class="hint" style="margin:0">Las notas de pedido de este cliente moverán la etapa solas, y el buscador de clientes lo encontrará también como «${esc(o.nombre)}».</p></div>`,
     [["Cancelar", "", cerrarModal], ["Vincular", "primary", () => {
@@ -4400,7 +4400,7 @@ function prCrear() {
       if (nombre.length < 3) return err("Escribe el nombre del local.");
       if (!comuna) return err("Escribe la comuna.");
       const dup = prTodos().find(x => prN(x.nombre) === prN(nombre) && prN(x.comuna) === prN(comuna));
-      if (dup) return err(`«${dup.nombre}» de ${dup.comuna} ya está en el embudo${dup.vendedor ? " (" + dup.vendedor + ")" : ""}.`);
+      if (dup) return err(`«${dup.nombre}» de ${dup.comuna} ya está en Prospectos${dup.vendedor ? " (" + dup.vendedor + ")" : ""}.`);
       const tel = prNum($("pnT").value), yo = SES.vendedor.nombre, primero = String(yo).split(" ")[0];
       const ref = prTodos().find(x => prN(x.comuna) === prN(comuna) && x.region);
       const o = { nuevo: true, nombre, comuna: ref ? ref.comuna : comuna, direccion: $("pnD").value.trim(), telefono: tel, whatsapp: /^569\d{8}$/.test(tel) ? tel : "",
@@ -4414,11 +4414,11 @@ function prCrear() {
       }
       const id = "PR-" + Date.now().toString(36).toUpperCase() + Math.floor(Math.random() * 36).toString(36).toUpperCase();
       prFiltro = -1; prQ = ""; if (prVend && prVend !== primero) prVend = "";
-      prGuardar(id, o); cerrarModal(); toast(`${nombre} quedó en tu embudo.`);
+      prGuardar(id, o); cerrarModal(); toast(`${nombre} quedó en tus prospectos.`);
     }]]);
   const pinta = () => {
     const d = prDuplicados($("pnN").value, $("pnC").value, $("pnD").value);
-    $("pnDup").innerHTML = d.pr.map(x => `<div><span>Ya está en el embudo: <b>${esc(x.nombre)}</b> · ${esc(x.comuna)}${x.vendedor ? " · " + esc(x.vendedor) : ""}</span><button type="button" data-dp="${esc(x.id)}">Ver</button></div>`).join("")
+    $("pnDup").innerHTML = d.pr.map(x => `<div><span>Ya está en Prospectos: <b>${esc(x.nombre)}</b> · ${esc(x.comuna)}${x.vendedor ? " · " + esc(x.vendedor) : ""}</span><button type="button" data-dp="${esc(x.id)}">Ver</button></div>`).join("")
       + d.cli.map(c => `<div><span>¿Es tu cliente <b>${esc(tc(c.nombre))}</b> (${esc(tc(c.comuna))})?</span><button type="button" data-dc="${esc(c.codigo)}">Abrir ficha</button></div>`).join("");
   };
   ["pnN", "pnC", "pnD"].forEach(id => $(id).oninput = () => { clearTimeout(pinta.t); pinta.t = setTimeout(pinta, 200); });
@@ -4483,7 +4483,7 @@ pintarFicha = function (cod) {
   _pintarFichaPr(cod);
   const l = prDeCliente(cod); if (!l.length || !$("crmFicha")) return;
   const d = document.createElement("div"); d.className = "pr-cli"; d.style.margin = "0 0 10px";
-  d.innerHTML = `En el embudo como <b>${l.map(o => esc(o.nombre)).join(", ")}</b> · ${esc(PR_CORTO[prIdx(l[0].etapa)])}`;
+  d.innerHTML = `En Prospectos como <b>${l.map(o => esc(o.nombre)).join(", ")}</b> · ${esc(PR_CORTO[prIdx(l[0].etapa)])}`;
   $("crmFicha").prepend(d);
 };
 
@@ -5040,7 +5040,7 @@ function pintarDash() {
       <div class="db-c"><h3>Venta por categoría <small>${MN}</small></h3>${cTop.length ? dbDona(cTop) : '<p class="db-vacio">Sin ventas este mes.</p>'}</div>
       ${X.cob.length ? `<div class="db-c"><h3>Cobranza por antigüedad <button type="button" class="lk" data-ir="cob">Cobranza ›</button></h3><b>${dbMM(cobTot)}</b> <span class="db-act">por cobrar</span>${cobH}</div>` : ""}
       <div class="db-c"><h3>Stock crítico <small>${yo ? "de lo que vendes" : "productos con venta"}</small></h3><div class="db-l">${stH || '<p class="db-vacio">Ningún producto con venta está por agotarse.</p>'}</div></div>
-      ${X.pr.length ? `<div class="db-c"><h3>Embudo de prospectos <button type="button" class="lk" data-ir="emb">Embudo ›</button></h3><div class="db-vr">${prH}</div></div>` : ""}
+      ${X.pr.length ? `<div class="db-c"><h3>Prospectos <button type="button" class="lk" data-ir="emb">Prospectos ›</button></h3><div class="db-vr">${prH}</div></div>` : ""}
     </div>
     ${act ? `<div class="db-act">🔄 Datos de Drive del ${esc(act.drive || "")}${DB.d.stockFecha ? ` · stock al ${esc(String(DB.d.stockFecha).split(",")[0])}` : ""}</div>` : ""}`;
   box.onclick = e => { const s = e.target.closest("[data-sc]"); if (s) { try { localStorage.setItem(DB_SKEY, s.dataset.sc); } catch (x) {} pintarDash(); return; }
@@ -5161,7 +5161,7 @@ const NAV_ICO = {
   embudo: '<path d="M4 5h16l-6 7.5V19l-4 1.5v-8z"/>',
   nut: '<path d="M7 20c-1.8 0-3-1.5-3-3.2 0-2 1.6-3 3-4.6 1.2-1.4 1.8-3.2 4.6-3.2s3.6 1.8 4.8 3.2c1.4 1.6 3 2.6 3 4.6 0 1.7-1.2 3.2-3 3.2-1.6 0-2.6-1-4.8-1S8.6 20 7 20z"/><circle cx="5" cy="8" r="1.7"/><circle cx="9.5" cy="4.6" r="1.7"/><circle cx="14.5" cy="4.6" r="1.7"/><circle cx="19" cy="8" r="1.7"/>'
 };
-const NAV_NOM = { inicio: "Inicio", dash: "Dashboard", avance: "Avance", pedido: "Pedido", clientes: "Clientes", agenda: "Agenda", ruta: "Ruta", cobranza: "Cobros", embudo: "Embudo", nut: "Nutrición" };
+const NAV_NOM = { inicio: "Inicio", dash: "Dashboard", avance: "Avance", pedido: "Pedido", clientes: "Clientes", agenda: "Agenda", ruta: "Ruta", cobranza: "Cobros", embudo: "Prospectos", nut: "Nutrición" };
 (function armarBarra() {
   const modos = document.querySelector(".modos"); if (!modos) return;
   const w = document.createElement("div"); w.className = "nav-ap"; w.id = "navAp";
@@ -6723,7 +6723,7 @@ document.head.insertAdjacentHTML("beforeend", "<style>" + CAL_CSS + "</style>");
 }
 </style>
 <script>/* ux-v1: nombres cortos en la barra */
-(function () { const C = { inicio: "Inicio", dash: "Panel", pedido: "Pedido", clientes: "Clientes", ruta: "Ruta", cobranza: "Cobros", embudo: "Embudo", nut: "Nutrición", agenda: "Agenda" };
+(function () { const C = { inicio: "Inicio", dash: "Panel", pedido: "Pedido", clientes: "Clientes", ruta: "Ruta", cobranza: "Cobros", embudo: "Prospectos", nut: "Nutrición", agenda: "Agenda" };
   document.querySelectorAll(".nav-ap .modos [data-modo]").forEach(b => { const s = b.querySelector("span"), n = C[b.dataset.modo]; if (s && n) s.textContent = n; b.title = n || b.title; b.setAttribute("aria-label", n || b.title); });
   try { lsSet("hwf-nav-pista", true); } catch (e) {}
   /* menos pasos: en Pedido primero Cliente → Entrega → Productos; «Mis notas de pedido» queda al final */
@@ -6938,7 +6938,7 @@ function rkdAyuda() {
     contado: ["% de tu venta pagada al contado, comparado con el % del equipo de los 3 meses anteriores.", "Ofrecer pago contado o transferencia al momento de la compra."],
     sku: ["Productos distintos que compra cada cliente en el mes (promedio), comparado con el promedio del equipo.", "Ampliar surtido: snacks, húmedos, arenas e higiene además del seco."],
     margen: ["Margen en pesos (venta − costo) comparado con la venta esperada × el margen promedio del equipo.", "Cuidar descuentos y vender líneas de mejor margen."],
-    nuevos: ["Clientes con su primera compra este mes, contra un objetivo de 4 al mes (según los días transcurridos).", "Prospectar y convertir: embudo y referidos."],
+    nuevos: ["Clientes con su primera compra este mes, contra un objetivo de 4 al mes (según los días transcurridos).", "Prospectar y convertir: prospectos y referidos."],
     fecha: ["Cada venta vale según el día en que se factura: 1,5 veces el día 1 y baja hasta 0,5 veces el último día; se compara con lo esperado repartido igual.", "Facturar temprano en el mes: no dejar los pedidos para el cierre."] };
   return `<details style="margin-top:10px"><summary style="cursor:pointer;font-weight:700">¿Cómo se suman los puntos? (7 parámetros)</summary>
     <ol style="margin:8px 0 0;padding-left:18px;font-size:.84rem;display:grid;gap:6px">${RKD_W.map(([k, t, w]) => `<li><b>${t} · ${w} puntos.</b> ${T[k][0]} <i>Cómo subirlo:</i> ${T[k][1]}</li>`).join("")}</ol>
@@ -7140,5 +7140,6 @@ function kpiHtml(B, yo) {
   let pend = false; new MutationObserver(() => { if (pend) return; pend = true; requestAnimationFrame(() => { pend = false; aplicar(); }); }).observe(document.body, { childList: true, subtree: true });
 })();
 </script>
+<!-- patch_prospectos -->
 </body>
 </html>
