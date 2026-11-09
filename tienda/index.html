@@ -1452,6 +1452,9 @@ main{max-width:1100px;margin:0 auto;padding:12px 16px;display:grid;gap:12px}
 .t-seg{display:flex;gap:4px;background:var(--sunk,#EEF2F5);border-radius:10px;padding:4px;flex-wrap:wrap}.t-seg button{border:0;background:none;font:inherit;font-weight:700;font-size:.82rem;padding:7px 10px;border-radius:8px;cursor:pointer;color:var(--muted,#5B6874)}
 .t-seg button[aria-pressed="true"]{background:var(--surface,#fff);color:var(--ink,#0F1E29)}
 [data-nadd]{display:none!important}
+.g-it{border:1px solid var(--line,#DAE1E7);border-radius:12px;padding:2px 12px}.g-it summary{cursor:pointer;font-weight:800;padding:10px 0}.g-it p{margin:0 0 8px;font-size:.9rem;line-height:1.45}
+.g-q{background:#F6EEFB;border-left:3px solid var(--hw);border-radius:8px;padding:8px 10px;font-style:italic}
+.t-nav{grid-template-columns:none!important;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr)}.t-nav button{font-size:.62rem!important}
 .t-stock{table-layout:fixed;width:100%}.t-stock th:first-child,.t-stock td:first-child{white-space:normal;width:auto;word-break:break-word}.t-stock th:nth-child(2),.t-stock td:nth-child(2){width:84px}.t-stock th:nth-child(3),.t-stock td:nth-child(3){width:58px}
 .st-n{display:block;font-weight:600;line-height:1.25}.st-c{display:block;color:var(--muted,#5B6874);font-size:.72rem}
 .d-bars{display:grid;gap:6px}.d-bar{display:grid;grid-template-columns:86px minmax(0,1fr) 92px;gap:8px;align-items:center;font-size:.8rem}
@@ -1464,12 +1467,12 @@ main,.t-card{min-width:0;max-width:100%}#sDash .t-t td:first-child{white-space:n
 </style></head><body>
 <div class="t-top"><div><h1>🐾 Tienda Hellywoof</h1><small id="tAct">Datos de Drive: —</small></div><button type="button" class="t-turno" id="tTurno">Turno: —</button></div>
 <nav class="t-nav" id="tNav">
-  <button type="button" data-s="inicio"><span>🏠</span>Inicio</button><button type="button" data-s="ventas"><span>💰</span>Ventas</button><button type="button" data-s="dash"><span>📊</span>Dashboard</button>
+  <button type="button" data-s="inicio"><span>🏠</span>Inicio</button><button type="button" data-s="ventas"><span>💰</span>Ventas</button><button type="button" data-s="dash"><span>📊</span>Panel</button>
   <button type="button" data-s="plan"><span>📈</span>Plan</button><button type="button" data-s="stock"><span>📦</span>Stock</button>
-  <button type="button" data-s="nut"><span>🐶</span>Nutrición</button><button type="button" data-s="rank"><span>🏆</span>Ranking</button><button type="button" data-s="adm" id="navAdm" hidden><span>🔑</span>Avances</button></nav>
+  <button type="button" data-s="nut"><span>🐶</span>Nutrición</button><button type="button" data-s="guia"><span>🤝</span>Venta</button><button type="button" data-s="rank"><span>🏆</span>Ranking</button><button type="button" data-s="adm" id="navAdm" hidden><span>🔑</span>Avances</button></nav>
 <main>
   <section class="t-sec" id="sInicio"></section><section class="t-sec" id="sVentas" hidden></section><section class="t-sec" id="sDash" hidden></section><section class="t-sec" id="sPlan" hidden></section>
-  <section class="t-sec" id="sStock" hidden></section><section class="t-sec" id="sNut" hidden><div id="crmNut"></div></section><section class="t-sec" id="sRank" hidden></section><section class="t-sec" id="sAdm" hidden></section>
+  <section class="t-sec" id="sStock" hidden></section><section class="t-sec" id="sNut" hidden><div id="crmNut"></div></section><section class="t-sec" id="sRank" hidden></section><section class="t-sec" id="sGuia" hidden></section><section class="t-sec" id="sAdm" hidden></section>
 </main>
 <div class="modal" id="mEnv" hidden><div class="mcard" role="dialog" aria-modal="true" aria-labelledby="mEnvT"><h2 id="mEnvT"></h2><div id="mEnvBody"></div><p class="amsg bad" id="mEnvErr" hidden></p><div class="mbtns" id="mEnvBtns"></div></div></div>
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
@@ -1661,6 +1664,16 @@ function pintarDash() {
   $("dProd").onchange = e => { dashProd = e.target.value; pintarDash(); };
 }
 
+/* ================= paso a paso para una venta efectiva ================= */
+const GUIA_PASOS = [["1. Bienvenida en 10 segundos", "Saluda apenas entra, con contacto visual y sonrisa. Si viene con su mascota, salúdala por su nombre: es la forma más rápida de generar confianza.", "«¡Hola, bienvenido! ¿Y este campeón cómo se llama?»"], ["2. Descubre la necesidad", "Pregunta antes de ofrecer: especie, edad, tamaño o peso, si está esterilizado, alguna condición (piel, sobrepeso, digestión) y qué come hoy. Escucha sin interrumpir.", "«¿Qué come hoy? ¿Cómo le ha ido con ese alimento: pelo, deposiciones, ánimo?»"], ["3. Usa Nutrición", "Abre Nutrición, busca el alimento que usa y muéstrale la comparación: proteína, energía, ración diaria y costo por día. Que lo vea en la pantalla.", "«Mire: con este, su perro come 230 g al día en vez de 280, y le sale más barato por día.»"], ["4. Recomienda máximo 2 opciones", "Una alternativa principal y una de respaldo (otro precio o formato). Más opciones confunden y retrasan la decisión.", "«Para él le recomiendo este; si prefiere algo más económico, este otro también le va bien.»"], ["5. Beneficio, no característica", "Traduce la ficha a lo que el cliente valora: pelo más brillante, menos deposiciones, rinde más, cuida los riñones de su gato.", "«Tiene más proteína animal: se va a notar en el pelo y en que come menos cantidad.»"], ["6. Venta cruzada", "Ofrece 1 complemento que tenga sentido: snack de premio, lata húmeda, arena para el gato, antipulgas si está por vencer. Siempre ligado a la mascota.", "«¿Le llevo también unos snacks para premiarlo? A muchos les ayuda en el cambio de alimento.»"], ["7. Cierra con naturalidad", "Pregunta por el formato o el medio de pago, dando por hecho la compra. Si duda, vuelve a la necesidad que te contó.", "«¿Se lo lleva en saco de 15 o prefiere probar con el de 3 kg?»"], ["8. Fideliza", "Explica la transición de 7 días, anota su WhatsApp para avisarle cuando se le esté acabando el saco y despídete por su nombre (y el de su mascota).", "«Le escribo en 4 semanas para que no se quede sin alimento, ¿le parece?»"]], GUIA_OBJ = [["«En el súper es más barato»", "El súper vende líneas de menor proteína; compara costo por día y la asesoría que recibe aquí.", "«Puede ser por saco, pero por día le sale casi igual y su perro come mejor. Además aquí le ayudamos si algo no le cae bien.»"], ["«Lo voy a pensar»", "Hay una duda no dicha: precio, si le gustará a la mascota o el tamaño del saco.", "«Claro. ¿Qué es lo que más le hace dudar: el precio o si le va a gustar? Si es lo segundo, parta con el formato chico.»"], ["«Mi perro es mañoso»", "Teme perder la compra si no le gusta.", "«Haga el cambio mezclando durante 7 días; si no le gusta, le ayudamos a buscar otra opción.»"], ["«Está caro»", "Reencuadra a costo por día y beneficios visibles.", "«Por día son $X, y con menos ración. Lo va a notar en el pelo y en las deposiciones.»"], ["«Solo vengo por lo de siempre»", "Respeta su decisión y deja una semilla.", "«¡Perfecto! Se lo paso al tiro. Por si le interesa, este mes tenemos esta alternativa con muy buena proteína.»"]];
+function pintarGuia() {
+  $("sGuia").innerHTML = `<div class="t-card"><h2>Venta efectiva paso a paso <small>en el mostrador de Hellywoof</small></h2>
+      ${GUIA_PASOS.map(([t, x, ej]) => `<details class="g-it"><summary>${esc(t)}</summary><p>${esc(x)}</p><p class="g-q">${esc(ej)}</p></details>`).join("")}</div>
+    <div class="t-card"><h2>Objeciones típicas del cliente</h2>
+      ${GUIA_OBJ.map(([t, x, ej]) => `<details class="g-it"><summary>${esc(t)}</summary><p>${esc(x)}</p><p class="g-q">${esc(ej)}</p></details>`).join("")}
+      <p class="t-vacio" style="font-size:.8rem">Escucha más de lo que hablas: la mejor venta es la que resuelve lo que la mascota necesita, y así el cliente vuelve.</p></div>`;
+}
+
 /* ================= plan ================= */
 function pintarPlan() {
   const R = resumen(), box = $("sPlan"), mes = R ? R.mes : {}, cur = R ? R.y * 100 + R.m : 0;
@@ -1816,11 +1829,11 @@ function pintarRank() {
 
 /* ================= navegación ================= */
 let vista = "inicio", MODO = "inicio";
-const SEC = { inicio: "sInicio", ventas: "sVentas", dash: "sDash", plan: "sPlan", stock: "sStock", nut: "sNut", rank: "sRank", adm: "sAdm" };
+const SEC = { inicio: "sInicio", ventas: "sVentas", dash: "sDash", guia: "sGuia", plan: "sPlan", stock: "sStock", nut: "sNut", rank: "sRank", adm: "sAdm" };
 function ir(s) { if (s === "adm") bajarRanking(); vista = MODO = s; Object.entries(SEC).forEach(([k, id]) => $(id).hidden = k !== s); document.querySelectorAll("#tNav [data-s]").forEach(b => b.setAttribute("aria-current", b.dataset.s === s));
   pintar(s); window.scrollTo({ top: 0 }); if (s === "rank") bajarRanking(); }
 const setModo = ir;
-function pintar(s) { try { ({ inicio: pintarInicio, ventas: pintarVentas, plan: pintarPlan, stock: pintarStock, nut: () => { if (SES || esAdmin()) { if (!SES) SES = { vendedor: { nombre: "Administración", usuario: "admin" } }; pintarNut(); } else $("crmNut").innerHTML = '<p class="t-vacio">Inicia la jornada para usar Nutrición.</p>'; }, rank: pintarRank, adm: pintarAdm, dash: pintarDash })[s](); } catch (e) { console.error(e); } }
+function pintar(s) { try { ({ inicio: pintarInicio, ventas: pintarVentas, plan: pintarPlan, stock: pintarStock, nut: () => { if (SES || esAdmin()) { if (!SES) SES = { vendedor: { nombre: "Administración", usuario: "admin" } }; pintarNut(); } else $("crmNut").innerHTML = '<p class="t-vacio">Inicia la jornada para usar Nutrición.</p>'; }, rank: pintarRank, adm: pintarAdm, dash: pintarDash, guia: pintarGuia })[s](); } catch (e) { console.error(e); } }
 function pintarTodo() { const D = DATA(), t = turno(); $("tTurno").textContent = "Turno: " + (t || "—") + " · cambiar"; $("tAct").textContent = "Datos de Drive: " + ((D && D.act && D.act.drive) || "—"); pintar(vista); }
 $("tNav").onclick = e => { const b = e.target.closest("[data-s]"); if (b) ir(b.dataset.s); };
 $("tTurno").onclick = () => { if (confirm("¿Cambiar quién está en la jornada de hoy? (o entrar como administración)")) { localStorage.removeItem(TURK); refrescarSES(); pedirTurno(); } };
@@ -1837,7 +1850,7 @@ function entrarAdmin() {
       lsSet(ADMK, { hasta: Date.now() + 8 * 3600 * 1000 }); refrescarSES(); cerrarModal(); modoAdmin(); ir("adm"); toast("Acceso de administración abierto."); }]], "Acceso administración");
   setTimeout(() => $("adK") && $("adK").focus(), 50);
 }
-function modoAdmin() { $("navAdm").hidden = !esAdmin(); $("tNav").style.gridTemplateColumns = esAdmin() ? "repeat(8,1fr)" : ""; }
+function modoAdmin() { $("navAdm").hidden = !esAdmin(); }
 let admVista = "mes";
 function pintarAdm() {
   if (!esAdmin()) { $("sAdm").innerHTML = '<div class="t-card"><p class="t-vacio">Acceso cerrado.</p><button type="button" class="t-btn" id="admIn">Entrar como administración</button></div>'; $("admIn").onclick = entrarAdmin; return; }
