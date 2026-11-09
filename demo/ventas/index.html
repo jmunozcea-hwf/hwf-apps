@@ -7018,5 +7018,46 @@ ptPintarRanking = function () {
   document.head.insertAdjacentHTML("beforeend", "<style>body.m-tec #crmMeta{display:none!important}</style>");
 })();
 </script>
+
+<style>/* patch_sidenavv */
+html body nav.modos,html body .nav-ap .modos,html body .nav-ap nav.modos{display:none!important}
+body{padding-bottom:16px!important}
+#snBtn{position:fixed;left:14px;bottom:calc(16px + env(safe-area-inset-bottom));z-index:9500;width:56px;height:56px;border-radius:50%;border:0;background:#0B3146;color:#fff;font-size:1.5rem;
+  box-shadow:0 8px 22px rgba(0,0,0,.28);cursor:pointer;display:grid;place-items:center}
+#snBtn small{position:absolute;bottom:-18px;left:50%;transform:translateX(-50%);font-size:.66rem;font-weight:800;color:#0B3146;white-space:nowrap;background:rgba(255,255,255,.9);border-radius:6px;padding:0 4px}
+#snBtn[hidden]{display:none!important}
+#snVelo{position:fixed;inset:0;z-index:9600;background:rgba(10,20,30,.35);opacity:0;pointer-events:none;transition:opacity .2s}#snVelo.on{opacity:1;pointer-events:auto}
+#snPanel{position:fixed;top:0;bottom:0;left:0;z-index:9700;width:min(290px,84vw);background:var(--surface,#fff);box-shadow:4px 0 24px rgba(0,0,0,.2);transform:translateX(-105%);transition:transform .22s ease;
+  display:flex;flex-direction:column;padding:calc(12px + env(safe-area-inset-top)) 10px calc(12px + env(safe-area-inset-bottom));overflow-y:auto}
+#snPanel.on{transform:none}
+#snPanel .sn-top{display:flex;align-items:center;justify-content:space-between;padding:4px 8px 8px;border-bottom:1px solid var(--line,#DAE1E7);margin-bottom:6px}
+#snPanel .sn-top b{font-size:1.05rem;color:#0B3146}#snPanel .sn-x{border:0;background:none;font-size:1.5rem;cursor:pointer;color:var(--muted,#5B6874)}
+#snPanel button.sn-i{display:flex;align-items:center;gap:12px;width:100%;border:0;background:none;font:inherit;font-weight:700;font-size:.95rem;color:var(--ink,#0F1E29);padding:11px 10px;border-radius:12px;cursor:pointer;text-align:left}
+#snPanel button.sn-i:hover{background:var(--sunk,#EEF2F5)}#snPanel button.sn-i[aria-current="true"]{background:#E6EEF3;color:#0B3146}
+#snPanel .sn-e{font-size:1.3rem;width:28px;text-align:center;font-family:'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif}
+</style>
+<script>/* patch_sidenavv: menú lateral oculto */
+(function () {
+  const ICO = { inicio: "🏠", dash: "📊", avance: "📈", pedido: "📝", clientes: "👥", agenda: "📅", ruta: "🗺️", cobranza: "💵", embudo: "🎯", nut: "🐶", tec: "🧠" };
+  const nombre = b => { const c = b.cloneNode(true); c.querySelectorAll(".emo, svg").forEach(x => x.remove()); return (b.getAttribute("title") || c.textContent || "").replace(/\s+/g, " ").trim(); };
+  const btn = document.createElement("button"); btn.id = "snBtn"; btn.type = "button"; btn.setAttribute("aria-label", "Abrir menú"); btn.innerHTML = "☰<small>Menú</small>";
+  const velo = document.createElement("div"); velo.id = "snVelo";
+  const pan = document.createElement("nav"); pan.id = "snPanel"; pan.setAttribute("aria-label", "Secciones");
+  document.body.append(velo, pan, btn);
+  const cerrar = () => { pan.classList.remove("on"); velo.classList.remove("on"); };
+  function abrir() {
+    const items = (typeof NAV_ORDEN !== "undefined" ? NAV_ORDEN : []).map(([m, id]) => [m, document.getElementById(id)]).filter(([, b]) => b);
+    pan.innerHTML = `<div class="sn-top"><b>Ventas HWF</b><button type="button" class="sn-x" aria-label="Cerrar">×</button></div>` +
+      items.map(([m, b]) => `<button type="button" class="sn-i" data-sm="${m}" aria-current="${typeof MODO !== "undefined" && MODO === m}"><span class="sn-e">${ICO[m] || "•"}</span>${nombre(b).replace(/[<>&]/g, "")}</button>`).join("");
+    pan.classList.add("on"); velo.classList.add("on");
+  }
+  pan.addEventListener("click", e => { if (e.target.closest(".sn-x")) return cerrar(); const it = e.target.closest("[data-sm]"); if (!it) return;
+    const id = (NAV_ORDEN.find(x => x[0] === it.dataset.sm) || [])[1], b = id && document.getElementById(id); if (b) b.click(); else if (typeof setModo === "function") setModo(it.dataset.sm); cerrar(); });
+  btn.onclick = () => pan.classList.contains("on") ? cerrar() : abrir();
+  velo.onclick = cerrar; document.addEventListener("keydown", e => { if (e.key === "Escape") cerrar(); });
+  /* el botón aparece solo con sesión iniciada (antes, la pantalla de elegir vendedor) */
+  const vis = () => { btn.hidden = !(typeof SES !== "undefined" && SES); }; vis(); setInterval(vis, 1500);
+})();
+</script>
 </body>
 </html>
