@@ -1644,7 +1644,7 @@ function pintarZonas() {
 }
 function pintarTerreno() {
   const acts = IMP.acts.slice().sort((a, b) => b.t - a.t);
-  if (!acts.length) { $("masBody").innerHTML = `<div class="card"><h2>Actividad en terreno</h2><p class="muted" style="margin:0">Aún no hay datos. Pide a cada vendedor que toque <b>"Exportar mi CRM a Excel"</b> en la app Ventas (Mis clientes) y te mande el archivo. Luego impórtalo en <b>Más → Datos</b>.</p></div>`; return; }
+  if (!acts.length) { $("masBody").innerHTML = `<div class="card"><h2>Actividad en terreno</h2><p class="muted" style="margin:0">Aún no hay datos. Pide a cada vendedor que toque <b>"Exportar mi CRM a Excel"</b> en la app Ventas (Mis clientes) y te mande el archivo. Luego impórtalo en <b>Menú ☰ → Datos</b>.</p></div>`; return; }
   const hace7 = Date.now() - 7 * 864e5, hace30 = Date.now() - 30 * 864e5;
   const por = CARTERAS().filter(v => v !== "Tienda Hellywoof").map(v => { const a = acts.filter(x => x.cart === v); return { v, v7: a.filter(x => x.tipo === "Visita" && x.t > hace7).length, v30: a.filter(x => x.tipo === "Visita" && x.t > hace30).length,
     otras: a.filter(x => x.tipo !== "Visita" && x.t > hace7).length, lejos: a.filter(x => x.tipo === "Visita" && x.dist !== "" && x.dist != null && Number(x.dist) > 300).length, ult: a[0] ? a[0].t : 0 }; });
@@ -2094,7 +2094,7 @@ naGuardar = function (est) {
 function syHace(t) { if (!t) return "nunca"; const s = Math.round((Date.now() - t) / 1000); return s < 60 ? "hace un momento" : s < 3600 ? `hace ${Math.round(s / 60)} min` : new Date(t).toLocaleString("es-CL"); }
 function syPintarEst() {
   const el = $("syEst"); if (!el) return; const cfg = SYC(), n = Object.keys(store.get("adm-sync-cola", {})).length;
-  el.innerHTML = !cfg ? '<span><span class="sy-pt"></span>Sin conexión automática: configúrala en Más → Datos.</span>'
+  el.innerHTML = !cfg ? '<span><span class="sy-pt"></span>Sin conexión automática: configúrala en Menú ☰ → Datos.</span>'
     : `<span><span class="sy-pt ${syErr ? "err" : n ? "cola" : "ok"}"></span>${syErr ? esc(syErr) : `Conectado · actualizado <b>${syHace(syUlt)}</b>`}${n ? ` · ${n} ${n === 1 ? "revisión" : "revisiones"} por enviar` : ""}</span><button class="btn" type="button" id="syAhora">Actualizar</button>`;
   if ($("syAhora")) $("syAhora").onclick = () => sySync(true);
 }
@@ -2421,7 +2421,7 @@ function pintarCobranza() {
   if (cxFil === "cheq") cl = cl.filter(c => c.docs.some(d => d.tipo === "Cheque"));
   if (q) cl = cl.filter(c => cxNorm(c.cli + " " + c.rut).includes(q));
   const porV = vends.map(v => { const ds = todos.filter(d => d.cart === v); return Object.assign({ v }, cxResumen(ds)); }).sort((a, b) => b.total - a.total);
-  const env = !SYC() ? ["", "Sin conexión automática configurada (Más → Datos)."] : s && s.error ? ["bad", s.error] : s && s.enviado ? ["ok", "Enviado a la app de vendedores."] : s && !s.enviado ? ["", "Pendiente de enviar a la app de vendedores."] : ["", "Los vendedores ven este informe en la pestaña Cobranza."];
+  const env = !SYC() ? ["", "Sin conexión automática configurada (Menú ☰ → Datos)."] : s && s.error ? ["bad", s.error] : s && s.enviado ? ["ok", "Enviado a la app de vendedores."] : s && !s.enviado ? ["", "Pendiente de enviar a la app de vendedores."] : ["", "Los vendedores ven este informe en la pestaña Cobranza."];
   $("masBody").innerHTML = `<div class="card"><h2>Cuentas por cobrar <span class="muted">informe del ${esc(C.emision || "—")}${C.hasta ? ` · vencen hasta el ${cxFecha(C.hasta)}` : ""}</span></h2>
       <div class="cx-kpi num"><div><span>Por cobrar</span><b>${mm(R.total)}</b><small>${R.nCli} clientes</small></div>
         <div class="warn"><span>Vencido</span><b>${mm(R.venc)}</b><small>${R.nVenc} clientes</small></div>
@@ -2540,7 +2540,7 @@ function prHoyISO() { const d = new Date(), z = n => String(n).padStart(2, "0");
 /* conteo por etapa (Descartado aparte) */
 function prConteo(l) { const c = PR_ETAPAS.map(() => 0); l.forEach(o => c[prIdx(o.etapa)]++); return c; }
 
-/* ---------- Embudo de ventas (Más → Embudo) ---------- */
+/* ---------- Embudo de ventas (Menú ☰ → Embudo) ---------- */
 const PR_BASE = {"cols": ["id", "nombre", "region", "zona", "comuna", "direccion", "telefono", "whatsapp", "email", "instagram", "facebook", "web", "segmento", "vendedor", "vendedor_email", "etapa", "proximo_contacto", "latitud", "longitud", "place_id", "notas", "actualizado"], "filas": []};
 const PR_VEND_MAIL = { "Diego": "diego@hwf.cl", "Claudia": "claudia@hwf.cl", "Matías": "matias@hwf.cl", "Victor": "victor@hwf.cl", "Jorge": "jorge@hwf.cl" };
 let prVend = "", prReg = "", prFiltro = -1, prQ = "";
@@ -2803,7 +2803,7 @@ $("fileIn").addEventListener("change", async e => {
     } catch (err) { res.push(`<div class="alert bad"><span class="ic">!</span><div><b>${esc(f.name)}</b><br>No se pudo importar: ${esc(err.message)}</div></div>`); }
   }
   store.set("adm-imp", IMP); e.target.value = "";
-  meses(); refrescar(); if ($("impRes")) $("impRes").innerHTML = res.join(""); else if (res.length) { const ok = res.filter(x => x.includes("alert ok")).length, mal = res.length - ok; toast(`${ok} ${ok === 1 ? "archivo importado" : "archivos importados"}${mal ? ` · ${mal} no se pudieron leer (revisa en Más → Datos)` : ""}.`); }
+  meses(); refrescar(); if ($("impRes")) $("impRes").innerHTML = res.join(""); else if (res.length) { const ok = res.filter(x => x.includes("alert ok")).length, mal = res.length - ok; toast(`${ok} ${ok === 1 ? "archivo importado" : "archivos importados"}${mal ? ` · ${mal} no se pudieron leer (revisa en Menú ☰ → Datos)` : ""}.`); }
 });
 
 /* ================= NAVEGACIÓN ================= */
@@ -3349,7 +3349,7 @@ async function drvPost(cfg, datos, seg) {
 }
 async function drvActualizar() {
   if (drvOcup) return; const cfg = SYC();
-  if (!cfg || !cfg.url) { toast("Primero configura la conexión automática en Más → Datos."); return; }
+  if (!cfg || !cfg.url) { toast("Primero configura la conexión automática en Menú ☰ → Datos."); return; }
   if (!navigator.onLine) { toast("Sin conexión a internet."); return; }
   drvOcup = true; drvMsg = `<span class="act-msg">Leyendo los informes de Drive y armando los datos de todas las apps. Tarda 2 a 4 minutos; no cierres la app.</span>`; drvPintar();
   const r = await drvPost(cfg, { accion: "datosActualizar" }, 330);
@@ -3506,7 +3506,7 @@ function pintarCambios() {
         <div><span>Datos modificados</span><b>${cnt("Datos")}</b><small>${cnt("Ubicación")} ubicaciones · ${cnt("Dirección de entrega")} dir. entrega</small></div>
         <div><span>Clientes nuevos</span><b>${cnt("Cliente nuevo")}</b><small>creados por vendedores</small></div></div>
       <div class="np-top"><button class="btn pri" type="button" id="ccXls">Exportar a Excel</button>${cfg && cfg.url ? '<button class="btn" type="button" id="ccAct">Actualizar</button>' : ""}</div>
-      <p class="muted" style="margin:0;font-size:.85rem">${cfg && cfg.url ? (s.bajado ? "Actualizado " + ccFecha(s.bajado) + " ·" : "Aún no se ha bajado el informe.") : "Sin conexión con el script: conéctalo en Más → Datos."} Cada cambio que un vendedor hace en un cliente desde la app Ventas queda registrado aquí y en la hoja “Cambios clientes” de la planilla.</p></div>
+      <p class="muted" style="margin:0;font-size:.85rem">${cfg && cfg.url ? (s.bajado ? "Actualizado " + ccFecha(s.bajado) + " ·" : "Aún no se ha bajado el informe.") : "Sin conexión con el script: conéctalo en Menú ☰ → Datos."} Cada cambio que un vendedor hace en un cliente desde la app Ventas queda registrado aquí y en la hoja “Cambios clientes” de la planilla.</p></div>
     ${motL.length ? `<div class="card"><h2>Bajas por motivo <span class="muted">${cnt("Baja")}</span></h2><div class="cc-mot">${motL.map(([m, n]) => `<span>${esc(m)}</span><span><i class="cc-bar" style="width:${Math.round(n / maxM * 100)}%"></i></span><b class="num">${n}</b>`).join("")}</div></div>` : ""}
     ${porV.length ? `<div class="card"><h2>Por vendedor</h2><div class="tbl"><table><thead><tr><th>Vendedor</th>${CC_TIPOS.map(t => `<th class="n">${esc(t)}</th>`).join("")}<th class="n">Total</th></tr></thead><tbody>${porV.map(([v, c]) => `<tr><td>${esc(v)}</td>${c.map(x => `<td class="n">${x || "·"}</td>`).join("")}<td class="n"><b>${c.reduce((a, b) => a + b, 0)}</b></td></tr>`).join("")}</tbody></table></div></div>` : ""}
     <div class="card"><h2>Bajas vigentes <span class="muted">${bajas.length}</span></h2>
@@ -3532,7 +3532,7 @@ function pintarCambios() {
 }
 async function ccReactivar(c) {
   if (!c) return; const cfg = SYC();
-  if (!cfg || !cfg.url) { toast("Para reactivar, conecta HWF Admin con el script (Más → Datos)."); return; }
+  if (!cfg || !cfg.url) { toast("Para reactivar, conecta HWF Admin con el script (Menú ☰ → Datos)."); return; }
   if (!confirm(`¿Reactivar a ${c.cliente}? Volverá a aparecer en la app de los vendedores.`)) return;
   const ev = { id: "CC-" + Date.now().toString(36).toUpperCase() + "-ADM", fecha: new Date().toISOString(), vendedor: "HWF Admin", cartera: c.cartera || "", codigo: c.codigo, cliente: c.cliente,
     tipo: "Reactivación", motivo: "Reactivado por HWF Admin", detalle: "", cambios: [{ campo: "Estado", antes: "De baja (" + (c.motivo || "") + ")", despues: "Activo" }] };
@@ -3840,7 +3840,7 @@ try { if (typeof TAB !== "undefined" && TAB === "res" && $("s-res") && !$("s-res
   b.onclick = async () => {
     if (b.disabled) return;
     const cfg = typeof SYC === "function" ? SYC() : null;
-    if (!cfg || !cfg.url) { toast("Primero conecta HWF Admin con el script (Más → Datos)."); return; }
+    if (!cfg || !cfg.url) { toast("Primero conecta HWF Admin con el script (Menú ☰ → Datos)."); return; }
     if (!navigator.onLine) { toast("Sin conexión a internet."); return; }
     b.disabled = true; tx("Sincronizando…");
     try {
@@ -4724,7 +4724,7 @@ document.head.insertAdjacentHTML("beforeend", `<style>
 </style>`);
 </script>
 
-<script>/* datosauto: Más → Datos sin importar archivos; todo llega solo desde Drive */
+<script>/* datosauto: Datos sin importar archivos; todo llega solo desde Drive */
 { const _pdDA = pintarDatos;
   const DA_INF = [["Ventas", "informe de ventas de Defontana (.xls), p. ej. «HWF SALES …»: el más nuevo manda en cada mes"],
     ["Notas de pedido Defontana", "informe de Cotizaciones pendientes (.xls)"],
@@ -4980,9 +4980,10 @@ pintarRanking = function () {
   let pend = false; new MutationObserver(() => { if (pend) return; pend = true; requestAnimationFrame(() => { pend = false; aplicar(); }); }).observe(document.body, { childList: true, subtree: true });
 })();
 </script>
-
+<style>/* sin apartado de reasignación de cartera (pedido de Jorge 09-11-2026); las reglas vigentes siguen aplicándose */#cartCard{display:none!important}</style>
 <style>/* patch_sidenav */
 nav.bottom{display:none!important}
+#masSeg{display:none!important}   /* las secciones de «Más» se abren directo desde el menú, al mismo nivel */
 body{padding-bottom:16px!important}
 #snBtn{position:fixed;left:14px;bottom:calc(16px + env(safe-area-inset-bottom));z-index:9500;width:56px;height:56px;border-radius:50%;border:0;background:#0B3146;color:#fff;font-size:1.5rem;
   box-shadow:0 8px 22px rgba(0,0,0,.28);cursor:pointer;display:grid;place-items:center}
@@ -5015,7 +5016,7 @@ body{padding-bottom:16px!important}
     const prin = [...document.querySelectorAll("nav.bottom [data-t]")].filter(b => b.dataset.t !== "mas"), mas = [...document.querySelectorAll("#masSeg [data-m]")];
     const it = (k, t, tipo) => `<button type="button" class="sn-i" data-${tipo}="${k}" aria-current="${actual === tipo + ":" + k}"><span class="sn-e">${ICO[k] || "•"}</span>${t}</button>`;
     pan.innerHTML = `<div class="sn-top"><b>HWF Admin</b><button type="button" class="sn-x" aria-label="Cerrar">×</button></div>
-      <h4>Principal</h4>${prin.map(b => it(b.dataset.t, txt(b), "t")).join("")}<h4>Más</h4>${mas.map(b => it(b.dataset.m, txt(b), "m")).join("")}`;
+      ${prin.map(b => it(b.dataset.t, txt(b), "t")).join("")}${mas.map(b => it(b.dataset.m, txt(b), "m")).join("")}`;
   }
   pan.addEventListener("click", e => {
     if (e.target.closest(".sn-x")) return cerrar();
@@ -5029,5 +5030,5 @@ body{padding-bottom:16px!important}
   document.addEventListener("keydown", e => { if (e.key === "Escape") cerrar(); });
 })();
 </script>
-<style>/* sin apartado de reasignación de cartera (pedido de Jorge 09-11-2026); las reglas vigentes siguen aplicándose */#cartCard{display:none!important}</style></body>
+</body>
 </html>
