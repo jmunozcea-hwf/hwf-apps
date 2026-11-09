@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="es-CL"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Tienda Hellywoof</title><meta name="theme-color" content="#5B2A86"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon-192.png">
-<script>/* espacio propio en el almacenamiento del sitio (no choca con Nota de Pedido ni HWF Admin en el mismo equipo) */
+<script>/* espacio propio en el almacenamiento del sitio (no choca con app Ventas ni HWF Admin en el mismo equipo) */
 (function () { var S = Storage.prototype, g = S.getItem, s = S.setItem, r = S.removeItem, P = "hwf-tda:";
   var k = function (x) { x = String(x); return x.indexOf(P) === 0 ? x : P + x; };
   S.getItem = function (x) { return g.call(this, k(x)); }; S.setItem = function (x, v) { return s.call(this, k(x), v); }; S.removeItem = function (x) { return r.call(this, k(x)); }; })();
@@ -1452,6 +1452,8 @@ main{max-width:1100px;margin:0 auto;padding:12px 16px;display:grid;gap:12px}
 .t-seg{display:flex;gap:4px;background:var(--sunk,#EEF2F5);border-radius:10px;padding:4px;flex-wrap:wrap}.t-seg button{border:0;background:none;font:inherit;font-weight:700;font-size:.82rem;padding:7px 10px;border-radius:8px;cursor:pointer;color:var(--muted,#5B6874)}
 .t-seg button[aria-pressed="true"]{background:var(--surface,#fff);color:var(--ink,#0F1E29)}
 [data-nadd]{display:none!important}
+.t-stock{table-layout:fixed;width:100%}.t-stock th:first-child,.t-stock td:first-child{white-space:normal;width:auto;word-break:break-word}.t-stock th:nth-child(2),.t-stock td:nth-child(2){width:84px}.t-stock th:nth-child(3),.t-stock td:nth-child(3){width:58px}
+.st-n{display:block;font-weight:600;line-height:1.25}.st-c{display:block;color:var(--muted,#5B6874);font-size:.72rem}
 .d-bars{display:grid;gap:6px}.d-bar{display:grid;grid-template-columns:86px minmax(0,1fr) 92px;gap:8px;align-items:center;font-size:.8rem}
 .d-bar .tr{display:grid;gap:2px}.d-bar .tr i{display:block;height:9px;border-radius:5px;background:var(--hw)}.d-bar .tr i.ly{background:#C9B3DD}.d-bar .tr i.mt{height:3px;background:#F28C28}
 .d-bar b{text-align:right;font-variant-numeric:tabular-nums}
@@ -1676,12 +1678,16 @@ function pintarStock() {
   const D = DATA(), box = $("sStock"), S = D && D.stock;
   if (!S || !S.length) { box.innerHTML = `<div class="t-card"><h2>Stock de la tienda</h2><p class="t-vacio">Todavía no llega el stock de la <b>bodega de la tienda</b>. Sube a la carpeta META el inventario de Defontana que incluya la bodega de Hellywoof: esta app usa solo esa bodega.</p>
     <div class="t-row"><button type="button" class="t-btn sec" id="stRev">Marcar stock revisado</button></div></div>`; $("stRev").onclick = () => { misSumar("stock", 1); toast("Stock revisado."); pintarInicio(); }; return; }
-  const q = norm(stQ), L = S.filter(x => !q || norm(x[0] + " " + x[1]).includes(q)).sort((a, b) => a[2] - b[2]);
+  /* orden: lo que más se vende → lo que menos (unidades vendidas en los últimos 90 días, por código de producto) */
+  const vend = {}; { const c0 = new Date(String(D.corte || hoyISO()) + "T12:00:00"), lim = isoD(new Date(c0.getTime() - 90 * 864e5));
+    D.rows.forEach(r => { const f = `${r[6]}-${String(r[1]).padStart(2, "0")}-${String(r[2]).padStart(2, "0")}`; if (f < lim) return; const cod = String((D.productos[r[0]] || [])[2] || ""); if (cod) vend[cod] = (vend[cod] || 0) + (r[3] || 0); }); }
+  const q = norm(stQ), L = S.filter(x => !q || norm(x[0] + " " + x[1]).includes(q)).sort((a, b) => (vend[String(b[0])] || 0) - (vend[String(a[0])] || 0) || a[2] - b[2]);
   const bajo = S.filter(x => x[2] > 0 && x[2] <= 3).length, cero = S.filter(x => x[2] <= 0).length;
   box.innerHTML = `<div class="t-card"><h2>Stock de la tienda <small>${esc(D.stockFecha || "")}</small></h2>
     <div class="t-kpis"><div class="t-kpi"><span>Productos</span><b>${S.length}</b></div><div class="t-kpi bad"><span>Sin stock</span><b>${cero}</b></div><div class="t-kpi"><span>Stock bajo (1–3)</span><b>${bajo}</b></div></div>
     <div class="t-row"><input id="stQ" type="search" placeholder="Buscar producto o código" value="${esc(stQ)}" style="flex:1;min-width:180px;border:1px solid var(--line);border-radius:10px;padding:10px"><button type="button" class="t-btn sec" id="stRev">Marcar stock revisado</button></div>
-    <div class="t-tw"><table class="t-t"><thead><tr><th>Producto</th><th>Código</th><th>Saldo</th></tr></thead><tbody>${L.slice(0, 400).map(x => `<tr><td>${esc(x[1])}</td><td>${esc(x[0])}</td><td class="${x[2] <= 0 ? "neg" : x[2] <= 3 ? "neg" : ""}">${x[2]}</td></tr>`).join("")}</tbody></table></div></div>`;
+    <p class="t-vacio" style="font-size:.78rem">Ordenado de lo que más se vende a lo que menos (unidades de los últimos 90 días).</p>
+    <table class="t-t t-stock"><thead><tr><th>Producto</th><th>Vendidas 90 d</th><th>Saldo</th></tr></thead><tbody>${L.slice(0, 400).map(x => `<tr><td><span class="st-n">${esc(x[1])}</span><small class="st-c">${esc(x[0])}</small></td><td>${Math.round(vend[String(x[0])] || 0)}</td><td class="${x[2] <= 3 ? "neg" : ""}"><b>${x[2]}</b></td></tr>`).join("")}</tbody></table></div>`;
   $("stQ").oninput = e => { stQ = e.target.value; const p = e.target.selectionStart; pintarStock(); $("stQ").focus(); try { $("stQ").setSelectionRange(p, p); } catch (x) {} };
   $("stRev").onclick = () => { misSumar("stock", 1); toast("Stock revisado."); pintarInicio(); };
 }
@@ -1818,7 +1824,7 @@ function pintar(s) { try { ({ inicio: pintarInicio, ventas: pintarVentas, plan: 
 function pintarTodo() { const D = DATA(), t = turno(); $("tTurno").textContent = "Turno: " + (t || "—") + " · cambiar"; $("tAct").textContent = "Datos de Drive: " + ((D && D.act && D.act.drive) || "—"); pintar(vista); }
 $("tNav").onclick = e => { const b = e.target.closest("[data-s]"); if (b) ir(b.dataset.s); };
 $("tTurno").onclick = () => { if (confirm("¿Cambiar quién está en la jornada de hoy? (o entrar como administración)")) { localStorage.removeItem(TURK); refrescarSES(); pedirTurno(); } };
-/* compatibilidad con el módulo de Nutrición de Nota de Pedido (sin pedido) */
+/* compatibilidad con el módulo de Nutrición de app Ventas (sin pedido) */
 const byCode = {}; const line = () => ({ q: 0 }); const setQty = () => {};
 /* ================= acceso de administración (solo revisa: no suma puntos) ================= */
 const ADMK = "admin";
