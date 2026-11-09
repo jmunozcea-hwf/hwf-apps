@@ -5915,7 +5915,7 @@ function plHtml(P, yo) {
   const surt = P.L.filter(c => (c.abc === "A" || c.abc === "B") && c.ofrecer.length && c.diasSin < 60).sort((a, b) => b.v3 - a.v3).slice(0, 6)
     .map(c => it(c, "Ofrecer: <b>" + c.ofrecer.slice(0, 2).map(esc).join("</b> · <b>") + "</b>")).join("");
   const cuota = yo ? `${nuevos} de ${PLAN.cuotaMin} a ${PLAN.cuotaMax}` : `${nuevos} en el mes`;
-  return `<div class="db-c card pl"><h3>Plan 80 MM <small>${yo ? "mi parte" : "todo el equipo"}</small></h3>
+  return `<div class="db-c card pl"><h3>Plan 100 MM <small>${yo ? "mi parte" : "todo el equipo"}</small></h3>
     ${d60 ? `<div class="pl-step"><b>Primer paso:</b> contacta a tus ${d60} ${d60 === 1 ? "cliente" : "clientes"} sin compra hace 60 días o más antes del viernes, con una oferta de regreso, y anota el motivo (precio, quiebre, competencia o cerró).</div>` : ""}
     <div class="pl-k"><div><span>Sin compra 30–59 días</span><b>${nf(P.d30.length)}</b></div><div><span>60–89 días</span><b>${nf(P.d60.length)}</b></div><div><span>90+ días</span><b>${nf(P.d90.length)}</b></div>
       <div><span>Reactivados este mes</span><b>${nf(P.reac.length)}</b><small>meta: 1 de cada 4 en 60 días</small></div>
@@ -5939,7 +5939,7 @@ pintarDash = function () {
     g.querySelectorAll("[data-pl-tel]").forEach(b => b.onclick = e => { e.stopPropagation(); abrirExterno("tel:+" + b.dataset.plTel); });
   } catch (e) { console.warn("plan", e); }
 };
-if (typeof APP_NOVEDADES !== "undefined" && Array.isArray(APP_NOVEDADES)) APP_NOVEDADES.unshift("Dashboard: tarjeta «Plan 80 MM» con tus clientes dormidos para reactivar, A/B/C, ofertas de surtido y cuota de clientes nuevos.");
+if (typeof APP_NOVEDADES !== "undefined" && Array.isArray(APP_NOVEDADES)) APP_NOVEDADES.unshift("Dashboard: tarjeta «Plan 100 MM» con tus clientes dormidos para reactivar, A/B/C, ofertas de surtido y cuota de clientes nuevos.");
 </script>
 
 <script>
@@ -6883,6 +6883,77 @@ const proxHabil = () => { const d = new Date(); do { d.setDate(d.getDate() + 1);
   DB = { v: a.v, d: a.d.BASE, act: a.d.ACT_INFO || null }; localStorage.removeItem(DB_KEY);
   if (typeof MODO !== "undefined" && MODO === "dash" && typeof pintarDash === "function") pintarDash();
 } catch (e) {} })();
+</script>
+
+<script>/* rankdist: plan 70 → 85 → 100 MM en 14 meses y ranking de vendedores por objetivos */
+const PLAN14 = (() => { const L = []; for (let i = 0; i < 14; i++) { const y = 2026 + Math.floor((10 + i) / 12), m = (10 + i) % 12 + 1, v = i <= 7 ? 70 + 15 * i / 7 : 85 + 15 * (i - 7) / 6;
+  L.push({ ym: y * 100 + m, y, m, meta: Math.round(v * 10) * 100000, hito: i === 0 ? 70 : i === 7 ? 85 : i === 13 ? 100 : 0 }); } return L; })();
+const metaPlan14 = (y, m) => { const p = PLAN14.find(x => x.ym === y * 100 + m); return p ? p.meta : y * 100 + m < PLAN14[0].ym ? PLAN14[0].meta : PLAN14[PLAN14.length - 1].meta; };
+const RKD_W = [["venta", "Venta ponderada", 35], ["ticket", "Ticket promedio", 20], ["contado", "Venta contado", 15], ["sku", "SKU por cliente", 12], ["margen", "Margen total", 10], ["nuevos", "Clientes nuevos", 8]];
+const rkdHabil = d => { const w = d.getDay(), k = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; return w > 0 && w < 6 && !(typeof FER !== "undefined" && FER.has(k)); };
+function rkdCalc(B, y, m) {
+  if (!B || !B.rows || !B.vend) return null;
+  const [cy, cm, cd] = String(B.corte || "").split("-").map(Number), enCurso = cy === y && cm === m, ultDia = enCurso ? cd : new Date(y, m, 0).getDate();
+  let hTot = 0, hPas = 0; for (let d = 1; d <= new Date(y, m, 0).getDate(); d++) { if (!rkdHabil(new Date(y, m - 1, d))) continue; hTot++; if (d <= ultDia) hPas++; }
+  const prog = hTot ? hPas / hTot : 1, anio = r => r[8] || B.anio, ym = r => anio(r) * 100 + r[2];
+  const fuera = v => !v || /tienda|hellywoof/i.test(v) || (typeof RK_FUERA !== "undefined" && RK_FUERA.test(v));
+  const prev = []; for (let k = 1; k <= 3; k++) { let yy = y, mm2 = m - k; if (mm2 < 1) { mm2 += 12; yy--; } prev.push(yy * 100 + mm2); }
+  const YM = y * 100 + m, prim = {}, V = {}, base = { venta: 0, costo: 0, cli: {}, docs: 0, cont: 0 };
+  B.rows.forEach(r => { const k = ym(r), f = k * 100 + r[3]; if (r[5] > 0 && (prim[r[0]] == null || f < prim[r[0]].f)) prim[r[0]] = { f, v: r[7] }; });
+  B.rows.forEach(r => { const v = B.vend[r[7]]; if (fuera(v)) return; const k = ym(r);
+    if (k === YM && r[3] <= ultDia) { const o = V[v] = V[v] || { v, venta: 0, costo: 0, cli: {}, docs: 0, cont: 0, nuevos: 0 }; o.venta += r[5]; o.costo += r[4] * r[6]; (o.cli[r[0]] = o.cli[r[0]] || new Set()).add(r[1]); }
+    else if (prev.includes(k)) { base.venta += r[5]; base.costo += r[4] * r[6]; const kk = k + "|" + r[0]; (base.cli[kk] = base.cli[kk] || new Set()).add(r[1]); } });
+  Object.entries(prim).forEach(([ci, p]) => { if (Math.floor(p.f / 100) !== YM || p.f % 100 > ultDia) return; const v = B.vend[p.v]; if (V[v]) V[v].nuevos++; });
+  let hayDocs = false, hayCont = false;
+  (B.vdia || []).forEach(([f, vi, nd, ct]) => { const k = Math.floor(f / 100), v = B.vend[vi]; if (fuera(v)) return; if (nd) hayDocs = true; if (ct) hayCont = true;
+    if (k === YM && f % 100 <= ultDia && V[v]) { V[v].docs += nd; V[v].cont += ct; } else if (prev.includes(k)) { base.docs += nd; base.cont += ct; } });
+  const bTicket = base.docs ? base.venta / base.docs : 0, bCont = base.venta ? base.cont / base.venta : 0, bMarg = base.venta ? 1 - base.costo / base.venta : 0;
+  const bSku = (() => { const l = Object.values(base.cli); return l.length ? l.reduce((s, x) => s + x.size, 0) / l.length : 0; })();
+  const metas = B.metas || {}, cap = x => Math.max(0, Math.min(1.2, x || 0));
+  const L = Object.values(V).filter(o => metas[o.v] > 0 || o.venta > 0).map(o => {
+    const meta = metas[o.v] || 0, esp = meta * prog, ncli = Object.keys(o.cli).length, sku = ncli ? Object.values(o.cli).reduce((s, x) => s + x.size, 0) / ncli : 0;
+    const marg = o.venta - o.costo, ticket = o.docs ? o.venta / o.docs : 0, cont = o.venta ? o.cont / o.venta : 0, objNuevos = 4 * prog;
+    const r = { venta: esp ? o.venta / esp : 0, ticket: bTicket && o.docs ? ticket / bTicket : null, contado: bCont && hayCont ? cont / bCont : null,
+      sku: bSku ? sku / bSku : 0, margen: esp && bMarg ? marg / (esp * bMarg) : 0, nuevos: objNuevos ? o.nuevos / objNuevos : 0 };
+    let pts = 0, max = 0; RKD_W.forEach(([k, , w]) => { if (r[k] == null) return; pts += w * cap(r[k]); max += w; });
+    return { v: o.v, meta, esp, venta: o.venta, ticket, cont, sku, marg, margPct: o.venta ? marg / o.venta : 0, nuevos: o.nuevos, ncli, r, score: max ? pts / max * 100 : 0 }; }).sort((a, b) => b.score - a.score);
+  return { L, y, m, prog, hPas, hTot, bTicket, bCont, bSku, bMarg, hayDocs, hayCont, ultDia, enCurso };
+}
+function rkdHtml(R, yo) {
+  if (!R) return '<p class="muted">Sin datos de ventas.</p>';
+  const pmm = n => "$" + (Math.abs(n) >= 1e6 ? (n / 1e6).toLocaleString("es-CL", { maximumFractionDigits: 1 }) + " MM" : Math.round(n).toLocaleString("es-CL"));
+  const pc = x => x == null ? "–" : Math.round(x * 100) + "%", med = ["🥇", "🥈", "🥉"], col = x => x == null ? "" : x >= 1 ? "color:#1C7A4E" : "color:#B42318";
+  const pesos = RKD_W.filter(([k]) => !((k === "ticket" && !R.hayDocs) || (k === "contado" && !R.hayCont)));
+  return `<div style="overflow-x:auto"><table class="rkd-t" style="width:100%;border-collapse:collapse;font-size:.84rem"><thead><tr><th>#</th><th style="text-align:left">Vendedor</th><th>Puntaje</th><th>Venta vs meta a la fecha</th><th>Ticket prom.</th><th>% contado</th><th>SKU/cliente</th><th>Margen</th><th>Nuevos</th></tr></thead><tbody>
+    ${R.L.map((x, i) => `<tr${yo && x.v === yo ? ' style="background:#FFF8E6"' : ""}><td>${med[i] || i + 1}</td><td style="text-align:left"><b>${String(x.v).replace(/[&<>"]/g, "")}</b></td><td><b>${x.score.toFixed(0)}</b></td>
+      <td style="${col(x.r.venta)}">${pmm(x.venta)} · ${pc(x.r.venta)}</td><td style="${col(x.r.ticket)}">${x.ticket ? pmm(x.ticket) : "–"}</td><td style="${col(x.r.contado)}">${R.hayCont ? pc(x.cont) : "–"}</td>
+      <td style="${col(x.r.sku)}">${x.sku.toFixed(1)}</td><td style="${col(x.r.margen)}">${pmm(x.marg)} · ${pc(x.margPct)}</td><td style="${col(x.r.nuevos)}">${x.nuevos}</td></tr>`).join("") || '<tr><td colspan="9">Sin ventas en el período.</td></tr>'}</tbody></table></div>
+    <p class="muted" style="font-size:.78rem;margin:8px 0 0">Puntaje del mes (100 = cumple todos los objetivos; cada criterio topa en 120%): ${pesos.map(([, t, w]) => t + " " + w).join(" · ")}${pesos.length < RKD_W.length ? " (ticket y/o contado se activan cuando el informe trae «Número del Documento» y «Cond. Pago»; mientras, su peso se reparte)" : ""}.
+      Referencias del equipo (3 meses anteriores): ticket ${R.bTicket ? pmm(R.bTicket) : "–"} · contado ${pc(R.bCont)} · ${R.bSku.toFixed(1)} SKU por cliente · margen ${pc(R.bMarg)}. Venta ponderada: meta del vendedor × ${R.hPas} de ${R.hTot} días hábiles. Objetivo: 4 clientes nuevos al mes.</p>`;
+}
+function plan14Html(B) {
+  if (!B || !B.rows) return "";
+  const tv = B.vend.indexOf("Tienda Hellywoof"), real = {}; B.rows.forEach(r => { if (r[7] === tv) return; const k = (r[8] || B.anio) * 100 + r[2]; real[k] = (real[k] || 0) + r[5]; });
+  const [cy, cm] = String(B.corte || "").split("-").map(Number), cur = cy * 100 + cm, pmm = n => "$" + (n / 1e6).toLocaleString("es-CL", { maximumFractionDigits: 1 }) + " MM";
+  return `<div class="card"><h2>Plan a 14 meses <span class="muted">venta neta mensual de la distribuidora (sin la tienda): 70 → 85 → 100 MM</span></h2>
+    <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:.85rem"><thead><tr><th style="text-align:left">Mes</th><th>Objetivo</th><th>Real</th><th>Cumplimiento</th><th>Diferencia</th></tr></thead><tbody>
+    ${PLAN14.map(p => { const v = real[p.ym] || 0, fut = p.ym > cur; return `<tr${p.ym === cur ? ' style="background:#FFF8E6"' : ""}><td style="text-align:left${p.hito ? ";font-weight:800" : ""}">${["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"][p.m - 1]} ${p.y}${p.hito ? " · hito " + p.hito + " MM" : ""}${p.ym === cur ? " · en curso" : ""}</td>
+      <td style="text-align:right">${pmm(p.meta)}</td><td style="text-align:right">${fut ? "" : pmm(v)}</td><td style="text-align:right">${fut ? "" : Math.round(v / p.meta * 100) + "%"}</td><td style="text-align:right;color:${v >= p.meta ? "#1C7A4E" : "#B42318"}">${fut ? "" : (v >= p.meta ? "+" : "") + pmm(v - p.meta)}</td></tr>`; }).join("")}</tbody></table></div></div>`;
+}
+document.head.insertAdjacentHTML("beforeend", "<style>.rkd-t th,.rkd-t td{padding:7px 8px;border-bottom:1px solid var(--line,#DAE1E7);text-align:right;white-space:nowrap}.rkd-t th{font-size:.74rem;color:var(--muted,#5B6874)}</style>");
+
+const plan14Sync = () => { try { const B = DB && DB.d; const [y, m] = String(B && B.corte || "").split("-").map(Number); if (y) PLAN.meta = metaPlan14(y, m); } catch (e) {} };
+plan14Sync();
+if (typeof pintarPlan === "function") { const _ppP14 = pintarPlan; pintarPlan = function () { plan14Sync(); const r = _ppP14.apply(this, arguments); try { const b = document.querySelector("#crmPlan, #planBody, .pl") ; const host = b ? (b.closest(".card") || b).parentElement : null; if (host && !host.querySelector(".plan14")) host.insertAdjacentHTML("beforeend", plan14Html(DB.d).replace('<div class="card">', '<div class="card plan14">')); } catch (e) {} return r; }; }
+/* ranking del equipo por objetivos (reemplaza al de misiones) */
+ptPintarRanking = function () {
+  const box = $("crmInicio"); if (!box || !SES) return; const viejo = $("ptCard"); if (viejo) viejo.remove();
+  try { ptGuardarHoy(); } catch (e) {}
+  const B = DB && DB.d; if (!B || !B.rows || !B.rows.length) return; const [y, m] = String(B.corte || "").split("-").map(Number); const R = rkdCalc(B, y, m); if (!R || !R.L.length) return;
+  const yo = SES.vendedor.nombre, mio = R.L.findIndex(x => x.v === yo);
+  box.insertAdjacentHTML("beforeend", `<section class="pt-card" id="ptCard" aria-label="Ranking del equipo"><div class="pt-top"><div><h3>🏆 Ranking del equipo</h3>
+    <small>${["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"][m - 1]} · objetivos del mes${mio >= 0 ? " · vas " + (mio + 1) + "° con " + R.L[mio].score.toFixed(0) + " puntos" : ""}</small></div></div>${rkdHtml(R, yo)}</section>`);
+};
 </script>
 </body>
 </html>
