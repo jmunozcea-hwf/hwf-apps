@@ -7059,5 +7059,49 @@ body{padding-bottom:16px!important}
   const vis = () => { btn.hidden = !(typeof SES !== "undefined" && SES); }; vis(); setInterval(vis, 1500);
 })();
 </script>
+
+<style>/* patch_kpiinicio */
+.kp-card{background:linear-gradient(135deg,#0B3146,#1F5673);color:#fff;border-radius:18px;padding:14px 16px;display:grid;gap:10px;margin:0 0 12px}
+.kp-card h3{margin:0;font-size:1rem;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}.kp-card h3 small{opacity:.8;font-weight:600;font-size:.78rem}
+.kp-bar{position:relative;height:12px;border-radius:999px;background:rgba(255,255,255,.18);overflow:hidden}.kp-bar i{position:absolute;inset:0 auto 0 0;background:#F0A818;border-radius:999px}
+.kp-bar s{position:absolute;top:-3px;bottom:-3px;width:3px;background:#fff;border-radius:2px}
+.kp-g{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px}
+.kp-k{background:rgba(255,255,255,.1);border-radius:12px;padding:8px 10px}.kp-k span{display:block;font-size:.7rem;opacity:.8;font-weight:700;text-transform:uppercase;letter-spacing:.03em}
+.kp-k b{display:block;font-size:1.05rem}.kp-k small span{display:inline;text-transform:none;letter-spacing:0;font-size:inherit;opacity:1}.kp-k small{display:block;font-size:.74rem;opacity:.85}
+.kp-t{width:100%;border-collapse:collapse;font-size:.8rem}.kp-t th,.kp-t td{padding:5px 6px;border-bottom:1px solid rgba(255,255,255,.15);text-align:right;white-space:nowrap}.kp-t th:first-child,.kp-t td:first-child{text-align:left}
+.kp-t th{font-size:.68rem;opacity:.8}.kp-ok{color:#9FE3B8}.kp-bad{color:#FFB4A9}
+</style>
+<script>/* patch_kpiinicio: cuadro de avance del mes */
+function kpiDatos(B) {
+  if (!B || !B.rows || !B.vend) return null; const [y, m] = String(B.corte || "").split("-").map(Number); if (!y) return null;
+  const R = rkdCalc(B, y, m); if (!R) return null;
+  const tv = B.vend.indexOf("Tienda Hellywoof"), an = r => r[8] || B.anio, prim = {}, cli = {}; let venta = 0, costo = 0, nuevos = 0;
+  B.rows.forEach(r => { const k = an(r) * 100 + r[2], f = k * 100 + r[3]; if (r[5] > 0 && (prim[r[0]] == null || f < prim[r[0]])) prim[r[0]] = f; });
+  B.rows.forEach(r => { if (r[7] === tv || an(r) !== y || r[2] !== m || r[3] > R.ultDia) return; venta += r[5]; costo += r[4] * r[6]; (cli[r[0]] = cli[r[0]] || new Set()).add(r[1]); });
+  Object.entries(prim).forEach(([ci, f]) => { if (Math.floor(f / 100) === y * 100 + m && f % 100 <= R.ultDia && cli[ci]) nuevos++; });
+  const nc = Object.keys(cli).length, meta = metaPlan14(y, m);
+  return { R, y, m, meta, venta, marg: venta - costo, margPct: venta ? 1 - costo / venta : 0, nuevos, sku: nc ? Object.values(cli).reduce((s, x) => s + x.size, 0) / nc : 0, nc };
+}
+function kpiHtml(B, yo) {
+  const K = kpiDatos(B); if (!K) return "";
+  const R = K.R, pmm = n => "$" + (Math.abs(n) >= 1e6 ? (n / 1e6).toLocaleString("es-CL", { maximumFractionDigits: 1 }) + " MM" : Math.round(n).toLocaleString("es-CL"));
+  const pc = x => Math.round((x || 0) * 100) + "%", av = K.meta ? K.venta / K.meta : 0, tp = R.prog, cls = (a, b) => a >= b ? "kp-ok" : "kp-bad";
+  const MES = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"][K.m - 1];
+  const v = yo ? R.L.find(x => x.v === yo) : null;
+  const col = (t, a, b) => `<div class="kp-k"><span>${t}</span><b>${a}</b>${b ? `<small>${b}</small>` : ""}</div>`;
+  let html = `<section class="kp-card" id="kpCard"><h3>📊 Avance de ${MES} <small>al ${R.ultDia} · ${R.hPas} de ${R.hTot} días hábiles</small></h3>
+    <div class="kp-bar" title="venta vs meta; la marca blanca es el avance de tiempo"><i style="width:${Math.min(100, av * 100).toFixed(1)}%"></i><s style="left:${Math.min(100, tp * 100).toFixed(1)}%"></s></div>
+    <div class="kp-g">${col("Meta distribuidora", pmm(K.meta), "plan 70 → 100 MM")}${col("Venta distribuidora", pmm(K.venta), `<span class="${cls(av, tp)}">${pc(av)} de la meta</span>`)}${col("Avance de tiempo", pc(tp), `${R.hPas} de ${R.hTot} días hábiles`)}
+      ${v ? col("Tu venta", pmm(v.venta), `<span class="${cls(v.meta ? v.venta / v.meta : 0, tp)}">${v.meta ? pc(v.venta / v.meta) + " de tu meta " + pmm(v.meta) : "sin meta"}</span>`) : ""}
+      ${col("Margen distribuidora", pmm(K.marg), pc(K.margPct))}${v ? col("Tu margen", pmm(v.marg), pc(v.margPct)) : ""}
+      ${col("Clientes nuevos", K.nuevos + " distribuidora", v ? v.nuevos + " tuyos" : "")}${col("SKU por cliente", K.sku.toFixed(1) + " distribuidora", v ? v.sku.toFixed(1) + " tuyos" : `${K.nc} clientes compraron`)}</div>`;
+  if (!yo) html += `<div style="overflow-x:auto"><table class="kp-t"><thead><tr><th>Vendedor</th><th>Venta</th><th>% de su meta</th><th>Margen</th><th>Nuevos</th><th>SKU/cliente</th></tr></thead><tbody>
+    ${R.L.map(x => `<tr><td>${String(x.v).replace(/[<>&]/g, "")}</td><td>${pmm(x.venta)}</td><td class="${cls(x.meta ? x.venta / x.meta : 0, tp)}">${x.meta ? pc(x.venta / x.meta) : "–"}</td><td>${pmm(x.marg)} · ${pc(x.margPct)}</td><td>${x.nuevos}</td><td>${x.sku.toFixed(1)}</td></tr>`).join("")}</tbody></table></div>`;
+  return html + `</section>`;
+}
+
+{ const _piKP = pintarInicio; pintarInicio = function () { const r = _piKP.apply(this, arguments);
+    try { const box = $("crmInicio"), B = DB && DB.d, o = $("kpCard"); if (o) o.remove(); if (box && B && SES) box.insertAdjacentHTML("afterbegin", kpiHtml(B, SES.vendedor.nombre)); } catch (e) { console.error(e); } return r; }; }
+</script>
 </body>
 </html>
