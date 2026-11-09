@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="es-CL"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Tienda Hellywoof</title><meta name="theme-color" content="#5B2A86"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon-192.png">
-<script>/* espacio propio en el almacenamiento del sitio (no choca con app Ventas ni HWF Admin en el mismo equipo) */
+<script>/* espacio propio en el almacenamiento del sitio (no choca con Nota de Pedido ni HWF Admin en el mismo equipo) */
 (function () { var S = Storage.prototype, g = S.getItem, s = S.setItem, r = S.removeItem, P = "hwf-tda:";
   var k = function (x) { x = String(x); return x.indexOf(P) === 0 ? x : P + x; };
   S.getItem = function (x) { return g.call(this, k(x)); }; S.setItem = function (x, v) { return s.call(this, k(x), v); }; S.removeItem = function (x) { return r.call(this, k(x)); }; })();
@@ -1535,7 +1535,7 @@ const turno = () => { const t = lsGet(TURK, null); return t && t.f === hoyISO() 
 let SES = null; const refrescarSES = () => { const v = turno(); SES = v ? { vendedor: { nombre: v + TAG, usuario: v } } : null; };
 function pedirTurno() {
   const o = document.createElement("div"); o.className = "t-ov"; o.id = "tOv";
-  o.innerHTML = `<div class="c"><h1>¿Quién inicia la jornada hoy?</h1><p>${esc(new Date().toLocaleDateString("es-CL", { weekday: "long", day: "numeric", month: "long" }))}. Todo lo de hoy (misiones, puntos y ventas anotadas) queda a tu nombre.</p>
+  o.innerHTML = `<div class="c"><h1>¿Quién inicia la jornada hoy?</h1><p>${esc(new Date().toLocaleDateString("es-CL", { weekday: "long", day: "numeric", month: "long" }))}. Todo lo de hoy (misiones y puntos) queda a tu nombre.</p>
     ${USUARIOS.map(u => `<button type="button" class="q" data-u="${esc(u)}">👤 ${esc(u)}</button>`).join("")}<button type="button" class="q" data-adm style="font-size:.9rem;color:#5B6874">🔑 Acceso administración (revisar avances)</button></div>`;
   document.body.appendChild(o); o.onclick = e => { if (e.target.closest("[data-adm]")) { o.remove(); return entrarAdmin(); } const b = e.target.closest("[data-u]"); if (!b) return; lsSet(TURK, { f: hoyISO(), v: b.dataset.u }); { const Hh = lsGet("turnos", {}); Hh[hoyISO()] = b.dataset.u; lsSet("turnos", Hh); } o.remove(); refrescarSES(); pintarTodo(); toast("Buena jornada, " + b.dataset.u + "."); };
 }
@@ -1818,7 +1818,7 @@ function pintar(s) { try { ({ inicio: pintarInicio, ventas: pintarVentas, plan: 
 function pintarTodo() { const D = DATA(), t = turno(); $("tTurno").textContent = "Turno: " + (t || "—") + " · cambiar"; $("tAct").textContent = "Datos de Drive: " + ((D && D.act && D.act.drive) || "—"); pintar(vista); }
 $("tNav").onclick = e => { const b = e.target.closest("[data-s]"); if (b) ir(b.dataset.s); };
 $("tTurno").onclick = () => { if (confirm("¿Cambiar quién está en la jornada de hoy? (o entrar como administración)")) { localStorage.removeItem(TURK); refrescarSES(); pedirTurno(); } };
-/* compatibilidad con el módulo de Nutrición de app Ventas (sin pedido) */
+/* compatibilidad con el módulo de Nutrición de Nota de Pedido (sin pedido) */
 const byCode = {}; const line = () => ({ q: 0 }); const setQty = () => {};
 /* ================= acceso de administración (solo revisa: no suma puntos) ================= */
 const ADMK = "admin";
