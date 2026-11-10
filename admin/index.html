@@ -4218,7 +4218,7 @@ function rkPeriodo(p) {
     mes: { a: mi, b: hoy, t: "Este mes", pa: mesAnt, pb: rkAdd(mesAnt, Math.max(0, Math.round((rkD(hoy) - rkD(mi)) / 864e5))) }, mant: { a: mesAnt, b: finMesAnt, t: "Mes pasado", pa: "", pb: "" } })[p];
 }
 function rkFilas() {
-  const s = store.get(RK_KEY, null), filas = ((s && s.filas) || []).map(r => ({ f: r[0], v: r[1], pts: +r[2] || 0, max: +r[3] || 0, ok: +r[4] || 0, n: +r[5] || 0, det: r[6] || "" }));
+  const s = store.get(RK_KEY, null), filas = ((s && s.filas) || []).filter(r => String(r && r[1] || "").charAt(0) !== "~").map(r => ({ f: r[0], v: r[1], pts: +r[2] || 0, max: +r[3] || 0, ok: +r[4] || 0, n: +r[5] || 0, det: r[6] || "" }));
   if (RK_DEMO && !filas.length) {   /* demo: puntajes simulados */
     const hoy = rkHoy(), ini = (() => { const d = rkD(hoy.slice(0, 8) + "01"); d.setMonth(d.getMonth() - 1); return rkIso(d); })();
     const MIS = ["Toma tus pedidos del día", "Cobra lo vencido o que vence hoy", "Arma tu ruta del día", "Contacta a 3 clientes con compra pendiente", "Cierra 5 notas de pedido Defontana", "Contacta 1 prospecto agendado"];
@@ -5175,7 +5175,7 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261110172336";
+const HWF_VER = "20261110173311";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer)\/[^/]*$/, "/");
   let avisado = false;
