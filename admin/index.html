@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="es">
 <head><!-- patch_claves -->
-<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0B3146"><link rel="apple-touch-icon" href="icon-192.png"><link rel="icon" href="icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="HWF Admin"><script>/* patch_congruencia: días de apertura de la tienda (todos, salvo feriados irrenunciables) */
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0B3146"><link rel="apple-touch-icon" href="icon-192.png"><link rel="icon" href="icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="HWF"><script>/* patch_congruencia: días de apertura de la tienda (todos, salvo feriados irrenunciables) */
 function tdaDiasAp(y, m, hasta) { const IRR = ["01-01", "05-01", "09-18", "09-19", "12-25"]; let n = 0;
   for (let d = 1; d <= hasta; d++) if (!IRR.includes(String(m).padStart(2, "0") + "-" + String(d).padStart(2, "0"))) n++; return n; }
 const npNorm = s => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toUpperCase().replace(/[^A-Z ]/g, " ").trim().split(/\s+/)[0] || "";
@@ -63,7 +63,7 @@ function pinta(){
  if(document.getElementById("hwfGate"))return;
  var s=document.createElement("style");s.textContent="#hwfGate{position:fixed;inset:0;z-index:2147483000;background:#0B3146;color:#fff;display:flex;align-items:center;justify-content:center;padding:20px;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}#hwfGate .c{background:#fff;color:#0F1E29;border-radius:18px;padding:22px;max-width:440px;width:100%;display:grid;gap:12px;box-shadow:0 20px 50px rgba(0,0,0,.35)}#hwfGate h1{margin:0;font-size:1.3rem}#hwfGate p{margin:0;color:#5B6874;font-size:.92rem;line-height:1.4}#hwfGate textarea{width:100%;box-sizing:border-box;min-height:96px;border:1px solid #DAE1E7;border-radius:12px;padding:10px;font:inherit;font-size:.9rem}#hwfGate button{border:0;border-radius:12px;padding:13px;font:inherit;font-weight:700;background:#0B3146;color:#fff;cursor:pointer;min-height:48px}#hwfGate button[disabled]{opacity:.6}#hwfGate .e{color:#B42318;font-size:.88rem;min-height:1em}";
  document.head.appendChild(s);
- var g=document.createElement("div");g.id="hwfGate";g.innerHTML='<div class="c"><h1>HWF Admin</h1><p>'+(ESADM?'Abre el <b>link de conexión</b> de HWF Admin o pega aquí el link o el código (empieza con <b>HWF1:</b>). Si no lo tienes: en el script de Google ejecuta <b>enviarLinksConexion</b> y te llega por correo.':'Abre el <b>link</b> que te envió HWF y la app se conecta sola. O pega aquí el link o el código (empieza con <b>HWF1:</b>). Se pide una sola vez.')+'</p><textarea id="hwfGc" placeholder="Pega el link o el código HWF1:…" autocomplete="off" autocapitalize="off" spellcheck="false"></textarea><details id="hwfGm" style="font-size:.9rem"><summary style="cursor:pointer;font-weight:600;color:#0B3146">¿No tienes link ni código? Conectar con URL y clave</summary><div style="display:grid;gap:8px;margin-top:8px"><input id="hwfGu" type="url" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off" autocapitalize="off" spellcheck="false" style="border:1px solid #DAE1E7;border-radius:12px;padding:11px;font:inherit;font-size:.9rem"><input id="hwfGk" type="text" placeholder="Clave (la de Config.gs)" autocomplete="off" autocapitalize="off" spellcheck="false" style="border:1px solid #DAE1E7;border-radius:12px;padding:11px;font:inherit;font-size:.9rem"><p style="font-size:.8rem;margin:0">La URL: Apps Script → Implementar → Gestionar implementaciones (termina en /exec). La clave: archivo Config.gs.</p></div></details><div class="e" id="hwfGe"></div><!-- gatemanual --><button type="button" id="hwfGb">Conectar</button></div>';
+ var g=document.createElement("div");g.id="hwfGate";g.innerHTML='<div class="c"><h1>HWF</h1><p>'+(ESADM?'Abre el <b>link de conexión</b> de HWF o pega aquí el link o el código (empieza con <b>HWF1:</b>). Si no lo tienes: en el script de Google ejecuta <b>enviarLinksConexion</b> y te llega por correo.':'Abre el <b>link</b> que te envió HWF y la app se conecta sola. O pega aquí el link o el código (empieza con <b>HWF1:</b>). Se pide una sola vez.')+'</p><textarea id="hwfGc" placeholder="Pega el link o el código HWF1:…" autocomplete="off" autocapitalize="off" spellcheck="false"></textarea><details id="hwfGm" style="font-size:.9rem"><summary style="cursor:pointer;font-weight:600;color:#0B3146">¿No tienes link ni código? Conectar con URL y clave</summary><div style="display:grid;gap:8px;margin-top:8px"><input id="hwfGu" type="url" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off" autocapitalize="off" spellcheck="false" style="border:1px solid #DAE1E7;border-radius:12px;padding:11px;font:inherit;font-size:.9rem"><input id="hwfGk" type="text" placeholder="Clave (la de Config.gs)" autocomplete="off" autocapitalize="off" spellcheck="false" style="border:1px solid #DAE1E7;border-radius:12px;padding:11px;font:inherit;font-size:.9rem"><p style="font-size:.8rem;margin:0">La URL: Apps Script → Implementar → Gestionar implementaciones (termina en /exec). La clave: archivo Config.gs.</p></div></details><div class="e" id="hwfGe"></div><!-- gatemanual --><button type="button" id="hwfGb">Conectar</button></div>';
  document.body.appendChild(g);
  document.getElementById("hwfGb").onclick=async function(){
   var b=this,e=document.getElementById("hwfGe"),c=dec(document.getElementById("hwfGc").value);if(!c){var gu=(document.getElementById("hwfGu")||{}).value||"",gk=(document.getElementById("hwfGk")||{}).value||"";gu=gu.trim();gk=gk.trim();if(/^https:\/\/script\.google(usercontent)?\.com\/.+\/exec$/.test(gu)&&gk.length>=4)c={url:gu,clave:gk};else if(gu||gk){e.textContent="Revisa la URL (debe terminar en /exec) y la clave.";return}}
@@ -127,7 +127,7 @@ window.cartAplicar = function (d) {
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0B3146">
-<title>HWF Admin</title>
+<title>HWF</title>
 <style>/* required styles */
 
 .leaflet-pane,
@@ -2100,7 +2100,7 @@ naGuardar = function (est) {
   _naGuardar(est);
   const p = NAACT && NAACT.p; if (!p || !p.id || !SYC()) return;
   const r = NAREV()[p.num], cola = store.get("adm-sync-cola", {});
-  cola[p.id] = r ? { id: p.id, est: r.est, items: r.items || null, nota: r.nota || "", fecha: r.fecha || new Date().toISOString(), por: "HWF Admin" } : { id: p.id, borrar: true, fecha: new Date().toISOString() };
+  cola[p.id] = r ? { id: p.id, est: r.est, items: r.items || null, nota: r.nota || "", fecha: r.fecha || new Date().toISOString(), por: "HWF" } : { id: p.id, borrar: true, fecha: new Date().toISOString() };
   if (r) { r.nube = true; const R = NAREV(); R[p.num] = r; setNAREV(R); }
   store.set("adm-sync-cola", cola); clearTimeout(naGuardar.t); naGuardar.t = setTimeout(() => sySync(), 800);
 };
@@ -2130,7 +2130,7 @@ pintarDatos = function () {
     <div class="sy-f"><label for="syUrl">URL del script (termina en /exec)</label><input id="syUrl" type="url" placeholder="https://script.google.com/macros/s/.../exec" value="${esc(cfg.url)}">
       <label for="syClave">Clave (la misma del script)</label><input id="syClave" type="text" autocomplete="off" value="${esc(cfg.clave)}"></div>
     <div class="np-top"><button class="btn pri" type="button" id="syGuardar">Guardar y probar</button>${cfg.url ? '<button class="btn danger" type="button" id="syQuitar">Desconectar</button>' : ""}</div>
-    ${cfg.url ? `<div class="sy-f"><label for="syCodigo">Código para los vendedores: cópialo y envíaselo por WhatsApp; ellos lo pegan en el botón “Conectar con HWF Admin” de su app.</label>
+    ${cfg.url ? `<div class="sy-f"><label for="syCodigo">Código para los vendedores: cópialo y envíaselo por WhatsApp; ellos lo pegan en el botón “Conectar con HWF” de su app.</label>
       <textarea class="sy-cod" id="syCodigo" readonly>${esc(syCodigo(cfg))}</textarea><div class="np-top"><button class="btn" type="button" id="syCopiar">Copiar código para vendedores</button></div></div>` : ""}
     <div class="sy-st" id="syEst"></div>`;
   const ref = $("masBody").firstElementChild; $("masBody").insertBefore(d, ref ? ref.nextSibling : null); syPintarEst();
@@ -2196,7 +2196,7 @@ naDescargarUna = async function (p) {
   ws.mergeCells("A1:K1"); const t = ws.getCell("A1"); t.value = EST_SELLO[est]; t.fill = fill(C1); t.font = { bold: true, size: 18, color: { argb: "FFFFFFFF" } }; t.alignment = { horizontal: "center", vertical: "middle" }; ws.getRow(1).height = 36;
   ws.mergeCells("A2:K2"); const s2 = ws.getCell("A2");
   const fr = r.fecha ? new Date(r.fecha).toLocaleString("es-CL") : "";
-  s2.value = `HWF MASCOTAS · Distribuidora HWF${est !== "pen" && fr ? ` · ${est === "apr" ? "Aprobada" : est === "rec" ? "Rechazada" : "Modificada"} el ${fr} por HWF Admin` : ""}`; s2.fill = fill(C2); s2.font = { bold: true, color: { argb: "FF" + C1 } }; s2.alignment = { horizontal: "center" };
+  s2.value = `HWF MASCOTAS · Distribuidora HWF${est !== "pen" && fr ? ` · ${est === "apr" ? "Aprobada" : est === "rec" ? "Rechazada" : "Modificada"} el ${fr} por HWF` : ""}`; s2.fill = fill(C2); s2.font = { bold: true, color: { argb: "FF" + C1 } }; s2.alignment = { horizontal: "center" };
   const pares = [["N° pedido", p.num, "Fecha emisión", naFecha(p)], ["Cliente", p.cliente, "RUT", p.rut || ""], ["Giro", p.giro || "", "Contacto", p.contacto || ""], ["Teléfono", p.fono || "", "Correo", p.mail || ""],
     ["Dirección facturación", p.dir || "", "Comuna / Ciudad", p.comuna || ""], ["Fecha entrega", naFISO(p.entrega), "Despacho", p.despacho || ""], ["Dirección entrega", p.dirEnt || "", "Vendedor", p.vend],
     ["Estado", NA_EST[est], "Comentario revisión", r.nota || ""]];
@@ -2566,7 +2566,7 @@ async function prSyncAdm() {
   const cfg = SYC(); if (!cfg) return false;
   const cola = store.get("adm-prosp-cola", {});
   for (const id of Object.keys(cola)) {
-    const r = await syCall(cfg, { accion: "prospectoCambio", cambio: Object.assign({ id, por: "HWF Admin" }, cola[id]) });
+    const r = await syCall(cfg, { accion: "prospectoCambio", cambio: Object.assign({ id, por: "HWF" }, cola[id]) });
     if (!r.ok) { if (/no está en la planilla/.test(r.error || "")) { const c = store.get("adm-prosp-cola", {}); delete c[id]; store.set("adm-prosp-cola", c); continue; } break; }
     const c2 = store.get("adm-prosp-cola", {}); delete c2[id]; store.set("adm-prosp-cola", c2);
   }
@@ -3074,7 +3074,7 @@ if (navEsAbierta()) navEmpujar();
 navPintar();
 
 
-/* ===== Notas borradas de la planilla: se quitan de HWF Admin ===== */
+/* ===== Notas borradas de la planilla: se quitan de HWF ===== */
 async function nappPurgar() {
   const cfg = SYC(); if (!cfg || !cfg.url) return;
   const ids = IMP.pedidos.filter(p => p.id).map(p => p.id); if (!ids.length) return;
@@ -3545,10 +3545,10 @@ function pintarCambios() {
 }
 async function ccReactivar(c) {
   if (!c) return; const cfg = SYC();
-  if (!cfg || !cfg.url) { toast("Para reactivar, conecta HWF Admin con el script (Menú ☰ → Datos)."); return; }
+  if (!cfg || !cfg.url) { toast("Para reactivar, conecta HWF con el script (Menú ☰ → Datos)."); return; }
   if (!confirm(`¿Reactivar a ${c.cliente}? Volverá a aparecer en la app de los vendedores.`)) return;
-  const ev = { id: "CC-" + Date.now().toString(36).toUpperCase() + "-ADM", fecha: new Date().toISOString(), vendedor: "HWF Admin", cartera: c.cartera || "", codigo: c.codigo, cliente: c.cliente,
-    tipo: "Reactivación", motivo: "Reactivado por HWF Admin", detalle: "", cambios: [{ campo: "Estado", antes: "De baja (" + (c.motivo || "") + ")", despues: "Activo" }] };
+  const ev = { id: "CC-" + Date.now().toString(36).toUpperCase() + "-ADM", fecha: new Date().toISOString(), vendedor: "HWF", cartera: c.cartera || "", codigo: c.codigo, cliente: c.cliente,
+    tipo: "Reactivación", motivo: "Reactivado por HWF", detalle: "", cambios: [{ campo: "Estado", antes: "De baja (" + (c.motivo || "") + ")", despues: "Activo" }] };
   const r = await syCall(cfg, { accion: "clienteCambios", cambios: [ev] });
   if (!r.ok) { toast(r.error || "No se pudo reactivar."); return; }
   await ccSync(); pintarCambios(); toast("Cliente reactivado. Los vendedores lo verán en la próxima sincronización.");
@@ -3586,7 +3586,7 @@ function npBarrasMes(pend) {
 </script>
 
 <script>
-/* ===== Comparación con el año anterior (común a HWF Admin y app Ventas) =====
+/* ===== Comparación con el año anterior (común a HWF y app Ventas) =====
    D.rows: [ci, pi, mes, día, cant, neto, costo, vend, año?]  (año vacío = D.anio)
    yaCalc(D, Y, M, lim, incl, cart): mes M a la misma fecha (día ≤ lim), año a la fecha, mes completo del año anterior,
    venta mensual de ambos años y detalle por cartera. Devuelve null si no hay ventas del año anterior. */
@@ -3665,7 +3665,7 @@ pintarDashboard = function () {
 </script>
 
 <script>
-/* Tarjeta «Cotizaciones Defontana» del Dashboard (HWF Admin y app Ventas).
+/* Tarjeta «Cotizaciones Defontana» del Dashboard (HWF y app Ventas).
    cots: [num, fecha dd/mm/aaaa, cliente, vendedor, cartera, cantidad, producto, monto neto] */
 const CZ_CSS = ".cz-tot{display:flex;gap:14px;flex-wrap:wrap;margin:0 0 8px}.cz-tot div{display:grid}.cz-tot b{font-size:1.15rem;font-variant-numeric:tabular-nums}.cz-tot span{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:700}"
   + ".cz-v{display:grid;gap:6px;margin:4px 0 10px}.cz-v .t{display:flex;justify-content:space-between;gap:8px;font-size:.88rem}.cz-v .t b{font-variant-numeric:tabular-nums}"
@@ -3853,7 +3853,7 @@ try { if (typeof TAB !== "undefined" && TAB === "res" && $("s-res") && !$("s-res
   b.onclick = async () => {
     if (b.disabled) return;
     const cfg = typeof SYC === "function" ? SYC() : null;
-    if (!cfg || !cfg.url) { toast("Primero conecta HWF Admin con el script (Menú ☰ → Datos)."); return; }
+    if (!cfg || !cfg.url) { toast("Primero conecta HWF con el script (Menú ☰ → Datos)."); return; }
     if (!navigator.onLine) { toast("Sin conexión a internet."); return; }
     b.disabled = true; tx("Sincronizando…");
     try {
@@ -3873,7 +3873,7 @@ try { if (typeof TAB !== "undefined" && TAB === "res" && $("s-res") && !$("s-res
 
 <script>
 /* Plan de crecimiento HWF sin presupuesto de marketing (presentación del 02-11-2026): de 65 a 80 MM mensuales.
-   Cálculo común para HWF Admin y app Ventas a partir de las ventas (D.rows: [cliente, producto, mes, día, cant, neto, costo, vendedor, año?]). */
+   Cálculo común para HWF y app Ventas a partir de las ventas (D.rows: [cliente, producto, mes, día, cant, neto, costo, vendedor, año?]). */
 const PLAN = { meta: 80000000, base: 65000000, cuotaMin: 4, cuotaMax: 6, excluir: [/\bpro ?pets?\b/, /\byanez\b/],  /* clientes fuera del plan (pedido de Jorge 03-11): Propets y Yañez */
   pasos: [["1–30", "Ordenar la base", ["Lista de dormidos desde Defontana", "Clasificación A, B y C", "WhatsApp Business y catálogo", "Reunión con 2 marcas principales"]],
           ["31–60", "Activar la venta", ["Oferta de surtido en cada visita", "Cuotas de prospección por vendedor", "Programa de referidos", "Calendario fijo de rutas"]],
@@ -4003,7 +4003,7 @@ try { if (typeof TAB !== "undefined" && TAB === "res" && $("s-res") && !$("s-res
 </script>
 
 <script>
-/* ===== Días calle (cobranza) — núcleo común de app Ventas y HWF Admin =====
+/* ===== Días calle (cobranza) — núcleo común de app Ventas y HWF =====
    Con la información libre de Defontana:
    - DSO (countback) = cuántos días de ventas recientes (con IVA), contando hacia atrás desde el corte, hacen falta para sumar
                        lo que se debe hoy. Más fiel que saldo ÷ ventas × 90 cuando las compras son irregulares.  (InfCobranzaDetallado + ventas)
@@ -4111,7 +4111,7 @@ function dcHtmlVentas(R, mm, esc, titulo) {
       ${top.map(c => `<tr><td>${esc(c.nom)}</td><td><span class="dc-p ${dcSem(c)}">${dcF(dcRef(c))}</span></td><td>${dcF(c.plazo)}</td><td>${mm(c.saldo)}</td></tr>`).join("")}</tbody></table></div>` : ""}
     <p class="dc-n">Días calle = cuántos días tarda en promedio un peso vendido en volver como pago. Verde: dentro del plazo · amarillo: hasta 20 días más · rojo: más lento.</p></section>`;
 }
-/* resumen detallado (HWF Admin) */
+/* resumen detallado (HWF) */
 let dcOrden = "saldo", dcQ = "", dcV = "", dcTodos = false;
 function dcHtmlAdmin(R, mm, esc) {
   const T = R.T, refT = dcRef(T);
@@ -4404,7 +4404,7 @@ async function praCambiar(i, on, btn) {
   const cfg = SYC(); if (!cfg || !cfg.url) { toast("Sin conexión con el script de Google: no se puede guardar."); return; }
   const p = CAT_APP.find(x => x[0] === i), t = new Date().toISOString();
   if (btn) btn.disabled = true;
-  const r = await _syCallPra(cfg, { accion: "clienteCambios", cambios: [{ id: "CC-PR-" + String(i).replace(/[^A-Za-z0-9]/g, "") + "-" + Date.now(), fecha: t, vendedor: "HWF Admin", cartera: "",
+  const r = await _syCallPra(cfg, { accion: "clienteCambios", cambios: [{ id: "CC-PR-" + String(i).replace(/[^A-Za-z0-9]/g, "") + "-" + Date.now(), fecha: t, vendedor: "HWF", cartera: "",
     codigo: "PRODUCTO", cliente: i + " · " + (p ? p[1] : ""), tipo: "Datos", motivo: on ? "Producto activado en la app de ventas" : "Producto desactivado en la app de ventas",
     detalle: JSON.stringify({ pr: 1, i, on, t }), cambios: [{ campo: "Visible en la app de ventas", antes: on ? "No" : "Sí", despues: on ? "Sí" : "No" }] }] });
   if (r && r.ok) { const E = praEstado(); E[i] = { on, t }; store.set(PRA_KEY, E); store.set(PRA_VER, ""); toast((p ? p[1] : i) + (on ? ": visible en la app de ventas." : ": oculto en la app de ventas.")); }
@@ -4450,13 +4450,13 @@ const _syCallCal = syCall;
 syCall = async function (cfg, d) { const r = await _syCallCal.apply(this, arguments);
   if (d && d.accion === "clientesCambios" && r && Array.isArray(r.cambios)) r.cambios = r.cambios.filter(c => c && c.codigo !== "EVENTO"); return r; };
 const CAL_call = d => CAL_DEMO ? calDemoCall(d) : (SYC() && SYC().url ? _syCallCal(SYC(), d) : Promise.resolve({ ok: false, error: "Sin conexión con el script de Google." }));
-const CAL_get = (k, d) => store.get(k, d), CAL_set = (k, v) => store.set(k, v), CAL_quien = () => "HWF Admin", CAL_toast = m => toast(m);
+const CAL_get = (k, d) => store.get(k, d), CAL_set = (k, v) => store.set(k, v), CAL_quien = () => "HWF", CAL_toast = m => toast(m);
 const CAL_clientes = () => ((typeof A !== "undefined" && A && A.clientes) || []).map(c => tc(c.nombre || c.nom || "")).filter(Boolean).sort(), CAL_admin = true;
-/* ===== Calendario del equipo (común a app Ventas y HWF Admin) =====
+/* ===== Calendario del equipo (común a app Ventas y HWF) =====
    Ferias, activaciones de producto, capacitaciones y otras actividades extra. Se guarda en el registro central del script
    (acción «clienteCambios», código «EVENTO», detalle JSON); sirve con el script v11 de la planilla y con el nuevo.
    Cada app define antes: CAL_call(datos) → respuesta del script, CAL_get(k, def), CAL_set(k, v), CAL_quien(), CAL_toast(m),
-   CAL_clientes() → nombres de clientes (sugerencias), CAL_admin (true en HWF Admin). */
+   CAL_clientes() → nombres de clientes (sugerencias), CAL_admin (true en HWF). */
 const CAL_TIPOS = ["Feria", "Activación", "Capacitación", "Reunión", "Otra"];
 const CAL_K = "hwf-cal", CAL_V = "hwf-cal-ver";
 const calEsc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -4634,7 +4634,7 @@ async function cartGuardar(o) {
   o.cart = 1; o.t = new Date().toISOString();
   if (!CART_DEMO) {
     const cfg = SYC(); if (!cfg || !cfg.url) { toast("Sin conexión con el script de Google: no se puede guardar."); return false; }
-    const r = await _syCallCart(cfg, { accion: "clienteCambios", cambios: [{ id: "CC-CT-" + Date.now(), fecha: o.t, vendedor: "HWF Admin", cartera: o.a || "", codigo: "CARTERA",
+    const r = await _syCallCart(cfg, { accion: "clienteCambios", cambios: [{ id: "CC-CT-" + Date.now(), fecha: o.t, vendedor: "HWF", cartera: o.a || "", codigo: "CARTERA",
       cliente: o.tipo === "cli" ? o.de : "Cartera de " + o.de, tipo: "Datos", motivo: o.borrado ? "Reasignación anulada" : (o.tipo === "cli" ? "Cliente reasignado a " : "Cartera completa reasignada a ") + (o.a || ""),
       detalle: JSON.stringify(o), cambios: [{ campo: "Cartera", antes: o.tipo === "cli" ? "" : o.de, despues: o.borrado ? "(anulado)" : o.a }] }] });
     if (!r || !r.ok) { toast("No se pudo guardar: " + ((r && r.error) || "sin respuesta")); return false; }
@@ -4660,7 +4660,7 @@ function cartCard() {
       <label>Pasan a<select id="cartA">${V.map(opt).join("")}</select></label><button type="button" id="cartVB">Reasignar cartera completa</button></div>
     ${listaV ? `<div><b style="font-size:.85rem">Carteras reasignadas</b><ul class="cart-l">${listaV}</ul></div>` : ""}
     ${listaC ? `<div><b style="font-size:.85rem">Clientes reasignados</b><ul class="cart-l">${listaC}</ul></div>` : ""}
-    <p class="muted" style="margin:0;font-size:.8rem">Se aplica a clientes, metas, ventas y cobranza en HWF Admin y en app Ventas (los teléfonos lo toman al abrir la app). Defontana sigue con el vendedor original.</p></div>`;
+    <p class="muted" style="margin:0;font-size:.8rem">Se aplica a clientes, metas, ventas y cobranza en HWF y en app Ventas (los teléfonos lo toman al abrir la app). Defontana sigue con el vendedor original.</p></div>`;
 }
 const _pintarVendedoresCart = pintarVendedores;
 pintarVendedores = function () {
@@ -4719,7 +4719,7 @@ function lcCard() {
       <div class="lc-bt"><button type="button" class="btn" data-lc-cp="${esc(l)}">Copiar link</button><a class="btn" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(t + ": abre este link en tu teléfono (solo una vez) y la app queda conectada: " + l)}">Enviar por WhatsApp</a></div></div></div>`;
   return `<div class="card" id="lcCard"><h2>Conectar teléfonos <span class="muted">sin copiar códigos</span></h2>
     <p class="muted" style="margin:0 0 10px;font-size:.85rem">Abre el link (o escanea el QR con la cámara) <b>una sola vez</b> en el teléfono: la app se conecta sola. Envíalo solo a personas de HWF: quien lo tenga puede ver los datos.</p>
-    ${blk("app Ventas (vendedores)", "Para los teléfonos de los vendedores", v)}${blk("HWF Admin", "Solo para administración", a)}
+    ${blk("app Ventas (vendedores)", "Para los teléfonos de los vendedores", v)}${blk("HWF", "Solo para administración", a)}
     <p class="muted" style="margin:10px 0 0;font-size:.78rem">iPhone: abre el link en Safari, espera que se conecte y recién ahí «Compartir → Agregar a inicio».</p></div>`;
 }
 const _pintarDatosLC = pintarDatos;
@@ -5029,7 +5029,7 @@ body{padding-bottom:16px!important}
   function pintar() {
     const prin = [...document.querySelectorAll("nav.bottom [data-t]")].filter(b => b.dataset.t !== "mas"), mas = [...document.querySelectorAll("#masSeg [data-m]")];
     const it = (k, t, tipo) => `<button type="button" class="sn-i" data-${tipo}="${k}" aria-current="${actual === tipo + ":" + k}"><span class="sn-e">${ICO[k] || "•"}</span>${t}</button>`;
-    pan.innerHTML = `<div class="sn-top"><b>HWF Admin</b><button type="button" class="sn-x" aria-label="Cerrar">×</button></div>
+    pan.innerHTML = `<div class="sn-top"><b>HWF</b><button type="button" class="sn-x" aria-label="Cerrar">×</button></div>
       ${prin.map(b => it(b.dataset.t, txt(b), "t")).join("")}${mas.map(b => it(b.dataset.m, txt(b), "m")).join("")}`;
   }
   pan.addEventListener("click", e => {
@@ -5165,7 +5165,7 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261110073653";
+const HWF_VER = "20261110075227";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer)\/[^/]*$/, "/");
   let avisado = false;

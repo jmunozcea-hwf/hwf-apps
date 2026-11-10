@@ -1,7 +1,8 @@
 <!doctype html>
 <html lang="es-CL"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Tienda Hellywoof</title><meta name="theme-color" content="#5B2A86"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon-192.png">
-<script>/* espacio propio en el almacenamiento del sitio (no choca con app Ventas ni HWF Admin en el mismo equipo) */
+<title>TIENDA HWF</title>
+<meta name="apple-mobile-web-app-title" content="TIENDA"><meta name="theme-color" content="#5B2A86"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon-192.png">
+<script>/* espacio propio en el almacenamiento del sitio (no choca con app Ventas ni HWF en el mismo equipo) */
 (function () { var S = Storage.prototype, g = S.getItem, s = S.setItem, r = S.removeItem, P = "hwf-tda:";
   var k = function (x) { x = String(x); return x.indexOf(P) === 0 ? x : P + x; };
   S.getItem = function (x) { return g.call(this, k(x)); }; S.setItem = function (x, v) { return s.call(this, k(x), v); }; S.removeItem = function (x) { return r.call(this, k(x)); }; })();
@@ -1007,7 +1008,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 .dir-prev{display:flex;gap:6px;flex-wrap:wrap}
 .dir-prev button{border:1px dashed var(--line);background:var(--surface);border-radius:999px;padding:6px 11px;font:inherit;font-size:.84rem;cursor:pointer;color:var(--ink)}
 
-/* ===== Envío a HWF Admin ===== */
+/* ===== Envío a HWF ===== */
 #btnSync .pt{width:9px;height:9px;border-radius:50%;background:#9AA5AF;display:inline-block}
 #btnSync.ok .pt{background:#1C7A4E}#btnSync.cola .pt{background:#C77700}#btnSync.err .pt{background:#B42318}
 .sy-cod{width:100%;min-height:90px;border:1px solid var(--line);border-radius:8px;padding:10px;font:inherit;font-size:.85rem;resize:vertical;background:var(--bg);color:var(--ink)}
@@ -1465,7 +1466,7 @@ main,.t-card{min-width:0;max-width:100%}#sDash .t-t td:first-child{white-space:n
 .d-ley .ly::before{background:#C9B3DD}.d-ley .mt::before{background:#F28C28;height:3px;vertical-align:3px}
 .modal[hidden],.toast[hidden],[hidden]{display:none!important}
 </style></head><body>
-<div class="t-top"><div><h1>🐾 Tienda Hellywoof</h1><small id="tAct">Datos de Drive: —</small></div><button type="button" class="t-turno" id="tTurno">Turno: —</button></div>
+<div class="t-top"><div><h1>🐾 TIENDA HWF</h1><small id="tAct">Datos de Drive: —</small></div><button type="button" class="t-turno" id="tTurno">Turno: —</button></div>
 <nav class="t-nav" id="tNav">
   <button type="button" data-s="inicio"><span>🏠</span>Inicio</button><button type="button" data-s="ventas"><span>💰</span>Ventas</button><button type="button" data-s="dash"><span>📊</span>Panel</button>
   <button type="button" data-s="plan"><span>📈</span>Plan</button><button type="button" data-s="stock"><span>📦</span>Stock</button>
@@ -1546,7 +1547,7 @@ function pedirTurno() {
 }
 function pantallaConexion(msg) {
   const o = document.createElement("div"); o.className = "t-ov"; o.id = "tGate";
-  o.innerHTML = `<div class="c"><h1>Tienda Hellywoof</h1><p>Abre el <b>link de conexión</b> que entrega HWF Admin, o pega aquí el link o el código (empieza con <b>HWF1:</b>). Se pide una sola vez en este computador.</p>
+  o.innerHTML = `<div class="c"><h1>TIENDA HWF</h1><p>Abre el <b>link de conexión</b> que entrega HWF, o pega aquí el link o el código (empieza con <b>HWF1:</b>). Se pide una sola vez en este computador.</p>
     <textarea id="gC" rows="3" placeholder="Pega el link o el código HWF1:…"></textarea>
     <details><summary style="cursor:pointer;font-weight:600">¿No tienes link ni código? Conectar con URL y clave</summary><div style="display:grid;gap:8px;margin-top:8px">
       <input id="gU" type="url" placeholder="https://script.google.com/macros/s/…/exec"><input id="gK" placeholder="Clave (la de Config.gs)"></div></details>
@@ -2269,7 +2270,7 @@ const stAbrev = n => ST_ABR.reduce((s, [r, t]) => s.replace(r, t), String(n || "
 try { if ($("sStock") && !$("sStock").hidden) pintarStock(); } catch (e) {}
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261110073653";
+const HWF_VER = "20261110075227";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer)\/[^/]*$/, "/");
   let avisado = false;

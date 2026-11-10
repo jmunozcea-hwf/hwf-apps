@@ -1,5 +1,6 @@
 <!doctype html><html lang="es-CL"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Chofer HWF</title><meta name="theme-color" content="#0B3146"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon-192.png">
+<title>CHOFER HWF</title>
+<meta name="apple-mobile-web-app-title" content="CHOFER"><meta name="theme-color" content="#0B3146"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon-192.png">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
 <style>
 :root{--navy:#0B3146;--oro:#F0A818;--verde:#1C7A4E;--rojo:#B42318;--bg:#F2F5F7;--ink:#0F1E29;--muted:#5B6874;--line:#DAE1E7;--sunk:#EEF2F5}
@@ -34,7 +35,7 @@ label.f{display:grid;gap:4px;font-size:.8rem;font-weight:700;color:var(--muted);
 .toast{position:fixed;left:50%;bottom:calc(88px + env(safe-area-inset-bottom));transform:translateX(-50%);background:#0F1E29;color:#fff;padding:10px 16px;border-radius:12px;z-index:200;max-width:90vw}
 [hidden]{display:none!important}
 </style></head><body>
-<div class="top"><div><h1>🚚 Chofer HWF</h1><small id="tSub">—</small></div><span class="gp" id="gps">GPS…</span></div>
+<div class="top"><div><h1>🚚 CHOFER HWF</h1><small id="tSub">—</small></div><span class="gp" id="gps">GPS…</span></div>
 <main><section id="s-ruta"></section><section id="s-mapa" hidden><div class="card" style="padding:8px"><div id="mapa"></div></div></section><section id="s-resumen" hidden></section></main>
 <nav class="bn" id="nav"><button type="button" data-s="ruta"><span class="ic"><svg viewBox="0 0 32 32" aria-hidden="true" class="hic"><defs><linearGradient id="hic-cruta" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1F5673"/><stop offset="1" stop-color="#0B3146"/></linearGradient></defs><rect width="32" height="32" rx="9" fill="url(#hic-cruta)"/><path d="M4 4h24v10C20 9 11 9 4 13z" fill="#fff" opacity=".12"/><g transform="translate(5.5 5.5) scale(.875)" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 6h10M10 12h10M10 18h10"/><path d="M3.5 6l1.5 1.5L7.5 5M3.5 12l1.5 1.5L7.5 11M3.5 18l1.5 1.5L7.5 17"/></g></svg></span>Ruta</button><button type="button" data-s="mapa"><span class="ic"><svg viewBox="0 0 32 32" aria-hidden="true" class="hic"><defs><linearGradient id="hic-cmapa" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FF8A6B"/><stop offset="1" stop-color="#D9483B"/></linearGradient></defs><rect width="32" height="32" rx="9" fill="url(#hic-cmapa)"/><path d="M4 4h24v10C20 9 11 9 4 13z" fill="#fff" opacity=".12"/><g transform="translate(5.5 5.5) scale(.875)" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3z"/><path d="M9 3v15M15 6v15"/></g></svg></span>Mapa</button><button type="button" data-s="resumen"><span class="ic"><svg viewBox="0 0 32 32" aria-hidden="true" class="hic"><defs><linearGradient id="hic-cresumen" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3FBF7F"/><stop offset="1" stop-color="#1C7A4E"/></linearGradient></defs><rect width="32" height="32" rx="9" fill="url(#hic-cresumen)"/><path d="M4 4h24v10C20 9 11 9 4 13z" fill="#fff" opacity=".12"/><g transform="translate(5.5 5.5) scale(.875)" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M15 9.5c-.5-1-1.6-1.5-3-1.5-1.7 0-3 .8-3 2s1.3 1.7 3 2 3 .8 3 2-1.3 2-3 2c-1.4 0-2.5-.5-3-1.5M12 6.5v1.5M12 16v1.5"/></g></svg></span>Resumen</button></nav><div class="toast" id="toast" hidden></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
@@ -61,7 +62,7 @@ async function api(d) { const c = cfg(); if (!c) return { ok: false, error: "Sin
 function dec(t) { t = String(t || "").replace(/\s+/g, ""); try { t = decodeURIComponent(t); } catch (e) {} const m = t.match(/HWF1:([A-Za-z0-9+\/=_-]+)/); if (!m) return null;
   try { const o = JSON.parse(decodeURIComponent(escape(atob(m[1].replace(/-/g, "+").replace(/_/g, "/"))))); return o.u && o.c ? { url: o.u, clave: o.c } : null; } catch (e) { return null; } }
 function puerta() { const o = document.createElement("div"); o.className = "gate"; const p = lsGet("perfil", {});
-  o.innerHTML = `<div class="c"><h1>🚚 Chofer HWF</h1>${cfg() ? "" : `<p class="muted" style="margin:0">Pega el link o el código de conexión (empieza con <b>HWF1:</b>) que te entrega logística.</p>
+  o.innerHTML = `<div class="c"><h1>🚚 CHOFER HWF</h1>${cfg() ? "" : `<p class="muted" style="margin:0">Pega el link o el código de conexión (empieza con <b>HWF1:</b>) que te entrega logística.</p>
     <textarea id="gC" rows="3" placeholder="Link o código HWF1:…"></textarea><details><summary style="cursor:pointer;font-weight:600">Conectar con URL y clave</summary><div style="display:grid;gap:8px;margin-top:8px"><input id="gU" type="url" placeholder="https://script.google.com/macros/s/…/exec"><input id="gK" placeholder="Clave"></div></details>`}
     <label class="f">Chofer<select id="gN"><option value="">Elige tu nombre…</option>${CHOFERES.map(n => `<option${p.chofer === n ? " selected" : ""}>${n}</option>`).join("")}</select></label>
     <label class="f">Vehículo de hoy<select id="gV">${VEH.map(([k, n]) => `<option value="${k}"${p.veh === k ? " selected" : ""}>${n}</option>`).join("")}</select></label>
@@ -228,7 +229,7 @@ function arrancar() { const P = perfil(); if (!P || !cfg()) return puerta(); if 
 if (!cfg() || !perfil()) puerta(); else arrancar();
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 </script><script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261110073653";
+const HWF_VER = "20261110075227";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer)\/[^/]*$/, "/");
   let avisado = false;

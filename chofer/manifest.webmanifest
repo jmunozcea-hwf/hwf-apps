@@ -1,7 +1,7 @@
 {
  "id": "/hwf-apps/chofer/",
- "name": "Chofer HWF",
- "short_name": "Chofer",
+ "name": "CHOFER HWF",
+ "short_name": "CHOFER",
  "start_url": "./",
  "scope": "./",
  "display": "standalone",

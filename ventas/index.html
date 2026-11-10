@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="es">
 <head><!-- patch_fantasia --><!-- patch_claves -->
-<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0B3146"><link rel="apple-touch-icon" href="icon-192.png"><link rel="icon" href="icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Ventas"><script>/* patch_congruencia: días de apertura de la tienda (todos, salvo feriados irrenunciables) */
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0B3146"><link rel="apple-touch-icon" href="icon-192.png"><link rel="icon" href="icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="VENTAS"><script>/* patch_congruencia: días de apertura de la tienda (todos, salvo feriados irrenunciables) */
 function tdaDiasAp(y, m, hasta) { const IRR = ["01-01", "05-01", "09-18", "09-19", "12-25"]; let n = 0;
   for (let d = 1; d <= hasta; d++) if (!IRR.includes(String(m).padStart(2, "0") + "-" + String(d).padStart(2, "0"))) n++; return n; }
 const npNorm = s => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toUpperCase().replace(/[^A-Z ]/g, " ").trim().split(/\s+/)[0] || "";
@@ -26,7 +26,7 @@ function npDeVend(B, v) { return (B && B.cots || []).filter(c => npNorm(c[4]) ==
   };
 })();</script>
 <script>if("serviceWorker" in navigator)addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})});</script>
-<script>/* dosapps: no duplicar el Dashboard si HWF Admin está en el mismo teléfono */
+<script>/* dosapps: no duplicar el Dashboard si HWF está en el mismo teléfono */
 (function () { var dvVer = function (s) { var m = /^\{"v":"([^"]*)"/.exec(String(s || "").slice(0, 80)); return m ? m[1] : ""; };
   var S = Storage.prototype, set = S.setItem;
   S.setItem = function (k, v) {
@@ -49,7 +49,7 @@ function pinta(){
  if(document.getElementById("hwfGate"))return;
  var s=document.createElement("style");s.textContent="#hwfGate{position:fixed;inset:0;z-index:2147483000;background:#0B3146;color:#fff;display:flex;align-items:center;justify-content:center;padding:20px;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}#hwfGate .c{background:#fff;color:#0F1E29;border-radius:18px;padding:22px;max-width:440px;width:100%;display:grid;gap:12px;box-shadow:0 20px 50px rgba(0,0,0,.35)}#hwfGate h1{margin:0;font-size:1.3rem}#hwfGate p{margin:0;color:#5B6874;font-size:.92rem;line-height:1.4}#hwfGate textarea{width:100%;box-sizing:border-box;min-height:96px;border:1px solid #DAE1E7;border-radius:12px;padding:10px;font:inherit;font-size:.9rem}#hwfGate button{border:0;border-radius:12px;padding:13px;font:inherit;font-weight:700;background:#0B3146;color:#fff;cursor:pointer;min-height:48px}#hwfGate button[disabled]{opacity:.6}#hwfGate .e{color:#B42318;font-size:.88rem;min-height:1em}";
  document.head.appendChild(s);
- var g=document.createElement("div");g.id="hwfGate";g.innerHTML='<div class="c"><h1>Ventas HWF</h1><p>'+(ESADM?'Abre el <b>link de conexión</b> de HWF Admin o pega aquí el link o el código (empieza con <b>HWF1:</b>). Si no lo tienes: en el script de Google ejecuta <b>enviarLinksConexion</b> y te llega por correo.':'Abre el <b>link</b> que te envió HWF y la app se conecta sola. O pega aquí el link o el código (empieza con <b>HWF1:</b>). Se pide una sola vez.')+'</p><textarea id="hwfGc" placeholder="Pega el link o el código HWF1:…" autocomplete="off" autocapitalize="off" spellcheck="false"></textarea><details id="hwfGm" style="font-size:.9rem"><summary style="cursor:pointer;font-weight:600;color:#0B3146">¿No tienes link ni código? Conectar con URL y clave</summary><div style="display:grid;gap:8px;margin-top:8px"><input id="hwfGu" type="url" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off" autocapitalize="off" spellcheck="false" style="border:1px solid #DAE1E7;border-radius:12px;padding:11px;font:inherit;font-size:.9rem"><input id="hwfGk" type="text" placeholder="Clave (la de Config.gs)" autocomplete="off" autocapitalize="off" spellcheck="false" style="border:1px solid #DAE1E7;border-radius:12px;padding:11px;font:inherit;font-size:.9rem"><p style="font-size:.8rem;margin:0">La URL: Apps Script → Implementar → Gestionar implementaciones (termina en /exec). La clave: archivo Config.gs.</p></div></details><div class="e" id="hwfGe"></div><!-- gatemanual --><button type="button" id="hwfGb">Conectar</button></div>';
+ var g=document.createElement("div");g.id="hwfGate";g.innerHTML='<div class="c"><h1>VENTAS HWF</h1><p>'+(ESADM?'Abre el <b>link de conexión</b> de HWF o pega aquí el link o el código (empieza con <b>HWF1:</b>). Si no lo tienes: en el script de Google ejecuta <b>enviarLinksConexion</b> y te llega por correo.':'Abre el <b>link</b> que te envió HWF y la app se conecta sola. O pega aquí el link o el código (empieza con <b>HWF1:</b>). Se pide una sola vez.')+'</p><textarea id="hwfGc" placeholder="Pega el link o el código HWF1:…" autocomplete="off" autocapitalize="off" spellcheck="false"></textarea><details id="hwfGm" style="font-size:.9rem"><summary style="cursor:pointer;font-weight:600;color:#0B3146">¿No tienes link ni código? Conectar con URL y clave</summary><div style="display:grid;gap:8px;margin-top:8px"><input id="hwfGu" type="url" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off" autocapitalize="off" spellcheck="false" style="border:1px solid #DAE1E7;border-radius:12px;padding:11px;font:inherit;font-size:.9rem"><input id="hwfGk" type="text" placeholder="Clave (la de Config.gs)" autocomplete="off" autocapitalize="off" spellcheck="false" style="border:1px solid #DAE1E7;border-radius:12px;padding:11px;font:inherit;font-size:.9rem"><p style="font-size:.8rem;margin:0">La URL: Apps Script → Implementar → Gestionar implementaciones (termina en /exec). La clave: archivo Config.gs.</p></div></details><div class="e" id="hwfGe"></div><!-- gatemanual --><button type="button" id="hwfGb">Conectar</button></div>';
  document.body.appendChild(g);
  document.getElementById("hwfGb").onclick=async function(){
   var b=this,e=document.getElementById("hwfGe"),c=dec(document.getElementById("hwfGc").value);if(!c){var gu=(document.getElementById("hwfGu")||{}).value||"",gk=(document.getElementById("hwfGk")||{}).value||"";gu=gu.trim();gk=gk.trim();if(/^https:\/\/script\.google(usercontent)?\.com\/.+\/exec$/.test(gu)&&gk.length>=4)c={url:gu,clave:gk};else if(gu||gk){e.textContent="Revisa la URL (debe terminar en /exec) y la clave.";return}}
@@ -131,7 +131,7 @@ function npRitmo(cots, Y, M, n, real, lim, ant) {
 <script>/* hwfAutoAct: recarga sola cuando hay versión nueva */(function(){var h0=null,t0=0;function hs(t){var h=0;for(var i=0;i<t.length;i++)h=(h*31+t.charCodeAt(i))|0;return h}function chk(){if(Date.now()-t0<20000)return;t0=Date.now();fetch(location.pathname,{cache:"no-store"}).then(function(r){return r.ok?r.text():null}).then(function(t){if(!t)return;var h=hs(t);if(h0===null){h0=h;return}if(h!==h0){h0=h;location.reload()}}).catch(function(){})}window.addEventListener("load",function(){setTimeout(chk,1500)});document.addEventListener("visibilitychange",function(){if(document.visibilityState==="visible")chk()});window.addEventListener("focus",chk);setInterval(chk,600000)})();</script>
 <style>.cli-fant{display:block;font-weight:600;color:var(--muted,#5B6874);font-size:.86em;margin-top:2px}.cli-top .cli-fant{display:inline;font-size:.82em}</style><style>.p14t td,.p14t th{white-space:nowrap;padding:6px 8px}.p14t td:first-child{white-space:normal;min-width:110px}</style></head>
 <body>
-<title>Ventas HWF</title>
+<title>VENTAS HWF</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Figtree:wght@400;500;600;700&display=swap">
 <style>
@@ -1135,7 +1135,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 .dir-prev{display:flex;gap:6px;flex-wrap:wrap}
 .dir-prev button{border:1px dashed var(--line);background:var(--surface);border-radius:999px;padding:6px 11px;font:inherit;font-size:.84rem;cursor:pointer;color:var(--ink)}
 
-/* ===== Envío a HWF Admin ===== */
+/* ===== Envío a HWF ===== */
 #btnSync .pt{width:9px;height:9px;border-radius:50%;background:#9AA5AF;display:inline-block}
 #btnSync.ok .pt{background:#1C7A4E}#btnSync.cola .pt{background:#C77700}#btnSync.err .pt{background:#B42318}
 .sy-cod{width:100%;min-height:90px;border:1px solid var(--line);border-radius:8px;padding:10px;font:inherit;font-size:.85rem;resize:vertical;background:var(--bg);color:var(--ink)}
@@ -3376,11 +3376,11 @@ async function syEnviar(manual) {
     const r = await syLlamar(cfg, { accion: "pedido", pedido: q[id] });
     if (r.ok) { const q2 = lsGet(SYCOLA, {}); if (q2[id] && q2[id].enviado === q[id].enviado) delete q2[id]; lsSet(SYCOLA, q2);
       const E = lsGet(SYENV, {}); if (E[id]) { E[id].cola = false; lsSet(SYENV, E); } ok++; syError = ""; }
-    else if (r.aprobada) { const q2 = lsGet(SYCOLA, {}); delete q2[id]; lsSet(SYCOLA, q2); const E = lsGet(SYENV, {}); if (E[id]) { E[id].cola = false; E[id].est = "apr"; lsSet(SYENV, E); } toast(`La nota ${q[id].num} ya estaba aprobada por HWF Admin: no se modificó.`); }
+    else if (r.aprobada) { const q2 = lsGet(SYCOLA, {}); delete q2[id]; lsSet(SYCOLA, q2); const E = lsGet(SYENV, {}); if (E[id]) { E[id].cola = false; E[id].est = "apr"; lsSet(SYENV, E); } toast(`La nota ${q[id].num} ya estaba aprobada por HWF: no se modificó.`); }
     else { syError = r.error || "No se pudo enviar."; break; }
   }
   syOcupado = false; syPintar();
-  if (manual || ok) toast(ok ? `${ok === 1 ? "Nota enviada" : ok + " notas enviadas"} a HWF Admin.` : syError ? "No se pudo enviar: " + syError : "No hay notas por enviar.");
+  if (manual || ok) toast(ok ? `${ok === 1 ? "Nota enviada" : ok + " notas enviadas"} a HWF.` : syError ? "No se pudo enviar: " + syError : "No hay notas por enviar.");
   if (ok || manual) syEstados();
 }
 async function syEstados() {
@@ -3392,15 +3392,15 @@ function syPintar() {
   const b = $("btnSync"); if (!b) return;
   const n = Object.keys(lsGet(SYCOLA, {})).length, cfg = syCfg();
   b.className = "btn " + (!cfg ? "" : n ? (syError ? "err" : "cola") : "ok");
-  b.innerHTML = `<span class="pt"></span> ${!cfg ? "Conectar con HWF Admin" : n ? `${n} por enviar` : "HWF Admin"}`;
+  b.innerHTML = `<span class="pt"></span> ${!cfg ? "Conectar con HWF" : n ? `${n} por enviar` : "HWF"}`;
 }
 const SY_EST = { pen: "Por revisar", mod: "Modificada", apr: "Aprobada", rec: "Rechazada" };
 function syAbrir() {
   const cfg = syCfg(), n = Object.keys(lsGet(SYCOLA, {})).length, cart = SES && SES.vendedor.cartera;
   const E = Object.entries(lsGet(SYENV, {})).filter(([, x]) => !cart || x.cart === cart).sort((a, b) => String(b[1].num).localeCompare(String(a[1].num))).slice(0, 25);
-  $("mEnvT").textContent = "Envío a HWF Admin";
+  $("mEnvT").textContent = "Envío a HWF";
   abrirModal(`<div class="mform">
-      ${cfg ? `<div class="gps ${syError ? "bad" : "ok"}">${syError ? esc(syError) : "Conectado. Cada nota que exportas se envía sola a HWF Admin."}${n ? ` · ${n} por enviar` : ""}</div>` :
+      ${cfg ? `<div class="gps ${syError ? "bad" : "ok"}">${syError ? esc(syError) : "Conectado. Cada nota que exportas se envía sola a HWF."}${n ? ` · ${n} por enviar` : ""}</div>` :
         `<p class="hint" style="margin:0">Pega el código de conexión que te envió el administrador (empieza con HWF1:).</p>`}
       <div class="f"><label for="syCod">Código de conexión</label><textarea class="sy-cod" id="syCod" placeholder="HWF1:...">${cfg ? "Conectado (pega un código nuevo para cambiarlo)" : ""}</textarea></div>
       ${E.length ? `<div class="blk" style="padding:10px 12px"><h3>Mis notas enviadas</h3><div class="hist">${E.map(([, x]) => `<div><b>${esc(tc(x.cliente))}</b> <span class="sy-est ${x.cola ? "cola" : x.est}">${x.cola ? "Por enviar" : SY_EST[x.est] || "Por revisar"}</span>
@@ -3414,7 +3414,7 @@ function syAbrir() {
        const r = await syLlamar(c, { accion: "probar" });
        if (!r.ok && !r.red) { $("mEnvErr").textContent = r.error || "No se pudo conectar."; $("mEnvErr").hidden = false; ev.currentTarget.disabled = false; ev.currentTarget.textContent = "Guardar código"; return; }
        lsSet(SYCFG, c); syError = r.ok ? "" : r.error; cerrarModal();
-       toast(r.ok ? "Conectado con HWF Admin." : "Código guardado. Se conectará cuando haya internet."); syEnviar();
+       toast(r.ok ? "Conectado con HWF." : "Código guardado. Se conectará cuando haya internet."); syEnviar();
      }]]);
 }
 /* número de nota con segundos: dos notas del mismo minuto no pueden repetir número */
@@ -3442,9 +3442,9 @@ syPintar(); setTimeout(() => { syEnviar(); syEstados(); }, 1500);
 /* ================================================================
    REGISTRO DE NOTAS DE PEDIDO (antes del apartado Cliente)
    ================================================================ */
-const RG = { cola: ["Por enviar", "Se envían solas cuando hay internet"], esp: ["En espera de aprobación", "Recibidas por HWF Admin"], apr: ["Aprobadas", "Listas para despacho"], rec: ["Rechazadas", "Revisa el comentario"] };
+const RG = { cola: ["Por enviar", "Se envían solas cuando hay internet"], esp: ["En espera de aprobación", "Recibidas por HWF"], apr: ["Aprobadas", "Listas para despacho"], rec: ["Rechazadas", "Revisa el comentario"] };
 let rgFiltro = null, rgTodas = false;
-/* el envío es automático: se quita el botón "HWF Admin" de la cabecera */
+/* el envío es automático: se quita el botón "HWF" de la cabecera */
 { const bSy = $("btnSync"); if (bSy) bSy.remove(); }
 const rgEst = x => x.cola ? "cola" : x.est === "apr" ? "apr" : x.est === "rec" ? "rec" : "esp";
 function rgNotas() {
@@ -3455,14 +3455,14 @@ function rgNotas() {
 function pintarRegistro() {
   if (!$("rgTabs")) return;
   const nCola = Object.keys(lsGet(SYCOLA, {})).length;
-  $("rgSync").textContent = !syCfg() ? "Envío automático desactivado." : syError && nCola ? `No se pudo enviar (${String(syError).replace(/\.$/, "")}). Se reintentará solo cada minuto.` : nCola ? "Enviando a HWF Admin…" : "Cada nota que exportas se envía sola a HWF Admin.";
+  $("rgSync").textContent = !syCfg() ? "Envío automático desactivado." : syError && nCola ? `No se pudo enviar (${String(syError).replace(/\.$/, "")}). Se reintentará solo cada minuto.` : nCola ? "Enviando a HWF…" : "Cada nota que exportas se envía sola a HWF.";
   const L = rgNotas(), c = { cola: [], esp: [], apr: [], rec: [] };
   L.forEach(x => c[rgEst(x)].push(x));
   if (!rgFiltro) rgFiltro = c.cola.length ? "cola" : c.esp.length ? "esp" : "apr";
   const monto = x => x.netoRev != null && x.est !== "pen" ? x.netoRev : x.neto;
   $("rgTabs").innerHTML = Object.keys(RG).map(k => `<button type="button" class="rg-tab ${k}" data-rg="${k}" aria-pressed="${rgFiltro === k}"><b>${c[k].length}</b><span>${RG[k][0]}</span><small>${fmt(c[k].reduce((s, x) => s + (Number(monto(x)) || 0), 0))}</small></button>`).join("");
   const vis = c[rgFiltro] || [], max = rgTodas ? vis.length : 5;
-  $("rgList").innerHTML = !L.length ? '<p class="rg-vacio">Aún no tienes notas de pedido. Cada nota que exportes a Excel queda registrada aquí y se envía a HWF Admin.</p>'
+  $("rgList").innerHTML = !L.length ? '<p class="rg-vacio">Aún no tienes notas de pedido. Cada nota que exportes a Excel queda registrada aquí y se envía a HWF.</p>'
     : !vis.length ? `<p class="rg-vacio">No tienes notas ${RG[rgFiltro][0].toLowerCase()}.</p>`
     : vis.slice(0, max).map(x => { const e = rgEst(x);
         return `<button type="button" class="rg-it ${e}" data-rgid="${esc(x.id)}"><b>${esc(tc(x.cliente || "Sin cliente"))}</b><span class="v">${fmt(monto(x))}</span>
@@ -3477,7 +3477,7 @@ function rgDetalle(id) {
   const x = rgNotas().find(n => n.id === id); if (!x) return;
   const e = rgEst(x), it = x.items || [];
   const sello = { cola: "POR ENVIAR", esp: x.est === "mod" ? "MODIFICADA POR HWF · EN ESPERA DE APROBACIÓN" : "EN ESPERA DE APROBACIÓN", apr: "✓ NOTA DE PEDIDO APROBADA", rec: "✕ NOTA DE PEDIDO RECHAZADA" }[e];
-  const sub = { cola: "Se enviará a HWF Admin apenas haya internet.", esp: "HWF Admin la recibió y está pendiente de revisión.", apr: "HWF Admin aprobó esta nota.", rec: "HWF Admin rechazó esta nota." }[e];
+  const sub = { cola: "Se enviará a HWF apenas haya internet.", esp: "HWF la recibió y está pendiente de revisión.", apr: "HWF aprobó esta nota.", rec: "HWF rechazó esta nota." }[e];
   $("mEnvT").textContent = "Nota de pedido " + x.num;
   abrirModal(`<div class="mform">
       <div class="rg-sello ${e}">${sello}<small>${sub}${x.nota ? " Comentario: " + esc(x.nota) : ""}</small></div>
@@ -3583,7 +3583,7 @@ function guardarLinea(c, L) {
   if (L.q > 0 || L.d !== p.dc) S.lines[c] = L; else delete S.lines[c];
   save(); refreshRow(c); totals();
 }
-/* las unidades gratis van como línea aparte, sin cargo (Excel, envío a HWF Admin y registro) */
+/* las unidades gratis van como línea aparte, sin cargo (Excel, envío a HWF y registro) */
 const _calcP = calc;
 calc = function () {
   const t = _calcP(); let gratis = 0; const extra = [];
@@ -3653,7 +3653,7 @@ pintarEdicion();
 
 function confirm0(x) {
   $("mEnvT").textContent = "¿Eliminar la nota " + x.num + "?";
-  abrirModal('<p class="hint" style="margin:0">Esta nota aún no se envía a HWF Admin. Si la eliminas, se borra de tu registro y no se enviará.</p>',
+  abrirModal('<p class="hint" style="margin:0">Esta nota aún no se envía a HWF. Si la eliminas, se borra de tu registro y no se enviará.</p>',
     [["Cancelar", "", () => rgDetalle(x.id)], ["Sí, eliminar nota", "danger", () => rgEliminar(x)]]);
   return false;
 }
@@ -3687,7 +3687,7 @@ function rgEliminar(x) {
   const E = lsGet(SYENV, {}); delete E[x.id]; lsSet(SYENV, E);
   const M = lsGet(EKEY, {}); delete M[x.id]; lsSet(EKEY, M);
   if (S.id === x.id) notaEnBlanco();
-  cerrarModal(); syPintar(); toast(`Nota ${x.num} eliminada. No se envió a HWF Admin.`);
+  cerrarModal(); syPintar(); toast(`Nota ${x.num} eliminada. No se envió a HWF.`);
 }
 
 
@@ -3738,7 +3738,7 @@ const APP_NOVEDADES = [
   "Prospectos: crea prospectos nuevos y vincula un prospecto con su cliente de la cartera (la app los reconoce como el mismo). En Ruta, agrega prospectos a la ruta del día.",
   "Nueva pestaña Prospectos: los prospectos por etapa, con próximo contacto, WhatsApp y nota de pedido directa.",
   "Margen de la nota al lado del total. Lo gratis del proveedor no baja el margen; lo gratis propio sí.",
-  "Cliente moroso: al hacer una nota se muestran las facturas vencidas del cliente y la nota llega marcada a HWF Admin.",
+  "Cliente moroso: al hacer una nota se muestran las facturas vencidas del cliente y la nota llega marcada a HWF.",
   "Nueva pestaña Cobranza: lo que tus clientes deben, vencido y por vencer, con recordatorio por WhatsApp. Se actualiza cada día.",
   "Stock de cada producto (inventario Defontana) y filtro “Con stock”. Avisa si pides más de lo disponible.",
   "Ventas, clientes, notas de pedido Defontana pendientes y metas actualizadas al último informe.",
@@ -3746,7 +3746,7 @@ const APP_NOVEDADES = [
   "Modifica tus notas por enviar, en espera o rechazadas (las aprobadas quedan bloqueadas).",
   "Promoción X + Y gratis por producto, con aporte propio o del proveedor.",
   "Eliminar nota deja todo en blanco para ingresar una nota nueva.",
-  "Las notas se envían solas a HWF Admin y te avisa cuando las aprueban."
+  "Las notas se envían solas a HWF y te avisa cuando las aprueban."
 ];
 const NVKEY = "hwf-inicio-vistos", NVVER = "hwf-inicio-version";
 const bI = document.createElement("button");
@@ -3933,7 +3933,7 @@ function cxResumen(docs) {
 var CXC_BASE = {"emision": "", "hasta": "", "cargado": "", "docs": []};
 const CXKEY = "hwf-cxc";
 let cxFiltro = "todos", cxCob = "", cxQ = "";
-/* el informe más nuevo entre el que trae la app y el último bajado de HWF Admin */
+/* el informe más nuevo entre el que trae la app y el último bajado de HWF */
 function cxDatos() { const s = lsGet(CXKEY, null), n = s && s.cobranza; return n && cxClave(n) >= cxClave(CXC_BASE) ? n : CXC_BASE; }
 function cxTodos() { return cxDocs(cxDatos()); }
 function cxMios() { const cart = SES && SES.vendedor.cartera, l = cxTodos(); return !cart || (typeof sinCartera === "function" && sinCartera(cart)) ? l : l.filter(d => d.cart === cart); }
@@ -4061,7 +4061,7 @@ function moAviso(nombre, ds, botones) {
   const tot = ds.reduce((s, d) => s + d.saldo, 0);
   $("mEnvT").textContent = "⚠ Cliente moroso";
   abrirModal(`<div class="mo-ban"><b class="t">CLIENTE MOROSO</b><span>${esc(tc(nombre))} tiene <b>${fmt(tot)}</b> vencido en ${ds.length} ${ds.length === 1 ? "documento" : "documentos"}:</span>${moTabla(ds)}
-    <small>Antes de despachar, coordina el pago de lo vencido. La nota llegará a HWF Admin marcada como cliente moroso.</small></div>`, botones);
+    <small>Antes de despachar, coordina el pago de lo vencido. La nota llegará a HWF marcada como cliente moroso.</small></div>`, botones);
 }
 /* al elegir el cliente de la nota */
 const _selCliMo = seleccionarCliente;
@@ -4231,7 +4231,7 @@ function pintarEmbudo() {
   box.innerHTML = `
     <div class="pr-hero"><h2>${verTodos && !prVend ? "Prospectos de todos los vendedores" : "Prospectos libres y tuyos · todo Chile"}${prVend ? " · " + esc(prVend) : ""} <small style="font-weight:600;opacity:.85">${base.length} prospectos · ${avanz} con nota de pedido o más</small></h2>
       <div class="pr-fun">${PR_ETAPAS.map((e, i) => `<button type="button" data-et="${i}" aria-pressed="${prFiltro === i}"><span>${esc(PR_CORTO[i])}</span><i style="width:${Math.round(cnt[i] / max * 100)}%;${i === 7 ? "opacity:.5" : ""}"></i><b>${cnt[i]}</b></button>`).join("")}</div></div>
-    <div class="pr-info"><span>${s && s.bajado ? "Sincronizado con HWF Admin" : "Prospectos de todo Chile"}${pend ? ` · <span class="pr-pend">${pend} ${pend === 1 ? "cambio" : "cambios"} por enviar</span>` : ""}</span><span class="pr-bt"><button class="btn primary" type="button" id="prNuevo">＋ Crear prospecto</button><button class="btn" type="button" id="prAct">Actualizar</button></span></div>
+    <div class="pr-info"><span>${s && s.bajado ? "Sincronizado con HWF" : "Prospectos de todo Chile"}${pend ? ` · <span class="pr-pend">${pend} ${pend === 1 ? "cambio" : "cambios"} por enviar</span>` : ""}</span><span class="pr-bt"><button class="btn primary" type="button" id="prNuevo">＋ Crear prospecto</button><button class="btn" type="button" id="prAct">Actualizar</button></span></div>
     ${verTodos && vends.length > 1 ? `<div class="pr-chips" id="prVends"><button type="button" data-v="" aria-pressed="${!prVend}">Todos</button>${vends.map(v => `<button type="button" data-v="${esc(v)}" aria-pressed="${prVend === v}">${esc(v)}</button>`).join("")}</div>` : ""}
     <div class="pr-chips" id="prFil"><button type="button" data-f="-1" aria-pressed="${prFiltro === -1}">Activos</button><button type="button" data-f="-2" aria-pressed="${prFiltro === -2}">Contactar hoy (${vencen})</button>${prFiltro >= 0 ? `<button type="button" data-f="${prFiltro}" aria-pressed="true">${esc(PR_CORTO[prFiltro])} ✕</button>` : ""}</div>
     <div class="search"><input id="prQ" type="search" placeholder="Buscar: nombre, comuna, dirección, rubro, teléfono…" aria-label="Buscar prospecto" value="${esc(prQ)}"></div>${prFiltrosHtml(todos)}
@@ -4906,7 +4906,7 @@ document.addEventListener("visibilitychange", () => { if (!document.hidden && MO
 
 
 /* ================================================================
-   DASHBOARD (mismo de HWF Admin) · Todo el equipo / Solo mis datos
+   DASHBOARD (mismo de HWF) · Todo el equipo / Solo mis datos
    ================================================================ */
 const DB_KEY = "hwf-dv-dash", DB_EMB = "0000-00-00 00:00:00", DB_SKEY = "hwf-dash-alcance";
 const DB_BASE = {"corte": "2026-02-01", "anio": 2026, "vend": [], "clientes": [], "productos": [], "cats": [], "rows": [], "metas": {}, "metaMes": 2, "cots": [], "stock": {}, "stockFecha": ""};
@@ -5085,7 +5085,7 @@ function pintarDash() {
   box.onclick = e => { const s = e.target.closest("[data-sc]"); if (s) { try { localStorage.setItem(DB_SKEY, s.dataset.sc); } catch (x) {} pintarDash(); return; }
     const b = e.target.closest("[data-ir]"); if (b) dbIr(b.dataset.ir); };
 }
-/* datos nuevos: el mismo paquete de HWF Admin que arma el script de Google con los informes de Drive */
+/* datos nuevos: el mismo paquete de HWF que arma el script de Google con los informes de Drive */
 async function dbRevisar() {
   if (dbOcup || document.hidden) return; const cfg = typeof syCfg === "function" ? syCfg() : null; if (!cfg || !cfg.url) return;
   dbOcup = true;
@@ -5128,12 +5128,12 @@ syEstados = async function () {
 };
 
 
-/* ===== Eliminar notas ya enviadas: se borran de la planilla y de HWF Admin ===== */
+/* ===== Eliminar notas ya enviadas: se borran de la planilla y de HWF ===== */
 confirm0 = function (x) {
   const e = rgEst(x);
   $("mEnvT").textContent = "¿Eliminar la nota " + x.num + "?";
-  const txt = e === "cola" ? "Esta nota aún no se envía a HWF Admin. Si la eliminas, se borra de tu registro y no se enviará."
-    : `Esta nota ya está en HWF Admin${e === "apr" ? " y está <b>aprobada</b>" : ""}. Si la eliminas, se borra de la planilla de notas y de HWF Admin. Necesitas internet.`;
+  const txt = e === "cola" ? "Esta nota aún no se envía a HWF. Si la eliminas, se borra de tu registro y no se enviará."
+    : `Esta nota ya está en HWF${e === "apr" ? " y está <b>aprobada</b>" : ""}. Si la eliminas, se borra de la planilla de notas y de HWF. Necesitas internet.`;
   abrirModal(`<p class="hint" style="margin:0">${txt}</p>`, [["Cancelar", "", () => rgDetalle(x.id)], ["Sí, eliminar nota", "danger", ev => rgEliminar(x, ev)]]);
   return false;
 };
@@ -5144,7 +5144,7 @@ rgEliminar = async function (x, ev) {
     if (cfg && cfg.url && navigator.onLine) syLlamar(cfg, { accion: "eliminar", id: x.id, vendedor: SES ? SES.vendedor.nombre : "" });
     return _rgEliminarLocal(x);
   }
-  if (!cfg || !cfg.url) { toast("Sin conexión con HWF Admin: no se puede eliminar una nota enviada."); return; }
+  if (!cfg || !cfg.url) { toast("Sin conexión con HWF: no se puede eliminar una nota enviada."); return; }
   if (ev && ev.currentTarget) { ev.currentTarget.disabled = true; ev.currentTarget.textContent = "Eliminando…"; }
   const r = await syLlamar(cfg, { accion: "eliminar", id: x.id, vendedor: SES ? SES.vendedor.nombre : "" });
   if (!r || !r.ok) { toast(r && r.red ? "Sin internet: inténtalo de nuevo cuando tengas conexión." : "No se pudo eliminar: " + ((r && r.error) || "error desconocido")); rgDetalle(x.id); return; }
@@ -5153,17 +5153,17 @@ rgEliminar = async function (x, ev) {
   const q = lsGet(SYCOLA, {}); delete q[x.id]; lsSet(SYCOLA, q);
   if (S.id === x.id) notaEnBlanco();
   cerrarModal(); syPintar(); if (typeof pintarRegistro === "function") pintarRegistro();
-  toast(`Nota ${x.num} eliminada. También se quitó de HWF Admin.`);
+  toast(`Nota ${x.num} eliminada. También se quitó de HWF.`);
 };
 
 
-/* ===== Botón Enviar (sin exportar): nota a HWF Admin + correo con PDF y Excel ===== */
+/* ===== Botón Enviar (sin exportar): nota a HWF + correo con PDF y Excel ===== */
 (function () {
   const bx = $("btnXls"); if (!bx) return;
   bx.insertAdjacentHTML("afterend", `<button class="btn primary" id="btnEnvNota" type="button"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg> Enviar</button>`);
   bx.remove();
   $("btnEnvNota").onclick = () => {
-    if (!syCfg() || !syCfg().url) { toast("La app no está conectada con HWF Admin: no se puede enviar."); return; }
+    if (!syCfg() || !syCfg().url) { toast("La app no está conectada con HWF: no se puede enviar."); return; }
     exportarConSugerencias();
   };
 })();
@@ -5175,7 +5175,7 @@ exportarAhora = function () {
   toast(`Enviando la nota ${num}…`);
   syEnviar().then(() => {
     const q = lsGet(SYCOLA, {});
-    if (!Object.keys(q).length) toast(`Nota ${num} enviada. Llegará por correo en PDF y Excel, y ya está en HWF Admin.`);
+    if (!Object.keys(q).length) toast(`Nota ${num} enviada. Llegará por correo en PDF y Excel, y ya está en HWF.`);
     else toast(`Nota ${num} guardada. Se enviará sola apenas haya internet.`);
     if (typeof pintarRegistro === "function") try { pintarRegistro(); } catch (e) {}
   });
@@ -5369,7 +5369,7 @@ if (SES && SES.local) {
 </style>
 <script>
 /* ================================================================
-   CLIENTES: DAR DE BAJA CON MOTIVO + REGISTRO DE CAMBIOS (informe en HWF Admin)
+   CLIENTES: DAR DE BAJA CON MOTIVO + REGISTRO DE CAMBIOS (informe en HWF)
    ================================================================ */
 const CC_MOTIVOS = ["Cerró el local o dejó de operar", "Compra a otro distribuidor", "Precio o condiciones comerciales", "Problemas de pago o moroso",
   "Cambio de dueño o de razón social", "Cliente duplicado", "Fuera de zona o de ruta", "No vende alimento para mascotas", "No quiere ser visitado", "Otro"];
@@ -5379,7 +5379,7 @@ let ccOcup = false;
 const ccCola = () => lsGet(CC_COLA, []);
 const ccSrv = () => lsGet(CC_SRV, { version: "", lista: [] });
 function ccTodos() { const ids = new Set(), out = []; ccCola().concat(ccSrv().lista || []).forEach(c => { if (c && !ids.has(c.id)) { ids.add(c.id); out.push(c); } }); return out; }
-/* estado de baja vigente de un cliente: manda el último evento Baja/Reactivación (de cualquier vendedor o de HWF Admin) */
+/* estado de baja vigente de un cliente: manda el último evento Baja/Reactivación (de cualquier vendedor o de HWF) */
 function ccEstados() {
   const m = {};
   ccTodos().filter(c => c.tipo === "Baja" || c.tipo === "Reactivación").sort((a, b) => String(a.fecha).localeCompare(String(b.fecha)))
@@ -5496,9 +5496,9 @@ pintarFicha = function (cod) {
   const b = esBaja(cod), pend = ccCola().some(x => x.codigo === cod && (x.tipo === "Baja" || x.tipo === "Reactivación"));
   const blk = document.createElement("div"); blk.className = "bj-blk" + (b ? " baja" : ""); blk.id = "bjBlk";
   blk.innerHTML = b ? `<h3>Cliente dado de baja</h3><div><b>${esc(b.motivo)}</b>${b.detalle ? " · " + esc(b.detalle) : ""}</div>
-      <span class="hint">${fdt(b.fecha)}${b.vendedor ? " · por " + esc(b.vendedor) : ""}${pend ? ' · <span class="bj-pend">por enviar a HWF Admin</span>' : ""}</span>
+      <span class="hint">${fdt(b.fecha)}${b.vendedor ? " · por " + esc(b.vendedor) : ""}${pend ? ' · <span class="bj-pend">por enviar a HWF</span>' : ""}</span>
       <div><button class="btn" type="button" id="bjReact">Reactivar cliente</button></div>`
-    : `<h3>Estado del cliente</h3><span class="hint">Si el cliente ya no compra, dalo de baja indicando el motivo. Dejará de aparecer en tu lista, la ruta y el buscador del pedido, y HWF Admin verá el motivo.</span>
+    : `<h3>Estado del cliente</h3><span class="hint">Si el cliente ya no compra, dalo de baja indicando el motivo. Dejará de aparecer en tu lista, la ruta y el buscador del pedido, y HWF verá el motivo.</span>
       <div><button class="btn bj-rojo" type="button" id="bjBaja">Dar de baja</button></div>`;
   const hist = [...f.querySelectorAll(".blk")].find(x => /Historial/.test((x.querySelector("h3") || {}).textContent || ""));
   if (hist) hist.before(blk); else f.appendChild(blk);
@@ -5517,13 +5517,13 @@ pintarFicha = function (cod) {
     $("mEnvT").textContent = "Dar de baja al cliente";
     abrirModal(`<div class="mform"><p class="hint" style="margin:0">${esc(tc(c.nombre))}${c.comuna ? " · " + esc(tc(c.comuna)) : ""}</p>
         <div class="f"><label for="bj_mot">Motivo de la baja</label><select id="bj_mot"><option value="">Elige un motivo…</option>${CC_MOTIVOS.map(m => `<option>${esc(m)}</option>`).join("")}</select></div>
-        <div class="f"><label for="bj_nota">Comentario <span id="bj_req">(opcional)</span></label><textarea id="bj_nota" placeholder="Detalle para HWF Admin: a quién le compra, desde cuándo, etc."></textarea></div></div>`,
+        <div class="f"><label for="bj_nota">Comentario <span id="bj_req">(opcional)</span></label><textarea id="bj_nota" placeholder="Detalle para HWF: a quién le compra, desde cuándo, etc."></textarea></div></div>`,
       [["Cancelar", "", cerrarModal], ["Dar de baja", "primary", () => {
         const mot = $("bj_mot").value, nota = $("bj_nota").value.trim();
         if (!mot) { $("mEnvErr").textContent = "Elige el motivo de la baja."; $("mEnvErr").hidden = false; return; }
         if (mot === "Otro" && !nota) { $("mEnvErr").textContent = "Escribe el motivo en el comentario."; $("mEnvErr").hidden = false; return; }
         ccRegistrar("Baja", c, { motivo: mot, detalle: nota, cambios: [{ campo: "Estado", antes: "Activo", despues: "De baja" }] });
-        cerrarModal(); toast("Cliente dado de baja. HWF Admin verá el motivo."); pintarFicha(cod);
+        cerrarModal(); toast("Cliente dado de baja. HWF verá el motivo."); pintarFicha(cod);
       }]]);
     $("bj_mot").onchange = () => { $("mEnvErr").hidden = true; $("bj_req").textContent = $("bj_mot").value === "Otro" ? "(obligatorio)" : "(opcional)"; };
   };
@@ -5543,7 +5543,7 @@ if (typeof APP_NOVEDADES !== "undefined" && Array.isArray(APP_NOVEDADES)) APP_NO
 </script>
 
 <script>
-/* ===== Comparación con el año anterior (común a HWF Admin y app Ventas) =====
+/* ===== Comparación con el año anterior (común a HWF y app Ventas) =====
    D.rows: [ci, pi, mes, día, cant, neto, costo, vend, año?]  (año vacío = D.anio)
    yaCalc(D, Y, M, lim, incl, cart): mes M a la misma fecha (día ≤ lim), año a la fecha, mes completo del año anterior,
    venta mensual de ambos años y detalle por cartera. Devuelve null si no hay ventas del año anterior. */
@@ -5626,7 +5626,7 @@ if (typeof APP_NOVEDADES !== "undefined" && Array.isArray(APP_NOVEDADES)) APP_NO
 </script>
 
 <script>
-/* Tarjeta «Cotizaciones Defontana» del Dashboard (HWF Admin y app Ventas).
+/* Tarjeta «Cotizaciones Defontana» del Dashboard (HWF y app Ventas).
    cots: [num, fecha dd/mm/aaaa, cliente, vendedor, cartera, cantidad, producto, monto neto] */
 const CZ_CSS = ".cz-tot{display:flex;gap:14px;flex-wrap:wrap;margin:0 0 8px}.cz-tot div{display:grid}.cz-tot b{font-size:1.15rem;font-variant-numeric:tabular-nums}.cz-tot span{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:700}"
   + ".cz-v{display:grid;gap:6px;margin:4px 0 10px}.cz-v .t{display:flex;justify-content:space-between;gap:8px;font-size:.88rem}.cz-v .t b{font-variant-numeric:tabular-nums}"
@@ -5868,7 +5868,7 @@ function cxImagen(c) {
 
 <script>
 /* Plan de crecimiento HWF sin presupuesto de marketing (presentación del 02-11-2026): de 65 a 80 MM mensuales.
-   Cálculo común para HWF Admin y app Ventas a partir de las ventas (D.rows: [cliente, producto, mes, día, cant, neto, costo, vendedor, año?]). */
+   Cálculo común para HWF y app Ventas a partir de las ventas (D.rows: [cliente, producto, mes, día, cant, neto, costo, vendedor, año?]). */
 const PLAN = { meta: 80000000, base: 65000000, cuotaMin: 4, cuotaMax: 6, excluir: [/\bpro ?pets?\b/, /\byanez\b/],  /* clientes fuera del plan (pedido de Jorge 03-11): Propets y Yañez */
   pasos: [["1–30", "Ordenar la base", ["Lista de dormidos desde Defontana", "Clasificación A, B y C", "WhatsApp Business y catálogo", "Reunión con 2 marcas principales"]],
           ["31–60", "Activar la venta", ["Oferta de surtido en cada visita", "Cuotas de prospección por vendedor", "Programa de referidos", "Calendario fijo de rutas"]],
@@ -6144,7 +6144,7 @@ exportarAhora = function () {
 </style>
 
 <script>
-/* ===== Días calle (cobranza) — núcleo común de app Ventas y HWF Admin =====
+/* ===== Días calle (cobranza) — núcleo común de app Ventas y HWF =====
    Con la información libre de Defontana:
    - DSO (countback) = cuántos días de ventas recientes (con IVA), contando hacia atrás desde el corte, hacen falta para sumar
                        lo que se debe hoy. Más fiel que saldo ÷ ventas × 90 cuando las compras son irregulares.  (InfCobranzaDetallado + ventas)
@@ -6252,7 +6252,7 @@ function dcHtmlVentas(R, mm, esc, titulo) {
       ${top.map(c => `<tr><td>${esc(c.nom)}</td><td><span class="dc-p ${dcSem(c)}">${dcF(dcRef(c))}</span></td><td>${dcF(c.plazo)}</td><td>${mm(c.saldo)}</td></tr>`).join("")}</tbody></table></div>` : ""}
     <p class="dc-n">Días calle = cuántos días tarda en promedio un peso vendido en volver como pago. Verde: dentro del plazo · amarillo: hasta 20 días más · rojo: más lento.</p></section>`;
 }
-/* resumen detallado (HWF Admin) */
+/* resumen detallado (HWF) */
 let dcOrden = "saldo", dcQ = "", dcV = "", dcTodos = false;
 function dcHtmlAdmin(R, mm, esc) {
   const T = R.T, refT = dcRef(T);
@@ -6479,7 +6479,7 @@ syLlamar = async function (cfg, d) {
 </script>
 
 <script>
-/* ================= Productos activos/inactivos (HWF Admin) ================= */
+/* ================= Productos activos/inactivos (HWF) ================= */
 const PRA_KEY = "hwf-prod-estado", PRA_VER = "hwf-prod-ver";
 const praEstado = () => lsGet(PRA_KEY, {});
 const praOff = i => { const e = praEstado()[i]; return !!(e && e.on === false); };
@@ -6607,11 +6607,11 @@ syLlamar = async function (cfg, d) { const r = await _syLlamarCal.apply(this, ar
 const CAL_call = d => CAL_DEMO ? calDemoCall(d) : (syCfg() && syCfg().url ? _syLlamarCal(syCfg(), d) : Promise.resolve({ ok: false, error: "La app no está conectada con HWF." }));
 const CAL_get = (k, d) => lsGet(k, d), CAL_set = (k, v) => lsSet(k, v), CAL_quien = () => (SES && SES.vendedor ? SES.vendedor.nombre : ""), CAL_toast = m => toast(m);
 const CAL_clientes = () => clientesLocal().map(c => tc(c.nombre)).sort(), CAL_admin = false;
-/* ===== Calendario del equipo (común a app Ventas y HWF Admin) =====
+/* ===== Calendario del equipo (común a app Ventas y HWF) =====
    Ferias, activaciones de producto, capacitaciones y otras actividades extra. Se guarda en el registro central del script
    (acción «clienteCambios», código «EVENTO», detalle JSON); sirve con el script v11 de la planilla y con el nuevo.
    Cada app define antes: CAL_call(datos) → respuesta del script, CAL_get(k, def), CAL_set(k, v), CAL_quien(), CAL_toast(m),
-   CAL_clientes() → nombres de clientes (sugerencias), CAL_admin (true en HWF Admin). */
+   CAL_clientes() → nombres de clientes (sugerencias), CAL_admin (true en HWF). */
 const CAL_TIPOS = ["Feria", "Activación", "Capacitación", "Reunión", "Otra"];
 const CAL_K = "hwf-cal", CAL_V = "hwf-cal-ver";
 const calEsc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -6927,7 +6927,7 @@ const proxHabil = () => { const d = new Date(); do { d.setDate(d.getDate() + 1);
     return r; }; }
 </script>
 
-<script>/* dosapps: Dashboard desde los datos de HWF Admin (mismo teléfono) */
+<script>/* dosapps: Dashboard desde los datos de HWF (mismo teléfono) */
 (function () { try { var dvVer = function (s) { var m = /^\{"v":"([^"]*)"/.exec(String(s || "").slice(0, 80)); return m ? m[1] : ""; };
   var s = localStorage.getItem("hwf-dv-admin"); if (!s || dvVer(s) < DB.v) return;
   var a = JSON.parse(s); if (!a || !a.d || !a.d.BASE || !a.d.BASE.rows) return;
@@ -7098,7 +7098,7 @@ body{padding-bottom:16px!important}
   const cerrar = () => { pan.classList.remove("on"); velo.classList.remove("on"); };
   function abrir() {
     const items = (typeof NAV_ORDEN !== "undefined" ? NAV_ORDEN : []).map(([m, id]) => [m, document.getElementById(id)]).filter(([, b]) => b);
-    pan.innerHTML = `<div class="sn-top"><b>Ventas HWF</b><button type="button" class="sn-x" aria-label="Cerrar">×</button></div>` +
+    pan.innerHTML = `<div class="sn-top"><b>VENTAS HWF</b><button type="button" class="sn-x" aria-label="Cerrar">×</button></div>` +
       items.map(([m, b]) => `<button type="button" class="sn-i" data-sm="${m}" aria-current="${typeof MODO !== "undefined" && MODO === m}"><span class="sn-e">${ICO[m] || "•"}</span>${nombre(b).replace(/[<>&]/g, "")}</button>`).join("");
     pan.classList.add("on"); velo.classList.add("on");
   }
@@ -7165,7 +7165,7 @@ function confirmarNota() {
   abrirModal(`<dl class="sum num"><dt>Cliente</dt><dd>${esc(c.razon || "")}</dd>${c.entrega ? `<dt>Entrega</dt><dd>${dd(c.entrega)}${c.tipo ? " · " + esc(c.tipo) : ""}</dd>` : ""}
       <dt>Productos</dt><dd>${fmtN(t.lin)} líneas · ${fmtN(t.uni)} unidades</dd><dt>Neto</dt><dd>${fmt(t.neto)}</dd>
       <dt>Total con IVA</dt><dd style="font-size:1.15rem;color:var(--accent)">${fmt(t.total)}</dd></dl>
-      <p class="hint" style="margin:0">Mientras HWF Admin no la apruebe, podrás modificarla desde el registro de notas («Revisar y modificar»).</p>`,
+      <p class="hint" style="margin:0">Mientras HWF no la apruebe, podrás modificarla desde el registro de notas («Revisar y modificar»).</p>`,
     [["← Volver al pedido", "", cerrarModal], ["Enviar nota", "primary", () => { cerrarModal(); exportarAhora(); }]]);
 }
 (function () { const card = document.querySelector("#mEnv .mcard"); if (!card || card.querySelector(".m-x")) return;
@@ -7173,7 +7173,7 @@ function confirmarNota() {
   x.onclick = () => cerrarModal(); card.insertBefore(x, card.firstChild); })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261110073653";
+const HWF_VER = "20261110075227";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer)\/[^/]*$/, "/");
   let avisado = false;

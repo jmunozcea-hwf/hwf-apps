@@ -1,7 +1,7 @@
 {
  "id": "/hwf-apps/tienda/",
- "name": "Tienda Hellywoof",
- "short_name": "Hellywoof",
+ "name": "TIENDA HWF",
+ "short_name": "TIENDA",
  "start_url": "./",
  "scope": "./",
  "display": "standalone",

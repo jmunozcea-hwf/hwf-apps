@@ -1,7 +1,7 @@
 {
  "id": "/hwf-apps/admin/",
- "name": "HWF Admin",
- "short_name": "HWF Admin",
+ "name": "HWF",
+ "short_name": "HWF",
  "start_url": "./",
  "scope": "./",
  "display": "standalone",

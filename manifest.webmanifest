@@ -1,7 +1,7 @@
 {
  "id": "/hwf-apps/",
- "name": "Ventas HWF",
- "short_name": "Ventas",
+ "name": "VENTAS HWF",
+ "short_name": "VENTAS",
  "start_url": "ventas/",
  "scope": "ventas/",
  "display": "standalone",
@@ -10,7 +10,17 @@
  "theme_color": "#0B3146",
  "lang": "es-CL",
  "icons": [
-  { "src": "ventas/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
-  { "src": "ventas/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  {
+   "src": "ventas/icon-192.png",
+   "sizes": "192x192",
+   "type": "image/png",
+   "purpose": "any maskable"
+  },
+  {
+   "src": "ventas/icon-512.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "any maskable"
+  }
  ]
 }

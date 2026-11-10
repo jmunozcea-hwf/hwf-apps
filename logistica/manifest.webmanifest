@@ -1,7 +1,7 @@
 {
  "id": "/hwf-apps/logistica/",
- "name": "Logística HWF",
- "short_name": "Logística",
+ "name": "LOGÍSTICA HWF",
+ "short_name": "LOGÍSTICA",
  "start_url": "./",
  "scope": "./",
  "display": "standalone",
