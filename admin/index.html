@@ -1,7 +1,19 @@
 <!doctype html>
 <html lang="es">
 <head><!-- patch_claves -->
-<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0B3146"><link rel="apple-touch-icon" href="icon-192.png"><link rel="icon" href="icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="HWF Admin"><script>/* espacio de almacenamiento: liberar respaldos re-descargables antes de perder datos nuevos */
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0B3146"><link rel="apple-touch-icon" href="icon-192.png"><link rel="icon" href="icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="HWF Admin"><script>/* patch_congruencia: días de apertura de la tienda (todos, salvo feriados irrenunciables) */
+function tdaDiasAp(y, m, hasta) { const IRR = ["01-01", "05-01", "09-18", "09-19", "12-25"]; let n = 0;
+  for (let d = 1; d <= hasta; d++) if (!IRR.includes(String(m).padStart(2, "0") + "-" + String(d).padStart(2, "0"))) n++; return n; }
+const npNorm = s => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toUpperCase().replace(/[^A-Z ]/g, " ").trim().split(/\s+/)[0] || "";
+function npDeVend(B, v) { return (B && B.cots || []).filter(c => npNorm(c[4]) === npNorm(v)).reduce((t, c) => t + (Number(c[7]) || 0), 0); }
+</script>
+<script>/* patch_congruencia: venta de la distribuidora (sin tienda) por producto y mes, para inventario */
+let __iDH = null;
+function invDistH(p, m) { if (!__iDH) { __iDH = {}; const tv = D.vend.indexOf("Tienda Hellywoof"), Y = Number(String(D.corte || "").slice(0, 4)) || D.anio;
+    D.rows.forEach(r => { if (r[7] === tv || (r[8] || D.anio) !== Y) return; const o = (__iDH[r[1]] = __iDH[r[1]] || {}), x = (o[r[2]] = o[r[2]] || { q: 0, c: 0 }); x.q += r[4] || 0; x.c += (r[4] || 0) * (r[6] || 0); }); }
+  return ((__iDH[p.pi] || {})[m]) || { q: 0, c: 0 }; }
+</script>
+<script>/* espacio de almacenamiento: liberar respaldos re-descargables antes de perder datos nuevos */
 (function () {
   var S = Storage.prototype, set = S.setItem, rem = S.removeItem;
   var PRESC = ["hwf-dv-dash", "hwf-crm-v1", "hwf-pt-cc", "adm-pt-chat", "hwf-ranking", "adm-ranking", "hwf-cli-cambios-srv", "adm-cc", "hwf-carteras-ver", "hwf-prod-ver", "adm-prod-ver", "hwf-cal-ver", "hwf-pub"];
@@ -1222,7 +1234,7 @@ function npRitmo(cots, Y, M, n, real, lim, ant) {
   <section class="sec" id="s-inv" hidden></section>
   <section class="sec" id="s-mas" hidden>
     <div class="seg" id="masSeg">
-      <button type="button" data-m="plan" aria-pressed="true">Plan 100 MM</button>
+      <button type="button" data-m="plan" aria-pressed="true">Plan de ventas</button>
       <button type="button" data-m="abast" aria-pressed="false">Abastecimiento</button>
       <button type="button" data-m="ranking" aria-pressed="false">Ranking</button>
       <button type="button" data-m="cots" aria-pressed="false">NP Defontana</button>
@@ -1403,7 +1415,7 @@ function calcular() {
   const prev3 = [M - 3, M - 2, M - 1].filter(x => x >= 1);
   const ytd = Array.from({ length: M }, (_, i) => i + 1);
   // clientes
-  const clientes = cl.map((c, ci) => ({ ci, nombre: c[0], comuna: c[1], cart: c[2], dir: c[3] || "",
+  const clientes = cl.map((c, ci) => ({ ci, nombre: c[0], comuna: c[1], cart: /CLIENTE BOLETA/i.test(c[0]) ? "Tienda Hellywoof" : c[2], dir: c[3] || "",
     mes: sum(cliMes[ci], [M]), hab: prev3.length ? sum(cliMes[ci], prev3) / prev3.length : 0, ytd: sum(cliMes[ci], ytd),
     ult: cliUlt[ci] || 0, primera: cliPrimera[ci] || 0, hist: cliMes[ci] || {} })).filter(c => incl(c.ci) && (c.ytd || c.hab));
   // productos
@@ -1424,7 +1436,7 @@ function calcular() {
   const carts = CARTERAS().concat(Object.keys(pm.cart).filter(c => !CARTERAS().includes(c) && (OPC.tienda || c !== "Tienda Hellywoof")));
   const vend = [...new Set(carts)].map(v => {
     const venta = pm.cart[v] || 0, app = appCart[v] || 0, avance = venta + app, meta = metaOk ? (METAS.metas[v] || 0) : 0;
-    const proy = enCorte && transcurridos ? venta / transcurridos * totales + app : avance;
+    const proy = enCorte && transcurridos ? (v === "Tienda Hellywoof" ? venta / Math.max(1, tdaDiasAp(Y, M, ct.d)) * tdaDiasAp(Y, M, diasMes(Y, M)) : venta / transcurridos * totales) : venta;   /* patch_congruencia: solo facturado */
     const cs = clientes.filter(c => c.cart === v);
     const costo = D.rows.reduce((s, r) => (anio(r) === Y && r[2] === M && cartRow(r) === v) ? s + r[4] * r[6] : s, 0);
     return { v, venta, app, avance, meta, falta: Math.max(0, meta - avance), proy, margen: venta ? 1 - costo / venta : 0,
@@ -1433,7 +1445,7 @@ function calcular() {
   }).filter(x => x.meta || x.venta || x.ncli);
   const meta = vend.reduce((s, x) => s + x.meta, 0), app = vend.reduce((s, x) => s + x.app, 0);
   A = { porMes, clientes, productos, comMes, catMes, pm, vend, meta, app, avance: pm.venta + app, enCorte, transcurridos, totales,
-        restantes: Math.max(0, totales - transcurridos), proy: enCorte && transcurridos ? pm.venta / transcurridos * totales + app : pm.venta + app,
+        restantes: Math.max(0, totales - transcurridos), proy: vend.reduce((s, x) => s + x.proy, 0) + Math.max(0, pm.venta - vend.reduce((s, x) => s + x.venta, 0)),
         prev3, ytd, metaOk, pedApp };
 }
 
@@ -2890,9 +2902,9 @@ const _pintarResumenAv = pintarResumen;
 /* las NP Defontana pendientes cuentan en el avance, la falta y la proyección de cada vendedor (una sola vez por cálculo) */
 function avAjustar() {
   if (!A || A._np || !A.enCorte) return; const np = avNP(); let tot = 0;
-  A.vend.forEach(v => { const n = np[avK(v.v)]; const m = n ? n.m : 0; v.np = m; v.avance += m; v.proy += m; v.falta = Math.max(0, v.meta - v.avance); tot += m; });
+  A.vend.forEach(v => { const n = np[avK(v.v)]; const m = n ? n.m : 0; v.np = m; v.avance += m; v.falta = Math.max(0, v.meta - v.avance); tot += m; });
   Object.values(np).forEach(n => { if (!A.vend.some(v => avK(v.v) === avK(n.v))) tot += n.m; });  /* NP de vendedores sin cartera (ej. Víctor) también suman al total */
-  A.np = tot; A.avance += tot; A.proy += tot; A._np = true;
+  A.np = tot; A.avance += tot;  A._np = true;
 }
 pintarResumen = function () {
   avAjustar();
@@ -3125,7 +3137,7 @@ function dbDatos() {
   const nappPen = (IMP.pedidos || []).filter(p => { const e = naEst(p.num); return e === "pen" || e === "mod"; }).length;
   const pr = typeof prTodos === "function" ? prTodos() : [];
   const stock = A.productos.map(p => { const s = stockDe(p.cod); if (s == null) return null;
-    const q = A.prev3.reduce((t, m) => t + (p.hist[m] ? p.hist[m].q : 0), 0) / Math.max(1, A.prev3.length);
+    const q = A.prev3.reduce((t, m) => t + invDistH(p, m).q, 0) / Math.max(1, A.prev3.length);
     if (!(q > 0)) return null; const dias = s > 0 ? Math.round(s / (q / 30)) : 0;
     return { p, s, q, dias }; }).filter(x => x && (x.s <= 0 || x.dias < 15)).sort((a, b) => (a.s > 0) - (b.s > 0) || b.p.hab - a.p.hab);
   return { ct, dm, lim, dia, diaP, dmP, prevHasta, prevTot, cob, cots, nappPen, pr, stock };
@@ -3133,7 +3145,7 @@ function dbDatos() {
 function pintarDashboard() {
   const s = $("s-res"); if (!s || window.__HWF_SIN_CONEXION) return;
   const X = dbDatos(), fa = A.pm.venta, np = A.np || 0, app = A.app || 0, mg = fa ? 1 - A.pm.costo / fa : 0;
-  const con = A.clientes.filter(c => c.mes > 0).length, hab = A.clientes.filter(c => c.hab > 0).length;
+  const _cD = A.clientes.filter(c => c.cart !== "Tienda Hellywoof"), con = _cD.filter(c => c.mes > 0).length, hab = _cD.filter(c => c.hab > 0).length, faD = fa - ((A.pm.cart || {})["Tienda Hellywoof"] || 0);
   const esp = A.enCorte && A.totales ? A.transcurridos / A.totales : 1, conMeta = A.metaOk && A.meta;
   const base = Math.max(A.meta || 0, A.avance, 1), w = v => Math.max(0, v / base * 100).toFixed(2) + "%";
   const varP = X.prevHasta ? fa / X.prevHasta - 1 : null;
@@ -3146,8 +3158,8 @@ function pintarDashboard() {
     K("av", "Proyección de cierre", mm(A.proy), conMeta ? `${pct(A.proy / A.meta)} de la meta` : "al ritmo actual", conMeta ? `<i class="chip ${A.proy >= A.meta ? "up" : A.proy >= A.meta * .9 ? "warn" : "down"}">${pct(A.proy / A.meta)}</i>` : ""),
     K("ven", "Facturado del mes", mm(fa), M > 1 ? `${MESES[M - 1]} a la misma fecha: ${mm(X.prevHasta)}` : "", dbChip(varP)),
     K("pro:margen", "Margen bruto", pct(mg), `${mm(fa - A.pm.costo)} en el mes`),
-    K("cli", "Clientes con compra", nf(con), `de ${nf(hab)} habituales (${pct(hab ? con / hab : 0)})`),
-    K("cli", "Venta por cliente", mm(con ? fa / con : 0), "promedio del mes"),
+    K("cli", "Clientes con compra", nf(con), `distribuidora · de ${nf(hab)} habituales (${pct(hab ? con / hab : 0)})`),
+    K("cli", "Venta por cliente", mm(con ? faD / con : 0), "promedio del mes · distribuidora"),
     X.cob.length ? K("mas:cobranza", "Por cobrar", mm(cobTot), `${mm(cobV)} vencido`, cobV ? `<i class="chip down">${pct(cobV / cobTot)}</i>` : "") : "",
     K("mas:cots", "NP Defontana", mm(npTot), `${npN} ${npN === 1 ? "nota pendiente" : "notas pendientes"}`),
     K("mas:napp", "Notas de la app", nf(X.nappPen), "por revisar", X.nappPen ? `<i class="chip warn">revisar</i>` : ""),
@@ -3722,9 +3734,9 @@ function invDatos() {
   const L = [];
   cods.forEach(cod => {
     const p = porCod[cod], s = stockDe(cod), stock = s == null ? null : Math.max(0, Number(s) || 0);
-    const q = p ? ms.reduce((t, m) => t + (p.hist[m] ? p.hist[m].q : 0), 0) / ms.length : 0;
+    const q = p ? ms.reduce((t, m) => t + invDistH(p, m).q, 0) / ms.length : 0;
     if (!p && !(stock > 0)) return;
-    const cq = p ? ms.reduce((t, m) => t + (p.hist[m] ? p.hist[m].q : 0), 0) : 0, cc = p ? ms.reduce((t, m) => t + (p.hist[m] ? p.hist[m].c : 0), 0) : 0;
+    const cq = p ? ms.reduce((t, m) => t + invDistH(p, m).q, 0) : 0, cc = p ? ms.reduce((t, m) => t + invDistH(p, m).c, 0) : 0;
     const cu = cq > 0 ? cc / cq : (p && p.ytdQ ? p.ytdC / p.ytdQ : 0);
     const dia = q / 30, dias = stock == null ? null : dia > 0 ? stock / dia : Infinity;
     const comprar = dias != null && dias < 7 ? Math.max(0, Math.ceil(q - stock)) : 0;
@@ -3960,7 +3972,7 @@ function pintarPlan() {
     <div class="pl-bar"><i style="width:${Math.min(100, proy / PLAN.meta * 100).toFixed(1)}%"></i></div>
     ${P.excl.length ? `<p class="muted" style="font-size:.8rem;margin:0 0 6px">Fuera del plan: ${P.excl.map(n => esc(tc(n))).join(", ")}.</p>` : ""}<div class="pl-step"><b>Primer paso esta semana:</b> contactar a los ${P.d60.length + P.d90.length} clientes sin compra hace 60 días o más (lista abajo y en el Dashboard de cada vendedor) antes del viernes.</div></div>
   <div class="card"><h2>Indicadores <span class="muted">seguimiento semanal</span></h2><div class="tbl"><table><thead><tr><th>Indicador</th><th class="r">Hoy</th><th class="r">Referencia</th><th>Meta</th></tr></thead><tbody>
-    <tr><td>Venta total (proyección)</td><td class="r num">${mm(proy)}</td><td class="r num">65 MM</td><td>${mm(PLAN.meta)} este mes</td></tr>
+    <tr><td>Venta total (proyección)</td><td class="r num">${mm(proy)}</td><td class="r num">${(() => { const _p = typeof PLAN14 !== "undefined" ? PLAN14.find(x => x.ym === P.Y * 100 + P.M) : null; return _p && _p.fc ? mm(_p.fc) + " sin cambios" : "—"; })()}</td><td>${mm(PLAN.meta)} este mes</td></tr>
     <tr><td>Clientes reactivados este mes</td><td class="r num">${P.reac.length}</td><td class="r num">${P.d60.length + P.d90.length} dormidos 60+</td><td>1 de cada 4 dormidos en 60 días</td></tr>
     <tr><td>Ticket promedio por cliente (mes a la fecha)</td><td class="r num">${mm(P.ticket)}</td><td class="r num">${mm(P.ticket3)} ${varP(P.ticket, P.ticket3)}</td><td>+10%</td></tr>
     <tr><td>Productos distintos por cliente</td><td class="r num">${P.lin.toFixed(1).replace(".", ",")}</td><td class="r num">${P.lin3.toFixed(1).replace(".", ",")}</td><td>+1 línea promedio</td></tr>
@@ -4901,8 +4913,8 @@ function rkdCalc(B, y, m) {
   const YM = y * 100 + m, prim = {}, V = {}, base = { venta: 0, costo: 0, cli: {}, docs: 0, cont: 0 };
   B.rows.forEach(r => { const k = ym(r), f = k * 100 + r[3]; if (r[5] > 0 && (prim[r[0]] == null || f < prim[r[0]].f)) prim[r[0]] = { f, v: r[7] }; });
   B.rows.forEach(r => { const v = B.vend[r[7]]; if (fuera(v)) return; const k = ym(r);
-    if (k === YM && r[3] <= ultDia) { const o = V[v] = V[v] || { v, venta: 0, costo: 0, cli: {}, docs: 0, cont: 0, nuevos: 0, vw: 0 }; o.venta += r[5]; o.vw += r[5] * rkdPesoDia(r[3], nDias); o.costo += r[4] * r[6]; (o.cli[r[0]] = o.cli[r[0]] || new Set()).add(r[1]); }
-    else if (prev.includes(k)) { base.venta += r[5]; base.costo += r[4] * r[6]; const kk = k + "|" + r[0]; (base.cli[kk] = base.cli[kk] || new Set()).add(r[1]); } });
+    if (k === YM && r[3] <= ultDia) { const o = V[v] = V[v] || { v, venta: 0, costo: 0, cli: {}, docs: 0, cont: 0, nuevos: 0, vw: 0 }; o.venta += r[5]; o.vw += r[5] * rkdPesoDia(r[3], nDias); o.costo += r[4] * r[6]; if (r[5] > 0) (o.cli[r[0]] = o.cli[r[0]] || new Set()).add(r[1]); }
+    else if (prev.includes(k)) { base.venta += r[5]; base.costo += r[4] * r[6]; const kk = k + "|" + r[0]; if (r[5] > 0) (base.cli[kk] = base.cli[kk] || new Set()).add(r[1]); } });
   Object.entries(prim).forEach(([ci, p]) => { if (Math.floor(p.f / 100) !== YM || p.f % 100 > ultDia) return; const v = B.vend[p.v]; if (V[v]) V[v].nuevos++; });
   let hayDocs = false, hayCont = false;
   (B.vdia || []).forEach(([f, vi, nd, ct]) => { const k = Math.floor(f / 100), v = B.vend[vi]; if (fuera(v)) return; if (nd) hayDocs = true; if (ct) hayCont = true;
@@ -5033,50 +5045,6 @@ body{padding-bottom:16px!important}
 })();
 </script>
 
-<style>/* patch_kpiinicio */
-.kp-card{background:linear-gradient(135deg,#0B3146,#1F5673);color:#fff;border-radius:18px;padding:14px 16px;display:grid;gap:10px;margin:0 0 12px}
-.kp-card h3{margin:0;font-size:1rem;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}.kp-card h3 small{opacity:.8;font-weight:600;font-size:.78rem}
-.kp-bar{position:relative;height:12px;border-radius:999px;background:rgba(255,255,255,.18);overflow:hidden}.kp-bar i{position:absolute;inset:0 auto 0 0;background:#F0A818;border-radius:999px}
-.kp-bar s{position:absolute;top:-3px;bottom:-3px;width:3px;background:#fff;border-radius:2px}
-.kp-g{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px}
-.kp-k{background:rgba(255,255,255,.1);border-radius:12px;padding:8px 10px}.kp-k span{display:block;font-size:.7rem;opacity:.8;font-weight:700;text-transform:uppercase;letter-spacing:.03em}
-.kp-k b{display:block;font-size:1.05rem}.kp-k small span{display:inline;text-transform:none;letter-spacing:0;font-size:inherit;opacity:1}.kp-k small{display:block;font-size:.74rem;opacity:.85}
-.kp-t{width:100%;border-collapse:collapse;font-size:.8rem}.kp-t th,.kp-t td{padding:5px 6px;border-bottom:1px solid rgba(255,255,255,.15);text-align:right;white-space:nowrap}.kp-t th:first-child,.kp-t td:first-child{text-align:left}
-.kp-t th{font-size:.68rem;opacity:.8}.kp-ok{color:#9FE3B8}.kp-bad{color:#FFB4A9}
-</style>
-<script>/* patch_kpiinicio: cuadro de avance del mes */
-function kpiDatos(B) {
-  if (!B || !B.rows || !B.vend) return null; const [y, m] = String(B.corte || "").split("-").map(Number); if (!y) return null;
-  const R = rkdCalc(B, y, m); if (!R) return null;
-  const tv = B.vend.indexOf("Tienda Hellywoof"), an = r => r[8] || B.anio, prim = {}, cli = {}; let venta = 0, costo = 0, nuevos = 0;
-  B.rows.forEach(r => { const k = an(r) * 100 + r[2], f = k * 100 + r[3]; if (r[5] > 0 && (prim[r[0]] == null || f < prim[r[0]])) prim[r[0]] = f; });
-  B.rows.forEach(r => { if (r[7] === tv || an(r) !== y || r[2] !== m || r[3] > R.ultDia) return; venta += r[5]; costo += r[4] * r[6]; (cli[r[0]] = cli[r[0]] || new Set()).add(r[1]); });
-  Object.entries(prim).forEach(([ci, f]) => { if (Math.floor(f / 100) === y * 100 + m && f % 100 <= R.ultDia && cli[ci]) nuevos++; });
-  const nc = Object.keys(cli).length, meta = metaPlan14(y, m);
-  return { R, y, m, meta, venta, marg: venta - costo, margPct: venta ? 1 - costo / venta : 0, nuevos, sku: nc ? Object.values(cli).reduce((s, x) => s + x.size, 0) / nc : 0, nc };
-}
-function kpiHtml(B, yo) {
-  const K = kpiDatos(B); if (!K) return "";
-  const R = K.R, pmm = n => "$" + (Math.abs(n) >= 1e6 ? (n / 1e6).toLocaleString("es-CL", { maximumFractionDigits: 1 }) + " MM" : Math.round(n).toLocaleString("es-CL"));
-  const pc = x => Math.round((x || 0) * 100) + "%", av = K.meta ? K.venta / K.meta : 0, tp = R.prog, cls = (a, b) => a >= b ? "kp-ok" : "kp-bad";
-  const MES = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"][K.m - 1];
-  const v = yo ? R.L.find(x => x.v === yo) : null;
-  const col = (t, a, b) => `<div class="kp-k"><span>${t}</span><b>${a}</b>${b ? `<small>${b}</small>` : ""}</div>`;
-  let html = `<section class="kp-card" id="kpCard"><h3>📊 Avance de ${MES} <small>al ${R.ultDia} · ${R.hPas} de ${R.hTot} días hábiles</small></h3>
-    <div class="kp-bar" title="venta vs meta; la marca blanca es el avance de tiempo"><i style="width:${Math.min(100, av * 100).toFixed(1)}%"></i><s style="left:${Math.min(100, tp * 100).toFixed(1)}%"></s></div>
-    <div class="kp-g">${col("Meta distribuidora", pmm(K.meta), "plan 63 → 100 MM")}${col("Venta distribuidora", pmm(K.venta), `<span class="${cls(av, tp)}">${pc(av)} de la meta</span>`)}${col("Avance de tiempo", pc(tp), `${R.hPas} de ${R.hTot} días hábiles`)}
-      ${v ? col("Tu venta", pmm(v.venta), `<span class="${cls(v.meta ? v.venta / v.meta : 0, tp)}">${v.meta ? pc(v.venta / v.meta) + " de tu meta " + pmm(v.meta) : "sin meta"}</span>`) : ""}
-      ${col("Margen distribuidora", pmm(K.marg), pc(K.margPct))}${v ? col("Tu margen", pmm(v.marg), pc(v.margPct)) : ""}
-      ${col("Clientes nuevos", K.nuevos + " distribuidora", v ? v.nuevos + " tuyos" : "")}${col("SKU por cliente", K.sku.toFixed(1) + " distribuidora", v ? v.sku.toFixed(1) + " tuyos" : `${K.nc} clientes compraron`)}</div>`;
-  if (!yo) html += `<div style="overflow-x:auto"><table class="kp-t"><thead><tr><th>Vendedor</th><th>Venta</th><th>% de su meta</th><th>Margen</th><th>Nuevos</th><th>SKU/cliente</th></tr></thead><tbody>
-    ${R.L.map(x => `<tr><td>${String(x.v).replace(/[<>&]/g, "")}</td><td>${pmm(x.venta)}</td><td class="${cls(x.meta ? x.venta / x.meta : 0, tp)}">${x.meta ? pc(x.venta / x.meta) : "–"}</td><td>${pmm(x.marg)} · ${pc(x.margPct)}</td><td>${x.nuevos}</td><td>${x.sku.toFixed(1)}</td></tr>`).join("")}</tbody></table></div>`;
-  return html + `</section>`;
-}
-
-{ const _pdKP = pintarDashboard; pintarDashboard = function () { const r = _pdKP.apply(this, arguments);
-    try { const s = $("s-res"), o = $("kpCard"); if (o) o.remove(); if (s && D) s.insertAdjacentHTML("afterbegin", kpiHtml(D, null)); } catch (e) { console.error(e); } return r; }; }
-setTimeout(() => { try { if (D && $("s-res") && !$("s-res").hidden && !$("kpCard")) pintarDashboard(); } catch (e) {} }, 50);
-</script>
 
 <style>/* patch_iconpest */
 .hic-pw{display:inline-block;width:18px;height:18px;flex:0 0 18px;vertical-align:-4px;margin-right:6px;line-height:0}
@@ -5146,7 +5114,7 @@ function pintarAbast() {
     <div class="kpis">
       <div class="kpi"><span>Comprar este mes</span><b class="num">${pm(X.tot[0].compra)}</b><small>${X.tot[0].n} productos · a costo</small></div>
       <div class="kpi"><span>Próximos ${nM} meses</span><b class="num">${pm(tres)}</b><small>${X.tot.slice(0, nM).map(t => mlab(t) + " " + pm(t.compra)).join(" · ")}</small></div>
-      <div class="kpi"><span>Inventario hoy (productos con venta)</span><b class="num">${pm(X.inv0)}</b><small>${Math.round(X.diasInv)} días de venta al ritmo del plan</small></div>
+      <div class="kpi"><span>Inventario hoy</span><b class="num">${(() => { const ii = typeof invIndice === "function" ? invIndice() : null; return pm(ii ? ii.valor : X.inv0); })()}</b><small>${(() => { const ii = typeof invIndice === "function" ? invIndice() : null; return (ii && isFinite(ii.dias) ? Math.round(ii.dias) + " días con la venta de 3 meses · " : "") + Math.round(X.diasInv) + " días al ritmo del plan"; })()}</small></div>
     </div>
     <div class="ab-par" style="margin-top:10px">
       <label>Stock de seguridad (días)<input id="abSeg" type="number" min="0" max="90" value="${X.P.seg}"></label>
@@ -5197,7 +5165,7 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261110055952";
+const HWF_VER = "20261110061243";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda)\/[^/]*$/, "/");
   let avisado = false;
@@ -5217,10 +5185,91 @@ const HWF_VER = "20261110055952";
 })();
 </script>
 
-<script>/* patch_kpifresco: fecha de los datos de Drive en el cuadro de avance */
-{ const _kdKF = kpiDatos; kpiDatos = function (B) { if (!B || !B.rows || !B.rows.length) return null; return _kdKF.apply(this, arguments); }; }
-{ const kfSello = () => { try { const c = $("kpCard"), s = c && c.querySelector("h3 small"); const a = typeof ACT_INFO !== "undefined" ? ACT_INFO : null; if (s && a && a.drive && !s.dataset.kf) { s.dataset.kf = 1; s.insertAdjacentHTML("beforeend", ` · Drive ${String(a.drive).replace(/[<>&]/g, "")}`); } } catch (e) {} };
-  const _pdKF = pintarDashboard; pintarDashboard = function () { const r = _pdKF.apply(this, arguments); kfSello(); return r; }; kfSello(); }
+
+<style>/* patch_avance */
+.av2{background:linear-gradient(140deg,#0B3146 0%,#174A63 60%,#1F5673 100%);color:#fff;border-radius:20px;padding:16px;display:grid;gap:14px;margin:0 0 14px;box-shadow:0 10px 28px rgba(11,49,70,.22)}
+.av2 *{box-sizing:border-box}.av2 h3{margin:0;font-size:1.05rem;line-height:1.2}.av2-hd{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.av2-fe{font-size:.72rem;opacity:.75;font-weight:600}
+.av2-blk{background:rgba(255,255,255,.07);border-radius:16px;padding:12px;display:grid;gap:9px}
+.av2-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.av2-top .t{font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;opacity:.8;font-weight:800;flex-basis:100%}
+.av2-top b{font-size:1.7rem;line-height:1;letter-spacing:-.01em}.av2-top .de{opacity:.8;font-size:.9rem;font-weight:600}
+.av2-st{margin-left:auto;border-radius:999px;padding:4px 10px;font-size:.74rem;font-weight:800;white-space:nowrap}
+.av2-st.ok{background:#1C7A4E}.av2-st.wa{background:#B26A00}.av2-st.ba{background:#B42318}
+.av2-bar{position:relative;height:14px;border-radius:999px;background:rgba(255,255,255,.16);overflow:visible}
+.av2-bar i{position:absolute;top:0;bottom:0;left:0;border-radius:999px}.av2-bar i.f{background:#F0A818;z-index:2}.av2-bar i.p{background:repeating-linear-gradient(45deg,#F7D58A 0 6px,#E8BE5E 6px 12px);z-index:1}
+.av2-bar s{position:absolute;top:-4px;bottom:-4px;width:3px;border-radius:2px;background:#fff;z-index:3;transform:translateX(-1px)}
+.av2-ley{display:flex;gap:4px 10px;flex-wrap:wrap;font-size:.72rem;opacity:.92}.av2-ley span{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.av2-ley i{width:10px;height:10px;border-radius:3px;display:inline-block}.av2-ley i.f{background:#F0A818}.av2-ley i.p{background:#E8BE5E}.av2-ley i.t{background:#fff;width:3px}
+.av2-g{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px}
+.av2-k{background:rgba(255,255,255,.08);border-radius:12px;padding:8px 10px;min-width:0}.av2-k span{display:block;font-size:.66rem;text-transform:uppercase;letter-spacing:.04em;opacity:.75;font-weight:800}
+.av2-k b{display:block;font-size:1.02rem;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.av2-k small{display:block;font-size:.72rem;opacity:.82}
+.av2 .ok{color:#9FE3B8}.av2 .ba{color:#FFB4A9}.av2 .wa{color:#FFD58A}.av2-st.ok,.av2-st.wa,.av2-st.ba{color:#fff}
+.av2-t{width:100%;border-collapse:collapse;font-size:.8rem}.av2-t th,.av2-t td{padding:6px;border-bottom:1px solid rgba(255,255,255,.13);text-align:right;white-space:nowrap}
+.av2-t th:first-child,.av2-t td:first-child{text-align:left}.av2-t th{font-size:.66rem;opacity:.75;text-transform:uppercase;letter-spacing:.03em}
+.av2-mb{display:block;height:6px;border-radius:9px;background:rgba(255,255,255,.15);margin-top:4px;position:relative;min-width:90px}.av2-mb i{position:absolute;top:0;bottom:0;left:0;border-radius:9px}
+.av2-mb i.f{background:#F0A818;z-index:2}.av2-mb i.p{background:#E8BE5E;z-index:1}.av2-mb s{position:absolute;top:-3px;bottom:-3px;width:2px;background:#fff;z-index:3}
+.av2-nota{font-size:.7rem;opacity:.7;margin:0}
+</style>
+<script>/* patch_avance: cuadro de avance del mes (v2) */
+const av2N = s => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toUpperCase().replace(/[^A-Z ]/g, " ").trim().split(/\s+/)[0] || "";
+function av2DiasTienda(y, m, hasta) { const IRR = ["01-01", "05-01", "09-18", "09-19", "12-25"]; let n = 0; for (let d = 1; d <= hasta; d++) if (!IRR.includes(String(m).padStart(2, "0") + "-" + String(d).padStart(2, "0"))) n++; return n; }
+function av2Datos(B) {
+  if (!B || !B.rows || !B.rows.length || !B.vend) return null; const [y, m] = String(B.corte || "").split("-").map(Number); if (!y) return null;
+  const R = rkdCalc(B, y, m); if (!R) return null;
+  const tv = B.vend.indexOf("Tienda Hellywoof"), an = r => r[8] || B.anio, prim = {}, cli = {}; let venta = 0, costo = 0, nuevos = 0, vT = 0;
+  B.rows.forEach(r => { const f = (an(r) * 100 + r[2]) * 100 + r[3]; if (r[5] > 0 && (prim[r[0]] == null || f < prim[r[0]])) prim[r[0]] = f; });
+  B.rows.forEach(r => { if (an(r) !== y || r[2] !== m || r[3] > R.ultDia) return; if (r[7] === tv) { vT += r[5]; return; }
+    venta += r[5]; costo += r[4] * r[6]; if (r[5] > 0) (cli[r[0]] = cli[r[0]] || new Set()).add(r[1]); });
+  Object.entries(prim).forEach(([ci, f]) => { if (Math.floor(f / 100) === y * 100 + m && f % 100 <= R.ultDia && cli[ci]) nuevos++; });
+  const np = {}; (B.cots || []).forEach(c => { const k = av2N(c[4]); np[k] = (np[k] || 0) + (Number(c[7]) || 0); });
+  const npDist = Object.entries(np).filter(([k]) => k !== av2N("Tienda Hellywoof")).reduce((t, [, v]) => t + v, 0);
+  const nc = Object.keys(cli).length, meta = metaPlan14(y, m), dm = new Date(y, m, 0).getDate();
+  const metaT = B.metas ? Object.entries(B.metas).filter(([k]) => /tienda|hellywoof/i.test(k)).reduce((t, [, v]) => t + (Number(v) || 0), 0) : 0;
+  const dT = av2DiasTienda(y, m, Math.min(R.ultDia, dm)), dTt = av2DiasTienda(y, m, dm);
+  return { R, y, m, meta, venta, costo, np, npDist, nuevos, nc, sku: nc ? Object.values(cli).reduce((s, x) => s + x.size, 0) / nc : 0,
+    proy: R.hPas ? venta / R.hPas * R.hTot : venta, tienda: { venta: vT, meta: metaT, proy: dT ? vT / dT * dTt : vT, np: np[av2N("Tienda Hellywoof")] || 0, tiempo: dTt ? dT / dTt : 0 } };
+}
+function av2Html(B, yo, act) {
+  const K = av2Datos(B); if (!K) return "";
+  const R = K.R, tp = R.hTot ? R.hPas / R.hTot : 0, rest = Math.max(0, R.hTot - R.hPas);
+  const pmm = n => { const a = Math.abs(n), s = n < 0 ? "−" : ""; return s + "$" + (a >= 1e6 ? (a / 1e6).toLocaleString("es-CL", { maximumFractionDigits: 1 }) + " MM" : a >= 1e3 ? Math.round(a / 1e3).toLocaleString("es-CL") + " mil" : Math.round(a).toLocaleString("es-CL")); };
+  const pc = x => Math.round((x || 0) * 100) + "%", n1 = x => (x || 0).toLocaleString("es-CL", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  const est = (a, t) => a >= t ? ["ok", "Al día"] : a >= t * 0.85 ? ["wa", "Un poco atrás"] : ["ba", "Atrasado"];
+  const MES = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"][K.m - 1];
+  const bar = (f, p, meta, t) => { const W = x => Math.max(0, Math.min(100, meta ? x / meta * 100 : 0)).toFixed(1) + "%"; return `<div class="av2-bar" role="img" aria-label="facturado ${pc(meta ? f / meta : 0)}, con pendientes ${pc(meta ? (f + p) / meta : 0)}, tiempo ${pc(t)}"><i class="p" style="width:${W(f + p)}"></i><i class="f" style="width:${W(f)}"></i><s style="left:${Math.min(100, t * 100).toFixed(1)}%"></s></div>`; };
+  const ley = (f, p, meta, t) => `<div class="av2-ley"><span><i class="f"></i>${pc(meta ? f / meta : 0)} facturado</span><span><i class="p"></i>${pc(meta ? (f + p) / meta : 0)} con pendientes (${pmm(p)})</span><span><i class="t"></i>tiempo ${pc(t)}</span></div>`;
+  const k = (t, b, s, c) => `<div class="av2-k"><span>${t}</span><b${c ? ` class="${c}"` : ""}>${b}</b>${s ? `<small>${s}</small>` : ""}</div>`;
+  const fe = act && act.drive ? ` · Drive ${String(act.drive).replace(/[<>&]/g, "")}` : "";
+  let html = `<section class="av2" id="kpCard"><div class="av2-hd"><h3>📊 Avance de ${MES}</h3><span class="av2-fe">datos al ${R.ultDia} · ${R.hPas} de ${R.hTot} días hábiles${fe}</span></div>`;
+  const v = yo ? R.L.find(x => av2N(x.v) === av2N(yo)) : null;
+  if (v) { const np = K.np[av2N(v.v)] || 0, a = v.meta ? v.venta / v.meta : 0, [sc, st] = est(a, tp), pr = R.hPas ? v.venta / R.hPas * R.hTot : v.venta, falta = Math.max(0, v.meta - v.venta);
+    html += `<div class="av2-blk"><div class="av2-top"><span class="t">Tu avance</span><b>${pmm(v.venta)}</b><span class="de">de ${v.meta ? pmm(v.meta) : "sin meta"}</span>${v.meta ? `<span class="av2-st ${sc}">${st}</span>` : ""}</div>
+      ${v.meta ? bar(v.venta, np, v.meta, tp) + ley(v.venta, np, v.meta, tp) : ""}
+      <div class="av2-g">${k("Proyección de cierre", pmm(pr), v.meta ? pc(pr / v.meta) + " de tu meta" : "al ritmo actual", v.meta ? (pr >= v.meta ? "ok" : pr >= v.meta * .85 ? "wa" : "ba") : "")}
+        ${k("Falta facturar", pmm(falta), rest ? pmm(falta / rest) + " por día hábil (" + rest + ")" : "último día")}
+        ${k("Tu margen", pc(v.margPct), pmm(v.marg))}${k("Nuevos · SKU/cliente", v.nuevos + " · " + n1(v.sku), "clientes nuevos · productos por cliente")}</div></div>`; }
+  const a = K.meta ? K.venta / K.meta : 0, [sc, st] = est(a, tp);
+  html += `<div class="av2-blk"><div class="av2-top"><span class="t">Distribuidora${yo ? " (todo el equipo)" : ""} · sin tienda</span><b>${pmm(K.venta)}</b><span class="de">de ${pmm(K.meta)}</span><span class="av2-st ${sc}">${st}</span></div>
+    ${bar(K.venta, K.npDist, K.meta, tp)}${ley(K.venta, K.npDist, K.meta, tp)}
+    <div class="av2-g">${k("Proyección de cierre", pmm(K.proy), pc(K.meta ? K.proy / K.meta : 0) + " de la meta", K.proy >= K.meta ? "ok" : K.proy >= K.meta * .85 ? "wa" : "ba")}
+      ${k("Falta facturar", pmm(Math.max(0, K.meta - K.venta)), rest ? pmm(Math.max(0, K.meta - K.venta) / rest) + " por día hábil" : "")}
+      ${k("Margen", pc(K.venta ? 1 - K.costo / K.venta : 0), pmm(K.venta - K.costo))}${k("Nuevos · SKU/cliente", K.nuevos + " · " + n1(K.sku), K.nc + " clientes compraron")}</div>`;
+  if (!yo) html += `<div style="overflow-x:auto"><table class="av2-t"><thead><tr><th>Vendedor</th><th>Facturado</th><th>Pendiente</th><th>Avance</th><th>Proyección</th><th>Margen</th><th>Nuevos</th><th>SKU/cl.</th></tr></thead><tbody>
+    ${R.L.map(x => { const np = K.np[av2N(x.v)] || 0, pr = R.hPas ? x.venta / R.hPas * R.hTot : x.venta, W = y => Math.max(0, Math.min(100, x.meta ? y / x.meta * 100 : 0)).toFixed(1) + "%", c = est(x.meta ? x.venta / x.meta : 0, tp)[0];
+      return `<tr><td>${String(x.v).replace(/[<>&]/g, "")}${x.meta ? `<span class="av2-mb"><i class="p" style="width:${W(x.venta + np)}"></i><i class="f" style="width:${W(x.venta)}"></i><s style="left:${(tp * 100).toFixed(1)}%"></s></span>` : ""}</td>
+        <td>${pmm(x.venta)}</td><td>${np ? pmm(np) : "–"}</td><td class="${c}">${x.meta ? pc(x.venta / x.meta) + " · " + pc((x.venta + np) / x.meta) : "–"}</td>
+        <td>${x.meta ? pc(pr / x.meta) : pmm(pr)}</td><td>${pc(x.margPct)}</td><td>${x.nuevos}</td><td>${n1(x.sku)}</td></tr>`; }).join("")}</tbody></table></div>
+    <p class="av2-nota">Avance: % facturado · % con pedidos pendientes (NP Defontana) sobre la meta del vendedor. Proyección: solo lo facturado al ritmo de los días hábiles.</p>`;
+  html += `</div>`;
+  if (!yo && (K.tienda.venta || K.tienda.meta)) { const T = K.tienda, a = T.meta ? T.venta / T.meta : 0, [sc, st] = est(a, T.tiempo);
+    html += `<div class="av2-blk"><div class="av2-top"><span class="t">Tienda Hellywoof (aparte)</span><b>${pmm(T.venta)}</b><span class="de">de ${T.meta ? pmm(T.meta) : "sin meta"}</span>${T.meta ? `<span class="av2-st ${sc}">${st}</span>` : ""}</div>
+      ${T.meta ? bar(T.venta, T.np, T.meta, T.tiempo) : ""}<div class="av2-g">${k("Proyección de cierre", pmm(T.proy), T.meta ? pc(T.proy / T.meta) + " de la meta" : "", T.meta ? (T.proy >= T.meta ? "ok" : T.proy >= T.meta * .85 ? "wa" : "ba") : "")}${k("Tiempo", pc(T.tiempo), "días de apertura (abre todos los días)")}</div></div>`; }
+  return html + `</section>`;
+}
+
+{ const _pdAV = pintarDashboard; pintarDashboard = function () { const r = _pdAV.apply(this, arguments);
+    try { const s = $("s-res"), o = $("kpCard"); if (o) o.remove(); if (s && D) s.insertAdjacentHTML("afterbegin", av2Html(D, null, typeof ACT_INFO !== "undefined" ? ACT_INFO : null)); } catch (e) { console.error(e); } return r; }; }
+setTimeout(() => { try { if (D && $("s-res") && !$("s-res").hidden && !$("kpCard")) pintarDashboard(); } catch (e) {} }, 50);
 </script>
 </body>
 </html>
