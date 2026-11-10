@@ -2949,7 +2949,7 @@ function exportarConSugerencias() {
   const t = calc();
   if (validate(t).length || !SES) { exportarAhora(); return; }
   const R = sugerencias();
-  if (!R.sel.length) { exportarAhora(); return; }
+  if (!R.sel.length) { confirmarNota(); return; }
   $("mEnvT").textContent = "Antes de enviar: 3 productos clave";
   const m = R.cartera, pctDia = v => m && m.porDia ? Math.round(v / m.porDia * 100) : 0;
   const item = (x, i) => `<div class="sg-it" data-i="${i}">
@@ -2968,7 +2968,9 @@ function exportarConSugerencias() {
       <div class="sg-tot"><span>Con lo marcado</span><b id="sgTot"></b></div>
       <p class="hint" id="sgPct" style="margin:0"></p>
     </div>`,
-    [["Enviar sin agregar", "", () => { cerrarModal(); exportarAhora(); }],
+    [["← Volver al pedido", "", () => { cerrarModal(); toast("Sigue editando el pedido; cuando esté listo, toca Enviar."); }],
+     ["Agregar y seguir editando", "", () => { const n = sgAgregar(R); cerrarModal(); toast(n ? `${n} ${n === 1 ? "producto agregado" : "productos agregados"}. Sigue editando y toca Enviar cuando esté listo.` : "No marcaste productos para agregar."); }],
+     ["Enviar sin agregar", "", () => { cerrarModal(); exportarAhora(); }],
      ["Agregar y enviar", "primary", () => {
        let n = 0; R.sel.forEach(x => { if (x.on !== false && x.q > 0) { setQty(x.k, (line(x.k).q || 0) + x.q); n++; } });
        cerrarModal(); if (n) { applyFilter(); toast(`${n} ${n === 1 ? "producto agregado" : "productos agregados"} al pedido.`); }
@@ -7182,5 +7184,28 @@ function kpiHtml(B, yo) {
 })();
 </script>
 <!-- patch_prospectos -->
+
+<style>/* patch_volver */
+#mEnv .mcard h2{padding-right:44px}
+body:has(#mEnv:not([hidden])) #snBtn{display:none!important}
+.m-x{position:sticky;top:0;justify-self:end;margin-bottom:-50px;z-index:3;box-shadow:0 2px 8px rgba(0,0,0,.12);width:36px;height:36px;border-radius:50%;border:0;background:var(--sunk,#EEF2F5);color:var(--ink,#0F1E29);font-size:1.3rem;line-height:1;cursor:pointer;display:grid;place-items:center}
+.m-x:hover{background:#DAE1E7}
+#mEnvBtns .btn{flex:1 1 auto}
+</style>
+<script>/* patch_volver: volver atrás y seguir editando */
+function sgAgregar(R) { let n = 0; R.sel.forEach(x => { if (x.on !== false && x.q > 0) { setQty(x.k, (line(x.k).q || 0) + x.q); n++; } }); if (n) { applyFilter(); totals(); save(); } return n; }
+function confirmarNota() {
+  const t = calc(), c = S.cli || {}, dd = s => { const [y, m, d] = String(s || "").split("-"); return d ? `${d}-${m}-${y}` : ""; };
+  $("mEnvT").textContent = "¿Enviar la nota?";
+  abrirModal(`<dl class="sum num"><dt>Cliente</dt><dd>${esc(c.razon || "")}</dd>${c.entrega ? `<dt>Entrega</dt><dd>${dd(c.entrega)}${c.tipo ? " · " + esc(c.tipo) : ""}</dd>` : ""}
+      <dt>Productos</dt><dd>${fmtN(t.lin)} líneas · ${fmtN(t.uni)} unidades</dd><dt>Neto</dt><dd>${fmt(t.neto)}</dd>
+      <dt>Total con IVA</dt><dd style="font-size:1.15rem;color:var(--accent)">${fmt(t.total)}</dd></dl>
+      <p class="hint" style="margin:0">Mientras HWF Admin no la apruebe, podrás modificarla desde el registro de notas («Revisar y modificar»).</p>`,
+    [["← Volver al pedido", "", cerrarModal], ["Enviar nota", "primary", () => { cerrarModal(); exportarAhora(); }]]);
+}
+(function () { const card = document.querySelector("#mEnv .mcard"); if (!card || card.querySelector(".m-x")) return;
+  const x = document.createElement("button"); x.type = "button"; x.className = "m-x"; x.setAttribute("aria-label", "Cerrar y volver"); x.title = "Cerrar y volver"; x.textContent = "×";
+  x.onclick = () => cerrarModal(); card.insertBefore(x, card.firstChild); })();
+</script>
 </body>
 </html>
