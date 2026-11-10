@@ -346,6 +346,9 @@ async function pintarSeg() { const box = $("s-seg"), fecha = lsGet("segFecha", f
         return `<tr><td><span class="sw" style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${COL[id] || "#5B6874"};margin-right:6px"></span>${esc(o.nombre)}</td><td>${esc(g ? g.chofer : "—")}</td>
           <td>${g ? `<span class="pill ${m <= 10 ? "p-ok" : m <= 60 ? "p-wa" : "p-bad"}">hace ${m < 60 ? m + " min" : Math.round(m / 60) + " h"}</span>` : '<span class="pill p-n">sin GPS</span>'}</td><td>${ok}${en.length > ok ? " + " + (en.length - ok) : ""} de ${o.plan || "—"}</td><td>${mm(en.reduce((t, e) => t + (e.monto || 0), 0))}</td></tr>`; }).join("") || '<tr><td colspan="5" class="muted">Sin vehículos en ruta.</td></tr>'}</tbody></table></div>
       ${Object.keys(pagos).length ? `<p class="nota">Cobros: ${Object.entries(pagos).map(([k, v]) => `${esc(k)} ${mm(v)}`).join(" · ")} · total ${mm(Object.values(pagos).reduce((a, b) => a + b, 0))}</p>` : ""}</div>
+    ${(E.jornadas || []).length ? `<div class="card"><h2>Registro de conducción <small>hoja «Conducción»</small></h2><div class="tw"><table class="t"><thead><tr><th>Chofer</th><th>Vehículo</th><th>Horario</th><th>Km</th><th>Entregas</th><th>Combustible</th></tr></thead><tbody>
+      ${E.jornadas.map(j => `<tr><td>${esc(j.chofer)}${j.obs ? "<small>" + esc(j.obs) + "</small>" : ""}</td><td>${esc(j.veh)}</td><td>${esc(j.inicio)} – ${esc(j.fin || "en curso")}${j.horas ? "<small>" + nf(j.horas, 1) + " h</small>" : ""}</td>
+        <td>${nf(j.kmGps, 1)} GPS${j.kmOdo ? "<small>" + nf(j.kmOdo) + " odómetro</small>" : ""}</td><td>${esc(j.entregas || "—")}${j.cobrado ? "<small>" + mm(j.cobrado) + "</small>" : ""}</td><td>${j.litros ? nf(j.litros, 1) + " L" : "—"}${j.comb ? "<small>" + mm(j.comb) + "</small>" : ""}</td></tr>`).join("")}</tbody></table></div></div>` : ""}
     <div class="card"><h2>Entregas registradas</h2><div class="tw"><table class="t"><thead><tr><th>Cliente</th><th>Hora</th><th>Estado</th><th>Recibe</th><th>Pago</th><th>Respaldo</th></tr></thead><tbody>
       ${ent.slice().reverse().map(e => `<tr><td>${esc(e.cli)}<small>${esc(e.veh)} · ${esc(e.chofer)}${e.num ? " · NP " + esc(e.num) : ""}${e.obs ? " · " + esc(e.obs) : ""}</small></td><td>${esc(e.hora)}</td>
         <td><span class="pill ${/conforme/i.test(e.estado) ? "p-ok" : /parcial/i.test(e.estado) ? "p-wa" : "p-bad"}">${esc(e.estado)}</span></td><td>${esc(e.recibe || "—")}</td><td>${esc(e.pago || "—")}${e.monto ? "<small>" + mm(e.monto) + "</small>" : ""}</td>
@@ -387,7 +390,7 @@ if (!cfg() || !DATA()) pantallaConexion(); else { arrancar(); bajar(true).then(n
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261110065235";
+const HWF_VER = "20261110070000";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer)\/[^/]*$/, "/");
   let avisado = false;

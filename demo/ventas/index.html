@@ -4191,23 +4191,23 @@ function pintarEmbudo() {
   const todos = prMios(), vends = [...new Set(todos.map(o => o.vendedor))].filter(Boolean).sort(), verTodos = prSinCartera();
   const base = todos.filter(o => !prVend || o.vendedor === prVend), cnt = prConteo(base), max = Math.max(1, ...cnt), hoy = prHoyISO();
   const q = prN(prQ);
-  let l = base.filter(o => (prFiltro < 0 ? o.etapa !== "Descartado" : prIdx(o.etapa) === prFiltro) && (!q || prN([o.nombre, o.comuna, o.direccion, o.segmento, o.cliente].join(" ")).includes(q)));
+  let l = base.filter(o => (prFiltro < 0 ? o.etapa !== "Descartado" : prIdx(o.etapa) === prFiltro) && prBusca(o, prQ) && prPasaF(o));   /* patch_prlibre */
   if (prFiltro === -2) l = base.filter(o => o.proximo_contacto && o.proximo_contacto <= hoy && o.etapa !== "Descartado");
   l.sort((a, b) => { const va = a.proximo_contacto && a.proximo_contacto <= hoy ? 0 : 1, vb = b.proximo_contacto && b.proximo_contacto <= hoy ? 0 : 1;
     return va - vb || (a.proximo_contacto || "9") .localeCompare(b.proximo_contacto || "9") || prIdx(a.etapa) - prIdx(b.etapa) || a.comuna.localeCompare(b.comuna, "es") || a.nombre.localeCompare(b.nombre, "es"); });
   const vencen = base.filter(o => o.proximo_contacto && o.proximo_contacto <= hoy && o.etapa !== "Descartado").length;
   const avanz = base.filter(o => prIdx(o.etapa) >= 3 && o.etapa !== "Descartado").length, pend = Object.keys(lsGet(PRCOLA, {})).length, s = lsGet(PRKEY, null);
   box.innerHTML = `
-    <div class="pr-hero"><h2>${verTodos && !prVend ? "Prospectos de todos los vendedores" : "Mis prospectos"}${prVend ? " · " + esc(prVend) : ""} <small style="font-weight:600;opacity:.85">${base.length} prospectos · ${avanz} con nota de pedido o más</small></h2>
+    <div class="pr-hero"><h2>${verTodos && !prVend ? "Prospectos de todos los vendedores" : "Prospectos libres y tuyos"}${prVend ? " · " + esc(prVend) : ""} <small style="font-weight:600;opacity:.85">${base.length} prospectos · ${avanz} con nota de pedido o más</small></h2>
       <div class="pr-fun">${PR_ETAPAS.map((e, i) => `<button type="button" data-et="${i}" aria-pressed="${prFiltro === i}"><span>${esc(PR_CORTO[i])}</span><i style="width:${Math.round(cnt[i] / max * 100)}%;${i === 7 ? "opacity:.5" : ""}"></i><b>${cnt[i]}</b></button>`).join("")}</div></div>
     <div class="pr-info"><span>${s && s.bajado ? "Sincronizado con HWF Admin" : "Prospectos de Maule y O'Higgins"}${pend ? ` · <span class="pr-pend">${pend} ${pend === 1 ? "cambio" : "cambios"} por enviar</span>` : ""}</span><span class="pr-bt"><button class="btn primary" type="button" id="prNuevo">＋ Crear prospecto</button><button class="btn" type="button" id="prAct">Actualizar</button></span></div>
     ${verTodos && vends.length > 1 ? `<div class="pr-chips" id="prVends"><button type="button" data-v="" aria-pressed="${!prVend}">Todos</button>${vends.map(v => `<button type="button" data-v="${esc(v)}" aria-pressed="${prVend === v}">${esc(v)}</button>`).join("")}</div>` : ""}
     <div class="pr-chips" id="prFil"><button type="button" data-f="-1" aria-pressed="${prFiltro === -1}">Activos</button><button type="button" data-f="-2" aria-pressed="${prFiltro === -2}">Contactar hoy (${vencen})</button>${prFiltro >= 0 ? `<button type="button" data-f="${prFiltro}" aria-pressed="true">${esc(PR_CORTO[prFiltro])} ✕</button>` : ""}</div>
-    <div class="search"><input id="prQ" type="search" placeholder="Buscar prospecto, comuna o rubro" aria-label="Buscar prospecto" value="${esc(prQ)}"></div>
+    <div class="search"><input id="prQ" type="search" placeholder="Buscar: nombre, comuna, dirección, rubro, teléfono…" aria-label="Buscar prospecto" value="${esc(prQ)}"></div>${prFiltrosHtml(todos)}
     ${l.map(o => { const i = prIdx(o.etapa), vence = o.proximo_contacto && o.proximo_contacto <= hoy && i !== 7, mov = prMovil(o), tel = prNum(o.telefono) || prNum(o.whatsapp);
       return `<div class="pr-card ${vence ? "vence" : ""}" data-pr="${esc(o.id)}">
         <div class="t"><b>${esc(o.nombre)}</b><span class="pr-et" style="background:${PR_COLOR[i]}">${esc(PR_CORTO[i])}</span></div>
-        <div class="pr-sub">${esc(o.segmento)} · ${esc(o.comuna)}${verTodos && !prVend ? " · " + esc(o.vendedor) : ""}<br>${esc(o.direccion)}</div>
+        <div class="pr-sub">${esc(o.segmento)} · ${esc(o.comuna)}${prDuenoHtml(o, verTodos && !prVend)}<br>${esc(o.direccion)}</div>
         ${o.proximo_contacto ? `<div class="pr-sub" style="${vence ? "color:#9A5B00;font-weight:700" : ""}">Próximo contacto: ${prFecha(o.proximo_contacto)}${vence ? (o.proximo_contacto < hoy ? " (atrasado)" : " (hoy)") : ""}</div>` : ""}
         ${prCliHtml(o)}
         ${o.notas ? `<div class="pr-nota">${esc(o.notas)}</div>` : ""}${o._pend ? '<span class="pr-pend">Cambio por enviar</span>' : ""}
@@ -7131,7 +7131,7 @@ function confirmarNota() {
   x.onclick = () => cerrarModal(); card.insertBefore(x, card.firstChild); })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261110065235";
+const HWF_VER = "20261110070000";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer)\/[^/]*$/, "/");
   let avisado = false;
@@ -7306,6 +7306,37 @@ rutaSoloPr = function () {
   $("rpEt").onchange = () => { RPF.etapa = $("rpEt").value; calcular(); }; $("rpH").onchange = () => { RPF.horas = Number($("rpH").value); calcular(); };
 };
 try { const b = $("rProsZ"); if (b) { b.textContent = "🎯 Ruta de prospectos (región y comuna)"; b.onclick = rutaSoloPr; } } catch (e) {}
+</script>
+
+<style>/* patch_prlibre */
+.prf{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin:6px 0 10px}.prf select{font:inherit;font-size:.82rem;padding:8px;border:1px solid var(--line,#DAE1E7);border-radius:10px;background:#fff;min-width:0}
+.pr-due{display:inline-block;border-radius:999px;padding:1px 8px;font-size:.72rem;font-weight:800;margin-left:4px}.pr-due.lib{background:#E3F4EA;color:#1C7A4E}.pr-due.mio{background:#E6EEF3;color:#0B3146}.pr-due.otro{background:#FFF1DC;color:#9A5B00}
+@media (max-width:420px){.prf{grid-template-columns:1fr 1fr}.prf select:last-child{grid-column:1 / -1}}
+</style>
+<script>/* patch_prlibre: prospectos libres por vendedor y búsqueda mejorada */
+const prYo = () => SES ? prN(SES.vendedor.nombre).split(" ")[0] : "";
+const prEsMio = o => !!String(o.asignado || "").trim() && prN(o.asignado).split(" ")[0] === prYo();
+prMios = function () { const l = prTodos(); if (prSinCartera()) return l; return l.filter(o => !String(o.asignado || "").trim() || prEsMio(o)); };
+function prBusca(o, q) { const w = prN(q).split(/\s+/).filter(Boolean); if (!w.length) return true;
+  const hay = prN([o.nombre, o.comuna, o.region, o.zona, o.direccion, o.segmento, o.cliente, o.notas, o.email, o.instagram, o.asignado, o.vendedor, rpRegion(o)].join(" ")), dig = String((o.telefono || "") + " " + (o.whatsapp || "")).replace(/\D/g, "");
+  return w.every(x => hay.includes(x) || (/^\d{3,}$/.test(x) && dig.includes(x))); }
+let PRF2 = { reg: "", com: "", due: "" };
+function prPasaF(o) { if (PRF2.reg && rpRegion(o) !== PRF2.reg) return false; if (PRF2.com && rpTit(o.comuna) !== PRF2.com) return false;
+  if (PRF2.due === "libre" && String(o.asignado || "").trim()) return false; if (PRF2.due === "mio" && !prEsMio(o)) return false; return true; }
+function prFiltrosHtml(todos) { const regs = [...new Set(todos.map(rpRegion))].sort((a, b) => a.localeCompare(b, "es"));
+  const coms = [...new Set(todos.filter(o => !PRF2.reg || rpRegion(o) === PRF2.reg).map(o => rpTit(o.comuna)).filter(Boolean))].sort((a, b) => a.localeCompare(b, "es"));
+  if (PRF2.com && !coms.includes(PRF2.com)) PRF2.com = "";
+  return `<div class="prf" id="prF2"><select data-k="reg" aria-label="Región"><option value="">Todas las regiones</option>${regs.map(r => `<option${r === PRF2.reg ? " selected" : ""}>${esc(r)}</option>`).join("")}</select>
+    <select data-k="com" aria-label="Comuna"><option value="">Todas las comunas</option>${coms.map(c => `<option${c === PRF2.com ? " selected" : ""}>${esc(c)}</option>`).join("")}</select>
+    <select data-k="due" aria-label="Asignación"><option value="">Libres y míos</option><option value="libre"${PRF2.due === "libre" ? " selected" : ""}>🟢 Solo libres</option><option value="mio"${PRF2.due === "mio" ? " selected" : ""}>👤 Solo míos</option></select></div>`; }
+function prDuenoHtml(o, verNombre) { const a = String(o.asignado || "").trim();
+  if (!a) return ' <span class="pr-due lib">🟢 Libre</span>';
+  if (prEsMio(o)) return ` <span class="pr-due mio" title="${esc(o.asignado_por || "")}">👤 Tuyo${o.asignado_por ? " · " + esc(String(o.asignado_por).replace(/^Nota de pedido/, "nota").replace(/^Factura Defontana/, "factura")) : ""}</span>`;
+  return ` <span class="pr-due otro">👤 ${esc(verNombre ? a : a.split(" ")[0])}</span>`; }
+{ const _peL = pintarEmbudo; pintarEmbudo = function () { const r = _peL.apply(this, arguments);
+    const f = document.getElementById("prF2"); if (f) f.onchange = e => { const s = e.target.closest("[data-k]"); if (!s) return; PRF2[s.dataset.k] = s.value; if (s.dataset.k === "reg") PRF2.com = ""; pintarEmbudo(); };
+    return r; }; }
+try { if (typeof MODO !== "undefined" && MODO === "embudo") pintarEmbudo(); } catch (e) {}
 </script>
 </body>
 </html>

@@ -46,6 +46,7 @@ const lsGet = (k, d) => { try { const v = JSON.parse(localStorage.getItem("hwf-c
 const lsSet = (k, v) => { try { localStorage.setItem("hwf-cho:" + k, JSON.stringify(v)); return true; } catch (e) { toast("Memoria del teléfono llena: envía las entregas pendientes con señal."); return false; } };
 let tT; function toast(m) { const t = $("toast"); t.textContent = m; t.hidden = false; clearTimeout(tT); tT = setTimeout(() => t.hidden = true, 3500); }
 const hoy = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; };
+const CHOFERES = ["Víctor", "Matías", "Jorge", "Cristóbal", "Claudia", "Diego"];
 const VEH = [["hd65", "Hyundai HD65 MAX"], ["boxer", "Peugeot Boxer L2H2"], ["g10", "Maxus G10 Cargo"], ["partner", "Peugeot Partner L2"]];
 const PAGOS = ["Efectivo", "Transferencia", "Cheque", "Tarjeta (POS)", "Crédito / factura a plazo", "Sin cobro (ya pagado)"];
 const ESTADOS = [["ok", "✅ Entregado conforme"], ["parcial", "🟡 Entrega parcial"], ["rech", "❌ Rechazado"], ["aus", "🚪 No estaba / cerrado"]];
@@ -62,14 +63,15 @@ function dec(t) { t = String(t || "").replace(/\s+/g, ""); try { t = decodeURICo
 function puerta() { const o = document.createElement("div"); o.className = "gate"; const p = lsGet("perfil", {});
   o.innerHTML = `<div class="c"><h1>🚚 Chofer HWF</h1>${cfg() ? "" : `<p class="muted" style="margin:0">Pega el link o el código de conexión (empieza con <b>HWF1:</b>) que te entrega logística.</p>
     <textarea id="gC" rows="3" placeholder="Link o código HWF1:…"></textarea><details><summary style="cursor:pointer;font-weight:600">Conectar con URL y clave</summary><div style="display:grid;gap:8px;margin-top:8px"><input id="gU" type="url" placeholder="https://script.google.com/macros/s/…/exec"><input id="gK" placeholder="Clave"></div></details>`}
-    <label class="f">Tu nombre<input id="gN" value="${esc(p.chofer || "")}" placeholder="Nombre del chofer"></label>
+    <label class="f">Chofer<select id="gN"><option value="">Elige tu nombre…</option>${CHOFERES.map(n => `<option${p.chofer === n ? " selected" : ""}>${n}</option>`).join("")}</select></label>
     <label class="f">Vehículo de hoy<select id="gV">${VEH.map(([k, n]) => `<option value="${k}"${p.veh === k ? " selected" : ""}>${n}</option>`).join("")}</select></label>
-    <div class="e" id="gE"></div><button type="button" class="btn pri" id="gB">Comenzar</button></div>`;
+    <label class="f">Kilometraje del odómetro al salir (opcional)<input id="gO" type="number" inputmode="numeric" placeholder="Ej.: 125430"></label>
+    <div class="e" id="gE"></div><button type="button" class="btn pri" id="gB">Comenzar jornada</button><p class="muted" style="margin:0;font-size:.8rem">Queda en el registro diario de conducción: chofer, vehículo, hora de inicio y término, kilómetros y entregas.</p></div>`;
   document.body.appendChild(o);
   $("gB").onclick = () => { if (!cfg()) { let c = dec($("gC").value); const u = ($("gU").value || "").trim(), k = ($("gK").value || "").trim();
       if (!c && /^https:\/\/script\.google(usercontent)?\.com\/.+\/exec$/.test(u) && k.length >= 4) c = { url: u, clave: k }; if (!c) { $("gE").textContent = "Link, código o URL/clave no válido."; return; } lsSet("cfg", c); }
-    const n = $("gN").value.trim(); if (!n) { $("gE").textContent = "Escribe tu nombre."; return; }
-    lsSet("perfil", { chofer: n, veh: $("gV").value, fecha: hoy() }); o.remove(); arrancar(); };
+    const n = $("gN").value; if (!n) { $("gE").textContent = "Elige tu nombre."; return; }
+    lsSet("perfil", { chofer: n, veh: $("gV").value, fecha: hoy() }); jornadaIniciar($("gO").value); o.remove(); arrancar(); };
   const LH = (String(location.hash).match(/HWF1:[A-Za-z0-9+\/=_%-]+/) || [])[0]; if (LH && $("gC")) { try { history.replaceState(null, "", location.pathname); } catch (e) {} $("gC").value = decodeURIComponent(LH); } }
 const perfil = () => lsGet("perfil", null), vehNom = id => (VEH.find(v => v[0] === id) || [id, id])[1];
 
@@ -87,7 +89,7 @@ const estados = () => lsGet("est_" + hoy(), {});
 let POS = null, ultEnvio = 0, ultPos = null, watch = null;
 function gpsIniciar() { if (!navigator.geolocation) { $("gps").textContent = "Sin GPS"; $("gps").className = "gp bad"; return; }
   watch = navigator.geolocation.watchPosition(p => { POS = { lat: p.coords.latitude, lng: p.coords.longitude, acc: p.coords.accuracy, vel: p.coords.speed || 0, t: Date.now() };
-      $("gps").textContent = "GPS activo"; $("gps").className = "gp ok"; gpsEnviar(); if (miMarca) miMarca.setLatLng([POS.lat, POS.lng]); },
+      $("gps").textContent = "GPS activo"; $("gps").className = "gp ok"; jornadaKm(POS); gpsEnviar(); if (miMarca) miMarca.setLatLng([POS.lat, POS.lng]); },
     () => { $("gps").textContent = "GPS apagado"; $("gps").className = "gp bad"; }, { enableHighAccuracy: true, maximumAge: 15000, timeout: 30000 }); }
 function dist(a, b) { const r = x => x * Math.PI / 180, dl = r(b.lat - a.lat), dg = r(b.lng - a.lng), s = Math.sin(dl / 2) ** 2 + Math.cos(r(a.lat)) * Math.cos(r(b.lat)) * Math.sin(dg / 2) ** 2; return 12742000 * Math.asin(Math.sqrt(s)); }
 async function gpsEnviar(forzar) { const P = perfil(); if (!POS || !P || !navigator.onLine) return; const mov = ultPos ? dist(ultPos, POS) : 1e9;
@@ -96,13 +98,29 @@ async function gpsEnviar(forzar) { const P = perfil(); if (!POS || !P || !naviga
 let wl = null; async function pantallaEncendida() { try { if ("wakeLock" in navigator && !document.hidden) wl = await navigator.wakeLock.request("screen"); } catch (e) {} }
 document.addEventListener("visibilitychange", () => { if (!document.hidden) { pantallaEncendida(); gpsEnviar(true); enviarCola(); } });
 
+/* ===== registro diario de conducción ===== */
+const jornada = () => lsGet("jornada", null), hhmm = () => new Date().toTimeString().slice(0, 5);
+function jornadaIniciar(odo) { const P = perfil(), J = jornada();
+  if (J && J.activa && J.fecha === hoy() && J.chofer === P.chofer && J.veh === P.veh) return;
+  if (J && J.activa) jornadaCerrar({ obs: "Cerrada al cambiar de chofer o vehículo" });
+  const N = { id: "J" + P.veh + "-" + Date.now().toString(36), fecha: hoy(), chofer: P.chofer, veh: P.veh, vehNombre: vehNom(P.veh), inicio: hhmm(), fin: "", horas: 0, kmGps: 0, odoIni: odo === "" || odo == null ? "" : Number(odo) || "", odoFin: "", kmOdo: 0, entregas: "", cobrado: 0, litros: 0, comb: 0, obs: "", activa: true, t0: Date.now() };
+  lsSet("jornada", N); jornadaEnviar(N); }
+function jornadaStats() { const X = misParadas(), E = estados(), L = Object.values(E); return { entregas: `${L.filter(e => e.est === "ok" || e.est === "parcial").length} de ${X.paradas.length}`, cobrado: L.reduce((t, e) => t + (e.monto || 0), 0) }; }
+function jornadaCerrar(d) { const J = jornada(); if (!J || !J.activa) return; const st = jornadaStats();
+  Object.assign(J, st, d || {}, { fin: hhmm(), horas: +((Date.now() - (J.t0 || Date.now())) / 3600000).toFixed(2), activa: false });
+  if (J.odoIni !== "" && J.odoFin !== "" && J.odoFin != null) J.kmOdo = Math.max(0, Number(J.odoFin) - Number(J.odoIni)); J.kmGps = +(J.kmGps || 0).toFixed(1); lsSet("jornada", J); jornadaEnviar(J); }
+function jornadaEnviar(J) { const Q = lsGet("colaJ", {}); const x = Object.assign({}, J); delete x.ult; delete x.t0; Q[J.id] = x; lsSet("colaJ", Q); enviarCola(); }
+function jornadaKm(pos) { const J = jornada(); if (!J || !J.activa || pos.acc > 100) return; if (J.ult) { const d = dist(J.ult, pos); if (d < 40) return; if (d < 5000) J.kmGps = (J.kmGps || 0) + d / 1000; } J.ult = { lat: pos.lat, lng: pos.lng }; lsSet("jornada", J); }
+
 /* ===== cola de entregas (funciona sin señal) ===== */
 const cola = () => lsGet("cola", []);
 let enviando = false;
-async function enviarCola() { if (enviando || !navigator.onLine) return; const C = cola(); if (!C.length) return pintarCola(); enviando = true;
+async function enviarCola() { if (enviando || !navigator.onLine) return; enviando = true;
+  for (const id of Object.keys(lsGet("colaJ", {}))) { const j = lsGet("colaJ", {})[id]; const r = await api({ accion: "jornada", jornada: j }); if (r.ok) { const Q = lsGet("colaJ", {}); if (Q[id] === undefined || JSON.stringify(Q[id]) === JSON.stringify(j)) { delete Q[id]; lsSet("colaJ", Q); } } else break; }
+  const C = cola(); if (!C.length) { enviando = false; return pintarCola(); }
   for (const e of C) { const r = await api({ accion: "entrega", entrega: e }); if (r.ok) { lsSet("cola", cola().filter(x => x.id !== e.id)); } else if (!r.red) { toast("No se pudo enviar: " + r.error); break; } else break; }
   enviando = false; pintarCola(); if (SEC === "resumen") pintarResumen(); }
-function pintarCola() { const n = cola().length, s = $("tSub"), P = perfil(); if (s && P) s.textContent = `${P.chofer} · ${vehNom(P.veh)}${n ? ` · ${n} por enviar` : ""}`; }
+function pintarCola() { const n = cola().length, s = $("tSub"), P = perfil(), J = jornada(); if (s && P) s.textContent = `${P.chofer} · ${vehNom(P.veh)}${J && J.activa ? ` · desde ${J.inicio} · ${nf(J.kmGps, 1)} km` : ""}${n ? ` · ${n} por enviar` : ""}`; }
 setInterval(enviarCola, 60000); window.addEventListener("online", enviarCola);
 
 /* ===== fotos y firma ===== */
@@ -186,16 +204,31 @@ function pintarResumen() { const X = misParadas(), E = estados(), P = perfil(), 
       <div class="k"><span>Kilos entregados</span><b>${nf(kg)}</b></div><div class="k"><span>Total cobrado</span><b>${fmt(tot)}</b></div></div>
     <h2 style="margin-top:14px">Cobros por forma de pago</h2>${Object.keys(por).length ? Object.entries(por).map(([k, v]) => `<div class="pd" style="grid-template-columns:1fr auto"><span>${esc(k)}</span><b>${fmt(v)}</b></div>`).join("") : '<p class="muted">Sin cobros registrados.</p>'}
     <p class="nota">${cola().length ? `<b>${cola().length} entregas por enviar</b> (sin señal): se envían solas.` : "Todas las entregas están enviadas a logística."}</p>
-    <div class="g2" style="margin-top:8px"><a class="btn ver" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(txt)}">💬 Enviar resumen</a><button type="button" class="btn" id="bEnv">⟳ Enviar pendientes</button></div></div>`;
-  $("bEnv").onclick = () => { enviarCola(); toast(navigator.onLine ? "Enviando…" : "Sin señal: se enviarán solas."); }; }
+    <div class="g2" style="margin-top:8px"><a class="btn ver" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(txt)}">💬 Enviar resumen</a><button type="button" class="btn" id="bEnv">⟳ Enviar pendientes</button></div></div>
+    ${(() => { const J = jornada(); if (!J || J.fecha !== hoy()) return `<div class="card"><h2>Registro de conducción</h2><p class="muted">Sin jornada iniciada hoy.</p><button type="button" class="btn pri" id="bJIni">Iniciar jornada</button></div>`;
+      return `<div class="card"><h2>Registro de conducción <small class="muted">${J.activa ? "en curso" : "terminada"}</small></h2>
+        <div class="g2"><div class="k"><span>Chofer</span><b style="font-size:1rem">${esc(J.chofer)}</b><small class="muted">${esc(J.vehNombre)}</small></div><div class="k"><span>Horario</span><b style="font-size:1rem">${esc(J.inicio)} – ${esc(J.fin || "…")}</b><small class="muted">${J.activa ? nf((Date.now() - J.t0) / 3600000, 1) : nf(J.horas, 1)} h</small></div>
+          <div class="k"><span>Km (GPS)</span><b>${nf(J.kmGps, 1)}</b>${J.kmOdo ? `<small class="muted">odómetro: ${nf(J.kmOdo)} km</small>` : ""}</div><div class="k"><span>Entregas</span><b>${esc(J.activa ? jornadaStats().entregas : J.entregas)}</b></div></div>
+        ${J.activa ? `<button type="button" class="btn oro" style="width:100%;margin-top:10px" id="bJFin">🏁 Terminar jornada</button>` : `<p class="nota">Jornada registrada${lsGet("colaJ", {})[J.id] ? " (se enviará con señal)" : ""}.</p><button type="button" class="btn" id="bJIni">Iniciar otra jornada</button>`}</div>`; })()}`;
+  $("bEnv").onclick = () => { enviarCola(); toast(navigator.onLine ? "Enviando…" : "Sin señal: se enviarán solas."); };
+  if ($("bJIni")) $("bJIni").onclick = () => puerta();
+  if ($("bJFin")) $("bJFin").onclick = () => { const o = document.createElement("div"); o.className = "ov"; const J = jornada();
+    o.innerHTML = `<div class="in"><div class="card"><h2>🏁 Terminar jornada</h2><p class="muted" style="margin:0 0 10px">${esc(J.chofer)} · ${esc(J.vehNombre)} · desde ${esc(J.inicio)} · ${nf(J.kmGps, 1)} km por GPS</p>
+      <label class="f">Kilometraje del odómetro al llegar (opcional)<input id="jO" type="number" inputmode="numeric" placeholder="${J.odoIni !== "" ? "Salida: " + J.odoIni : "Ej.: 125610"}"></label>
+      <div class="g2"><label class="f">Combustible cargado (litros)<input id="jL" type="number" inputmode="decimal" placeholder="0"></label><label class="f">Combustible ($)<input id="jC" type="number" inputmode="numeric" placeholder="0"></label></div>
+      <label class="f">Observaciones (peajes, incidentes, mantención…)<textarea id="jX" rows="2"></textarea></label>
+      <div class="g2"><button type="button" class="btn" id="jNo">Cancelar</button><button type="button" class="btn pri" id="jSi">Terminar y registrar</button></div></div></div>`;
+    document.body.appendChild(o); $("jNo").onclick = () => o.remove();
+    $("jSi").onclick = () => { const of = $("jO").value; if (of !== "" && J.odoIni !== "" && Number(of) < Number(J.odoIni)) { toast("El odómetro final es menor que el de salida."); return; }
+      jornadaCerrar({ odoFin: of === "" ? "" : Number(of), litros: Number($("jL").value) || 0, comb: Number($("jC").value) || 0, obs: $("jX").value.trim() }); o.remove(); toast("Jornada registrada."); pintarResumen(); pintarCola(); }; }; }
 
-function arrancar() { const P = perfil(); if (!P || !cfg()) return puerta(); if (P.fecha !== hoy()) { lsSet("perfil", Object.assign(P, { fecha: hoy() })); }
+function arrancar() { const P = perfil(); if (!P || !cfg()) return puerta(); if (P.fecha !== hoy()) { const J = jornada(); if (J && J.activa) jornadaCerrar({ obs: "Cerrada automáticamente al día siguiente" }); return puerta(); }
   pintarCola(); ir(SEC); gpsIniciar(); pantallaEncendida(); bajarRuta(true).then(n => { if (n) pintar(SEC); }); enviarCola();
   /* limpia estados de días anteriores */ try { Object.keys(localStorage).filter(k => /^hwf-cho:est_\d{4}-\d{2}-\d{2}$/.test(k) && k !== "hwf-cho:est_" + hoy()).forEach(k => localStorage.removeItem(k)); } catch (e) {} }
 if (!cfg() || !perfil()) puerta(); else arrancar();
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 </script><script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261110065235";
+const HWF_VER = "20261110070000";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer)\/[^/]*$/, "/");
   let avisado = false;
