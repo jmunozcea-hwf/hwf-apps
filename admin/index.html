@@ -1240,7 +1240,7 @@ function npRitmo(cots, Y, M, n, real, lim, ant) {
       <button type="button" data-m="cots" aria-pressed="false">NP Defontana</button>
       <button type="button" data-m="napp" aria-pressed="false">NP App</button>
       <button type="button" data-m="cobranza" aria-pressed="false">Cobranza</button>
-      <button type="button" data-m="embudo" aria-pressed="false">Embudo</button>
+      <button type="button" data-m="embudo" aria-pressed="false">Prospectos</button>
       <button type="button" data-m="cambios" aria-pressed="false">Cambios clientes</button>
       <button type="button" data-m="datos" aria-pressed="false">Datos</button>
     </div>
@@ -2553,7 +2553,7 @@ function prHoyISO() { const d = new Date(), z = n => String(n).padStart(2, "0");
 /* conteo por etapa (Descartado aparte) */
 function prConteo(l) { const c = PR_ETAPAS.map(() => 0); l.forEach(o => c[prIdx(o.etapa)]++); return c; }
 
-/* ---------- Embudo de ventas (Menú ☰ → Embudo) ---------- */
+/* ---------- Embudo de ventas (Menú ☰ → Prospectos) ---------- */
 const PR_BASE = {"cols": ["id", "nombre", "region", "zona", "comuna", "direccion", "telefono", "whatsapp", "email", "instagram", "facebook", "web", "segmento", "vendedor", "vendedor_email", "etapa", "proximo_contacto", "latitud", "longitud", "place_id", "notas", "actualizado"], "filas": []};
 const PR_VEND_MAIL = { "Diego": "diego@hwf.cl", "Claudia": "claudia@hwf.cl", "Matías": "matias@hwf.cl", "Victor": "victor@hwf.cl", "Jorge": "jorge@hwf.cl" };
 let prVend = "", prReg = "", prFiltro = -1, prQ = "";
@@ -2598,7 +2598,7 @@ function pintarEmbudo() {
   l.sort((a, b) => prIdx(b.etapa === "Descartado" ? "" : b.etapa) - prIdx(a.etapa === "Descartado" ? "" : a.etapa) || a.comuna.localeCompare(b.comuna, "es") || a.nombre.localeCompare(b.nombre, "es"));
   const tabla = (filas, clave) => `<div class="tbl"><table class="pr-tbl"><thead><tr><th>${clave}</th>${PR_CORTO.map(t => `<th class="n">${esc(t)}</th>`).join("")}<th class="n">Total</th></tr></thead><tbody>${filas.map(([n, ls]) => { const c = prConteo(ls);
     return `<tr><td>${esc(n)}</td>${c.map(x => `<td class="n">${x || "·"}</td>`).join("")}<td class="n"><b>${ls.length}</b></td></tr>`; }).join("")}</tbody></table></div>`;
-  $("masBody").innerHTML = `<div class="card"><h2>Embudo de ventas <span class="muted">Todo Chile${prVend ? " · " + esc(prVend) : ""}${prReg ? " · " + esc(prReg) : ""}</span></h2>
+  $("masBody").innerHTML = `<div class="card"><h2>Prospectos <span class="muted">Todo Chile${prVend ? " · " + esc(prVend) : ""}${prReg ? " · " + esc(prReg) : ""}</span></h2>
       <div class="pr-kpi num"><div><span>Prospectos activos</span><b>${act.length}</b><small>${cnt[7]} descartados</small></div>
         <div><span>Con nota de pedido</span><b>${conNota}</b><small>${pct(act.length ? conNota / act.length : 0)} del embudo</small></div>
         <div><span>Ya compraron</span><b>${ganados}</b><small>primer pedido o más</small></div>
@@ -2623,7 +2623,7 @@ function pintarEmbudo() {
   $("prQ").oninput = () => { prQ = $("prQ").value; clearTimeout(pintarEmbudo.t); pintarEmbudo.t = setTimeout(() => { pintarEmbudo(); const i = $("prQ"); i.focus(); i.setSelectionRange(i.value.length, i.value.length); }, 250); };
   $("masBody").querySelectorAll("[data-pr]").forEach(b => b.onclick = () => prAbrirAdm(b.dataset.pr));
   $("prXls").onclick = () => prExportar(todos);
-  if ($("prAct")) $("prAct").onclick = async () => { $("prAct").disabled = true; await prSyncAdm(); pintarEmbudo(); toast("Embudo actualizado."); };
+  if ($("prAct")) $("prAct").onclick = async () => { $("prAct").disabled = true; await prSyncAdm(); pintarEmbudo(); toast("Prospectos actualizados."); };
 }
 function prAbrirAdm(id) {
   const o = prTodos().find(x => x.id === id); if (!o) return;
@@ -2652,14 +2652,14 @@ function prExportar(todos) {
   const res = vends.map(v => { const c = prConteo(todos.filter(o => o.vendedor === v)), r = { Vendedor: v }; PR_ETAPAS.forEach((e, i) => r[e] = c[i]); r.Total = c.reduce((s, x) => s + x, 0); return r; });
   const wb = XLSX.utils.book_new();
   [["Resumen por vendedor", res], ["Prospectos", det]].forEach(([n, rows]) => { const ws = XLSX.utils.json_to_sheet(rows); ws["!cols"] = Object.keys(rows[0] || {}).map(k => ({ wch: /nombre|direccion|notas|Vendedor/.test(k) ? 34 : 14 })); XLSX.utils.book_append_sheet(wb, ws, n); });
-  npDescargar(XLSX.write(wb, { bookType: "xlsx", type: "array" }), `Embudo HWF ${prHoyISO()}.xlsx`, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+  npDescargar(XLSX.write(wb, { bookType: "xlsx", type: "array" }), `Prospectos HWF ${prHoyISO()}.xlsx`, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
 }
 /* Resumen: contactos del embudo atrasados */
 const _alertasPr = alertas;
 alertas = function () {
   const out = _alertasPr(), hoy = prHoyISO(), act = prTodos().filter(o => o.etapa !== "Descartado");
   const atras = act.filter(o => o.proximo_contacto && o.proximo_contacto < hoy), nota = act.filter(o => prIdx(o.etapa) >= 3).length;
-  if (act.length) out.push([atras.length ? "warn" : "info", "▽", `Embudo: <b>${act.length} prospectos activos</b>, ${nota} con nota de pedido o más.${atras.length ? ` ${atras.length} con contacto atrasado (${[...new Set(atras.map(o => o.vendedor))].map(esc).join(", ")}).` : ""}`]);
+  if (act.length) out.push([atras.length ? "warn" : "info", "▽", `Prospectos: <b>${act.length} activos</b>, ${nota} con nota de pedido o más.${atras.length ? ` ${atras.length} con contacto atrasado (${[...new Set(atras.map(o => o.vendedor))].map(esc).join(", ")}).` : ""}`]);
   return out;
 };
 
@@ -2976,7 +2976,7 @@ pintarAvance = function () {
 const NAV_TABS = ["res", "av", "ven", "cli", "pro", "inv", "mas"].filter(t => document.querySelector(`nav.bottom [data-t="${t}"]`));
 const NAV_TNOM = { res: "Resumen", av: "Avance", ven: "Vendedores", cli: "Clientes", pro: "Productos", mas: "Más" };
 const NAV_MAS = [...$("masSeg").querySelectorAll("[data-m]")].map(b => b.dataset.m);
-const NAV_MNOM = { plan: "Plan de ventas", ranking: "Ranking", zonas: "Zonas", terreno: "Terreno", cots: "NP Defontana", napp: "NP App", bonif: "Bonificados", cobranza: "Cobranza", embudo: "Embudo", cambios: "Cambios clientes", datos: "Datos" };
+const NAV_MNOM = { plan: "Plan de ventas", ranking: "Ranking", zonas: "Zonas", terreno: "Terreno", cots: "NP Defontana", napp: "NP App", bonif: "Bonificados", cobranza: "Cobranza", embudo: "Prospectos", cambios: "Cambios clientes", datos: "Datos" };
 const NAV_MICO = {
   ranking: '<path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4"/>',
   plan: '<path d="M4 19h16"/><path d="M6 15l4-4 3 3 5-6"/><path d="M15 8h3v3"/>',
@@ -3207,7 +3207,7 @@ function pintarDashboard() {
       <div class="card db-c"><h3>Venta por categoría <small>${MESES[M].toLowerCase()}</small></h3><div class="chartbox sm"><canvas id="cCat"></canvas></div></div>
       ${X.cob.length ? `<div class="card db-c"><h3>Cobranza por antigüedad <button type="button" class="lk" data-ir="mas:cobranza">Cobranza ›</button></h3><b class="num">${mm(cobTot)}</b> <span class="muted">por cobrar</span>${cobH}</div>` : ""}
       <div class="card db-c"><h3>Stock crítico <button type="button" class="lk" data-ir="pro:stock">Stock ›</button></h3><div class="db-l">${stH || '<p class="db-vacio">Ningún producto con venta está por agotarse.</p>'}</div></div>
-      ${X.pr.length ? `<div class="card db-c"><h3>Embudo de prospectos <button type="button" class="lk" data-ir="mas:embudo">Embudo ›</button></h3><div class="db-vr">${prH}</div></div>` : ""}
+      ${X.pr.length ? `<div class="card db-c"><h3>Prospectos <button type="button" class="lk" data-ir="mas:embudo">Ver todos ›</button></h3><div class="db-vr">${prH}</div></div>` : ""}
     </div></div>`;
   s.onclick = e => { const b = e.target.closest("[data-ir]"); if (b) dbIr(b.dataset.ir); };
   /* gráficos */
@@ -4593,7 +4593,7 @@ document.head.insertAdjacentHTML("beforeend", "<style>" + CAL_CSS + "</style>");
 }
 </style>
 <script>/* ux-v1: nombres cortos en «Más» (el nombre completo queda en el título del botón) */
-(function () { const C = { plan: "Plan 100MM", ranking: "Ranking", zonas: "Zonas", terreno: "Terreno", cots: "NP Defont.", napp: "NP App", bonif: "Bonific.", cobranza: "Cobranza", embudo: "Embudo", cambios: "Cambios", datos: "Datos" };
+(function () { const C = { plan: "Plan 100MM", ranking: "Ranking", zonas: "Zonas", terreno: "Terreno", cots: "NP Defont.", napp: "NP App", bonif: "Bonific.", cobranza: "Cobranza", embudo: "Prospectos", cambios: "Cambios", datos: "Datos" };
   const corto = () => { if (!matchMedia("(max-width:999px)").matches) return;
     document.querySelectorAll("#masSeg [data-m]").forEach(b => { const s = b.querySelector("span"), n = C[b.dataset.m]; if (s && n) { b.title = b.title || s.textContent; s.textContent = n; } }); };
   corto(); })();
@@ -5165,7 +5165,7 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261110075227";
+const HWF_VER = "20261110075441";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer)\/[^/]*$/, "/");
   let avisado = false;
