@@ -5784,7 +5784,7 @@ const _pintarRutaZ = pintarRuta;
 pintarRuta = function () {
   _pintarRutaZ();
   if (!$("crmRuta") || !SES || !RUTA || !$("rPros") || $("rProsZ")) return;
-  const b = document.createElement("button"); b.className = "btn"; b.type = "button"; b.id = "rProsZ"; b.textContent = "Ruta de prospectos por zona"; $("rPros").after(b); b.onclick = rutaSoloPr;
+  const b = document.createElement("button"); b.className = "btn"; b.type = "button"; b.id = "rProsZ"; b.textContent = "🎯 Ruta de prospectos (región y comuna)"; $("rPros").after(b); b.onclick = rutaSoloPr;
 };
 </script>
 
@@ -7131,7 +7131,7 @@ function confirmarNota() {
   x.onclick = () => cerrarModal(); card.insertBefore(x, card.firstChild); })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261110063257";
+const HWF_VER = "20261110063627";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica)\/[^/]*$/, "/");
   let avisado = false;
@@ -7237,6 +7237,75 @@ function av2Html(B, yo, act) {
     try { const box = $("crmInicio"), o = $("kpCard"); if (o) o.remove(); if (box && typeof DB !== "undefined" && DB && SES) box.insertAdjacentHTML("afterbegin", av2Html(DB.d, SES.vendedor.nombre, DB.act)); } catch (e) { console.error(e); } return r; };
   let avV = typeof DB !== "undefined" && DB ? DB.v : "";
   setInterval(() => { try { if (DB && DB.v !== avV) { avV = DB.v; if (MODO === "inicio" && !document.hidden) pintarInicio(); } } catch (e) {} }, 2000); }
+</script>
+
+<style>/* patch_prruta */
+.rp-f{display:grid;gap:8px}.rp-f label{display:grid;gap:3px;font-size:.78rem;font-weight:700;color:var(--muted,#5B6874)}
+.rp-ch{display:flex;gap:6px;flex-wrap:wrap;max-height:150px;overflow:auto}.rp-ch button{border:1px solid var(--line,#DAE1E7);background:#fff;border-radius:999px;padding:5px 10px;font:inherit;font-size:.78rem;font-weight:700;cursor:pointer}
+.rp-ch button[aria-pressed="true"]{background:#0B3146;color:#fff;border-color:#0B3146}
+.rp-res{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.rp-res div{background:var(--sunk,#EEF2F5);border-radius:10px;padding:6px 8px;font-size:.72rem;color:var(--muted,#5B6874)}.rp-res b{display:block;font-size:1rem;color:var(--ink,#0F1E29)}
+.rp-l label{display:flex;gap:8px;align-items:flex-start;padding:6px 0;border-bottom:1px solid var(--line,#DAE1E7);font-size:.86rem}.rp-l .num{min-width:22px;height:22px;border-radius:50%;background:#0B3146;color:#fff;font-size:.72rem;font-weight:800;display:grid;place-items:center}
+@media (max-width:420px){.rp-res{grid-template-columns:repeat(2,1fr)}}
+</style>
+<script>/* patch_prruta: ruta de prospectos por región y comuna */
+const RP_REG = { "O'Higgins": ["rancagua","machali","rengo","san fernando","santa cruz","requinoa","donihue","coinco","coltauco","chimbarongo","codegua","graneros","olivar","quinta de tilcoco","placilla","malloa","nancagua","palmilla","chepica","lolol","peralillo","pichilemu","marchigue","las cabras","san vicente","san vicente de tagua tagua","san vicente de tt","paredones","navidad","litueche","la estrella","pumanque","pichidegua","peumo","mostazal","san francisco de mostazal"],
+  "Maule": ["talca","curico","linares","molina","parral","constitucion","teno","romeral","rauco","hualane","licanten","sagrada familia","san clemente","san javier","san rafael","pelarco","maule","yerbas buenas","colbun","longavi","retiro","villa alegre","cauquenes","pelluhue","rio claro","curepto","empedrado","pencahue","chanco","vichuquen"],
+  "Ñuble": ["chillan","chillan viejo","san carlos","quillon","bulnes","coihueco"], "Biobío": ["los angeles","concepcion"], "Araucanía": ["angol","temuco"], "Los Ríos": ["valdivia"],
+  "Metropolitana": ["santiago","buin","isla de maipo","curacavi","talagante","paine","melipilla"], "Valparaíso": ["vina del mar","valparaiso","casablanca","san antonio"] };
+const rpN = s => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z ]/g, " ").replace(/\s+/g, " ").trim();
+function rpRegion(x) { const r = rpN(x.region);
+  if (r) { if (/higgins|libertador/.test(r)) return "O'Higgins"; if (/maule/.test(r)) return "Maule"; if (/nuble/.test(r)) return "Ñuble"; if (/biob/.test(r)) return "Biobío"; if (/araucan/.test(r)) return "Araucanía"; if (/rios/.test(r)) return "Los Ríos"; if (/metropolitana|santiago/.test(r)) return "Metropolitana"; if (/valpara/.test(r)) return "Valparaíso"; }
+  const c = rpN(x.comuna); for (const k in RP_REG) if (RP_REG[k].includes(c)) return k; return "Sin región"; }
+const rpTit = s => String(s || "").toLowerCase().replace(/(^|\s)\S/g, m => m.toUpperCase());
+const rpVencido = x => { const f = String(x.proximo_contacto || "").slice(0, 10); return f && f <= today(); };
+let RPF = null;
+rutaSoloPr = function () {
+  if (!RUTA) return;
+  const todos = prMios().filter(x => x.etapa !== "Descartado" && prIdx(x.etapa) < 6).map(x => ({ x, pt: prPunto(x), reg: rpRegion(x), com: rpTit(x.comuna || "Sin comuna") }));
+  const conPt = todos.filter(y => y.pt);
+  if (!conPt.length) { toast("No tienes prospectos activos con dirección o comuna conocida."); return; }
+  const regs = [...new Set(conPt.map(y => y.reg))].sort((a, b) => a.localeCompare(b, "es"));
+  RPF = RPF || { reg: regs.includes("O'Higgins") ? "O'Higgins" : regs[0], coms: [], etapa: "act", horas: 6 };
+  if (!regs.includes(RPF.reg)) RPF.reg = regs[0];
+  $("mEnvT").textContent = "Ruta de prospectos";
+  abrirModal(`<div class="rp-f">
+      <label>Región<select id="rpReg">${regs.map(r => `<option value="${esc(r)}"${r === RPF.reg ? " selected" : ""}>${esc(r)} · ${conPt.filter(y => y.reg === r).length}</option>`).join("")}</select></label>
+      <label>Comunas <small style="font-weight:600">(toca para elegir una o varias; ninguna = todas)</small><div class="rp-ch" id="rpCom"></div></label>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><label>Etapa<select id="rpEt"><option value="act">Activos (mapeo a recompra)</option><option value="venc">Contacto vencido o de hoy</option><option value="nuevo">Sin contactar (mapeo)</option></select></label>
+        <label>Horas disponibles<select id="rpH">${[2, 3, 4, 5, 6, 7, 8, 9].map(n => `<option value="${n}"${n === RPF.horas ? " selected" : ""}>${n} h</option>`).join("")}</select></label></div>
+      <div class="rp-res" id="rpRes"></div><div class="rp-l" id="rpL"></div>
+      <p class="hint" style="margin:0">Parte desde ${RUTA.o && RUTA.o.tipo === "gps" ? "tu ubicación" : "el inicio de tu ruta"}. Primero los de contacto vencido; luego el más cercano mientras alcance el tiempo (traslado + ${VISITA} min por visita). Orden final optimizado. Puedes quitar los que no quieras.</p></div>`,
+    [["Cancelar", "", cerrarModal], ["Armar ruta", "primary", () => {
+      const ids = [...$("rpL").querySelectorAll("input:checked")].map(i => i.value);
+      if (!ids.length) { toast("Marca al menos un prospecto."); return; }
+      lsSet(RPKEY, { fecha: today(), ids }); RUTA.excl = RUTA.excl.filter(k => !ids.includes(k));
+      if (!RUTA.planes.length) { RUTA.planes = [[]]; RUTA.sel = 0; }
+      RUTA.planes[RUTA.sel] = ids.slice(); const r = paradas(); RUTA.planes[RUTA.sel] = dosOpt(RUTA.o, r).map(x => x.c.codigo); lsSet(RKEY, RUTA);
+      cerrarModal(); pintarRuta(); toast(`Ruta con ${ids.length} ${ids.length === 1 ? "prospecto" : "prospectos"}.`); }]]);
+  $("rpEt").value = RPF.etapa;
+  const pintaComunas = () => { const cs = {}; conPt.filter(y => y.reg === RPF.reg).forEach(y => cs[y.com] = (cs[y.com] || 0) + 1);
+    RPF.coms = RPF.coms.filter(c => cs[c]);
+    $("rpCom").innerHTML = Object.keys(cs).sort((a, b) => a.localeCompare(b, "es")).map(c => `<button type="button" data-c="${esc(c)}" aria-pressed="${RPF.coms.includes(c)}">${esc(c)} · ${cs[c]}</button>`).join(""); };
+  const calcular = () => {
+    let L = conPt.filter(y => y.reg === RPF.reg && (!RPF.coms.length || RPF.coms.includes(y.com)));
+    if (RPF.etapa === "venc") L = L.filter(y => rpVencido(y.x)); if (RPF.etapa === "nuevo") L = L.filter(y => prIdx(y.x.etapa) === 0);
+    const lim = RPF.horas * 60, sel = []; let p = RUTA.o, t = 0, resto = L.slice();
+    /* primero los vencidos (más cercano entre ellos), después el resto; se agregan mientras alcance el tiempo con la vuelta */
+    [resto.filter(y => rpVencido(y.x)), resto.filter(y => !rpVencido(y.x))].forEach(grupo => { while (grupo.length) { let bi = -1, bd = Infinity;
+        grupo.forEach((y, i) => { const m = minutos(p, y.pt); if (m < bd) { bd = m; bi = i; } }); const y = grupo.splice(bi, 1)[0];
+        if (t + bd + VISITA + minutos(y.pt, RUTA.o) > lim) continue; t += bd + VISITA; sel.push(y); p = y.pt; } });
+    let r = sel.map(y => ({ c: { codigo: y.x.id }, pt: y.pt, y })); r = r.length > 2 ? dosOpt(RUTA.o, r) : r;
+    const T = r.length ? tiempoRuta(RUTA.o, r) + minutos(r[r.length - 1].pt, RUTA.o) : 0; let km = 0, a = RUTA.o; r.forEach(z => { km += distM(a, z.pt) / 1000 * 1.3; a = z.pt; }); if (r.length) km += distM(a, RUTA.o) / 1000 * 1.3;
+    const fin = new Date(Date.now() + T * 60000);
+    $("rpRes").innerHTML = `<div>Visitas<b>${r.length}</b>de ${L.length}</div><div>Recorrido<b>${Math.round(km)} km</b>ida y vuelta</div><div>Duración<b>${Math.floor(T / 60)} h ${String(Math.round(T % 60)).padStart(2, "0")}</b>con visitas</div><div>Termina<b>${fin.toLocaleTimeString("es-CL", { hour: "2-digit", minute: "2-digit" })}</b>si sales ahora</div>`;
+    $("rpL").innerHTML = r.map((z, i) => { const x = z.y.x; return `<label><input type="checkbox" value="${esc(x.id)}" checked><span class="num">${i + 1}</span><span><b>${esc(x.nombre)}</b><br><small>${esc(z.y.com)} · ${esc(x.segmento || "")} · ${esc(PR_CORTO[prIdx(x.etapa)] || "")}${rpVencido(x) ? " · <b style=\"color:#B42318\">contacto vencido</b>" : ""}${z.pt.tipo === "comuna" ? " · ubicación aprox." : ""}</small></span></label>`; }).join("")
+      || `<p class="hint">No hay prospectos con esos filtros${L.length ? " que alcancen en " + RPF.horas + " h" : ""}.</p>`; };
+  pintaComunas(); calcular();
+  $("rpReg").onchange = () => { RPF.reg = $("rpReg").value; RPF.coms = []; pintaComunas(); calcular(); };
+  $("rpCom").onclick = e => { const b = e.target.closest("[data-c]"); if (!b) return; const c = b.dataset.c; RPF.coms = RPF.coms.includes(c) ? RPF.coms.filter(x => x !== c) : RPF.coms.concat(c); pintaComunas(); calcular(); };
+  $("rpEt").onchange = () => { RPF.etapa = $("rpEt").value; calcular(); }; $("rpH").onchange = () => { RPF.horas = Number($("rpH").value); calcular(); };
+};
+try { const b = $("rProsZ"); if (b) { b.textContent = "🎯 Ruta de prospectos (región y comuna)"; b.onclick = rutaSoloPr; } } catch (e) {}
 </script>
 </body>
 </html>
