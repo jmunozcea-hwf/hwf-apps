@@ -1765,7 +1765,7 @@ function diasMetricas() {
   const D = DATA(); if (!D) return null; const clave = D.v + "|" + D.rows.length; if (puntCache && puntClave === clave) return puntCache;
   const G = {}, big = D.productos.map(p => kgDe(p[0]) >= 10);
   D.rows.forEach(r => { const f = `${r[6]}-${String(r[1]).padStart(2, "0")}-${String(r[2]).padStart(2, "0")}`, o = G[f] = G[f] || { venta: 0, sacos: 0, docs: {} };
-    o.venta += r[4]; if (big[r[0]] && r[3] > 0) o.sacos += r[3]; if (r[7]) { const d = o.docs[r[7]] = o.docs[r[7]] || new Set(); d.add(r[0]); } });
+    o.venta += r[4]; if (big[r[0]] && r[3] > 0) o.sacos += r[3]; if (r[7] && r[4] > 0) { const d = o.docs[r[7]] = o.docs[r[7]] || new Set(); d.add(r[0]); }   /* ticket y SKU por ticket: solo documentos con venta (una NC no es ticket) */ });
   Object.values(G).forEach(o => { const n = Object.keys(o.docs).length; o.tickets = n; o.ticket = n ? o.venta / n : 0; o.sku = n ? Object.values(o.docs).reduce((s, x) => s + x.size, 0) / n : 0; delete o.docs; });
   /* pesos por día de la semana (feriado = domingo) con las últimas 12 semanas antes del corte */
   const corte = D.corte, c0 = new Date(corte + "T12:00:00"), ini = isoD(new Date(c0.getTime() - 84 * 864e5)), sum = Array(7).fill(0), cnt = Array(7).fill(0);
@@ -2269,7 +2269,7 @@ const stAbrev = n => ST_ABR.reduce((s, [r, t]) => s.replace(r, t), String(n || "
 try { if ($("sStock") && !$("sStock").hidden) pintarStock(); } catch (e) {}
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261110061243";
+const HWF_VER = "20261110061536";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda)\/[^/]*$/, "/");
   let avisado = false;
