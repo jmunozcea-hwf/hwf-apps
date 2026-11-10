@@ -436,7 +436,7 @@ if (!cfg()) pantallaConexion(); else if (!DATA()) { bajar(true).then(() => DATA(
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261110163237";
+const HWF_VER = "20261110163728";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer)\/[^/]*$/, "/");
   let avisado = false;
@@ -537,6 +537,9 @@ const HWF_VER = "20261110163237";
 <script>/* patch_grafventas: LOGÍSTICA */ { const _pd = pintarDash; pintarDash = function () { const r = _pd.apply(this, arguments); try { const D = DATA(); vmPoner(document.getElementById("s-dash"), D && D.vmes); } catch (e) {} return r; };
   try { if (typeof SEC !== "undefined" && SEC === "dash" && DATA()) pintarDash(); } catch (e) {} }</script>
 <style>.demo-sello{position:fixed;left:50%;transform:translateX(-50%);top:calc(3px + env(safe-area-inset-top));z-index:99999;background:#C2410C;color:#fff;font:800 10px/1 system-ui,sans-serif;letter-spacing:.08em;padding:5px 8px;border-radius:999px;pointer-events:none;opacity:.92;box-shadow:0 2px 8px rgba(0,0,0,.2)}</style><div class="demo-sello" aria-hidden="true">DEMO · DATOS FICTICIOS</div>
+<script>/* patch_grafventas: LOGÍSTICA */ { const _pd = pintarDash; pintarDash = function () { const r = _pd.apply(this, arguments); try { const D = DATA(); vmPoner(document.getElementById("s-dash"), D && D.vmes); } catch (e) {} return r; };
+  try { if (typeof SEC !== "undefined" && SEC === "dash" && DATA()) pintarDash(); } catch (e) {} }</script>
+
 <style>/* patch_grafventas */
 .vm-card{display:grid;gap:8px}.vm-card h3{margin:0;font-size:1.02rem;display:flex;justify-content:space-between;gap:8px;align-items:baseline}
 .vm-card h3 small{font-weight:600;color:var(--muted,#5B6874);font-size:.76rem;text-align:right}
@@ -556,39 +559,43 @@ const vmMM = v => "$" + (v / 1e6).toLocaleString("es-CL", { minimumFractionDigit
 const VM_MES = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
 function vmHtml(VM, id) {
   if (!VM || !VM.a) return `<div class="card vm-card" id="${id}"><h3>Venta neta mensual</h3><p style="margin:0;color:var(--muted,#5B6874);font-size:.85rem">Disponible con la próxima actualización de datos.</p></div>`;
-  const [CY, CM, CD] = String(VM.corte || "").split("-").map(Number), Y0 = 2025, N = 36, W = 360, H = 200, L = 34, R = 8, T = 10, B = 24;
-  const val = (y, m) => ((VM.a[y] || [])[m - 1]) || 0, idx = (y, m) => (y - Y0) * 12 + (m - 1);
-  const s25 = [], s26 = [], pl = [];
-  for (let m = 1; m <= 12; m++) { if (VM.a[2025]) s25.push([idx(2025, m), val(2025, m)]); if (VM.a[2026] && (2026 < CY || m <= CM)) s26.push([idx(2026, m), val(2026, m)]); }
-  VM_PLAN.forEach(([ym, v]) => { const y = Math.floor(ym / 100), m = ym % 100, i = idx(y, m); if (i >= 0 && i < N) pl.push([i, v]); });
-  const mx = Math.max(1, ...s25.map(p => p[1]), ...s26.map(p => p[1]), ...pl.map(p => p[1])), paso = mx > 80e6 ? 25e6 : 20e6, top = Math.ceil(mx * 1.05 / paso) * paso;
-  const X = i => L + i * (W - L - R) / (N - 1), Y = v => T + (H - T - B) * (1 - v / top), pts = s => s.map(p => X(p[0]).toFixed(1) + "," + Y(p[1]).toFixed(1)).join(" ");
+  const [CY, CM, CD] = String(VM.corte || "").split("-").map(Number), W = 360, H = 210, L = 34, R = 8, T = 10, B = 24;
+  const val = (y, m) => ((VM.a[y] || [])[m - 1]) || 0, meta = vmMetas(VM);
+  const s25 = [], s26 = [], m26 = [], p27 = [];
+  for (let m = 1; m <= 12; m++) { if (VM.a[2025]) s25.push([m - 1, val(2025, m)]); if (VM.a[2026] && (2026 < CY || m <= CM)) s26.push([m - 1, val(2026, m)]);
+    if (meta[202600 + m]) m26.push([m - 1, meta[202600 + m]]); if (meta[202700 + m]) p27.push([m - 1, meta[202700 + m]]); }
+  const mx = Math.max(1, ...s25.map(p => p[1]), ...s26.map(p => p[1]), ...m26.map(p => p[1]), ...p27.map(p => p[1])), paso = mx > 80e6 ? 25e6 : 20e6, top = Math.ceil(mx * 1.05 / paso) * paso;
+  const X = i => L + i * (W - L - R) / 11, Y = v => T + (H - T - B) * (1 - v / top), pts = s => s.map(p => X(p[0]).toFixed(1) + "," + Y(p[1]).toFixed(1)).join(" ");
   let g = ""; for (let v = 0; v <= top; v += paso) g += `<line x1="${L}" x2="${W - R}" y1="${Y(v)}" y2="${Y(v)}" stroke="currentColor" stroke-opacity=".12"/><text x="${L - 4}" y="${Y(v) + 3}" text-anchor="end" font-size="9" fill="currentColor" fill-opacity=".6">${Math.round(v / 1e6)}</text>`;
-  for (let i = 0; i < N; i += 6) g += `<text x="${X(i)}" y="${H - 8}" text-anchor="middle" font-size="9" fill="currentColor" fill-opacity=".6">${VM_MES[i % 12]} ${String(Y0 + Math.floor(i / 12)).slice(2)}</text>`;
-  [12, 24].forEach(i => { g += `<line x1="${X(i)}" x2="${X(i)}" y1="${T}" y2="${H - B}" stroke="currentColor" stroke-opacity=".18" stroke-dasharray="2 3"/>`; });
+  for (let i = 0; i < 12; i++) g += `<text x="${X(i)}" y="${H - 8}" text-anchor="middle" font-size="9" fill="currentColor" fill-opacity=".6">${VM_MES[i]}</text>`;
   const parc = s26.length && CY === 2026 ? s26[s26.length - 1] : null, s26c = parc ? s26.slice(0, -1) : s26;
-  const dots = (s, c) => s.map(p => `<circle cx="${X(p[0]).toFixed(1)}" cy="${Y(p[1]).toFixed(1)}" r="2.3" fill="${c}"/>`).join("");
-  g += `<polyline points="${pts(s25)}" fill="none" stroke="#9AA8B4" stroke-width="2"/>${dots(s25, "#9AA8B4")}`;
-  g += `<polyline points="${pts(pl)}" fill="none" stroke="#F0A818" stroke-width="2.2" stroke-dasharray="5 4"/>${dots(pl, "#F0A818")}`;
-  g += `<polyline points="${pts(s26c)}" fill="none" stroke="#0B3146" stroke-width="2.6"/>${dots(s26c, "#0B3146")}`;
+  const dots = (s, c, r) => s.map(p => `<circle cx="${X(p[0]).toFixed(1)}" cy="${Y(p[1]).toFixed(1)}" r="${r || 2.3}" fill="${c}"/>`).join("");
+  g += `<polyline points="${pts(p27)}" fill="none" stroke="#F0A818" stroke-opacity=".75" stroke-width="2" stroke-dasharray="5 4"/>${dots(p27, "#F5C25B", 2)}`;
+  g += `<polyline points="${pts(s25)}" fill="none" stroke="#9AA8B4" stroke-width="2.2"/>${dots(s25, "#9AA8B4")}`;
+  g += `<polyline points="${pts(m26)}" fill="none" stroke="#E07B24" stroke-width="2.6"/>${dots(m26, "#E07B24", 3)}`;
+  g += `<polyline points="${pts(s26c)}" fill="none" stroke="#0B3146" stroke-width="2.8"/>${dots(s26c, "#0B3146")}`;
   if (parc) { const p0 = s26c[s26c.length - 1]; if (p0) g += `<line x1="${X(p0[0])}" y1="${Y(p0[1])}" x2="${X(parc[0])}" y2="${Y(parc[1])}" stroke="#0B3146" stroke-width="2" stroke-dasharray="2 3"/>`;
-    g += `<circle cx="${X(parc[0])}" cy="${Y(parc[1])}" r="3.4" fill="#fff" stroke="#0B3146" stroke-width="2"/>`; }
+    g += `<circle cx="${X(parc[0])}" cy="${Y(parc[1])}" r="3.6" fill="#fff" stroke="#0B3146" stroke-width="2"/>`; }
   g += `<line class="vm-cur" x1="0" x2="0" y1="${T}" y2="${H - B}" stroke="#E07B24" stroke-width="1.2" visibility="hidden"/>`;
   const ytd = (y, hasta) => (VM.a[y] || []).slice(0, hasta).reduce((t, v) => t + v, 0), mesesCerr = CY === 2026 ? CM - 1 : 12;
-  const t26 = ytd(2026, mesesCerr), t25 = ytd(2025, mesesCerr), vs = t25 ? (t26 / t25 - 1) : 0, plan12 = VM_PLAN.filter(p => Math.floor(p[0] / 100) === 2027).reduce((t, p) => t + p[1], 0);
+  const t26 = ytd(2026, mesesCerr), t25 = ytd(2025, mesesCerr), vs = t25 ? (t26 / t25 - 1) : 0, plan12 = p27.reduce((t, p) => t + p[1], 0);
   return `<div class="card vm-card" id="${id}"><h3>Venta neta mensual <small>total distribuidora + tienda · facturas − NC, sin IVA</small></h3>
-    <div class="vm-ley"><span><i style="background:#9AA8B4"></i>2025</span><span><i style="background:#0B3146"></i>2026${parc ? " (○ " + VM_MES[CM - 1] + " parcial al " + String(CD).padStart(2, "0") + "-" + String(CM).padStart(2, "0") + ")" : ""}</span><span><i style="background:#F0A818"></i>Plan proyectado (distribuidora + tienda)</span></div>
-    <svg class="vm-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Venta neta mensual total 2025, 2026 y plan">${g}</svg>
+    <div class="vm-ley"><span><i style="background:#9AA8B4"></i>2025</span><span><i style="background:#0B3146"></i>2026${parc ? " (○ " + VM_MES[CM - 1] + " parcial al " + String(CD).padStart(2, "0") + "-" + String(CM).padStart(2, "0") + ")" : ""}</span><span><i style="background:#E07B24"></i>Meta 2026</span><span><i style="background:#F5C25B"></i>Plan 2027</span></div>
+    <svg class="vm-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Venta neta mensual 2025 y 2026 y meta, mismo eje">${g}</svg>
     <div class="vm-det">Toca el gráfico para ver cada mes.</div>
-    <div class="vm-res"><div>2026 ene–${VM_MES[Math.max(0, mesesCerr - 1)]}<b>${vmMM(t26)}</b></div><div>vs mismo período 2025${t25 ? `<b style="color:${vs >= 0 ? "#1C7A4E" : "#B42318"}">${(vs >= 0 ? "+" : "−") + Math.abs(vs * 100).toLocaleString("es-CL", { maximumFractionDigits: 1 })}%</b>` : "<b>—</b>"}</div><div>Plan 2027<b>${vmMM(plan12)}</b></div></div></div>`;
+    <div class="vm-res"><div>2026 ene–${VM_MES[Math.max(0, mesesCerr - 1)]}<b>${vmMM(t26)}</b></div><div>vs mismo período 2025${t25 ? `<b style="color:${vs >= 0 ? "#1C7A4E" : "#B42318"}">${(vs >= 0 ? "+" : "−") + Math.abs(vs * 100).toLocaleString("es-CL", { maximumFractionDigits: 1 })}%</b>` : "<b>—</b>"}</div><div>Plan 2027<b>${plan12 ? vmMM(plan12) : "—"}</b></div></div></div>`;
 }
+/* metas por mes (ym → $): plan total (distribuidora + tienda) y, si el script las manda, metas guardadas de meses anteriores */
+function vmMetas(VM) { const o = {}; VM_PLAN.forEach(([ym, v]) => o[ym] = v); try { Object.keys(VM.metas || {}).forEach(k => { const ym = Number(String(k).replace("-", "")); if (VM.metas[k] && !o[ym]) o[ym] = VM.metas[k]; }); } catch (e) {} return o; }
 function vmActivar(el, VM) { if (!el || !VM || !VM.a) return; const svg = el.querySelector("svg"), det = el.querySelector(".vm-det"), cur = el.querySelector(".vm-cur"); if (!svg) return;
-  const [CY, CM] = String(VM.corte || "").split("-").map(Number), plan = {}; VM_PLAN.forEach(([ym, v]) => plan[ym] = v);
+  const [CY, CM] = String(VM.corte || "").split("-").map(Number), meta = vmMetas(VM);
   const ver = ev => { const r = svg.getBoundingClientRect(), x = ((ev.touches ? ev.touches[0].clientX : ev.clientX) - r.left) / r.width * 360;
-    const i = Math.max(0, Math.min(35, Math.round((x - 34) / (318 / 35)))), y = 2025 + Math.floor(i / 12), m = i % 12 + 1, ym = y * 100 + m;
-    cur.setAttribute("x1", 34 + i * 318 / 35); cur.setAttribute("x2", 34 + i * 318 / 35); cur.setAttribute("visibility", "visible");
-    const real = (y < CY || (y === CY && m <= CM)) && VM.a[y] ? VM.a[y][m - 1] : null, ant = VM.a[y - 1] ? VM.a[y - 1][m - 1] : null;
-    det.innerHTML = `<b>${VM_MES[m - 1]} ${y}</b>: ${real != null ? "real " + vmMM(real) + (y === CY && m === CM ? " (parcial)" : "") : "—"}${ant ? " · " + (y - 1) + " " + vmMM(ant) : ""}${plan[ym] ? " · plan " + vmMM(plan[ym]) : ""}`; };
+    const i = Math.max(0, Math.min(11, Math.round((x - 34) / (318 / 11)))), m = i + 1, px = 34 + i * 318 / 11;
+    cur.setAttribute("x1", px); cur.setAttribute("x2", px); cur.setAttribute("visibility", "visible");
+    const v25 = VM.a[2025] ? VM.a[2025][i] : null, v26 = VM.a[2026] && (CY > 2026 || m <= CM) ? VM.a[2026][i] : null;
+    const parts = [`<b>${VM_MES[i]}</b>:`]; if (v25 != null) parts.push("2025 " + vmMM(v25)); if (v26 != null) parts.push("2026 " + vmMM(v26) + (CY === 2026 && m === CM ? " (parcial)" : ""));
+    if (meta[202600 + m]) parts.push("meta " + vmMM(meta[202600 + m]) + (v26 != null ? " (" + Math.round(v26 / meta[202600 + m] * 100) + "%)" : "")); if (meta[202700 + m]) parts.push("plan 2027 " + vmMM(meta[202700 + m]));
+    det.innerHTML = parts[0] + " " + parts.slice(1).join(" · "); };
   svg.addEventListener("click", ver); svg.addEventListener("touchstart", ver, { passive: true }); svg.addEventListener("touchmove", ver, { passive: true }); }
 function vmPoner(cont, VM, antes) { try { if (!cont) return; const v = cont.querySelector("#vmCard"); if (v) v.remove();
   const d = document.createElement("div"); d.innerHTML = vmHtml(VM, "vmCard"); const el = d.firstElementChild;
