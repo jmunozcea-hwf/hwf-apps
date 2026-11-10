@@ -5165,7 +5165,7 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261110133523";
+const HWF_VER = "20261110135843";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer)\/[^/]*$/, "/");
   let avisado = false;
@@ -5306,5 +5306,13 @@ setTimeout(() => { try { if (D && $("s-res") && !$("s-res").hidden && !$("kpCard
     eval(n + " = g"); } catch (e) {} }
 })();
 </script>
+<style>/* patch_czfilas */
+.cz .db-l .it{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 10px;align-items:baseline;max-width:100%;box-sizing:border-box}
+.cz .db-l .it .n{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700}
+.cz .db-l .it .v{white-space:nowrap}
+.cz .db-l .it small{grid-column:1/-1;white-space:normal;line-height:1.5;color:var(--muted)}
+.cz .db-l .it small .cz-dias{margin-left:4px;white-space:nowrap}
+.cz{min-width:0;max-width:100%;overflow:hidden}
+</style>
 </body>
 </html>
