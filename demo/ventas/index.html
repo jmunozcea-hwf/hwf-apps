@@ -7132,7 +7132,7 @@ function confirmarNota() {
   x.onclick = () => cerrarModal(); card.insertBefore(x, card.firstChild); })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261110083143";
+const HWF_VER = "20261110124715";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer)\/[^/]*$/, "/");
   let avisado = false;
@@ -7386,5 +7386,11 @@ rutaElegirPr = function () { return rutaSoloPr(); };
     try { const b = document.getElementById("rProsZ"); if (b) { b.textContent = "🎯 Prospectos a la ruta (buscar, región y comuna)"; b.onclick = rutaSoloPr; } } catch (e) {}
     return r; }; }
 </script>
+<style>/* patch_contraste */
+.av-row{color:#0F1E29}.av-row .t span{font-weight:800;color:#0F1E29}.av-row .t b{color:#0B3146}.av-row small{color:#4A5763}
+.av-row.yo{box-shadow:0 0 0 2px #F0A818}
+.av-eq + .in-ley{color:rgba(255,255,255,.92)!important}
+.in-sec h3{color:inherit}.in-sec h3 small{color:inherit!important;opacity:.8}
+</style>
 </body>
 </html>
