@@ -272,7 +272,7 @@ function arrancar() { const P = perfil(); if (!P || !cfg()) return puerta(); if 
 if (!cfg() || !perfil()) puerta(); else arrancar();
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 </script><script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261110080620";
+const HWF_VER = "20261110081612";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer)\/[^/]*$/, "/");
   let avisado = false;
@@ -291,4 +291,20 @@ const HWF_VER = "20261110080620";
   document.addEventListener("visibilitychange", () => { if (!document.hidden) revisar(); });
 })();
 </script>
-<style>.demo-sello{position:fixed;left:50%;transform:translateX(-50%);top:calc(3px + env(safe-area-inset-top));z-index:99999;background:#C2410C;color:#fff;font:800 10px/1 system-ui,sans-serif;letter-spacing:.08em;padding:5px 8px;border-radius:999px;pointer-events:none;opacity:.92;box-shadow:0 2px 8px rgba(0,0,0,.2)}</style><div class="demo-sello" aria-hidden="true">DEMO · DATOS FICTICIOS</div></body></html>
+<style>.demo-sello{position:fixed;left:50%;transform:translateX(-50%);top:calc(3px + env(safe-area-inset-top));z-index:99999;background:#C2410C;color:#fff;font:800 10px/1 system-ui,sans-serif;letter-spacing:.08em;padding:5px 8px;border-radius:999px;pointer-events:none;opacity:.92;box-shadow:0 2px 8px rgba(0,0,0,.2)}</style><div class="demo-sello" aria-hidden="true">DEMO · DATOS FICTICIOS</div>
+<script>/* patch_avisoscript */
+(function () {
+  const K = "hwf-aviso-script", hoy = () => new Date().toISOString().slice(0, 10);
+  function aviso(acc) { try { if (document.getElementById("hwfAvisoScript") || localStorage.getItem(K) === hoy()) return; } catch (e) {}
+    const d = document.createElement("div"); d.id = "hwfAvisoScript"; d.setAttribute("role", "alert");
+    d.style.cssText = "position:fixed;left:10px;right:10px;top:calc(8px + env(safe-area-inset-top));z-index:100000;background:#B42318;color:#fff;border-radius:14px;padding:12px 14px;font:14px/1.4 system-ui,sans-serif;box-shadow:0 8px 24px rgba(0,0,0,.3);max-width:620px;margin:0 auto";
+    d.innerHTML = '<b>El script de Google no está actualizado</b><br>No reconoce «' + String(acc || "") + '»: el GPS, las entregas, las rutas y el seguimiento no se guardan. Avísale a Jorge: en Apps Script hay que ejecutar <b>instalarAutoActualizacion</b>. Mientras tanto, las entregas quedan guardadas en este teléfono.'
+      + '<div style="text-align:right;margin-top:6px"><button type="button" style="font:inherit;font-weight:700;border:0;border-radius:10px;padding:6px 14px;background:#fff;color:#B42318">Entendido</button></div>';
+    d.querySelector("button").onclick = () => { try { localStorage.setItem(K, hoy()); } catch (e) {} d.remove(); };
+    (document.body || document.documentElement).appendChild(d); }
+  const revisa = (r, d) => { try { if (r && r.ok === false && /desconocid/i.test(String(r.error || ""))) aviso(d && d.accion); } catch (e) {} return r; };
+  if (typeof syLlamar === "function") { const f = syLlamar; syLlamar = async function (c, d) { return revisa(await f.apply(this, arguments), d); }; }
+  if (typeof api === "function") { const f = api; api = async function (d) { return revisa(await f.apply(this, arguments), d); }; }
+})();
+</script>
+</body></html>
