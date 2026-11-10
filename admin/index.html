@@ -2964,7 +2964,7 @@ pintarAvance = function () {
 const NAV_TABS = ["res", "av", "ven", "cli", "pro", "inv", "mas"].filter(t => document.querySelector(`nav.bottom [data-t="${t}"]`));
 const NAV_TNOM = { res: "Resumen", av: "Avance", ven: "Vendedores", cli: "Clientes", pro: "Productos", mas: "Más" };
 const NAV_MAS = [...$("masSeg").querySelectorAll("[data-m]")].map(b => b.dataset.m);
-const NAV_MNOM = { plan: "Plan 100 MM", ranking: "Ranking", zonas: "Zonas", terreno: "Terreno", cots: "NP Defontana", napp: "NP App", bonif: "Bonificados", cobranza: "Cobranza", embudo: "Embudo", cambios: "Cambios clientes", datos: "Datos" };
+const NAV_MNOM = { plan: "Plan de ventas", ranking: "Ranking", zonas: "Zonas", terreno: "Terreno", cots: "NP Defontana", napp: "NP App", bonif: "Bonificados", cobranza: "Cobranza", embudo: "Embudo", cambios: "Cambios clientes", datos: "Datos" };
 const NAV_MICO = {
   ranking: '<path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4"/>',
   plan: '<path d="M4 19h16"/><path d="M6 15l4-4 3 3 5-6"/><path d="M15 8h3v3"/>',
@@ -3980,7 +3980,7 @@ pintarDashboard = function () {
   _pintarDashboardPL.apply(this, arguments);
   const s = $("s-res"), g = s && s.querySelector(".db-g"); if (!g) return;
   try { const P = plDatos(), proy = plProy(P), d60 = P.d60.length + P.d90.length;
-    g.insertAdjacentHTML("afterbegin", `<div class="card db-c pl"><h3>Plan 100 MM <button type="button" class="lk" data-ir="mas:plan">Ver plan ›</button></h3>
+    g.insertAdjacentHTML("afterbegin", `<div class="card db-c pl"><h3>Plan de ventas <button type="button" class="lk" data-ir="mas:plan">Ver plan ›</button></h3>
       <div class="pl-bar"><i style="width:${Math.min(100, proy / PLAN.meta * 100).toFixed(1)}%"></i></div>
       <div class="pl-k"><div><span>Proyección</span><b>${mm(proy)}</b><small>${Math.round(proy / PLAN.meta * 100)}% de la meta del mes</small></div><div><span>Dormidos 60+ días</span><b>${d60}</b><small>${P.reac.length} reactivados este mes</small></div>
         <div><span>Clientes nuevos</span><b>${P.nuevos.length}</b><small>cuota 4–6 por vendedor</small></div></div></div>`);
