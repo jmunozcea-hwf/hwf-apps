@@ -5165,7 +5165,7 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261110082034";
+const HWF_VER = "20261110083143";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer)\/[^/]*$/, "/");
   let avisado = false;
@@ -5295,6 +5295,15 @@ setTimeout(() => { try { if (D && $("s-res") && !$("s-res").hidden && !$("kpCard
     } catch (e) {}
   }
   setTimeout(revisar, 8000);
+})();
+</script>
+
+<script>/* patch_rankpuente: las filas «~…» de la hoja Puntajes son datos de Logística/Chofer, no vendedores */
+(function () {
+  const limpia = (d, r) => { try { if (d && d.accion === "ranking" && r && Array.isArray(r.filas)) r.filas = r.filas.filter(f => String(f && f[1] || "").charAt(0) !== "~"); } catch (e) {} return r; };
+  for (const n of ["syLlamar", "syCall", "api"]) { try { const f = eval(n); if (typeof f !== "function") continue;
+    const g = n === "api" ? async function (d) { return limpia(d, await f.apply(this, arguments)); } : async function (c, d) { return limpia(d, await f.apply(this, arguments)); };
+    eval(n + " = g"); } catch (e) {} }
 })();
 </script>
 </body>

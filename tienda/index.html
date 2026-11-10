@@ -2270,7 +2270,7 @@ const stAbrev = n => ST_ABR.reduce((s, [r, t]) => s.replace(r, t), String(n || "
 try { if ($("sStock") && !$("sStock").hidden) pintarStock(); } catch (e) {}
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261110082034";
+const HWF_VER = "20261110083143";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer)\/[^/]*$/, "/");
   let avisado = false;
@@ -2287,6 +2287,15 @@ const HWF_VER = "20261110082034";
     document.body.appendChild(d); }
   setTimeout(revisar, 4000); setInterval(revisar, 30 * 60 * 1000);
   document.addEventListener("visibilitychange", () => { if (!document.hidden) revisar(); });
+})();
+</script>
+
+<script>/* patch_rankpuente: las filas «~…» de la hoja Puntajes son datos de Logística/Chofer, no vendedores */
+(function () {
+  const limpia = (d, r) => { try { if (d && d.accion === "ranking" && r && Array.isArray(r.filas)) r.filas = r.filas.filter(f => String(f && f[1] || "").charAt(0) !== "~"); } catch (e) {} return r; };
+  for (const n of ["syLlamar", "syCall", "api"]) { try { const f = eval(n); if (typeof f !== "function") continue;
+    const g = n === "api" ? async function (d) { return limpia(d, await f.apply(this, arguments)); } : async function (c, d) { return limpia(d, await f.apply(this, arguments)); };
+    eval(n + " = g"); } catch (e) {} }
 })();
 </script>
 </body></html>

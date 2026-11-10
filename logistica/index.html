@@ -391,7 +391,7 @@ if (!cfg() || !DATA()) pantallaConexion(); else { arrancar(); bajar(true).then(n
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261110082034";
+const HWF_VER = "20261110083143";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer)\/[^/]*$/, "/");
   let avisado = false;
@@ -411,6 +411,68 @@ const HWF_VER = "20261110082034";
 })();
 </script>
 
+
+<script>/* patch_puente */
+(function () {
+  const ACC = ["rutaGuardar", "rutaLeer", "gps", "entrega", "logEstado", "jornada"], K = "hwf-puente";
+  let st = {}; try { st = JSON.parse(localStorage.getItem(K)) || {}; } catch (e) {}
+  const guarda = () => { try { localStorage.setItem(K, JSON.stringify(st)); } catch (e) {} };
+  const z = n => String(n).padStart(2, "0"), hoyL = () => { const d = new Date(); return `${d.getFullYear()}-${z(d.getMonth() + 1)}-${z(d.getDate())}`; };
+  const okF = f => /^\d{4}-\d\d-\d\d$/.test(String(f || "")) ? String(f) : hoyL(), ts = () => Math.floor(Date.now() / 1000);
+  const desconocida = r => r && r.ok === false && /desconocid/i.test(String(r.error || ""));
+  const b64e = s => btoa(unescape(encodeURIComponent(s))), b64d = s => decodeURIComponent(escape(atob(s)));
+  const corta = (s, n) => String(s == null ? "" : s).slice(0, n);
+  /* fotos y firma pendientes (IndexedDB) */
+  const idb = () => new Promise((ok, no) => { try { const q = indexedDB.open("hwf-puente", 1); q.onupgradeneeded = () => q.result.createObjectStore("ent"); q.onsuccess = () => ok(q.result); q.onerror = () => no(q.error); } catch (e) { no(e); } });
+  const idbPut = async (k, v) => { try { const db = await idb(); await new Promise(r => { const t = db.transaction("ent", "readwrite"); t.objectStore("ent").put(v, k); t.oncomplete = r; t.onerror = r; }); } catch (e) {} };
+  const idbAll = async () => { try { const db = await idb(); return await new Promise(r => { const t = db.transaction("ent"), s = t.objectStore("ent"), out = []; const c = s.openCursor(); c.onsuccess = () => { const x = c.result; if (x) { out.push([x.key, x.value]); x.continue(); } else r(out); }; c.onerror = () => r(out); }); } catch (e) { return []; } };
+  const idbDel = async k => { try { const db = await idb(); await new Promise(r => { const t = db.transaction("ent", "readwrite"); t.objectStore("ent").delete(k); t.oncomplete = r; t.onerror = r; }); } catch (e) {} };
+  function instalar(nombre, llamar) {
+    let subiendo = false;
+    async function subirPendientes() { if (subiendo) return; subiendo = true;
+      try { for (const [k, e] of await idbAll()) { const r = await llamar({ accion: "entrega", entrega: e }); if (desconocida(r)) break; if (r && r.ok) await idbDel(k); } } catch (e) {} subiendo = false; }
+    const pt = (fecha, clave, v, det) => llamar({ accion: "puntaje", puntaje: { fecha: okF(fecha), vendedor: clave, puntos: v, max: 0, cumplidas: 0, misiones: 0, detalle: det } });
+    async function filas(fecha) { const r = await llamar({ accion: "ranking", desde: okF(fecha) }); return r && r.ok ? (r.filas || []).filter(f => f[0] === okF(fecha) && String(f[1]).charAt(0) === "~") : null; }
+    const J = s => { try { return JSON.parse(s); } catch (e) { return null; } };
+    function leerRuta(F) { const por = {};
+      F.filter(f => /^~R\|\d+$/.test(f[1])).forEach(f => { const m = /^(\d+)\|(\d+)\|(.*)$/.exec(f[6]); if (!m) return; const v = m[1], i = Number(f[1].split("|")[1]); (por[v] = por[v] || { n: Number(m[2]), p: {} }).p[i] = m[3]; });
+      const vs = Object.keys(por).sort((a, b) => b - a);
+      for (const v of vs) { const o = por[v]; let s = ""; for (let i = 0; i < o.n; i++) { if (o.p[i] == null) { s = null; break; } s += o.p[i]; } if (s != null) { try { return JSON.parse(b64d(s)); } catch (e) {} } }
+      return null; }
+    async function puente(d) {
+      if (d.accion === "gps") return pt(hoyL(), "~G|" + corta(d.veh, 20), ts(), JSON.stringify({ c: corta(d.chofer, 40), a: +(+d.lat).toFixed(6), o: +(+d.lng).toFixed(6), p: Math.round(+d.acc || 0), s: +d.vel || 0, t: new Date().toISOString() }));
+      if (d.accion === "rutaGuardar") { const s = b64e(JSON.stringify(d.rutas || [])), N = 850, n = Math.max(1, Math.ceil(s.length / N)), v = ts();
+        for (let i = 0; i < n; i++) { const r = await pt(d.fecha, "~R|" + i, v, v + "|" + n + "|" + s.slice(i * N, (i + 1) * N)); if (!r || !r.ok) return { ok: false, error: "No se pudo enviar la ruta (parte " + (i + 1) + " de " + n + "). Intenta de nuevo." }; }
+        return { ok: true, fecha: d.fecha, rutas: (d.rutas || []).length, paradas: (d.rutas || []).reduce((t, x) => t + (x.paradas || []).length, 0), puente: true }; }
+      if (d.accion === "rutaLeer") { const F = await filas(d.fecha); if (!F) return { ok: false, error: "Sin conexión con el script." }; const R = leerRuta(F); return R ? { ok: true, fecha: d.fecha, ruta: { fecha: d.fecha, rutas: R }, puente: true } : { ok: true, vacio: true }; }
+      if (d.accion === "entrega") { const e = d.entrega || {}, id = corta(e.id || ("E" + Date.now()), 60);
+        let o = { id, h: corta(e.hora, 8), v: corta(e.vehNombre || e.veh, 30), c: corta(e.chofer, 30), p: e.parada, cl: corta(e.cli, 80), n: corta(e.num, 20), e: corta(e.estado, 20), r: corta(e.recibe, 50), pg: corta(e.pago, 30), m: Number(e.monto) || 0, o: corta(e.obs, 160), f: (e.fotos || []).length, fi: e.firma ? 1 : 0, la: e.lat, lo: e.lng };
+        let s = JSON.stringify(o); if (s.length > 880) { o.o = corta(o.o, 40); o.cl = corta(o.cl, 40); s = JSON.stringify(o).slice(0, 880); }
+        const r = await pt(e.fecha, "~E|" + id, ts(), s); if (r && r.ok && ((e.fotos || []).length || e.firma)) await idbPut(id, e);
+        return r && r.ok ? { ok: true, id, puente: true } : r; }
+      if (d.accion === "jornada") { const j = d.jornada || {}, id = corta(j.id, 60); if (!id) return { ok: false, error: "Jornada sin identificador." };
+        const o = { id, f: okF(j.fecha), c: corta(j.chofer, 40), v: corta(j.vehNombre || j.veh, 40), i: corta(j.inicio, 8), t: corta(j.fin, 8), h: +j.horas || 0, kg: +j.kmGps || 0, oi: j.odoIni, of: j.odoFin, ko: +j.kmOdo || 0, en: corta(j.entregas, 20), co: +j.cobrado || 0, li: +j.litros || 0, cb: +j.comb || 0, ob: corta(j.obs, 200), ac: j.activa ? 1 : 0 };
+        const r = await pt(j.fecha, "~J|" + id, ts(), JSON.stringify(o)); return r && r.ok ? { ok: true, id, puente: true } : r; }
+      if (d.accion === "logEstado") { const F = await filas(d.fecha); if (!F) return { ok: false, error: "Sin conexión con el script." };
+        const gps = {}, ent = [], jor = [];
+        F.forEach(f => { const k = String(f[1]), x = J(f[6]); if (!x) return;
+          if (k.startsWith("~G|")) { const veh = k.slice(3); gps[veh] = { veh, chofer: x.c, lat: x.a, lng: x.o, acc: x.p, vel: x.s, ts: x.t }; }
+          else if (k.startsWith("~E|")) ent.push({ id: x.id, hora: x.h, veh: x.v, chofer: x.c, parada: x.p, cli: x.cl, num: x.n, estado: x.e, recibe: x.r, pago: x.pg, monto: x.m, obs: x.o, fotos: x.f ? x.f + " (pendientes de subir)" : "", firma: x.fi ? "pendiente de subir" : "" });
+          else if (k.startsWith("~J|")) jor.push({ id: x.id, chofer: x.c, veh: x.v, inicio: x.i, fin: x.t, horas: x.h, kmGps: x.kg, odoIni: x.oi, odoFin: x.of, kmOdo: x.ko, entregas: x.en, cobrado: x.co, litros: x.li, comb: x.cb, obs: x.ob, activa: !!x.ac }); });
+        ent.sort((a, b) => String(a.hora).localeCompare(String(b.hora)));
+        return { ok: true, fecha: d.fecha, gps, entregas: ent, recorrido: {}, jornadas: jor, puente: true }; }
+      return { ok: false, error: "Acción desconocida." }; }
+    return async function (d, real) {
+      if (!d || ACC.indexOf(d.accion) < 0) return real();
+      const usar = st.on && Date.now() - (st.t || 0) < 30 * 60000;
+      if (!usar) { const r = await real(); if (!desconocida(r)) { if (st.on) { st = {}; guarda(); } if (r && r.ok) subirPendientes(); return r; } st = { on: true, t: Date.now() }; guarda(); }
+      return puente(d); };
+  }
+  const envolver = (nombre, fn, armar) => { const p = instalar(nombre, armar); return p; };
+  if (typeof syLlamar === "function") { const f = syLlamar; const p = instalar("log", d => f(cfg(), d)); syLlamar = async function (c, d) { const a = arguments, t = this; return p(d, () => f.apply(t, a)); }; }
+  if (typeof api === "function") { const f = api; const p = instalar("cho", d => f(d)); api = async function (d) { const a = arguments, t = this; return p(d, () => f.apply(t, a)); }; }
+})();
+</script>
 <script>/* patch_avisoscript */
 (function () {
   const K = "hwf-aviso-script", hoy = () => new Date().toISOString().slice(0, 10);
