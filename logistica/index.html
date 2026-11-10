@@ -101,11 +101,15 @@ function kgDe(n) { const s = String(n || "").toUpperCase().replace(",", "."); le
   if (k) kg = Number(k[1]); else if (g) kg = Number(g[1]) / 1000; const u = /\(\s*(\d+)\s*U\s*\)|\bX\s*(\d+)\b|(\d+)\s*UNID/.exec(s); if (u) kg *= Number(u[1] || u[2] || u[3]) || 1; return kg > 0 ? kg : 0.8; }
 function m3De(n, kg) { const s = norm(n); const f = /arena|litter|sanitari/.test(s) ? 0.0017 : /lata|sobre|pouch|humed|pate/.test(s) ? 0.0013 : 0.0028; return kg * f; }
 const PI = () => { const D = DATA(), o = {}; Object.entries(D.productos || {}).forEach(([c, p]) => o[c] = { cod: c, nombre: p[0], prov: p[1] }); return o; };
-function demanda(D) { const o = {}; (D.dem || []).forEach(x => o[x[0]] = { d: x[1], t: x[2], cu: x[3], dv: x[4] || [0,0,0,0], tv: x[5] || [0,0,0,0] }); return o; }
+function demanda(D) { const o = {}, z = [0, 0, 0, 0]; (D.dem || []).forEach(x => o[x[0]] = { d: x[1], t: x[2], cu: x[3], dv: x[4] || z, tv: x[5] || z });
+  /* pronóstico por producto del script (fcCalc_): [qD, vD, σD, abcD, qT, vT, σT, abcT] */
+  const P = (D.fc && D.fc.p) || {}; Object.keys(P).forEach(k => { (o[k] = o[k] || { d: z, t: z, cu: 0, dv: z, tv: z }).fc = P[k]; }); return o; }
 const esTiendaB = b => /TIENDA|HELLY/i.test(b), esDistB = b => /DISTRIBU/i.test(b);
 const cuDe = (D, dm, cod) => (dm[cod] && dm[cod].cu) || Number((D.costo || {})[cod]) || 0;
 /* venta mensual (unidades) que corresponde a una bodega: distribuidora o tienda (promedio 3 meses cerrados) */
-const qMes = (dm, cod, b) => { const x = dm[cod]; if (!x) return 0; const a = esTiendaB(b) ? x.t : esDistB(b) ? x.d : x.d.map((v, i) => v + x.t[i]); return (a[0] + a[1] + a[2]) / 3; };
+const qMes = (dm, cod, b) => { const x = dm[cod]; if (!x) return 0;
+  if (x.fc) return esTiendaB(b) ? x.fc[4] : esDistB(b) ? x.fc[0] : x.fc[0] + x.fc[4];   /* pronóstico (dist: promedio 6 meses; tienda: suavizamiento) */
+  const a = esTiendaB(b) ? x.t : esDistB(b) ? x.d : x.d.map((v, i) => v + x.t[i]); return (a[0] + a[1] + a[2]) / 3; };
 
 /* ===== navegación ===== */
 let SEC = lsGet("sec", "dash");
@@ -141,18 +145,23 @@ function pintarInv() { const D = DATA(), bods = Object.keys(D.bodegas || {}); if
   $("invQ").oninput = () => { invQ = $("invQ").value; clearTimeout(pintarInv.t); pintarInv.t = setTimeout(() => { pintarInv(); const i = $("invQ"); i.focus(); i.setSelectionRange(i.value.length, i.value.length); }, 250); }; }
 
 /* ===== abastecimiento ===== */
-const parA = () => Object.assign({ seg: 15, lead: 7 }, lsGet("abast", {}));
+const parA = () => Object.assign({ seg: 15, lead: 7, modo: "medio", rev: 7 }, lsGet("abast", {}));
+/* stock de seguridad según el error del pronóstico de cada producto y su clase ABC (nivel de servicio por clase) */
+const NIVELES = { alto: { A: 2.05, B: 1.65, C: 1.28, t: "alto (A 98 %, B 95 %, C 90 %)" }, medio: { A: 1.65, B: 1.28, C: 1.04, t: "medio (A 95 %, B 90 %, C 85 %)" } };
 /* mismo método que Admin → Abastecimiento: mes en curso = lo que falta para la meta (meta − venta del mes) escalado sobre la venta de
    los 3 meses cerrados, + stock de seguridad y plazo del proveedor con la meta del mes siguiente, − stock */
 function abastDatos(b) { const D = DATA(), dm = demanda(D), P = PI(), A = parA(), M = D.meses || [], ym = M[3] || 0, esT = esTiendaB(b);
   const sig = ym % 100 === 12 ? ym + 89 : ym + 1, metaF = esT ? metaT : metaD;
-  let base = 0, vMes = 0; Object.values(dm).forEach(x => { const v = esT ? x.tv : x.dv; base += (v[0] + v[1] + v[2]) / 3; vMes += v[3]; });
+  const conFc = !!(D.fc && D.fc.p);
+  let base = 0, vMes = 0; Object.values(dm).forEach(x => { const v = esT ? x.tv : x.dv; base += conFc ? (x.fc ? x.fc[esT ? 5 : 1] : 0) : (v[0] + v[1] + v[2]) / 3; vMes += v[3]; });
   const aplica = base > 0 && (esT || esDistB(b)), meta = metaF(ym), f0 = aplica ? Math.max(0, meta - vMes) / base : 1, f1 = aplica ? metaF(sig) / base : 1;
   const st = {}; (D.bodegas[b] || []).forEach(([c, , s]) => st[c] = Math.max(0, Number(s) || 0));
   const cods = new Set(Object.keys(st).concat(Object.keys(dm).filter(c => qMes(dm, c, b) > 0)));
-  const L = []; cods.forEach(cod => { const q = qMes(dm, cod, b); if (!(q > 0)) return; const s = st[cod] || 0, necesita = q * f0 + q * f1 * (A.seg + A.lead) / 30, compra = Math.max(0, Math.ceil(necesita - s)), cu = cuDe(D, dm, cod), dia = q * f1 / 30;
-    L.push({ cod, nombre: (P[cod] && P[cod].nombre) || cod, prov: (P[cod] && P[cod].prov) || "Sin proveedor", q: q * f1, s, dias: dia ? s / dia : Infinity, compra, monto: compra * cu, cu, urg: dia ? s / dia < A.lead + A.seg : false }); });
-  return { L, f: f1, meta, vMes, base, A, esT, aplica }; }
+  const N = conFc ? NIVELES[A.modo] : null, L = []; cods.forEach(cod => { const q = qMes(dm, cod, b); if (!(q > 0)) return; const fc = dm[cod] && dm[cod].fc, o = esT ? 4 : 0, cls = fc ? fc[o + 3] || "C" : "",
+      ss = N && fc && fc[o + 2] > 0 ? N[cls] * fc[o + 2] * f1 * Math.sqrt((A.lead + A.rev) / 30) : q * f1 * A.seg / 30,
+      s = st[cod] || 0, necesita = q * f0 + q * f1 * A.lead / 30 + ss, compra = Math.max(0, Math.ceil(necesita - s)), cu = cuDe(D, dm, cod), dia = q * f1 / 30;
+    L.push({ cod, nombre: (P[cod] && P[cod].nombre) || cod, prov: (P[cod] && P[cod].prov) || "Sin proveedor", q: q * f1, s, cls, ss, dias: dia ? s / dia : Infinity, compra, monto: compra * cu, cu, urg: dia ? s < q * f1 * A.lead / 30 + ss : false }); });
+  return { L, f: f1, meta, vMes, base, A, esT, aplica, conFc, N }; }
 let abB = null;
 function pintarAbast() { const D = DATA(), bods = Object.keys(D.bodegas || {}).filter(b => esDistB(b) || esTiendaB(b)); const opts = bods.length ? bods : Object.keys(D.bodegas || {});
   if (!abB || !opts.includes(abB)) abB = opts.find(esDistB) || opts[0];
@@ -163,15 +172,16 @@ function pintarAbast() { const D = DATA(), bods = Object.keys(D.bodegas || {}).f
     <div class="chips" id="abB">${opts.map(b => `<button type="button" data-b="${esc(b)}" aria-pressed="${abB === b}">${esc(b)}</button>`).join("")}</div>
     <div class="kp"><div class="k"><span>Comprar ahora</span><b>${mm(tot)}</b><small>${C.length} productos a costo</small></div><div class="k"><span>Urgente</span><b class="bad">${urg.length}</b><small>no alcanza para plazo + seguridad</small></div>
       <div class="k"><span>Este mes falta vender</span><b>${X.aplica ? mm(Math.max(0, X.meta - X.vMes)) : "—"}</b><small>${X.aplica ? "meta " + mm(X.meta) + " − " + mm(X.vMes) + " vendido · base " + mm(X.base) + "/mes" : "venta histórica"}</small></div></div>
-    <div class="row" style="margin-top:10px"><label>Stock de seguridad (días)<input id="aSeg" type="number" min="0" max="60" value="${X.A.seg}" style="width:90px"></label>
+    <div class="row" style="margin-top:10px"><label>Stock de seguridad<select id="aModo">${Object.entries(NIVELES).map(([k, n]) => `<option value="${k}"${X.A.modo === k ? " selected" : ""}>según error · servicio ${n.t}</option>`).join("")}<option value="dias"${X.N ? "" : " selected"}>días fijos</option></select></label>
+      <label${X.N ? ' style="display:none"' : ""}>Días de seguridad<input id="aSeg" type="number" min="0" max="60" value="${X.A.seg}" style="width:90px"></label>
       <label>Plazo del proveedor (días)<input id="aLead" type="number" min="0" max="60" value="${X.A.lead}" style="width:90px"></label><button type="button" class="btn ver" id="aCsv">⬇ Orden sugerida (Excel/CSV)</button></div>
-    <p class="nota">Compra = lo que falta vender este mes + stock de seguridad y plazo del proveedor (con la meta del mes siguiente) − stock. Venta de cada producto = promedio de los 3 meses cerrados de esa bodega, escalado a la meta del plan (distribuidora, con estacionalidad, 54,3 → 65,7 → 71,1 MM; tienda 8,2 → 11,0 → 14,2 MM; total $1.000 MM en 14 meses). Mismo método que Admin → Abastecimiento.</p></div>
-  ${GP.map(g => `<div class="card"><h2>${esc(g.k)} <small>${g.l.length} productos · ${mm(g.t)}</small></h2><div class="tw"><table class="t"><thead><tr><th>Producto</th><th>Stock</th><th>Venta/mes</th><th>Días</th><th>Comprar</th><th>Monto</th></tr></thead><tbody>
-    ${g.l.map(x => `<tr><td>${esc(x.nombre)}<small>${esc(x.cod)}</small></td><td class="${x.s <= 0 ? "bad" : ""}">${nf(x.s)}</td><td>${nf(x.q, x.q < 10 ? 1 : 0)}</td><td><span class="pill ${x.urg ? "p-bad" : "p-wa"}">${isFinite(x.dias) ? nf(x.dias) : "—"}</span></td><td><b>${nf(x.compra)} u</b></td><td>${mm(x.monto)}</td></tr>`).join("")}</tbody></table></div></div>`).join("") || '<div class="card"><p class="muted">No hay compras sugeridas con estos parámetros.</p></div>'}`;
+    <p class="nota">Compra = lo que falta vender este mes + venta durante el plazo del proveedor (con la meta del mes siguiente) + stock de seguridad − stock. ${X.conFc ? "Venta de cada producto = pronóstico (distribuidora: promedio de 6 meses cerrados; tienda: suavizamiento exponencial), elegido por prueba sobre 2026," : "Venta de cada producto = promedio de los 3 meses cerrados de esa bodega,"} escalado a la meta del plan (distribuidora, con estacionalidad, 54,3 → 65,7 → 71,1 MM; tienda 8,2 → 11,0 → 14,2 MM; total $1.000 MM en 14 meses). ${X.N ? "Stock de seguridad según el error real del pronóstico de cada producto y su clase (A = 80 % de la venta, B = 15 %, C = 5 %), servicio " + X.N.t + ", revisión semanal." : "Stock de seguridad: " + X.A.seg + " días de venta."} Mismo método que Admin → Abastecimiento.</p></div>
+  ${GP.map(g => `<div class="card"><h2>${esc(g.k)} <small>${g.l.length} productos · ${mm(g.t)}</small></h2><div class="tw"><table class="t"><thead><tr><th>Producto</th><th>Stock</th><th>Venta/mes</th><th>Seguridad</th><th>Días</th><th>Comprar</th><th>Monto</th></tr></thead><tbody>
+    ${g.l.map(x => `<tr><td>${esc(x.nombre)}<small>${esc(x.cod)}${x.cls ? " · clase " + x.cls : ""}</small></td><td class="${x.s <= 0 ? "bad" : ""}">${nf(x.s)}</td><td>${nf(x.q, x.q < 10 ? 1 : 0)}</td><td>${nf(x.ss, x.ss < 10 ? 1 : 0)}</td><td><span class="pill ${x.urg ? "p-bad" : "p-wa"}">${isFinite(x.dias) ? nf(x.dias) : "—"}</span></td><td><b>${nf(x.compra)} u</b></td><td>${mm(x.monto)}</td></tr>`).join("")}</tbody></table></div></div>`).join("") || '<div class="card"><p class="muted">No hay compras sugeridas con estos parámetros.</p></div>'}`;
   $("abB").onclick = e => { const b = e.target.closest("[data-b]"); if (b) { abB = b.dataset.b; pintarAbast(); } };
-  const g = () => { lsSet("abast", { seg: +$("aSeg").value || 0, lead: +$("aLead").value || 0 }); pintarAbast(); }; ["aSeg", "aLead"].forEach(i => $(i).onchange = g);
-  $("aCsv").onclick = () => { const f = [["Bodega", "Proveedor", "Código", "Producto", "Stock", "Venta/mes", "Días", "Comprar (u)", "Costo unitario", "Monto"]];
-    GP.forEach(gp => gp.l.forEach(x => f.push([abB, gp.k, x.cod, x.nombre, x.s, Math.round(x.q), isFinite(x.dias) ? Math.round(x.dias) : "", x.compra, Math.round(x.cu), Math.round(x.monto)])));
+  const g = () => { lsSet("abast", Object.assign(parA(), { seg: +$("aSeg").value || 0, lead: +$("aLead").value || 0, modo: $("aModo").value })); pintarAbast(); }; ["aSeg", "aLead", "aModo"].forEach(i => $(i).onchange = g);
+  $("aCsv").onclick = () => { const f = [["Bodega", "Proveedor", "Código", "Producto", "Clase", "Stock", "Venta/mes", "Stock de seguridad", "Días", "Comprar (u)", "Costo unitario", "Monto"]];
+    GP.forEach(gp => gp.l.forEach(x => f.push([abB, gp.k, x.cod, x.nombre, x.cls, x.s, Math.round(x.q), Math.round(x.ss), isFinite(x.dias) ? Math.round(x.dias) : "", x.compra, Math.round(x.cu), Math.round(x.monto)])));
     descargar(`Orden sugerida ${abB} ${(DATA().corte || "")}.csv`, f); }; }
 function descargar(nombre, filas) { const csv = "﻿" + filas.map(r => r.map(v => { const s = String(v == null ? "" : v); return /[;"\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; }).join(";")).join("\r\n");
   const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" })); a.download = nombre; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); toast("Archivo descargado."); }
@@ -392,7 +402,7 @@ if (!cfg() || !DATA()) pantallaConexion(); else { arrancar(); bajar(true).then(n
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261110165015";
+const HWF_VER = "20261110170223";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer)\/[^/]*$/, "/");
   let avisado = false;
