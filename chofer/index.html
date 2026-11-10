@@ -1,0 +1,217 @@
+<!doctype html><html lang="es-CL"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Chofer HWF</title><meta name="theme-color" content="#0B3146"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon-192.png">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+<style>
+:root{--navy:#0B3146;--oro:#F0A818;--verde:#1C7A4E;--rojo:#B42318;--bg:#F2F5F7;--ink:#0F1E29;--muted:#5B6874;--line:#DAE1E7;--sunk:#EEF2F5}
+*{box-sizing:border-box}html,body{margin:0}body{font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);padding-bottom:calc(78px + env(safe-area-inset-bottom))}
+.top{background:linear-gradient(120deg,#0B3146,#1F5673);color:#fff;padding:calc(12px + env(safe-area-inset-top)) 16px 12px;display:flex;align-items:center;gap:10px}
+.top h1{margin:0;font-size:1.1rem}.top small{display:block;opacity:.85;font-size:.76rem}.gp{margin-left:auto;border-radius:999px;padding:4px 10px;font-size:.74rem;font-weight:800;background:rgba(255,255,255,.15);white-space:nowrap}
+.gp.ok{background:#1C7A4E}.gp.bad{background:#B42318}
+nav.bn{position:fixed;left:0;right:0;bottom:0;z-index:50;background:#fff;border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(3,1fr);padding-bottom:env(safe-area-inset-bottom)}
+nav.bn button{border:0;background:none;font:inherit;font-size:.72rem;font-weight:700;color:var(--muted);padding:7px 2px 6px;display:grid;justify-items:center;gap:2px;cursor:pointer}
+nav.bn .ic{width:32px;height:32px}nav.bn .ic svg{width:100%;height:100%;display:block}nav.bn button[aria-current="true"]{color:var(--navy)}nav.bn button[aria-current="true"] .ic{outline:2px solid var(--oro);outline-offset:1px;border-radius:10px}
+main{max-width:720px;margin:0 auto;padding:12px}.card{background:#fff;border-radius:16px;padding:14px;margin-bottom:12px;box-shadow:0 1px 3px rgba(11,49,70,.08)}
+.card h2{margin:0 0 8px;font-size:1.05rem}.muted{color:var(--muted)}.nota{font-size:.8rem;color:var(--muted);margin:6px 0 0}
+.btn{border:1px solid var(--line);background:#fff;border-radius:12px;padding:11px 14px;font:inherit;font-weight:700;cursor:pointer;text-align:center;text-decoration:none;color:var(--ink);display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:46px}
+.btn.pri{background:var(--navy);color:#fff;border-color:var(--navy)}.btn.ver{background:var(--verde);color:#fff;border-color:var(--verde)}.btn.oro{background:var(--oro);color:#0B3146;border-color:var(--oro)}.btn:disabled{opacity:.5}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+input,select,textarea{font:inherit;border:1px solid var(--line);border-radius:12px;padding:11px;background:#fff;width:100%}
+label.f{display:grid;gap:4px;font-size:.8rem;font-weight:700;color:var(--muted);margin-bottom:10px}
+.sig{position:relative;border:2px dashed var(--line);border-radius:14px;background:#fff;touch-action:none}.sig canvas{display:block;width:100%;height:190px;border-radius:12px}.sig span{position:absolute;left:12px;bottom:8px;font-size:.75rem;color:var(--muted);pointer-events:none}
+.nx{border:2px solid var(--oro);background:#FFFBF0}.nx .t{font-size:.72rem;font-weight:800;color:#9A5B00;text-transform:uppercase;letter-spacing:.04em}
+.nx h3{margin:2px 0 4px;font-size:1.15rem}.it{font-size:.82rem;color:var(--muted);margin:6px 0}
+.pd{display:grid;grid-template-columns:30px 1fr auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}.pd:last-child{border-bottom:0}
+.pd .n{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:.8rem;background:var(--sunk)}.pd .n.ok{background:#1C7A4E;color:#fff}.pd .n.bad{background:#B42318;color:#fff}.pd .n.wa{background:#F0A818;color:#0B3146}
+.pd small{display:block;color:var(--muted);font-size:.78rem}.pill{border-radius:999px;padding:2px 8px;font-size:.72rem;font-weight:800}.p-ok{background:#E3F4EA;color:var(--verde)}.p-bad{background:#FDE7E4;color:var(--rojo)}.p-wa{background:#FFF1DC;color:#9A5B00}.p-n{background:var(--sunk);color:var(--muted)}
+.ests{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px}.ests button{border:2px solid var(--line);background:#fff;border-radius:12px;padding:10px 6px;font:inherit;font-size:.86rem;font-weight:800;cursor:pointer}
+.ests button[aria-pressed="true"]{border-color:var(--navy);background:#E6EEF3}
+.th{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}.th div{position:relative}.th img{width:74px;height:74px;object-fit:cover;border-radius:10px;border:1px solid var(--line)}.th button{position:absolute;top:-6px;right:-6px;width:24px;height:24px;border-radius:50%;border:0;background:#B42318;color:#fff;font-weight:800;cursor:pointer}
+#mapa{height:calc(100vh - 230px);min-height:320px;border-radius:14px}
+.k{background:var(--sunk);border-radius:12px;padding:10px}.k span{display:block;font-size:.7rem;text-transform:uppercase;font-weight:800;color:var(--muted)}.k b{display:block;font-size:1.25rem}
+.ov{position:fixed;inset:0;z-index:100;background:var(--bg);overflow:auto;padding:calc(12px + env(safe-area-inset-top)) 12px calc(16px + env(safe-area-inset-bottom))}.ov .in{max-width:640px;margin:0 auto}
+.gate{position:fixed;inset:0;z-index:120;background:linear-gradient(140deg,#0B3146,#1F5673);display:grid;place-items:center;padding:16px}.gate .c{background:#fff;border-radius:18px;padding:20px;max-width:440px;width:100%;display:grid;gap:10px}
+.gate h1{margin:0;font-size:1.2rem}.gate .e{color:var(--rojo);font-size:.85rem;min-height:1em}
+.toast{position:fixed;left:50%;bottom:calc(88px + env(safe-area-inset-bottom));transform:translateX(-50%);background:#0F1E29;color:#fff;padding:10px 16px;border-radius:12px;z-index:200;max-width:90vw}
+[hidden]{display:none!important}
+</style></head><body>
+<div class="top"><div><h1>🚚 Chofer HWF</h1><small id="tSub">—</small></div><span class="gp" id="gps">GPS…</span></div>
+<main><section id="s-ruta"></section><section id="s-mapa" hidden><div class="card" style="padding:8px"><div id="mapa"></div></div></section><section id="s-resumen" hidden></section></main>
+<nav class="bn" id="nav"><button type="button" data-s="ruta"><span class="ic"><svg viewBox="0 0 32 32" aria-hidden="true" class="hic"><defs><linearGradient id="hic-cruta" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1F5673"/><stop offset="1" stop-color="#0B3146"/></linearGradient></defs><rect width="32" height="32" rx="9" fill="url(#hic-cruta)"/><path d="M4 4h24v10C20 9 11 9 4 13z" fill="#fff" opacity=".12"/><g transform="translate(5.5 5.5) scale(.875)" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 6h10M10 12h10M10 18h10"/><path d="M3.5 6l1.5 1.5L7.5 5M3.5 12l1.5 1.5L7.5 11M3.5 18l1.5 1.5L7.5 17"/></g></svg></span>Ruta</button><button type="button" data-s="mapa"><span class="ic"><svg viewBox="0 0 32 32" aria-hidden="true" class="hic"><defs><linearGradient id="hic-cmapa" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FF8A6B"/><stop offset="1" stop-color="#D9483B"/></linearGradient></defs><rect width="32" height="32" rx="9" fill="url(#hic-cmapa)"/><path d="M4 4h24v10C20 9 11 9 4 13z" fill="#fff" opacity=".12"/><g transform="translate(5.5 5.5) scale(.875)" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3z"/><path d="M9 3v15M15 6v15"/></g></svg></span>Mapa</button><button type="button" data-s="resumen"><span class="ic"><svg viewBox="0 0 32 32" aria-hidden="true" class="hic"><defs><linearGradient id="hic-cresumen" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3FBF7F"/><stop offset="1" stop-color="#1C7A4E"/></linearGradient></defs><rect width="32" height="32" rx="9" fill="url(#hic-cresumen)"/><path d="M4 4h24v10C20 9 11 9 4 13z" fill="#fff" opacity=".12"/><g transform="translate(5.5 5.5) scale(.875)" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M15 9.5c-.5-1-1.6-1.5-3-1.5-1.7 0-3 .8-3 2s1.3 1.7 3 2 3 .8 3 2-1.3 2-3 2c-1.4 0-2.5-.5-3-1.5M12 6.5v1.5M12 16v1.5"/></g></svg></span>Resumen</button></nav><div class="toast" id="toast" hidden></div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const fmt = n => "$" + Math.round(Number(n) || 0).toLocaleString("es-CL"), nf = (n, d) => (Number(n) || 0).toLocaleString("es-CL", { maximumFractionDigits: d || 0 });
+const lsGet = (k, d) => { try { const v = JSON.parse(localStorage.getItem("hwf-cho:" + k) || "null"); return v == null ? d : v; } catch (e) { return d; } };
+const lsSet = (k, v) => { try { localStorage.setItem("hwf-cho:" + k, JSON.stringify(v)); return true; } catch (e) { toast("Memoria del teléfono llena: envía las entregas pendientes con señal."); return false; } };
+let tT; function toast(m) { const t = $("toast"); t.textContent = m; t.hidden = false; clearTimeout(tT); tT = setTimeout(() => t.hidden = true, 3500); }
+const hoy = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; };
+const VEH = [["hd65", "Hyundai HD65 MAX"], ["boxer", "Peugeot Boxer L2H2"], ["g10", "Maxus G10 Cargo"], ["partner", "Peugeot Partner L2"]];
+const PAGOS = ["Efectivo", "Transferencia", "Cheque", "Tarjeta (POS)", "Crédito / factura a plazo", "Sin cobro (ya pagado)"];
+const ESTADOS = [["ok", "✅ Entregado conforme"], ["parcial", "🟡 Entrega parcial"], ["rech", "❌ Rechazado"], ["aus", "🚪 No estaba / cerrado"]];
+const ESTXT = Object.fromEntries(ESTADOS.map(([k, t]) => [k, t.replace(/^\S+\s/, "")]));
+
+/* ===== conexión ===== */
+const cfg = () => lsGet("cfg", null);
+async function api(d) { const c = cfg(); if (!c) return { ok: false, error: "Sin conexión configurada." };
+  try { const r = await fetch(c.url, { method: "POST", body: JSON.stringify(Object.assign({ clave: c.clave }, d)) }); const o = JSON.parse(await r.text());
+    if (o && o.ok === false && (o.clave === false || /clave no coincide/i.test(o.error || ""))) { localStorage.removeItem("hwf-cho:cfg"); alert("La clave ya no es la del script de Google. Vuelve a conectar."); location.reload(); }
+    return o; } catch (e) { return { ok: false, red: true, error: "Sin señal o el script no respondió." }; } }
+function dec(t) { t = String(t || "").replace(/\s+/g, ""); try { t = decodeURIComponent(t); } catch (e) {} const m = t.match(/HWF1:([A-Za-z0-9+\/=_-]+)/); if (!m) return null;
+  try { const o = JSON.parse(decodeURIComponent(escape(atob(m[1].replace(/-/g, "+").replace(/_/g, "/"))))); return o.u && o.c ? { url: o.u, clave: o.c } : null; } catch (e) { return null; } }
+function puerta() { const o = document.createElement("div"); o.className = "gate"; const p = lsGet("perfil", {});
+  o.innerHTML = `<div class="c"><h1>🚚 Chofer HWF</h1>${cfg() ? "" : `<p class="muted" style="margin:0">Pega el link o el código de conexión (empieza con <b>HWF1:</b>) que te entrega logística.</p>
+    <textarea id="gC" rows="3" placeholder="Link o código HWF1:…"></textarea><details><summary style="cursor:pointer;font-weight:600">Conectar con URL y clave</summary><div style="display:grid;gap:8px;margin-top:8px"><input id="gU" type="url" placeholder="https://script.google.com/macros/s/…/exec"><input id="gK" placeholder="Clave"></div></details>`}
+    <label class="f">Tu nombre<input id="gN" value="${esc(p.chofer || "")}" placeholder="Nombre del chofer"></label>
+    <label class="f">Vehículo de hoy<select id="gV">${VEH.map(([k, n]) => `<option value="${k}"${p.veh === k ? " selected" : ""}>${n}</option>`).join("")}</select></label>
+    <div class="e" id="gE"></div><button type="button" class="btn pri" id="gB">Comenzar</button></div>`;
+  document.body.appendChild(o);
+  $("gB").onclick = () => { if (!cfg()) { let c = dec($("gC").value); const u = ($("gU").value || "").trim(), k = ($("gK").value || "").trim();
+      if (!c && /^https:\/\/script\.google(usercontent)?\.com\/.+\/exec$/.test(u) && k.length >= 4) c = { url: u, clave: k }; if (!c) { $("gE").textContent = "Link, código o URL/clave no válido."; return; } lsSet("cfg", c); }
+    const n = $("gN").value.trim(); if (!n) { $("gE").textContent = "Escribe tu nombre."; return; }
+    lsSet("perfil", { chofer: n, veh: $("gV").value, fecha: hoy() }); o.remove(); arrancar(); };
+  const LH = (String(location.hash).match(/HWF1:[A-Za-z0-9+\/=_%-]+/) || [])[0]; if (LH && $("gC")) { try { history.replaceState(null, "", location.pathname); } catch (e) {} $("gC").value = decodeURIComponent(LH); } }
+const perfil = () => lsGet("perfil", null), vehNom = id => (VEH.find(v => v[0] === id) || [id, id])[1];
+
+/* ===== ruta del día ===== */
+const rutaHoy = () => { const R = lsGet("ruta", null); return R && R.fecha === hoy() ? R : null; };
+function misParadas() { const R = rutaHoy(), P = perfil(); if (!R || !P) return { paradas: [], origen: null };
+  const mias = (R.ruta.rutas || []).filter(r => r.veh === P.veh).sort((a, b) => (a.vuelta || 1) - (b.vuelta || 1)); let n = 0;
+  return { paradas: mias.flatMap(r => r.paradas.map(p => Object.assign({ vuelta: r.vuelta || 1, ord: ++n }, p))), origen: (mias[0] && mias[0].origen) || null, km: mias.reduce((t, r) => t + (r.km || 0), 0), vueltas: mias.length }; }
+async function bajarRuta(silencio) { const r = await api({ accion: "rutaLeer", fecha: hoy() });
+  if (r.ok && r.ruta) { lsSet("ruta", { fecha: hoy(), ruta: r.ruta }); if (!silencio) toast("Ruta del día actualizada."); return true; }
+  if (!silencio) toast(r.ok ? "Logística aún no envía la ruta de hoy." : r.error); return false; }
+const estados = () => lsGet("est_" + hoy(), {});
+
+/* ===== GPS ===== */
+let POS = null, ultEnvio = 0, ultPos = null, watch = null;
+function gpsIniciar() { if (!navigator.geolocation) { $("gps").textContent = "Sin GPS"; $("gps").className = "gp bad"; return; }
+  watch = navigator.geolocation.watchPosition(p => { POS = { lat: p.coords.latitude, lng: p.coords.longitude, acc: p.coords.accuracy, vel: p.coords.speed || 0, t: Date.now() };
+      $("gps").textContent = "GPS activo"; $("gps").className = "gp ok"; gpsEnviar(); if (miMarca) miMarca.setLatLng([POS.lat, POS.lng]); },
+    () => { $("gps").textContent = "GPS apagado"; $("gps").className = "gp bad"; }, { enableHighAccuracy: true, maximumAge: 15000, timeout: 30000 }); }
+function dist(a, b) { const r = x => x * Math.PI / 180, dl = r(b.lat - a.lat), dg = r(b.lng - a.lng), s = Math.sin(dl / 2) ** 2 + Math.cos(r(a.lat)) * Math.cos(r(b.lat)) * Math.sin(dg / 2) ** 2; return 12742000 * Math.asin(Math.sqrt(s)); }
+async function gpsEnviar(forzar) { const P = perfil(); if (!POS || !P || !navigator.onLine) return; const mov = ultPos ? dist(ultPos, POS) : 1e9;
+  if (!forzar && Date.now() - ultEnvio < 120000 && mov < 300) return; ultEnvio = Date.now(); ultPos = POS;
+  await api({ accion: "gps", veh: P.veh, chofer: P.chofer, lat: POS.lat, lng: POS.lng, acc: POS.acc, vel: POS.vel }); }
+let wl = null; async function pantallaEncendida() { try { if ("wakeLock" in navigator && !document.hidden) wl = await navigator.wakeLock.request("screen"); } catch (e) {} }
+document.addEventListener("visibilitychange", () => { if (!document.hidden) { pantallaEncendida(); gpsEnviar(true); enviarCola(); } });
+
+/* ===== cola de entregas (funciona sin señal) ===== */
+const cola = () => lsGet("cola", []);
+let enviando = false;
+async function enviarCola() { if (enviando || !navigator.onLine) return; const C = cola(); if (!C.length) return pintarCola(); enviando = true;
+  for (const e of C) { const r = await api({ accion: "entrega", entrega: e }); if (r.ok) { lsSet("cola", cola().filter(x => x.id !== e.id)); } else if (!r.red) { toast("No se pudo enviar: " + r.error); break; } else break; }
+  enviando = false; pintarCola(); if (SEC === "resumen") pintarResumen(); }
+function pintarCola() { const n = cola().length, s = $("tSub"), P = perfil(); if (s && P) s.textContent = `${P.chofer} · ${vehNom(P.veh)}${n ? ` · ${n} por enviar` : ""}`; }
+setInterval(enviarCola, 60000); window.addEventListener("online", enviarCola);
+
+/* ===== fotos y firma ===== */
+function comprimir(file) { return new Promise(res => { const img = new Image(), u = URL.createObjectURL(file); img.onload = () => { const M = 1280, k = Math.min(1, M / Math.max(img.width, img.height)), c = document.createElement("canvas");
+    c.width = Math.round(img.width * k); c.height = Math.round(img.height * k); c.getContext("2d").drawImage(img, 0, 0, c.width, c.height); URL.revokeObjectURL(u); res(c.toDataURL("image/jpeg", 0.6)); }; img.onerror = () => res(null); img.src = u; }); }
+function firmaPad(cv) { const ctx = cv.getContext("2d"); let dib = false, vacio = true, last = null; const ajustar = () => { const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1; cv.width = r.width * dpr; cv.height = r.height * dpr; ctx.scale(dpr, dpr); ctx.lineWidth = 2.4; ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.strokeStyle = "#0B3146"; };
+  ajustar(); const pt = e => { const r = cv.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
+  cv.onpointerdown = e => { dib = true; last = pt(e); cv.setPointerCapture(e.pointerId); }; cv.onpointermove = e => { if (!dib) return; const p = pt(e); ctx.beginPath(); ctx.moveTo(last[0], last[1]); ctx.lineTo(p[0], p[1]); ctx.stroke(); last = p; vacio = false; };
+  cv.onpointerup = cv.onpointercancel = () => { dib = false; };
+  return { limpiar: () => { ctx.clearRect(0, 0, cv.width, cv.height); vacio = true; }, vacio: () => vacio, png: () => { const c = document.createElement("canvas"); c.width = cv.width; c.height = cv.height; const x = c.getContext("2d"); x.fillStyle = "#fff"; x.fillRect(0, 0, c.width, c.height); x.drawImage(cv, 0, 0); return c.toDataURL("image/png"); } }; }
+
+/* ===== registrar entrega ===== */
+function registrar(p) { const o = document.createElement("div"); o.className = "ov"; const fotos = []; let est = "ok";
+  const iva = Math.round((p.monto || 0) * 1.19);
+  o.innerHTML = `<div class="in"><div class="card"><h2>Entrega · ${esc(p.cli)}</h2><p class="muted" style="margin:0 0 8px">${esc(p.comuna)}${p.dir ? " · " + esc(p.dir) : ""}${p.num ? " · NP " + esc(p.num) : ""}</p>
+      <div class="ests" id="eEst">${ESTADOS.map(([k, t]) => `<button type="button" data-e="${k}" aria-pressed="${k === est}">${t}</button>`).join("")}</div>
+      <label class="f">📷 Fotos de la entrega (hasta 4)<input id="eFoto" type="file" accept="image/*" capture="environment" multiple></label><div class="th" id="eTh"></div>
+      <div id="eRec"><label class="f">Recibe (nombre)<input id="eNom" placeholder="Nombre de quien recibe"></label><label class="f">RUT de quien recibe (opcional)<input id="eRut" placeholder="12.345.678-9"></label>
+        <label class="f">✍️ Firma de recepción conforme</label><div class="sig"><canvas id="eSig"></canvas><span>Firme aquí con el dedo</span></div><div style="text-align:right;margin:4px 0 10px"><button type="button" class="btn" id="eLimp" style="min-height:34px;padding:6px 12px">Borrar firma</button></div>
+        <div class="g2"><label class="f">💵 Forma de pago<select id="ePago">${PAGOS.map(x => `<option>${x}</option>`).join("")}</select></label><label class="f">Monto cobrado ($)<input id="eMon" type="number" inputmode="numeric" placeholder="0"></label></div>
+        ${p.monto ? `<p class="nota" style="margin:-4px 0 10px">Pedido neto ${fmt(p.monto)} · con IVA ${fmt(iva)} <button type="button" class="btn" id="eIva" style="min-height:30px;padding:4px 10px;font-size:.8rem">Usar ${fmt(iva)}</button></p>` : ""}</div>
+      <label class="f">Observación<textarea id="eObs" rows="2" placeholder="Ej.: faltó 1 saco, cliente pide cambio, dejó en bodega…"></textarea></label>
+      <div class="g2"><button type="button" class="btn" id="eNo">Cancelar</button><button type="button" class="btn ver" id="eSi">Guardar entrega</button></div>
+      <p class="nota">Se guarda con la hora y tu ubicación GPS. Sin señal queda en el teléfono y se envía sola.</p></div></div>`;
+  document.body.appendChild(o); const pad = firmaPad($("eSig"));
+  const pintEst = () => { o.querySelectorAll("#eEst [data-e]").forEach(b => b.setAttribute("aria-pressed", b.dataset.e === est)); $("eRec").hidden = est === "aus"; };
+  $("eEst").onclick = e => { const b = e.target.closest("[data-e]"); if (b) { est = b.dataset.e; pintEst(); } };
+  const pintTh = () => { $("eTh").innerHTML = fotos.map((f, i) => `<div><img src="${f}" alt="foto ${i + 1}"><button type="button" data-q="${i}">×</button></div>`).join(""); };
+  $("eTh").onclick = e => { const b = e.target.closest("[data-q]"); if (b) { fotos.splice(+b.dataset.q, 1); pintTh(); } };
+  $("eFoto").onchange = async () => { for (const f of [...$("eFoto").files]) { if (fotos.length >= 4) break; const d = await comprimir(f); if (d) fotos.push(d); } $("eFoto").value = ""; pintTh(); };
+  $("eLimp").onclick = () => pad.limpiar(); if ($("eIva")) $("eIva").onclick = () => $("eMon").value = iva; $("eNo").onclick = () => o.remove();
+  $("eSi").onclick = () => { const conRec = est !== "aus";
+    if (conRec && (est === "ok" || est === "parcial") && pad.vacio()) { toast("Falta la firma de recepción conforme."); return; }
+    if (conRec && (est === "ok" || est === "parcial") && !$("eNom").value.trim()) { toast("Escribe el nombre de quien recibe."); return; }
+    if ((est === "rech" || est === "aus" || est === "parcial") && !$("eObs").value.trim()) { toast("Explica en la observación qué pasó."); return; }
+    const P = perfil(), d = new Date(), e = { id: "E" + P.veh + "-" + p.id + "-" + Date.now().toString(36), fecha: hoy(), hora: d.toTimeString().slice(0, 5), veh: P.veh, vehNombre: vehNom(P.veh), chofer: P.chofer,
+      parada: p.id, cli: p.cli, num: p.num || "", estado: ESTXT[est], recibe: conRec ? $("eNom").value.trim() : "", rut: conRec ? $("eRut").value.trim() : "", pago: conRec ? $("ePago").value : "", monto: conRec ? Number($("eMon").value) || 0 : 0,
+      obs: $("eObs").value.trim(), lat: POS ? POS.lat : "", lng: POS ? POS.lng : "", fotos: fotos.slice(), firma: conRec && !pad.vacio() ? pad.png() : "" };
+    const C = cola(); C.push(e); if (!lsSet("cola", C)) return; const E = estados(); E[p.id] = { est, hora: e.hora, pago: e.pago, monto: e.monto }; lsSet("est_" + hoy(), E);
+    o.remove(); toast("Entrega guardada."); pintar(SEC); enviarCola(); gpsEnviar(true); }; }
+
+/* ===== pantallas ===== */
+let SEC = "ruta";
+function ir(s) { SEC = s; document.querySelectorAll("main > section").forEach(x => x.hidden = x.id !== "s-" + s); document.querySelectorAll("#nav [data-s]").forEach(b => b.setAttribute("aria-current", b.dataset.s === s)); pintar(s); window.scrollTo({ top: 0 }); }
+$("nav").onclick = e => { const b = e.target.closest("[data-s]"); if (b) ir(b.dataset.s); };
+function pintar(s) { ({ ruta: pintarRuta, mapa: pintarMapa, resumen: pintarResumen })[s](); }
+const navUrl = p => `https://www.google.com/maps/dir/?api=1${POS ? `&origin=${POS.lat},${POS.lng}` : ""}&destination=${p.lat},${p.lng}&travelmode=driving`;
+const telNorm = t => String(t || "").replace(/[^\d+]/g, ""), waNorm = t => { const d = String(t || "").replace(/\D/g, ""); return d.length === 9 ? "56" + d : d; };
+function pintarRuta() { const X = misParadas(), E = estados(), P = perfil();
+  if (!X.paradas.length) { $("s-ruta").innerHTML = `<div class="card"><h2>Ruta de hoy · ${esc(vehNom(P.veh))}</h2><p class="muted">${rutaHoy() ? "Logística no asignó paradas a este vehículo hoy." : "Todavía no hay ruta de hoy en este teléfono."}</p>
+      <div class="g2"><button type="button" class="btn pri" id="bR">⟳ Bajar ruta del día</button><button type="button" class="btn" id="bV">Cambiar vehículo</button></div></div>`;
+    $("bR").onclick = async () => { $("bR").disabled = true; await bajarRuta(); pintarRuta(); }; $("bV").onclick = () => puerta(); return; }
+  const pend = X.paradas.filter(p => !E[p.id]), sig = pend[0], hechas = X.paradas.length - pend.length;
+  const pill = p => { const e = E[p.id]; return !e ? '<span class="pill p-n">pendiente</span>' : e.est === "ok" ? '<span class="pill p-ok">entregado</span>' : e.est === "parcial" ? '<span class="pill p-wa">parcial</span>' : '<span class="pill p-bad">' + (e.est === "rech" ? "rechazado" : "no estaba") + "</span>"; };
+  $("s-ruta").innerHTML = `${sig ? `<div class="card nx"><span class="t">Siguiente parada · ${sig.ord} de ${X.paradas.length}${X.vueltas > 1 ? " · vuelta " + sig.vuelta : ""}</span><h3>${esc(sig.cli)}</h3>
+      <div class="muted">${esc(sig.dir || "")}${sig.dir ? ", " : ""}${esc(sig.comuna)}</div><div class="it">${nf(sig.kg)} kg${sig.monto ? " · " + fmt(sig.monto) + " neto" : ""}${sig.num ? " · NP " + esc(sig.num) : ""}${sig.vend ? " · " + esc(sig.vend) : ""}</div>
+      ${(sig.items || []).length ? `<div class="it">${sig.items.map(i => `${nf(i[0])} × ${esc(i[1])}`).join("<br>")}</div>` : ""}
+      <div class="g3" style="margin:8px 0"><a class="btn pri" target="_blank" rel="noopener" href="${esc(navUrl(sig))}">🧭 Navegar</a>${sig.tel ? `<a class="btn" href="tel:${esc(telNorm(sig.tel))}">📞 Llamar</a><a class="btn" target="_blank" rel="noopener" href="https://wa.me/${esc(waNorm(sig.tel))}?text=${encodeURIComponent("Hola, le habla el chofer de HWF. Voy en camino con su pedido.")}">💬 Avisar</a>` : "<span></span><span></span>"}</div>
+      <button type="button" class="btn ver" style="width:100%" data-reg="${esc(sig.id)}">✅ Registrar entrega</button></div>` : `<div class="card"><h2>🎉 Ruta terminada</h2><p class="muted">Registraste las ${X.paradas.length} paradas. Vuelve a ${esc((X.origen && X.origen.nombre) || "la bodega")}.</p>${X.origen ? `<a class="btn pri" target="_blank" rel="noopener" href="${esc(navUrl(X.origen))}">🧭 Volver a bodega</a>` : ""}</div>`}
+    <div class="card"><h2>Ruta de hoy <small class="muted">${hechas} de ${X.paradas.length} · ${nf(X.km)} km planificados</small></h2>
+      ${X.paradas.map(p => { const e = E[p.id]; return `<div class="pd"><span class="n ${e ? (e.est === "ok" ? "ok" : e.est === "parcial" ? "wa" : "bad") : ""}">${p.ord}</span><div><b>${esc(p.cli)}</b><small>${esc(p.comuna)} · ${nf(p.kg)} kg${e && e.hora ? " · " + e.hora : ""}${e && e.pago ? " · " + esc(e.pago) : ""}</small>${pill(p)}</div>
+        <div style="display:grid;gap:4px"><a class="btn" style="min-height:36px;padding:6px 10px" target="_blank" rel="noopener" href="${esc(navUrl(p))}">🧭</a><button type="button" class="btn" style="min-height:36px;padding:6px 10px" data-reg="${esc(p.id)}">${e ? "✏️" : "✅"}</button></div></div>`; }).join("")}
+      <div class="g2" style="margin-top:10px"><button type="button" class="btn" id="bR">⟳ Actualizar ruta</button><button type="button" class="btn" id="bV">Cambiar vehículo</button></div></div>`;
+  $("s-ruta").querySelectorAll("[data-reg]").forEach(b => b.onclick = () => { const p = X.paradas.find(x => x.id === b.dataset.reg); if (p) registrar(p); });
+  $("bR").onclick = async () => { $("bR").disabled = true; await bajarRuta(); pintarRuta(); }; $("bV").onclick = () => puerta(); }
+let mapa = null, miMarca = null;
+function pintarMapa() { const X = misParadas(), E = estados(); if (!window.L) { $("mapa").innerHTML = '<p class="nota" style="padding:12px">Mapa no disponible sin internet.</p>'; return; }
+  setTimeout(() => { if (mapa) mapa.remove(); mapa = L.map("mapa"); L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 18, attribution: "© OpenStreetMap" }).addTo(mapa);
+    const pts = [], col = p => { const e = E[p.id]; return !e ? "#5B6874" : e.est === "ok" ? "#1C7A4E" : e.est === "parcial" ? "#F0A818" : "#B42318"; };
+    if (X.origen) { pts.push([X.origen.lat, X.origen.lng]); L.marker([X.origen.lat, X.origen.lng]).addTo(mapa).bindPopup(esc(X.origen.nombre)); }
+    X.paradas.forEach(p => { pts.push([p.lat, p.lng]); L.marker([p.lat, p.lng], { icon: L.divIcon({ className: "", html: `<div style="width:28px;height:28px;border-radius:50%;background:${col(p)};color:#fff;font-weight:800;display:grid;place-items:center;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.3)">${p.ord}</div>`, iconSize: [28, 28], iconAnchor: [14, 14] }) }).addTo(mapa).bindPopup(`${p.ord}. ${esc(p.cli)}<br>${esc(p.comuna)} · ${nf(p.kg)} kg`); });
+    if (X.origen) pts.push([X.origen.lat, X.origen.lng]); if (pts.length > 1) L.polyline(pts, { color: "#0B3146", weight: 3, dashArray: "6 6" }).addTo(mapa);
+    if (POS) { miMarca = L.circleMarker([POS.lat, POS.lng], { radius: 9, color: "#fff", weight: 3, fillColor: "#1F8FFF", fillOpacity: 1 }).addTo(mapa).bindPopup("Tú"); pts.push([POS.lat, POS.lng]); }
+    if (pts.length) mapa.fitBounds(pts, { padding: [24, 24] }); else mapa.setView([-34.17, -70.74], 9); }, 60); }
+function pintarResumen() { const X = misParadas(), E = estados(), P = perfil(), L = Object.values(E), por = {};
+  L.forEach(e => { if (e.pago) por[e.pago] = (por[e.pago] || 0) + (e.monto || 0); }); const tot = Object.values(por).reduce((a, b) => a + b, 0);
+  const ok = L.filter(e => e.est === "ok").length, par = L.filter(e => e.est === "parcial").length, mal = L.filter(e => e.est === "rech" || e.est === "aus").length, kg = X.paradas.filter(p => E[p.id] && (E[p.id].est === "ok" || E[p.id].est === "parcial")).reduce((t, p) => t + p.kg, 0);
+  const txt = `Resumen ${hoy()} · ${P.chofer} · ${vehNom(P.veh)}\nEntregadas ${ok} · parciales ${par} · no entregadas ${mal} · de ${X.paradas.length}\n${nf(kg)} kg entregados\nCobrado: ${fmt(tot)}\n` + Object.entries(por).map(([k, v]) => `· ${k}: ${fmt(v)}`).join("\n");
+  $("s-resumen").innerHTML = `<div class="card"><h2>Resumen del día <small class="muted">${esc(hoy())}</small></h2>
+    <div class="g2"><div class="k"><span>Entregadas</span><b>${ok}${par ? " + " + par + " parc." : ""}</b><small class="muted">de ${X.paradas.length}</small></div><div class="k"><span>No entregadas</span><b style="color:${mal ? "#B42318" : "inherit"}">${mal}</b></div>
+      <div class="k"><span>Kilos entregados</span><b>${nf(kg)}</b></div><div class="k"><span>Total cobrado</span><b>${fmt(tot)}</b></div></div>
+    <h2 style="margin-top:14px">Cobros por forma de pago</h2>${Object.keys(por).length ? Object.entries(por).map(([k, v]) => `<div class="pd" style="grid-template-columns:1fr auto"><span>${esc(k)}</span><b>${fmt(v)}</b></div>`).join("") : '<p class="muted">Sin cobros registrados.</p>'}
+    <p class="nota">${cola().length ? `<b>${cola().length} entregas por enviar</b> (sin señal): se envían solas.` : "Todas las entregas están enviadas a logística."}</p>
+    <div class="g2" style="margin-top:8px"><a class="btn ver" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(txt)}">💬 Enviar resumen</a><button type="button" class="btn" id="bEnv">⟳ Enviar pendientes</button></div></div>`;
+  $("bEnv").onclick = () => { enviarCola(); toast(navigator.onLine ? "Enviando…" : "Sin señal: se enviarán solas."); }; }
+
+function arrancar() { const P = perfil(); if (!P || !cfg()) return puerta(); if (P.fecha !== hoy()) { lsSet("perfil", Object.assign(P, { fecha: hoy() })); }
+  pintarCola(); ir(SEC); gpsIniciar(); pantallaEncendida(); bajarRuta(true).then(n => { if (n) pintar(SEC); }); enviarCola();
+  /* limpia estados de días anteriores */ try { Object.keys(localStorage).filter(k => /^hwf-cho:est_\d{4}-\d{2}-\d{2}$/.test(k) && k !== "hwf-cho:est_" + hoy()).forEach(k => localStorage.removeItem(k)); } catch (e) {} }
+if (!cfg() || !perfil()) puerta(); else arrancar();
+if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
+</script><script id="hwfVerJs">/* sello_version: aviso de versión nueva */
+const HWF_VER = "20261110065235";
+(function () {
+  const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer)\/[^/]*$/, "/");
+  let avisado = false;
+  async function revisar() {
+    if (avisado || !navigator.onLine) return;
+    try { const r = await fetch(raiz + "version.json?t=" + Date.now(), { cache: "no-store" }); if (!r.ok) return; const j = await r.json();
+      if (j && j.v && String(j.v) > HWF_VER) mostrar(j); } catch (e) {}
+  }
+  function mostrar(j) { avisado = true; const d = document.createElement("div"); d.id = "hwfVer";
+    d.innerHTML = `<span style="white-space:nowrap">Nueva versión disponible</span><button type="button">Actualizar</button>`;
+    d.style.cssText = "position:fixed;left:50%;transform:translateX(-50%);top:calc(34px + env(safe-area-inset-top));white-space:nowrap;z-index:10000;background:#0B3146;color:#fff;border-radius:999px;padding:8px 8px 8px 16px;display:flex;gap:10px;align-items:center;box-shadow:0 8px 24px rgba(0,0,0,.3);font:600 .88rem system-ui,sans-serif;max-width:calc(100vw - 24px)";
+    const b = d.querySelector("button"); b.style.cssText = "border:0;border-radius:999px;background:#F0A818;color:#0B3146;font:800 .85rem system-ui,sans-serif;padding:8px 14px;cursor:pointer";
+    b.onclick = async () => { b.textContent = "Actualizando…"; try { const rs = await navigator.serviceWorker?.getRegistrations?.(); if (rs) await Promise.all(rs.map(x => x.update().catch(() => {}))); } catch (e) {} location.reload(); };
+    document.body.appendChild(d); }
+  setTimeout(revisar, 4000); setInterval(revisar, 30 * 60 * 1000);
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) revisar(); });
+})();
+</script>
+</body></html>
