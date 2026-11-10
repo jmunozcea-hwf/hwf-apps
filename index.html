@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="manifest" href="ventas/manifest.webmanifest"><!-- misma identidad que la app Ventas instalada antes en la raíz: Chrome la actualiza a su nuevo alcance -->
+<link rel="manifest" href="manifest.webmanifest"><!-- 10-11-2026: mismo URL e id que el manifest del ícono antiguo de la raíz, con alcance solo ventas/: Chrome actualiza ese ícono y deja de abarcar Logística, Chofer, Admin y Tienda --><!-- misma identidad que la app Ventas instalada antes en la raíz: Chrome la actualiza a su nuevo alcance -->
 <meta name="theme-color" content="#0B3146">
 <title>Instalar apps HWF</title>
 <link rel="icon" href="ventas/icon-192.png">
@@ -70,7 +70,7 @@ ol{margin:0;padding-left:20px;display:grid;gap:6px}
     <ol data-p="and"><li>Abre la app con el botón de arriba, en <b>Chrome</b>.</li><li>Toca el menú <b>⋮</b> (arriba a la derecha).</li><li>Elige <b>«Instalar app»</b> o <b>«Agregar a la pantalla principal»</b>.</li></ol>
     <ol data-p="ios" hidden><li>Abre la app con el botón de arriba, en <b>Safari</b>.</li><li>Toca <b>Compartir</b> (el cuadrado con la flecha hacia arriba).</li><li>Elige <b>«Agregar a inicio»</b> y luego <b>Agregar</b>.</li></ol>
     <ol data-p="pc" hidden><li>Abre la app con el botón de arriba, en <b>Chrome</b> o <b>Edge</b>.</li><li>En la barra de direcciones, toca el ícono de <b>instalar</b> (pantalla con flecha).</li><li>Confirma con <b>Instalar</b>.</li></ol>
-    <p class="muted">La primera vez la app pide el <b>código de conexión</b> (empieza con <b>HWF1:</b>). Pídeselo a HWF; en HWF Admin está en Más → Datos → «Copiar código para vendedores».</p>
+    <p class="muted">La primera vez la app pide el <b>código de conexión</b> (empieza con <b>HWF1:</b>). Pídeselo a HWF; en HWF Admin está en Menú ☰ → Datos → «Copiar código para vendedores».</p>
   </section>
 
   <section class="card">
@@ -83,7 +83,12 @@ ol{margin:0;padding-left:20px;display:grid;gap:6px}
 </div>
 <script>
 /* la app Ventas instalada antes del cambio abre esta página: sigue funcionando yendo a ventas/ */
-if (window.matchMedia && matchMedia("(display-mode: standalone)").matches || navigator.standalone) location.replace("ventas/" + location.search);
+if (window.matchMedia && matchMedia("(display-mode: standalone)").matches || navigator.standalone) {
+  /* ícono antiguo (instalado en la raíz): se espera unos segundos en esta página para que Chrome lea el manifest y actualice el ícono */
+  const sp = document.createElement("div"); sp.style.cssText = "position:fixed;inset:0;z-index:9999;display:grid;place-items:center;background:#0B3146;color:#fff;font:600 1.05rem system-ui,sans-serif;text-align:center;padding:24px";
+  sp.innerHTML = 'Abriendo Ventas HWF…<br><small style="opacity:.75;font-weight:400">Actualizando el ícono</small>'; document.body.appendChild(sp);
+  setTimeout(() => location.replace("ventas/" + (location.search ? location.search + "&" : "?") + "icono=viejo"), 2500);
+}
 document.querySelector(".tabs").onclick = function (e) {
   var b = e.target.closest("[data-t]"); if (!b) return;
   document.querySelectorAll(".tabs button").forEach(function (x) { x.setAttribute("aria-pressed", x === b); });
