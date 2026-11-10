@@ -1192,7 +1192,7 @@ function npRitmo(cots, Y, M, n, real, lim, ant) {
 }
 </script>
 <script>/* hwfAutoAct: recarga sola cuando hay versión nueva */(function(){var h0=null,t0=0;function hs(t){var h=0;for(var i=0;i<t.length;i++)h=(h*31+t.charCodeAt(i))|0;return h}function chk(){if(Date.now()-t0<20000)return;t0=Date.now();fetch(location.pathname,{cache:"no-store"}).then(function(r){return r.ok?r.text():null}).then(function(t){if(!t)return;var h=hs(t);if(h0===null){h0=h;return}if(h!==h0){h0=h;location.reload()}}).catch(function(){})}window.addEventListener("load",function(){setTimeout(chk,1500)});document.addEventListener("visibilitychange",function(){if(document.visibilityState==="visible")chk()});window.addEventListener("focus",chk);setInterval(chk,600000)})();</script>
-</head>
+<style>.p14t td,.p14t th{white-space:nowrap;padding:6px 8px}.p14t td:first-child{white-space:normal;min-width:110px}</style></head>
 <body>
 <div class="lock" id="lock" hidden>
   <div class="box">
@@ -3949,7 +3949,7 @@ function pintarPlan() {
   const chk = (() => { try { return JSON.parse(localStorage.getItem(PLCHK) || "{}"); } catch (e) { return {}; } })();
   const it = c => `<div class="it"><b>${esc(tc(c.nombre))}<span class="pl-tag ${c.abc}">${c.abc}</span></b><span class="v">${mm(c.hab)}/mes</span><small>${esc(c.cart)} · <span class="pl-tag d">${c.diasSin} días</span></small></div>`;
   const surt = P.L.filter(c => (c.abc === "A" || c.abc === "B") && c.ofrecer.length && c.diasSin < 60).sort((a, b) => b.v3 - a.v3).slice(0, 12);
-  $("masBody").innerHTML = `<div class="card pl"><h2>Plan de crecimiento <span class="muted">plan a 14 meses: 70 → 85 → 100 MM netos al mes</span></h2>
+  $("masBody").innerHTML = `<div class="card pl"><h2>Plan de crecimiento <span class="muted">plan a 14 meses: 63 → 85 → 100 MM netos al mes</span></h2>
     <div class="pl-k"><div><span>Venta del mes a la fecha</span><b>${mm(P.vMes)}</b><small>${String(P.CD).padStart(2, "0")}-${String(P.M).padStart(2, "0")} · sin tienda</small></div>
       <div><span>Proyección de cierre</span><b>${mm(proy)}</b><small>${Math.round(proy / PLAN.meta * 100)}% de la meta del mes</small></div>
       <div><span>Brecha a la meta del mes</span><b style="color:${falta ? "var(--bad)" : "var(--ok)"}">${falta ? mm(falta) : "cumplida"}</b><small>base de referencia 65 MM</small></div>
@@ -4882,10 +4882,9 @@ function cliFantasia(nombre) { return cliFantasias()[norm(nombre || "")] || ""; 
 function cliBusca(ci, nombre) { const c = D.clientes[ci] || []; return [cliFantasia(nombre || c[0]), c[3], c[4], String(c[4] || "").replace(/[^0-9kK]/g, ""), c[5], c[6], c[7]].filter(Boolean).join(" "); }
 </script>
 
-<script>/* rankdist: plan 70 → 85 → 100 MM en 14 meses y ranking de vendedores por objetivos */
-const PLAN14_FIJA = { 202611: 63000000 };   /* metas fijadas a mano (pedido de Jorge 10-11-2026: noviembre 2026 = 63 MM, la suma de las metas de los vendedores; la tienda aparte, 10 MM) */
-const PLAN14 = (() => { const L = []; for (let i = 0; i < 14; i++) { const y = 2026 + Math.floor((10 + i) / 12), m = (10 + i) % 12 + 1, v = i <= 7 ? 70 + 15 * i / 7 : 85 + 15 * (i - 7) / 6;
-  const fija = PLAN14_FIJA[y * 100 + m]; L.push({ ym: y * 100 + m, y, m, meta: fija || Math.round(v * 10) * 100000, fija: !!fija, hito: i === 0 ? 70 : i === 7 ? 85 : i === 13 ? 100 : 0 }); } return L; })();
+<script>/* rankdist: plan 63 → 85 → 100 MM en 14 meses y ranking de vendedores por objetivos */
+/* patch_plan14modelo: plan calculado con pronóstico (ensamble de 5 modelos) */
+const PLAN14 = [{"ym": 202611, "y": 2026, "m": 11, "meta": 63000000, "fc": 57200000, "nivel": 62.4, "hito": 63}, {"ym": 202612, "y": 2026, "m": 12, "meta": 66700000, "fc": 57900000, "nivel": 65.7, "hito": 0}, {"ym": 202701, "y": 2027, "m": 1, "meta": 66300000, "fc": 52000000, "nivel": 68.9, "hito": 0}, {"ym": 202702, "y": 2027, "m": 2, "meta": 70900000, "fc": 54400000, "nivel": 72.1, "hito": 0}, {"ym": 202703, "y": 2027, "m": 3, "meta": 75900000, "fc": 57000000, "nivel": 75.3, "hito": 0}, {"ym": 202704, "y": 2027, "m": 4, "meta": 80100000, "fc": 58400000, "nivel": 78.6, "hito": 0}, {"ym": 202705, "y": 2027, "m": 5, "meta": 77800000, "fc": 50600000, "nivel": 81.8, "hito": 0}, {"ym": 202706, "y": 2027, "m": 6, "meta": 85600000, "fc": 57000000, "nivel": 85.0, "hito": 85}, {"ym": 202707, "y": 2027, "m": 7, "meta": 85600000, "fc": 53800000, "nivel": 87.5, "hito": 0}, {"ym": 202708, "y": 2027, "m": 8, "meta": 90100000, "fc": 56300000, "nivel": 90.0, "hito": 0}, {"ym": 202709, "y": 2027, "m": 9, "meta": 97800000, "fc": 62700000, "nivel": 92.5, "hito": 0}, {"ym": 202710, "y": 2027, "m": 10, "meta": 91100000, "fc": 51600000, "nivel": 95.0, "hito": 0}, {"ym": 202711, "y": 2027, "m": 11, "meta": 98100000, "fc": 56800000, "nivel": 97.5, "hito": 0}, {"ym": 202712, "y": 2027, "m": 12, "meta": 104200000, "fc": 60800000, "nivel": 100.0, "hito": 100}];
 const metaPlan14 = (y, m) => { const p = PLAN14.find(x => x.ym === y * 100 + m); return p ? p.meta : y * 100 + m < PLAN14[0].ym ? PLAN14[0].meta : PLAN14[PLAN14.length - 1].meta; };
 const RKD_W = [["venta", "Venta ponderada", 33], ["ticket", "Ticket promedio", 19], ["contado", "Venta contado", 14], ["sku", "SKU por cliente", 11], ["margen", "Margen total", 9], ["nuevos", "Clientes nuevos", 7], ["fecha", "Facturación temprana", 7]];
 const rkdPesoDia = (d, n) => n > 1 ? 1.5 - (d - 1) / (n - 1) : 1;   /* 1,5 el día 1 → 0,5 el último día del mes */
@@ -4946,10 +4945,10 @@ function plan14Html(B) {
   if (!B || !B.rows) return "";
   const tv = B.vend.indexOf("Tienda Hellywoof"), real = {}; B.rows.forEach(r => { if (r[7] === tv) return; const k = (r[8] || B.anio) * 100 + r[2]; real[k] = (real[k] || 0) + r[5]; });
   const [cy, cm] = String(B.corte || "").split("-").map(Number), cur = cy * 100 + cm, pmm = n => "$" + (n / 1e6).toLocaleString("es-CL", { maximumFractionDigits: 1 }) + " MM";
-  return `<div class="card"><h2>Plan a 14 meses <span class="muted">venta neta mensual de la distribuidora (sin la tienda): 70 → 85 → 100 MM</span></h2>
-    <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:.85rem"><thead><tr><th style="text-align:left">Mes</th><th>Objetivo</th><th>Real</th><th>Cumplimiento</th><th>Diferencia</th></tr></thead><tbody>
-    ${PLAN14.map(p => { const v = real[p.ym] || 0, fut = p.ym > cur; return `<tr${p.ym === cur ? ' style="background:#FFF8E6"' : ""}><td style="text-align:left${p.hito ? ";font-weight:800" : ""}">${["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"][p.m - 1]} ${p.y}${p.hito ? " · hito " + p.hito + " MM" : ""}${p.fija ? " · meta fijada" : ""}${p.ym === cur ? " · en curso" : ""}</td>
-      <td style="text-align:right">${pmm(p.meta)}</td><td style="text-align:right">${fut ? "" : pmm(v)}</td><td style="text-align:right">${fut ? "" : Math.round(v / p.meta * 100) + "%"}</td><td style="text-align:right;color:${v >= p.meta ? "#1C7A4E" : "#B42318"}">${fut ? "" : (v >= p.meta ? "+" : "") + pmm(v - p.meta)}</td></tr>`; }).join("")}</tbody></table></div></div>`;
+  return `<div class="card"><h2>Plan a 14 meses <span class="muted">venta neta mensual de la distribuidora (sin la tienda): 63 → 85 → 100 MM</span></h2>
+    <div style="overflow-x:auto"><table class="p14t" style="width:100%;border-collapse:collapse;font-size:.85rem"><thead><tr><th style="text-align:left">Mes</th><th>Objetivo</th><th title="lo que se vendería sin cambios, según el pronóstico">Pronóstico base</th><th>Real</th><th>Cumplimiento</th><th>Diferencia</th></tr></thead><tbody>
+    ${PLAN14.map(p => { const v = real[p.ym] || 0, fut = p.ym > cur; return `<tr${p.ym === cur ? ' style="background:#FFF8E6"' : ""}><td style="text-align:left${p.hito ? ";font-weight:800" : ""}">${["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"][p.m - 1]} ${p.y}${p.hito ? " · hito " + p.hito + " MM" : ""}${p.ym === cur ? " · en curso" : ""}</td>
+      <td style="text-align:right">${pmm(p.meta)}</td><td style="text-align:right;color:#5B6874">${p.fc ? pmm(p.fc) : ""}</td><td style="text-align:right">${fut ? "" : pmm(v)}</td><td style="text-align:right">${fut ? "" : Math.round(v / p.meta * 100) + "%"}</td><td style="text-align:right;color:${v >= p.meta ? "#1C7A4E" : "#B42318"}">${fut ? "" : (v >= p.meta ? "+" : "") + pmm(v - p.meta)}</td></tr>`; }).join("")}</tbody></table></div><p class="muted" style="font-size:.78rem;margin:8px 0 0">Cómo se calculó: el <b>pronóstico base</b> es lo que vendería la distribuidora sin cambios, combinando 5 modelos (promedio móvil, estacional del año anterior, regresión con tendencia y estacionalidad, Holt amortiguado y ARIMA) sobre la venta por día hábil de ene-2025 a oct-2026, con feriados de Chile; probado en may–oct 2026 se equivoca en promedio ±12% al mes. El <b>objetivo</b> sube el nivel de 63 (nov-26) a 85 (jun-27) y 100 MM (dic-27) y se ajusta por los días hábiles y la estacionalidad de cada mes, por eso no sube en línea recta. La diferencia entre ambos es el crecimiento que hay que lograr.</p></div>`;
 }
 document.head.insertAdjacentHTML("beforeend", "<style>.rkd-t th,.rkd-t td{padding:7px 8px;border-bottom:1px solid var(--line,#DAE1E7);text-align:right;white-space:nowrap}.rkd-t th{font-size:.74rem;color:var(--muted,#5B6874)}</style>");
 
@@ -5063,7 +5062,7 @@ function kpiHtml(B, yo) {
   const col = (t, a, b) => `<div class="kp-k"><span>${t}</span><b>${a}</b>${b ? `<small>${b}</small>` : ""}</div>`;
   let html = `<section class="kp-card" id="kpCard"><h3>📊 Avance de ${MES} <small>al ${R.ultDia} · ${R.hPas} de ${R.hTot} días hábiles</small></h3>
     <div class="kp-bar" title="venta vs meta; la marca blanca es el avance de tiempo"><i style="width:${Math.min(100, av * 100).toFixed(1)}%"></i><s style="left:${Math.min(100, tp * 100).toFixed(1)}%"></s></div>
-    <div class="kp-g">${col("Meta distribuidora", pmm(K.meta), (PLAN14.find(p => p.ym === K.y * 100 + K.m) || {}).fija ? "meta fijada para el mes" : "plan 70 → 100 MM")}${col("Venta distribuidora", pmm(K.venta), `<span class="${cls(av, tp)}">${pc(av)} de la meta</span>`)}${col("Avance de tiempo", pc(tp), `${R.hPas} de ${R.hTot} días hábiles`)}
+    <div class="kp-g">${col("Meta distribuidora", pmm(K.meta), "plan 63 → 100 MM")}${col("Venta distribuidora", pmm(K.venta), `<span class="${cls(av, tp)}">${pc(av)} de la meta</span>`)}${col("Avance de tiempo", pc(tp), `${R.hPas} de ${R.hTot} días hábiles`)}
       ${v ? col("Tu venta", pmm(v.venta), `<span class="${cls(v.meta ? v.venta / v.meta : 0, tp)}">${v.meta ? pc(v.venta / v.meta) + " de tu meta " + pmm(v.meta) : "sin meta"}</span>`) : ""}
       ${col("Margen distribuidora", pmm(K.marg), pc(K.margPct))}${v ? col("Tu margen", pmm(v.marg), pc(v.margPct)) : ""}
       ${col("Clientes nuevos", K.nuevos + " distribuidora", v ? v.nuevos + " tuyos" : "")}${col("SKU por cliente", K.sku.toFixed(1) + " distribuidora", v ? v.sku.toFixed(1) + " tuyos" : `${K.nc} clientes compraron`)}</div>`;
