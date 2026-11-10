@@ -7173,7 +7173,7 @@ function confirmarNota() {
   x.onclick = () => cerrarModal(); card.insertBefore(x, card.firstChild); })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261110163024";
+const HWF_VER = "20261110163237";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer)\/[^/]*$/, "/");
   let avisado = false;
@@ -7499,6 +7499,9 @@ rutaElegirPr = function () { return rutaSoloPr(); };
 .cz{min-width:0;max-width:100%;overflow:hidden}
 </style>
 
+<script>/* patch_grafventas: VENTAS */ { const _pi = pintarInicio; pintarInicio = function () { const r = _pi.apply(this, arguments); try { vmPoner(document.getElementById("crmInicio"), vmDeBase(DB && DB.d)); } catch (e) {} return r; };
+  try { if (typeof MODO !== "undefined" && MODO === "inicio") pintarInicio(); } catch (e) {} }</script>
+
 <style>/* patch_grafventas */
 .vm-card{display:grid;gap:8px}.vm-card h3{margin:0;font-size:1.02rem;display:flex;justify-content:space-between;gap:8px;align-items:baseline}
 .vm-card h3 small{font-weight:600;color:var(--muted,#5B6874);font-size:.76rem;text-align:right}
@@ -7509,11 +7512,10 @@ rutaElegirPr = function () { return rutaSoloPr(); };
 .vm-res b{display:block;font-size:.95rem;color:var(--ink,#0F1E29);font-variant-numeric:tabular-nums}
 </style>
 <script>/* patch_grafventas: venta neta mensual 2025, 2026 y plan (distribuidora) */
-const VM_PLAN = [[202611, 63000000], [202612, 66400000], [202701, 69800000], [202702, 73000000], [202703, 76200000], [202704, 79200000], [202705, 82200000], [202706, 85000000], [202707, 87700000], [202708, 90400000], [202709, 92900000], [202710, 95400000], [202711, 97700000], [202712, 100000000]];
+const VM_PLAN = [[202611, 73000000], [202612, 77100000], [202701, 81200000], [202702, 85100000], [202703, 89100000], [202704, 92800000], [202705, 96500000], [202706, 100000000], [202707, 103500000], [202708, 107100000], [202709, 110400000], [202710, 113700000], [202711, 116900000], [202712, 120000000]];
 function vmDeBase(B) { try {
-  if (!B || !B.rows || !B.rows.length) return null; const tv = (B.vend || []).indexOf("Tienda Hellywoof"), bol = {};
-  (B.clientes || []).forEach((c, i) => { if (/CLIENTE BOLETA/i.test(String(c && c[0] || ""))) bol[i] = 1; });
-  const a = {}; B.rows.forEach(r => { if (r[7] === tv || bol[r[0]]) return; const y = r[8] || B.anio; (a[y] = a[y] || new Array(12).fill(0))[r[2] - 1] += Number(r[5]) || 0; });
+  if (!B || !B.rows || !B.rows.length) return null;
+  const a = {}; B.rows.forEach(r => { const y = r[8] || B.anio; (a[y] = a[y] || new Array(12).fill(0))[r[2] - 1] += Number(r[5]) || 0; });   /* TOTAL: distribuidora + tienda */
   return { corte: B.corte, a }; } catch (e) { return null; } }
 const vmMM = v => "$" + (v / 1e6).toLocaleString("es-CL", { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + " MM";
 const VM_MES = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
@@ -7539,9 +7541,9 @@ function vmHtml(VM, id) {
   g += `<line class="vm-cur" x1="0" x2="0" y1="${T}" y2="${H - B}" stroke="#E07B24" stroke-width="1.2" visibility="hidden"/>`;
   const ytd = (y, hasta) => (VM.a[y] || []).slice(0, hasta).reduce((t, v) => t + v, 0), mesesCerr = CY === 2026 ? CM - 1 : 12;
   const t26 = ytd(2026, mesesCerr), t25 = ytd(2025, mesesCerr), vs = t25 ? (t26 / t25 - 1) : 0, plan12 = VM_PLAN.filter(p => Math.floor(p[0] / 100) === 2027).reduce((t, p) => t + p[1], 0);
-  return `<div class="card vm-card" id="${id}"><h3>Venta neta mensual <small>distribuidora (sin tienda) · facturas − NC, sin IVA</small></h3>
-    <div class="vm-ley"><span><i style="background:#9AA8B4"></i>2025</span><span><i style="background:#0B3146"></i>2026${parc ? " (○ " + VM_MES[CM - 1] + " parcial al " + String(CD).padStart(2, "0") + "-" + String(CM).padStart(2, "0") + ")" : ""}</span><span><i style="background:#F0A818"></i>Plan proyectado</span></div>
-    <svg class="vm-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Venta neta mensual 2025, 2026 y plan">${g}</svg>
+  return `<div class="card vm-card" id="${id}"><h3>Venta neta mensual <small>total distribuidora + tienda · facturas − NC, sin IVA</small></h3>
+    <div class="vm-ley"><span><i style="background:#9AA8B4"></i>2025</span><span><i style="background:#0B3146"></i>2026${parc ? " (○ " + VM_MES[CM - 1] + " parcial al " + String(CD).padStart(2, "0") + "-" + String(CM).padStart(2, "0") + ")" : ""}</span><span><i style="background:#F0A818"></i>Plan proyectado (distribuidora + tienda)</span></div>
+    <svg class="vm-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Venta neta mensual total 2025, 2026 y plan">${g}</svg>
     <div class="vm-det">Toca el gráfico para ver cada mes.</div>
     <div class="vm-res"><div>2026 ene–${VM_MES[Math.max(0, mesesCerr - 1)]}<b>${vmMM(t26)}</b></div><div>vs mismo período 2025${t25 ? `<b style="color:${vs >= 0 ? "#1C7A4E" : "#B42318"}">${(vs >= 0 ? "+" : "−") + Math.abs(vs * 100).toLocaleString("es-CL", { maximumFractionDigits: 1 })}%</b>` : "<b>—</b>"}</div><div>Plan 2027<b>${vmMM(plan12)}</b></div></div></div>`;
 }
