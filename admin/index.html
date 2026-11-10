@@ -2598,7 +2598,7 @@ function pintarEmbudo() {
   l.sort((a, b) => prIdx(b.etapa === "Descartado" ? "" : b.etapa) - prIdx(a.etapa === "Descartado" ? "" : a.etapa) || a.comuna.localeCompare(b.comuna, "es") || a.nombre.localeCompare(b.nombre, "es"));
   const tabla = (filas, clave) => `<div class="tbl"><table class="pr-tbl"><thead><tr><th>${clave}</th>${PR_CORTO.map(t => `<th class="n">${esc(t)}</th>`).join("")}<th class="n">Total</th></tr></thead><tbody>${filas.map(([n, ls]) => { const c = prConteo(ls);
     return `<tr><td>${esc(n)}</td>${c.map(x => `<td class="n">${x || "·"}</td>`).join("")}<td class="n"><b>${ls.length}</b></td></tr>`; }).join("")}</tbody></table></div>`;
-  $("masBody").innerHTML = `<div class="card"><h2>Embudo de ventas <span class="muted">Maule y O'Higgins${prVend ? " · " + esc(prVend) : ""}${prReg ? " · " + esc(prReg) : ""}</span></h2>
+  $("masBody").innerHTML = `<div class="card"><h2>Embudo de ventas <span class="muted">Todo Chile${prVend ? " · " + esc(prVend) : ""}${prReg ? " · " + esc(prReg) : ""}</span></h2>
       <div class="pr-kpi num"><div><span>Prospectos activos</span><b>${act.length}</b><small>${cnt[7]} descartados</small></div>
         <div><span>Con nota de pedido</span><b>${conNota}</b><small>${pct(act.length ? conNota / act.length : 0)} del embudo</small></div>
         <div><span>Ya compraron</span><b>${ganados}</b><small>primer pedido o más</small></div>
@@ -2632,7 +2632,7 @@ function prAbrirAdm(id) {
       <span class="muted" style="font-size:.85rem">${esc(o.direccion)}${o.telefono ? " · tel. " + esc(o.telefono) : ""}${prIG(o) ? ` · <a href="${esc(prIG(o))}" target="_blank" rel="noopener">${esc(o.instagram)}</a>` : ""}${o.web ? ` · <a href="${esc(/^https?:/i.test(o.web) ? o.web : "https://" + o.web)}" target="_blank" rel="noopener">web</a>` : ""}${o.cliente ? "<br>Cliente vinculado: <b>" + esc(o.cliente) + "</b>" : ""}${o.creado_por ? "<br>Creado por " + esc(o.creado_por) : ""}</span></div><button class="x" type="button" aria-label="Cerrar">×</button></div>
     <div class="card pr-form">
       <div><label for="prEt">Etapa</label><select id="prEt">${PR_ETAPAS.map(e => `<option ${e === o.etapa ? "selected" : ""}>${esc(e)}</option>`).join("")}</select></div>
-      <div><label for="prVd">Asignado a <small class="muted">(${o.asignado ? esc(o.asignado_por || "") + (o.asignado_fecha ? " · " + esc(o.asignado_fecha) : "") : "libre: queda del vendedor que ingresa la primera nota de pedido o factura en Defontana"})</small></label><select id="prVd"><option value="">— Libre (todos lo ven) —</option>${vends.map(v => `<option ${v === (o.asignado || "") ? "selected" : ""}>${esc(v)}</option>`).join("")}</select></div><!-- patch_prasig_admin -->
+      <div><label for="prVd">Vendedor</label><select id="prVd">${vends.map(v => `<option ${v === o.vendedor ? "selected" : ""}>${esc(v)}</option>`).join("")}</select></div>
       <div><label for="prPx">Próximo contacto</label><input id="prPx" type="date" value="${esc(o.proximo_contacto || "")}"></div>
       <div><label for="prNt">Notas</label><textarea id="prNt">${esc(o.notas || "")}</textarea></div>
       <div class="np-top"><button class="btn" type="button" id="prMapa">Ver en Google Maps</button><button class="btn ok" type="button" id="prOk">Guardar</button></div>
@@ -2640,7 +2640,7 @@ function prAbrirAdm(id) {
   $("prMapa").onclick = () => window.open(prMapa(o), "_blank");
   $("prOk").onclick = () => {
     const vd = $("prVd").value, c = { etapa: $("prEt").value, proximo_contacto: $("prPx").value, notas: $("prNt").value.trim() };
-    if (vd !== (o.asignado || "")) { c.asignado = vd; if (vd) { c.vendedor = vd; c.vendedor_email = PR_VEND_MAIL[vd] || ""; } }
+    if (vd !== o.vendedor) { c.vendedor = vd; c.vendedor_email = PR_VEND_MAIL[vd] || ""; }
     cerrarSheet(); prGuardarAdm(o.id, c); toast(`${o.nombre}: ${PR_CORTO[prIdx(c.etapa)]}.`);
   };
 }
@@ -5165,7 +5165,7 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261110070000";
+const HWF_VER = "20261110070929";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer)\/[^/]*$/, "/");
   let avisado = false;
