@@ -1,0 +1,456 @@
+<!doctype html><html lang="es-CL"><head>
+<script>/* demo_log: servidor simulado y datos ficticios */
+(function () {
+  const PFX = "hwf-logdemo:", URL = "https://hwf-demo.invalid/exec", SRV = "hwf-demo:srv", P = [["RR0133", "Aceite Salmon 150 ml Perro y Gato (Pack 8 Unid)", 27056], ["RR0009", "Agility Adulto DermaControl 15 Kg", 33446], ["RR0008", "Agility Adulto DermaControl 3 Kg", 8754], ["RR0004", "Agility Adulto Raza Pequeña 1,5 Kg (PACK 2 Unid)", 7984], ["RR0005", "Agility Adulto Raza Pequeña 15 Kg", 31451], ["RR0007", "Agility Cachorro 15 Kg", 31451], ["RR0006", "Agility Cachorro 3 Kg", 8091], ["RR0010", "Agility Cats Adulto 1,5 Kg", 7309], ["RR0011", "Agility Cats Adulto 10 Kg", 32792], ["RR0021", "Agility Cats Kitten 1,5 Kg", 7309], ["RR0022", "Agility Cats Kitten 10 Kg", 33380], ["RR0014", "Agility Cats Urinary 1,5 Kg", 7309], ["RR0025", "Agility Cats Urinary 10 Kg", 33057], ["RR0002", "Agility Perro Adulto Mediano y Grande 15 Kg", 30109], ["RR0001", "Agility Perro Adulto Mediano y Grande 20 Kg", 35635], ["RR0003", "Agility Perro Adulto Mediano y Grande 3 Kg", 8754], ["RR0170", "Agility Perro Senior 7+ 15 Kg", 33545], ["RR0169", "Agility Perro Senior 7+ 3 Kg", 8000], ["RR0026", "Agility+ Cats Adulto Salmon 1,5 Kg", 7551], ["RR0027", "Agility+ Cats Adulto Salmon 10 Kg", 36304], ["RR0023", "Agility+ Cats Control Peso 1,5 Kg", 7400], ["RR0024", "Agility+ Cats Control Peso 10 Kg", 34376], ["RR0028", "Agility+ Perro Adulto Cordero 1,5 Kg", 5672], ["RR0029", "Agility+ Perro Adulto Cordero 15 Kg", 37521], ["RR0144", "Arena Clean Cat Lavanda 4 Kg (Pack 6U)", 17940], ["RR0143", "Arena Clean Cat Talco Bebe 4 Kg (Pack 6U)", 17940], ["RR0049", "Caldo de Hueso Perro 250 gr (Caja 10u)", 20370], ["RR0141", "Caldo Salmon Gato 150 ml (Pack x 6 Unid)", 16302], ["RR0150", "Calmante Perro 60 Caps", 11377], ["RR0047", "Cool&Clean 17,2 Kg", 21180], ["RR0046", "Cool&Clean 8,6 Kg", 11759], ["RR0064", "Dog Evolution Adulto 15 Kg", 27647], ["RR0118", "Dog Evolution Adulto Raza Pequeña 3 Kg", 7983], ["RR0064-2", "Dog Evolution Cachorro 15 Kg", 31008], ["RR0134", "Ikai Caldo Salmon Perro 150 ml (PACK 8 UNID)", 21736], ["RR0135", "IKAI Mousse Funcional Piel y Pelaje Salmon Perro 150 gr (Pack x 8 Unid)", 24152], ["RR0085", "Lata Agility Cachorro 340 gr (Pack 6u)", 13272], ["RR0073", "Lata Agility Cats Adulto Carne Vacuno 340 gr (Pack 6u)", 13272], ["RR0076", "Lata Agility Cats Kitten 340 gr (Pack 6u)", 13272], ["RR0163", "Lata Agility Cats Urinary 340 gr (Pack 6U)", 13272], ["RR0084", "Lata Agility Perro Carne Vacuno 340 gr (Pack 6u)", 13272], ["RR0081", "Lata Agility Perro Cerdo 340 gr (Pack 6u)", 13272], ["RR0080", "Lata Agility Perro Cordero 340 gr (Pack 6u)", 13272], ["RR0077", "Lata Agility+ Cats Digest Confort 340 gr (Pack 6u)", 14076], ["RR0078", "Lata Agility+ Cats Strong Heart 340 gr (Pack 6u)", 14076], ["RR0082", "Lata Agility+ Perro Cordero Digest Confort 340 gr (Pack 6u)", 14076], ["RR0083", "Lata Agility+ Perro Cordero Strong Heart 340 gr (Pack 6u)", 14076], ["RR0088", "Lata Bestpet Gato Adulto Carne Vacuno 400g (Pack 12u)", 20616], ["RR0086", "Lata Bestpet Gato Adulto Pollo 400g (Pack 12u)", 20616], ["RR0091", "Lata Bestpet Perro Adulto Carne Vacuno 400g (Pack 12u)", 20616], ["RR0050", "Lata PuraNatura Salmón 300 gr (Caja 12u)", 27516], ["RR0079", "Lata Sieger Katze Urinary 340 gr (Pack 6u)", 22146], ["RR0096", "Lata Sieger RECOVERY Gato 340 gr (Pack 6u)", 22146], ["RR0095", "Lata Sieger RECOVERY Perro 340 gr (Pack 6u)", 22146], ["RR0016", "Latas PuraNatura Adulto Carne 300 gr (12 u)", 17556], ["RR0017", "Latas PuraNatura Adulto Pollo 300 gr (12 u)", 17556], ["RR0015", "Latas PuraNatura Cachorro 300 gr (12 u)", 17556], ["RR0048", "Latas PuraNatura Gato Carne 300 gr (12 u)", 17556], ["RR0018", "Latas PuraNatura Gato Pescado 300 gr (12 u)", 17556], ["RR0019", "Latas PuraNatura Gato Pollo 300 gr (12 u)", 17556], ["RR0092", "LindoCat Advanced Multicat 10,6 Kg", 12867], ["RR0145", "LindoCat Charme 8,6 Kg", 11150], ["RR0094", "LindoCat Natural White 14 Kg", 12867], ["RR0131", "LindoCat Soaply 5L (4,5 Kg)", 6234], ["RR0093", "LindoCat Soaply 8,6 Kg", 9441], ["RR0140", "Mousse Funcional Cuidado Digestivo Salmon Cangrejo 60 gr Gato (Pack x 16 Unid)", 28944], ["RR0139", "Mousse Funcional Piel y Pelaje Salmon Gato 60 gr (Pack x 16 Unid)", 28944], ["RR0138", "Mousse Salmon Cangrejo Gato 60 gr (Pack x 16 Unid)", 28944], ["RR0137", "Mousse Salmon Gatos 60 gr (Pack x 16 Unid)", 28944], ["RR0136", "Mousse Salmon y Camarón Gatos 60 gr (Pack x 16 Unid)", 28944], ["RR0152", "Omega 3 Gato 30 Caps", 3758], ["RR0151", "Omega 3 Perro 60 Caps", 5202], ["RR0125", "Ownat Care Gato Hypoallergenic 1,5 Kg", 14886], ["RR0127", "Ownat Care Gato Renal 1,5 Kg", 14870], ["RR0128", "Ownat Care Gato Renal 3 Kg", 22909], ["RR0129", "Ownat Care Gato Urinary 1,5 Kg", 14970], ["RR0123", "Ownat Care Perro Dermatologic 3 Kg", 22743], ["RR0121", "Ownat Care Perro Digestive 3 Kg", 20676], ["RR0119", "Ownat Care Perro Mobility 3 Kg", 22743], ["RR0070", "Ownat Classic Complet 12 Kg", 37901], ["RR0069", "Ownat Classic Complet 4 Kg", 15284], ["RR0113", "Ownat Classic Duck Adult 12 Kg", 43202], ["RR0112", "Ownat Classic Duck Adult 4 Kg", 15906], ["RR0109", "Ownat Classic Fish Adult 12 Kg", 39766], ["RR0108", "Ownat Classic Fish Adult 4 Kg", 15906], ["RR0072", "Ownat Classic Junior 12 Kg", 39618], ["RR0071", "Ownat Classic Junior 4 Kg", 15015], ["RR0111", "Ownat Classic Light Adult 12 Kg", 41986], ["RR0110", "Ownat Classic Light Adult 4 Kg", 16536], ["RR0105", "Ownat Classic Mini Adult 1,5 Kg", 7004], ["RR0106", "Ownat Classic Mini Adult 4 Kg", 15284], ["RR0164", "Ownat Classic Mini Adult 8 Kg", 25769], ["RR0165", "Ownat Daily Care 1,5 Kg", 6799], ["RR0062", "Ownat Daily Care 15 Kg", 53100], ["RR0061", "Ownat Daily Care 4 Kg", 19864], ["RR0114", "Ownat Fish Adulto Gato 1,5 Kg", 9098], ["RR0115", "Ownat Fish Adulto Gato 4 Kg", 19024], ["RR0055", "Ownat GF Adulto Gato Pollo 3 Kg (Libre Grano)", 21630], ["RR0055-2", "Ownat GF Adulto Gato Pollo 8 Kg (Libre Grano)", 49176], ["RR0056", "Ownat GF Adulto Gato Sterilized 3 Kg (Libre Grano)", 21752], ["RR0056-2", "Ownat GF Adulto Gato Sterilized 8 Kg (Libre Grano)", 49166], ["RR0116", "Ownat GF Adulto Gato Sterilized Fish 3 Kg (Libre Grano)", 21752], ["RR0117", "Ownat GF Adulto Gato Sterilized Fish 8 Kg (Libre Grano)", 49177], ["RR0102", "Ownat GF Adulto Light Perro 14 Kg (Libre Grano)", 59868], ["RR0101", "Ownat GF Adulto Light Perro 3 Kg (Libre Grano)", 18510], ["RR0098", "Ownat GF Adulto Perro Pato 14 Kg (Libre Grano)", 60982], ["RR0097", "Ownat GF Adulto Perro Pato 3 Kg (Libre Grano)", 18692], ["RR0052", "Ownat GF Adulto Perro Pollo 14 Kg (Libre Grano)", 53457], ["RR0051", "Ownat GF Adulto Perro Pollo 3 Kg (Libre Grano)", 16380], ["RR0053", "Ownat GF Adulto Perro Salmón 14 Kg (Libre Grano)", 59550], ["RR0054", "Ownat GF Adulto Perro Salmón 3 Kg (Libre Grano)", 16380], ["RR0104", "Ownat GF Adulto Trout Perro 14 Kg (Libre Grano)", 60982], ["RR0103", "Ownat GF Adulto Trout Perro 3 Kg (Libre Grano)", 18692], ["RR0100", "Ownat GF Junior Perro 14 Kg (Libre Grano)", 59868], ["RR0099", "Ownat GF Junior Perro 3 Kg (Libre Grano)", 18692], ["RR0057", "Ownat Kitten 1,5 Kg", 9345], ["RR0058", "Ownat Kitten 4 Kg", 19864], ["RR0063", "Ownat Light 4 Kg", 19864], ["RR0060", "Ownat Sterilized 1,5 Kg", 8846], ["RR0060-2", "Ownat Sterilized 15 Kg", 53633], ["RR0059", "Ownat Sterilized 4 Kg", 19864], ["RR0036", "Poema Adulto Pollo 12 Kg", 39621], ["RR0037", "Poema Adulto Pollo 3 Kg", 14145], ["RR0035", "Poema Adulto Salmón 12 Kg", 39621], ["RR0013", "Poema Adulto Salmón 3 Kg", 14145], ["RR0041", "Poema Cachorro Pollo 12 Kg", 39621], ["RR0040", "Poema Cachorro Pollo 3 Kg", 14145], ["RR0039", "Poema Cachorro Salmón 12 Kg", 39621], ["RR0038", "Poema Cachorro Salmón 3 Kg", 14145], ["RR0020", "Poema Esterilizado Control Peso 2 Kg", 11431], ["RR0030", "Poema Esterilizado Control Peso 7 Kg", 31868], ["RR0031", "Poema Esterilizado Control Urinario 2 Kg", 11431], ["RR0032", "Poema Esterilizado Control Urinario 7 Kg", 31868], ["RR0034", "Poema Patagónico 12 Kg", 30714], ["RR0012", "Poema Patagónico 20 Kg", 46533], ["RR0033", "Poema Patagónico 3 Kg", 10625], ["RR0043", "Poema Senior Pollo 12 Kg", 39621], ["RR0042", "Poema Senior Pollo 3 Kg", 14145], ["RR0045", "Poema Senior Salmón 12 Kg", 39621], ["RR0044", "Poema Senior Salmón 3 Kg", 14145], ["RR0166", "Proterline Adulto 22 Kg", 36908], ["RR0167", "Proterline Cachorro 15 Kg", 28840], ["RR0168", "Proterline Gato Adulto 10 Kg", 20773], ["RR0147", "Snack Horneado Gato Salmon IKAI 85 g Caja (6 Unid)", 15726], ["RR0146", "Snack Horneado Perro Salmon IKAI 113 g Caja (5 Unid)", 13105], ["RR0149", "Suplemento Antialérgico Perro 30 Caps", 10200], ["RR0148", "Suplemento Articular Perro 30 Caps", 9677], ["RR0158", "TurKat Carbón Activado 8,6 Kg", 9900]];
+  try { if (!localStorage.getItem(PFX + "cfg")) localStorage.setItem(PFX + "cfg", JSON.stringify({ url: URL, clave: "demo" })); } catch (e) {}
+  let semilla = 7; const rnd = () => (semilla = (semilla * 16807) % 2147483647) / 2147483647, ent = (a, b) => a + Math.floor(rnd() * (b - a + 1)), uno = l => l[Math.floor(rnd() * l.length)];
+  const z = n => String(n).padStart(2, "0"), hoy = new Date();
+  const dmy = d => `${z(d.getDate())}/${z(d.getMonth() + 1)}/${d.getFullYear()}`, menos = n => { const d = new Date(hoy); d.setDate(d.getDate() - n); return d; };
+  function paquete() { semilla = 7;
+    const marca = n => n.split(" ")[0].toUpperCase(), productos = {}, stockD = [], stockT = [], dem = [], costo = {};
+    P.forEach(([c, n, pr]) => { productos[c] = [n, marca(n)]; const co = Math.round(pr * (0.55 + rnd() * 0.15)); costo[c] = co;
+      const base = Math.max(0, Math.round((60000 / Math.max(pr, 2500)) * (0.3 + rnd() * 1.6)));
+      const d = [0, 1, 2, 3].map(() => Math.max(0, base + ent(-3, 6))), t = [0, 1, 2, 3].map(() => rnd() < 0.5 ? ent(0, 3) : 0);
+      dem.push([c, d, t, co, d.map(u => u * pr), t.map(u => Math.round(u * pr * 1.25))]);
+      stockD.push([c, n, Math.max(0, Math.round(base * (0.4 + rnd() * 1.8)) - (rnd() < 0.08 ? 99 : 0))]); stockT.push([c, n, rnd() < 0.6 ? ent(0, 6) : 0]); });
+    const comunas = ["Rancagua", "Machalí", "Rengo", "San Fernando", "Santa Cruz", "Graneros", "Requínoa", "Talca", "Curicó", "Linares", "Molina", "San Clemente", "Buin", "Paine"];
+    const A = ["Pet Shop", "Veterinaria", "Forrajería", "Mundo Mascota", "Agroveterinaria", "Tienda", "Clínica Veterinaria"], B = ["Los Aromos", "El Roble", "Patitas", "San Martín", "La Huella", "Cuatro Patas", "El Molino", "Las Acacias", "Bigotes", "El Campito", "Santa Elena", "Los Pinos", "Huellitas", "Peludos", "El Faro", "Villa Sur"];
+    const calles = ["Av. Central", "Calle Larga", "Los Olmos", "Camino Real", "Av. Libertad", "Las Rosas", "El Bosque", "Pasaje Uno"], V = ["Ana Pérez", "Luis Soto", "Paula Rojas"];
+    const clientes = []; for (let i = 0; i < 26; i++) clientes.push([`${uno(A)} ${uno(B)} ${i + 1}`, uno(comunas), `${uno(calles)} ${ent(100, 2999)}`, "+5690000" + ent(1000, 9999), uno(V)]);
+    const kg = P.filter(p => /\d\s*kg/i.test(p[1])), cots = [];
+    for (let i = 0; i < 15; i++) { const c = uno(clientes), num = String(4600 + i), f = dmy(menos(ent(0, 12))); const n = ent(1, 4);
+      for (let k = 0; k < n; k++) { const p = uno(kg), q = ent(1, 6); cots.push([num, f, c[0], c[4], c[4], q, p[1], q * p[2]]); } }
+    const meses = []; for (let i = 3; i >= 0; i--) { const d = new Date(hoy.getFullYear(), hoy.getMonth() - i, 1); meses.push(d.getFullYear() * 100 + d.getMonth() + 1); }
+    const corte = `${hoy.getFullYear()}-${z(hoy.getMonth() + 1)}-${z(hoy.getDate())}`;
+    return { LOG: { corte, anio: hoy.getFullYear(), meses, bodegas: { DISTRIBUIDORA: stockD, TIENDA: stockT }, stockFecha: `${z(hoy.getDate())}-${z(hoy.getMonth() + 1)}-${hoy.getFullYear()} 09:00`,
+      productos, dem, cots, clientes, costo }, ACT_INFO: {} }; }
+  const st = () => { try { return JSON.parse(localStorage.getItem(SRV)) || {}; } catch (e) { return {}; } };
+  const guarda = s => { try { localStorage.setItem(SRV, JSON.stringify(s)); } catch (e) {} };
+  function responde(q) { const s = Object.assign({ rutas: {}, gps: {}, entregas: [], jornadas: {} }, st()); let o = { ok: true };
+    if (q.accion === "datos") o = { ok: true, version: "DEMO " + new Date().toISOString().slice(0, 10), paquete: paquete() };
+    else if (q.accion === "rutaGuardar") { s.rutas[q.fecha] = { fecha: q.fecha, rutas: q.rutas }; s.entregas = s.entregas.filter(e => !String(e.id || "").startsWith(q.fecha)); o = { ok: true, fecha: q.fecha, rutas: q.rutas.length, paradas: q.rutas.reduce((t, x) => t + x.paradas.length, 0) }; }
+    else if (q.accion === "rutaLeer") o = s.rutas[q.fecha] ? { ok: true, fecha: q.fecha, ruta: s.rutas[q.fecha] } : { ok: true, vacio: true };
+    else if (q.accion === "gps") s.gps[q.veh] = { veh: q.veh, chofer: q.chofer, lat: q.lat, lng: q.lng, ts: new Date().toISOString() };
+    else if (q.accion === "entrega") { const e = q.entrega || {}; if (!s.entregas.some(x => x.id === e.id)) s.entregas.push(Object.assign({}, e, { fotos: (e.fotos || []).length, firma: !!e.firma })); o = { ok: true, id: e.id }; }
+    else if (q.accion === "jornada") { const j = q.jornada || {}; s.jornadas[j.id] = j; o = { ok: true, id: j.id }; }
+    else if (q.accion === "logEstado") o = { ok: true, fecha: q.fecha, gps: s.gps, entregas: s.entregas.map(e => ({ id: e.id, hora: e.hora, veh: e.vehNombre, chofer: e.chofer, parada: e.parada, cli: e.cli, num: e.num, estado: e.estado, recibe: e.recibe, pago: e.pago, monto: e.monto, obs: e.obs, fotos: e.fotos, firma: e.firma })), recorrido: {}, jornadas: Object.values(s.jornadas) };
+    else if (q.accion === "probar") o = { ok: true, demo: true };
+    guarda(s); return o; }
+  const f0 = window.fetch.bind(window);
+  window.fetch = function (u, o) { if (String(u && u.url || u) !== URL) return f0(u, o);
+    let q = {}; try { q = JSON.parse(o && o.body || "{}"); } catch (e) {}
+    return new Promise(r => setTimeout(() => r(new Response(JSON.stringify(responde(q)), { headers: { "Content-Type": "application/json" } })), 250)); };
+})();
+</script><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>DEMO LOGÍSTICA</title>
+<meta name="apple-mobile-web-app-title" content="DEMO LOGÍSTICA"><meta name="theme-color" content="#1C7A4E"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon-192.png">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+<style>
+:root{--navy:#0B3146;--azul:#1F5673;--oro:#F0A818;--verde:#1C7A4E;--rojo:#B42318;--bg:#F2F5F7;--surface:#fff;--ink:#0F1E29;--muted:#5B6874;--line:#DAE1E7;--sunk:#EEF2F5}
+*{box-sizing:border-box}html,body{margin:0}body{font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);padding-bottom:calc(76px + env(safe-area-inset-bottom))}
+.top{background:linear-gradient(120deg,#0B3146,#1C7A4E);color:#fff;padding:calc(12px + env(safe-area-inset-top)) 16px 12px;display:flex;align-items:center;gap:12px}
+.top h1{margin:0;font-size:1.15rem}.top small{opacity:.8;font-size:.75rem;display:block}.top button{margin-left:auto;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.12);color:#fff;border-radius:10px;padding:7px 11px;font:inherit;font-size:.82rem;cursor:pointer}
+nav.bn{position:fixed;left:0;right:0;bottom:0;z-index:50;background:var(--surface);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(6,1fr);padding-bottom:env(safe-area-inset-bottom)}
+nav.bn button{border:0;background:none;font:inherit;font-size:.68rem;font-weight:700;color:var(--muted);padding:7px 2px 6px;display:grid;justify-items:center;gap:2px;cursor:pointer}
+nav.bn .ic{width:30px;height:30px;display:block}nav.bn .ic svg{width:100%;height:100%;display:block}nav.bn button[aria-current="true"]{color:var(--navy)}nav.bn button[aria-current="true"] .ic{outline:2px solid var(--oro);outline-offset:1px;border-radius:10px}
+main{max-width:1100px;margin:0 auto;padding:12px}.card{background:var(--surface);border-radius:16px;padding:14px;margin-bottom:12px;box-shadow:0 1px 3px rgba(11,49,70,.08)}
+.card h2{margin:0 0 10px;font-size:1.05rem}.card h2 small{color:var(--muted);font-weight:600;font-size:.78rem}
+.kp{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}.k{background:var(--sunk);border-radius:12px;padding:10px}.k span{display:block;font-size:.68rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:800}
+.k b{display:block;font-size:1.25rem;margin-top:2px}.k small{display:block;color:var(--muted);font-size:.76rem}.bad{color:var(--rojo)}.ok{color:var(--verde)}.wa{color:#9A5B00}
+.tw{overflow-x:auto}table.t{width:100%;border-collapse:collapse;font-size:.84rem}.t th,.t td{padding:7px 6px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}.t th:first-child,.t td:first-child{text-align:left;white-space:normal}
+.t th{font-size:.68rem;text-transform:uppercase;color:var(--muted)}.t td small{display:block;color:var(--muted);font-size:.72rem}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}.chips button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:6px 12px;font:inherit;font-size:.8rem;font-weight:700;cursor:pointer}
+.chips button[aria-pressed="true"]{background:var(--navy);color:#fff;border-color:var(--navy)}
+input,select,textarea{font:inherit;border:1px solid var(--line);border-radius:10px;padding:9px 10px;background:#fff;color:var(--ink);max-width:100%}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:end}.row label{display:grid;gap:3px;font-size:.74rem;font-weight:700;color:var(--muted)}
+.btn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:9px 14px;font:inherit;font-weight:700;cursor:pointer}.btn.pri{background:var(--navy);color:#fff;border-color:var(--navy)}.btn.ver{background:var(--verde);color:#fff;border-color:var(--verde)}
+.btn:disabled{opacity:.5}.muted{color:var(--muted)}.nota{font-size:.78rem;color:var(--muted);margin:8px 0 0}
+.pill{display:inline-block;border-radius:999px;padding:1px 8px;font-size:.72rem;font-weight:800}.p-ok{background:#E3F4EA;color:var(--verde)}.p-wa{background:#FFF1DC;color:#9A5B00}.p-bad{background:#FDE7E4;color:var(--rojo)}.p-n{background:var(--sunk);color:var(--muted)}
+.st{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}.st:last-child{border-bottom:0}
+.st .n{font-weight:700}.st small{display:block;color:var(--muted);font-size:.75rem}
+.rt{border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:10px}.rt h3{margin:0 0 6px;font-size:1rem;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.rt .sw{width:14px;height:14px;border-radius:4px;display:inline-block}.rt ol{margin:6px 0 0;padding-left:20px}.rt li{margin:3px 0}.rt li small{color:var(--muted)}
+.bar{height:8px;border-radius:9px;background:var(--sunk);overflow:hidden}.bar i{display:block;height:100%;background:var(--verde)}
+#mapa{height:360px;border-radius:14px;margin:8px 0;z-index:1}
+.ov{position:fixed;inset:0;z-index:100;background:linear-gradient(140deg,#0B3146,#1C7A4E);display:grid;place-items:center;padding:16px}.ov .c{background:#fff;border-radius:18px;padding:20px;max-width:440px;width:100%;display:grid;gap:10px}
+.ov h1{margin:0;font-size:1.2rem}.ov textarea{width:100%}.ov .e{color:var(--rojo);font-size:.85rem;min-height:1em}
+.toast{position:fixed;left:50%;bottom:calc(86px + env(safe-area-inset-bottom));transform:translateX(-50%);background:#0F1E29;color:#fff;padding:10px 16px;border-radius:12px;z-index:200;max-width:90vw}
+[hidden]{display:none!important}
+@media print{nav.bn,.top button,.np{display:none!important}body{background:#fff}.card{box-shadow:none}}
+</style></head><body>
+<div class="top"><div><h1>🚚 DEMO LOGÍSTICA</h1><small id="tAct">Datos de Drive: —</small></div><button type="button" id="tRef">⟳ Actualizar</button></div>
+<main><section id="s-dash"></section><section id="s-inv" hidden></section><section id="s-abast" hidden></section><section id="s-rutas" hidden></section><section id="s-seg" hidden></section><section id="s-flota" hidden></section></main>
+<nav class="bn" id="nav"><button type="button" data-s="dash"><span class="ic"><svg viewBox="0 0 32 32" aria-hidden="true" class="hic"><defs><linearGradient id="hic-ndash" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3D8BB0"/><stop offset="1" stop-color="#1F5673"/></linearGradient></defs><rect width="32" height="32" rx="9" fill="url(#hic-ndash)"/><path d="M4 4h24v10C20 9 11 9 4 13z" fill="#fff" opacity=".12"/><g transform="translate(5.5 5.5) scale(.875)" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16"/><path d="M7 16v-5"/><path d="M12 16V7"/><path d="M17 16v-8"/></g></svg></span>Panel</button><button type="button" data-s="inv"><span class="ic"><svg viewBox="0 0 32 32" aria-hidden="true" class="hic"><defs><linearGradient id="hic-ninv" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8FD3D6"/><stop offset="1" stop-color="#3E9EA6"/></linearGradient></defs><rect width="32" height="32" rx="9" fill="url(#hic-ninv)"/><path d="M4 4h24v10C20 9 11 9 4 13z" fill="#fff" opacity=".12"/><g transform="translate(5.5 5.5) scale(.875)" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l9-4 9 4v10l-9 4-9-4z"/><path d="M3 7l9 4 9-4M12 11v10"/></g></svg></span>Inventario</button><button type="button" data-s="abast"><span class="ic"><svg viewBox="0 0 32 32" aria-hidden="true" class="hic"><defs><linearGradient id="hic-nabast" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3FBF7F"/><stop offset="1" stop-color="#1C7A4E"/></linearGradient></defs><rect width="32" height="32" rx="9" fill="url(#hic-nabast)"/><path d="M4 4h24v10C20 9 11 9 4 13z" fill="#fff" opacity=".12"/><g transform="translate(5.5 5.5) scale(.875)" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6h11v10H2z"/><path d="M13 9h4l4 4v3h-8z"/><circle cx="6.5" cy="17.5" r="2"/><circle cx="17" cy="17.5" r="2"/></g></svg></span>Abastecimiento</button><button type="button" data-s="rutas"><span class="ic"><svg viewBox="0 0 32 32" aria-hidden="true" class="hic"><defs><linearGradient id="hic-nrutas" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FF8A6B"/><stop offset="1" stop-color="#D9483B"/></linearGradient></defs><rect width="32" height="32" rx="9" fill="url(#hic-nrutas)"/><path d="M4 4h24v10C20 9 11 9 4 13z" fill="#fff" opacity=".12"/><g transform="translate(5.5 5.5) scale(.875)" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3z"/><path d="M9 3v15M15 6v15"/></g></svg></span>Rutas</button><button type="button" data-s="seg"><span class="ic"><svg viewBox="0 0 32 32" aria-hidden="true" class="hic"><defs><linearGradient id="hic-nseg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFC94A"/><stop offset="1" stop-color="#F28C28"/></linearGradient></defs><rect width="32" height="32" rx="9" fill="url(#hic-nseg)"/><path d="M4 4h24v10C20 9 11 9 4 13z" fill="#fff" opacity=".12"/><g transform="translate(5.5 5.5) scale(.875)" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></g></svg></span>Seguimiento</button><button type="button" data-s="flota"><span class="ic"><svg viewBox="0 0 32 32" aria-hidden="true" class="hic"><defs><linearGradient id="hic-nflota" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1F5673"/><stop offset="1" stop-color="#0B3146"/></linearGradient></defs><rect width="32" height="32" rx="9" fill="url(#hic-nflota)"/><path d="M4 4h24v10C20 9 11 9 4 13z" fill="#fff" opacity=".12"/><g transform="translate(5.5 5.5) scale(.875)" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l7 19-7-4-7 4z"/></g></svg></span>Flota</button></nav>
+<div class="toast" id="toast" hidden></div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const fmt = n => "$" + Math.round(Number(n) || 0).toLocaleString("es-CL");
+const mm = n => { const a = Math.abs(n || 0); return (n < 0 ? "−" : "") + (a >= 1e6 ? "$" + (a / 1e6).toLocaleString("es-CL", { maximumFractionDigits: 1 }) + " MM" : a >= 1e3 ? "$" + Math.round(a / 1e3).toLocaleString("es-CL") + " mil" : fmt(a)); };
+const nf = (n, d) => (Number(n) || 0).toLocaleString("es-CL", { maximumFractionDigits: d || 0, minimumFractionDigits: d || 0 });
+const lsGet = (k, d) => { try { const v = JSON.parse(localStorage.getItem("hwf-logdemo:" + k) || "null"); return v == null ? d : v; } catch (e) { return d; } };
+const lsSet = (k, v) => { try { localStorage.setItem("hwf-logdemo:" + k, JSON.stringify(v)); } catch (e) { toast("No hay espacio para guardar en este equipo."); } };
+const fLocal = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;   /* fecha de Chile (no UTC) */
+const norm = s => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
+let tT; function toast(m) { const t = $("toast"); t.textContent = m; t.hidden = false; clearTimeout(tT); tT = setTimeout(() => t.hidden = true, 3500); }
+const MES = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"], MC = ["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
+const PLAN_D = {"202611": 63.0, "202612": 66.4, "202701": 69.8, "202702": 73.0, "202703": 76.2, "202704": 79.2, "202705": 82.2, "202706": 85.0, "202707": 87.7, "202708": 90.4, "202709": 92.9, "202710": 95.4, "202711": 97.7, "202712": 100.0};   /* meta distribuidora por mes (MM), igual a Admin */
+const metaD = ym => (PLAN_D[ym] || (ym < 202611 ? 63 : 100)) * 1e6;
+const metaT = ym => { const i = Math.max(0, Math.min(13, (Math.floor(ym / 100) - 2026) * 12 + (ym % 100) - 11)); return Math.round((i <= 7 ? 10 + 5 * i / 7 : 15 + 5 * (i - 7) / 6) * 10) * 1e5; };
+const COMUNAS = {"linares": [-35.8467, -71.5931], "rancagua": [-34.1708, -70.7444], "talca": [-35.4264, -71.6554], "curico": [-34.9828, -71.2394], "san fernando": [-34.5853, -70.989], "machali": [-34.1808, -70.6511], "rengo": [-34.4022, -70.8567], "molina": [-35.1144, -71.2828], "santa cruz": [-34.6386, -71.3653], "parral": [-36.1436, -71.8261], "requinoa": [-34.285, -70.8183], "los angeles": [-37.4697, -72.3537], "constitucion": [-35.3333, -72.4167], "pichilemu": [-34.3871, -72.0033], "donihue": [-34.2264, -70.965], "san carlos": [-36.4246, -71.958], "isla de maipo": [-33.75, -70.9], "teno": [-34.8703, -71.1622], "buin": [-33.7322, -70.7428], "san javier": [-35.5953, -71.7294], "chimbarongo": [-34.7122, -71.0433], "olivar": [-34.21, -70.82], "san clemente": [-35.5383, -71.4869], "placilla": [-34.6139, -71.115], "quinta de tilcoco": [-34.3519, -70.9631], "curacavi": [-33.4063, -71.1333], "navidad": [-33.9573, -71.8337], "angol": [-37.795, -72.7164], "coltauco": [-34.2867, -71.0806], "rauco": [-34.9289, -71.3125], "hualane": [-34.9767, -71.8047], "yerbas buenas": [-35.6869, -71.5603], "las cabras": [-34.2933, -71.3092], "peralillo": [-34.485, -71.4917], "san vicente": [-34.4386, -71.0786], "san vicente de t-t": [-34.4386, -71.0786], "san vicente de tagua tagua": [-34.4386, -71.0786], "cauquenes": [-35.9672, -72.3222], "romeral": [-34.9611, -71.1272], "paredones": [-34.65, -71.9], "maule": [-35.5333, -71.7], "vina del mar": [-33.0245, -71.5518], "casablanca": [-33.3194, -71.4089], "pelarco": [-35.3739, -71.3264], "san francisco de mostazal": [-33.98, -70.7128], "mostazal": [-33.98, -70.7128], "chillan": [-36.6066, -72.1034], "lolol": [-34.7286, -71.645], "sagrada familia": [-34.9947, -71.38], "codegua": [-34.0353, -70.6672], "quillon": [-36.7378, -72.47], "valdivia": [-39.8142, -73.2459], "longavi": [-35.9653, -71.6828], "retiro": [-36.0453, -71.76], "coinco": [-34.2697, -70.9722], "colbun": [-35.695, -71.4067], "licanten": [-34.9833, -72.0], "pelluhue": [-35.8167, -72.5667], "villa alegre": [-35.6869, -71.7442], "graneros": [-34.0647, -70.7272], "malloa": [-34.4464, -70.945], "nancagua": [-34.6625, -71.2156], "palmilla": [-34.6036, -71.3592], "chepica": [-34.7317, -71.275], "litueche": [-34.1167, -71.7333], "marchigue": [-34.3967, -71.6189], "la estrella": [-34.2, -71.6667], "pumanque": [-34.6064, -71.6669], "pichidegua": [-34.3586, -71.2833], "peumo": [-34.3833, -71.1667], "rio claro": [-35.2833, -71.2667], "curepto": [-35.0833, -72.0167], "empedrado": [-35.6, -72.2833], "pencahue": [-35.4, -71.8167], "chanco": [-35.7333, -72.5333], "san rafael": [-35.3167, -71.5167], "vichuquen": [-34.8833, -72.0], "talagante": [-33.665, -70.9283], "santiago": [-33.4489, -70.6693], "chillan viejo": [-36.6228, -72.1317]};
+
+/* ===== conexión (misma que las otras apps) ===== */
+const cfg = () => lsGet("cfg", null);
+async function syLlamar(c, d) { try { const r = await fetch(c.url, { method: "POST", body: JSON.stringify(Object.assign({ clave: c.clave }, d)) }); const o = JSON.parse(await r.text());
+    if (o && o.ok === false && (o.clave === false || /clave no coincide/i.test(o.error || ""))) { localStorage.removeItem("hwf-logdemo:cfg"); alert("La clave guardada ya no es la del script de Google. Vuelve a conectar."); location.reload(); }
+    return o; } catch (e) { return { ok: false, red: true, error: "Sin conexión a internet o el script no respondió." }; } }
+function dec(t) { t = String(t || "").replace(/\s+/g, ""); try { t = decodeURIComponent(t); } catch (e) {} const m = t.match(/HWF1:([A-Za-z0-9+\/=_-]+)/); if (!m) return null;
+  try { const o = JSON.parse(decodeURIComponent(escape(atob(m[1].replace(/-/g, "+").replace(/_/g, "/"))))); return o.u && o.c ? { url: o.u, clave: o.c } : null; } catch (e) { return null; } }
+/* si el script todavía no publica el paquete de logística: se arma desde el de Admin (solo bodega de la distribuidora) */
+function deAdmin(v, p) { const B = p.BASE || {}; if (!B.rows) return null; const tv = (B.vend || []).indexOf("Tienda Hellywoof"), cy = Number(String(B.corte).slice(0, 4)), cm = Number(String(B.corte).slice(5, 7)), meses = [];
+  for (let i = 3; i >= 0; i--) { const d = new Date(cy, cm - 1 - i, 1); meses.push(d.getFullYear() * 100 + d.getMonth() + 1); }
+  const dem = {}; B.rows.forEach(r => { const j = meses.indexOf((r[8] || B.anio) * 100 + r[2]); if (j < 0) return; const pr = B.productos[r[1]]; if (!pr) return; const o = dem[pr[2]] = dem[pr[2]] || { d: [0,0,0,0], t: [0,0,0,0], dv: [0,0,0,0], tv: [0,0,0,0], c: 0, q: 0 };
+    (r[7] === tv ? o.t : o.d)[j] += r[4] || 0; (r[7] === tv ? o.tv : o.dv)[j] += r[5] || 0; if (r[4] > 0 && r[6] > 0) { o.c += r[4] * r[6]; o.q += r[4]; } });
+  const prods = {}; B.productos.forEach(x => prods[x[2]] = [x[0], (B.cats || [])[x[1]] || ""]);
+  const st = Object.entries(B.stock || {}).map(([c, s]) => [c, (prods[c] || [c])[0], s]);
+  return { v, corte: B.corte, meses, bodegas: { "DISTRIBUIDORA": st }, stockFecha: B.stockFecha || "", productos: prods, dem: Object.keys(dem).map(k => [k, dem[k].d, dem[k].t, dem[k].q ? Math.round(dem[k].c / dem[k].q) : 0, dem[k].dv, dem[k].tv]),
+    cots: B.cots || [], clientes: (B.clientes || []).filter(c => !/CLIENTE BOLETA/i.test(c[0])).map(c => [c[0], c[1], c[3], c[5], c[2]]), costo: p.COSTO || {}, act: p.ACT_INFO || {}, desdeAdmin: true }; }
+async function bajar(silencio) { const c = cfg(); if (!c) return false; const D0 = lsGet("datos", null);
+  const r = await syLlamar(c, { accion: "datos", app: "logistica", version: D0 && !D0.desdeAdmin ? D0.v : "" }); let D = null;
+  if (r && r.ok && r.paquete && r.paquete.LOG) D = Object.assign({ v: r.version }, r.paquete.LOG, { act: r.paquete.ACT_INFO || {} });
+  else if (r && r.ok && r.igual && D0) return false;
+  else if (r && r.ok) { const a = await syLlamar(c, { accion: "datos", app: "admin", version: "" }); if (a && a.ok && a.paquete) D = deAdmin(a.version, a.paquete); }
+  if (!D) { if (!silencio && r && r.error) toast(r.error); return false; }
+  if (D0 && D0.v >= D.v && !(D0.desdeAdmin && !D.desdeAdmin)) return false; lsSet("datos", D); return true; }
+const DATA = () => lsGet("datos", null);
+function pantallaConexion(msg) { const o = document.createElement("div"); o.className = "ov"; o.id = "gate";
+  o.innerHTML = `<div class="c"><h1>🚚 DEMO LOGÍSTICA</h1><p>Abre el <b>link de conexión</b> que entrega HWF, o pega aquí el link o el código (empieza con <b>HWF1:</b>). Se pide una sola vez en este equipo.</p>
+    <textarea id="gC" rows="3" placeholder="Pega el link o el código HWF1:…"></textarea>
+    <details><summary style="cursor:pointer;font-weight:600">¿No tienes link ni código? Conectar con URL y clave</summary><div style="display:grid;gap:8px;margin-top:8px"><input id="gU" type="url" placeholder="https://script.google.com/macros/s/…/exec"><input id="gK" placeholder="Clave (la de Config.gs)"></div></details>
+    <div class="e" id="gE">${esc(msg || "")}</div><button type="button" class="btn pri" id="gB">Conectar</button></div>`;
+  document.body.appendChild(o);
+  $("gB").onclick = async () => { let c = dec($("gC").value); const u = $("gU").value.trim(), k = $("gK").value.trim();
+    if (!c && /^https:\/\/script\.google(usercontent)?\.com\/.+\/exec$/.test(u) && k.length >= 4) c = { url: u, clave: k };
+    if (!c) { $("gE").textContent = "No es un link, código o URL/clave válido."; return; }
+    $("gB").disabled = true; $("gB").textContent = "Descargando datos…"; lsSet("cfg", c);
+    const ok = await bajar(true); if (!ok && !DATA()) { $("gB").disabled = false; $("gB").textContent = "Conectar"; $("gE").textContent = "No se pudieron bajar los datos. Revisa el link o la clave."; localStorage.removeItem("hwf-logdemo:cfg"); return; }
+    o.remove(); arrancar(); };
+  const LH = (String(location.hash).match(/HWF1:[A-Za-z0-9+\/=_%-]+/) || [])[0]; if (LH) { try { history.replaceState(null, "", location.pathname); } catch (e) {} $("gC").value = decodeURIComponent(LH); $("gB").click(); } }
+
+/* ===== productos: peso y volumen desde el nombre ===== */
+function kgDe(n) { const s = String(n || "").toUpperCase().replace(",", "."); let kg = 0; const k = /(\d+(?:\.\d+)?)\s*(KG|KILOS?)\b/.exec(s), g = /(\d+(?:\.\d+)?)\s*(GRS?|GRAMOS|G)\b/.exec(s);
+  if (k) kg = Number(k[1]); else if (g) kg = Number(g[1]) / 1000; const u = /\(\s*(\d+)\s*U\s*\)|\bX\s*(\d+)\b|(\d+)\s*UNID/.exec(s); if (u) kg *= Number(u[1] || u[2] || u[3]) || 1; return kg > 0 ? kg : 0.8; }
+function m3De(n, kg) { const s = norm(n); const f = /arena|litter|sanitari/.test(s) ? 0.0017 : /lata|sobre|pouch|humed|pate/.test(s) ? 0.0013 : 0.0028; return kg * f; }
+const PI = () => { const D = DATA(), o = {}; Object.entries(D.productos || {}).forEach(([c, p]) => o[c] = { cod: c, nombre: p[0], prov: p[1] }); return o; };
+function demanda(D) { const o = {}; (D.dem || []).forEach(x => o[x[0]] = { d: x[1], t: x[2], cu: x[3], dv: x[4] || [0,0,0,0], tv: x[5] || [0,0,0,0] }); return o; }
+const esTiendaB = b => /TIENDA|HELLY/i.test(b), esDistB = b => /DISTRIBU/i.test(b);
+const cuDe = (D, dm, cod) => (dm[cod] && dm[cod].cu) || Number((D.costo || {})[cod]) || 0;
+/* venta mensual (unidades) que corresponde a una bodega: distribuidora o tienda (promedio 3 meses cerrados) */
+const qMes = (dm, cod, b) => { const x = dm[cod]; if (!x) return 0; const a = esTiendaB(b) ? x.t : esDistB(b) ? x.d : x.d.map((v, i) => v + x.t[i]); return (a[0] + a[1] + a[2]) / 3; };
+
+/* ===== navegación ===== */
+let SEC = lsGet("sec", "dash");
+function ir(s) { SEC = s; lsSet("sec", s); document.querySelectorAll("main > section").forEach(x => x.hidden = x.id !== "s-" + s); document.querySelectorAll("#nav [data-s]").forEach(b => b.setAttribute("aria-current", b.dataset.s === s)); pintar(s); window.scrollTo({ top: 0 }); }
+$("nav").onclick = e => { const b = e.target.closest("[data-s]"); if (b) ir(b.dataset.s); };
+function pintar(s) { try { ({ dash: pintarDash, inv: pintarInv, abast: pintarAbast, rutas: pintarRutas, seg: pintarSeg, flota: pintarFlota })[s](); } catch (e) { console.error(e); $("s-" + s).innerHTML = `<div class="card"><p class="bad">Error al mostrar: ${esc(e.message)}</p></div>`; } }
+
+/* ===== inventario ===== */
+function invFilas(b) { const D = DATA(), dm = demanda(D), P = PI(), L = [];
+  const bods = b === "__todas" ? Object.keys(D.bodegas || {}) : [b];
+  bods.forEach(bo => (D.bodegas[bo] || []).forEach(([cod, nom, s]) => { const q = qMes(dm, cod, bo), cu = cuDe(D, dm, cod), st = Math.max(0, Number(s) || 0);
+    L.push({ bo, cod, nombre: (P[cod] && P[cod].nombre) || nom, prov: (P[cod] && P[cod].prov) || "", stock: st, q, dias: q > 0 ? st / (q / 30) : Infinity, cu, valor: st * cu }); }));
+  return L; }
+let invB = null, invF = "todos", invQ = "";
+function pintarInv() { const D = DATA(), bods = Object.keys(D.bodegas || {}); if (!invB || (invB !== "__todas" && !bods.includes(invB))) invB = bods.find(esDistB) || bods[0] || "__todas";
+  let L = invFilas(invB); const val = L.reduce((t, x) => t + x.valor, 0), sin = L.filter(x => x.stock <= 0 && x.q > 0), baj = L.filter(x => x.stock > 0 && x.q > 0 && x.dias < 7), quieto = L.filter(x => x.stock > 0 && !(x.q > 0));
+  const qn = norm(invQ); if (invF === "sin") L = sin; else if (invF === "bajo") L = baj; else if (invF === "quieto") L = quieto;
+  if (qn) L = L.filter(x => norm(x.nombre + " " + x.cod + " " + x.prov).includes(qn));
+  L.sort((a, b) => (a.dias - b.dias) || b.q - a.q);
+  const pill = x => !(x.q > 0) ? '<span class="pill p-n">sin venta</span>' : x.stock <= 0 ? '<span class="pill p-bad">sin stock</span>' : `<span class="pill ${x.dias < 7 ? "p-bad" : x.dias < 15 ? "p-wa" : "p-ok"}">${nf(x.dias)} días</span>`;
+  $("s-inv").innerHTML = `<div class="card"><h2>Inventario por bodega <small>stock ${esc(D.stockFecha || "")}</small></h2>
+    <div class="chips" id="invB">${bods.map(b => `<button type="button" data-b="${esc(b)}" aria-pressed="${invB === b}">${esc(b)}</button>`).join("")}${bods.length > 1 ? `<button type="button" data-b="__todas" aria-pressed="${invB === "__todas"}">Todas</button>` : ""}</div>
+    <div class="kp"><div class="k"><span>Inventario a costo</span><b>${mm(val)}</b><small>${invFilas(invB).filter(x => x.stock > 0).length} productos con stock</small></div>
+      <div class="k"><span>Sin stock y con venta</span><b class="bad">${sin.length}</b><small>quiebres</small></div><div class="k"><span>Bajo 7 días</span><b class="wa">${baj.length}</b><small>por agotarse</small></div>
+      <div class="k"><span>Stock sin venta</span><b>${quieto.length}</b><small>${mm(quieto.reduce((t, x) => t + x.valor, 0))} inmovilizado</small></div></div>
+    <div class="chips" id="invF">${[["todos","Todos"],["sin","Sin stock"],["bajo","Bajo 7 días"],["quieto","Sin venta"]].map(([k, t]) => `<button type="button" data-f="${k}" aria-pressed="${invF === k}">${t}</button>`).join("")}</div>
+    <input id="invQ" type="search" placeholder="Buscar producto, código o proveedor" value="${esc(invQ)}" style="width:100%">
+    <p class="nota">Días de stock = stock ÷ venta diaria de esa bodega (promedio de ${D.meses ? D.meses.slice(0, 3).map(m => MC[m % 100 - 1]).join(", ") : "3 meses"}; distribuidora y tienda por separado). Valor a costo unitario de la venta.</p></div>
+  <div class="card"><div class="tw"><table class="t"><thead><tr><th>Producto</th>${invB === "__todas" ? "<th>Bodega</th>" : ""}<th>Stock</th><th>Venta/mes</th><th>Días</th><th>Valor</th></tr></thead><tbody>
+    ${L.slice(0, 400).map(x => `<tr><td>${esc(x.nombre)}<small>${esc(x.cod)} · ${esc(x.prov)}</small></td>${invB === "__todas" ? `<td>${esc(x.bo)}</td>` : ""}<td class="${x.stock <= 0 ? "bad" : ""}"><b>${nf(x.stock)}</b></td><td>${x.q ? nf(x.q, x.q < 10 ? 1 : 0) : "—"}</td><td>${pill(x)}</td><td>${mm(x.valor)}</td></tr>`).join("") || '<tr><td colspan="6" class="muted">Sin productos con ese filtro.</td></tr>'}</tbody></table></div></div>`;
+  $("invB").onclick = e => { const b = e.target.closest("[data-b]"); if (b) { invB = b.dataset.b; pintarInv(); } };
+  $("invF").onclick = e => { const b = e.target.closest("[data-f]"); if (b) { invF = b.dataset.f; pintarInv(); } };
+  $("invQ").oninput = () => { invQ = $("invQ").value; clearTimeout(pintarInv.t); pintarInv.t = setTimeout(() => { pintarInv(); const i = $("invQ"); i.focus(); i.setSelectionRange(i.value.length, i.value.length); }, 250); }; }
+
+/* ===== abastecimiento ===== */
+const parA = () => Object.assign({ seg: 15, lead: 7 }, lsGet("abast", {}));
+/* mismo método que Admin → Abastecimiento: mes en curso = lo que falta para la meta (meta − venta del mes) escalado sobre la venta de
+   los 3 meses cerrados, + stock de seguridad y plazo del proveedor con la meta del mes siguiente, − stock */
+function abastDatos(b) { const D = DATA(), dm = demanda(D), P = PI(), A = parA(), M = D.meses || [], ym = M[3] || 0, esT = esTiendaB(b);
+  const sig = ym % 100 === 12 ? ym + 89 : ym + 1, metaF = esT ? metaT : metaD;
+  let base = 0, vMes = 0; Object.values(dm).forEach(x => { const v = esT ? x.tv : x.dv; base += (v[0] + v[1] + v[2]) / 3; vMes += v[3]; });
+  const aplica = base > 0 && (esT || esDistB(b)), meta = metaF(ym), f0 = aplica ? Math.max(0, meta - vMes) / base : 1, f1 = aplica ? metaF(sig) / base : 1;
+  const st = {}; (D.bodegas[b] || []).forEach(([c, , s]) => st[c] = Math.max(0, Number(s) || 0));
+  const cods = new Set(Object.keys(st).concat(Object.keys(dm).filter(c => qMes(dm, c, b) > 0)));
+  const L = []; cods.forEach(cod => { const q = qMes(dm, cod, b); if (!(q > 0)) return; const s = st[cod] || 0, necesita = q * f0 + q * f1 * (A.seg + A.lead) / 30, compra = Math.max(0, Math.ceil(necesita - s)), cu = cuDe(D, dm, cod), dia = q * f1 / 30;
+    L.push({ cod, nombre: (P[cod] && P[cod].nombre) || cod, prov: (P[cod] && P[cod].prov) || "Sin proveedor", q: q * f1, s, dias: dia ? s / dia : Infinity, compra, monto: compra * cu, cu, urg: dia ? s / dia < A.lead + A.seg : false }); });
+  return { L, f: f1, meta, vMes, base, A, esT, aplica }; }
+let abB = null;
+function pintarAbast() { const D = DATA(), bods = Object.keys(D.bodegas || {}).filter(b => esDistB(b) || esTiendaB(b)); const opts = bods.length ? bods : Object.keys(D.bodegas || {});
+  if (!abB || !opts.includes(abB)) abB = opts.find(esDistB) || opts[0];
+  if (!abB) { $("s-abast").innerHTML = '<div class="card"><p class="muted">No hay stock por bodega todavía.</p></div>'; return; }
+  const X = abastDatos(abB), C = X.L.filter(x => x.compra > 0), tot = C.reduce((t, x) => t + x.monto, 0), urg = C.filter(x => x.urg);
+  const G = {}; C.forEach(x => (G[x.prov] = G[x.prov] || []).push(x)); const GP = Object.entries(G).map(([k, l]) => ({ k, l: l.sort((a, b) => a.dias - b.dias), t: l.reduce((s, x) => s + x.monto, 0) })).sort((a, b) => b.t - a.t);
+  $("s-abast").innerHTML = `<div class="card"><h2>Abastecimiento <small>compras sugeridas por bodega</small></h2>
+    <div class="chips" id="abB">${opts.map(b => `<button type="button" data-b="${esc(b)}" aria-pressed="${abB === b}">${esc(b)}</button>`).join("")}</div>
+    <div class="kp"><div class="k"><span>Comprar ahora</span><b>${mm(tot)}</b><small>${C.length} productos a costo</small></div><div class="k"><span>Urgente</span><b class="bad">${urg.length}</b><small>no alcanza para plazo + seguridad</small></div>
+      <div class="k"><span>Este mes falta vender</span><b>${X.aplica ? mm(Math.max(0, X.meta - X.vMes)) : "—"}</b><small>${X.aplica ? "meta " + mm(X.meta) + " − " + mm(X.vMes) + " vendido · base " + mm(X.base) + "/mes" : "venta histórica"}</small></div></div>
+    <div class="row" style="margin-top:10px"><label>Stock de seguridad (días)<input id="aSeg" type="number" min="0" max="60" value="${X.A.seg}" style="width:90px"></label>
+      <label>Plazo del proveedor (días)<input id="aLead" type="number" min="0" max="60" value="${X.A.lead}" style="width:90px"></label><button type="button" class="btn ver" id="aCsv">⬇ Orden sugerida (Excel/CSV)</button></div>
+    <p class="nota">Compra = lo que falta vender este mes + stock de seguridad y plazo del proveedor (con la meta del mes siguiente) − stock. Venta de cada producto = promedio de los 3 meses cerrados de esa bodega, escalado a la meta del plan (distribuidora 63 → 85 → 100 MM; tienda 10 → 15 → 20 MM). Mismo método que Admin → Abastecimiento.</p></div>
+  ${GP.map(g => `<div class="card"><h2>${esc(g.k)} <small>${g.l.length} productos · ${mm(g.t)}</small></h2><div class="tw"><table class="t"><thead><tr><th>Producto</th><th>Stock</th><th>Venta/mes</th><th>Días</th><th>Comprar</th><th>Monto</th></tr></thead><tbody>
+    ${g.l.map(x => `<tr><td>${esc(x.nombre)}<small>${esc(x.cod)}</small></td><td class="${x.s <= 0 ? "bad" : ""}">${nf(x.s)}</td><td>${nf(x.q, x.q < 10 ? 1 : 0)}</td><td><span class="pill ${x.urg ? "p-bad" : "p-wa"}">${isFinite(x.dias) ? nf(x.dias) : "—"}</span></td><td><b>${nf(x.compra)} u</b></td><td>${mm(x.monto)}</td></tr>`).join("")}</tbody></table></div></div>`).join("") || '<div class="card"><p class="muted">No hay compras sugeridas con estos parámetros.</p></div>'}`;
+  $("abB").onclick = e => { const b = e.target.closest("[data-b]"); if (b) { abB = b.dataset.b; pintarAbast(); } };
+  const g = () => { lsSet("abast", { seg: +$("aSeg").value || 0, lead: +$("aLead").value || 0 }); pintarAbast(); }; ["aSeg", "aLead"].forEach(i => $(i).onchange = g);
+  $("aCsv").onclick = () => { const f = [["Bodega", "Proveedor", "Código", "Producto", "Stock", "Venta/mes", "Días", "Comprar (u)", "Costo unitario", "Monto"]];
+    GP.forEach(gp => gp.l.forEach(x => f.push([abB, gp.k, x.cod, x.nombre, x.s, Math.round(x.q), isFinite(x.dias) ? Math.round(x.dias) : "", x.compra, Math.round(x.cu), Math.round(x.monto)])));
+    descargar(`Orden sugerida ${abB} ${(DATA().corte || "")}.csv`, f); }; }
+function descargar(nombre, filas) { const csv = "﻿" + filas.map(r => r.map(v => { const s = String(v == null ? "" : v); return /[;"\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; }).join(";")).join("\r\n");
+  const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" })); a.download = nombre; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); toast("Archivo descargado."); }
+
+/* ===== flota y parámetros ===== */
+const FLOTA0 = [
+  { id: "hd65", nombre: "Hyundai HD65 MAX", kg: 4400, m3: 18, kml: 7, var: 110, fijo: 55000, vel: 55, on: true, nota: "camión 3/4 · carga útil 4.400 kg · diésel 2,9 L · caja ~18 m³" },
+  { id: "boxer", nombre: "Peugeot Boxer L2H2", kg: 1310, m3: 11.5, kml: 11, var: 70, fijo: 45000, vel: 65, on: true, nota: "furgón · 1.310 kg · 11,5 m³ · diésel 12,8 km/l mixto" },
+  { id: "g10", nombre: "Maxus G10 Cargo", kg: 945, m3: 5.2, kml: 10.5, var: 60, fijo: 45000, vel: 65, on: true, nota: "furgón · 945–1.000 kg · 5,2 m³ · diésel 11 km/l mixto" },
+  { id: "partner", nombre: "Peugeot Partner L2", kg: 950, m3: 3.9, kml: 17, var: 50, fijo: 45000, vel: 65, on: true, nota: "furgón compacto · 950 kg · 3,9 m³ (4,4 con Multiflex) · diésel 1.5 · 22 km/l mixto" }];
+const PAR0 = { diesel: 1000, parada: 15, jornada: 9, factor: 1.3, util: 0.95, origen: { nombre: "Bodega principal HWF · Ruta H-30 1799, Punta de Cortés, Rancagua", lat: -34.1815, lng: -70.8309 } };
+const flota = () => { const g = lsGet("flota", null); return FLOTA0.map(v => Object.assign({}, v, (g || {})[v.id] || {})); };
+const par = () => { const p = lsGet("par", {}); if (p.origen && Math.abs(p.origen.lat + 34.9828) < 1e-4 && Math.abs(p.origen.lng + 71.2394) < 1e-4) delete p.origen; return Object.assign({}, PAR0, p); };
+const COL = { hd65: "#0B3146", boxer: "#F28C28", g10: "#1C7A4E", partner: "#7A3E9D" };
+const costoKm = (v, P) => P.diesel / v.kml + v.var;
+function pintarFlota() { const F = flota(), P = par();
+  $("s-flota").innerHTML = `<div class="card"><h2>Flota y costos <small>valores editables</small></h2>
+    ${F.map(v => `<div class="rt"><h3><span class="sw" style="background:${COL[v.id]}"></span>${esc(v.nombre)} <label style="margin-left:auto;font-size:.82rem;font-weight:700"><input type="checkbox" data-v="${v.id}" data-k="on" ${v.on ? "checked" : ""}> disponible</label></h3>
+      <p class="nota" style="margin:0 0 6px">${esc(v.nota)}</p><div class="row">
+      ${[["kg","Carga útil (kg)"],["m3","Volumen (m³)"],["kml","Rendimiento (km/l)"],["var","Mantención y neumáticos ($/km)"],["fijo","Costo fijo día ($: chofer, ayudante)"],["vel","Velocidad media (km/h)"]].map(([k, t]) => `<label>${t}<input type="number" step="any" data-v="${v.id}" data-k="${k}" value="${v[k]}" style="width:120px"></label>`).join("")}</div>
+      <p class="nota">Costo por km: <b>${fmt(costoKm(v, P))}</b> (diésel ${fmt(P.diesel / v.kml)} + ${fmt(v.var)}) · costo por kg a plena carga en 100 km: ${fmt((costoKm(v, P) * 100 + v.fijo) / v.kg)}</p></div>`).join("")}
+    <h2 style="margin-top:14px">Parámetros de ruta</h2><div class="row">
+      <label>Diésel ($/litro)<input type="number" id="pDiesel" value="${P.diesel}" style="width:110px"></label><label>Tiempo por entrega (min)<input type="number" id="pParada" value="${P.parada}" style="width:110px"></label>
+      <label>Jornada máxima (h)<input type="number" step="0.5" id="pJornada" value="${P.jornada}" style="width:110px"></label><label>Factor de ruta (km reales ÷ línea recta)<input type="number" step="0.05" id="pFactor" value="${P.factor}" style="width:110px"></label>
+      <label>Uso máximo de capacidad<input type="number" step="0.05" id="pUtil" value="${P.util}" style="width:110px"></label></div>
+    <h2 style="margin-top:14px">Origen de las rutas</h2><div class="row"><label>Nombre<input id="oNom" value="${esc(P.origen.nombre)}" style="width:220px"></label><label>Latitud<input id="oLat" type="number" step="any" value="${P.origen.lat}" style="width:130px"></label>
+      <label>Longitud<input id="oLng" type="number" step="any" value="${P.origen.lng}" style="width:130px"></label><button type="button" class="btn" id="oGps">📍 Usar mi ubicación actual</button></div>
+    <p class="nota">Especificaciones de fábrica (Chile): HD65 MAX carga 4.400 kg, largo carrozable 4,7 m; Boxer L2H2 11,5 m³ y 1.310 kg; G10 Cargo 5,2 m³ y 945–1.000 kg; Partner L2 3,9 m³ (4,4 con Multiflex) y 950 kg. Rendimientos con carga, algo bajo el homologado. Ajusta costos fijos y de mantención a los reales de HWF.</p></div>`;
+  $("s-flota").oninput = e => { const t = e.target; if (t.dataset.v) { const g = lsGet("flota", {}); g[t.dataset.v] = g[t.dataset.v] || {}; g[t.dataset.v][t.dataset.k] = t.type === "checkbox" ? t.checked : Number(t.value) || 0; lsSet("flota", g); } };
+  $("s-flota").onchange = e => { const t = e.target; if (!t.dataset.v && t.id) { const p = lsGet("par", {}); ({ pDiesel: "diesel", pParada: "parada", pJornada: "jornada", pFactor: "factor", pUtil: "util" })[t.id] && (p[({ pDiesel: "diesel", pParada: "parada", pJornada: "jornada", pFactor: "factor", pUtil: "util" })[t.id]] = Number(t.value) || 0);
+      if (/^o(Nom|Lat|Lng)$/.test(t.id)) p.origen = { nombre: $("oNom").value, lat: Number($("oLat").value), lng: Number($("oLng").value) }; lsSet("par", p); } pintarFlota(); };
+  $("oGps").onclick = () => navigator.geolocation ? navigator.geolocation.getCurrentPosition(pos => { const p = lsGet("par", {}); p.origen = { nombre: $("oNom").value || "Bodega HWF", lat: +pos.coords.latitude.toFixed(6), lng: +pos.coords.longitude.toFixed(6) }; lsSet("par", p); toast("Origen guardado."); pintarFlota(); }, () => toast("No se pudo obtener la ubicación.")) : toast("Este equipo no tiene GPS."); }
+
+/* ===== ubicación de clientes ===== */
+const geoMem = () => lsGet("geo", {});
+function comunaLL(c) { const k = norm(c).replace(/\./g, "").replace(/\s+/g, " "); return COMUNAS[k] || COMUNAS[k.replace(/ de .*$/, "")] || null; }
+function ubic(cli, comuna) { const g = geoMem()[norm(cli)]; if (g) return { lat: g[0], lng: g[1], fuente: g[2] === "comuna" ? "comuna" : g[2] || "exacta" }; const c = comunaLL(comuna); return c ? { lat: c[0], lng: c[1], fuente: "comuna" } : null; }
+const R_T = 6371, rad = x => x * Math.PI / 180;
+function hav(a, b) { const dl = rad(b.lat - a.lat), dg = rad(b.lng - a.lng), s = Math.sin(dl / 2) ** 2 + Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(dg / 2) ** 2; return 2 * R_T * Math.asin(Math.sqrt(s)); }
+async function geocodificar(paradas, onP) { const G = geoMem(); let n = 0, ok = 0;
+  for (const p of paradas) { if (G[norm(p.cli)] || !p.dir) continue; n++; onP && onP(n);
+    try { const q = encodeURIComponent(`${p.dir}, ${p.comuna}, Chile`); const r = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=cl&q=${q}`, { headers: { "Accept-Language": "es" } }); const j = await r.json();
+      if (j && j[0]) { const ll = { lat: +j[0].lat, lng: +j[0].lon }, c = comunaLL(p.comuna); if (!c || hav(ll, { lat: c[0], lng: c[1] }) < 40) { G[norm(p.cli)] = [+ll.lat.toFixed(6), +ll.lng.toFixed(6), "exacta"]; ok++; } } } catch (e) {}
+    await new Promise(r => setTimeout(r, 1100)); }   /* OpenStreetMap: máximo 1 consulta por segundo */
+  lsSet("geo", G); return { n, ok }; }
+
+/* ===== paradas del día: pedidos pendientes (NP Defontana) + manuales ===== */
+function paradasBase() { const D = DATA(), CL = {}; (D.clientes || []).forEach(c => CL[norm(c[0])] = c); const P = PI(), byName = {}; Object.values(P).forEach(p => byName[norm(p.nombre)] = p);
+  const G = {}; (D.cots || []).forEach(c => { const k = c[0]; const o = G[k] = G[k] || { id: "np" + k, num: k, fecha: c[1], cli: c[2], vend: c[4] || c[3], items: [], kg: 0, m3: 0, monto: 0 };
+    const kg = kgDe(c[6]) * (Number(c[5]) || 0); o.items.push([c[5], c[6]]); o.kg += kg; o.m3 += m3De(c[6], kg); o.monto += Number(c[7]) || 0; });
+  const L = Object.values(G).map(o => { const c = CL[norm(o.cli)] || ["", "", "", "", ""]; return Object.assign(o, { comuna: c[1] || "", dir: c[2] || "", tel: c[3] || "" }); });
+  (lsGet("manuales", [])).forEach(m => L.push(Object.assign({ manual: true }, m)));
+  return L; }
+const diasDesde = f => { const m = /(\d{2})\/(\d{2})\/(\d{4})/.exec(f || ""); if (!m) return null; return Math.round((Date.now() - new Date(+m[3], m[2] - 1, +m[1]).getTime()) / 864e5); };
+
+/* ===== optimización de rutas ===== */
+function optimizar(paradas, F, P) {
+  const O = { lat: P.origen.lat, lng: P.origen.lng }, S = paradas.map((p, i) => Object.assign({ i }, p)), n = S.length;
+  const d0 = S.map(s => hav(O, s) * P.factor), d = S.map(a => S.map(b => hav(a, b) * P.factor));
+  const len = r => r.length ? d0[r[0]] + d0[r[r.length - 1]] + r.slice(1).reduce((t, x, k) => t + d[r[k]][x], 0) : 0;
+  const carga = r => r.reduce((t, x) => ({ kg: t.kg + S[x].kg, m3: t.m3 + S[x].m3 }), { kg: 0, m3: 0 });
+  const horas = (r, v) => len(r) / v.vel + r.length * P.parada / 60;
+  function twoOpt(r) { let mejor = true, it = 0; while (mejor && it++ < 50) { mejor = false; for (let a = 0; a < r.length - 1; a++) for (let b = a + 1; b < r.length; b++) { const nr = r.slice(0, a).concat(r.slice(a, b + 1).reverse(), r.slice(b + 1)); if (len(nr) < len(r) - 1e-6) { r = nr; mejor = true; } } } return r; }
+  function savings(cap) { let R = S.map(s => [s.i]), de = S.map(s => s.i); const sv = []; for (let a = 0; a < n; a++) for (let b = a + 1; b < n; b++) sv.push([d0[a] + d0[b] - d[a][b], a, b]); sv.sort((x, y) => y[0] - x[0]);
+    const ruta = x => R.findIndex(r => r && r.includes(x));
+    for (const [, a, b] of sv) { const ia = ruta(a), ib = ruta(b); if (ia < 0 || ib < 0 || ia === ib) continue; let A = R[ia], B = R[ib], nr = null;
+      if (A[A.length - 1] === a && B[0] === b) nr = A.concat(B); else if (A[0] === a && B[B.length - 1] === b) nr = B.concat(A); else if (A[A.length - 1] === a && B[B.length - 1] === b) nr = A.concat(B.slice().reverse()); else if (A[0] === a && B[0] === b) nr = A.slice().reverse().concat(B);
+      if (!nr) continue; const c = carga(nr); if (c.kg > cap.kg * P.util || c.m3 > cap.m3 * P.util || horas(nr, cap) > P.jornada) continue; R[ia] = nr; R[ib] = null; }
+    return R.filter(Boolean).map(twoOpt); }
+  const disp = F.filter(v => v.on); if (!disp.length || !n) return null;
+  const costo = (r, v) => len(r) * costoKm(v, P);
+  /* penalidad por dejar una parada fuera: más alta si el pedido es antiguo o de mayor monto */
+  const pen = x => 5e6 + (diasDesde(S[x].fecha) || 0) * 2e5 + (S[x].monto || 0) * 0.5;
+  function evaluar(R, asig) { const usos = disp.map(v => ({ v, viajes: [], h: 0 })), sinAsig = []; let ok = true;
+    R.forEach((r, i) => { const k = asig[i]; if (k < 0) { sinAsig.push(...r); return; } const u = usos[k], c = carga(r); if (c.kg > u.v.kg * P.util || c.m3 > u.v.m3 * P.util) { ok = false; return; } u.viajes.push(r); u.h += horas(r, u.v); });
+    if (!ok || usos.some(u => u.h > P.jornada)) return null;
+    const total = usos.reduce((t, u) => t + (u.viajes.length ? u.v.fijo + u.viajes.reduce((s, r) => s + costo(r, u.v), 0) : 0), 0);
+    return { usos: usos.filter(u => u.viajes.length), sinAsig, total, score: total + sinAsig.reduce((t, x) => t + pen(x), 0) }; }
+  /* asignación óptima de rutas a vehículos (búsqueda exhaustiva, con segundas vueltas si alcanza la jornada); con muchas rutas, voraz */
+  function asignar(R) { const V = disp.length, nR = R.length; let best = null;
+    if (Math.pow(V + 1, nR) <= 300000) { const a = new Array(nR).fill(-1);
+      (function rec(i) { if (i === nR) { const e = evaluar(R, a); if (e && (!best || e.score < best.score)) best = e; return; } for (let k = -1; k < V; k++) { a[i] = k; rec(i + 1); } })(0); return best; }
+    const a = [], usos = disp.map(() => 0); R.forEach((r, i) => { let bk = -1, bc = Infinity; const c = carga(r);
+      disp.forEach((v, k) => { if (c.kg > v.kg * P.util || c.m3 > v.m3 * P.util || usos[k] + horas(r, v) > P.jornada) return; const cc = costo(r, v) + (usos[k] ? 0 : v.fijo); if (cc < bc) { bc = cc; bk = k; } });
+      a[i] = bk; if (bk >= 0) usos[bk] += horas(r, disp[bk]); }); return evaluar(R, a); }
+  let mejor = null; disp.forEach(v => { const R = savings(v), A = asignar(R); if (A && (!mejor || A.score < mejor.score)) mejor = A; });
+  /* escenario: cada parada sola en el vehículo más barato que cabe (referencia para medir el ahorro) */
+  const solo = S.reduce((t, s) => { const v = disp.filter(v => s.kg <= v.kg && s.m3 <= v.m3).sort((a, b) => costoKm(a, P) - costoKm(b, P))[0] || disp[0]; return t + 2 * d0[s.i] * costoKm(v, P) + v.fijo; }, 0);
+  return { S, d0, len, carga, horas, costo, res: mejor, solo, O }; }
+
+let RT = null, mapa = null;
+function pintarRutas() { const D = DATA(), P = par(), F = flota(), L = paradasBase(), sel = lsGet("sel", null), excl = new Set(lsGet("excl", [])), G = geoMem();
+  const fecha = lsGet("fecha", fLocal(new Date(Date.now() + 864e5)));
+  $("s-rutas").innerHTML = `<div class="card"><h2>Rutas de despacho <small>pedidos pendientes de Defontana + paradas agregadas</small></h2>
+    <div class="k" style="margin-bottom:10px"><span>Vehículos disponibles hoy</span><div class="chips" id="rVeh">${F.map(v => `<button type="button" data-veh="${v.id}" aria-pressed="${!!v.on}" title="${esc(v.nota)}"><span class="sw" style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${COL[v.id]};margin-right:5px"></span>${esc(v.nombre)} · ${nf(v.kg)} kg</button>`).join("")}</div><small>Toca para quitar o agregar. Origen: ${esc(P.origen.nombre)} (cámbialo en Flota).</small></div>
+    <div class="row"><label>Fecha de despacho<input type="date" id="rFecha" value="${fecha}"></label><button type="button" class="btn" id="rGeo">📍 Ubicar direcciones exactas</button><button type="button" class="btn" id="rAdd">+ Agregar parada</button>
+      <button type="button" class="btn pri" id="rOpt">⚙ Armar rutas óptimas</button></div>
+    <div id="rLista" style="margin-top:8px">${L.map(p => { const u = ubic(p.cli, p.comuna), dd = diasDesde(p.fecha);
+      return `<div class="st"><input type="checkbox" data-id="${esc(p.id)}" ${excl.has(p.id) ? "" : "checked"} aria-label="Incluir ${esc(p.cli)}"><div><span class="n">${esc(p.cli)}</span>
+        <small>${esc(p.comuna || "sin comuna")}${p.dir ? " · " + esc(p.dir) : ""} · ${p.manual ? "parada agregada" : "NP " + esc(p.num) + (dd != null ? ` · hace ${dd} días` : "") + " · " + esc(p.vend || "")}</small>
+        <small>${nf(p.kg)} kg · ${nf(p.m3, 2)} m³${p.monto ? " · " + mm(p.monto) : ""} · ${u ? (u.fuente === "comuna" ? '<span class="pill p-wa">ubicación: centro de la comuna</span>' : '<span class="pill p-ok">ubicación exacta</span>') : `<span class="pill p-bad">sin ubicación</span> <select data-com="${esc(p.cli)}" style="padding:3px 6px;font-size:.78rem"><option value="">Elegir comuna…</option>${Object.keys(COMUNAS).sort().map(k => `<option value="${k}">${k.replace(/\b\w/g, c => c.toUpperCase())}</option>`).join("")}</select>`}</small></div>
+        <div style="display:grid;gap:4px">${p.tel ? `<a class="btn" style="padding:5px 9px;text-align:center" href="tel:${esc(p.tel)}">📞</a>` : ""}<button type="button" class="btn" style="padding:5px 9px" data-gps="${esc(p.cli)}" title="Fijar ubicación con el GPS (estando en el cliente)">📍</button>${p.manual ? `<button type="button" class="btn" style="padding:5px 9px" data-del="${esc(p.id)}">✕</button>` : ""}</div></div>`; }).join("") || '<p class="muted">No hay pedidos pendientes de despacho. Agrega paradas con «+ Agregar parada».</p>'}</div>
+    <p class="nota">Ubicación: exacta (OpenStreetMap o GPS del chofer, queda guardada) o centro de la comuna. Distancia = línea recta × ${P.factor} (factor de ruta). Peso y volumen estimados desde el nombre del producto (kg del saco).</p></div>
+  <div id="rRes"></div>`;
+  $("rFecha").onchange = () => lsSet("fecha", $("rFecha").value);
+  $("rVeh").onclick = e => { const b = e.target.closest("[data-veh]"); if (!b) return; const g = lsGet("flota", {}), id = b.dataset.veh, on = b.getAttribute("aria-pressed") !== "true";
+    if (!on && flota().filter(v => v.on).length <= 1) { toast("Debe quedar al menos un vehículo disponible."); return; } g[id] = Object.assign(g[id] || {}, { on }); lsSet("flota", g); RT = null; pintarRutas(); };
+  $("rLista").onchange = e => { const sc = e.target.closest("[data-com]"); if (sc && sc.value) { const Gm = geoMem(), c = COMUNAS[sc.value]; Gm[norm(sc.dataset.com)] = [c[0], c[1], "comuna"]; lsSet("geo", Gm); toast("Comuna fijada para este cliente."); return pintarRutas(); }
+    const c = e.target.closest("[data-id]"); if (!c) return; const s = new Set(lsGet("excl", [])); c.checked ? s.delete(c.dataset.id) : s.add(c.dataset.id); lsSet("excl", [...s]); };
+  $("rLista").onclick = e => { const g = e.target.closest("[data-gps]"), x = e.target.closest("[data-del]");
+    if (x) { lsSet("manuales", lsGet("manuales", []).filter(m => m.id !== x.dataset.del)); pintarRutas(); }
+    if (g) { if (!navigator.geolocation) return toast("Este equipo no tiene GPS."); navigator.geolocation.getCurrentPosition(pos => { const Gm = geoMem(); Gm[norm(g.dataset.gps)] = [+pos.coords.latitude.toFixed(6), +pos.coords.longitude.toFixed(6), "gps"]; lsSet("geo", Gm); toast("Ubicación del cliente guardada."); pintarRutas(); }, () => toast("No se pudo obtener la ubicación."), { enableHighAccuracy: true }); } };
+  $("rGeo").onclick = async () => { const b = $("rGeo"); b.disabled = true; const r = await geocodificar(L.filter(p => !excl.has(p.id)), k => b.textContent = `Buscando ${k}…`); toast(r.n ? `${r.ok} de ${r.n} direcciones ubicadas.` : "Todas las paradas ya tienen ubicación exacta."); pintarRutas(); };
+  $("rAdd").onclick = agregarParada;
+  $("rOpt").onclick = () => { const inc = L.filter(p => !excl.has(p.id)).map(p => Object.assign({}, p, ubic(p.cli, p.comuna) || {})); const sinU = inc.filter(p => p.lat == null);
+    if (sinU.length) toast(`${sinU.length} sin ubicación (sin comuna conocida): quedan fuera.`); const ok = inc.filter(p => p.lat != null);
+    RT = optimizar(ok, F, P); lsSet("ultimaRuta", RT ? { fecha: $("rFecha").value, total: RT.res.total, km: RT.res.usos.reduce((t, u) => t + u.viajes.reduce((s, r) => s + RT.len(r), 0), 0), veh: RT.res.usos.length, paradas: ok.length - RT.res.sinAsig.length, kg: ok.reduce((t, p) => t + p.kg, 0), monto: ok.reduce((t, p) => t + (p.monto || 0), 0) } : null);
+    pintarResultado(); };
+  if (RT) pintarResultado(); }
+function agregarParada() { const D = DATA(), box = document.createElement("div"); box.className = "ov";
+  box.innerHTML = `<div class="c"><h1>Agregar parada</h1><input id="aCli" list="aCliL" placeholder="Cliente (escribe para buscar)"><datalist id="aCliL">${(D.clientes || []).map(c => `<option value="${esc(c[0])}">${esc(c[1])}</option>`).join("")}</datalist>
+    <div class="row"><label>Kilos<input id="aKg" type="number" value="100" style="width:110px"></label><label>Monto ($, opcional)<input id="aMon" type="number" style="width:140px"></label></div><input id="aNota" placeholder="Nota (opcional)">
+    <div class="row"><button type="button" class="btn" id="aNo">Cancelar</button><button type="button" class="btn pri" id="aSi">Agregar</button></div></div>`;
+  document.body.appendChild(box); $("aNo").onclick = () => box.remove();
+  $("aSi").onclick = () => { const n = $("aCli").value.trim(); if (!n) return; const c = (D.clientes || []).find(x => norm(x[0]) === norm(n)) || [n, "", "", "", ""]; const kg = Number($("aKg").value) || 0;
+    const L = lsGet("manuales", []); L.push({ id: "m" + Date.now(), cli: c[0], comuna: c[1], dir: c[2], tel: c[3], kg, m3: kg * 0.0028, monto: Number($("aMon").value) || 0, nota: $("aNota").value, fecha: "" }); lsSet("manuales", L); box.remove(); pintarRutas(); }; }
+function pintarResultado() { const box = $("rRes"); if (!RT || !RT.res) { box.innerHTML = '<div class="card"><p class="muted">Selecciona paradas con ubicación y vehículos disponibles.</p></div>'; return; }
+  const R = RT.res, P = par(), km = R.usos.reduce((t, u) => t + u.viajes.reduce((s, r) => s + RT.len(r), 0), 0), kg = R.usos.reduce((t, u) => t + u.viajes.reduce((s, r) => s + RT.carga(r).kg, 0), 0);
+  const monto = R.usos.reduce((t, u) => t + u.viajes.reduce((s, r) => s + r.reduce((a, x) => a + (RT.S[x].monto || 0), 0), 0), 0), aho = RT.solo - R.total;
+  const link = (r) => { const pts = r.map(x => `${RT.S[x].lat},${RT.S[x].lng}`), o = `${RT.O.lat},${RT.O.lng}`, L = []; for (let i = 0; i < pts.length; i += 9) L.push(`https://www.google.com/maps/dir/?api=1&origin=${i ? pts[i - 1] : o}&destination=${i + 9 >= pts.length ? o : pts[i + 8]}&waypoints=${encodeURIComponent(pts.slice(i, i + (i + 9 >= pts.length ? 9 : 8)).join("|"))}&travelmode=driving`); return L; };
+  box.innerHTML = `<div class="card"><h2>Plan de rutas <small>${esc(lsGet("fecha", ""))}</small></h2>
+    <div class="kp"><div class="k"><span>Costo total del día</span><b>${mm(R.total)}</b><small>${R.usos.length} ${R.usos.length === 1 ? "vehículo" : "vehículos"} · ${nf(km)} km</small></div>
+      <div class="k"><span>Costo por kg</span><b>${kg ? fmt(R.total / kg) : "—"}</b><small>${nf(kg)} kg despachados</small></div><div class="k"><span>% sobre lo despachado</span><b>${monto ? nf(R.total / monto * 100, 1) + "%" : "—"}</b><small>${monto ? mm(monto) + " en pedidos" : "sin montos"}</small></div>
+      <div class="k"><span>Ahorro vs. viajes separados</span><b class="ok">${mm(Math.max(0, aho))}</b><small>${RT.solo ? nf(Math.max(0, aho) / RT.solo * 100) + "% menos" : ""}</small></div></div>
+    ${R.sinAsig.length ? `<div class="bad" style="margin:8px 0 0"><b>${R.sinAsig.length} ${R.sinAsig.length === 1 ? "parada no cabe" : "paradas no caben"} hoy:</b><ul style="margin:4px 0 0;padding-left:18px">${R.sinAsig.map(x => { const s = RT.S[x], ida = RT.d0[x], vmax = Math.max(...flota().filter(v => v.on).map(v => v.vel)), h = 2 * ida / vmax + P.parada / 60, kgMax = Math.max(...flota().filter(v => v.on).map(v => v.kg));
+      return `<li>${esc(s.cli)} (${esc(s.comuna)}): ${h > P.jornada ? `ida y vuelta ${nf(2 * ida)} km ≈ ${nf(h, 1)} h, más que la jornada de ${P.jornada} h → viaje especial, transporte externo o subir la jornada` : s.kg > kgMax * P.util ? `${nf(s.kg)} kg superan la capacidad de la flota → dividir el pedido` : "no alcanza la jornada de los vehículos disponibles → dejar para mañana, sumar un vehículo o una segunda vuelta"}</li>`; }).join("")}</ul></div>` : ""}
+    <div id="mapa"></div>
+    <div class="row np"><button type="button" class="btn pri" id="rEnv">📤 Enviar rutas a choferes</button><button type="button" class="btn" onclick="window.print()">🖨 Imprimir hojas de ruta</button></div>
+    <p class="nota np">Cada chofer abre la app <b>CHOFER HWF</b>, elige su vehículo y recibe su ruta de hoy (${esc(lsGet("fecha", ""))}) con navegación, GPS y registro de entrega con fotos, firma y forma de pago. Seguimiento en vivo en la pestaña «Seguimiento».</p></div>
+  ${R.usos.map(u => { const v = u.v; return u.viajes.map((r, vi) => { const c = RT.carga(r), k = RT.len(r), h = RT.horas(r, v), comb = k * P.diesel / v.kml, vari = k * v.var, fijo = vi ? 0 : v.fijo;
+    const txt = `Ruta ${v.nombre}${u.viajes.length > 1 ? " (vuelta " + (vi + 1) + ")" : ""} ${lsGet("fecha", "")}:\n` + r.map((x, i) => `${i + 1}. ${RT.S[x].cli} · ${RT.S[x].comuna}${RT.S[x].dir ? " · " + RT.S[x].dir : ""} · ${nf(RT.S[x].kg)} kg${RT.S[x].tel ? " · " + RT.S[x].tel : ""}`).join("\n") + "\n" + link(r).join("\n");
+    return `<div class="card rt"><h3><span class="sw" style="background:${COL[v.id]}"></span>${esc(v.nombre)}${u.viajes.length > 1 ? ` · vuelta ${vi + 1}` : ""}<span class="muted" style="margin-left:auto;font-size:.82rem">${nf(k)} km · ${nf(h, 1)} h · ${mm(comb + vari + fijo)}</span></h3>
+      <div class="kp"><div class="k"><span>Carga</span><b>${nf(c.kg)} kg</b><div class="bar"><i style="width:${Math.min(100, c.kg / v.kg * 100)}%"></i></div><small>${nf(c.kg / v.kg * 100)}% de ${nf(v.kg)} kg · ${nf(c.m3, 1)} de ${nf(v.m3, 1)} m³</small></div>
+        <div class="k"><span>Costo</span><b>${mm(comb + vari + fijo)}</b><small>diésel ${mm(comb)} · mantención ${mm(vari)}${fijo ? " · fijo " + mm(fijo) : ""}</small></div></div>
+      <ol>${r.map(x => { const s = RT.S[x]; return `<li><b>${esc(s.cli)}</b> <small>${esc(s.comuna)}${s.dir ? " · " + esc(s.dir) : ""} · ${nf(s.kg)} kg${s.monto ? " · " + mm(s.monto) : ""}${s.num ? " · NP " + esc(s.num) : ""}${s.fuente === "comuna" ? " · ubicación aprox." : ""}</small></li>`; }).join("")}</ol>
+      <div class="row np" style="margin-top:8px">${link(r).map((l, i) => `<a class="btn ver" target="_blank" rel="noopener" href="${esc(l)}">🧭 Navegar${link(r).length > 1 ? " " + (i + 1) : ""}</a>`).join("")}
+        <a class="btn" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(txt)}">WhatsApp al chofer</a></div></div>`; }).join(""); }).join("")}`;
+  $("rEnv").onclick = async () => { const b = $("rEnv"), P2 = par(), rutas = [];
+    R.usos.forEach(u => u.viajes.forEach((r, vi) => rutas.push({ veh: u.v.id, vehNombre: u.v.nombre, vuelta: vi + 1, km: Math.round(RT.len(r)), horas: +RT.horas(r, u.v).toFixed(1), costo: Math.round(RT.costo(r, u.v) + (vi ? 0 : u.v.fijo)), origen: P2.origen,
+      paradas: r.map(x => { const s = RT.S[x]; return { id: s.id, cli: s.cli, dir: s.dir || "", comuna: s.comuna || "", tel: s.tel || "", lat: s.lat, lng: s.lng, kg: Math.round(s.kg), monto: s.monto || 0, num: s.num || "", vend: s.vend || "", items: s.items || [] }; }) })));
+    b.disabled = true; b.textContent = "Enviando…"; const res = await syLlamar(cfg(), { accion: "rutaGuardar", fecha: lsGet("fecha", ""), rutas, por: "Logística" });
+    b.disabled = false; b.textContent = "📤 Enviar rutas a choferes"; toast(res.ok ? `Rutas enviadas: ${res.rutas} ${res.rutas === 1 ? "ruta" : "rutas"}, ${res.paradas} paradas para el ${res.fecha}.` : "No se pudo enviar: " + (res.error || "error")); };
+  try { if (window.L) { mapa && mapa.remove(); mapa = L.map("mapa"); L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 18, attribution: "© OpenStreetMap" }).addTo(mapa); const bb = [[RT.O.lat, RT.O.lng]];
+    L.marker([RT.O.lat, RT.O.lng]).addTo(mapa).bindPopup(esc(P.origen.nombre));
+    R.usos.forEach(u => u.viajes.forEach(r => { const pts = [[RT.O.lat, RT.O.lng]].concat(r.map(x => [RT.S[x].lat, RT.S[x].lng]), [[RT.O.lat, RT.O.lng]]); L.polyline(pts, { color: COL[u.v.id], weight: 4, opacity: .85 }).addTo(mapa);
+      r.forEach((x, i) => { const s = RT.S[x]; bb.push([s.lat, s.lng]); L.circleMarker([s.lat, s.lng], { radius: 8, color: "#fff", weight: 2, fillColor: COL[u.v.id], fillOpacity: 1 }).addTo(mapa).bindPopup(`${i + 1}. ${esc(s.cli)}<br>${esc(s.comuna)} · ${nf(s.kg)} kg`); }); }));
+    mapa.fitBounds(bb, { padding: [24, 24] }); } else $("mapa").outerHTML = '<p class="nota">Mapa no disponible sin internet.</p>'; } catch (e) {} }
+
+/* ===== seguimiento en vivo (app CHOFER HWF) ===== */
+let segMapa = null, segT = null;
+async function pintarSeg() { const box = $("s-seg"), fecha = lsGet("segFecha", fLocal(new Date())), F = flota();
+  box.innerHTML = `<div class="card"><h2>Seguimiento de choferes <small>GPS y entregas en vivo</small></h2><div class="row"><label>Día<input type="date" id="sFecha" value="${fecha}"></label><button type="button" class="btn pri" id="sAct">⟳ Actualizar</button></div><p class="nota" id="sInfo">Cargando…</p><div id="mapa2" style="height:340px;border-radius:14px;margin-top:8px"></div></div><div id="sRes"></div>`;
+  $("sFecha").onchange = () => { lsSet("segFecha", $("sFecha").value); pintarSeg(); }; $("sAct").onclick = () => pintarSeg();
+  const [E, RU] = await Promise.all([syLlamar(cfg(), { accion: "logEstado", fecha }), syLlamar(cfg(), { accion: "rutaLeer", fecha })]);
+  if (!E.ok) { $("sInfo").textContent = E.error || "No se pudo leer el seguimiento (el script debe estar actualizado)."; return; }
+  const rutas = RU.ok && RU.ruta ? RU.ruta.rutas : [], ent = E.entregas || [], porVeh = {};
+  rutas.forEach(r => { const o = porVeh[r.veh] = porVeh[r.veh] || { nombre: r.vehNombre, plan: 0, km: 0 }; o.plan += r.paradas.length; o.km += r.km || 0; });
+  const nomDe = id => (F.find(v => v.id === id) || {}).nombre || id, mins = ts => ts ? Math.round((Date.now() - new Date(ts)) / 60000) : null;
+  Object.keys(E.gps || {}).forEach(id => { porVeh[id] = porVeh[id] || { nombre: nomDe(id), plan: 0, km: 0 }; });
+  const pagos = {}; ent.forEach(e => { if (e.pago) pagos[e.pago] = (pagos[e.pago] || 0) + (e.monto || 0); });
+  $("sInfo").textContent = `${rutas.length ? rutas.length + " rutas enviadas" : "Sin rutas enviadas para este día"} · ${ent.length} entregas registradas · actualizado ${new Date().toLocaleTimeString("es-CL", { hour: "2-digit", minute: "2-digit" })}`;
+  $("sRes").innerHTML = `<div class="card"><h2>Vehículos</h2><div class="tw"><table class="t"><thead><tr><th>Vehículo</th><th>Chofer</th><th>Última posición</th><th>Entregas</th><th>Cobrado</th></tr></thead><tbody>
+      ${Object.entries(porVeh).map(([id, o]) => { const g = (E.gps || {})[id], m = g ? mins(g.ts) : null, en = ent.filter(e => e.veh === o.nombre || e.veh === id), ok = en.filter(e => /conforme/i.test(e.estado)).length;
+        return `<tr><td><span class="sw" style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${COL[id] || "#5B6874"};margin-right:6px"></span>${esc(o.nombre)}</td><td>${esc(g ? g.chofer : "—")}</td>
+          <td>${g ? `<span class="pill ${m <= 10 ? "p-ok" : m <= 60 ? "p-wa" : "p-bad"}">hace ${m < 60 ? m + " min" : Math.round(m / 60) + " h"}</span>` : '<span class="pill p-n">sin GPS</span>'}</td><td>${ok}${en.length > ok ? " + " + (en.length - ok) : ""} de ${o.plan || "—"}</td><td>${mm(en.reduce((t, e) => t + (e.monto || 0), 0))}</td></tr>`; }).join("") || '<tr><td colspan="5" class="muted">Sin vehículos en ruta.</td></tr>'}</tbody></table></div>
+      ${Object.keys(pagos).length ? `<p class="nota">Cobros: ${Object.entries(pagos).map(([k, v]) => `${esc(k)} ${mm(v)}`).join(" · ")} · total ${mm(Object.values(pagos).reduce((a, b) => a + b, 0))}</p>` : ""}</div>
+    ${(E.jornadas || []).length ? `<div class="card"><h2>Registro de conducción <small>hoja «Conducción»</small></h2><div class="tw"><table class="t"><thead><tr><th>Chofer</th><th>Vehículo</th><th>Horario</th><th>Km</th><th>Entregas</th><th>Combustible</th></tr></thead><tbody>
+      ${E.jornadas.map(j => `<tr><td>${esc(j.chofer)}${j.obs ? "<small>" + esc(j.obs) + "</small>" : ""}</td><td>${esc(j.veh)}</td><td>${esc(j.inicio)} – ${esc(j.fin || "en curso")}${j.horas ? "<small>" + nf(j.horas, 1) + " h</small>" : ""}</td>
+        <td>${nf(j.kmGps, 1)} GPS${j.kmOdo ? "<small>" + nf(j.kmOdo) + " odómetro</small>" : ""}</td><td>${esc(j.entregas || "—")}${j.cobrado ? "<small>" + mm(j.cobrado) + "</small>" : ""}</td><td>${j.litros ? nf(j.litros, 1) + " L" : "—"}${j.comb ? "<small>" + mm(j.comb) + "</small>" : ""}</td></tr>`).join("")}</tbody></table></div></div>` : ""}
+    <div class="card"><h2>Entregas registradas</h2><div class="tw"><table class="t"><thead><tr><th>Cliente</th><th>Hora</th><th>Estado</th><th>Recibe</th><th>Pago</th><th>Respaldo</th></tr></thead><tbody>
+      ${ent.slice().reverse().map(e => `<tr><td>${esc(e.cli)}<small>${esc(e.veh)} · ${esc(e.chofer)}${e.num ? " · NP " + esc(e.num) : ""}${e.obs ? " · " + esc(e.obs) : ""}</small></td><td>${esc(e.hora)}</td>
+        <td><span class="pill ${/conforme/i.test(e.estado) ? "p-ok" : /parcial/i.test(e.estado) ? "p-wa" : "p-bad"}">${esc(e.estado)}</span></td><td>${esc(e.recibe || "—")}</td><td>${esc(e.pago || "—")}${e.monto ? "<small>" + mm(e.monto) + "</small>" : ""}</td>
+        <td>${e.fotos ? "📷 " + e.fotos : ""} ${e.firma ? "✍️" : ""}</td></tr>`).join("") || '<tr><td colspan="6" class="muted">Aún no hay entregas registradas.</td></tr>'}</tbody></table></div>
+      <p class="nota">Fotos y firmas: carpeta de datos en Drive → «Entregas HWF» → ${esc(fecha)}. Detalle completo en la hoja «Entregas» de la planilla.</p></div>`;
+  try { if (window.L) { segMapa && segMapa.remove(); segMapa = L.map("mapa2"); L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 18, attribution: "© OpenStreetMap" }).addTo(segMapa); const bb = [], P = par();
+      bb.push([P.origen.lat, P.origen.lng]); L.marker([P.origen.lat, P.origen.lng]).addTo(segMapa).bindPopup(esc(P.origen.nombre));
+      rutas.forEach(r => r.paradas.forEach(p => { if (!p.lat) return; bb.push([p.lat, p.lng]); const e = ent.find(x => x.parada === p.id || x.cli === p.cli);
+        L.circleMarker([p.lat, p.lng], { radius: 7, color: "#fff", weight: 2, fillColor: !e ? "#9AA8B4" : /conforme/i.test(e.estado) ? "#1C7A4E" : /parcial/i.test(e.estado) ? "#F0A818" : "#B42318", fillOpacity: 1 }).addTo(segMapa).bindPopup(`${esc(p.cli)}<br>${e ? esc(e.estado) + " " + esc(e.hora) : "pendiente"}`); }));
+      Object.entries(E.recorrido || {}).forEach(([id, pts]) => { if (pts.length > 1) L.polyline(pts.map(x => [x[0], x[1]]), { color: COL[id] || "#5B6874", weight: 3, opacity: .8 }).addTo(segMapa); });
+      Object.entries(E.gps || {}).forEach(([id, g]) => { bb.push([g.lat, g.lng]); L.marker([g.lat, g.lng], { icon: L.divIcon({ className: "", html: `<div style="background:${COL[id] || "#0B3146"};color:#fff;border-radius:10px;padding:3px 7px;font-weight:800;font-size:12px;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.3)">🚚 ${esc((porVeh[id] || {}).nombre || id)}</div>`, iconAnchor: [20, 12] }) }).addTo(segMapa).bindPopup(`${esc(g.chofer)} · hace ${mins(g.ts)} min`); });
+      segMapa.fitBounds(bb, { padding: [24, 24] }); } else $("mapa2").outerHTML = '<p class="nota">Mapa no disponible sin internet.</p>'; } catch (e) {}
+  clearTimeout(segT); segT = setTimeout(() => { if (SEC === "seg" && !document.hidden) pintarSeg(); }, 120000); }
+
+/* ===== panel ===== */
+function pintarDash() { const D = DATA(), bods = Object.keys(D.bodegas || {}), L = paradasBase(), U = lsGet("ultimaRuta", null), dm = demanda(D);
+  const porB = bods.map(b => { const f = invFilas(b); return { b, val: f.reduce((t, x) => t + x.valor, 0), sin: f.filter(x => x.stock <= 0 && x.q > 0).length, baj: f.filter(x => x.stock > 0 && x.q > 0 && x.dias < 7).length,
+    dias: (() => { const v = f.reduce((t, x) => t + x.valor, 0), dd = f.reduce((t, x) => t + x.q / 30 * x.cu, 0); return dd ? v / dd : 0; })() }; });
+  const kg = L.reduce((t, p) => t + p.kg, 0), m3 = L.reduce((t, p) => t + p.m3, 0), monto = L.reduce((t, p) => t + (p.monto || 0), 0), ant = L.filter(p => (diasDesde(p.fecha) || 0) >= 3);
+  const quieb = invFilas(bods.find(esDistB) || bods[0] || "").filter(x => x.stock <= 0 && x.q > 0).sort((a, b) => b.q - a.q).slice(0, 6);
+  const F = flota().filter(v => v.on), capKg = F.reduce((t, v) => t + v.kg, 0);
+  $("s-dash").innerHTML = `<div class="card"><h2>Panel logístico <small>datos al ${esc(D.corte || "")} · stock ${esc(D.stockFecha || "")}</small></h2>
+    <div class="kp"><div class="k"><span>Inventario total a costo</span><b>${mm(porB.reduce((t, x) => t + x.val, 0))}</b><small>${bods.length} ${bods.length === 1 ? "bodega" : "bodegas"}</small></div>
+      <div class="k"><span>Pedidos por despachar</span><b>${L.length}</b><small>${nf(kg)} kg · ${nf(m3, 1)} m³ · ${mm(monto)}</small></div>
+      <div class="k"><span>Pedidos con 3+ días</span><b class="${ant.length ? "bad" : "ok"}">${ant.length}</b><small>priorizar en la ruta</small></div>
+      <div class="k"><span>Capacidad de la flota</span><b>${nf(capKg)} kg</b><small>${F.length} vehículos · ${kg && capKg ? nf(kg / capKg * 100) + "% ocupada por lo pendiente" : ""}</small></div>
+      ${U ? `<div class="k"><span>Última ruta (${esc(U.fecha)})</span><b>${mm(U.total)}</b><small>${nf(U.km)} km · ${U.veh} veh. · ${U.kg ? fmt(U.total / U.kg) + "/kg" : ""}${U.monto ? " · " + nf(U.total / U.monto * 100, 1) + "% de la venta" : ""}</small></div>` : ""}</div>
+    ${D.desdeAdmin ? '<p class="nota">Por ahora solo la bodega de la distribuidora: el script publicará todas las bodegas en la próxima actualización de datos (al subir el informe o con el botón Drive de Admin).</p>' : ""}</div>
+  <div class="card"><h2>Bodegas</h2><div class="tw"><table class="t"><thead><tr><th>Bodega</th><th>Inventario</th><th>Días de stock</th><th>Sin stock</th><th>Bajo 7 días</th></tr></thead><tbody>
+    ${porB.map(x => `<tr><td><b>${esc(x.b)}</b></td><td>${mm(x.val)}</td><td>${x.dias ? nf(x.dias) : "—"}</td><td class="${x.sin ? "bad" : ""}">${x.sin}</td><td class="${x.baj ? "wa" : ""}">${x.baj}</td></tr>`).join("")}</tbody></table></div></div>
+  ${quieb.length ? `<div class="card"><h2>Quiebres que más venden <small>bodega distribuidora</small></h2><div class="tw"><table class="t"><thead><tr><th>Producto</th><th>Venta/mes</th><th>Proveedor</th></tr></thead><tbody>${quieb.map(x => `<tr><td>${esc(x.nombre)}</td><td>${nf(x.q)}</td><td>${esc(x.prov)}</td></tr>`).join("")}</tbody></table></div><div class="row" style="margin-top:8px"><button type="button" class="btn ver" onclick="ir('abast')">Ver abastecimiento ›</button></div></div>` : ""}
+  <div class="card"><h2>Despachos pendientes</h2>${L.slice(0, 8).map(p => `<div class="st"><span class="pill ${(diasDesde(p.fecha) || 0) >= 3 ? "p-bad" : "p-ok"}">${diasDesde(p.fecha) != null ? diasDesde(p.fecha) + " d" : "—"}</span><div><span class="n">${esc(p.cli)}</span><small>${esc(p.comuna)} · ${nf(p.kg)} kg · ${mm(p.monto)}</small></div><span></span></div>`).join("") || '<p class="muted">Sin pedidos pendientes.</p>'}
+    <div class="row" style="margin-top:8px"><button type="button" class="btn pri" onclick="ir('rutas')">Armar rutas ›</button></div></div>`; }
+
+/* ===== arranque ===== */
+function arrancar() { const D = DATA(); $("tAct").textContent = "Datos de Drive: " + ((D.act && D.act.drive) || D.corte || "—"); ir(SEC); }
+$("tRef").onclick = async () => { $("tRef").disabled = true; $("tRef").textContent = "Actualizando…"; const n = await bajar(); $("tRef").disabled = false; $("tRef").textContent = "⟳ Actualizar"; if (n) { arrancar(); toast("Datos actualizados."); } else toast("Ya tienes los últimos datos."); };
+if (!cfg()) pantallaConexion(); else if (!DATA()) { bajar(true).then(() => DATA() ? arrancar() : pantallaConexion()); } else { arrancar(); bajar(true).then(n => { if (n) arrancar(); }); }
+if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
+</script>
+<script id="hwfVerJs">/* sello_version: aviso de versión nueva */
+const HWF_VER = "20261110080620";
+(function () {
+  const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer)\/[^/]*$/, "/");
+  let avisado = false;
+  async function revisar() {
+    if (avisado || !navigator.onLine) return;
+    try { const r = await fetch(raiz + "version.json?t=" + Date.now(), { cache: "no-store" }); if (!r.ok) return; const j = await r.json();
+      if (j && j.v && String(j.v) > HWF_VER) mostrar(j); } catch (e) {}
+  }
+  function mostrar(j) { avisado = true; const d = document.createElement("div"); d.id = "hwfVer";
+    d.innerHTML = `<span style="white-space:nowrap">Nueva versión disponible</span><button type="button">Actualizar</button>`;
+    d.style.cssText = "position:fixed;left:50%;transform:translateX(-50%);top:calc(34px + env(safe-area-inset-top));white-space:nowrap;z-index:10000;background:#0B3146;color:#fff;border-radius:999px;padding:8px 8px 8px 16px;display:flex;gap:10px;align-items:center;box-shadow:0 8px 24px rgba(0,0,0,.3);font:600 .88rem system-ui,sans-serif;max-width:calc(100vw - 24px)";
+    const b = d.querySelector("button"); b.style.cssText = "border:0;border-radius:999px;background:#F0A818;color:#0B3146;font:800 .85rem system-ui,sans-serif;padding:8px 14px;cursor:pointer";
+    b.onclick = async () => { b.textContent = "Actualizando…"; try { const rs = await navigator.serviceWorker?.getRegistrations?.(); if (rs) await Promise.all(rs.map(x => x.update().catch(() => {}))); } catch (e) {} location.reload(); };
+    document.body.appendChild(d); }
+  setTimeout(revisar, 4000); setInterval(revisar, 30 * 60 * 1000);
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) revisar(); });
+})();
+</script>
+<style>.demo-sello{position:fixed;left:50%;transform:translateX(-50%);top:calc(3px + env(safe-area-inset-top));z-index:99999;background:#C2410C;color:#fff;font:800 10px/1 system-ui,sans-serif;letter-spacing:.08em;padding:5px 8px;border-radius:999px;pointer-events:none;opacity:.92;box-shadow:0 2px 8px rgba(0,0,0,.2)}</style><div class="demo-sello" aria-hidden="true">DEMO · DATOS FICTICIOS</div></body></html>

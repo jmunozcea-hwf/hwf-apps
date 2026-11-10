@@ -1,7 +1,7 @@
 {
  "id": "/hwf-apps/demo/admin/",
- "name": "HWF DEMO",
- "short_name": "HWF DEMO",
+ "name": "DEMO ADMIN",
+ "short_name": "DEMO ADMIN",
  "start_url": "./",
  "scope": "./",
  "display": "standalone",
