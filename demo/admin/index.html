@@ -4842,8 +4842,9 @@ function cliBusca(ci, nombre) { const c = D.clientes[ci] || []; return [cliFanta
 </script>
 
 <script>/* rankdist: plan 70 → 85 → 100 MM en 14 meses y ranking de vendedores por objetivos */
+const PLAN14_FIJA = { 202611: 73000000 };   /* metas fijadas a mano (pedido de Jorge 10-11-2026: noviembre 2026 = 73 MM) */
 const PLAN14 = (() => { const L = []; for (let i = 0; i < 14; i++) { const y = 2026 + Math.floor((10 + i) / 12), m = (10 + i) % 12 + 1, v = i <= 7 ? 70 + 15 * i / 7 : 85 + 15 * (i - 7) / 6;
-  L.push({ ym: y * 100 + m, y, m, meta: Math.round(v * 10) * 100000, hito: i === 0 ? 70 : i === 7 ? 85 : i === 13 ? 100 : 0 }); } return L; })();
+  const fija = PLAN14_FIJA[y * 100 + m]; L.push({ ym: y * 100 + m, y, m, meta: fija || Math.round(v * 10) * 100000, fija: !!fija, hito: i === 0 ? (fija ? fija / 1e6 : 70) : i === 7 ? 85 : i === 13 ? 100 : 0 }); } return L; })();
 const metaPlan14 = (y, m) => { const p = PLAN14.find(x => x.ym === y * 100 + m); return p ? p.meta : y * 100 + m < PLAN14[0].ym ? PLAN14[0].meta : PLAN14[PLAN14.length - 1].meta; };
 const RKD_W = [["venta", "Venta ponderada", 33], ["ticket", "Ticket promedio", 19], ["contado", "Venta contado", 14], ["sku", "SKU por cliente", 11], ["margen", "Margen total", 9], ["nuevos", "Clientes nuevos", 7], ["fecha", "Facturación temprana", 7]];
 const rkdPesoDia = (d, n) => n > 1 ? 1.5 - (d - 1) / (n - 1) : 1;   /* 1,5 el día 1 → 0,5 el último día del mes */
@@ -4906,7 +4907,7 @@ function plan14Html(B) {
   const [cy, cm] = String(B.corte || "").split("-").map(Number), cur = cy * 100 + cm, pmm = n => "$" + (n / 1e6).toLocaleString("es-CL", { maximumFractionDigits: 1 }) + " MM";
   return `<div class="card"><h2>Plan a 14 meses <span class="muted">venta neta mensual de la distribuidora (sin la tienda): 70 → 85 → 100 MM</span></h2>
     <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:.85rem"><thead><tr><th style="text-align:left">Mes</th><th>Objetivo</th><th>Real</th><th>Cumplimiento</th><th>Diferencia</th></tr></thead><tbody>
-    ${PLAN14.map(p => { const v = real[p.ym] || 0, fut = p.ym > cur; return `<tr${p.ym === cur ? ' style="background:#FFF8E6"' : ""}><td style="text-align:left${p.hito ? ";font-weight:800" : ""}">${["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"][p.m - 1]} ${p.y}${p.hito ? " · hito " + p.hito + " MM" : ""}${p.ym === cur ? " · en curso" : ""}</td>
+    ${PLAN14.map(p => { const v = real[p.ym] || 0, fut = p.ym > cur; return `<tr${p.ym === cur ? ' style="background:#FFF8E6"' : ""}><td style="text-align:left${p.hito ? ";font-weight:800" : ""}">${["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"][p.m - 1]} ${p.y}${p.hito ? " · hito " + p.hito + " MM" : ""}${p.fija ? " · meta fijada" : ""}${p.ym === cur ? " · en curso" : ""}</td>
       <td style="text-align:right">${pmm(p.meta)}</td><td style="text-align:right">${fut ? "" : pmm(v)}</td><td style="text-align:right">${fut ? "" : Math.round(v / p.meta * 100) + "%"}</td><td style="text-align:right;color:${v >= p.meta ? "#1C7A4E" : "#B42318"}">${fut ? "" : (v >= p.meta ? "+" : "") + pmm(v - p.meta)}</td></tr>`; }).join("")}</tbody></table></div></div>`;
 }
 document.head.insertAdjacentHTML("beforeend", "<style>.rkd-t th,.rkd-t td{padding:7px 8px;border-bottom:1px solid var(--line,#DAE1E7);text-align:right;white-space:nowrap}.rkd-t th{font-size:.74rem;color:var(--muted,#5B6874)}</style>");
@@ -5021,7 +5022,7 @@ function kpiHtml(B, yo) {
   const col = (t, a, b) => `<div class="kp-k"><span>${t}</span><b>${a}</b>${b ? `<small>${b}</small>` : ""}</div>`;
   let html = `<section class="kp-card" id="kpCard"><h3>📊 Avance de ${MES} <small>al ${R.ultDia} · ${R.hPas} de ${R.hTot} días hábiles</small></h3>
     <div class="kp-bar" title="venta vs meta; la marca blanca es el avance de tiempo"><i style="width:${Math.min(100, av * 100).toFixed(1)}%"></i><s style="left:${Math.min(100, tp * 100).toFixed(1)}%"></s></div>
-    <div class="kp-g">${col("Meta distribuidora", pmm(K.meta), "plan 70 → 100 MM")}${col("Venta distribuidora", pmm(K.venta), `<span class="${cls(av, tp)}">${pc(av)} de la meta</span>`)}${col("Avance de tiempo", pc(tp), `${R.hPas} de ${R.hTot} días hábiles`)}
+    <div class="kp-g">${col("Meta distribuidora", pmm(K.meta), (PLAN14.find(p => p.ym === K.y * 100 + K.m) || {}).fija ? "meta fijada para el mes" : "plan 70 → 100 MM")}${col("Venta distribuidora", pmm(K.venta), `<span class="${cls(av, tp)}">${pc(av)} de la meta</span>`)}${col("Avance de tiempo", pc(tp), `${R.hPas} de ${R.hTot} días hábiles`)}
       ${v ? col("Tu venta", pmm(v.venta), `<span class="${cls(v.meta ? v.venta / v.meta : 0, tp)}">${v.meta ? pc(v.venta / v.meta) + " de tu meta " + pmm(v.meta) : "sin meta"}</span>`) : ""}
       ${col("Margen distribuidora", pmm(K.marg), pc(K.margPct))}${v ? col("Tu margen", pmm(v.marg), pc(v.margPct)) : ""}
       ${col("Clientes nuevos", K.nuevos + " distribuidora", v ? v.nuevos + " tuyos" : "")}${col("SKU por cliente", K.sku.toFixed(1) + " distribuidora", v ? v.sku.toFixed(1) + " tuyos" : `${K.nc} clientes compraron`)}</div>`;
