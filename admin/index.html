@@ -5165,7 +5165,7 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261110081612";
+const HWF_VER = "20261110082034";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer)\/[^/]*$/, "/");
   let avisado = false;
@@ -5272,5 +5272,30 @@ function av2Html(B, yo, act) {
 setTimeout(() => { try { if (D && $("s-res") && !$("s-res").hidden && !$("kpCard")) pintarDashboard(); } catch (e) {} }, 50);
 </script>
 
+
+<script>/* patch_estadoscript */
+(function () {
+  const K = "hwf-estado-script", hoy = () => new Date().toISOString().slice(0, 10);
+  function aviso(titulo, txt) { try { if (document.getElementById("hwfEstadoScript") || localStorage.getItem(K) === hoy() + titulo) return; } catch (e) {}
+    const d = document.createElement("div"); d.id = "hwfEstadoScript"; d.setAttribute("role", "alert");
+    d.style.cssText = "position:fixed;left:10px;right:10px;bottom:calc(76px + env(safe-area-inset-bottom));z-index:100000;background:#B42318;color:#fff;border-radius:14px;padding:12px 14px;font:14px/1.4 system-ui,sans-serif;box-shadow:0 8px 24px rgba(0,0,0,.3);max-width:640px;margin:0 auto";
+    d.innerHTML = "<b>" + titulo + "</b><br>" + txt + '<div style="text-align:right;margin-top:6px"><button type="button" style="font:inherit;font-weight:700;border:0;border-radius:10px;padding:6px 14px;background:#fff;color:#B42318">Entendido</button></div>';
+    d.querySelector("button").onclick = () => { try { localStorage.setItem(K, hoy() + titulo); } catch (e) {} d.remove(); };
+    document.body.appendChild(d); }
+  async function revisar() {
+    try {
+      const cfg = typeof SYC === "function" ? SYC() : null; if (!cfg || !cfg.url || typeof syCall !== "function") return;
+      const raiz = location.pathname.replace(/\/(demo\/)?admin\/[^/]*$/, "/");
+      let esperado = ""; try { const j = await (await fetch(raiz + "version.json?t=" + Date.now(), { cache: "no-store" })).json(); esperado = j.script || ""; } catch (e) {}
+      const r = await syCall(cfg, { accion: "estadoScript" }); if (!r) return;
+      const pasos = "En la planilla: Extensiones → Apps Script. Instrucciones en hwf-fuente/script/INSTALAR_AUTOACTUALIZACION.md.";
+      if (r.ok === false && /desconocid/i.test(String(r.error || ""))) return aviso("El script de Google no tiene el cargador automático", "Producción puede estar con una versión antigua (sin Logística, Chofer ni GPS). Hay que pegar script/Cargador.gs como Código.gs, ejecutar instalarAutoActualizacion y publicar una Versión nueva. " + pasos);
+      if (r.error) return aviso("La actualización automática del script falló", String(r.error).replace(/</g, "&lt;") + " " + pasos);
+      if (esperado && r.version && String(r.version) < esperado) return aviso("El script de Google está atrasado", "Producción tiene la versión " + r.version + " y la última es " + esperado + ". Se corrige sola en menos de una hora; si sigue, revisa la hoja «Actualizaciones». " + pasos);
+    } catch (e) {}
+  }
+  setTimeout(revisar, 8000);
+})();
+</script>
 </body>
 </html>
