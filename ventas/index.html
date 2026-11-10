@@ -7207,5 +7207,25 @@ function confirmarNota() {
   const x = document.createElement("button"); x.type = "button"; x.className = "m-x"; x.setAttribute("aria-label", "Cerrar y volver"); x.title = "Cerrar y volver"; x.textContent = "×";
   x.onclick = () => cerrarModal(); card.insertBefore(x, card.firstChild); })();
 </script>
+<script id="hwfVerJs">/* sello_version: aviso de versión nueva */
+const HWF_VER = "20261110053053";
+(function () {
+  const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda)\/[^/]*$/, "/");
+  let avisado = false;
+  async function revisar() {
+    if (avisado || !navigator.onLine) return;
+    try { const r = await fetch(raiz + "version.json?t=" + Date.now(), { cache: "no-store" }); if (!r.ok) return; const j = await r.json();
+      if (j && j.v && String(j.v) > HWF_VER) mostrar(j); } catch (e) {}
+  }
+  function mostrar(j) { avisado = true; const d = document.createElement("div"); d.id = "hwfVer";
+    d.innerHTML = `<span style="white-space:nowrap">Nueva versión disponible</span><button type="button">Actualizar</button>`;
+    d.style.cssText = "position:fixed;left:50%;transform:translateX(-50%);top:calc(34px + env(safe-area-inset-top));white-space:nowrap;z-index:10000;background:#0B3146;color:#fff;border-radius:999px;padding:8px 8px 8px 16px;display:flex;gap:10px;align-items:center;box-shadow:0 8px 24px rgba(0,0,0,.3);font:600 .88rem system-ui,sans-serif;max-width:calc(100vw - 24px)";
+    const b = d.querySelector("button"); b.style.cssText = "border:0;border-radius:999px;background:#F0A818;color:#0B3146;font:800 .85rem system-ui,sans-serif;padding:8px 14px;cursor:pointer";
+    b.onclick = async () => { b.textContent = "Actualizando…"; try { const rs = await navigator.serviceWorker?.getRegistrations?.(); if (rs) await Promise.all(rs.map(x => x.update().catch(() => {}))); } catch (e) {} location.reload(); };
+    document.body.appendChild(d); }
+  setTimeout(revisar, 4000); setInterval(revisar, 30 * 60 * 1000);
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) revisar(); });
+})();
+</script>
 </body>
 </html>
