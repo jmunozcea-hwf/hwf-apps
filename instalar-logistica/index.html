@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="es-CL">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#1C7A4E">
+<title>Instalar Logística HWF</title>
+<link rel="icon" href="../logistica/icon-192.png">
+<style>
+:root{--bg:#F3F6F8;--surface:#fff;--ink:#0F1E29;--muted:#5B6874;--line:#DAE1E7;--navy:#0B3146;--ok:#1C7A4E;--okbg:#E3F4EA}
+@media (prefers-color-scheme:dark){:root{--bg:#0E171E;--surface:#16222B;--ink:#E8EEF2;--muted:#9AA8B4;--line:#26343F;--navy:#80C8CD;--ok:#7FD3A6;--okbg:#173327}}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+a{color:var(--navy)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.45}
+.wrap{max-width:720px;margin:0 auto;padding:20px 16px 48px;display:grid;gap:16px}
+header{background:linear-gradient(120deg,#0B3146,#1C7A4E);color:#fff;border-radius:18px;padding:20px}
+header h1{margin:0 0 4px;font-size:1.45rem}
+header p{margin:0;opacity:.9}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px;display:grid;gap:12px}
+.card h2{margin:0;font-size:1.1rem}
+.app{display:grid;grid-template-columns:56px 1fr;gap:12px;align-items:center}
+.app img{width:56px;height:56px;border-radius:14px}
+.app b{display:block;font-size:1.05rem}
+.app small{color:var(--muted)}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+a.btn,button.btn{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:10px 16px;border-radius:12px;font:inherit;font-weight:700;text-decoration:none;cursor:pointer;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+a.btn.pri,button.btn.pri{background:#0B3146;border-color:#0B3146;color:#fff}
+ol{margin:0;padding-left:20px;display:grid;gap:6px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tabs button{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:8px 14px;font:inherit;font-weight:600;cursor:pointer;min-height:40px}
+.tabs button[aria-pressed="true"]{background:#0B3146;border-color:#0B3146;color:#fff}
+.ok{background:var(--okbg);color:var(--ok);border-radius:10px;padding:10px 12px;font-weight:600}
+.muted{color:var(--muted);font-size:.9rem;margin:0}
+.aviso{border-color:#F0A818;background:color-mix(in srgb,#F0A818 10%,var(--surface))}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>🚚 Logística HWF</h1>
+    <p>Instala o reinstala la app de Logística en el celular del chofer o el computador de bodega.</p>
+  </header>
+
+  <section class="card">
+    <h2>1. Abre la app</h2>
+    <div class="app"><img src="../logistica/icon-192.png" alt=""><div><b>Logística HWF</b><small>Para bodega y despacho: panel, inventario por bodega, abastecimiento y rutas diarias con costo (Hyundai HD65 MAX, Peugeot Boxer L2H2, Maxus G10 Cargo y Peugeot Partner L2).</small></div></div>
+    <div class="btns"><a class="btn pri" href="../logistica/">Abrir Logística HWF</a></div>
+  </section>
+
+  <section class="card">
+    <h2>2. Agrégala a la pantalla de inicio</h2>
+    <div class="tabs" role="group" aria-label="Tipo de equipo">
+      <button type="button" data-t="and" aria-pressed="true">Android</button>
+      <button type="button" data-t="ios" aria-pressed="false">iPhone</button>
+      <button type="button" data-t="pc" aria-pressed="false">Computador</button>
+    </div>
+    <ol data-p="and"><li>Abre la app con el botón de arriba, en <b>Chrome</b>.</li><li>Toca el menú <b>⋮</b> (arriba a la derecha).</li><li>Elige <b>«Instalar app»</b> o <b>«Agregar a la pantalla principal»</b>.</li></ol>
+    <ol data-p="ios" hidden><li>Abre la app con el botón de arriba, en <b>Safari</b>.</li><li>Toca <b>Compartir</b> (el cuadrado con la flecha hacia arriba).</li><li>Elige <b>«Agregar a inicio»</b> y luego <b>Agregar</b>.</li></ol>
+    <ol data-p="pc" hidden><li>Abre la app con el botón de arriba, en <b>Chrome</b> o <b>Edge</b>.</li><li>En la barra de direcciones, toca el ícono de <b>instalar</b> (pantalla con flecha).</li><li>Confirma con <b>Instalar</b>.</li></ol>
+    <p class="muted">La primera vez la app pide el <b>código de conexión</b> (empieza con <b>HWF1:</b>). Te lo entrega HWF Admin (Menú ☰ → Datos). También puedes conectar con la URL del script y la clave.</p>
+  </section>
+
+  <section class="card">
+    <h2>3. ¿No ves la versión nueva?</h2>
+    <p class="muted" style="margin:0">Las apps se actualizan solas. Si una sigue mostrando la versión anterior, toca este botón y vuelve a abrirla. <b>No se borra</b> la conexión, la flota ni las ubicaciones guardadas.</p>
+    <div class="btns"><button class="btn pri" type="button" id="forzar">Forzar versión nueva</button></div>
+    <div class="ok" id="okMsg" hidden></div>
+    <p class="muted">Si aún así no cambia: elimina el ícono de la app del inicio y vuelve a instalarla desde esta página (paso 1 y 2).</p>
+  </section>
+</div>
+<script>
+document.querySelector(".tabs").onclick = function (e) {
+  var b = e.target.closest("[data-t]"); if (!b) return;
+  document.querySelectorAll(".tabs button").forEach(function (x) { x.setAttribute("aria-pressed", x === b); });
+  document.querySelectorAll("ol[data-p]").forEach(function (o) { o.hidden = o.dataset.p !== b.dataset.t; });
+};
+(function () { var ua = navigator.userAgent; var t = /iPhone|iPad|iPod/.test(ua) ? "ios" : /Android/.test(ua) ? "and" : "pc"; var b = document.querySelector('[data-t="' + t + '"]'); if (b) b.click(); })();
+/* quita el caché de las apps (no toca la conexión ni los datos guardados) */
+document.getElementById("forzar").onclick = async function () {
+  var btn = this; btn.disabled = true; btn.textContent = "Actualizando…";
+  var n = 0;
+  try { if ("serviceWorker" in navigator) { var regs = await navigator.serviceWorker.getRegistrations(); for (var i = 0; i < regs.length; i++) { await regs[i].unregister(); n++; } } } catch (e) {}
+  try { if (window.caches) { var ks = await caches.keys(); for (var j = 0; j < ks.length; j++) await caches.delete(ks[j]); } } catch (e) {}
+  var m = document.getElementById("okMsg"); m.hidden = false;
+  m.textContent = "Listo. Cierra la app por completo y vuelve a abrirla: cargará la versión nueva.";
+  btn.textContent = "Forzar versión nueva"; btn.disabled = false;
+};
+</script>
+</body>
+</html>
