@@ -7173,7 +7173,7 @@ function confirmarNota() {
   x.onclick = () => cerrarModal(); card.insertBefore(x, card.firstChild); })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261110124715";
+const HWF_VER = "20261110133523";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer)\/[^/]*$/, "/");
   let avisado = false;
@@ -7459,5 +7459,36 @@ rutaElegirPr = function () { return rutaSoloPr(); };
 .av-eq + .in-ley{color:rgba(255,255,255,.92)!important}
 .in-sec h3{color:inherit}.in-sec h3 small{color:inherit!important;opacity:.8}
 </style>
+
+<style>/* patch_prarmar */ .pr-armar{width:100%;margin:2px 0 10px;min-height:46px;border-radius:12px;border:0;background:#0B3146;color:#fff;font:inherit;font-weight:800;cursor:pointer}
+.pr-armar[disabled]{opacity:.5}</style>
+<script>/* patch_prarmar: armar la ruta con los prospectos filtrados */
+(function () {
+  const espera = (fn, ms) => new Promise(r => { const t0 = Date.now(); (function ver() { const v = fn(); if (v || Date.now() - t0 > ms) return r(v); setTimeout(ver, 120); })(); });
+  async function armar() {
+    try {
+      setModo("ruta");
+      if (!(await espera(() => typeof RUTA !== "undefined" && RUTA && document.getElementById("rProsZ"), 6000))) { toast("Abre la pestaña Ruta una vez y vuelve a intentarlo."); return; }
+      rutaSoloPr();
+      const ok = await espera(() => { const l = document.getElementById("rpL"); return l && l.querySelector("input") ? l : null; }, 4000);
+      const b = [...document.querySelectorAll("button")].find(x => x.textContent.trim() === "Ruta solo prospectos");
+      if (!ok || !b) { if (b) toast("Ningún prospecto filtrado alcanza en las horas elegidas: ajusta las horas o la comuna."); return; }
+      const m = /(\d+)\s*de\s*(\d+)/.exec(((document.getElementById("rpRes") || {}).innerText || "").replace(/\n/g, " ")), hs = (typeof RPF !== "undefined" && RPF && RPF.horas) || 6;
+      b.click(); setTimeout(() => { try { window.scrollTo({ top: 0, behavior: "smooth" }); } catch (e) {}
+        if (m && +m[1] < +m[2]) toast(`Ruta con ${m[1]} de ${m[2]} prospectos filtrados: los que alcanzan en ${hs} h. Para más, toca 🎯 y sube las horas o elige menos comunas.`, 6000);
+        else if (m) toast(`Ruta con los ${m[1]} prospectos filtrados.`); }, 400);
+    } catch (e) { toast("No se pudo armar la ruta: " + (e && e.message || e)); }
+  }
+  const _pe = pintarEmbudo;
+  pintarEmbudo = function () { const r = _pe.apply(this, arguments);
+    try { const f = document.getElementById("prF2"); if (f && !document.getElementById("prArmar")) {
+        const n = document.querySelectorAll("#crmEmbudo .pr-card").length, b = document.createElement("button");
+        b.type = "button"; b.id = "prArmar"; b.className = "pr-armar"; b.disabled = !n;
+        b.textContent = n ? `🗺️ Armar ruta con estos ${n} prospecto${n === 1 ? "" : "s"}` : "🗺️ Sin prospectos con estos filtros";
+        b.onclick = armar; f.after(b); } } catch (e) {}
+    return r; };
+  try { if (typeof MODO !== "undefined" && MODO === "embudo") pintarEmbudo(); } catch (e) {}
+})();
+</script>
 </body>
 </html>
