@@ -5091,7 +5091,8 @@ function abDatos() {
   const R = rkdCalc(B, cy, cm), resto = R ? Math.max(0, 1 - R.hPas / R.hTot) : 0.5;
   const meses = PLAN14.filter(p => p.ym >= cy * 100 + cm).slice(0, 14);
   const cuCod = cod => { const c = (typeof COSTO !== "undefined" && COSTO) ? Number(COSTO[cod]) : 0; return c > 0 ? c : 0; };
-  const L = Object.values(pr).filter(o => FC ? o.fc && o.fc[0] > 0 : o.q > 0).map(o => { const s = stockDe(o.cod); return Object.assign(o, { qm: FC ? o.fc[0] : o.q / 3, cu: o.q ? o.c / o.q : cuCod(o.cod),
+  const DESC = new Set(B.desc || []); /* descontinuados (hoja «Descontinuados»): no se compran */
+  const L = Object.values(pr).filter(o => (FC ? o.fc && o.fc[0] > 0 : o.q > 0) && !DESC.has(o.cod)).map(o => { const s = stockDe(o.cod); return Object.assign(o, { qm: FC ? o.fc[0] : o.q / 3, cu: o.q ? o.c / o.q : cuCod(o.cod),
     cls: FC ? o.fc[3] || "C" : "", sg: FC ? o.fc[2] : 0, stock: s == null ? 0 : Math.max(0, Number(s) || 0), sinDato: s == null, compras: [] }); });
   /* simulación mes a mes por producto */
   const segF = P.seg / 30, leadF = P.lead / 30, NV = FC ? AB_NIV[P.modo] : null, raiz = Math.sqrt((P.lead + P.rev) / 30);
@@ -5105,7 +5106,7 @@ function abDatos() {
   const inv0 = L.reduce((s, o) => s + o.stock * o.cu, 0), cvDia = L.reduce((s, o) => s + o.qm * o.cu, 0) * (meses[0].meta / base) / 30;
   let inv = inv0; tot.forEach(t => { inv = inv + t.compra - t.costoVta; t.invFin = inv;  });
   const margen = L.reduce((s, o) => s + o.v, 0) ? 1 - L.reduce((s, o) => s + o.c, 0) / L.reduce((s, o) => s + o.v, 0) : 0;
-  return { P, L, tot, base, prev, resto, vtaMes, inv0, FC: !!FC, NV, diasInv: cvDia > 0 ? inv0 / cvDia : 0, margen, sinStock: L.filter(o => o.sinDato).length, cy, cm };
+  return { P, L, tot, base, prev, resto, vtaMes, inv0, FC: !!FC, NV, nDesc: DESC.size, diasInv: cvDia > 0 ? inv0 / cvDia : 0, margen, sinStock: L.filter(o => o.sinDato).length, cy, cm };
 }
 let abQ = "";
 function pintarAbast() {
@@ -5132,7 +5133,7 @@ function pintarAbast() {
     </div>
     <p class="muted" style="font-size:.78rem;margin:8px 0 0">Cómo se calcula: ${X.FC ? `la venta de cada producto = pronóstico (promedio de los 6 meses cerrados, elegido por prueba sobre 2026; total ${pm(X.base)}/mes)` : `la venta de cada producto en ${X.prev.map(v => MES[v % 100 - 1]).join(", ")} (promedio ${pm(X.base)}/mes)`} se escala a la meta de cada mes del plan, con la misma mezcla.
       Compra del mes = venta esperada + stock de seguridad (${X.NV ? "según el error real del pronóstico de cada producto y su clase A/B/C, servicio " + X.NV.t + ", revisión semanal" : X.P.seg + " días del mes siguiente"}) − stock proyectado; este mes cubre lo que falta para la meta (${pm(X.tot[0].meta)} − ${pm(X.vtaMes)} ya vendidos) más el plazo de entrega (${X.P.lead} días).
-      Stock: bodega DISTRIBUIDORA al ${esc(D.stockFecha || "")}${X.sinStock ? ` (${X.sinStock} productos sin dato de stock se tratan como 0)` : ""}. Costos: costo unitario de la venta. Margen del mix: ${Math.round(X.margen * 100)}%.</p></div>
+      ${X.nDesc ? "Sin compra: " + X.nDesc + " productos descontinuados (hoja «Descontinuados» de la planilla). " : ""}Stock: bodega DISTRIBUIDORA al ${esc(D.stockFecha || "")}${X.sinStock ? ` (${X.sinStock} productos sin dato de stock se tratan como 0)` : ""}. Costos: costo unitario de la venta. Margen del mix: ${Math.round(X.margen * 100)}%.</p></div>
   <div class="card"><h2>Presupuesto de compras <span class="muted">mes a mes, a costo</span></h2>
     <div class="tbl"><table class="ab-t"><thead><tr><th>Mes</th><th class="r">Meta venta</th><th class="r">Costo de lo vendido</th><th class="r">Compras</th><th class="r">Inventario fin de mes</th></tr></thead><tbody>
     ${X.tot.map((t, i) => `<tr class="${i === 0 ? "ab-cur" : ""}"><td>${MES[t.m - 1]} ${t.y}${i === 0 ? " · en curso (falta " + pm(Math.max(0, t.meta - X.vtaMes)) + ")" : ""}</td><td class="r">${pm(t.meta)}</td><td class="r">${pm(t.costoVta)}</td><td class="r"><b>${pm(t.compra)}</b></td><td class="r">${pm(t.invFin)}</td></tr>`).join("")}
@@ -5174,7 +5175,7 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261110170223";
+const HWF_VER = "20261110172336";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer)\/[^/]*$/, "/");
   let avisado = false;

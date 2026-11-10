@@ -207,11 +207,11 @@ function abastDatos(b) { const D = DATA(), dm = demanda(D), P = PI(), A = parA()
   const aplica = base > 0 && (esT || esDistB(b)), meta = metaF(ym), f0 = aplica ? Math.max(0, meta - vMes) / base : 1, f1 = aplica ? metaF(sig) / base : 1;
   const st = {}; (D.bodegas[b] || []).forEach(([c, , s]) => st[c] = Math.max(0, Number(s) || 0));
   const cods = new Set(Object.keys(st).concat(Object.keys(dm).filter(c => qMes(dm, c, b) > 0)));
-  const N = conFc ? NIVELES[A.modo] : null, L = []; cods.forEach(cod => { const q = qMes(dm, cod, b); if (!(q > 0)) return; const fc = dm[cod] && dm[cod].fc, o = esT ? 4 : 0, cls = fc ? fc[o + 3] || "C" : "",
+  const N = conFc ? NIVELES[A.modo] : null, L = [], DESC = new Set(D.desc || []); cods.forEach(cod => { const q = qMes(dm, cod, b); if (!(q > 0) || DESC.has(cod)) return;   /* descontinuados: no se compran */ const fc = dm[cod] && dm[cod].fc, o = esT ? 4 : 0, cls = fc ? fc[o + 3] || "C" : "",
       ss = N && fc && fc[o + 2] > 0 ? N[cls] * fc[o + 2] * f1 * Math.sqrt((A.lead + A.rev) / 30) : q * f1 * A.seg / 30,
       s = st[cod] || 0, necesita = q * f0 + q * f1 * A.lead / 30 + ss, compra = Math.max(0, Math.ceil(necesita - s)), cu = cuDe(D, dm, cod), dia = q * f1 / 30;
     L.push({ cod, nombre: (P[cod] && P[cod].nombre) || cod, prov: (P[cod] && P[cod].prov) || "Sin proveedor", q: q * f1, s, cls, ss, dias: dia ? s / dia : Infinity, compra, monto: compra * cu, cu, urg: dia ? s < q * f1 * A.lead / 30 + ss : false }); });
-  return { L, f: f1, meta, vMes, base, A, esT, aplica, conFc, N }; }
+  return { L, f: f1, meta, vMes, base, A, esT, aplica, conFc, N, nDesc: DESC.size }; }
 let abB = null;
 function pintarAbast() { const D = DATA(), bods = Object.keys(D.bodegas || {}).filter(b => esDistB(b) || esTiendaB(b)); const opts = bods.length ? bods : Object.keys(D.bodegas || {});
   if (!abB || !opts.includes(abB)) abB = opts.find(esDistB) || opts[0];
@@ -225,7 +225,7 @@ function pintarAbast() { const D = DATA(), bods = Object.keys(D.bodegas || {}).f
     <div class="row" style="margin-top:10px"><label>Stock de seguridad<select id="aModo">${Object.entries(NIVELES).map(([k, n]) => `<option value="${k}"${X.A.modo === k ? " selected" : ""}>según error · servicio ${n.t}</option>`).join("")}<option value="dias"${X.N ? "" : " selected"}>días fijos</option></select></label>
       <label${X.N ? ' style="display:none"' : ""}>Días de seguridad<input id="aSeg" type="number" min="0" max="60" value="${X.A.seg}" style="width:90px"></label>
       <label>Plazo del proveedor (días)<input id="aLead" type="number" min="0" max="60" value="${X.A.lead}" style="width:90px"></label><button type="button" class="btn ver" id="aCsv">⬇ Orden sugerida (Excel/CSV)</button></div>
-    <p class="nota">Compra = lo que falta vender este mes + venta durante el plazo del proveedor (con la meta del mes siguiente) + stock de seguridad − stock. ${X.conFc ? "Venta de cada producto = pronóstico (distribuidora: promedio de 6 meses cerrados; tienda: suavizamiento exponencial), elegido por prueba sobre 2026," : "Venta de cada producto = promedio de los 3 meses cerrados de esa bodega,"} escalado a la meta del plan (distribuidora, con estacionalidad, 54,3 → 65,7 → 71,1 MM; tienda 8,2 → 11,0 → 14,2 MM; total $1.000 MM en 14 meses). ${X.N ? "Stock de seguridad según el error real del pronóstico de cada producto y su clase (A = 80 % de la venta, B = 15 %, C = 5 %), servicio " + X.N.t + ", revisión semanal." : "Stock de seguridad: " + X.A.seg + " días de venta."} Mismo método que Admin → Abastecimiento.</p></div>
+    <p class="nota">Compra = lo que falta vender este mes + venta durante el plazo del proveedor (con la meta del mes siguiente) + stock de seguridad − stock. ${X.conFc ? "Venta de cada producto = pronóstico (distribuidora: promedio de 6 meses cerrados; tienda: suavizamiento exponencial), elegido por prueba sobre 2026," : "Venta de cada producto = promedio de los 3 meses cerrados de esa bodega,"} escalado a la meta del plan (distribuidora, con estacionalidad, 54,3 → 65,7 → 71,1 MM; tienda 8,2 → 11,0 → 14,2 MM; total $1.000 MM en 14 meses). ${X.N ? "Stock de seguridad según el error real del pronóstico de cada producto y su clase (A = 80 % de la venta, B = 15 %, C = 5 %), servicio " + X.N.t + ", revisión semanal." : "Stock de seguridad: " + X.A.seg + " días de venta."} ${X.nDesc ? " Sin compra: " + X.nDesc + " productos descontinuados (hoja «Descontinuados» de la planilla)." : ""} Mismo método que Admin → Abastecimiento.</p></div>
   ${GP.map(g => `<div class="card"><h2>${esc(g.k)} <small>${g.l.length} productos · ${mm(g.t)}</small></h2><div class="tw"><table class="t"><thead><tr><th>Producto</th><th>Stock</th><th>Venta/mes</th><th>Seguridad</th><th>Días</th><th>Comprar</th><th>Monto</th></tr></thead><tbody>
     ${g.l.map(x => `<tr><td>${esc(x.nombre)}<small>${esc(x.cod)}${x.cls ? " · clase " + x.cls : ""}</small></td><td class="${x.s <= 0 ? "bad" : ""}">${nf(x.s)}</td><td>${nf(x.q, x.q < 10 ? 1 : 0)}</td><td>${nf(x.ss, x.ss < 10 ? 1 : 0)}</td><td><span class="pill ${x.urg ? "p-bad" : "p-wa"}">${isFinite(x.dias) ? nf(x.dias) : "—"}</span></td><td><b>${nf(x.compra)} u</b></td><td>${mm(x.monto)}</td></tr>`).join("")}</tbody></table></div></div>`).join("") || '<div class="card"><p class="muted">No hay compras sugeridas con estos parámetros.</p></div>'}`;
   $("abB").onclick = e => { const b = e.target.closest("[data-b]"); if (b) { abB = b.dataset.b; pintarAbast(); } };
@@ -452,7 +452,7 @@ if (!cfg()) pantallaConexion(); else if (!DATA()) { bajar(true).then(() => DATA(
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261110170223";
+const HWF_VER = "20261110172336";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer)\/[^/]*$/, "/");
   let avisado = false;
