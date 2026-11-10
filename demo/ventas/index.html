@@ -3702,7 +3702,7 @@ candidatos = function () {
    ================================================================ */
 const APP_VERSION = "5.6";
 const APP_NOVEDADES = [
-  "Prospectos de todo Chile, para todos los vendedores: una sola búsqueda (nombre, comuna, dirección, rubro o teléfono) con filtro de región y comuna, también en Ruta → «🎯 Prospectos a la ruta» para sumarlos a tu ruta o armar una ruta solo de prospectos.",
+  "Prospectos de todo Chile: ves los libres y los tuyos (un prospecto queda tuyo cuando se le factura en Defontana; Admin puede reasignarlo). Una sola búsqueda (nombre, comuna, dirección, rubro o teléfono) con filtro de región y comuna, también en Ruta → «🎯 Prospectos a la ruta» para sumarlos a tu ruta o armar una ruta solo de prospectos.",
   "Navegación más simple: flechas ‹ › para pasar de apartado, desliza el dedo para cambiar y el botón atrás vuelve donde estabas.",
   "Nuevo apartado Nutrición: compara el alimento de la competencia con los nuestros, con 3 razones y la ración diaria equivalente para cada perro o gato. Incluye las fichas técnicas de toda la línea HWF.",
   "Prospectos: crea prospectos nuevos y vincula un prospecto con su cliente de la cartera (la app los reconoce como el mismo). En Ruta, agrega prospectos a la ruta del día.",
@@ -4199,7 +4199,7 @@ function pintarEmbudo() {
   const vencen = base.filter(o => o.proximo_contacto && o.proximo_contacto <= hoy && o.etapa !== "Descartado").length;
   const avanz = base.filter(o => prIdx(o.etapa) >= 3 && o.etapa !== "Descartado").length, pend = Object.keys(lsGet(PRCOLA, {})).length, s = lsGet(PRKEY, null);
   box.innerHTML = `
-    <div class="pr-hero"><h2>${verTodos && !prVend ? "Prospectos de todos los vendedores" : "Prospectos · todo Chile"}${prVend ? " · " + esc(prVend) : ""} <small style="font-weight:600;opacity:.85">${base.length} prospectos · ${avanz} con nota de pedido o más</small></h2>
+    <div class="pr-hero"><h2>${verTodos && !prVend ? "Prospectos de todos los vendedores" : "Prospectos libres y tuyos · todo Chile"}${prVend ? " · " + esc(prVend) : ""} <small style="font-weight:600;opacity:.85">${base.length} prospectos · ${avanz} con nota de pedido o más</small></h2>
       <div class="pr-fun">${PR_ETAPAS.map((e, i) => `<button type="button" data-et="${i}" aria-pressed="${prFiltro === i}"><span>${esc(PR_CORTO[i])}</span><i style="width:${Math.round(cnt[i] / max * 100)}%;${i === 7 ? "opacity:.5" : ""}"></i><b>${cnt[i]}</b></button>`).join("")}</div></div>
     <div class="pr-info"><span>${s && s.bajado ? "Sincronizado con HWF Admin" : "Prospectos de todo Chile"}${pend ? ` · <span class="pr-pend">${pend} ${pend === 1 ? "cambio" : "cambios"} por enviar</span>` : ""}</span><span class="pr-bt"><button class="btn primary" type="button" id="prNuevo">＋ Crear prospecto</button><button class="btn" type="button" id="prAct">Actualizar</button></span></div>
     ${verTodos && vends.length > 1 ? `<div class="pr-chips" id="prVends"><button type="button" data-v="" aria-pressed="${!prVend}">Todos</button>${vends.map(v => `<button type="button" data-v="${esc(v)}" aria-pressed="${prVend === v}">${esc(v)}</button>`).join("")}</div>` : ""}
@@ -7132,7 +7132,7 @@ function confirmarNota() {
   x.onclick = () => cerrarModal(); card.insertBefore(x, card.firstChild); })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261110072123";
+const HWF_VER = "20261110072437";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer)\/[^/]*$/, "/");
   let avisado = false;
@@ -7353,7 +7353,7 @@ function prDuenoHtml(o, verNombre) { const a = String(o.asignado || "").trim();
 try { if (typeof MODO !== "undefined" && MODO === "embudo") pintarEmbudo(); } catch (e) {}
 </script>
 
-<style>/* patch_prtodos */ .prf{grid-template-columns:1fr 1fr}.prf select:last-child{grid-column:auto}.pr-due{display:none}</style>
+<style>/* patch_prtodos */ </style>
 <script>/* patch_prtodos: prospectos de todo Chile, sin vendedor asignado */
 Object.assign(RP_REG, {
   "Arica y Parinacota": ["arica","putre","camarones","general lagos"],
@@ -7376,10 +7376,6 @@ rpRegion = function (x) { const r = rpN(x.region);
       [/biob/, "Biobío"], [/araucan/, "Araucanía"], [/los rios/, "Los Ríos"], [/los lagos/, "Los Lagos"], [/aysen|aisen|ibanez/, "Aysén"], [/magallanes|antartica/, "Magallanes"]];
     for (const [re, k] of M) if (re.test(r)) return k; }
   const c = rpN(x.comuna); for (const k in RP_REG) if (RP_REG[k].includes(c)) return k; return "Sin región"; };
-prMios = function () { return prTodos(); };
-if (typeof PRF2 !== "undefined") PRF2.due = "";
-{ const _pfh = prFiltrosHtml; prFiltrosHtml = function (t) { return _pfh(t).replace(/<select data-k="due"[\s\S]*?<\/select>/, ""); }; }
-prDuenoHtml = function () { return ""; };
 try { if (typeof MODO !== "undefined" && MODO === "embudo") pintarEmbudo(); } catch (e) {}
 </script>
 
