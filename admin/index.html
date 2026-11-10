@@ -3963,7 +3963,7 @@ function pintarPlan() {
   const chk = (() => { try { return JSON.parse(localStorage.getItem(PLCHK) || "{}"); } catch (e) { return {}; } })();
   const it = c => `<div class="it"><b>${esc(tc(c.nombre))}<span class="pl-tag ${c.abc}">${c.abc}</span></b><span class="v">${mm(c.hab)}/mes</span><small>${esc(c.cart)} · <span class="pl-tag d">${c.diasSin} días</span></small></div>`;
   const surt = P.L.filter(c => (c.abc === "A" || c.abc === "B") && c.ofrecer.length && c.diasSin < 60).sort((a, b) => b.v3 - a.v3).slice(0, 12);
-  $("masBody").innerHTML = `<div class="card pl"><h2>Plan de crecimiento <span class="muted">plan a 14 meses: 63 → 85 → 100 MM netos al mes</span></h2>
+  $("masBody").innerHTML = `<div class="card pl"><h2>Plan de crecimiento <span class="muted">plan a 14 meses: 55,2 → 61,2 → 65,7 MM netos al mes</span></h2>
     <div class="pl-k"><div><span>Venta del mes a la fecha</span><b>${mm(P.vMes)}</b><small>${String(P.CD).padStart(2, "0")}-${String(P.M).padStart(2, "0")} · sin tienda</small></div>
       <div><span>Proyección de cierre</span><b>${mm(proy)}</b><small>${Math.round(proy / PLAN.meta * 100)}% de la meta del mes</small></div>
       <div><span>Brecha a la meta del mes</span><b style="color:${falta ? "var(--bad)" : "var(--ok)"}">${falta ? mm(falta) : "cumplida"}</b><small>${(() => { const _p = typeof PLAN14 !== "undefined" ? PLAN14.find(x => x.ym === P.Y * 100 + P.M) : null; return _p && _p.fc ? "pronóstico sin cambios " + mm(_p.fc) : "meta del plan"; })()}</small></div>
@@ -4896,9 +4896,9 @@ function cliFantasia(nombre) { return cliFantasias()[norm(nombre || "")] || ""; 
 function cliBusca(ci, nombre) { const c = D.clientes[ci] || []; return [cliFantasia(nombre || c[0]), c[3], c[4], String(c[4] || "").replace(/[^0-9kK]/g, ""), c[5], c[6], c[7]].filter(Boolean).join(" "); }
 </script>
 
-<script>/* rankdist: plan 63 → 85 → 100 MM en 14 meses y ranking de vendedores por objetivos */
+<script>/* rankdist: plan 55,2 → 61,2 → 65,7 MM en 14 meses y ranking de vendedores por objetivos */
 /* patch_plan14modelo: plan calculado con pronóstico (ensamble de 5 modelos) */
-const PLAN14 = [{"ym": 202611, "y": 2026, "m": 11, "meta": 63000000, "fc": 55600000, "nivel": 63.0, "hito": 63}, {"ym": 202612, "y": 2026, "m": 12, "meta": 66400000, "fc": 55600000, "nivel": 66.4, "hito": 0}, {"ym": 202701, "y": 2027, "m": 1, "meta": 69800000, "fc": 55700000, "nivel": 69.8, "hito": 0}, {"ym": 202702, "y": 2027, "m": 2, "meta": 73000000, "fc": 55700000, "nivel": 73.0, "hito": 0}, {"ym": 202703, "y": 2027, "m": 3, "meta": 76200000, "fc": 55700000, "nivel": 76.2, "hito": 0}, {"ym": 202704, "y": 2027, "m": 4, "meta": 79200000, "fc": 55700000, "nivel": 79.2, "hito": 0}, {"ym": 202705, "y": 2027, "m": 5, "meta": 82200000, "fc": 55700000, "nivel": 82.2, "hito": 0}, {"ym": 202706, "y": 2027, "m": 6, "meta": 85000000, "fc": 55700000, "nivel": 85.0, "hito": 85}, {"ym": 202707, "y": 2027, "m": 7, "meta": 87700000, "fc": 55700000, "nivel": 87.7, "hito": 0}, {"ym": 202708, "y": 2027, "m": 8, "meta": 90400000, "fc": 55700000, "nivel": 90.4, "hito": 0}, {"ym": 202709, "y": 2027, "m": 9, "meta": 92900000, "fc": 55700000, "nivel": 92.9, "hito": 0}, {"ym": 202710, "y": 2027, "m": 10, "meta": 95400000, "fc": 55800000, "nivel": 95.4, "hito": 0}, {"ym": 202711, "y": 2027, "m": 11, "meta": 97700000, "fc": 55800000, "nivel": 97.7, "hito": 0}, {"ym": 202712, "y": 2027, "m": 12, "meta": 100000000, "fc": 55800000, "nivel": 100.0, "hito": 100}];
+const PLAN14 = [{"ym": 202611, "y": 2026, "m": 11, "meta": 55200000, "fc": 55600000, "nivel": 55.2, "hito": 55}, {"ym": 202612, "y": 2026, "m": 12, "meta": 56100000, "fc": 55600000, "nivel": 56.1, "hito": 0}, {"ym": 202701, "y": 2027, "m": 1, "meta": 57000000, "fc": 55700000, "nivel": 57.0, "hito": 0}, {"ym": 202702, "y": 2027, "m": 2, "meta": 57800000, "fc": 55700000, "nivel": 57.8, "hito": 0}, {"ym": 202703, "y": 2027, "m": 3, "meta": 58600000, "fc": 55700000, "nivel": 58.6, "hito": 0}, {"ym": 202704, "y": 2027, "m": 4, "meta": 59500000, "fc": 55700000, "nivel": 59.5, "hito": 0}, {"ym": 202705, "y": 2027, "m": 5, "meta": 60400000, "fc": 55700000, "nivel": 60.4, "hito": 0}, {"ym": 202706, "y": 2027, "m": 6, "meta": 61200000, "fc": 55700000, "nivel": 61.2, "hito": 61}, {"ym": 202707, "y": 2027, "m": 7, "meta": 62000000, "fc": 55700000, "nivel": 62.0, "hito": 0}, {"ym": 202708, "y": 2027, "m": 8, "meta": 62700000, "fc": 55700000, "nivel": 62.7, "hito": 0}, {"ym": 202709, "y": 2027, "m": 9, "meta": 63500000, "fc": 55700000, "nivel": 63.5, "hito": 0}, {"ym": 202710, "y": 2027, "m": 10, "meta": 64200000, "fc": 55800000, "nivel": 64.2, "hito": 0}, {"ym": 202711, "y": 2027, "m": 11, "meta": 65000000, "fc": 55800000, "nivel": 65.0, "hito": 0}, {"ym": 202712, "y": 2027, "m": 12, "meta": 65700000, "fc": 55800000, "nivel": 65.7, "hito": 66}];
 const metaPlan14 = (y, m) => { const p = PLAN14.find(x => x.ym === y * 100 + m); return p ? p.meta : y * 100 + m < PLAN14[0].ym ? PLAN14[0].meta : PLAN14[PLAN14.length - 1].meta; };
 const RKD_W = [["venta", "Venta ponderada", 33], ["ticket", "Ticket promedio", 19], ["contado", "Venta contado", 14], ["sku", "SKU por cliente", 11], ["margen", "Margen total", 9], ["nuevos", "Clientes nuevos", 7], ["fecha", "Facturación temprana", 7]];
 const rkdPesoDia = (d, n) => n > 1 ? 1.5 - (d - 1) / (n - 1) : 1;   /* 1,5 el día 1 → 0,5 el último día del mes */
@@ -4959,10 +4959,10 @@ function plan14Html(B) {
   if (!B || !B.rows) return "";
   const tv = B.vend.indexOf("Tienda Hellywoof"), real = {}; B.rows.forEach(r => { if (r[7] === tv) return; const k = (r[8] || B.anio) * 100 + r[2]; real[k] = (real[k] || 0) + r[5]; });
   const [cy, cm] = String(B.corte || "").split("-").map(Number), cur = cy * 100 + cm, pmm = n => "$" + (n / 1e6).toLocaleString("es-CL", { maximumFractionDigits: 1 }) + " MM";
-  return `<div class="card"><h2>Plan a 14 meses <span class="muted">venta neta mensual de la distribuidora (sin la tienda): 63 → 85 → 100 MM</span></h2>
+  return `<div class="card"><h2>Plan a 14 meses <span class="muted">venta neta mensual de la distribuidora (sin la tienda): 55,2 → 61,2 → 65,7 MM</span></h2>
     <div style="overflow-x:auto"><table class="p14t" style="width:100%;border-collapse:collapse;font-size:.85rem"><thead><tr><th style="text-align:left">Mes</th><th>Objetivo</th><th title="lo que se vendería sin cambios, según el pronóstico">Pronóstico base</th><th>Real</th><th>Cumplimiento</th><th>Diferencia</th></tr></thead><tbody>
     ${PLAN14.map(p => { const v = real[p.ym] || 0, fut = p.ym > cur; return `<tr${p.ym === cur ? ' style="background:#FFF8E6"' : ""}><td style="text-align:left${p.hito ? ";font-weight:800" : ""}">${["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"][p.m - 1]} ${p.y}${p.hito ? " · hito " + p.hito + " MM" : ""}${p.ym === cur ? " · en curso" : ""}</td>
-      <td style="text-align:right">${pmm(p.meta)}</td><td style="text-align:right;color:#5B6874">${p.fc ? pmm(p.fc) : ""}</td><td style="text-align:right">${fut ? "" : pmm(v)}</td><td style="text-align:right">${fut ? "" : Math.round(v / p.meta * 100) + "%"}</td><td style="text-align:right;color:${v >= p.meta ? "#1C7A4E" : "#B42318"}">${fut ? "" : (v >= p.meta ? "+" : "") + pmm(v - p.meta)}</td></tr>`; }).join("")}</tbody></table></div><p class="muted" style="font-size:.78rem;margin:8px 0 0">Cómo se calculó: la venta mensual es irregular (venta que se corre de un mes al siguiente, p. ej. may-26 $41 MM y jun-26 $69 MM), por eso se <b>suaviza</b> con promedio móvil de 3 meses sobre la venta por día hábil (ene-2025 a oct-2026, feriados de Chile). El <b>pronóstico base</b> (lo que se vendería sin cambios, ≈$55,6 MM al mes) combina Holt amortiguado, ARIMA y regresión; frente a la venta mensual real se equivoca en promedio ±12%. El <b>objetivo</b> sube parejo todos los meses: 63 (nov-26) → 85 (jun-27) → 100 MM (dic-27). La diferencia entre ambos es el crecimiento que hay que lograr.</p></div>`;
+      <td style="text-align:right">${pmm(p.meta)}</td><td style="text-align:right;color:#5B6874">${p.fc ? pmm(p.fc) : ""}</td><td style="text-align:right">${fut ? "" : pmm(v)}</td><td style="text-align:right">${fut ? "" : Math.round(v / p.meta * 100) + "%"}</td><td style="text-align:right;color:${v >= p.meta ? "#1C7A4E" : "#B42318"}">${fut ? "" : (v >= p.meta ? "+" : "") + pmm(v - p.meta)}</td></tr>`; }).join("")}</tbody></table></div><p class="muted" style="font-size:.78rem;margin:8px 0 0">Cómo se calculó: la venta mensual es irregular (venta que se corre de un mes al siguiente, p. ej. may-26 $41 MM y jun-26 $69 MM), por eso se <b>suaviza</b> con promedio móvil de 3 meses sobre la venta por día hábil (ene-2025 a oct-2026, feriados de Chile). El <b>pronóstico base</b> (lo que se vendería sin cambios, ≈$55,6 MM al mes) combina Holt amortiguado, ARIMA y regresión; frente a la venta mensual real se equivoca en promedio ±12%. El <b>objetivo</b> sube parejo todos los meses: 55,2 (nov-26) → 61,2 (jun-27) → 65,7 MM (dic-27). Total 14 meses con tienda: $1.000 MM. La diferencia entre ambos es el crecimiento que hay que lograr.</p></div>`;
 }
 document.head.insertAdjacentHTML("beforeend", "<style>.rkd-t th,.rkd-t td{padding:7px 8px;border-bottom:1px solid var(--line,#DAE1E7);text-align:right;white-space:nowrap}.rkd-t th{font-size:.74rem;color:var(--muted,#5B6874)}</style>");
 
@@ -5165,7 +5165,7 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261110163728";
+const HWF_VER = "20261110164558";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer)\/[^/]*$/, "/");
   let avisado = false;
@@ -5321,6 +5321,12 @@ setTimeout(() => { try { if (D && $("s-res") && !$("s-res").hidden && !$("kpCard
 <script>/* patch_grafventas: HWF */ { const _pd = pintarDashboard; pintarDashboard = function () { const r = _pd.apply(this, arguments); try { vmPoner(document.getElementById("s-res"), vmDeBase(BASE)); } catch (e) {} return r; };
   try { if (document.getElementById("s-res") && document.getElementById("s-res").children.length) vmPoner(document.getElementById("s-res"), vmDeBase(BASE)); } catch (e) {} }</script>
 
+<script>/* patch_grafventas: HWF */ { const _pd = pintarDashboard; pintarDashboard = function () { const r = _pd.apply(this, arguments); try { vmPoner(document.getElementById("s-res"), vmDeBase(BASE)); } catch (e) {} return r; };
+  try { if (document.getElementById("s-res") && document.getElementById("s-res").children.length) vmPoner(document.getElementById("s-res"), vmDeBase(BASE)); } catch (e) {} }</script>
+
+<script>/* patch_grafventas: HWF */ { const _pd = pintarDashboard; pintarDashboard = function () { const r = _pd.apply(this, arguments); try { vmPoner(document.getElementById("s-res"), vmDeBase(BASE)); } catch (e) {} return r; };
+  try { if (document.getElementById("s-res") && document.getElementById("s-res").children.length) vmPoner(document.getElementById("s-res"), vmDeBase(BASE)); } catch (e) {} }</script>
+
 <style>/* patch_grafventas */
 .vm-card{display:grid;gap:8px}.vm-card h3{margin:0;font-size:1.02rem;display:flex;justify-content:space-between;gap:8px;align-items:baseline}
 .vm-card h3 small{font-weight:600;color:var(--muted,#5B6874);font-size:.76rem;text-align:right}
@@ -5331,7 +5337,7 @@ setTimeout(() => { try { if (D && $("s-res") && !$("s-res").hidden && !$("kpCard
 .vm-res b{display:block;font-size:.95rem;color:var(--ink,#0F1E29);font-variant-numeric:tabular-nums}
 </style>
 <script>/* patch_grafventas: venta neta mensual 2025, 2026 y plan (distribuidora) */
-const VM_PLAN = [[202611, 73000000], [202612, 77100000], [202701, 81200000], [202702, 85100000], [202703, 89100000], [202704, 92800000], [202705, 96500000], [202706, 100000000], [202707, 103500000], [202708, 107100000], [202709, 110400000], [202710, 113700000], [202711, 116900000], [202712, 120000000]];
+const VM_PLAN = [[202611, 64000000], [202612, 65100000], [202701, 66300000], [202702, 67400000], [202703, 68600000], [202704, 69700000], [202705, 70900000], [202706, 72000000], [202707, 73100000], [202708, 74300000], [202709, 75400000], [202710, 76600000], [202711, 77700000], [202712, 78900000]];
 function vmDeBase(B) { try {
   if (!B || !B.rows || !B.rows.length) return null;
   const a = {}; B.rows.forEach(r => { const y = r[8] || B.anio; (a[y] = a[y] || new Array(12).fill(0))[r[2] - 1] += Number(r[5]) || 0; });   /* TOTAL: distribuidora + tienda */
@@ -5359,12 +5365,12 @@ function vmHtml(VM, id) {
     g += `<circle cx="${X(parc[0])}" cy="${Y(parc[1])}" r="3.6" fill="#fff" stroke="#0B3146" stroke-width="2"/>`; }
   g += `<line class="vm-cur" x1="0" x2="0" y1="${T}" y2="${H - B}" stroke="#E07B24" stroke-width="1.2" visibility="hidden"/>`;
   const ytd = (y, hasta) => (VM.a[y] || []).slice(0, hasta).reduce((t, v) => t + v, 0), mesesCerr = CY === 2026 ? CM - 1 : 12;
-  const t26 = ytd(2026, mesesCerr), t25 = ytd(2025, mesesCerr), vs = t25 ? (t26 / t25 - 1) : 0, plan12 = p27.reduce((t, p) => t + p[1], 0);
+  const t26 = ytd(2026, mesesCerr), t25 = ytd(2025, mesesCerr), vs = t25 ? (t26 / t25 - 1) : 0, plan12 = p27.reduce((t, p) => t + p[1], 0), plan14 = VM_PLAN.reduce((t, p) => t + p[1], 0);
   return `<div class="card vm-card" id="${id}"><h3>Venta neta mensual <small>total distribuidora + tienda · facturas − NC, sin IVA</small></h3>
     <div class="vm-ley"><span><i style="background:#9AA8B4"></i>2025</span><span><i style="background:#0B3146"></i>2026${parc ? " (○ " + VM_MES[CM - 1] + " parcial al " + String(CD).padStart(2, "0") + "-" + String(CM).padStart(2, "0") + ")" : ""}</span><span><i style="background:#E07B24"></i>Meta 2026</span><span><i style="background:#F5C25B"></i>Plan 2027</span></div>
     <svg class="vm-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Venta neta mensual 2025 y 2026 y meta, mismo eje">${g}</svg>
     <div class="vm-det">Toca el gráfico para ver cada mes.</div>
-    <div class="vm-res"><div>2026 ene–${VM_MES[Math.max(0, mesesCerr - 1)]}<b>${vmMM(t26)}</b></div><div>vs mismo período 2025${t25 ? `<b style="color:${vs >= 0 ? "#1C7A4E" : "#B42318"}">${(vs >= 0 ? "+" : "−") + Math.abs(vs * 100).toLocaleString("es-CL", { maximumFractionDigits: 1 })}%</b>` : "<b>—</b>"}</div><div>Plan 2027<b>${plan12 ? vmMM(plan12) : "—"}</b></div></div></div>`;
+    <div class="vm-res"><div>2026 ene–${VM_MES[Math.max(0, mesesCerr - 1)]}<b>${vmMM(t26)}</b></div><div>vs mismo período 2025${t25 ? `<b style="color:${vs >= 0 ? "#1C7A4E" : "#B42318"}">${(vs >= 0 ? "+" : "−") + Math.abs(vs * 100).toLocaleString("es-CL", { maximumFractionDigits: 1 })}%</b>` : "<b>—</b>"}</div><div>Plan nov-26 → dic-27<b>${plan14 ? vmMM(plan14) : "—"}</b>${plan12 ? "2027: " + vmMM(plan12) : ""}</div></div></div>`;
 }
 /* metas por mes (ym → $): plan total (distribuidora + tienda) y, si el script las manda, metas guardadas de meses anteriores */
 function vmMetas(VM) { const o = {}; VM_PLAN.forEach(([ym, v]) => o[ym] = v); try { Object.keys(VM.metas || {}).forEach(k => { const ym = Number(String(k).replace("-", "")); if (VM.metas[k] && !o[ym]) o[ym] = VM.metas[k]; }); } catch (e) {} return o; }
