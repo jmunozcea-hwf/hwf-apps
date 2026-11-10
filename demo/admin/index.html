@@ -2460,7 +2460,7 @@ async function cxAsegurar() {
   if (!srv || cxClave(loc) > cxClave(srv)) { store.set("adm-cxc", { cobranza: loc, enviado: false }); await cxEnviar(false); return false; }
   store.set("adm-cxc", { cobranza: srv, enviado: r.version, origen: "nube" }); return true;
 }
-sySync = async function (manual) { await _sySyncCx(manual); const n = await cxAsegurar(); if (n && vistaMas === "cobranza" && $("masBody")) pintarCobranza(); };
+sySync = async function (manual) { await _sySyncCx(manual); const n = await cxAsegurar(); if (n && vistaMas === "cobranza" && $("masBody")) pintarCobranza(); if (n && vistaMas === "plan" && $("masBody") && typeof pintarPlan === "function") pintarPlan(); };
 
 /* ---------- Margen de las notas de la app ---------- */
 const COSTO = __dvGet("COSTO") || {"RR0133": 19863, "RR0009": 25385, "RR0008": 6372, "RR0004": 5972, "RR0005": 21260, "RR0007": 24028, "RR0006": 5340, "RR0010": 5145, "RR0011": 23183, "RR0021": 5072, "RR0022": 26403, "RR0014": 5620, "RR0025": 25024, "RR0002": 22732, "RR0001": 26191, "RR0003": 6530, "RR0170": 26634, "RR0169": 5544, "RR0026": 5897, "RR0027": 24505, "RR0023": 5453, "RR0024": 25610, "RR0028": 4140, "RR0029": 28966, "RR0144": 12970, "RR0143": 12952, "RR0049": 14750, "RR0141": 12379, "RR0150": 7869, "RR0047": 15249, "RR0046": 8795, "RR0064": 20375, "RR0118": 5787, "RR0064-2": 23938, "RR0134": 17106, "RR0135": 16399, "RR0085": 9617, "RR0073": 10245, "RR0076": 10299, "RR0163": 9635, "RR0084": 10139, "RR0081": 10312, "RR0080": 10484, "RR0077": 10514, "RR0078": 10148, "RR0082": 9684, "RR0083": 10345, "RR0088": 14245, "RR0086": 16121, "RR0091": 15008, "RR0050": 21434, "RR0079": 16498, "RR0096": 15747, "RR0095": 14970, "RR0016": 12552, "RR0017": 11604, "RR0015": 12394, "RR0048": 13570, "RR0018": 12043, "RR0019": 12131, "RR0092": 9215, "RR0145": 8494, "RR0094": 9249, "RR0131": 4918, "RR0093": 6905, "RR0140": 20458, "RR0139": 21799, "RR0138": 19465, "RR0137": 19855, "RR0136": 19122, "RR0152": 2654, "RR0151": 3598, "RR0125": 9973, "RR0127": 11152, "RR0128": 16958, "RR0129": 11197, "RR0123": 15351, "RR0121": 13956, "RR0119": 15647, "RR0070": 30131, "RR0069": 10102, "RR0113": 33654, "RR0112": 10895, "RR0109": 31017, "RR0108": 11690, "RR0072": 29158, "RR0071": 11741, "RR0111": 31615, "RR0110": 12071, "RR0105": 4860, "RR0106": 11249, "RR0164": 19507, "RR0165": 5133, "RR0062": 39771, "RR0061": 14302, "RR0114": 6850, "RR0115": 13208, "RR0055": 17152, "RR0055-2": 37226, "RR0056": 15356, "RR0056-2": 39234, "RR0116": 17379, "RR0117": 35759, "RR0102": 41249, "RR0101": 13049, "RR0098": 41123, "RR0097": 14534, "RR0052": 35816, "RR0051": 11334, "RR0053": 44364, "RR0054": 10827, "RR0104": 43236, "RR0103": 14037, "RR0100": 44001, "RR0099": 12355, "RR0057": 7242, "RR0058": 14838, "RR0063": 14509, "RR0060": 6678, "RR0060-2": 36577, "RR0059": 15513, "RR0036": 27972, "RR0037": 10170, "RR0035": 26942, "RR0013": 10014, "RR0041": 30825, "RR0040": 10396, "RR0039": 29636, "RR0038": 10934, "RR0020": 8653, "RR0030": 23263, "RR0031": 7933, "RR0032": 24155, "RR0034": 24049, "RR0012": 36016, "RR0033": 7256, "RR0043": 29755, "RR0042": 11188, "RR0045": 27061, "RR0044": 9632, "RR0166": 27754, "RR0167": 20591, "RR0168": 13876, "RR0147": 12012, "RR0146": 9016, "RR0149": 7513, "RR0148": 7199, "RR0158": 7464}, COSTO_FECHA = __dvGet("COSTO_FECHA") || "28-10-2026";
@@ -3867,9 +3867,10 @@ function planCalc(D, o) {
   const yr = r => r[8] || D.anio, m3 = [1, 2, 3].map(k => { let y = Y, m = M - k; if (m < 1) { m += 12; y--; } return y * 100 + m; });
   const C = {}, exc = {}, fuera = ci => { if (ci in exc) return exc[ci]; const n = PL_N((D.clientes[ci] || [""])[0]); return exc[ci] = PLAN.excluir.some(re => re.test(n)); };
   D.rows.forEach(r => {
-    if (!(r[5] > 0)) return; const cart = o.cartDe(r); if (!o.incluye(cart) || fuera(r[0])) return;
+    /* patch_plannc */ const nc = !(r[5] > 0); const cart = o.cartDe(r); if (!o.incluye(cart) || fuera(r[0])) return;
     const y = yr(r), t = Date.UTC(y, r[2] - 1, r[3]), ym = y * 100 + r[2]; if (t > hoy) return;
     const c = C[r[0]] = C[r[0]] || { ci: r[0], cart, f: new Set(), ult: 0, prim: Infinity, v12: 0, v3: 0, vMes: 0, tipos: new Set(), marcas: new Set(), pMes: new Set(), p3: {} };
+    if (nc) { if (hoy - t < 365 * dia) c.v12 += r[5]; if (m3.includes(ym)) c.v3 += r[5]; if (t >= ini) c.vMes += r[5]; return; }   /* nota de crédito: resta monto, no es compra */
     if (t >= c.ult) { c.ult = t; c.cart = cart; } if (t < c.prim) c.prim = t; c.f.add(t);
     if (hoy - t < 365 * dia) c.v12 += r[5];
     if (m3.includes(ym)) { c.v3 += r[5]; (c.p3[ym] = c.p3[ym] || new Set()).add(r[1]); }
@@ -3888,7 +3889,7 @@ function planCalc(D, o) {
   abc.forEach(c => { c.abc = acc < tot * 0.8 ? "A" : acc < tot * 0.95 ? "B" : "C"; acc += c.v3; });
   L.forEach(c => { if (!c.abc) c.abc = "C"; });
   const dorm = L.filter(c => c.diasSin >= 30 && c.diasSin <= 365 && c.v12 > 0).sort((a, b) => b.hab - a.hab);
-  const con = L.filter(c => c.vMes > 0), vMes = con.reduce((s, c) => s + c.vMes, 0);
+  const con = L.filter(c => c.vMes > 0), vMes = L.reduce((s, c) => s + c.vMes, 0);
   const n3 = m3.reduce((s, ym) => s + L.filter(c => c.p3[ym]).length, 0), v3 = L.reduce((s, c) => s + c.v3, 0);
   const l3 = L.reduce((s, c) => s + Object.values(c.p3).reduce((a, x) => a + x.size, 0), 0);
   return { excl: Object.keys(exc).filter(k => exc[k]).map(k => (D.clientes[k] || [""])[0]), Y, M, CD, L, dorm, d30: dorm.filter(c => c.diasSin < 60), d60: dorm.filter(c => c.diasSin >= 60 && c.diasSin < 90), d90: dorm.filter(c => c.diasSin >= 90),
@@ -3909,7 +3910,7 @@ document.head.insertAdjacentHTML("beforeend", "<style>" + PL_CSS + ".pl-chk labe
 const PL_T = "Tienda Hellywoof", PLCHK = "adm-plan-chk";
 function plDatos() { return planCalc(D, { cartDe: cartRow, incluye: c => c !== PL_T }); }
 function plProy(P) { const t = habiles(P.Y, P.M, 1, P.CD), T = habiles(P.Y, P.M, 1, diasMes(P.Y, P.M)); return t ? P.vMes / t * T : P.vMes; }
-function plDiasCalle(P) { try { const s = (typeof cxTodos === "function" ? cxTodos() : []).reduce((t, d) => t + Math.max(0, d.saldo || 0), 0); return P.v3 ? s / (P.v3 / 91) : null; } catch (e) { return null; } }
+function plDiasCalle(P) { try { const _cx = typeof cxTodos === "function" ? cxTodos() : []; if (!_cx.length) return null; const s = _cx.reduce((t, d) => t + Math.max(0, d.saldo || 0), 0); return P.v3 ? s / (P.v3 / 91) : null; } catch (e) { return null; } }
 function pintarPlan() {
   const P = plDatos(), proy = plProy(P), falta = Math.max(0, PLAN.meta - proy), dc = plDiasCalle(P), di = typeof invIndice === "function" ? invIndice() : null;
   const vends = [...new Set(P.L.map(c => c.cart))].filter(Boolean).sort();
@@ -3924,7 +3925,7 @@ function pintarPlan() {
   $("masBody").innerHTML = `<div class="card pl"><h2>Plan de crecimiento <span class="muted">plan a 14 meses: 63 → 85 → 100 MM netos al mes</span></h2>
     <div class="pl-k"><div><span>Venta del mes a la fecha</span><b>${mm(P.vMes)}</b><small>${String(P.CD).padStart(2, "0")}-${String(P.M).padStart(2, "0")} · sin tienda</small></div>
       <div><span>Proyección de cierre</span><b>${mm(proy)}</b><small>${Math.round(proy / PLAN.meta * 100)}% de la meta del mes</small></div>
-      <div><span>Brecha a la meta del mes</span><b style="color:${falta ? "var(--bad)" : "var(--ok)"}">${falta ? mm(falta) : "cumplida"}</b><small>base de referencia 65 MM</small></div>
+      <div><span>Brecha a la meta del mes</span><b style="color:${falta ? "var(--bad)" : "var(--ok)"}">${falta ? mm(falta) : "cumplida"}</b><small>${(() => { const _p = typeof PLAN14 !== "undefined" ? PLAN14.find(x => x.ym === P.Y * 100 + P.M) : null; return _p && _p.fc ? "pronóstico sin cambios " + mm(_p.fc) : "meta del plan"; })()}</small></div>
       <div><span>Días calle (cobranza)</span><b>${dc == null ? "—" : Math.round(dc) + " días"}</b><small>por cobrar ÷ venta diaria · mantener o bajar</small></div>
       ${di ? `<div><span>Días de inventario</span><b>${isFinite(di.dias) ? Math.round(di.dias) + " días" : "—"}</b><small>${di.urg} productos bajo 7 días</small></div>` : ""}</div>
     <div class="pl-bar"><i style="width:${Math.min(100, proy / PLAN.meta * 100).toFixed(1)}%"></i></div>
@@ -5155,7 +5156,7 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261110055505";
+const HWF_VER = "20261110055952";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda)\/[^/]*$/, "/");
   let avisado = false;

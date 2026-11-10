@@ -2490,7 +2490,7 @@ async function cxAsegurar() {
   if (!srv || cxClave(loc) > cxClave(srv)) { store.set("adm-cxc", { cobranza: loc, enviado: false }); await cxEnviar(false); return false; }
   store.set("adm-cxc", { cobranza: srv, enviado: r.version, origen: "nube" }); return true;
 }
-sySync = async function (manual) { await _sySyncCx(manual); const n = await cxAsegurar(); if (n && vistaMas === "cobranza" && $("masBody")) pintarCobranza(); };
+sySync = async function (manual) { await _sySyncCx(manual); const n = await cxAsegurar(); if (n && vistaMas === "cobranza" && $("masBody")) pintarCobranza(); if (n && vistaMas === "plan" && $("masBody") && typeof pintarPlan === "function") pintarPlan(); };
 
 /* ---------- Margen de las notas de la app ---------- */
 const COSTO = __dvGet("COSTO") || {}, COSTO_FECHA = __dvGet("COSTO_FECHA") || "";
@@ -3896,9 +3896,10 @@ function planCalc(D, o) {
   const yr = r => r[8] || D.anio, m3 = [1, 2, 3].map(k => { let y = Y, m = M - k; if (m < 1) { m += 12; y--; } return y * 100 + m; });
   const C = {}, exc = {}, fuera = ci => { if (ci in exc) return exc[ci]; const n = PL_N((D.clientes[ci] || [""])[0]); return exc[ci] = PLAN.excluir.some(re => re.test(n)); };
   D.rows.forEach(r => {
-    if (!(r[5] > 0)) return; const cart = o.cartDe(r); if (!o.incluye(cart) || fuera(r[0])) return;
+    /* patch_plannc */ const nc = !(r[5] > 0); const cart = o.cartDe(r); if (!o.incluye(cart) || fuera(r[0])) return;
     const y = yr(r), t = Date.UTC(y, r[2] - 1, r[3]), ym = y * 100 + r[2]; if (t > hoy) return;
     const c = C[r[0]] = C[r[0]] || { ci: r[0], cart, f: new Set(), ult: 0, prim: Infinity, v12: 0, v3: 0, vMes: 0, tipos: new Set(), marcas: new Set(), pMes: new Set(), p3: {} };
+    if (nc) { if (hoy - t < 365 * dia) c.v12 += r[5]; if (m3.includes(ym)) c.v3 += r[5]; if (t >= ini) c.vMes += r[5]; return; }   /* nota de crédito: resta monto, no es compra */
     if (t >= c.ult) { c.ult = t; c.cart = cart; } if (t < c.prim) c.prim = t; c.f.add(t);
     if (hoy - t < 365 * dia) c.v12 += r[5];
     if (m3.includes(ym)) { c.v3 += r[5]; (c.p3[ym] = c.p3[ym] || new Set()).add(r[1]); }
@@ -3917,7 +3918,7 @@ function planCalc(D, o) {
   abc.forEach(c => { c.abc = acc < tot * 0.8 ? "A" : acc < tot * 0.95 ? "B" : "C"; acc += c.v3; });
   L.forEach(c => { if (!c.abc) c.abc = "C"; });
   const dorm = L.filter(c => c.diasSin >= 30 && c.diasSin <= 365 && c.v12 > 0).sort((a, b) => b.hab - a.hab);
-  const con = L.filter(c => c.vMes > 0), vMes = con.reduce((s, c) => s + c.vMes, 0);
+  const con = L.filter(c => c.vMes > 0), vMes = L.reduce((s, c) => s + c.vMes, 0);
   const n3 = m3.reduce((s, ym) => s + L.filter(c => c.p3[ym]).length, 0), v3 = L.reduce((s, c) => s + c.v3, 0);
   const l3 = L.reduce((s, c) => s + Object.values(c.p3).reduce((a, x) => a + x.size, 0), 0);
   return { excl: Object.keys(exc).filter(k => exc[k]).map(k => (D.clientes[k] || [""])[0]), Y, M, CD, L, dorm, d30: dorm.filter(c => c.diasSin < 60), d60: dorm.filter(c => c.diasSin >= 60 && c.diasSin < 90), d90: dorm.filter(c => c.diasSin >= 90),
@@ -3938,7 +3939,7 @@ document.head.insertAdjacentHTML("beforeend", "<style>" + PL_CSS + ".pl-chk labe
 const PL_T = "Tienda Hellywoof", PLCHK = "adm-plan-chk";
 function plDatos() { return planCalc(D, { cartDe: cartRow, incluye: c => c !== PL_T }); }
 function plProy(P) { const t = habiles(P.Y, P.M, 1, P.CD), T = habiles(P.Y, P.M, 1, diasMes(P.Y, P.M)); return t ? P.vMes / t * T : P.vMes; }
-function plDiasCalle(P) { try { const s = (typeof cxTodos === "function" ? cxTodos() : []).reduce((t, d) => t + Math.max(0, d.saldo || 0), 0); return P.v3 ? s / (P.v3 / 91) : null; } catch (e) { return null; } }
+function plDiasCalle(P) { try { const _cx = typeof cxTodos === "function" ? cxTodos() : []; if (!_cx.length) return null; const s = _cx.reduce((t, d) => t + Math.max(0, d.saldo || 0), 0); return P.v3 ? s / (P.v3 / 91) : null; } catch (e) { return null; } }
 function pintarPlan() {
   const P = plDatos(), proy = plProy(P), falta = Math.max(0, PLAN.meta - proy), dc = plDiasCalle(P), di = typeof invIndice === "function" ? invIndice() : null;
   const vends = [...new Set(P.L.map(c => c.cart))].filter(Boolean).sort();
@@ -3953,7 +3954,7 @@ function pintarPlan() {
   $("masBody").innerHTML = `<div class="card pl"><h2>Plan de crecimiento <span class="muted">plan a 14 meses: 63 → 85 → 100 MM netos al mes</span></h2>
     <div class="pl-k"><div><span>Venta del mes a la fecha</span><b>${mm(P.vMes)}</b><small>${String(P.CD).padStart(2, "0")}-${String(P.M).padStart(2, "0")} · sin tienda</small></div>
       <div><span>Proyección de cierre</span><b>${mm(proy)}</b><small>${Math.round(proy / PLAN.meta * 100)}% de la meta del mes</small></div>
-      <div><span>Brecha a la meta del mes</span><b style="color:${falta ? "var(--bad)" : "var(--ok)"}">${falta ? mm(falta) : "cumplida"}</b><small>base de referencia 65 MM</small></div>
+      <div><span>Brecha a la meta del mes</span><b style="color:${falta ? "var(--bad)" : "var(--ok)"}">${falta ? mm(falta) : "cumplida"}</b><small>${(() => { const _p = typeof PLAN14 !== "undefined" ? PLAN14.find(x => x.ym === P.Y * 100 + P.M) : null; return _p && _p.fc ? "pronóstico sin cambios " + mm(_p.fc) : "meta del plan"; })()}</small></div>
       <div><span>Días calle (cobranza)</span><b>${dc == null ? "—" : Math.round(dc) + " días"}</b><small>por cobrar ÷ venta diaria · mantener o bajar</small></div>
       ${di ? `<div><span>Días de inventario</span><b>${isFinite(di.dias) ? Math.round(di.dias) + " días" : "—"}</b><small>${di.urg} productos bajo 7 días</small></div>` : ""}</div>
     <div class="pl-bar"><i style="width:${Math.min(100, proy / PLAN.meta * 100).toFixed(1)}%"></i></div>
@@ -5196,7 +5197,7 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261110055505";
+const HWF_VER = "20261110055952";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda)\/[^/]*$/, "/");
   let avisado = false;
