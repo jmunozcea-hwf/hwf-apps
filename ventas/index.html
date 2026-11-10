@@ -7172,7 +7172,7 @@ function confirmarNota() {
   x.onclick = () => cerrarModal(); card.insertBefore(x, card.firstChild); })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261110063627";
+const HWF_VER = "20261110063827";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica)\/[^/]*$/, "/");
   let avisado = false;
@@ -7347,6 +7347,16 @@ rutaSoloPr = function () {
   $("rpEt").onchange = () => { RPF.etapa = $("rpEt").value; calcular(); }; $("rpH").onchange = () => { RPF.horas = Number($("rpH").value); calcular(); };
 };
 try { const b = $("rProsZ"); if (b) { b.textContent = "🎯 Ruta de prospectos (región y comuna)"; b.onclick = rutaSoloPr; } } catch (e) {}
+</script>
+
+<script>/* patch_linklog: acceso a Logística HWF en el menú lateral */
+(function () { if (/\/demo\//.test(location.pathname)) return;
+  const url = location.pathname.replace(/\/(ventas|admin)\/[^/]*$/, "/logistica/");
+  const poner = () => { const p = document.getElementById("snPanel"); if (!p || p.querySelector(".sn-log")) return;
+    const a = document.createElement("a"); a.className = "sn-i sn-log"; a.href = url; a.target = "_blank"; a.rel = "noopener";
+    a.style.cssText = "display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit;font-weight:700;padding:11px 10px;border-radius:12px;border-top:1px solid var(--line,#DAE1E7);margin-top:6px";
+    a.innerHTML = '<span class="sn-e" style="font-size:1.3rem;width:28px;text-align:center">🚚</span>Logística HWF<span style="margin-left:auto;font-size:.8rem;opacity:.6">↗</span>'; p.appendChild(a); };
+  new MutationObserver(poner).observe(document.body, { childList: true, subtree: true }); poner(); })();
 </script>
 </body>
 </html>

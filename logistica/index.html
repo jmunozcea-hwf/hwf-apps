@@ -178,9 +178,9 @@ const FLOTA0 = [
   { id: "hd65", nombre: "Hyundai HD65 MAX", kg: 4400, m3: 18, kml: 7, var: 110, fijo: 55000, vel: 55, on: true, nota: "camión 3/4 · carga útil 4.400 kg · diésel 2,9 L · caja ~18 m³" },
   { id: "boxer", nombre: "Peugeot Boxer L2H2", kg: 1310, m3: 11.5, kml: 11, var: 70, fijo: 45000, vel: 65, on: true, nota: "furgón · 1.310 kg · 11,5 m³ · diésel 12,8 km/l mixto" },
   { id: "g10", nombre: "Maxus G10 Cargo", kg: 945, m3: 5.2, kml: 10.5, var: 60, fijo: 45000, vel: 65, on: true, nota: "furgón · 945–1.000 kg · 5,2 m³ · diésel 11 km/l mixto" }];
-const PAR0 = { diesel: 1000, parada: 15, jornada: 9, factor: 1.3, util: 0.95, origen: { nombre: "Bodega HWF (Curicó)", lat: -34.9828, lng: -71.2394 } };
+const PAR0 = { diesel: 1000, parada: 15, jornada: 9, factor: 1.3, util: 0.95, origen: { nombre: "Bodega principal HWF · Ruta H-30 1799, Punta de Cortés, Rancagua", lat: -34.1815, lng: -70.8309 } };
 const flota = () => { const g = lsGet("flota", null); return FLOTA0.map(v => Object.assign({}, v, (g || {})[v.id] || {})); };
-const par = () => Object.assign({}, PAR0, lsGet("par", {}));
+const par = () => { const p = lsGet("par", {}); if (p.origen && Math.abs(p.origen.lat + 34.9828) < 1e-4 && Math.abs(p.origen.lng + 71.2394) < 1e-4) delete p.origen; return Object.assign({}, PAR0, p); };
 const COL = { hd65: "#0B3146", boxer: "#F28C28", g10: "#1C7A4E" };
 const costoKm = (v, P) => P.diesel / v.kml + v.var;
 function pintarFlota() { const F = flota(), P = par();
@@ -262,6 +262,7 @@ let RT = null, mapa = null;
 function pintarRutas() { const D = DATA(), P = par(), F = flota(), L = paradasBase(), sel = lsGet("sel", null), excl = new Set(lsGet("excl", [])), G = geoMem();
   const fecha = lsGet("fecha", new Date(Date.now() + 864e5).toISOString().slice(0, 10));
   $("s-rutas").innerHTML = `<div class="card"><h2>Rutas de despacho <small>pedidos pendientes de Defontana + paradas agregadas</small></h2>
+    <div class="k" style="margin-bottom:10px"><span>Vehículos disponibles hoy</span><div class="chips" id="rVeh">${F.map(v => `<button type="button" data-veh="${v.id}" aria-pressed="${!!v.on}" title="${esc(v.nota)}"><span class="sw" style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${COL[v.id]};margin-right:5px"></span>${esc(v.nombre)} · ${nf(v.kg)} kg</button>`).join("")}</div><small>Toca para quitar o agregar. Origen: ${esc(P.origen.nombre)} (cámbialo en Flota).</small></div>
     <div class="row"><label>Fecha de despacho<input type="date" id="rFecha" value="${fecha}"></label><button type="button" class="btn" id="rGeo">📍 Ubicar direcciones exactas</button><button type="button" class="btn" id="rAdd">+ Agregar parada</button>
       <button type="button" class="btn pri" id="rOpt">⚙ Armar rutas óptimas</button></div>
     <div id="rLista" style="margin-top:8px">${L.map(p => { const u = ubic(p.cli, p.comuna), dd = diasDesde(p.fecha);
@@ -272,6 +273,8 @@ function pintarRutas() { const D = DATA(), P = par(), F = flota(), L = paradasBa
     <p class="nota">Ubicación: exacta (OpenStreetMap o GPS del chofer, queda guardada) o centro de la comuna. Distancia = línea recta × ${P.factor} (factor de ruta). Peso y volumen estimados desde el nombre del producto (kg del saco).</p></div>
   <div id="rRes"></div>`;
   $("rFecha").onchange = () => lsSet("fecha", $("rFecha").value);
+  $("rVeh").onclick = e => { const b = e.target.closest("[data-veh]"); if (!b) return; const g = lsGet("flota", {}), id = b.dataset.veh, on = b.getAttribute("aria-pressed") !== "true";
+    if (!on && flota().filter(v => v.on).length <= 1) { toast("Debe quedar al menos un vehículo disponible."); return; } g[id] = Object.assign(g[id] || {}, { on }); lsSet("flota", g); RT = null; pintarRutas(); };
   $("rLista").onchange = e => { const sc = e.target.closest("[data-com]"); if (sc && sc.value) { const Gm = geoMem(), c = COMUNAS[sc.value]; Gm[norm(sc.dataset.com)] = [c[0], c[1], "comuna"]; lsSet("geo", Gm); toast("Comuna fijada para este cliente."); return pintarRutas(); }
     const c = e.target.closest("[data-id]"); if (!c) return; const s = new Set(lsGet("excl", [])); c.checked ? s.delete(c.dataset.id) : s.add(c.dataset.id); lsSet("excl", [...s]); };
   $("rLista").onclick = e => { const g = e.target.closest("[data-gps]"), x = e.target.closest("[data-del]");
@@ -344,7 +347,7 @@ if (!cfg() || !DATA()) pantallaConexion(); else { arrancar(); bajar(true).then(n
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261110063627";
+const HWF_VER = "20261110063827";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica)\/[^/]*$/, "/");
   let avisado = false;
