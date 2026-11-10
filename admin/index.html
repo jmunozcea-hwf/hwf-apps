@@ -5196,7 +5196,7 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261110053053";
+const HWF_VER = "20261110055505";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda)\/[^/]*$/, "/");
   let avisado = false;
@@ -5214,6 +5214,12 @@ const HWF_VER = "20261110053053";
   setTimeout(revisar, 4000); setInterval(revisar, 30 * 60 * 1000);
   document.addEventListener("visibilitychange", () => { if (!document.hidden) revisar(); });
 })();
+</script>
+
+<script>/* patch_kpifresco: fecha de los datos de Drive en el cuadro de avance */
+{ const _kdKF = kpiDatos; kpiDatos = function (B) { if (!B || !B.rows || !B.rows.length) return null; return _kdKF.apply(this, arguments); }; }
+{ const kfSello = () => { try { const c = $("kpCard"), s = c && c.querySelector("h3 small"); const a = typeof ACT_INFO !== "undefined" ? ACT_INFO : null; if (s && a && a.drive && !s.dataset.kf) { s.dataset.kf = 1; s.insertAdjacentHTML("beforeend", ` · Drive ${String(a.drive).replace(/[<>&]/g, "")}`); } } catch (e) {} };
+  const _pdKF = pintarDashboard; pintarDashboard = function () { const r = _pdKF.apply(this, arguments); kfSello(); return r; }; kfSello(); }
 </script>
 </body>
 </html>
