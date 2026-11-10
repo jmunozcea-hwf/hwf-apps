@@ -177,11 +177,12 @@ function descargar(nombre, filas) { const csv = "﻿" + filas.map(r => r.map(v =
 const FLOTA0 = [
   { id: "hd65", nombre: "Hyundai HD65 MAX", kg: 4400, m3: 18, kml: 7, var: 110, fijo: 55000, vel: 55, on: true, nota: "camión 3/4 · carga útil 4.400 kg · diésel 2,9 L · caja ~18 m³" },
   { id: "boxer", nombre: "Peugeot Boxer L2H2", kg: 1310, m3: 11.5, kml: 11, var: 70, fijo: 45000, vel: 65, on: true, nota: "furgón · 1.310 kg · 11,5 m³ · diésel 12,8 km/l mixto" },
-  { id: "g10", nombre: "Maxus G10 Cargo", kg: 945, m3: 5.2, kml: 10.5, var: 60, fijo: 45000, vel: 65, on: true, nota: "furgón · 945–1.000 kg · 5,2 m³ · diésel 11 km/l mixto" }];
+  { id: "g10", nombre: "Maxus G10 Cargo", kg: 945, m3: 5.2, kml: 10.5, var: 60, fijo: 45000, vel: 65, on: true, nota: "furgón · 945–1.000 kg · 5,2 m³ · diésel 11 km/l mixto" },
+  { id: "partner", nombre: "Peugeot Partner L2", kg: 950, m3: 3.9, kml: 17, var: 50, fijo: 45000, vel: 65, on: true, nota: "furgón compacto · 950 kg · 3,9 m³ (4,4 con Multiflex) · diésel 1.5 · 22 km/l mixto" }];
 const PAR0 = { diesel: 1000, parada: 15, jornada: 9, factor: 1.3, util: 0.95, origen: { nombre: "Bodega principal HWF · Ruta H-30 1799, Punta de Cortés, Rancagua", lat: -34.1815, lng: -70.8309 } };
 const flota = () => { const g = lsGet("flota", null); return FLOTA0.map(v => Object.assign({}, v, (g || {})[v.id] || {})); };
 const par = () => { const p = lsGet("par", {}); if (p.origen && Math.abs(p.origen.lat + 34.9828) < 1e-4 && Math.abs(p.origen.lng + 71.2394) < 1e-4) delete p.origen; return Object.assign({}, PAR0, p); };
-const COL = { hd65: "#0B3146", boxer: "#F28C28", g10: "#1C7A4E" };
+const COL = { hd65: "#0B3146", boxer: "#F28C28", g10: "#1C7A4E", partner: "#7A3E9D" };
 const costoKm = (v, P) => P.diesel / v.kml + v.var;
 function pintarFlota() { const F = flota(), P = par();
   $("s-flota").innerHTML = `<div class="card"><h2>Flota y costos <small>valores editables</small></h2>
@@ -195,7 +196,7 @@ function pintarFlota() { const F = flota(), P = par();
       <label>Uso máximo de capacidad<input type="number" step="0.05" id="pUtil" value="${P.util}" style="width:110px"></label></div>
     <h2 style="margin-top:14px">Origen de las rutas</h2><div class="row"><label>Nombre<input id="oNom" value="${esc(P.origen.nombre)}" style="width:220px"></label><label>Latitud<input id="oLat" type="number" step="any" value="${P.origen.lat}" style="width:130px"></label>
       <label>Longitud<input id="oLng" type="number" step="any" value="${P.origen.lng}" style="width:130px"></label><button type="button" class="btn" id="oGps">📍 Usar mi ubicación actual</button></div>
-    <p class="nota">Especificaciones de fábrica (Chile): HD65 MAX carga 4.400 kg, largo carrozable 4,7 m; Boxer L2H2 11,5 m³ y 1.310 kg; G10 Cargo 5,2 m³ y 945–1.000 kg. Rendimientos con carga, algo bajo el homologado. Ajusta costos fijos y de mantención a los reales de HWF.</p></div>`;
+    <p class="nota">Especificaciones de fábrica (Chile): HD65 MAX carga 4.400 kg, largo carrozable 4,7 m; Boxer L2H2 11,5 m³ y 1.310 kg; G10 Cargo 5,2 m³ y 945–1.000 kg; Partner L2 3,9 m³ (4,4 con Multiflex) y 950 kg. Rendimientos con carga, algo bajo el homologado. Ajusta costos fijos y de mantención a los reales de HWF.</p></div>`;
   $("s-flota").oninput = e => { const t = e.target; if (t.dataset.v) { const g = lsGet("flota", {}); g[t.dataset.v] = g[t.dataset.v] || {}; g[t.dataset.v][t.dataset.k] = t.type === "checkbox" ? t.checked : Number(t.value) || 0; lsSet("flota", g); } };
   $("s-flota").onchange = e => { const t = e.target; if (!t.dataset.v && t.id) { const p = lsGet("par", {}); ({ pDiesel: "diesel", pParada: "parada", pJornada: "jornada", pFactor: "factor", pUtil: "util" })[t.id] && (p[({ pDiesel: "diesel", pParada: "parada", pJornada: "jornada", pFactor: "factor", pUtil: "util" })[t.id]] = Number(t.value) || 0);
       if (/^o(Nom|Lat|Lng)$/.test(t.id)) p.origen = { nombre: $("oNom").value, lat: Number($("oLat").value), lng: Number($("oLng").value) }; lsSet("par", p); } pintarFlota(); };
@@ -347,7 +348,7 @@ if (!cfg() || !DATA()) pantallaConexion(); else { arrancar(); bajar(true).then(n
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261110063827";
+const HWF_VER = "20261110064123";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica)\/[^/]*$/, "/");
   let avisado = false;
