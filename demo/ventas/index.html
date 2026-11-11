@@ -5925,7 +5925,7 @@ function plHtml(P, yo) {
   const surt = P.L.filter(c => (c.abc === "A" || c.abc === "B") && c.ofrecer.length && c.diasSin < 60).sort((a, b) => b.v3 - a.v3).slice(0, 6)
     .map(c => it(c, "Ofrecer: <b>" + c.ofrecer.slice(0, 2).map(esc).join("</b> · <b>") + "</b>")).join("");
   const cuota = yo ? `${nuevos} de ${PLAN.cuotaMin} a ${PLAN.cuotaMax}` : `${nuevos} en el mes`;
-  return `<div class="db-c card pl"><h3>Plan 100 MM <small>${yo ? "mi parte" : "todo el equipo"}</small></h3>
+  return `<div class="db-c card pl"><h3>Plan de ventas <small>${yo ? "mi parte" : "todo el equipo"}</small></h3>
     ${d60 ? `<div class="pl-step"><b>Primer paso:</b> contacta a tus ${d60} ${d60 === 1 ? "cliente" : "clientes"} sin compra hace 60 días o más antes del viernes, con una oferta de regreso, y anota el motivo (precio, quiebre, competencia o cerró).</div>` : ""}
     <div class="pl-k"><div><span>Sin compra 30–59 días</span><b>${nf(P.d30.length)}</b></div><div><span>60–89 días</span><b>${nf(P.d60.length)}</b></div><div><span>90+ días</span><b>${nf(P.d90.length)}</b></div>
       <div><span>Reactivados este mes</span><b>${nf(P.reac.length)}</b><small>meta: 1 de cada 4 en 60 días</small></div>
@@ -6895,7 +6895,7 @@ const proxHabil = () => { const d = new Date(); do { d.setDate(d.getDate() + 1);
 } catch (e) {} })();
 </script>
 
-<script>/* rankdist: plan 55,2 → 61,2 → 65,7 MM en 14 meses y ranking de vendedores por objetivos */
+<script>/* rankdist: plan 54,3 → 65,7 → 71,1 MM en 14 meses y ranking de vendedores por objetivos */
 /* patch_plan14modelo: plan calculado con pronóstico (ensamble de 5 modelos) */
 const PLAN14 = [{"ym": 202611, "y": 2026, "m": 11, "meta": 54300000, "fc": 55600000, "nivel": 54.3, "hito": 54}, {"ym": 202612, "y": 2026, "m": 12, "meta": 60500000, "fc": 55600000, "nivel": 60.5, "hito": 0}, {"ym": 202701, "y": 2027, "m": 1, "meta": 53700000, "fc": 55700000, "nivel": 53.7, "hito": 0}, {"ym": 202702, "y": 2027, "m": 2, "meta": 55600000, "fc": 55700000, "nivel": 55.6, "hito": 0}, {"ym": 202703, "y": 2027, "m": 3, "meta": 58500000, "fc": 55700000, "nivel": 58.5, "hito": 0}, {"ym": 202704, "y": 2027, "m": 4, "meta": 58900000, "fc": 55700000, "nivel": 58.9, "hito": 0}, {"ym": 202705, "y": 2027, "m": 5, "meta": 53700000, "fc": 55700000, "nivel": 53.7, "hito": 0}, {"ym": 202706, "y": 2027, "m": 6, "meta": 65700000, "fc": 55700000, "nivel": 65.7, "hito": 66}, {"ym": 202707, "y": 2027, "m": 7, "meta": 62400000, "fc": 55700000, "nivel": 62.4, "hito": 0}, {"ym": 202708, "y": 2027, "m": 8, "meta": 56300000, "fc": 55700000, "nivel": 56.3, "hito": 0}, {"ym": 202709, "y": 2027, "m": 9, "meta": 71500000, "fc": 55700000, "nivel": 71.5, "hito": 0}, {"ym": 202710, "y": 2027, "m": 10, "meta": 62700000, "fc": 55800000, "nivel": 62.7, "hito": 0}, {"ym": 202711, "y": 2027, "m": 11, "meta": 64000000, "fc": 55800000, "nivel": 64.0, "hito": 0}, {"ym": 202712, "y": 2027, "m": 12, "meta": 71100000, "fc": 55800000, "nivel": 71.1, "hito": 71}];
 const metaPlan14 = (y, m) => { const p = PLAN14.find(x => x.ym === y * 100 + m); return p ? p.meta : y * 100 + m < PLAN14[0].ym ? PLAN14[0].meta : PLAN14[PLAN14.length - 1].meta; };
@@ -6958,7 +6958,7 @@ function plan14Html(B) {
   if (!B || !B.rows) return "";
   const tv = B.vend.indexOf("Tienda Hellywoof"), real = {}; B.rows.forEach(r => { if (r[7] === tv) return; const k = (r[8] || B.anio) * 100 + r[2]; real[k] = (real[k] || 0) + r[5]; });
   const [cy, cm] = String(B.corte || "").split("-").map(Number), cur = cy * 100 + cm, pmm = n => "$" + (n / 1e6).toLocaleString("es-CL", { maximumFractionDigits: 1 }) + " MM";
-  return `<div class="card"><h2>Plan a 14 meses <span class="muted">venta neta mensual de la distribuidora (sin la tienda): 55,2 → 61,2 → 65,7 MM</span></h2>
+  return `<div class="card"><h2>Plan a 14 meses <span class="muted">venta neta mensual de la distribuidora (sin la tienda): 54,3 → 65,7 → 71,1 MM</span></h2>
     <div style="overflow-x:auto"><table class="p14t" style="width:100%;border-collapse:collapse;font-size:.85rem"><thead><tr><th style="text-align:left">Mes</th><th>Objetivo</th><th title="lo que se vendería sin cambios, según el pronóstico">Pronóstico base</th><th>Real</th><th>Cumplimiento</th><th>Diferencia</th></tr></thead><tbody>
     ${PLAN14.map(p => { const v = real[p.ym] || 0, fut = p.ym > cur; return `<tr${p.ym === cur ? ' style="background:#FFF8E6"' : ""}><td style="text-align:left${p.hito ? ";font-weight:800" : ""}">${["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"][p.m - 1]} ${p.y}${p.hito ? " · hito " + p.hito + " MM" : ""}${p.ym === cur ? " · en curso" : ""}</td>
       <td style="text-align:right">${pmm(p.meta)}</td><td style="text-align:right;color:#5B6874">${p.fc ? pmm(p.fc) : ""}</td><td style="text-align:right">${fut ? "" : pmm(v)}</td><td style="text-align:right">${fut ? "" : Math.round(v / p.meta * 100) + "%"}</td><td style="text-align:right;color:${v >= p.meta ? "#1C7A4E" : "#B42318"}">${fut ? "" : (v >= p.meta ? "+" : "") + pmm(v - p.meta)}</td></tr>`; }).join("")}</tbody></table></div><p class="muted" style="font-size:.78rem;margin:8px 0 0">Cómo se calculó: la venta mensual es irregular (venta que se corre de un mes al siguiente, p. ej. may-26 $41 MM y jun-26 $69 MM), por eso se <b>suaviza</b> con promedio móvil de 3 meses sobre la venta por día hábil (ene-2025 a oct-2026, feriados de Chile). El <b>pronóstico base</b> (lo que se vendería sin cambios, ≈$55,6 MM al mes) combina Holt amortiguado, ARIMA y regresión; frente a la venta mensual real se equivoca en promedio ±12%. El <b>objetivo</b> sube con la tendencia y la estacionalidad de cada mes: 54,3 (nov-26) → 65,7 (jun-27) → 71,1 MM (dic-27). Total 14 meses con tienda: $1.000 MM. La diferencia entre ambos es el crecimiento que hay que lograr.</p></div>`;
@@ -7132,7 +7132,7 @@ function confirmarNota() {
   x.onclick = () => cerrarModal(); card.insertBefore(x, card.firstChild); })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261110173311";
+const HWF_VER = "20261111213115";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer)\/[^/]*$/, "/");
   let avisado = false;
@@ -7513,5 +7513,32 @@ function vmPoner(cont, VM, antes) { try { if (!cont) return; const v = cont.quer
 </script>
 <script>/* patch_grafventas: VENTAS */ { const _pi = pintarInicio; pintarInicio = function () { const r = _pi.apply(this, arguments); try { vmPoner(document.getElementById("crmInicio"), vmDeBase(DB && DB.d)); } catch (e) {} return r; };
   try { if (typeof MODO !== "undefined" && MODO === "inicio") pintarInicio(); } catch (e) {} }</script>
+<style>/* patch_sinrepetidos */
+.rep-x{display:none!important}
+#s-res .db > button.db-av,#s-res #avVend,#s-res .db-k > button[data-ir="av"],#s-res .db-k > button[data-ir^="pro:margen"],
+#s-res .db-k > button[data-ir="mas:cobranza"],#s-res .db-k > button[data-ir="mas:cots"],#s-res .db-k > button[data-ir="mas:embudo"]{display:none!important}
+#mAvance{display:none!important}
+#crmDash #crmAvance > .in-hero{display:none!important}
+</style>
+<script>/* patch_sinrepetidos: oculta las secciones que repiten información dentro de la misma app */
+(function () {
+  const T = e => (e.textContent || "").replace(/\s+/g, " ").trim(), tit = c => { const h = c.querySelector("h2,h3"); return h ? T(h) : ""; };
+  const REP_K = /^(Proyecci[oó]n de cierre|Margen bruto|Por cobrar|NP Defontana|Prospectos activos)/i;
+  function limpiar() { try {
+    const adm = document.getElementById("s-res"), ven = document.getElementById("crmDash");
+    [adm, ven].forEach(root => { if (!root) return;
+      root.querySelectorAll(".db-g > .db-c").forEach(c => { if (/^Vendedores\b/.test(tit(c))) c.classList.add("rep-x"); }); });
+    if (adm) adm.querySelectorAll(".db-c.pl .pl-k > div").forEach(d => { const s = d.querySelector("span"); if (s && /^(Proyecci[oó]n|Clientes nuevos)/i.test(T(s))) d.classList.add("rep-x"); });
+    if (ven) ven.querySelectorAll(".db-k > button").forEach(b => { if (REP_K.test(T(b))) b.classList.add("rep-x"); });
+  } catch (e) {} }
+  let t = null; const prog = () => { clearTimeout(t); t = setTimeout(limpiar, 30); };
+  try { new MutationObserver(prog).observe(document.body, { childList: true, subtree: true }); } catch (e) {}
+  limpiar();
+  /* si alguien llega a «Avance» (pestaña quitada), va a «Panel» */
+  try { if (typeof setModo === "function" && document.getElementById("mAvance")) { const _sm = setModo; setModo = function (m) { return _sm.call(this, m === "avance" ? "dash" : m); }; } } catch (e) {}
+  /* nombre del apartado en el menú Más de HWF */
+  try { if (typeof NAV_MNOM !== "undefined" && !NAV_MNOM.abast) { NAV_MNOM.abast = "Abastecimiento"; const b = document.querySelector('[data-sm="abast"] span'); if (b) b.textContent = "Abastecimiento"; } } catch (e) {}
+})();
+</script>
 </body>
 </html>
