@@ -3963,7 +3963,7 @@ function pintarPlan() {
   const chk = (() => { try { return JSON.parse(localStorage.getItem(PLCHK) || "{}"); } catch (e) { return {}; } })();
   const it = c => `<div class="it"><b>${esc(tc(c.nombre))}<span class="pl-tag ${c.abc}">${c.abc}</span></b><span class="v">${mm(c.hab)}/mes</span><small>${esc(c.cart)} · <span class="pl-tag d">${c.diasSin} días</span></small></div>`;
   const surt = P.L.filter(c => (c.abc === "A" || c.abc === "B") && c.ofrecer.length && c.diasSin < 60).sort((a, b) => b.v3 - a.v3).slice(0, 12);
-  $("masBody").innerHTML = `<div class="card pl"><h2>Plan de crecimiento <span class="muted">plan a 14 meses: 54,3 → 65,7 → 71,1 MM netos al mes</span></h2>
+  $("masBody").innerHTML = `<div class="card pl"><h2>Plan de crecimiento <span class="muted">plan a 14 meses: 53,0 → 64,1 → 69,4 MM netos al mes</span></h2>
     <div class="pl-k"><div><span>Venta del mes a la fecha</span><b>${mm(P.vMes)}</b><small>${String(P.CD).padStart(2, "0")}-${String(P.M).padStart(2, "0")} · sin tienda</small></div>
       <div><span>Proyección de cierre</span><b>${mm(proy)}</b><small>${Math.round(proy / PLAN.meta * 100)}% de la meta del mes</small></div>
       <div><span>Brecha a la meta del mes</span><b style="color:${falta ? "var(--bad)" : "var(--ok)"}">${falta ? mm(falta) : "cumplida"}</b><small>${(() => { const _p = typeof PLAN14 !== "undefined" ? PLAN14.find(x => x.ym === P.Y * 100 + P.M) : null; return _p && _p.fc ? "pronóstico sin cambios " + mm(_p.fc) : "meta del plan"; })()}</small></div>
@@ -4896,9 +4896,9 @@ function cliFantasia(nombre) { return cliFantasias()[norm(nombre || "")] || ""; 
 function cliBusca(ci, nombre) { const c = D.clientes[ci] || []; return [cliFantasia(nombre || c[0]), c[3], c[4], String(c[4] || "").replace(/[^0-9kK]/g, ""), c[5], c[6], c[7]].filter(Boolean).join(" "); }
 </script>
 
-<script>/* rankdist: plan 54,3 → 65,7 → 71,1 MM en 14 meses y ranking de vendedores por objetivos */
+<script>/* rankdist: plan 53,0 → 64,1 → 69,4 MM en 14 meses y ranking de vendedores por objetivos */
 /* patch_plan14modelo: plan calculado con pronóstico (ensamble de 5 modelos) */
-const PLAN14 = [{"ym": 202611, "y": 2026, "m": 11, "meta": 54300000, "fc": 55600000, "nivel": 54.3, "hito": 54}, {"ym": 202612, "y": 2026, "m": 12, "meta": 60500000, "fc": 55600000, "nivel": 60.5, "hito": 0}, {"ym": 202701, "y": 2027, "m": 1, "meta": 53700000, "fc": 55700000, "nivel": 53.7, "hito": 0}, {"ym": 202702, "y": 2027, "m": 2, "meta": 55600000, "fc": 55700000, "nivel": 55.6, "hito": 0}, {"ym": 202703, "y": 2027, "m": 3, "meta": 58500000, "fc": 55700000, "nivel": 58.5, "hito": 0}, {"ym": 202704, "y": 2027, "m": 4, "meta": 58900000, "fc": 55700000, "nivel": 58.9, "hito": 0}, {"ym": 202705, "y": 2027, "m": 5, "meta": 53700000, "fc": 55700000, "nivel": 53.7, "hito": 0}, {"ym": 202706, "y": 2027, "m": 6, "meta": 65700000, "fc": 55700000, "nivel": 65.7, "hito": 66}, {"ym": 202707, "y": 2027, "m": 7, "meta": 62400000, "fc": 55700000, "nivel": 62.4, "hito": 0}, {"ym": 202708, "y": 2027, "m": 8, "meta": 56300000, "fc": 55700000, "nivel": 56.3, "hito": 0}, {"ym": 202709, "y": 2027, "m": 9, "meta": 71500000, "fc": 55700000, "nivel": 71.5, "hito": 0}, {"ym": 202710, "y": 2027, "m": 10, "meta": 62700000, "fc": 55800000, "nivel": 62.7, "hito": 0}, {"ym": 202711, "y": 2027, "m": 11, "meta": 64000000, "fc": 55800000, "nivel": 64.0, "hito": 0}, {"ym": 202712, "y": 2027, "m": 12, "meta": 71100000, "fc": 55800000, "nivel": 71.1, "hito": 71}];
+const PLAN14 = [{"ym": 202611, "y": 2026, "m": 11, "meta": 53000000, "fc": 55600000, "nivel": 53.0, "hito": 53}, {"ym": 202612, "y": 2026, "m": 12, "meta": 59000000, "fc": 55600000, "nivel": 59.0, "hito": 0}, {"ym": 202701, "y": 2027, "m": 1, "meta": 52400000, "fc": 55700000, "nivel": 52.4, "hito": 0}, {"ym": 202702, "y": 2027, "m": 2, "meta": 54200000, "fc": 55700000, "nivel": 54.2, "hito": 0}, {"ym": 202703, "y": 2027, "m": 3, "meta": 57000000, "fc": 55700000, "nivel": 57.0, "hito": 0}, {"ym": 202704, "y": 2027, "m": 4, "meta": 57400000, "fc": 55700000, "nivel": 57.4, "hito": 0}, {"ym": 202705, "y": 2027, "m": 5, "meta": 52400000, "fc": 55700000, "nivel": 52.4, "hito": 0}, {"ym": 202706, "y": 2027, "m": 6, "meta": 64100000, "fc": 55700000, "nivel": 64.1, "hito": 64}, {"ym": 202707, "y": 2027, "m": 7, "meta": 60800000, "fc": 55700000, "nivel": 60.8, "hito": 0}, {"ym": 202708, "y": 2027, "m": 8, "meta": 54900000, "fc": 55700000, "nivel": 54.9, "hito": 0}, {"ym": 202709, "y": 2027, "m": 9, "meta": 69700000, "fc": 55700000, "nivel": 69.7, "hito": 0}, {"ym": 202710, "y": 2027, "m": 10, "meta": 61100000, "fc": 55800000, "nivel": 61.1, "hito": 0}, {"ym": 202711, "y": 2027, "m": 11, "meta": 62400000, "fc": 55800000, "nivel": 62.4, "hito": 0}, {"ym": 202712, "y": 2027, "m": 12, "meta": 69400000, "fc": 55800000, "nivel": 69.4, "hito": 69}];
 const metaPlan14 = (y, m) => { const p = PLAN14.find(x => x.ym === y * 100 + m); return p ? p.meta : y * 100 + m < PLAN14[0].ym ? PLAN14[0].meta : PLAN14[PLAN14.length - 1].meta; };
 const RKD_W = [["venta", "Venta ponderada", 33], ["ticket", "Ticket promedio", 19], ["contado", "Venta contado", 14], ["sku", "SKU por cliente", 11], ["margen", "Margen total", 9], ["nuevos", "Clientes nuevos", 7], ["fecha", "Facturación temprana", 7]];
 const rkdPesoDia = (d, n) => n > 1 ? 1.5 - (d - 1) / (n - 1) : 1;   /* 1,5 el día 1 → 0,5 el último día del mes */
@@ -4959,10 +4959,10 @@ function plan14Html(B) {
   if (!B || !B.rows) return "";
   const tv = B.vend.indexOf("Tienda Hellywoof"), real = {}; B.rows.forEach(r => { if (r[7] === tv) return; const k = (r[8] || B.anio) * 100 + r[2]; real[k] = (real[k] || 0) + r[5]; });
   const [cy, cm] = String(B.corte || "").split("-").map(Number), cur = cy * 100 + cm, pmm = n => "$" + (n / 1e6).toLocaleString("es-CL", { maximumFractionDigits: 1 }) + " MM";
-  return `<div class="card"><h2>Plan a 14 meses <span class="muted">venta neta mensual de la distribuidora (sin la tienda): 54,3 → 65,7 → 71,1 MM</span></h2>
+  return `<div class="card"><h2>Plan a 14 meses <span class="muted">venta neta mensual de la distribuidora (sin la tienda): 53,0 → 64,1 → 69,4 MM</span></h2>
     <div style="overflow-x:auto"><table class="p14t" style="width:100%;border-collapse:collapse;font-size:.85rem"><thead><tr><th style="text-align:left">Mes</th><th>Objetivo</th><th title="lo que se vendería sin cambios, según el pronóstico">Pronóstico base</th><th>Real</th><th>Cumplimiento</th><th>Diferencia</th></tr></thead><tbody>
     ${PLAN14.map(p => { const v = real[p.ym] || 0, fut = p.ym > cur; return `<tr${p.ym === cur ? ' style="background:#FFF8E6"' : ""}><td style="text-align:left${p.hito ? ";font-weight:800" : ""}">${["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"][p.m - 1]} ${p.y}${p.hito ? " · hito " + p.hito + " MM" : ""}${p.ym === cur ? " · en curso" : ""}</td>
-      <td style="text-align:right">${pmm(p.meta)}</td><td style="text-align:right;color:#5B6874">${p.fc ? pmm(p.fc) : ""}</td><td style="text-align:right">${fut ? "" : pmm(v)}</td><td style="text-align:right">${fut ? "" : Math.round(v / p.meta * 100) + "%"}</td><td style="text-align:right;color:${v >= p.meta ? "#1C7A4E" : "#B42318"}">${fut ? "" : (v >= p.meta ? "+" : "") + pmm(v - p.meta)}</td></tr>`; }).join("")}</tbody></table></div><p class="muted" style="font-size:.78rem;margin:8px 0 0">Cómo se calculó: la venta mensual es irregular (venta que se corre de un mes al siguiente, p. ej. may-26 $41 MM y jun-26 $69 MM), por eso se <b>suaviza</b> con promedio móvil de 3 meses sobre la venta por día hábil (ene-2025 a oct-2026, feriados de Chile). El <b>pronóstico base</b> (lo que se vendería sin cambios, ≈$55,6 MM al mes) combina Holt amortiguado, ARIMA y regresión; frente a la venta mensual real se equivoca en promedio ±12%. El <b>objetivo</b> sube con la tendencia y la estacionalidad de cada mes: 54,3 (nov-26) → 65,7 (jun-27) → 71,1 MM (dic-27). Total 14 meses con tienda: $1.000 MM. La diferencia entre ambos es el crecimiento que hay que lograr.</p></div>`;
+      <td style="text-align:right">${pmm(p.meta)}</td><td style="text-align:right;color:#5B6874">${p.fc ? pmm(p.fc) : ""}</td><td style="text-align:right">${fut ? "" : pmm(v)}</td><td style="text-align:right">${fut ? "" : Math.round(v / p.meta * 100) + "%"}</td><td style="text-align:right;color:${v >= p.meta ? "#1C7A4E" : "#B42318"}">${fut ? "" : (v >= p.meta ? "+" : "") + pmm(v - p.meta)}</td></tr>`; }).join("")}</tbody></table></div><p class="muted" style="font-size:.78rem;margin:8px 0 0">Cómo se calculó: la venta mensual es irregular (venta que se corre de un mes al siguiente, p. ej. may-26 $41 MM y jun-26 $69 MM), por eso se <b>suaviza</b> con promedio móvil de 3 meses sobre la venta por día hábil (ene-2025 a oct-2026, feriados de Chile). El <b>pronóstico base</b> (lo que se vendería sin cambios, ≈$55,6 MM al mes) combina Holt amortiguado, ARIMA y regresión; frente a la venta mensual real se equivoca en promedio ±12%. El <b>objetivo</b> sube con la tendencia y la estacionalidad de cada mes: 53,0 (nov-26) → 64,1 (jun-27) → 69,4 MM (dic-27). Total 14 meses con tienda: $1.000 MM. La diferencia entre ambos es el crecimiento que hay que lograr.</p></div>`;
 }
 document.head.insertAdjacentHTML("beforeend", "<style>.rkd-t th,.rkd-t td{padding:7px 8px;border-bottom:1px solid var(--line,#DAE1E7);text-align:right;white-space:nowrap}.rkd-t th{font-size:.74rem;color:var(--muted,#5B6874)}</style>");
 
@@ -5175,7 +5175,7 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261111213607";
+const HWF_VER = "20261111213736";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer)\/[^/]*$/, "/");
   let avisado = false;
@@ -5343,67 +5343,6 @@ setTimeout(() => { try { if (D && $("s-res") && !$("s-res").hidden && !$("kpCard
 <script>/* patch_grafventas: HWF */ { const _pd = pintarDashboard; pintarDashboard = function () { const r = _pd.apply(this, arguments); try { vmPoner(document.getElementById("s-res"), vmDeBase(BASE)); } catch (e) {} return r; };
   try { if (document.getElementById("s-res") && document.getElementById("s-res").children.length) vmPoner(document.getElementById("s-res"), vmDeBase(BASE)); } catch (e) {} }</script>
 
-<style>/* patch_grafventas */
-.vm-card{display:grid;gap:8px}.vm-card h3{margin:0;font-size:1.02rem;display:flex;justify-content:space-between;gap:8px;align-items:baseline}
-.vm-card h3 small{font-weight:600;color:var(--muted,#5B6874);font-size:.76rem;text-align:right}
-.vm-ley{display:flex;gap:12px;flex-wrap:wrap;font-size:.8rem;color:var(--muted,#5B6874)}.vm-ley i{display:inline-block;width:16px;height:3px;border-radius:2px;margin-right:5px;vertical-align:3px}
-.vm-svg{width:100%;height:auto;display:block;touch-action:pan-y;cursor:crosshair}
-.vm-det{font-size:.84rem;min-height:1.3em;color:var(--ink,#0F1E29);font-variant-numeric:tabular-nums}.vm-det b{font-weight:800}
-.vm-res{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.vm-res div{background:var(--sunk,#EEF2F5);border-radius:10px;padding:6px 8px;font-size:.72rem;color:var(--muted,#5B6874)}
-.vm-res b{display:block;font-size:.95rem;color:var(--ink,#0F1E29);font-variant-numeric:tabular-nums}
-</style>
-<script>/* patch_grafventas: venta neta mensual 2025, 2026 y plan (distribuidora) */
-const VM_PLAN = [[202611, 62500000], [202612, 70000000], [202701, 62200000], [202702, 64000000], [202703, 68300000], [202704, 69200000], [202705, 64700000], [202706, 76700000], [202707, 73900000], [202708, 68300000], [202709, 82800000], [202710, 76200000], [202711, 75900000], [202712, 85300000]];
-function vmDeBase(B) { try {
-  if (!B || !B.rows || !B.rows.length) return null;
-  const a = {}; B.rows.forEach(r => { const y = r[8] || B.anio; (a[y] = a[y] || new Array(12).fill(0))[r[2] - 1] += Number(r[5]) || 0; });   /* TOTAL: distribuidora + tienda */
-  return { corte: B.corte, a }; } catch (e) { return null; } }
-const vmMM = v => "$" + (v / 1e6).toLocaleString("es-CL", { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + " MM";
-const VM_MES = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
-function vmHtml(VM, id) {
-  if (!VM || !VM.a) return `<div class="card vm-card" id="${id}"><h3>Venta neta mensual</h3><p style="margin:0;color:var(--muted,#5B6874);font-size:.85rem">Disponible con la próxima actualización de datos.</p></div>`;
-  const [CY, CM, CD] = String(VM.corte || "").split("-").map(Number), W = 360, H = 210, L = 34, R = 8, T = 10, B = 24;
-  const val = (y, m) => ((VM.a[y] || [])[m - 1]) || 0, meta = vmMetas(VM);
-  const s25 = [], s26 = [], m26 = [], p27 = [];
-  for (let m = 1; m <= 12; m++) { if (VM.a[2025]) s25.push([m - 1, val(2025, m)]); if (VM.a[2026] && (2026 < CY || m <= CM)) s26.push([m - 1, val(2026, m)]);
-    if (meta[202600 + m]) m26.push([m - 1, meta[202600 + m]]); if (meta[202700 + m]) p27.push([m - 1, meta[202700 + m]]); }
-  const mx = Math.max(1, ...s25.map(p => p[1]), ...s26.map(p => p[1]), ...m26.map(p => p[1]), ...p27.map(p => p[1])), paso = mx > 80e6 ? 25e6 : 20e6, top = Math.ceil(mx * 1.05 / paso) * paso;
-  const X = i => L + i * (W - L - R) / 11, Y = v => T + (H - T - B) * (1 - v / top), pts = s => s.map(p => X(p[0]).toFixed(1) + "," + Y(p[1]).toFixed(1)).join(" ");
-  let g = ""; for (let v = 0; v <= top; v += paso) g += `<line x1="${L}" x2="${W - R}" y1="${Y(v)}" y2="${Y(v)}" stroke="currentColor" stroke-opacity=".12"/><text x="${L - 4}" y="${Y(v) + 3}" text-anchor="end" font-size="9" fill="currentColor" fill-opacity=".6">${Math.round(v / 1e6)}</text>`;
-  for (let i = 0; i < 12; i++) g += `<text x="${X(i)}" y="${H - 8}" text-anchor="middle" font-size="9" fill="currentColor" fill-opacity=".6">${VM_MES[i]}</text>`;
-  const parc = s26.length && CY === 2026 ? s26[s26.length - 1] : null, s26c = parc ? s26.slice(0, -1) : s26;
-  const dots = (s, c, r) => s.map(p => `<circle cx="${X(p[0]).toFixed(1)}" cy="${Y(p[1]).toFixed(1)}" r="${r || 2.3}" fill="${c}"/>`).join("");
-  g += `<polyline points="${pts(p27)}" fill="none" stroke="#F0A818" stroke-opacity=".75" stroke-width="2" stroke-dasharray="5 4"/>${dots(p27, "#F5C25B", 2)}`;
-  g += `<polyline points="${pts(s25)}" fill="none" stroke="#9AA8B4" stroke-width="2.2"/>${dots(s25, "#9AA8B4")}`;
-  g += `<polyline points="${pts(m26)}" fill="none" stroke="#E07B24" stroke-width="2.6"/>${dots(m26, "#E07B24", 3)}`;
-  g += `<polyline points="${pts(s26c)}" fill="none" stroke="#0B3146" stroke-width="2.8"/>${dots(s26c, "#0B3146")}`;
-  if (parc) { const p0 = s26c[s26c.length - 1]; if (p0) g += `<line x1="${X(p0[0])}" y1="${Y(p0[1])}" x2="${X(parc[0])}" y2="${Y(parc[1])}" stroke="#0B3146" stroke-width="2" stroke-dasharray="2 3"/>`;
-    g += `<circle cx="${X(parc[0])}" cy="${Y(parc[1])}" r="3.6" fill="#fff" stroke="#0B3146" stroke-width="2"/>`; }
-  g += `<line class="vm-cur" x1="0" x2="0" y1="${T}" y2="${H - B}" stroke="#E07B24" stroke-width="1.2" visibility="hidden"/>`;
-  const ytd = (y, hasta) => (VM.a[y] || []).slice(0, hasta).reduce((t, v) => t + v, 0), mesesCerr = CY === 2026 ? CM - 1 : 12;
-  const t26 = ytd(2026, mesesCerr), t25 = ytd(2025, mesesCerr), vs = t25 ? (t26 / t25 - 1) : 0, plan12 = p27.reduce((t, p) => t + p[1], 0), plan14 = VM_PLAN.reduce((t, p) => t + p[1], 0);
-  return `<div class="card vm-card" id="${id}"><h3>Venta neta mensual <small>total distribuidora + tienda · facturas − NC, sin IVA</small></h3>
-    <div class="vm-ley"><span><i style="background:#9AA8B4"></i>2025</span><span><i style="background:#0B3146"></i>2026${parc ? " (○ " + VM_MES[CM - 1] + " parcial al " + String(CD).padStart(2, "0") + "-" + String(CM).padStart(2, "0") + ")" : ""}</span><span><i style="background:#E07B24"></i>Meta 2026</span><span><i style="background:#F5C25B"></i>Plan 2027</span></div>
-    <svg class="vm-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Venta neta mensual 2025 y 2026 y meta, mismo eje">${g}</svg>
-    <div class="vm-det">Toca el gráfico para ver cada mes.</div>
-    <div class="vm-res"><div>2026 ene–${VM_MES[Math.max(0, mesesCerr - 1)]}<b>${vmMM(t26)}</b></div><div>vs mismo período 2025${t25 ? `<b style="color:${vs >= 0 ? "#1C7A4E" : "#B42318"}">${(vs >= 0 ? "+" : "−") + Math.abs(vs * 100).toLocaleString("es-CL", { maximumFractionDigits: 1 })}%</b>` : "<b>—</b>"}</div><div>Plan nov-26 → dic-27<b>${plan14 ? vmMM(plan14) : "—"}</b>${plan12 ? "2027: " + vmMM(plan12) : ""}</div></div></div>`;
-}
-/* metas por mes (ym → $): plan total (distribuidora + tienda) y, si el script las manda, metas guardadas de meses anteriores */
-function vmMetas(VM) { const o = {}; VM_PLAN.forEach(([ym, v]) => o[ym] = v); try { Object.keys(VM.metas || {}).forEach(k => { const ym = Number(String(k).replace("-", "")); if (VM.metas[k] && !o[ym]) o[ym] = VM.metas[k]; }); } catch (e) {} return o; }
-function vmActivar(el, VM) { if (!el || !VM || !VM.a) return; const svg = el.querySelector("svg"), det = el.querySelector(".vm-det"), cur = el.querySelector(".vm-cur"); if (!svg) return;
-  const [CY, CM] = String(VM.corte || "").split("-").map(Number), meta = vmMetas(VM);
-  const ver = ev => { const r = svg.getBoundingClientRect(), x = ((ev.touches ? ev.touches[0].clientX : ev.clientX) - r.left) / r.width * 360;
-    const i = Math.max(0, Math.min(11, Math.round((x - 34) / (318 / 11)))), m = i + 1, px = 34 + i * 318 / 11;
-    cur.setAttribute("x1", px); cur.setAttribute("x2", px); cur.setAttribute("visibility", "visible");
-    const v25 = VM.a[2025] ? VM.a[2025][i] : null, v26 = VM.a[2026] && (CY > 2026 || m <= CM) ? VM.a[2026][i] : null;
-    const parts = [`<b>${VM_MES[i]}</b>:`]; if (v25 != null) parts.push("2025 " + vmMM(v25)); if (v26 != null) parts.push("2026 " + vmMM(v26) + (CY === 2026 && m === CM ? " (parcial)" : ""));
-    if (meta[202600 + m]) parts.push("meta " + vmMM(meta[202600 + m]) + (v26 != null ? " (" + Math.round(v26 / meta[202600 + m] * 100) + "%)" : "")); if (meta[202700 + m]) parts.push("plan 2027 " + vmMM(meta[202700 + m]));
-    det.innerHTML = parts[0] + " " + parts.slice(1).join(" · "); };
-  svg.addEventListener("click", ver); svg.addEventListener("touchstart", ver, { passive: true }); svg.addEventListener("touchmove", ver, { passive: true }); }
-function vmPoner(cont, VM, antes) { try { if (!cont) return; const v = cont.querySelector("#vmCard"); if (v) v.remove();
-  const d = document.createElement("div"); d.innerHTML = vmHtml(VM, "vmCard"); const el = d.firstElementChild;
-  const ref = antes === "top" ? cont.firstElementChild : (cont.children[1] || null); ref ? cont.insertBefore(el, ref) : cont.appendChild(el); vmActivar(el, VM); } catch (e) {} }
-</script>
 <script>/* patch_grafventas: HWF */ { const _pd = pintarDashboard; pintarDashboard = function () { const r = _pd.apply(this, arguments); try { vmPoner(document.getElementById("s-res"), vmDeBase(BASE)); } catch (e) {} return r; };
   try { if (document.getElementById("s-res") && document.getElementById("s-res").children.length) vmPoner(document.getElementById("s-res"), vmDeBase(BASE)); } catch (e) {} }</script>
 <style>/* patch_bi */
@@ -5463,14 +5402,16 @@ function vmPoner(cont, VM, antes) { try { if (!cont) return; const v = cont.quer
     return { X, B, AN, hayC, mes, tot, ult, prov: Object.values(prov), prod: Object.values(prod), provs: [...provs].sort((a, b) => a.localeCompare(b, "es")) }; }
   function grafico(R) { const W = 640, H = 250, L = 44, Rr = 8, T = 12, Bm = 26, n = R.ult + 1, v = o => E.u === "$" ? o.vv : o.vq, c = o => E.u === "$" ? o.cv : o.cq;
     const mx = Math.max(1, ...R.mes.slice(0, n).map(o => Math.max(v(o), c(o), E.u === "$" ? o.vc : 0))), esc_ = E.u === "$" ? 1e6 : 1, paso = (() => { const p = Math.pow(10, Math.floor(Math.log10(mx / esc_ || 1))), q = mx / esc_ / p; return (q > 5 ? 2 : q > 2 ? 1 : 0.5) * p * esc_; })();
-    const top = Math.ceil(mx / paso) * paso, y = x => T + (H - T - Bm) * (1 - x / top), g = (W - L - Rr) / n, bw = Math.min(22, g * 0.34); let s = "";
+    const top = Math.ceil(mx / paso) * paso, y = x => T + (H - T - Bm) * (1 - x / top), g = (W - L - Rr) / n; let s = "";
     for (let k = 0; k <= top + 1e-9; k += paso) s += `<line x1="${L}" x2="${W - Rr}" y1="${y(k)}" y2="${y(k)}" stroke="#DDE3E8" stroke-width="1"/><text x="${L - 6}" y="${y(k) + 4}" text-anchor="end" font-size="11" fill="#5B6874">${E.u === "$" ? (k / 1e6).toLocaleString("es-CL") : k.toLocaleString("es-CL")}</text>`;
-    let pl = "";
-    R.mes.slice(0, n).forEach((o, i) => { const cx = L + g * (i + 0.5);
-      s += `<rect x="${cx - bw - 1}" y="${y(Math.max(0, v(o)))}" width="${bw}" height="${Math.max(0, y(0) - y(Math.max(0, v(o))))}" rx="3" fill="#0B3146"><title>${MES[i]}: ventas ${F(v(o))}</title></rect>`;
-      s += `<rect x="${cx + 1}" y="${y(Math.max(0, c(o)))}" width="${bw}" height="${Math.max(0, y(0) - y(Math.max(0, c(o))))}" rx="3" fill="#E07B24"><title>${MES[i]}: compras ${F(c(o))}</title></rect>`;
-      s += `<text x="${cx}" y="${H - 8}" text-anchor="middle" font-size="11" fill="#5B6874">${MES[i]}</text>`; if (E.u === "$") pl += `${cx},${y(Math.max(0, o.vc))} `; });
-    if (E.u === "$" && n > 1) s += `<polyline points="${pl}" fill="none" stroke="#5B6874" stroke-width="2" stroke-dasharray="5 4"/>`;
+    const pts = { v: "", c: "", k: "" }; let dots = "";
+    R.mes.slice(0, n).forEach((o, i) => { const cx = L + g * (i + 0.5), yv = y(Math.max(0, v(o))), yc = y(Math.max(0, c(o)));
+      pts.v += `${cx},${yv} `; pts.c += `${cx},${yc} `; if (E.u === "$") pts.k += `${cx},${y(Math.max(0, o.vc))} `;
+      dots += `<circle cx="${cx}" cy="${yv}" r="4" fill="#0B3146"><title>${MES[i]}: ventas ${F(v(o))}</title></circle>` + (R.hayC ? `<circle cx="${cx}" cy="${yc}" r="4" fill="#E07B24"><title>${MES[i]}: compras ${F(c(o))}</title></circle>` : "");
+      s += `<text x="${cx}" y="${H - 8}" text-anchor="middle" font-size="11" fill="#5B6874">${MES[i]}</text>`; });
+    if (E.u === "$") s += `<polyline points="${pts.k}" fill="none" stroke="#5B6874" stroke-width="2" stroke-dasharray="5 4"/>`;
+    if (R.hayC) s += `<polyline points="${pts.c}" fill="none" stroke="#E07B24" stroke-width="2.5" stroke-linejoin="round"/>`;
+    s += `<polyline points="${pts.v}" fill="none" stroke="#0B3146" stroke-width="2.5" stroke-linejoin="round"/>` + dots;
     return `<svg class="bi-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Ventas y compras por mes">${s}</svg>`; }
   function html(R) { const P = E.u === "$", t = R.tot, v = P ? t.vv : t.vq, c = P ? t.cv : t.cq, ref = P ? t.vc : t.vq, dif = c - ref, hay = !!R.hayC;
     const dcl = x => x > 0 ? "bi-neg" : x < 0 ? "bi-pos" : "";
@@ -5489,7 +5430,7 @@ function vmPoner(cont, VM, antes) { try { if (!cont) return; const v = cont.quer
         <div>${P ? "Costo de lo vendido" : "Compras ÷ ventas"}<b>${P ? fm(t.vc) : (hay && v ? Math.round(c / v * 100) + "%" : "—")}</b><small>${P ? (t.vv ? "margen " + Math.round((1 - t.vc / t.vv) * 100) + "%" : "") : "100% = se compra lo que se vende"}</small></div>
         <div>Compras − ${P ? "costo vendido" : "ventas"}<b class="${hay ? dcl(dif) : ""}">${hay ? F(dif) : "—"}</b><small>${hay ? (dif > 0 ? "se compró más de lo vendido: sube el inventario" : dif < 0 ? "se compró menos: baja el inventario" : "") : ""}</small></div></div></div>
     <div class="card"><h2>Por mes <span class="muted">${E.prov ? esc(E.prov) : "todos los proveedores"} · ${P ? "millones de $" : "unidades"}</span></h2>
-      <div class="bi-ley"><span><i style="background:#0B3146"></i>Ventas${P ? " netas" : ""}</span><span><i style="background:#E07B24"></i>Compras</span>${P ? '<span><i style="background:none;border-top:2px dashed #5B6874;height:0;border-radius:0;vertical-align:4px"></i>Costo de lo vendido</span>' : ""}</div>
+      <div class="bi-ley"><span><i style="background:#0B3146;height:3px;width:16px;vertical-align:4px"></i>Ventas${P ? " netas" : ""}</span><span><i style="background:#E07B24;height:3px;width:16px;vertical-align:4px"></i>Compras</span>${P ? '<span><i style="background:none;border-top:2px dashed #5B6874;height:0;border-radius:0;vertical-align:4px"></i>Costo de lo vendido</span>' : ""}</div>
       ${grafico(R)}
       <div class="tbl" style="overflow-x:auto;margin-top:8px"><table class="bi-t"><thead><tr><th>Mes</th><th>Ventas</th>${P ? "<th>Costo vendido</th>" : ""}<th>Compras</th><th>Compras − ${P ? "costo" : "ventas"}</th>${P ? "<th>Margen</th>" : ""}</tr></thead><tbody>
         ${R.mes.slice(0, R.ult + 1).map(filaM).join("")}<tr class="tot"><td>Total</td><td>${F(v)}</td>${P ? `<td>${fm(t.vc)}</td>` : ""}<td>${hay ? F(c) : "—"}</td><td class="${hay ? dcl(dif) : ""}">${hay ? F(dif) : "—"}</td>${P ? `<td>${t.vv ? Math.round((1 - t.vc / t.vv) * 100) + "%" : "—"}</td>` : ""}</tr></tbody></table></div></div>
@@ -5548,5 +5489,69 @@ function vmPoner(cont, VM, antes) { try { if (!cont) return; const v = cont.quer
   try { if (typeof NAV_MNOM !== "undefined" && !NAV_MNOM.abast) { NAV_MNOM.abast = "Abastecimiento"; const b = document.querySelector('[data-sm="abast"] span'); if (b) b.textContent = "Abastecimiento"; } } catch (e) {}
 })();
 </script>
+
+<style>/* patch_grafventas */
+.vm-card{display:grid;gap:8px}.vm-card h3{margin:0;font-size:1.02rem;display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.vm-card h3 small{font-weight:600;color:var(--muted,#5B6874);font-size:.76rem;text-align:right}
+.vm-ley{display:flex;gap:12px;flex-wrap:wrap;font-size:.8rem;color:var(--muted,#5B6874)}.vm-ley i{display:inline-block;width:16px;height:3px;border-radius:2px;margin-right:5px;vertical-align:3px}
+.vm-svg{width:100%;height:auto;display:block;touch-action:pan-y;cursor:crosshair}
+.vm-det{font-size:.84rem;min-height:1.3em;color:var(--ink,#0F1E29);font-variant-numeric:tabular-nums}.vm-det b{font-weight:800}
+.vm-res{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.vm-res div{background:var(--sunk,#EEF2F5);border-radius:10px;padding:6px 8px;font-size:.72rem;color:var(--muted,#5B6874)}
+.vm-res b{display:block;font-size:.95rem;color:var(--ink,#0F1E29);font-variant-numeric:tabular-nums}
+</style>
+<script>/* patch_grafventas: venta neta mensual 2025, 2026 y plan (distribuidora) */
+const VM_PLAN = [[202611, 63000000], [202612, 69800000], [202701, 62100000], [202702, 63700000], [202703, 68100000], [202704, 69100000], [202705, 64900000], [202706, 76600000], [202707, 73900000], [202708, 68500000], [202709, 82500000], [202710, 76400000], [202711, 75900000], [202712, 85500000]];
+function vmDeBase(B) { try {
+  if (!B || !B.rows || !B.rows.length) return null;
+  const a = {}; B.rows.forEach(r => { const y = r[8] || B.anio; (a[y] = a[y] || new Array(12).fill(0))[r[2] - 1] += Number(r[5]) || 0; });   /* TOTAL: distribuidora + tienda */
+  return { corte: B.corte, a }; } catch (e) { return null; } }
+const vmMM = v => "$" + (v / 1e6).toLocaleString("es-CL", { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + " MM";
+const VM_MES = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
+function vmHtml(VM, id) {
+  if (!VM || !VM.a) return `<div class="card vm-card" id="${id}"><h3>Venta neta mensual</h3><p style="margin:0;color:var(--muted,#5B6874);font-size:.85rem">Disponible con la próxima actualización de datos.</p></div>`;
+  const [CY, CM, CD] = String(VM.corte || "").split("-").map(Number), W = 360, H = 210, L = 34, R = 8, T = 10, B = 24;
+  const val = (y, m) => ((VM.a[y] || [])[m - 1]) || 0, meta = vmMetas(VM);
+  const s25 = [], s26 = [], m26 = [], p27 = [];
+  for (let m = 1; m <= 12; m++) { if (VM.a[2025]) s25.push([m - 1, val(2025, m)]); if (VM.a[2026] && (2026 < CY || m <= CM)) s26.push([m - 1, val(2026, m)]);
+    if (meta[202600 + m]) m26.push([m - 1, meta[202600 + m]]); if (meta[202700 + m]) p27.push([m - 1, meta[202700 + m]]); }
+  const mx = Math.max(1, ...s25.map(p => p[1]), ...s26.map(p => p[1]), ...m26.map(p => p[1]), ...p27.map(p => p[1])), paso = mx > 80e6 ? 25e6 : 20e6, top = Math.ceil(mx * 1.05 / paso) * paso;
+  const X = i => L + i * (W - L - R) / 11, Y = v => T + (H - T - B) * (1 - v / top), pts = s => s.map(p => X(p[0]).toFixed(1) + "," + Y(p[1]).toFixed(1)).join(" ");
+  let g = ""; for (let v = 0; v <= top; v += paso) g += `<line x1="${L}" x2="${W - R}" y1="${Y(v)}" y2="${Y(v)}" stroke="currentColor" stroke-opacity=".12"/><text x="${L - 4}" y="${Y(v) + 3}" text-anchor="end" font-size="9" fill="currentColor" fill-opacity=".6">${Math.round(v / 1e6)}</text>`;
+  for (let i = 0; i < 12; i++) g += `<text x="${X(i)}" y="${H - 8}" text-anchor="middle" font-size="9" fill="currentColor" fill-opacity=".6">${VM_MES[i]}</text>`;
+  const parc = s26.length && CY === 2026 ? s26[s26.length - 1] : null, s26c = parc ? s26.slice(0, -1) : s26;
+  const dots = (s, c, r) => s.map(p => `<circle cx="${X(p[0]).toFixed(1)}" cy="${Y(p[1]).toFixed(1)}" r="${r || 2.3}" fill="${c}"/>`).join("");
+  g += `<polyline points="${pts(p27)}" fill="none" stroke="#F0A818" stroke-opacity=".75" stroke-width="2" stroke-dasharray="5 4"/>${dots(p27, "#F5C25B", 2)}`;
+  g += `<polyline points="${pts(s25)}" fill="none" stroke="#9AA8B4" stroke-width="2.2"/>${dots(s25, "#9AA8B4")}`;
+  g += `<polyline points="${pts(m26)}" fill="none" stroke="#E07B24" stroke-width="2.6"/>${dots(m26, "#E07B24", 3)}`;
+  g += `<polyline points="${pts(s26c)}" fill="none" stroke="#0B3146" stroke-width="2.8"/>${dots(s26c, "#0B3146")}`;
+  if (parc) { const p0 = s26c[s26c.length - 1]; if (p0) g += `<line x1="${X(p0[0])}" y1="${Y(p0[1])}" x2="${X(parc[0])}" y2="${Y(parc[1])}" stroke="#0B3146" stroke-width="2" stroke-dasharray="2 3"/>`;
+    g += `<circle cx="${X(parc[0])}" cy="${Y(parc[1])}" r="3.6" fill="#fff" stroke="#0B3146" stroke-width="2"/>`; }
+  g += `<line class="vm-cur" x1="0" x2="0" y1="${T}" y2="${H - B}" stroke="#E07B24" stroke-width="1.2" visibility="hidden"/>`;
+  const ytd = (y, hasta) => (VM.a[y] || []).slice(0, hasta).reduce((t, v) => t + v, 0), mesesCerr = CY === 2026 ? CM - 1 : 12;
+  const t26 = ytd(2026, mesesCerr), t25 = ytd(2025, mesesCerr), vs = t25 ? (t26 / t25 - 1) : 0, plan12 = p27.reduce((t, p) => t + p[1], 0), plan14 = VM_PLAN.reduce((t, p) => t + p[1], 0);
+  return `<div class="card vm-card" id="${id}"><h3>Venta neta mensual <small>total distribuidora + tienda · facturas − NC, sin IVA</small></h3>
+    <div class="vm-ley"><span><i style="background:#9AA8B4"></i>2025</span><span><i style="background:#0B3146"></i>2026${parc ? " (○ " + VM_MES[CM - 1] + " parcial al " + String(CD).padStart(2, "0") + "-" + String(CM).padStart(2, "0") + ")" : ""}</span><span><i style="background:#E07B24"></i>Meta 2026</span><span><i style="background:#F5C25B"></i>Plan 2027</span></div>
+    <svg class="vm-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Venta neta mensual 2025 y 2026 y meta, mismo eje">${g}</svg>
+    <div class="vm-det">Toca el gráfico para ver cada mes.</div>
+    <div class="vm-res"><div>2026 ene–${VM_MES[Math.max(0, mesesCerr - 1)]}<b>${vmMM(t26)}</b></div><div>vs mismo período 2025${t25 ? `<b style="color:${vs >= 0 ? "#1C7A4E" : "#B42318"}">${(vs >= 0 ? "+" : "−") + Math.abs(vs * 100).toLocaleString("es-CL", { maximumFractionDigits: 1 })}%</b>` : "<b>—</b>"}</div><div>Plan nov-26 → dic-27<b>${plan14 ? vmMM(plan14) : "—"}</b>${plan12 ? "2027: " + vmMM(plan12) : ""}</div></div></div>`;
+}
+/* metas por mes (ym → $): plan total (distribuidora + tienda) y, si el script las manda, metas guardadas de meses anteriores */
+function vmMetas(VM) { const o = {}; VM_PLAN.forEach(([ym, v]) => o[ym] = v); try { Object.keys(VM.metas || {}).forEach(k => { const ym = Number(String(k).replace("-", "")); if (VM.metas[k] && !o[ym]) o[ym] = VM.metas[k]; }); } catch (e) {} return o; }
+function vmActivar(el, VM) { if (!el || !VM || !VM.a) return; const svg = el.querySelector("svg"), det = el.querySelector(".vm-det"), cur = el.querySelector(".vm-cur"); if (!svg) return;
+  const [CY, CM] = String(VM.corte || "").split("-").map(Number), meta = vmMetas(VM);
+  const ver = ev => { const r = svg.getBoundingClientRect(), x = ((ev.touches ? ev.touches[0].clientX : ev.clientX) - r.left) / r.width * 360;
+    const i = Math.max(0, Math.min(11, Math.round((x - 34) / (318 / 11)))), m = i + 1, px = 34 + i * 318 / 11;
+    cur.setAttribute("x1", px); cur.setAttribute("x2", px); cur.setAttribute("visibility", "visible");
+    const v25 = VM.a[2025] ? VM.a[2025][i] : null, v26 = VM.a[2026] && (CY > 2026 || m <= CM) ? VM.a[2026][i] : null;
+    const parts = [`<b>${VM_MES[i]}</b>:`]; if (v25 != null) parts.push("2025 " + vmMM(v25)); if (v26 != null) parts.push("2026 " + vmMM(v26) + (CY === 2026 && m === CM ? " (parcial)" : ""));
+    if (meta[202600 + m]) parts.push("meta " + vmMM(meta[202600 + m]) + (v26 != null ? " (" + Math.round(v26 / meta[202600 + m] * 100) + "%)" : "")); if (meta[202700 + m]) parts.push("plan 2027 " + vmMM(meta[202700 + m]));
+    det.innerHTML = parts[0] + " " + parts.slice(1).join(" · "); };
+  svg.addEventListener("click", ver); svg.addEventListener("touchstart", ver, { passive: true }); svg.addEventListener("touchmove", ver, { passive: true }); }
+function vmPoner(cont, VM, antes) { try { if (!cont) return; const v = cont.querySelector("#vmCard"); if (v) v.remove();
+  const d = document.createElement("div"); d.innerHTML = vmHtml(VM, "vmCard"); const el = d.firstElementChild;
+  const ref = antes === "top" ? cont.firstElementChild : (cont.children[1] || null); ref ? cont.insertBefore(el, ref) : cont.appendChild(el); vmActivar(el, VM); } catch (e) {} }
+</script>
+<script>/* patch_grafventas: HWF */ { const _pd = pintarDashboard; pintarDashboard = function () { const r = _pd.apply(this, arguments); try { vmPoner(document.getElementById("s-res"), vmDeBase(BASE)); } catch (e) {} return r; };
+  try { if (document.getElementById("s-res") && document.getElementById("s-res").children.length) vmPoner(document.getElementById("s-res"), vmDeBase(BASE)); } catch (e) {} }</script>
 </body>
 </html>

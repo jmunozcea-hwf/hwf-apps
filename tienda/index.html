@@ -1501,8 +1501,8 @@ const diaTienda = d => { d = d instanceof Date ? d : new Date(String(d) + "T12:0
 const diasTienda = (y, m, hasta) => { let n = 0; const fin = new Date(y, m, 0).getDate(); for (let d = 1; d <= Math.min(fin, hasta || fin); d++) if (diaTienda(new Date(y, m - 1, d))) n++; return n; };
 const USUARIOS = ["Francisco", "Benjamín", "Genérico"], TAG = " (Tienda)";
 
-/* ================= plan escalonado: 14 meses, subida gradual 8,2 → 11,0 → 14,2 MM ================= */
-const PLAN = [{"ym": 202611, "y": 2026, "m": 11, "meta": 8200000, "hito": 8.2}, {"ym": 202612, "y": 2026, "m": 12, "meta": 9500000, "hito": 0}, {"ym": 202701, "y": 2027, "m": 1, "meta": 8500000, "hito": 0}, {"ym": 202702, "y": 2027, "m": 2, "meta": 8400000, "hito": 0}, {"ym": 202703, "y": 2027, "m": 3, "meta": 9800000, "hito": 0}, {"ym": 202704, "y": 2027, "m": 4, "meta": 10300000, "hito": 0}, {"ym": 202705, "y": 2027, "m": 5, "meta": 11000000, "hito": 0}, {"ym": 202706, "y": 2027, "m": 6, "meta": 11000000, "hito": 11.0}, {"ym": 202707, "y": 2027, "m": 7, "meta": 11500000, "hito": 0}, {"ym": 202708, "y": 2027, "m": 8, "meta": 12000000, "hito": 0}, {"ym": 202709, "y": 2027, "m": 9, "meta": 11300000, "hito": 0}, {"ym": 202710, "y": 2027, "m": 10, "meta": 13500000, "hito": 0}, {"ym": 202711, "y": 2027, "m": 11, "meta": 11900000, "hito": 0}, {"ym": 202712, "y": 2027, "m": 12, "meta": 14200000, "hito": 14.2}];   /* patch_plan1000: 14 meses = $1.000 MM con distribuidora */
+/* ================= plan escalonado: 14 meses, subida gradual 10,0 → 12,5 → 16,1 MM ================= */
+const PLAN = [{"ym": 202611, "y": 2026, "m": 11, "meta": 10000000, "hito": 10.0}, {"ym": 202612, "y": 2026, "m": 12, "meta": 10800000, "hito": 0}, {"ym": 202701, "y": 2027, "m": 1, "meta": 9700000, "hito": 0}, {"ym": 202702, "y": 2027, "m": 2, "meta": 9500000, "hito": 0}, {"ym": 202703, "y": 2027, "m": 3, "meta": 11100000, "hito": 0}, {"ym": 202704, "y": 2027, "m": 4, "meta": 11700000, "hito": 0}, {"ym": 202705, "y": 2027, "m": 5, "meta": 12500000, "hito": 0}, {"ym": 202706, "y": 2027, "m": 6, "meta": 12500000, "hito": 12.5}, {"ym": 202707, "y": 2027, "m": 7, "meta": 13100000, "hito": 0}, {"ym": 202708, "y": 2027, "m": 8, "meta": 13600000, "hito": 0}, {"ym": 202709, "y": 2027, "m": 9, "meta": 12800000, "hito": 0}, {"ym": 202710, "y": 2027, "m": 10, "meta": 15300000, "hito": 0}, {"ym": 202711, "y": 2027, "m": 11, "meta": 13500000, "hito": 0}, {"ym": 202712, "y": 2027, "m": 12, "meta": 16100000, "hito": 16.1}];   /* patch_plan1000: 14 meses = $1.000 MM con distribuidora */
 const metaDe = (y, m) => { const p = PLAN.find(x => x.ym === y * 100 + m); return p ? p.meta : (y * 100 + m < PLAN[0].ym ? PLAN[0].meta : PLAN[PLAN.length - 1].meta); };
 
 /* ================= conexión con el script de Google ================= */
@@ -1677,8 +1677,8 @@ function pintarGuia() {
 /* ================= plan ================= */
 function pintarPlan() {
   const R = resumen(), box = $("sPlan"), mes = R ? R.mes : {}, cur = R ? R.y * 100 + R.m : 0;
-  box.innerHTML = `<div class="t-card"><h2>Plan de crecimiento Hellywoof <small>14 meses · subida gradual de 8,2 a 14,2 millones al mes</small></h2>
-    <p class="t-vacio">Hitos: <b>8,2 MM</b> en noviembre 2026 · <b>11,0 MM</b> en junio 2027 · <b>14,2 MM</b> en diciembre 2027 (plan total con distribuidora: $1.000 MM en 14 meses). La meta del mes en Ventas sale de esta tabla.</p>
+  box.innerHTML = `<div class="t-card"><h2>Plan de crecimiento Hellywoof <small>14 meses · subida gradual de 10,0 a 16,1 millones al mes</small></h2>
+    <p class="t-vacio">Hitos: <b>10,0 MM</b> en noviembre 2026 · <b>12,5 MM</b> en junio 2027 · <b>16,1 MM</b> en diciembre 2027 (plan total con distribuidora: $1.000 MM en 14 meses). La meta del mes en Ventas sale de esta tabla.</p>
     <div class="t-tw"><table class="t-t"><thead><tr><th>Mes</th><th>Objetivo</th><th>Real</th><th>Cumplimiento</th><th>Diferencia</th></tr></thead><tbody>
     ${PLAN.map(p => { const v = mes[p.ym] || 0, fut = p.ym > cur, act = p.ym === cur;
       return `<tr class="${act ? "hoy" : ""}${p.hito ? " hito" : ""}"><td>${MC[p.m - 1]} ${p.y}${p.hito ? " · hito " + p.hito + " MM" : ""}${act ? " · en curso" : ""}</td><td>${mm(p.meta)}</td><td>${fut ? "" : mm(v)}</td>
@@ -2269,7 +2269,7 @@ const stAbrev = n => ST_ABR.reduce((s, [r, t]) => s.replace(r, t), String(n || "
 try { if ($("sStock") && !$("sStock").hidden) pintarStock(); } catch (e) {}
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261111213607";
+const HWF_VER = "20261111213736";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer)\/[^/]*$/, "/");
   let avisado = false;
