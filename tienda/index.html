@@ -2269,7 +2269,7 @@ const stAbrev = n => ST_ABR.reduce((s, [r, t]) => s.replace(r, t), String(n || "
 try { if ($("sStock") && !$("sStock").hidden) pintarStock(); } catch (e) {}
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261112213942";
+const HWF_VER = "20261112214856";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer)\/[^/]*$/, "/");
   let avisado = false;
@@ -2523,10 +2523,10 @@ body.nb-sinia #navBotones{bottom:calc(84px + env(safe-area-inset-bottom))}
   const T = HB ? HB.tipo : "tienda", RC = T !== "admin", DEMO = /DEMO/.test(document.title);
   const NOM = { admin: "HWF (administración)", ventas: "VENTAS (app de los vendedores)", log: "LOGÍSTICA", tienda: "TIENDA (Tienda Hellywoof)" }[T] || T;
   const ALC = {
-    ventas: "App de los vendedores de HWF. Secciones: Inicio (avance del mes, buenas noticias), Pedido (crear notas de pedido, se envían al script y llegan por correo con PDF y Excel; botones para PDF, enviar e imprimir), Clientes (cartera, ficha, última compra, sugerencias de productos), Ruta (planificar visitas del día, PDF), Cobranza (documentos por cobrar), Prospectos (clientes potenciales), Panel, Inteligencia de negocio (apartado propio: venta de la distribuidora por marca, formato y producto; exportar a PDF, Excel, correo e imprimir), Catálogos y precios (descargar en PDF para enviar por WhatsApp o imprimir). ESTE ASISTENTE SOLO REVISA: ventas, stock de la bodega distribuidora, prospectos y cobranza. No tiene costos, márgenes ni compras: si preguntan otra cosa, dilo.",
-    admin: "App de administración HWF (gerencia). Secciones: Inicio (avance del mes contra la meta, proyección de cierre), Ventas y ranking por vendedor, cliente y producto, Inventario con Inteligencia de negocio (unidades Ventas y Logística: ventas y compras en $ o unidades, filtros proveedor/marca/formato/producto, canal, análisis avanzado con Pareto, alertas y pronóstico, exportar PDF/Excel/correo/imprimir), Abastecimiento (compra sugerida por mes según pronóstico y stock de seguridad por clase ABC), Plan de ventas nov-26 a dic-27 ($1.000 MM: distribuidora 827,8 + tienda 172,2), Pago a proveedores (plan a 14 meses: Planet Pet a contado, Montaraz −50 % de la deuda), Catálogo y listas de precio (archivos en Drive), Cobranza, Prospectos y notas de pedido de la app.",
+    ventas: "App de los vendedores de HWF. Secciones: Inicio (avance del mes, buenas noticias), Pedido (crear notas de pedido, se envían al script y llegan por correo con PDF y Excel; botones para PDF, enviar e imprimir), Clientes (cartera, ficha, última compra, sugerencias de productos), Ruta (planificar visitas del día, PDF), Cobranza (documentos por cobrar), Prospectos (clientes potenciales), Panel, BI (apartado propio: venta de la distribuidora por marca, formato y producto; exportar a PDF, Excel, correo e imprimir), Catálogos y precios (descargar en PDF para enviar por WhatsApp o imprimir). ESTE ASISTENTE SOLO REVISA: ventas, stock de la bodega distribuidora, prospectos y cobranza. No tiene costos, márgenes ni compras: si preguntan otra cosa, dilo.",
+    admin: "App de administración HWF (gerencia). Secciones: Inicio (avance del mes contra la meta, proyección de cierre), Ventas y ranking por vendedor, cliente y producto, Inventario con BI (unidades Ventas y Logística: ventas y compras en $ o unidades, filtros proveedor/marca/formato/producto, canal, análisis avanzado con Pareto, alertas y pronóstico, exportar PDF/Excel/correo/imprimir), Abastecimiento (compra sugerida por mes según pronóstico y stock de seguridad por clase ABC), Plan de ventas nov-26 a dic-27 ($1.000 MM: distribuidora 827,8 + tienda 172,2), Pago a proveedores (plan a 14 meses: Planet Pet a contado, Montaraz −50 % de la deuda), Catálogo y listas de precio (archivos en Drive), Cobranza, Prospectos y notas de pedido de la app.",
     tienda: "App de la Tienda Hellywoof (venta en local con boleta). Secciones: Inicio, Ventas, Panel, Plan (meta mensual de la tienda), Stock (bodega de la tienda), Nutrición, Ranking y Catálogos y precios. ESTE ASISTENTE SOLO REVISA: ventas de la tienda y stock de la bodega de la tienda. No tiene costos ni márgenes: si preguntan otra cosa, dilo.",
-    log: "App de logística HWF. Secciones: Panel (buenas noticias, avance), Inteligencia de negocio (unidades Ventas y Logística: ventas, compras y stock por proveedor/marca/formato/producto y canal; exportar PDF/Excel/correo/imprimir), Abastecimiento (compra sugerida según pronóstico y stock de seguridad), Rutas de despacho (armar rutas del día, enviarlas a la app Chofer, seguimiento GPS y entregas con foto/firma; PDF), stock de todas las bodegas, pedidos pendientes y clientes para despacho."
+    log: "App de logística HWF. Secciones: Panel (buenas noticias, avance), BI (unidades Ventas y Logística: ventas, compras y stock por proveedor/marca/formato/producto y canal; exportar PDF/Excel/correo/imprimir), Abastecimiento (compra sugerida según pronóstico y stock de seguridad), Rutas de despacho (armar rutas del día, enviarlas a la app Chofer, seguimiento GPS y entregas con foto/firma; PDF), stock de todas las bodegas, pedidos pendientes y clientes para despacho."
   }[T] || "";
   const SUG = {
     ventas: ["¿Cómo vamos con la meta del mes? ESTE ASISTENTE no tiene costos, márgenes, compras en pesos ni stock valorizado: si preguntan por eso, dilo.", "¿Qué clientes tienen facturas vencidas?", "¿Qué prospectos debo contactar esta semana?", "¿Qué productos están sin stock?"],
@@ -2759,6 +2759,40 @@ body.nb-sinia #navBotones{bottom:calc(84px + env(safe-area-inset-bottom))}
   $q.addEventListener("input", () => { $q.style.height = "auto"; $q.style.height = Math.min(140, $q.scrollHeight) + "px"; });
   document.addEventListener("keydown", e => { if (e.key === "Escape" && pan.classList.contains("on")) cerrar(); });
   window.hwfAsistente = { contexto };   /* para pruebas */
+})();
+</script>
+<style>/* patch_menuorden */
+#snPanel .sn-g{font-size:.7rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted,#5B6874);padding:12px 10px 4px;border-top:1px solid var(--line,#E3E9EE);margin-top:6px}
+#snPanel .sn-i .sn-e:has(svg){width:34px;min-width:34px;height:34px}#snPanel .sn-i .sn-e svg{width:34px;height:34px;display:block}
+#snPanel .sn-g.sn-g0{border-top:0;margin-top:0;padding-top:4px}
+</style>
+<script>/* patch_menuorden: menús reordenados y agrupados */
+(function () {
+  const VEN = typeof NAV_ORDEN !== "undefined" && typeof setModo === "function" && !!document.getElementById("mInicio"), ADM = !VEN && !!document.querySelector("nav.bottom") && !!document.getElementById("s-res");
+  const LOG = !VEN && !ADM && !!document.querySelector('#nav [data-s="rutas"]'), TND = !VEN && !ADM && !!document.getElementById("tNav");
+  const GV = [["Mi día", ["inicio", "pedido", "clientes", "agenda", "ruta", "cobranza", "embudo", "cat"]], ["Análisis", ["dash", "avance", "bi"]], ["Aprender", ["nut", "tec"]]];
+  const GA = [["Ventas", ["t:res", "t:ven", "t:cli", "t:pro", "m:ranking", "m:plan", "m:zonas", "m:terreno", "m:bonif"]], ["Pedidos y cobranza", ["m:cots", "m:napp", "m:cobranza", "m:embudo"]],
+    ["BI y compras", ["b:v", "b:l", "m:abast", "m:provee"]], ["Archivos y datos", ["m:catalogo", "m:cambios", "m:datos"]]];
+  const pos = (G, k) => { let n = 0; for (const [, l] of G) { const i = l.indexOf(k); if (i >= 0) return n + i; n += l.length; } return 999; };
+  if (VEN) { const ord = () => { const a = NAV_ORDEN.slice(); a.sort((x, y) => pos(GV, x[0]) - pos(GV, y[0])); NAV_ORDEN.splice(0, NAV_ORDEN.length, ...a); };
+    ord(); setTimeout(ord, 0); setTimeout(ord, 1500);   /* BI, Catálogos y Técnicas se agregan al cargar */ }
+  /* títulos de grupo en el menú lateral (VENTAS y HWF) */
+  function grupos() { const pan = document.getElementById("snPanel"); if (!pan || pan.querySelector(":scope > .sn-g")) return;
+    const items = [...pan.querySelectorAll(":scope > .sn-i")]; if (!items.length) return; if (ADM && pan.querySelector('.sn-i[data-t="inv"]:not([data-biu])')) return;   /* espera a que BI reemplace Inventario */
+    pan.querySelectorAll(":scope > .sn-g").forEach(x => x.remove());
+    const key = b => VEN ? b.dataset.sm : b.dataset.biu ? "b:" + b.dataset.biu : b.dataset.t ? "t:" + b.dataset.t : "m:" + b.dataset.m, G = VEN ? GV : GA;
+    if (ADM) { const ico = s => { const x = pan.querySelector(s + " .sn-e"); return x ? x.innerHTML : ""; };   /* íconos que faltaban */
+      [["m:provee", '[data-m="cobranza"]'], ["m:catalogo", '[data-m="cots"]']].forEach(([k, s]) => { const it = items.find(b => key(b) === k), e = it && it.querySelector(".sn-e"); if (e && e.textContent.trim() === "•") e.innerHTML = ico(s) || "•"; }); const bv = items.find(b => key(b) === "b:v"), ev = bv && bv.querySelector(".sn-e"), pl = ico('[data-m="plan"]'); if (ev && pl) ev.innerHTML = pl; }
+    items.sort((a, b) => pos(G, key(a)) - pos(G, key(b))); let g0 = -1, n = 0;
+    items.forEach(b => { const p = pos(G, key(b)); let gi = -1, acc = 0; G.forEach(([, l], i) => { if (p >= acc && p < acc + l.length) gi = i; acc += l.length; }); if (gi < 0) gi = G.length;
+      if (gi !== g0) { const h = document.createElement("div"); h.className = "sn-g" + (n ? "" : " sn-g0"); h.textContent = gi < G.length ? G[gi][0] : "Otros"; pan.appendChild(h); g0 = gi; n++; } pan.appendChild(b); });
+  }
+  if (VEN || ADM) { const sn = () => document.getElementById("snPanel"); const mo = new MutationObserver(() => setTimeout(grupos, 0)); const t = setInterval(() => { if (sn()) { mo.observe(sn(), { childList: true }); clearInterval(t); } }, 300); }
+  /* barras inferiores */
+  const barra = (sel, orden) => { const nav = document.querySelector(sel); if (!nav) return; const bs = [...nav.querySelectorAll(":scope > button")], k = b => b.dataset.biu ? "b:" + b.dataset.biu : b.dataset.s;
+    bs.sort((a, b) => { const i = orden.indexOf(k(a)), j = orden.indexOf(k(b)); return (i < 0 ? 99 : i) - (j < 0 ? 99 : j); }).forEach(b => nav.appendChild(b)); };
+  if (LOG) { const o = ["dash", "rutas", "seg", "flota", "abast", "b:v", "b:l"]; barra("#nav", o); setTimeout(() => barra("#nav", o), 500); }
+  if (TND) { const o = ["inicio", "ventas", "stock", "cat", "plan", "dash", "guia", "nut", "rank", "adm"]; barra("#tNav", o); setTimeout(() => barra("#tNav", o), 500); }
 })();
 </script>
 </body></html>
