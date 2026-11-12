@@ -7173,7 +7173,7 @@ function confirmarNota() {
   x.onclick = () => cerrarModal(); card.insertBefore(x, card.firstChild); })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261112095225";
+const HWF_VER = "20261112100017";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer)\/[^/]*$/, "/");
   let avisado = false;
@@ -7519,6 +7519,132 @@ rutaElegirPr = function () { return rutaSoloPr(); };
 
 <script>/* patch_grafventas: VENTAS */ { const _pi = pintarInicio; pintarInicio = function () { const r = _pi.apply(this, arguments); try { vmPoner(document.getElementById("crmInicio"), vmDeBase(DB && DB.d)); } catch (e) {} return r; };
   try { if (typeof MODO !== "undefined" && MODO === "inicio") pintarInicio(); } catch (e) {} }</script>
+<style>/* patch_pdf */
+#btnPdf{display:inline-flex}.pdf-info{display:grid;gap:8px}.pdf-info .pdf-n{font-weight:800;word-break:break-word}
+</style>
+<script>/* patch_pdf: PDF de la nota de pedido y de la ruta (enviar, imprimir, descargar) */
+(function () {
+  /* ---------- generador PDF mínimo: A4, Helvetica / Helvetica-Bold, texto, líneas y rectángulos ---------- */
+  const HW = [278,278,355,556,556,889,667,191,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,278,278,584,584,584,556,1015,667,667,722,722,667,611,778,722,278,500,667,556,833,722,778,667,778,722,667,611,722,667,944,667,667,611,278,278,278,469,556,333,556,556,500,556,556,278,556,556,222,222,500,222,833,556,556,556,556,333,500,278,556,500,722,500,500,500,334,260,334,584];
+  const MAPA = { 8211: 150, 8212: 151, 8216: 145, 8217: 146, 8220: 147, 8221: 148, 8226: 149, 8364: 128, 8230: 133, 8594: 45, 8250: 62 };
+  const cod = s => { const o = []; for (const ch of String(s == null ? "" : s)) { let c = ch.codePointAt(0); if (c > 255) c = MAPA[c] || 0; if (c >= 32) o.push(c); } return o; };
+  const ancho = (s, sz, b) => cod(s).reduce((t, c) => t + (c <= 126 ? HW[c - 32] : c === 237 || c === 205 || c === 236 ? 278 : c >= 192 && c <= 221 ? 690 : 556), 0) / 1000 * sz * (b ? 1.06 : 1);
+  function Pdf() { const W = 595.28, H = 841.89, pags = []; let ops = [];
+    const n = x => (Math.round(x * 100) / 100).toString(), col = c => c.map(v => n(v / 255)).join(" ");
+    const api = { W, H, y: 0,
+      pagina() { ops = []; pags.push(ops); api.y = 0; return api; },
+      rect(x, y, w, h, c) { ops.push(`${col(c)} rg ${n(x)} ${n(H - y - h)} ${n(w)} ${n(h)} re f`); return api; },
+      linea(x1, y1, x2, y2, c, g) { ops.push(`${col(c || [201, 211, 219])} RG ${n(g || 0.7)} w ${n(x1)} ${n(H - y1)} m ${n(x2)} ${n(H - y2)} l S`); return api; },
+      texto(x, y, s, o) { o = o || {}; const sz = o.sz || 10, b = !!o.b, w = ancho(s, sz, b), xx = o.al === "r" ? x - w : o.al === "c" ? x - w / 2 : x;
+        const t = cod(s).map(c => (c === 40 || c === 41 || c === 92 ? "\\" : "") + String.fromCharCode(c)).join("");
+        ops.push(`BT /F${b ? 2 : 1} ${n(sz)} Tf ${col(o.c || [15, 30, 41])} rg 1 0 0 1 ${n(xx)} ${n(H - y)} Tm (${t}) Tj ET`); return api; },
+      partir(s, max, sz, b) { const out = []; String(s == null ? "" : s).split(/\n/).forEach(par => { let l = ""; par.split(/\s+/).filter(Boolean).forEach(p => { const t = l ? l + " " + p : p;
+          if (ancho(t, sz, b) <= max || !l) l = t; else { out.push(l); l = p; } }); out.push(l); }); return out.filter((x, i) => x || i === 0); },
+      corta(s, max, sz, b) { s = String(s == null ? "" : s); if (ancho(s, sz, b) <= max) return s; while (s.length > 1 && ancho(s + "...", sz, b) > max) s = s.slice(0, -1); return s.trim() + "..."; },
+      paginas: () => pags.length,
+      bytes() { const objs = [], add = s => (objs.push(s), objs.length); add(""); add("");
+        const f1 = add("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>"), f2 = add("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>"), kids = [];
+        pags.forEach(p => { const st = p.join("\n"), c = add(`<< /Length ${st.length} >>\nstream\n${st}\nendstream`);
+          kids.push(add(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${n(W)} ${n(H)}] /Resources << /Font << /F1 ${f1} 0 R /F2 ${f2} 0 R >> >> /Contents ${c} 0 R >>`)); });
+        objs[0] = "<< /Type /Catalog /Pages 2 0 R >>"; objs[1] = `<< /Type /Pages /Kids [${kids.map(k => k + " 0 R").join(" ")}] /Count ${kids.length} >>`;
+        let out = "%PDF-1.4\n%\xE2\xE3\xCF\xD3\n"; const off = []; objs.forEach((o, i) => { off.push(out.length); out += `${i + 1} 0 obj\n${o}\nendobj\n`; });
+        const xr = out.length; out += `xref\n0 ${objs.length + 1}\n0000000000 65535 f \n` + off.map(o => String(o).padStart(10, "0") + " 00000 n \n").join("") + `trailer\n<< /Size ${objs.length + 1} /Root 1 0 R >>\nstartxref\n${xr}\n%%EOF`;
+        const u = new Uint8Array(out.length); for (let i = 0; i < out.length; i++) u[i] = out.charCodeAt(i) & 255; return u; } };
+    return api.pagina(); }
+  const AZ = [11, 49, 70], GR = [91, 104, 116], SU = [238, 242, 245], M = 40;
+  const cabecera = (d, titulo, der1, der2) => { d.rect(0, 0, d.W, 74, AZ); d.texto(M, 36, "HWF", { sz: 24, b: 1, c: [255, 255, 255] }); d.texto(M, 54, "Distribuidora HWF Mascotas", { sz: 9, c: [207, 220, 229] });
+    d.texto(d.W - M, 32, titulo, { sz: 15, b: 1, c: [255, 255, 255], al: "r" }); if (der1) d.texto(d.W - M, 48, der1, { sz: 10, c: [255, 255, 255], al: "r" }); if (der2) d.texto(d.W - M, 61, der2, { sz: 9, c: [207, 220, 229], al: "r" }); d.y = 96; };
+  const pie = (d, txt) => { const t = d.paginas(); d._pies = d._pies || []; d._pies.push(() => 0); d.linea(M, d.H - 44, d.W - M, d.H - 44); d.texto(M, d.H - 30, txt, { sz: 8, c: GR }); d.texto(d.W - M, d.H - 30, "Página " + t, { sz: 8, c: GR, al: "r" }); };
+  const dd = s => { if (!s) return ""; const p = String(s).split("-"); return p.length === 3 ? `${p[2]}-${p[1]}-${p[0]}` : String(s); };
+  const pesos = v => "$" + Math.round(v).toLocaleString("es-CL"), limpio = s => String(s || "").replace(/[\\/:*?"<>|]/g, "").trim();
+
+  /* ---------- nota de pedido ---------- */
+  function pdfPedido(t) { const d = Pdf(), c = S.cli, PIE = "Distribuidora HWF · +56 952914022 · diego@hwf.cl";
+    const vend = (typeof SES !== "undefined" && SES && SES.vendedor && SES.vendedor.nombre) || "";
+    cabecera(d, "Nota de pedido", "N° " + (S.num || ""), "Emisión " + dd(S.emision));
+    const campos = [["Cliente", c.razon], ["RUT", c.rut], ["Giro", c.giro], ["Contacto", c.contacto], ["Teléfono", c.fono], ["Correo", c.mail], ["Dirección facturación", c.dir], ["Comuna / Ciudad", c.comuna],
+      ["Fecha de entrega", dd(c.entrega)], ["Despacho", c.tipo], ["Dirección de entrega", c.tipo === "Retiro en bodega" ? "Retiro en bodega" : c.dirdesp], ["Vendedor", vend]];
+    const cw = (d.W - 2 * M - 16) / 2; let y = d.y;
+    for (let i = 0; i < campos.length; i += 2) { let alto = 0; [0, 1].forEach(k => { const f = campos[i + k]; if (!f) return; const x = M + k * (cw + 16); d.texto(x, y, f[0].toUpperCase(), { sz: 7, b: 1, c: GR });
+        const ls = d.partir(f[1] || "—", cw, 10, 0).slice(0, 2); ls.forEach((l, j) => d.texto(x, y + 12 + j * 12, d.corta(l, cw, 10), { sz: 10 })); alto = Math.max(alto, ls.length); }); y += 16 + alto * 12; }
+    y += 6; const X = { cod: M + 4, des: M + 62, can: M + 322, pre: M + 392, dsc: M + 436, val: d.W - M - 4 }, wDes = 222;
+    const encabezado = () => { d.rect(M, y, d.W - 2 * M, 20, AZ); const o = { sz: 8, b: 1, c: [255, 255, 255] }; d.texto(X.cod, y + 13, "CÓDIGO", o); d.texto(X.des, y + 13, "DESCRIPCIÓN", o); d.texto(X.can, y + 13, "CANT.", Object.assign({ al: "r" }, o));
+      d.texto(X.pre, y + 13, "PRECIO NETO", Object.assign({ al: "r" }, o)); d.texto(X.dsc, y + 13, "DESC.", Object.assign({ al: "r" }, o)); d.texto(X.val, y + 13, "VALOR NETO", Object.assign({ al: "r" }, o)); y += 20; };
+    encabezado();
+    t.items.slice().sort((a, b) => a.p.d.localeCompare(b.p.d, "es")).forEach(({ p, L, u, v }, i) => { const ls = d.partir(p.d + (p.pr ? " · " + p.pr : ""), wDes, 9, 0).slice(0, 3), h = 8 + ls.length * 11;
+      if (y + h > d.H - 60) { pie(d, PIE); d.pagina(); cabecera(d, "Nota de pedido", "N° " + (S.num || ""), c.razon || ""); y = d.y; encabezado(); }
+      if (i % 2) d.rect(M, y, d.W - 2 * M, h, SU);
+      d.texto(X.cod, y + 12, d.corta(p.s, 54, 9), { sz: 9, c: GR }); ls.forEach((l, j) => d.texto(X.des, y + 12 + j * 11, l, { sz: 9 }));
+      d.texto(X.can, y + 12, Number(L.q).toLocaleString("es-CL"), { sz: 9, al: "r" }); d.texto(X.pre, y + 12, pesos(p.p), { sz: 9, al: "r" });
+      d.texto(X.dsc, y + 12, L.d ? Number(L.d).toLocaleString("es-CL") + "%" : "—", { sz: 9, al: "r" }); d.texto(X.val, y + 12, pesos(v), { sz: 9, b: 1, al: "r" }); y += h; });
+    d.linea(M, y, d.W - M, y, AZ, 1); y += 8;
+    const obs = d.partir(c.obs || "", d.W - 2 * M, 9, 0), nec = 86 + (c.obs ? 26 + obs.length * 11 : 0);
+    if (y + nec > d.H - 60) { pie(d, PIE); d.pagina(); cabecera(d, "Nota de pedido", "N° " + (S.num || ""), c.razon || ""); y = d.y; }
+    const xt = d.W - M - 4, xl = d.W - M - 150; d.texto(M + 4, y + 12, t.lin + " líneas · " + Number(t.uni).toLocaleString("es-CL") + " unidades", { sz: 9, c: GR });
+    [["Neto", pesos(t.neto)], ["IVA 19%", pesos(t.iva)]].forEach(([a, b], i) => { d.texto(xl, y + 12 + i * 15, a, { sz: 10, c: GR }); d.texto(xt, y + 12 + i * 15, b, { sz: 10, al: "r" }); });
+    d.rect(xl - 8, y + 36, d.W - M - xl + 8, 24, AZ); d.texto(xl, y + 52, "TOTAL", { sz: 11, b: 1, c: [255, 255, 255] }); d.texto(xt, y + 52, pesos(t.total), { sz: 12, b: 1, c: [255, 255, 255], al: "r" });
+    d.texto(xl, y + 74, "Envío", { sz: 9, c: GR }); d.texto(xt, y + 74, t.neto >= (typeof ENVIO_GRATIS !== "undefined" ? ENVIO_GRATIS : 200000) ? "Gratis" : "Según tarifa", { sz: 9, al: "r" }); y += 92;
+    if (c.obs) { d.texto(M, y, "OBSERVACIONES", { sz: 7, b: 1, c: GR }); obs.forEach((l, j) => d.texto(M, y + 13 + j * 11, l, { sz: 9 })); }
+    pie(d, PIE); return { bytes: d.bytes(), paginas: d.paginas(), nombre: `Nota de pedido ${limpio(S.num)} ${limpio(c.razon || "cliente")}.pdf`.replace(/\s+/g, " "),
+      msg: `Nota de pedido ${S.num || ""} · ${c.razon || ""} · total ${pesos(t.total)} (neto ${pesos(t.neto)})` }; }
+
+  /* ---------- hoja de ruta ---------- */
+  function pdfRuta() { if (typeof RUTA === "undefined" || !RUTA) return null; const r = paradas(); if (!r.length) return null; const d = Pdf(), tcx = typeof tc === "function" ? tc : x => x;
+    const vend = (typeof SES !== "undefined" && SES && SES.vendedor && SES.vendedor.nombre) || "", ini = new Date(RUTA.ini), hm = x => String(x.getHours()).padStart(2, "0") + ":" + String(x.getMinutes()).padStart(2, "0");
+    const dia = ini.toLocaleDateString("es-CL", { weekday: "long", day: "2-digit", month: "2-digit", year: "numeric" }), PIE = "Hoja de ruta · " + vend + " · tiempos estimados";
+    let t = new Date(RUTA.ini), a = RUTA.o, km = 0; const F = r.map(x => { const mv = minutos(a, x.pt); km += distM(a, x.pt) / 1000 * 1.3; t = new Date(t.getTime() + mv * 60000); const lleg = t; t = new Date(t.getTime() + VISITA * 60000); a = x.pt; return { x, mv, lleg }; });
+    const pot = r.reduce((s, x) => s + (x.falta || 0) + (x.cot || 0), 0);
+    cabecera(d, "Hoja de ruta", dia, vend); let y = d.y;
+    d.texto(M, y, "Salida: " + d.corta(RUTA.origenTxt || "", d.W - 2 * M - 40, 9), { sz: 9, c: GR }); y += 16;
+    const k = [["VISITAS", String(r.length)], ["RECORRIDO APROX.", Math.round(km) + " km"], ["INICIO", hm(ini)], ["TERMINA APROX.", hm(t)], ["POR RECUPERAR", pesos(pot)]], kw = (d.W - 2 * M - 4 * 8) / 5;
+    k.forEach(([a1, b1], i) => { const x = M + i * (kw + 8); d.rect(x, y, kw, 38, SU); d.texto(x + 8, y + 13, a1, { sz: 6.5, b: 1, c: GR }); d.texto(x + 8, y + 29, b1, { sz: 12, b: 1 }); }); y += 52;
+    const X = { n: M + 6, h: M + 30, cli: M + 72, mot: M + 318, tel: d.W - M - 4 }, wCli = 236, wMot = 118;
+    const enc = () => { d.rect(M, y, d.W - 2 * M, 20, AZ); const o = { sz: 8, b: 1, c: [255, 255, 255] }; d.texto(X.n, y + 13, "N°", o); d.texto(X.h, y + 13, "LLEGA", o); d.texto(X.cli, y + 13, "CLIENTE Y DIRECCIÓN", o); d.texto(X.mot, y + 13, "MOTIVO", o); d.texto(X.tel, y + 13, "TELÉFONO", Object.assign({ al: "r" }, o)); y += 20; };
+    enc();
+    F.forEach(({ x, mv, lleg }, i) => { const c = x.c || {}, dir = [tcx(c.direccion), tcx(c.comuna)].filter(Boolean).join(", ") + (x.pt && x.pt.tipo === "comuna" ? " (ubicación aprox.)" : "");
+      const lm = d.partir((x.por || []).map(p => p.t).join(" · ") || "—", wMot, 8, 0).slice(0, 3), ld = d.partir(dir || "Sin dirección", wCli, 8, 0).slice(0, 2), h = Math.max(30 + (ld.length - 1) * 10, 10 + lm.length * 10) + 12;
+      if (y + h > d.H - 60) { pie(d, PIE); d.pagina(); cabecera(d, "Hoja de ruta", dia, vend); y = d.y; enc(); }
+      if (i % 2) d.rect(M, y, d.W - 2 * M, h, SU);
+      d.texto(X.n, y + 14, String(i + 1), { sz: 11, b: 1, c: AZ }); d.texto(X.h, y + 14, hm(lleg), { sz: 10, b: 1 }); d.texto(X.h, y + 25, Math.round(mv) + " min", { sz: 7, c: GR });
+      d.texto(X.cli, y + 14, d.corta(tcx(c.nombre) || "", wCli, 10, 1), { sz: 10, b: 1 }); ld.forEach((l, j) => d.texto(X.cli, y + 26 + j * 10, l, { sz: 8, c: GR }));
+      lm.forEach((l, j) => d.texto(X.mot, y + 14 + j * 10, l, { sz: 8 })); d.texto(X.tel, y + 14, String(c.telefono || ""), { sz: 9, al: "r" });
+      d.linea(X.cli, y + h - 8, X.cli + 150, y + h - 8, [201, 211, 219], 0.5); d.texto(X.cli + 154, y + h - 6, "resultado / firma", { sz: 6.5, c: GR }); y += h; });
+    if (y + 30 > d.H - 60) { pie(d, PIE); d.pagina(); cabecera(d, "Hoja de ruta", dia, vend); y = d.y; }
+    d.texto(M, y + 16, "Tiempos estimados: distancia en línea recta × 1,3 y " + VISITA + " minutos por visita.", { sz: 8, c: GR });
+    pie(d, PIE); const f = `${ini.getFullYear()}-${String(ini.getMonth() + 1).padStart(2, "0")}-${String(ini.getDate()).padStart(2, "0")}`;
+    return { bytes: d.bytes(), paginas: d.paginas(), nombre: `Ruta ${f} ${limpio(vend)}.pdf`.replace(/\s+/g, " "), msg: `Hoja de ruta ${dia} · ${r.length} visitas · ${Math.round(km)} km aprox.` }; }
+
+  /* ---------- enviar, imprimir, descargar ---------- */
+  const avisa = m => { try { toast(m); } catch (e) {} };
+  function bajar(P) { const bl = new Blob([P.bytes], { type: "application/pdf" });
+    try { if (typeof NATIVO !== "undefined" && NATIVO && NATIVO.guardar) { NATIVO.guardar(toB64(P.bytes.buffer), P.nombre); return; } } catch (e) {}
+    const a = document.createElement("a"); a.href = URL.createObjectURL(bl); a.download = P.nombre; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 8000); avisa("PDF descargado. Revisa la carpeta Descargas."); }
+  async function enviar(P) { const f = new File([P.bytes], P.nombre, { type: "application/pdf" });
+    try { if (navigator.canShare && navigator.canShare({ files: [f] })) { await navigator.share({ files: [f], title: P.nombre.replace(/\.pdf$/, ""), text: P.msg }); return; } } catch (e) { if (e && e.name === "AbortError") return; }
+    bajar(P); avisa("Este equipo no permite compartir el archivo: quedó descargado para adjuntarlo."); }
+  function imprimir(P) { const url = URL.createObjectURL(new Blob([P.bytes], { type: "application/pdf" })), tactil = matchMedia("(pointer:coarse)").matches;
+    if (!tactil) { try { const fr = document.createElement("iframe"); fr.style.cssText = "position:fixed;right:0;bottom:0;width:1px;height:1px;border:0;opacity:0"; fr.src = url; document.body.appendChild(fr);
+        fr.onload = () => { try { fr.contentWindow.focus(); fr.contentWindow.print(); } catch (e) { window.open(url, "_blank"); } setTimeout(() => { fr.remove(); URL.revokeObjectURL(url); }, 120000); }; return; } catch (e) {} }
+    const w = window.open(url, "_blank"); if (!w) { bajar(P); avisa("Abre el PDF descargado y elige Imprimir."); } else avisa("Se abrió el PDF: usa el menú ⋮ → Imprimir."); setTimeout(() => URL.revokeObjectURL(url), 120000); }
+  function cuadro(titulo, P) { try { $("mEnvT").textContent = titulo; } catch (e) {}
+    abrirModal(`<div class="pdf-info"><div class="pdf-n">${esc(P.nombre)}</div><p class="hint" style="margin:0">${P.paginas} ${P.paginas === 1 ? "página" : "páginas"} · ${Math.max(1, Math.round(P.bytes.length / 1024))} KB. «Enviar» abre las apps del teléfono (WhatsApp, correo…) con el PDF adjunto. «Imprimir» lo manda a la impresora o lo abre para imprimirlo.</p></div>`,
+      [["Cerrar", "", cerrarModal], ["Descargar", "", () => bajar(P)], ["Imprimir", "", () => imprimir(P)], ["Enviar", "primary", () => enviar(P)]]); }
+
+  /* ---------- botón en Pedido ---------- */
+  try { const be = document.getElementById("btnEnviar"); if (be && !document.getElementById("btnPdf")) { const b = document.createElement("button"); b.type = "button"; b.className = "btn"; b.id = "btnPdf";
+      b.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg> PDF';
+      b.title = "Generar el PDF de la nota para enviar o imprimir"; be.parentNode.insertBefore(b, be);
+      b.onclick = () => { const t = calc(), errs = validate(t); if (errs.length) { if (typeof mostrarErrores === "function") mostrarErrores(errs, "Antes de generar el PDF"); else avisa(errs[0]); return; }
+        try { $("errBox").hidden = true; } catch (e) {} let P; try { P = pdfPedido(t); } catch (e) { avisa("No se pudo generar el PDF: " + (e && e.message || e)); return; } cuadro("PDF de la nota de pedido", P); }; } } catch (e) {}
+
+  /* ---------- botón en Ruta ---------- */
+  function botonRuta() { try { const box = document.getElementById("crmRuta"); if (!box || box.querySelector("#rPdf")) return; const zona = box.querySelector(".r-btns"); if (!zona) return;
+      const b = document.createElement("button"); b.type = "button"; b.className = "btn"; b.id = "rPdf"; b.textContent = "📄 PDF de la ruta (enviar o imprimir)"; zona.appendChild(b);
+      b.onclick = () => { let P; try { P = pdfRuta(); } catch (e) { avisa("No se pudo generar el PDF: " + (e && e.message || e)); return; } if (!P) { avisa("No hay visitas en la ruta."); return; } cuadro("PDF de la ruta", P); }; } catch (e) {} }
+  try { const cr = document.getElementById("crmRuta"); if (cr) { new MutationObserver(botonRuta).observe(cr, { childList: true, subtree: true }); botonRuta(); } } catch (e) {}
+  window.hwfPdf = { pedido: () => pdfPedido(calc()), ruta: pdfRuta };
+})();
+</script>
 <style>/* patch_sinrepetidos */
 .rep-x{display:none!important}
 #s-res .db > button.db-av,#s-res #avVend,#s-res .db-k > button[data-ir="av"],#s-res .db-k > button[data-ir^="pro:margen"],
