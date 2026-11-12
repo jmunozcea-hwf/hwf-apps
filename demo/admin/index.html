@@ -5136,7 +5136,7 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261112213551";
+const HWF_VER = "20261112213942";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer)\/[^/]*$/, "/");
   let avisado = false;
@@ -6027,6 +6027,132 @@ function vmPoner(cont, VM, antes) { try { if (!cont) return; const v = cont.quer
   let t0 = 0; new MutationObserver(() => { clearTimeout(t0); t0 = setTimeout(ajustar, 60); }).observe(res, { childList: true, subtree: true }); ajustar();
 })();
 </script>
+<style>/* patch_navbotones */
+#navBotones{position:fixed;right:14px;bottom:calc(140px + env(safe-area-inset-bottom));z-index:890;display:grid;gap:8px}
+#navBotones button{width:44px;height:44px;border-radius:50%;border:1px solid var(--line,#C9D3DB);background:var(--card,var(--surface,#fff));color:var(--ink,#0F1E29);font:700 1.15rem system-ui,sans-serif;cursor:pointer;box-shadow:0 3px 10px rgba(11,49,70,.18);display:grid;place-items:center;padding:0}
+#navBotones button:focus-visible{outline:3px solid #F5B400;outline-offset:2px}#navBotones .nb-x{color:#B42318}
+body.nb-sinia #navBotones{bottom:calc(84px + env(safe-area-inset-bottom))}
+#nbSalir{position:fixed;inset:0;z-index:1200;background:rgba(11,49,70,.55);display:grid;place-items:center;padding:16px}#nbSalir div{background:var(--card,#fff);color:var(--ink,#0F1E29);border-radius:18px;padding:18px;max-width:380px;display:grid;gap:10px}
+#nbSalir h2{margin:0;font-size:1.1rem}#nbSalir p{margin:0;font-size:.9rem;color:var(--muted,#5B6874)}#nbSalir .nb-f{display:flex;gap:8px;justify-content:flex-end}#nbSalir button{border-radius:12px;padding:10px 14px;font:700 .95rem system-ui,sans-serif;cursor:pointer;border:1px solid var(--line,#C9D3DB);background:var(--card,#fff);color:inherit}#nbSalir .nb-si{background:#B42318;border-color:#B42318;color:#fff}
+@media print{#navBotones,#nbSalir{display:none!important}}
+</style>
+<script>/* patch_navbotones: botones Atrás y Salir */
+(function () {
+  if (document.getElementById("navBotones")) return;
+  const APP = typeof NAV_ORDEN !== "undefined" && typeof setModo === "function" && document.getElementById("mInicio") ? "ventas" : document.getElementById("s-res") && document.querySelector("nav.bottom") ? "admin" : typeof ir === "function" ? "ir" : "";
+  if (!APP) return;
+  const vis = el => el && !el.hidden && getComputedStyle(el).display !== "none";
+  /* 1) cerrar lo que esté abierto */
+  function cerrarAbierto() { const ia = document.getElementById("iaPan"); if (ia && ia.classList.contains("on")) { const x = document.getElementById("iaX"); if (x) x.click(); return true; }
+    const sn = document.getElementById("snPanel"); if (sn && sn.classList.contains("on")) { const v = document.getElementById("snVelo"); if (v) v.click(); return true; }
+    const rd = document.getElementById("rdOv"); if (rd) { const b = document.getElementById("rdIr"); if (b) b.click(); return true; }
+    const sal = document.getElementById("nbSalir"); if (sal) { sal.remove(); return true; }
+    if (APP === "ventas") { const me = document.getElementById("mEnv"); if (vis(me) && typeof cerrarModal === "function") { cerrarModal(); return true; } }
+    const mo = [...document.querySelectorAll(".modal,.ov,.t-ov,[role=dialog]")].find(x => vis(x) && x.id !== "iaPan" && !x.classList.contains("gate") && x.id !== "tGate" && x.id !== "hwfGate");
+    if (mo) { const c = mo.querySelector('[aria-label="Cerrar"],.x,.cerrar,[data-cerrar]'); if (c) { c.click(); return true; } }
+    return false; }
+  /* 2) historial de secciones */
+  const pila = []; let actual = null, volviendo = false;
+  if (APP === "ir") { try { actual = typeof SEC === "string" ? SEC : (typeof MODO !== "undefined" ? MODO : null); } catch (e) {}
+    const _ir = ir; ir = function (s) { if (!volviendo && actual && actual !== s) { pila.push(actual); if (pila.length > 30) pila.shift(); } actual = s; return _ir.apply(this, arguments); }; }
+  if (APP === "admin") { actual = "t:res";
+    document.addEventListener("click", e => { if (volviendo) return; const t = e.target.closest("nav.bottom [data-t], #masSeg [data-m], [data-biu]"); if (!t) return;
+      const k = t.dataset.biu ? "b:" + t.dataset.biu : t.dataset.t ? "t:" + t.dataset.t : "m:" + t.dataset.m; if (k === "t:mas" || k === "t:inv") return; if (actual && actual !== k) { pila.push(actual); if (pila.length > 30) pila.shift(); } actual = k; }, true); }
+  function irA(k) { volviendo = true; try {
+      if (APP === "ir") ir(k);
+      else { const [t, v] = k.split(":"); if (t === "t") { const b = document.querySelector('nav.bottom [data-t="' + v + '"]'); if (b) b.click(); }
+        else if (t === "m") { const m = document.querySelector('nav.bottom [data-t="mas"]'); if (m) m.click(); const b = document.querySelector('#masSeg [data-m="' + v + '"]'); if (b) b.click(); }
+        else if (t === "b") { const f = document.createElement("span"); f.dataset.biu = v; f.hidden = true; document.body.appendChild(f); f.click(); f.remove(); const b = document.querySelector('nav.bottom [data-t="inv"]'); if (b) b.click(); } }
+      actual = k; window.scrollTo({ top: 0 }); } finally { volviendo = false; } }
+  function atras() { if (cerrarAbierto()) return;
+    if (APP === "ventas") { if (typeof navPila !== "undefined" && navPila.length > 1) history.back(); else if (typeof MODO !== "undefined" && MODO !== "inicio") setModo("inicio"); return; }
+    if (pila.length) irA(pila.pop()); else { const ini = APP === "admin" ? "t:res" : document.querySelector('[data-s="inicio"]') ? "inicio" : document.querySelector('[data-s="dash"]') ? "dash" : null; if (ini && ini !== actual) irA(ini); } }
+  function salir() { if (document.getElementById("nbSalir")) return; const o = document.createElement("div"); o.id = "nbSalir"; o.setAttribute("role", "alertdialog");
+    o.innerHTML = '<div><h2>¿Salir de la app?</h2><p>Lo que esté pendiente de enviar queda guardado en este equipo y se envía solo cuando vuelvas a abrirla.</p><div class="nb-f"><button type="button" id="nbNo">Seguir aquí</button><button type="button" class="nb-si" id="nbSi">Salir</button></div></div>';
+    document.body.appendChild(o); o.onclick = e => { if (e.target === o) o.remove(); }; o.querySelector("#nbNo").onclick = () => o.remove();
+    o.querySelector("#nbSi").onclick = () => { try { window.close(); } catch (e) {} setTimeout(() => { if (document.visibilityState === "visible") o.querySelector("div").innerHTML = '<h2>Listo para cerrar</h2><p>Este teléfono no deja que la app se cierre sola: usa el botón de inicio o el de apps recientes del teléfono y desliza la app hacia arriba. Al volver la encontrarás tal como la dejaste.</p><div class="nb-f"><button type="button" id="nbOk">Entendido</button></div>', o.querySelector("#nbOk").onclick = () => o.remove(); }, 400); }; }
+  const box = document.createElement("div"); box.id = "navBotones"; box.innerHTML = '<button type="button" id="nbAtras" aria-label="Atrás" title="Atrás">‹</button><button type="button" class="nb-x" id="nbSal" aria-label="Salir de la app" title="Salir de la app">⏻</button>';
+  document.body.appendChild(box); box.querySelector("#nbAtras").onclick = atras; box.querySelector("#nbSal").onclick = salir;
+  const ajusta = () => document.body.classList.toggle("nb-sinia", !document.getElementById("iaBtn")); ajusta(); setTimeout(ajusta, 1500);
+  /* oculto mientras hay una pantalla de ingreso */
+  setInterval(() => { const g = [...document.querySelectorAll(".gate,#gate,#tGate,#hwfGate,.t-ov,#rdOv")].some(vis); box.style.display = g ? "none" : ""; }, 800);
+})();
+</script>
+<style>/* patch_avancediario */
+.ad-card{background:var(--card,var(--surface,#fff));border:1px solid var(--line,#DAE1E7);border-radius:16px;padding:14px;margin:0 0 12px;display:grid;gap:8px;color:var(--ink,#0F1E29)}
+.ad-card h2{margin:0;font-size:1.02rem;display:flex;justify-content:space-between;gap:8px;align-items:baseline;flex-wrap:wrap}.ad-card h2 small{font-weight:600;color:var(--muted,#5B6874);font-size:.76rem}
+.ad-seg{display:flex;gap:4px;background:var(--sunk,#EEF2F5);padding:3px;border-radius:10px}.ad-seg button{flex:1;border:0;background:transparent;border-radius:8px;padding:7px 6px;font:inherit;font-weight:700;font-size:.82rem;color:var(--muted,#5B6874);cursor:pointer}
+.ad-seg button[aria-pressed="true"]{background:var(--card,#fff);color:var(--ink,#0F1E29);box-shadow:0 1px 3px rgba(15,30,41,.15)}
+.ad-svg{width:100%;height:auto;display:block}.ad-ley{display:flex;flex-wrap:wrap;gap:10px;font-size:.76rem;color:var(--muted,#5B6874)}.ad-ley i{display:inline-block;width:16px;height:0;border-top:3px solid;margin-right:5px;vertical-align:3px}
+.ad-res{margin:0;font-size:.86rem;line-height:1.4;color:var(--muted,#5B6874)}.ad-res b{color:var(--ink,#0F1E29)}
+.ad-k{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}.ad-k div{background:var(--sunk,#EEF2F5);border-radius:10px;padding:7px 9px;font-size:.72rem;color:var(--muted,#5B6874)}.ad-k b{display:block;font-size:1rem;color:var(--ink,#0F1E29);font-variant-numeric:tabular-nums}
+@media(min-width:700px){.ad-k{grid-template-columns:repeat(4,minmax(0,1fr))}}.ad-ok{color:#1C7A4E!important}.ad-mal{color:#B42318!important}
+</style>
+<script>/* patch_avancediario: avance del mes día a día (gráfico de líneas) al inicio */
+(function () {
+  const ADM = !!document.getElementById("s-res") && typeof pintarDashboard === "function", VEN = !ADM && typeof NAV_ORDEN !== "undefined" && !!document.getElementById("mInicio"), TND = !ADM && !VEN && !!document.getElementById("tNav") && typeof DATA === "function";
+  if (!ADM && !VEN && !TND) return;
+  const FER = new Set(["2026-01-01", "2026-04-03", "2026-04-04", "2026-05-01", "2026-05-21", "2026-06-21", "2026-06-29", "2026-07-16", "2026-08-15", "2026-09-18", "2026-09-19", "2026-10-12", "2026-10-31", "2026-11-01", "2026-12-08", "2026-12-25",
+    "2027-01-01", "2027-04-02", "2027-04-03", "2027-05-01", "2027-05-21", "2027-06-21", "2027-06-28", "2027-07-16", "2027-08-15", "2027-09-17", "2027-09-18", "2027-09-19", "2027-10-11", "2027-10-31", "2027-11-01", "2027-12-08", "2027-12-25"]);
+  const IRR = ["01-01", "05-01", "09-18", "09-19", "12-25"], MESL = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
+  const k = (y, m, d) => y + "-" + String(m).padStart(2, "0") + "-" + String(d).padStart(2, "0"), dim = (y, m) => new Date(y, m, 0).getDate();
+  const habil = (y, m, d, tienda) => { const w = new Date(y, m - 1, d).getDay(); return tienda ? !IRR.includes(k(y, m, d).slice(5)) : w && w !== 6 && !FER.has(k(y, m, d)); };
+  const MM = v => "$" + (Math.abs(v) >= 1e6 ? (v / 1e6).toLocaleString("es-CL", { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + " MM" : Math.round(v).toLocaleString("es-CL"));
+  const pc = x => isFinite(x) ? Math.round(x * 100) + "%" : "–";
+  const LS = "hwf-ad-vista"; let vista = ""; try { vista = localStorage.getItem(LS) || ""; } catch (e) {}
+  /* datos: {y, m, corteDia, series:{clave:{nom, d:[por día], meta, tienda, ant:[por día mes anterior]}}} */
+  function datos() {
+    if (TND) { const D = DATA() || {}, R = D.rows || [], y = Number(String(D.corte || "").slice(0, 4)), m = Number(String(D.corte || "").slice(5, 7)), cd = Number(String(D.corte || "").slice(8, 10)) || dim(y, m); if (!y) return null;
+      const pa = new Date(y, m - 2, 1), y2 = pa.getFullYear(), m2 = pa.getMonth() + 1, d = new Array(32).fill(0), ant = new Array(32).fill(0);
+      R.forEach(r => { const ry = r[6] || D.anio; if (ry === y && r[1] === m) d[r[2]] += Number(r[4]) || 0; else if (ry === y2 && r[1] === m2) ant[r[2]] += Number(r[4]) || 0; });
+      let PL = []; try { PL = typeof PLAN !== "undefined" ? PLAN : []; } catch (e) {} const meta = (PL.find(x => x.ym === y * 100 + m) || {}).meta || 0;
+      return { y, m, cd, S: { t: { nom: "Tienda", d, ant, meta, tienda: true } }, orden: ["t"] }; }
+    const HB = window.hwfBi; if (!HB) return null; const B = HB.base() || {}, R = B.rows || [], V = B.vend || [], tv = V.indexOf("Tienda Hellywoof");
+    let y = Number(String(B.corte || "").slice(0, 4)) || B.anio, m = Number(String(B.corte || "").slice(5, 7)), cd = Number(String(B.corte || "").slice(8, 10));
+    if (ADM) { const sel = document.getElementById("selMes"), v = sel && Number(sel.value); if (v && v !== y * 100 + m) { y = Math.floor(v / 100); m = v % 100; cd = dim(y, m); } }
+    if (!y || !m) return null; cd = cd || dim(y, m);
+    const pa = new Date(y, m - 2, 1), y2 = pa.getFullYear(), m2 = pa.getMonth() + 1, z = () => new Array(32).fill(0), dD = z(), dT = z(), aD = z(), aT = z();
+    let yoI = -1, yo = null; if (VEN) { try { if (typeof SES !== "undefined" && SES && SES.vendedor) { yo = SES.vendedor.cartera || SES.vendedor.nombre; yoI = V.findIndex(v => String(v).toLowerCase() === String(yo).toLowerCase()); } } catch (e) {} }
+    const dY = z(), aY = z();
+    R.forEach(r => { const ry = r[8] || B.anio, v = Number(r[5]) || 0, dd = r[3] || 1, t = r[7] === tv; if (ry === y && r[2] === m) { (t ? dT : dD)[dd] += v; if (r[7] === yoI) dY[dd] += v; } else if (ry === y2 && r[2] === m2) { (t ? aT : aD)[dd] += v; if (r[7] === yoI) aY[dd] += v; } });
+    let mD = 0; try { mD = HB.meta(y, m) || 0; } catch (e) {} const MT = B.metas || {}, mesMeta = Number(B.metaMes) === m, mT = mesMeta ? Number(MT["Tienda Hellywoof"]) || 0 : 0;
+    const S = { d: { nom: "Distribuidora", d: dD, ant: aD, meta: mD } };
+    if (ADM) { S.t = { nom: "Tienda", d: dT, ant: aT, meta: mT, tienda: true }; S.j = { nom: "Total", d: dD.map((x, i) => x + dT[i]), ant: aD.map((x, i) => x + aT[i]), meta: mD && mT ? mD + mT : 0, junta: true }; return { y, m, cd, S, orden: ["j", "d", "t"] }; }
+    const mY = yoI >= 0 && mesMeta ? Number(MT[V[yoI]]) || 0 : 0; if (yoI >= 0 && (mY > 0 || dY.some(x => x) || aY.some(x => x))) { S.y = { nom: "Mi avance", d: dY, ant: aY, meta: mY, yo: V[yoI] }; return { y, m, cd, S, orden: ["y", "d"] }; }
+    return { y, m, cd, S, orden: ["d"] }; }
+  const acum = a => { const o = []; let s = 0; for (let i = 1; i < a.length; i++) { s += a[i] || 0; o[i] = s; } return o; };
+  function metaCurva(X, s) { const n = dim(X.y, X.m), tot = []; let h = 0, H = 0; for (let d = 1; d <= n; d++) if (habil(X.y, X.m, d, s.tienda)) H++; for (let d = 1; d <= n; d++) { if (habil(X.y, X.m, d, s.tienda)) h++; tot[d] = s.meta * h / Math.max(1, H); } return { c: tot, H, h: (() => { let x = 0; for (let d = 1; d <= X.cd; d++) if (habil(X.y, X.m, d, s.tienda)) x++; return x; })() }; }
+  function html() { const X = datos(); if (!X) return ""; let vu = ""; try { vu = localStorage.getItem(LS) || ""; } catch (e) {} vista = X.orden.includes(vu) ? vu : X.orden[0]; const s = X.S[vista], n = dim(X.y, X.m), ac = acum(s.d), aa = acum(s.ant), mc = metaCurva(X, s.junta ? Object.assign({}, s, { tienda: false }) : s);
+    const nA = dim(new Date(X.y, X.m - 2, 1).getFullYear(), new Date(X.y, X.m - 2, 1).getMonth() + 1), hoy = ac[X.cd] || 0, pr1 = (z, t) => { const q = metaCurva(X, Object.assign({}, z, { tienda: t })), a = acum(z.d)[X.cd] || 0; return q.h ? a / q.h * q.H : 0; };
+    const proy = s.junta ? pr1(X.S.d, false) + pr1(X.S.t, true) : pr1(s, !!s.tienda), ideal = s.junta ? metaCurva(X, X.S.d).c[X.cd] + metaCurva(X, X.S.t).c[X.cd] : mc.c[X.cd] || 0;
+    const extra = s.junta ? [["Distribuidora", acum(X.S.d.d), "#1F5673"], ["Tienda", acum(X.S.t.d), "#8E44AD"]] : [];
+    const W = 360, Hh = 190, L = 40, Rm = 8, T = 10, Bm = 22, mx = Math.max(1, s.meta || 0, ...ac.filter(Boolean), ...aa.filter(Boolean)) * 1.05, xs = d => L + (d - 1) * (W - L - Rm) / Math.max(1, n - 1), ys = v => T + (Hh - T - Bm) * (1 - v / mx);
+    const pl = (arr, hasta, col, w, dash, op) => { const p = []; for (let d = 1; d <= hasta; d++) if (arr[d] != null) p.push(xs(Math.min(d, n)).toFixed(1) + "," + ys(arr[d]).toFixed(1)); return p.length ? `<polyline points="${p.join(" ")}" fill="none" stroke="${col}" stroke-width="${w}"${dash ? ` stroke-dasharray="${dash}"` : ""}${op ? ` stroke-opacity="${op}"` : ""} stroke-linejoin="round" stroke-linecap="round"/>` : ""; };
+    let g = ""; const paso = mx > 80e6 ? 20e6 : mx > 30e6 ? 10e6 : mx > 12e6 ? 5e6 : mx > 4e6 ? 2e6 : mx > 1.5e6 ? 5e5 : 2e5;
+    for (let v = 0; v <= mx; v += paso) g += `<line x1="${L}" x2="${W - Rm}" y1="${ys(v)}" y2="${ys(v)}" stroke="currentColor" stroke-opacity=".1"/><text x="${L - 4}" y="${ys(v) + 3}" text-anchor="end" font-size="9" fill="currentColor" fill-opacity=".6">${v === 0 ? "0" : v >= 1e6 ? (v / 1e6).toLocaleString("es-CL", { maximumFractionDigits: 1 }) : Math.round(v / 1e3) + "k"}</text>`;
+    [1, 5, 10, 15, 20, 25, n].forEach(d => { if (d <= n) g += `<text x="${xs(d)}" y="${Hh - 6}" text-anchor="middle" font-size="9" fill="currentColor" fill-opacity=".6">${d}</text>`; });
+    g += `<line x1="${xs(X.cd)}" x2="${xs(X.cd)}" y1="${T}" y2="${Hh - Bm}" stroke="#E07B24" stroke-opacity=".35" stroke-dasharray="2 3"/>`;
+    g += pl(aa, nA, "#9AA8B4", 1.8, "", ".9") + (s.meta ? pl(mc.c, n, "#E07B24", 2, "5 4") : "") + extra.map(([, a, c]) => pl(a, X.cd, c, 1.8, "", ".8")).join("") + pl(ac, X.cd, "#0B3146", 3);
+    if (ac[X.cd] != null) g += `<circle cx="${xs(X.cd)}" cy="${ys(hoy)}" r="4" fill="#fff" stroke="#0B3146" stroke-width="2.2"/>`;
+    const est = s.meta ? (hoy >= ideal ? "ad-ok" : "ad-mal") : "", mesN = MESL[X.m - 1], antN = MESL[new Date(X.y, X.m - 2, 1).getMonth()];
+    return `<div class="ad-card" id="adCard"><h2>📈 Avance de ${mesN}, día a día <small>${s.junta ? "distribuidora + tienda" : esc2(s.nom)}${s.yo ? " · " + esc2(s.yo) : ""} · al ${X.cd} de ${mesN}</small></h2>
+      ${X.orden.length > 1 ? `<div class="ad-seg" role="group" aria-label="Qué avance ver">${X.orden.map(o => `<button type="button" data-ad="${o}" aria-pressed="${o === vista}">${o === "j" ? "Juntas" : esc2(X.S[o].nom)}</button>`).join("")}</div>` : ""}
+      <svg class="ad-svg" viewBox="0 0 ${W} ${Hh}" role="img" aria-label="Venta acumulada del mes por día contra la meta">${g}</svg>
+      <div class="ad-ley"><span><i style="border-color:#0B3146"></i>${s.junta ? "Total acumulado" : "Venta acumulada"}</span>${s.meta ? '<span><i style="border-color:#E07B24;border-top-style:dashed"></i>Meta ideal</span>' : ""}${extra.map(([t, , c]) => `<span><i style="border-color:${c}"></i>${t}</span>`).join("")}<span><i style="border-color:#9AA8B4"></i>${antN}</span></div>
+      <p class="ad-res">${s.meta ? `Llevas <b>${MM(hoy)}</b> (${pc(hoy / s.meta)} de ${MM(s.meta)}); lo ideal a hoy era ${MM(ideal)}: <b class="${est}">${hoy >= ideal ? "vamos " + MM(hoy - ideal) + " adelante" : "faltan " + MM(ideal - hoy)}</b> · proyección al ritmo actual ${MM(proy)} (${pc(proy / s.meta)}).` : `Llevas <b>${MM(hoy)}</b> · proyección al ritmo actual ${MM(proy)}.`}</p></div>`; }
+  const esc2 = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const host = () => ADM ? document.getElementById("s-res") : VEN ? document.getElementById("crmInicio") : document.getElementById("sInicio");
+  let ocup = false;
+  function poner() { const h = host(); if (!h || ocup) return; ocup = true; try { const v = h.querySelector("#adCard"); let t = ""; try { t = html(); } catch (e) { console.error(e); }
+      if (!t) { if (v) v.remove(); return; } if (v) v.outerHTML = t; else h.insertAdjacentHTML("afterbegin", t); const c = h.querySelector("#adCard"); if (c !== h.firstElementChild) h.insertBefore(c, h.firstElementChild);
+      c.querySelectorAll("[data-ad]").forEach(b => b.onclick = () => { vista = b.dataset.ad; try { localStorage.setItem(LS, vista); } catch (e) {} poner(); }); } finally { setTimeout(() => { ocup = false; }, 0); } }
+  const h0 = host(); if (!h0) return; let t0 = 0;
+  new MutationObserver(() => { if (ocup) return; const c = h0.querySelector("#adCard"); if (c && c === h0.firstElementChild && c.dataset.f === firma()) return; clearTimeout(t0); t0 = setTimeout(() => { poner(); const c2 = h0.querySelector("#adCard"); if (c2) c2.dataset.f = firma(); }, 30); }).observe(h0, { childList: true });
+  function firma() { const s = document.getElementById("selMes"); return (s ? s.value : "") + "|" + vista; }
+  poner(); const c = h0.querySelector("#adCard"); if (c) c.dataset.f = firma();
+  [800, 2500, 6000].forEach(t => setTimeout(() => { if (!h0.querySelector("#adCard")) poner(); }, t));   /* por si los datos llegan después */
+})();
+</script>
 <style>/* patch_asistente */
 #iaBtn{position:fixed;right:14px;bottom:calc(84px + env(safe-area-inset-bottom));z-index:900;border:0;border-radius:999px;padding:12px 16px;font:600 .95rem system-ui,sans-serif;
   background:linear-gradient(135deg,#0B3146,#1C7A4E);color:#fff;box-shadow:0 6px 18px rgba(11,49,70,.35);cursor:pointer;display:flex;gap:6px;align-items:center}
@@ -6261,7 +6387,7 @@ function vmPoner(cont, VM, antes) { try { if (!cont) return; const v = cont.quer
   const pan = document.createElement("section"); pan.id = "iaPan"; pan.setAttribute("aria-label", "Asistente IA"); pan.setAttribute("role", "dialog");
   pan.innerHTML = '<div class="ia-h"><b>✨ Asistente ' + esc(NOM.split(" ")[0]) + '</b><button type="button" id="iaNew" title="Nueva conversación">Nueva</button><button type="button" id="iaX" aria-label="Cerrar">✕</button></div>' +
     '<div class="ia-m" id="iaMsgs" aria-live="polite"></div><form class="ia-f" id="iaF"><textarea id="iaQ" rows="1" maxlength="2000" placeholder="Pregunta sobre ventas, metas, clientes, stock…"></textarea><button type="submit" id="iaGo">Enviar</button></form>' +
-    '<div class="ia-n">Responde con los datos cargados en esta app' + (RC ? " (sin costos ni márgenes)" : "") + '. Puede equivocarse: revisa las cifras importantes.</div>';
+    '<div class="ia-n">Sin costo: responde con los datos de esta app' + (RC ? " (sin costos ni márgenes)" : "") + '; lo que no sabe calcular se lo pregunta a la IA gratis de Google (Gemini), sin RUT ni teléfonos. Revisa las cifras importantes.</div>';
   document.body.appendChild(btn); document.body.appendChild(pan);
   const $m = pan.querySelector("#iaMsgs"), $q = pan.querySelector("#iaQ"), $go = pan.querySelector("#iaGo");
   const burbuja = (cls, html) => { const d = document.createElement("div"); d.className = "ia-b " + cls; d.innerHTML = html; $m.appendChild(d); $m.scrollTop = $m.scrollHeight; return d; };
@@ -6270,15 +6396,18 @@ function vmPoner(cont, VM, antes) { try { if (!cont) return; const v = cont.quer
   async function preguntar(q) { q = String(q || "").trim(); if (!q || OCUP) return; OCUP = true; $go.disabled = true; $q.value = ""; burbuja("ia-u", esc(q)); const esp = burbuja("ia-a", '<span class="ia-p">Pensando…</span>');
     let res; const loc = () => { let t; try { t = local(q); } catch (e) { t = "No pude calcular eso (" + (e && e.message) + ")."; } return { ok: true, respuesta: t, local: true }; };
     let cl = null; try { cl = JSON.parse(localStorage.getItem("hwf-ia-claude") || "null"); } catch (e) {}
-    if (DEMO || !conn() || (cl && cl.no && Date.now() - cl.t < 864e5)) res = loc();   /* modo sin costo */
+    /* 12-11-2026: primero el asistente local (sin costo); si no entiende la pregunta, la IA gratis del script (Gemini) */
+    const r0 = loc(), entiende = !/^Puedo responderte sin costo sobre/.test(r0.respuesta);
+    if (entiende || DEMO || !conn() || (cl && cl.no && Date.now() - cl.t < 36e5)) res = r0;
     else { const c = conn();
       { try { if (CTX == null) CTX = contexto(); } catch (e) { CTX = "No se pudo resumir los datos de la app (" + (e && e.message) + ")."; }
         const ctrl = new AbortController(), tm = setTimeout(() => ctrl.abort(), 120000);
         try { const r = await fetch(c.url, { method: "POST", body: JSON.stringify({ clave: c.clave, accion: "asistente", app: T, usuario: usuario(), contexto: CTX, historial: H.slice(-12), pregunta: q }), signal: ctrl.signal }), t = await r.text();
           try { res = JSON.parse(t); } catch (e) { res = { ok: false, error: "El script de Google no reconoce el asistente todavía. Espera unos minutos a que se actualice." }; } }
         catch (e) { res = null; } finally { clearTimeout(tm); }
-        if (!res || res.sinClave || !res.ok) { if (res && res.sinClave) try { localStorage.setItem("hwf-ia-claude", JSON.stringify({ no: 1, t: Date.now() })); } catch (e) {} res = loc(); } } }
-    if (res && res.ok) { esp.innerHTML = md(res.respuesta) + (res.local ? '<p class="ia-l">Modo sin costo · calculado en la app</p>' : ""); H.push({ role: "user", content: q }, { role: "assistant", content: res.respuesta }); }
+        if (!res || res.sinClave || !res.ok) { if (res && res.sinClave) try { localStorage.setItem("hwf-ia-claude", JSON.stringify({ no: 1, t: Date.now() })); } catch (e) {}
+          res = Object.assign({}, r0, { respuesta: (res && !res.sinClave && res.error ? "_" + res.error + "_\n\n" : "") + r0.respuesta }); } } }
+    if (res && res.ok) { esp.innerHTML = md(res.respuesta) + (res.local ? '<p class="ia-l">Sin costo · calculado en la app</p>' : res.proveedor === "gemini" ? '<p class="ia-l">IA Gemini · plan gratis · revisa las cifras importantes</p>' : ""); H.push({ role: "user", content: q }, { role: "assistant", content: res.respuesta }); }
     else { esp.innerHTML = '<p class="ia-e">' + esc((res && res.error) || "No se pudo responder.") + "</p>"; }
     $m.scrollTop = $m.scrollHeight; OCUP = false; $go.disabled = false; }
   const abrir = () => { pan.classList.add("on"); btn.style.display = "none"; if (!$m.children.length) inicio(); setTimeout(() => $q.focus(), 50); };
@@ -6290,132 +6419,6 @@ function vmPoner(cont, VM, antes) { try { if (!cont) return; const v = cont.quer
   $q.addEventListener("input", () => { $q.style.height = "auto"; $q.style.height = Math.min(140, $q.scrollHeight) + "px"; });
   document.addEventListener("keydown", e => { if (e.key === "Escape" && pan.classList.contains("on")) cerrar(); });
   window.hwfAsistente = { contexto };   /* para pruebas */
-})();
-</script>
-<style>/* patch_navbotones */
-#navBotones{position:fixed;right:14px;bottom:calc(140px + env(safe-area-inset-bottom));z-index:890;display:grid;gap:8px}
-#navBotones button{width:44px;height:44px;border-radius:50%;border:1px solid var(--line,#C9D3DB);background:var(--card,var(--surface,#fff));color:var(--ink,#0F1E29);font:700 1.15rem system-ui,sans-serif;cursor:pointer;box-shadow:0 3px 10px rgba(11,49,70,.18);display:grid;place-items:center;padding:0}
-#navBotones button:focus-visible{outline:3px solid #F5B400;outline-offset:2px}#navBotones .nb-x{color:#B42318}
-body.nb-sinia #navBotones{bottom:calc(84px + env(safe-area-inset-bottom))}
-#nbSalir{position:fixed;inset:0;z-index:1200;background:rgba(11,49,70,.55);display:grid;place-items:center;padding:16px}#nbSalir div{background:var(--card,#fff);color:var(--ink,#0F1E29);border-radius:18px;padding:18px;max-width:380px;display:grid;gap:10px}
-#nbSalir h2{margin:0;font-size:1.1rem}#nbSalir p{margin:0;font-size:.9rem;color:var(--muted,#5B6874)}#nbSalir .nb-f{display:flex;gap:8px;justify-content:flex-end}#nbSalir button{border-radius:12px;padding:10px 14px;font:700 .95rem system-ui,sans-serif;cursor:pointer;border:1px solid var(--line,#C9D3DB);background:var(--card,#fff);color:inherit}#nbSalir .nb-si{background:#B42318;border-color:#B42318;color:#fff}
-@media print{#navBotones,#nbSalir{display:none!important}}
-</style>
-<script>/* patch_navbotones: botones Atrás y Salir */
-(function () {
-  if (document.getElementById("navBotones")) return;
-  const APP = typeof NAV_ORDEN !== "undefined" && typeof setModo === "function" && document.getElementById("mInicio") ? "ventas" : document.getElementById("s-res") && document.querySelector("nav.bottom") ? "admin" : typeof ir === "function" ? "ir" : "";
-  if (!APP) return;
-  const vis = el => el && !el.hidden && getComputedStyle(el).display !== "none";
-  /* 1) cerrar lo que esté abierto */
-  function cerrarAbierto() { const ia = document.getElementById("iaPan"); if (ia && ia.classList.contains("on")) { const x = document.getElementById("iaX"); if (x) x.click(); return true; }
-    const sn = document.getElementById("snPanel"); if (sn && sn.classList.contains("on")) { const v = document.getElementById("snVelo"); if (v) v.click(); return true; }
-    const rd = document.getElementById("rdOv"); if (rd) { const b = document.getElementById("rdIr"); if (b) b.click(); return true; }
-    const sal = document.getElementById("nbSalir"); if (sal) { sal.remove(); return true; }
-    if (APP === "ventas") { const me = document.getElementById("mEnv"); if (vis(me) && typeof cerrarModal === "function") { cerrarModal(); return true; } }
-    const mo = [...document.querySelectorAll(".modal,.ov,.t-ov,[role=dialog]")].find(x => vis(x) && x.id !== "iaPan" && !x.classList.contains("gate") && x.id !== "tGate" && x.id !== "hwfGate");
-    if (mo) { const c = mo.querySelector('[aria-label="Cerrar"],.x,.cerrar,[data-cerrar]'); if (c) { c.click(); return true; } }
-    return false; }
-  /* 2) historial de secciones */
-  const pila = []; let actual = null, volviendo = false;
-  if (APP === "ir") { try { actual = typeof SEC === "string" ? SEC : (typeof MODO !== "undefined" ? MODO : null); } catch (e) {}
-    const _ir = ir; ir = function (s) { if (!volviendo && actual && actual !== s) { pila.push(actual); if (pila.length > 30) pila.shift(); } actual = s; return _ir.apply(this, arguments); }; }
-  if (APP === "admin") { actual = "t:res";
-    document.addEventListener("click", e => { if (volviendo) return; const t = e.target.closest("nav.bottom [data-t], #masSeg [data-m], [data-biu]"); if (!t) return;
-      const k = t.dataset.biu ? "b:" + t.dataset.biu : t.dataset.t ? "t:" + t.dataset.t : "m:" + t.dataset.m; if (k === "t:mas" || k === "t:inv") return; if (actual && actual !== k) { pila.push(actual); if (pila.length > 30) pila.shift(); } actual = k; }, true); }
-  function irA(k) { volviendo = true; try {
-      if (APP === "ir") ir(k);
-      else { const [t, v] = k.split(":"); if (t === "t") { const b = document.querySelector('nav.bottom [data-t="' + v + '"]'); if (b) b.click(); }
-        else if (t === "m") { const m = document.querySelector('nav.bottom [data-t="mas"]'); if (m) m.click(); const b = document.querySelector('#masSeg [data-m="' + v + '"]'); if (b) b.click(); }
-        else if (t === "b") { const f = document.createElement("span"); f.dataset.biu = v; f.hidden = true; document.body.appendChild(f); f.click(); f.remove(); const b = document.querySelector('nav.bottom [data-t="inv"]'); if (b) b.click(); } }
-      actual = k; window.scrollTo({ top: 0 }); } finally { volviendo = false; } }
-  function atras() { if (cerrarAbierto()) return;
-    if (APP === "ventas") { if (typeof navPila !== "undefined" && navPila.length > 1) history.back(); else if (typeof MODO !== "undefined" && MODO !== "inicio") setModo("inicio"); return; }
-    if (pila.length) irA(pila.pop()); else { const ini = APP === "admin" ? "t:res" : document.querySelector('[data-s="inicio"]') ? "inicio" : document.querySelector('[data-s="dash"]') ? "dash" : null; if (ini && ini !== actual) irA(ini); } }
-  function salir() { if (document.getElementById("nbSalir")) return; const o = document.createElement("div"); o.id = "nbSalir"; o.setAttribute("role", "alertdialog");
-    o.innerHTML = '<div><h2>¿Salir de la app?</h2><p>Lo que esté pendiente de enviar queda guardado en este equipo y se envía solo cuando vuelvas a abrirla.</p><div class="nb-f"><button type="button" id="nbNo">Seguir aquí</button><button type="button" class="nb-si" id="nbSi">Salir</button></div></div>';
-    document.body.appendChild(o); o.onclick = e => { if (e.target === o) o.remove(); }; o.querySelector("#nbNo").onclick = () => o.remove();
-    o.querySelector("#nbSi").onclick = () => { try { window.close(); } catch (e) {} setTimeout(() => { if (document.visibilityState === "visible") o.querySelector("div").innerHTML = '<h2>Listo para cerrar</h2><p>Este teléfono no deja que la app se cierre sola: usa el botón de inicio o el de apps recientes del teléfono y desliza la app hacia arriba. Al volver la encontrarás tal como la dejaste.</p><div class="nb-f"><button type="button" id="nbOk">Entendido</button></div>', o.querySelector("#nbOk").onclick = () => o.remove(); }, 400); }; }
-  const box = document.createElement("div"); box.id = "navBotones"; box.innerHTML = '<button type="button" id="nbAtras" aria-label="Atrás" title="Atrás">‹</button><button type="button" class="nb-x" id="nbSal" aria-label="Salir de la app" title="Salir de la app">⏻</button>';
-  document.body.appendChild(box); box.querySelector("#nbAtras").onclick = atras; box.querySelector("#nbSal").onclick = salir;
-  const ajusta = () => document.body.classList.toggle("nb-sinia", !document.getElementById("iaBtn")); ajusta(); setTimeout(ajusta, 1500);
-  /* oculto mientras hay una pantalla de ingreso */
-  setInterval(() => { const g = [...document.querySelectorAll(".gate,#gate,#tGate,#hwfGate,.t-ov,#rdOv")].some(vis); box.style.display = g ? "none" : ""; }, 800);
-})();
-</script>
-<style>/* patch_avancediario */
-.ad-card{background:var(--card,var(--surface,#fff));border:1px solid var(--line,#DAE1E7);border-radius:16px;padding:14px;margin:0 0 12px;display:grid;gap:8px;color:var(--ink,#0F1E29)}
-.ad-card h2{margin:0;font-size:1.02rem;display:flex;justify-content:space-between;gap:8px;align-items:baseline;flex-wrap:wrap}.ad-card h2 small{font-weight:600;color:var(--muted,#5B6874);font-size:.76rem}
-.ad-seg{display:flex;gap:4px;background:var(--sunk,#EEF2F5);padding:3px;border-radius:10px}.ad-seg button{flex:1;border:0;background:transparent;border-radius:8px;padding:7px 6px;font:inherit;font-weight:700;font-size:.82rem;color:var(--muted,#5B6874);cursor:pointer}
-.ad-seg button[aria-pressed="true"]{background:var(--card,#fff);color:var(--ink,#0F1E29);box-shadow:0 1px 3px rgba(15,30,41,.15)}
-.ad-svg{width:100%;height:auto;display:block}.ad-ley{display:flex;flex-wrap:wrap;gap:10px;font-size:.76rem;color:var(--muted,#5B6874)}.ad-ley i{display:inline-block;width:16px;height:0;border-top:3px solid;margin-right:5px;vertical-align:3px}
-.ad-res{margin:0;font-size:.86rem;line-height:1.4;color:var(--muted,#5B6874)}.ad-res b{color:var(--ink,#0F1E29)}
-.ad-k{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}.ad-k div{background:var(--sunk,#EEF2F5);border-radius:10px;padding:7px 9px;font-size:.72rem;color:var(--muted,#5B6874)}.ad-k b{display:block;font-size:1rem;color:var(--ink,#0F1E29);font-variant-numeric:tabular-nums}
-@media(min-width:700px){.ad-k{grid-template-columns:repeat(4,minmax(0,1fr))}}.ad-ok{color:#1C7A4E!important}.ad-mal{color:#B42318!important}
-</style>
-<script>/* patch_avancediario: avance del mes día a día (gráfico de líneas) al inicio */
-(function () {
-  const ADM = !!document.getElementById("s-res") && typeof pintarDashboard === "function", VEN = !ADM && typeof NAV_ORDEN !== "undefined" && !!document.getElementById("mInicio"), TND = !ADM && !VEN && !!document.getElementById("tNav") && typeof DATA === "function";
-  if (!ADM && !VEN && !TND) return;
-  const FER = new Set(["2026-01-01", "2026-04-03", "2026-04-04", "2026-05-01", "2026-05-21", "2026-06-21", "2026-06-29", "2026-07-16", "2026-08-15", "2026-09-18", "2026-09-19", "2026-10-12", "2026-10-31", "2026-11-01", "2026-12-08", "2026-12-25",
-    "2027-01-01", "2027-04-02", "2027-04-03", "2027-05-01", "2027-05-21", "2027-06-21", "2027-06-28", "2027-07-16", "2027-08-15", "2027-09-17", "2027-09-18", "2027-09-19", "2027-10-11", "2027-10-31", "2027-11-01", "2027-12-08", "2027-12-25"]);
-  const IRR = ["01-01", "05-01", "09-18", "09-19", "12-25"], MESL = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
-  const k = (y, m, d) => y + "-" + String(m).padStart(2, "0") + "-" + String(d).padStart(2, "0"), dim = (y, m) => new Date(y, m, 0).getDate();
-  const habil = (y, m, d, tienda) => { const w = new Date(y, m - 1, d).getDay(); return tienda ? !IRR.includes(k(y, m, d).slice(5)) : w && w !== 6 && !FER.has(k(y, m, d)); };
-  const MM = v => "$" + (Math.abs(v) >= 1e6 ? (v / 1e6).toLocaleString("es-CL", { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + " MM" : Math.round(v).toLocaleString("es-CL"));
-  const pc = x => isFinite(x) ? Math.round(x * 100) + "%" : "–";
-  const LS = "hwf-ad-vista"; let vista = ""; try { vista = localStorage.getItem(LS) || ""; } catch (e) {}
-  /* datos: {y, m, corteDia, series:{clave:{nom, d:[por día], meta, tienda, ant:[por día mes anterior]}}} */
-  function datos() {
-    if (TND) { const D = DATA() || {}, R = D.rows || [], y = Number(String(D.corte || "").slice(0, 4)), m = Number(String(D.corte || "").slice(5, 7)), cd = Number(String(D.corte || "").slice(8, 10)) || dim(y, m); if (!y) return null;
-      const pa = new Date(y, m - 2, 1), y2 = pa.getFullYear(), m2 = pa.getMonth() + 1, d = new Array(32).fill(0), ant = new Array(32).fill(0);
-      R.forEach(r => { const ry = r[6] || D.anio; if (ry === y && r[1] === m) d[r[2]] += Number(r[4]) || 0; else if (ry === y2 && r[1] === m2) ant[r[2]] += Number(r[4]) || 0; });
-      let PL = []; try { PL = typeof PLAN !== "undefined" ? PLAN : []; } catch (e) {} const meta = (PL.find(x => x.ym === y * 100 + m) || {}).meta || 0;
-      return { y, m, cd, S: { t: { nom: "Tienda", d, ant, meta, tienda: true } }, orden: ["t"] }; }
-    const HB = window.hwfBi; if (!HB) return null; const B = HB.base() || {}, R = B.rows || [], V = B.vend || [], tv = V.indexOf("Tienda Hellywoof");
-    let y = Number(String(B.corte || "").slice(0, 4)) || B.anio, m = Number(String(B.corte || "").slice(5, 7)), cd = Number(String(B.corte || "").slice(8, 10));
-    if (ADM) { const sel = document.getElementById("selMes"), v = sel && Number(sel.value); if (v && v !== y * 100 + m) { y = Math.floor(v / 100); m = v % 100; cd = dim(y, m); } }
-    if (!y || !m) return null; cd = cd || dim(y, m);
-    const pa = new Date(y, m - 2, 1), y2 = pa.getFullYear(), m2 = pa.getMonth() + 1, z = () => new Array(32).fill(0), dD = z(), dT = z(), aD = z(), aT = z();
-    let yoI = -1, yo = null; if (VEN) { try { if (typeof SES !== "undefined" && SES && SES.vendedor) { yo = SES.vendedor.cartera || SES.vendedor.nombre; yoI = V.findIndex(v => String(v).toLowerCase() === String(yo).toLowerCase()); } } catch (e) {} }
-    const dY = z(), aY = z();
-    R.forEach(r => { const ry = r[8] || B.anio, v = Number(r[5]) || 0, dd = r[3] || 1, t = r[7] === tv; if (ry === y && r[2] === m) { (t ? dT : dD)[dd] += v; if (r[7] === yoI) dY[dd] += v; } else if (ry === y2 && r[2] === m2) { (t ? aT : aD)[dd] += v; if (r[7] === yoI) aY[dd] += v; } });
-    let mD = 0; try { mD = HB.meta(y, m) || 0; } catch (e) {} const MT = B.metas || {}, mesMeta = Number(B.metaMes) === m, mT = mesMeta ? Number(MT["Tienda Hellywoof"]) || 0 : 0;
-    const S = { d: { nom: "Distribuidora", d: dD, ant: aD, meta: mD } };
-    if (ADM) { S.t = { nom: "Tienda", d: dT, ant: aT, meta: mT, tienda: true }; S.j = { nom: "Total", d: dD.map((x, i) => x + dT[i]), ant: aD.map((x, i) => x + aT[i]), meta: mD && mT ? mD + mT : 0, junta: true }; return { y, m, cd, S, orden: ["j", "d", "t"] }; }
-    const mY = yoI >= 0 && mesMeta ? Number(MT[V[yoI]]) || 0 : 0; if (yoI >= 0 && (mY > 0 || dY.some(x => x) || aY.some(x => x))) { S.y = { nom: "Mi avance", d: dY, ant: aY, meta: mY, yo: V[yoI] }; return { y, m, cd, S, orden: ["y", "d"] }; }
-    return { y, m, cd, S, orden: ["d"] }; }
-  const acum = a => { const o = []; let s = 0; for (let i = 1; i < a.length; i++) { s += a[i] || 0; o[i] = s; } return o; };
-  function metaCurva(X, s) { const n = dim(X.y, X.m), tot = []; let h = 0, H = 0; for (let d = 1; d <= n; d++) if (habil(X.y, X.m, d, s.tienda)) H++; for (let d = 1; d <= n; d++) { if (habil(X.y, X.m, d, s.tienda)) h++; tot[d] = s.meta * h / Math.max(1, H); } return { c: tot, H, h: (() => { let x = 0; for (let d = 1; d <= X.cd; d++) if (habil(X.y, X.m, d, s.tienda)) x++; return x; })() }; }
-  function html() { const X = datos(); if (!X) return ""; let vu = ""; try { vu = localStorage.getItem(LS) || ""; } catch (e) {} vista = X.orden.includes(vu) ? vu : X.orden[0]; const s = X.S[vista], n = dim(X.y, X.m), ac = acum(s.d), aa = acum(s.ant), mc = metaCurva(X, s.junta ? Object.assign({}, s, { tienda: false }) : s);
-    const nA = dim(new Date(X.y, X.m - 2, 1).getFullYear(), new Date(X.y, X.m - 2, 1).getMonth() + 1), hoy = ac[X.cd] || 0, pr1 = (z, t) => { const q = metaCurva(X, Object.assign({}, z, { tienda: t })), a = acum(z.d)[X.cd] || 0; return q.h ? a / q.h * q.H : 0; };
-    const proy = s.junta ? pr1(X.S.d, false) + pr1(X.S.t, true) : pr1(s, !!s.tienda), ideal = s.junta ? metaCurva(X, X.S.d).c[X.cd] + metaCurva(X, X.S.t).c[X.cd] : mc.c[X.cd] || 0;
-    const extra = s.junta ? [["Distribuidora", acum(X.S.d.d), "#1F5673"], ["Tienda", acum(X.S.t.d), "#8E44AD"]] : [];
-    const W = 360, Hh = 190, L = 40, Rm = 8, T = 10, Bm = 22, mx = Math.max(1, s.meta || 0, ...ac.filter(Boolean), ...aa.filter(Boolean)) * 1.05, xs = d => L + (d - 1) * (W - L - Rm) / Math.max(1, n - 1), ys = v => T + (Hh - T - Bm) * (1 - v / mx);
-    const pl = (arr, hasta, col, w, dash, op) => { const p = []; for (let d = 1; d <= hasta; d++) if (arr[d] != null) p.push(xs(Math.min(d, n)).toFixed(1) + "," + ys(arr[d]).toFixed(1)); return p.length ? `<polyline points="${p.join(" ")}" fill="none" stroke="${col}" stroke-width="${w}"${dash ? ` stroke-dasharray="${dash}"` : ""}${op ? ` stroke-opacity="${op}"` : ""} stroke-linejoin="round" stroke-linecap="round"/>` : ""; };
-    let g = ""; const paso = mx > 80e6 ? 20e6 : mx > 30e6 ? 10e6 : mx > 12e6 ? 5e6 : mx > 4e6 ? 2e6 : mx > 1.5e6 ? 5e5 : 2e5;
-    for (let v = 0; v <= mx; v += paso) g += `<line x1="${L}" x2="${W - Rm}" y1="${ys(v)}" y2="${ys(v)}" stroke="currentColor" stroke-opacity=".1"/><text x="${L - 4}" y="${ys(v) + 3}" text-anchor="end" font-size="9" fill="currentColor" fill-opacity=".6">${v === 0 ? "0" : v >= 1e6 ? (v / 1e6).toLocaleString("es-CL", { maximumFractionDigits: 1 }) : Math.round(v / 1e3) + "k"}</text>`;
-    [1, 5, 10, 15, 20, 25, n].forEach(d => { if (d <= n) g += `<text x="${xs(d)}" y="${Hh - 6}" text-anchor="middle" font-size="9" fill="currentColor" fill-opacity=".6">${d}</text>`; });
-    g += `<line x1="${xs(X.cd)}" x2="${xs(X.cd)}" y1="${T}" y2="${Hh - Bm}" stroke="#E07B24" stroke-opacity=".35" stroke-dasharray="2 3"/>`;
-    g += pl(aa, nA, "#9AA8B4", 1.8, "", ".9") + (s.meta ? pl(mc.c, n, "#E07B24", 2, "5 4") : "") + extra.map(([, a, c]) => pl(a, X.cd, c, 1.8, "", ".8")).join("") + pl(ac, X.cd, "#0B3146", 3);
-    if (ac[X.cd] != null) g += `<circle cx="${xs(X.cd)}" cy="${ys(hoy)}" r="4" fill="#fff" stroke="#0B3146" stroke-width="2.2"/>`;
-    const est = s.meta ? (hoy >= ideal ? "ad-ok" : "ad-mal") : "", mesN = MESL[X.m - 1], antN = MESL[new Date(X.y, X.m - 2, 1).getMonth()];
-    return `<div class="ad-card" id="adCard"><h2>📈 Avance de ${mesN}, día a día <small>${s.junta ? "distribuidora + tienda" : esc2(s.nom)}${s.yo ? " · " + esc2(s.yo) : ""} · al ${X.cd} de ${mesN}</small></h2>
-      ${X.orden.length > 1 ? `<div class="ad-seg" role="group" aria-label="Qué avance ver">${X.orden.map(o => `<button type="button" data-ad="${o}" aria-pressed="${o === vista}">${o === "j" ? "Juntas" : esc2(X.S[o].nom)}</button>`).join("")}</div>` : ""}
-      <svg class="ad-svg" viewBox="0 0 ${W} ${Hh}" role="img" aria-label="Venta acumulada del mes por día contra la meta">${g}</svg>
-      <div class="ad-ley"><span><i style="border-color:#0B3146"></i>${s.junta ? "Total acumulado" : "Venta acumulada"}</span>${s.meta ? '<span><i style="border-color:#E07B24;border-top-style:dashed"></i>Meta ideal</span>' : ""}${extra.map(([t, , c]) => `<span><i style="border-color:${c}"></i>${t}</span>`).join("")}<span><i style="border-color:#9AA8B4"></i>${antN}</span></div>
-      <p class="ad-res">${s.meta ? `Llevas <b>${MM(hoy)}</b> (${pc(hoy / s.meta)} de ${MM(s.meta)}); lo ideal a hoy era ${MM(ideal)}: <b class="${est}">${hoy >= ideal ? "vamos " + MM(hoy - ideal) + " adelante" : "faltan " + MM(ideal - hoy)}</b> · proyección al ritmo actual ${MM(proy)} (${pc(proy / s.meta)}).` : `Llevas <b>${MM(hoy)}</b> · proyección al ritmo actual ${MM(proy)}.`}</p></div>`; }
-  const esc2 = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-  const host = () => ADM ? document.getElementById("s-res") : VEN ? document.getElementById("crmInicio") : document.getElementById("sInicio");
-  let ocup = false;
-  function poner() { const h = host(); if (!h || ocup) return; ocup = true; try { const v = h.querySelector("#adCard"); let t = ""; try { t = html(); } catch (e) { console.error(e); }
-      if (!t) { if (v) v.remove(); return; } if (v) v.outerHTML = t; else h.insertAdjacentHTML("afterbegin", t); const c = h.querySelector("#adCard"); if (c !== h.firstElementChild) h.insertBefore(c, h.firstElementChild);
-      c.querySelectorAll("[data-ad]").forEach(b => b.onclick = () => { vista = b.dataset.ad; try { localStorage.setItem(LS, vista); } catch (e) {} poner(); }); } finally { setTimeout(() => { ocup = false; }, 0); } }
-  const h0 = host(); if (!h0) return; let t0 = 0;
-  new MutationObserver(() => { if (ocup) return; const c = h0.querySelector("#adCard"); if (c && c === h0.firstElementChild && c.dataset.f === firma()) return; clearTimeout(t0); t0 = setTimeout(() => { poner(); const c2 = h0.querySelector("#adCard"); if (c2) c2.dataset.f = firma(); }, 30); }).observe(h0, { childList: true });
-  function firma() { const s = document.getElementById("selMes"); return (s ? s.value : "") + "|" + vista; }
-  poner(); const c = h0.querySelector("#adCard"); if (c) c.dataset.f = firma();
-  [800, 2500, 6000].forEach(t => setTimeout(() => { if (!h0.querySelector("#adCard")) poner(); }, t));   /* por si los datos llegan después */
 })();
 </script>
 </body>

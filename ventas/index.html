@@ -7174,7 +7174,7 @@ function confirmarNota() {
   x.onclick = () => cerrarModal(); card.insertBefore(x, card.firstChild); })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261112213551";
+const HWF_VER = "20261112213942";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer)\/[^/]*$/, "/");
   let avisado = false;
@@ -8164,271 +8164,6 @@ function vmPoner(cont, VM, antes) { try { if (!cont) return; const v = cont.quer
 @media (min-width:1900px){ html{font-size:17px} }
 @media (min-width:2500px){ html{font-size:18.5px} }
 </style>
-<style>/* patch_asistente */
-#iaBtn{position:fixed;right:14px;bottom:calc(84px + env(safe-area-inset-bottom));z-index:900;border:0;border-radius:999px;padding:12px 16px;font:600 .95rem system-ui,sans-serif;
-  background:linear-gradient(135deg,#0B3146,#1C7A4E);color:#fff;box-shadow:0 6px 18px rgba(11,49,70,.35);cursor:pointer;display:flex;gap:6px;align-items:center}
-#iaBtn:focus-visible{outline:3px solid #F5B400;outline-offset:2px}
-#iaPan{position:fixed;inset:0;z-index:1000;background:var(--bg,#F4F7F9);display:none;flex-direction:column;color:var(--ink,#13222D)}
-#iaPan.on{display:flex}
-@media(min-width:900px){#iaPan{inset:auto 18px 18px auto;width:min(520px,92vw);height:min(760px,86vh);border-radius:18px;box-shadow:0 18px 50px rgba(0,0,0,.28);overflow:hidden;border:1px solid var(--line,#DAE1E7)}}
-.ia-h{display:flex;align-items:center;gap:8px;padding:12px 14px;background:#0B3146;color:#fff}.ia-h b{flex:1;font-size:1.02rem}.ia-h button{background:rgba(255,255,255,.14);color:#fff;border:0;border-radius:10px;padding:8px 11px;font:inherit;cursor:pointer}
-.ia-m{flex:1;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:10px}
-.ia-b{flex-shrink:0;max-width:92%;padding:10px 12px;border-radius:14px;line-height:1.45;font-size:.95rem;word-wrap:break-word;overflow-x:auto}
-.ia-u{align-self:flex-end;background:#0B3146;color:#fff;border-bottom-right-radius:4px;white-space:pre-wrap}
-.ia-a{align-self:flex-start;background:var(--card,#fff);border:1px solid var(--line,#DAE1E7);border-bottom-left-radius:4px}
-.ia-a p{margin:.2em 0 .5em}.ia-a ul{margin:.2em 0 .5em;padding-left:1.2em}.ia-a table{border-collapse:collapse;font-size:.84rem;margin:.3em 0}.ia-a td,.ia-a th{border:1px solid var(--line,#DAE1E7);padding:3px 6px;text-align:left}
-.ia-a th{background:rgba(11,49,70,.06)}.ia-e{color:#B42318}
-.ia-s{flex-shrink:0;display:flex;flex-wrap:wrap;gap:6px}.ia-s button{border:1px solid var(--line,#C9D3DB);background:var(--card,#fff);color:inherit;border-radius:999px;padding:7px 11px;font:inherit;font-size:.86rem;cursor:pointer}
-.ia-f{display:flex;gap:8px;padding:10px;border-top:1px solid var(--line,#DAE1E7);background:var(--card,#fff)}
-.ia-f textarea{flex:1;resize:none;border:1px solid var(--line,#C9D3DB);border-radius:12px;padding:10px;font:inherit;font-size:16px;min-height:44px;max-height:140px;background:var(--bg,#fff);color:inherit}
-.ia-f button{border:0;border-radius:12px;padding:0 16px;background:#1C7A4E;color:#fff;font:600 .95rem system-ui,sans-serif;cursor:pointer}.ia-f button:disabled{opacity:.5}
-.ia-n{font-size:.74rem;color:var(--muted,#5B6874);padding:0 12px 8px;background:var(--card,#fff)}
-.ia-l{margin:.4em 0 0!important;font-size:.72rem;color:var(--muted,#5B6874)}.ia-a em{font-style:normal;color:var(--muted,#5B6874);font-size:.8rem}
-.ia-p{display:inline-block;animation:iaP 1.2s infinite}@keyframes iaP{50%{opacity:.3}}
-@media print{#iaBtn,#iaPan{display:none!important}}
-</style>
-<script>/* patch_asistente: asistente IA con los datos cargados en la app (pregunta → script de Google → API de Claude) */
-(function () {
-  const HB = window.hwfBi, TND = !HB && /TIENDA/.test(document.title) && typeof DATA === "function"; if ((!HB && !TND) || document.getElementById("iaBtn")) return;
-  /* VENTAS y TIENDA (12-11-2026): el asistente solo revisa ventas, stock de su bodega, prospectos y cobranza (sin costos ni compras) */
-  const T = HB ? HB.tipo : "tienda", RC = T !== "admin", DEMO = /DEMO/.test(document.title);
-  const NOM = { admin: "HWF (administración)", ventas: "VENTAS (app de los vendedores)", log: "LOGÍSTICA", tienda: "TIENDA (Tienda Hellywoof)" }[T] || T;
-  const ALC = {
-    ventas: "App de los vendedores de HWF. Secciones: Inicio (avance del mes, buenas noticias), Pedido (crear notas de pedido, se envían al script y llegan por correo con PDF y Excel; botones para PDF, enviar e imprimir), Clientes (cartera, ficha, última compra, sugerencias de productos), Ruta (planificar visitas del día, PDF), Cobranza (documentos por cobrar), Prospectos (clientes potenciales), Panel, Inteligencia de negocio (apartado propio: venta de la distribuidora por marca, formato y producto; exportar a PDF, Excel, correo e imprimir), Catálogos y precios (descargar en PDF para enviar por WhatsApp o imprimir). ESTE ASISTENTE SOLO REVISA: ventas, stock de la bodega distribuidora, prospectos y cobranza. No tiene costos, márgenes ni compras: si preguntan otra cosa, dilo.",
-    admin: "App de administración HWF (gerencia). Secciones: Inicio (avance del mes contra la meta, proyección de cierre), Ventas y ranking por vendedor, cliente y producto, Inventario con Inteligencia de negocio (unidades Ventas y Logística: ventas y compras en $ o unidades, filtros proveedor/marca/formato/producto, canal, análisis avanzado con Pareto, alertas y pronóstico, exportar PDF/Excel/correo/imprimir), Abastecimiento (compra sugerida por mes según pronóstico y stock de seguridad por clase ABC), Plan de ventas nov-26 a dic-27 ($1.000 MM: distribuidora 827,8 + tienda 172,2), Pago a proveedores (plan a 14 meses: Planet Pet a contado, Montaraz −50 % de la deuda), Catálogo y listas de precio (archivos en Drive), Cobranza, Prospectos y notas de pedido de la app.",
-    tienda: "App de la Tienda Hellywoof (venta en local con boleta). Secciones: Inicio, Ventas, Panel, Plan (meta mensual de la tienda), Stock (bodega de la tienda), Nutrición, Ranking y Catálogos y precios. ESTE ASISTENTE SOLO REVISA: ventas de la tienda y stock de la bodega de la tienda. No tiene costos ni márgenes: si preguntan otra cosa, dilo.",
-    log: "App de logística HWF. Secciones: Panel (buenas noticias, avance), Inteligencia de negocio (unidades Ventas y Logística: ventas, compras y stock por proveedor/marca/formato/producto y canal; exportar PDF/Excel/correo/imprimir), Abastecimiento (compra sugerida según pronóstico y stock de seguridad), Rutas de despacho (armar rutas del día, enviarlas a la app Chofer, seguimiento GPS y entregas con foto/firma; PDF), stock de todas las bodegas, pedidos pendientes y clientes para despacho."
-  }[T] || "";
-  const SUG = {
-    ventas: ["¿Cómo vamos con la meta del mes? ESTE ASISTENTE no tiene costos, márgenes, compras en pesos ni stock valorizado: si preguntan por eso, dilo.", "¿Qué clientes tienen facturas vencidas?", "¿Qué prospectos debo contactar esta semana?", "¿Qué productos están sin stock?"],
-    tienda: ["¿Cómo vamos con la meta del mes?", "¿Qué productos se venden más este mes?", "¿Qué productos se están acabando en la tienda?", "¿Cuál es el ticket promedio del mes?"],
-    admin: ["Resume cómo va el mes contra la meta", "¿Qué marcas crecen y cuáles caen este año?", "¿Qué productos clase A tienen poco stock?", "¿Cómo va cada vendedor este mes?"],
-    log: ["¿Qué productos se quedan sin stock en menos de 15 días?", "¿Cuánto compramos por proveedor este año?", "¿Qué pedidos están pendientes?", "¿Qué productos tienen más stock que venta?"]
-  }[T] || [];
-  const MES = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
-  const n0 = v => Math.round(Number(v) || 0).toLocaleString("es-CL"), pz = v => "$" + n0(v), pc = v => isFinite(v) ? (Math.round(v * 1000) / 10).toLocaleString("es-CL") + " %" : "–";
-  const tc = s => String(s || "").toLowerCase().replace(/(^|[\s\-])([a-záéíóúñ])/g, (m, a, b) => a + b.toUpperCase());
-  const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-  const conn = () => { try { if (typeof SYC === "function") { const c = SYC(); if (c && c.url) return c; } } catch (e) {}
-    try { if (typeof syCfg === "function") { const c = syCfg(); if (c && c.url) return c; } } catch (e) {}
-    try { if (typeof cfg === "function") { const c = cfg(); if (c && c.url) return c; } } catch (e) {} return null; };
-  const usuario = () => { try { if (T === "ventas" && typeof SES !== "undefined" && SES && SES.vendedor) return SES.vendedor.nombre || ""; } catch (e) {}
-    try { if (T === "tienda" && typeof TURK !== "undefined") { const t = JSON.parse(localStorage.getItem(TURK) || "null"); const n = t && (t.nombre || t.quien || (typeof t === "string" ? t : "")); if (n) return String(n); } } catch (e) {} return T; };
-  const habiles = (y, m, hasta) => { let n = 0; const fin = new Date(y, m, 0).getDate(); for (let d = 1; d <= Math.min(fin, hasta || fin); d++) { const w = new Date(y, m - 1, d).getDay(); if (w && w < 6) n++; } return n; };
-
-  /* ===== resumen de los datos de la app ===== */
-  function contexto() { if (T === "tienda") return ctxTienda();
-    const B = HB.base() || {}, R = B.rows || [], P = B.productos || [], cats = B.cats || [], V = B.vend || [], tv = V.indexOf("Tienda Hellywoof"), an = r => r[8] || B.anio;
-    let X = null; try { X = typeof DATA === "function" ? DATA() : null; } catch (e) {}
-    const cy = Number(String(B.corte || "").slice(0, 4)) || B.anio, cm = Number(String(B.corte || "").slice(5, 7)) || 12, cd = Number(String(B.corte || "").slice(8, 10)) || 0;
-    const L = [], hoy = new Date(), tab = (t, cab, filas) => { if (!filas.length) return; L.push("", "## " + t, cab.join(" | ")); filas.forEach(f => L.push(f.join(" | "))); };
-    L.push("APP: " + NOM, "ALCANCE Y FUNCIONES: " + ALC, "Usuario: " + usuario(),
-      "Fecha de hoy: " + hoy.toLocaleDateString("es-CL") + ". Ventas facturadas (Defontana, neto sin IVA) al " + (B.corte || "?") + "; " + MES[cm - 1] + " " + cy + " va en curso. Stock al " + (B.stockFecha || (X && X.stockFecha) || "?") + ".",
-      RC ? "Esta app NO muestra costos, márgenes ni compras en pesos: no los tienes." : "Costo = cantidad × costo unitario; margen = venta − costo.",
-      "Plan de ventas nov-26 a dic-27: $1.000 MM en 14 meses (distribuidora 827,8 MM + tienda 172,2 MM), con estacionalidad.");
-    const info = P.map(p => { const pm = HB.prov(cats[p[1]]); return { n: p[0], cod: String(p[2]), pv: pm[0], ma: pm[1] || pm[0] }; });
-    /* venta mensual */
-    const mesK = {}, z = () => ({ dv: 0, du: 0, dc: 0, tv: 0, tu: 0, tc: 0 });
-    R.forEach(r => { const k = an(r) * 100 + r[2], o = mesK[k] = mesK[k] || z(), q = Number(r[4]) || 0, v = Number(r[5]) || 0, c = q * (Number(r[6]) || 0);
-      if (r[7] === tv) { o.tv += v; o.tu += q; o.tc += c; } else { o.dv += v; o.du += q; o.dc += c; } });
-    const KM = Object.keys(mesK).map(Number).sort();
-    tab("Venta neta mensual", ["Mes", "Distribuidora $", "Distribuidora unid.", "Tienda $", "Tienda unid.", "Total $"].concat(RC ? [] : ["Margen distribuidora %", "Margen tienda %"]),
-      KM.map(k => { const o = mesK[k]; return [MES[k % 100 - 1] + "-" + Math.floor(k / 100), pz(o.dv), n0(o.du), pz(o.tv), n0(o.tu), pz(o.dv + o.tv)].concat(RC ? [] : [pc(o.dv ? 1 - o.dc / o.dv : NaN), pc(o.tv ? 1 - o.tc / o.tv : NaN)]); }));
-    /* metas y avance del mes */
-    const metas = []; for (let y = cy; y <= cy + 1; y++) for (let m = 1; m <= 12; m++) { let mt = 0; try { mt = HB.meta(y, m) || 0; } catch (e) {} if (mt > 0) metas.push([MES[m - 1] + "-" + y, pz(mt)]); }
-    tab("Meta mensual de la distribuidora (plan)", ["Mes", "Meta $"], metas);
-    const o = mesK[cy * 100 + cm] || z(); let mt = 0; try { mt = HB.meta(cy, cm) || 0; } catch (e) {}
-    const hT = habiles(cy, cm), hP = habiles(cy, cm, cd || undefined), proy = hP ? o.dv / hP * hT : 0;
-    const pend = (B.cots || (X && X.cots) || []); let pendT = 0; const pendV = {}, pendN = {}; pend.forEach(c => { const v = Number(c[7]) || 0; pendT += v; pendV[c[3]] = (pendV[c[3]] || 0) + v; (pendN[c[3]] = pendN[c[3]] || new Set()).add(c[0]); });
-    L.push("", "## Avance de " + MES[cm - 1] + " " + cy + " (distribuidora)", "Facturado: " + pz(o.dv) + " · meta: " + (mt ? pz(mt) : "sin dato") + (mt ? " · avance facturado " + pc(o.dv / mt) + " · avance con pendientes " + pc((o.dv + pendT) / mt) : "") +
-      " · pedidos/cotizaciones pendientes (NP Defontana): " + pz(pendT) + " · días hábiles " + hP + " de " + hT + " · proyección de cierre (solo facturado al ritmo): " + pz(proy) + (mt ? " (" + pc(proy / mt) + " de la meta)" : "") + " · tienda facturado: " + pz(o.tv));
-    /* vendedores */
-    const vk = {}; if (T !== "log") R.forEach(r => { if (an(r) !== cy) return; const k = V[r[7]] || "?", w = vk[k] = vk[k] || { m: {}, a: 0 }; w.m[r[2]] = (w.m[r[2]] || 0) + (Number(r[5]) || 0); w.a += Number(r[5]) || 0; });
-    const MT = B.metas || {};
-    tab("Venta neta por vendedor " + cy + " (meta del mes " + (B.metaMes ? MES[B.metaMes - 1] : MES[cm - 1]) + ")", ["Vendedor", "Año $", MES[cm - 1] + " $", "Meta del mes $", "Pendiente $", "N° pendientes"].concat(cm > 1 ? [MES[cm - 2] + " $"] : []),
-      Object.keys(vk).sort((a, b) => vk[b].a - vk[a].a).map(k => [k, pz(vk[k].a), pz(vk[k].m[cm] || 0), MT[k] ? pz(MT[k]) : "–", pz(pendV[k] || 0), pendN[k] ? pendN[k].size : 0].concat(cm > 1 ? [pz(vk[k].m[cm - 1] || 0)] : [])));
-    /* marcas: año en curso vs. mismo período del año anterior */
-    const mk = {}; R.forEach(r => { const y = an(r), i = info[r[1]]; if (!i || (y !== cy && y !== cy - 1) || r[2] > cm || (r[2] === cm && cd && r[3] > cd)) return;
-      const w = mk[i.ma] = mk[i.ma] || { pv: i.pv, a: 0, b: 0, u: 0, c: 0 }, v = Number(r[5]) || 0; if (y === cy) { w.a += v; w.u += Number(r[4]) || 0; w.c += (Number(r[4]) || 0) * (Number(r[6]) || 0); } else w.b += v; });
-    tab("Venta por marca: ene–" + MES[cm - 1] + " " + cy + " vs. mismo período " + (cy - 1), ["Marca", "Proveedor", cy + " $", cy + " unid.", (cy - 1) + " $", "Variación"].concat(RC ? [] : ["Margen %"]),
-      Object.keys(mk).sort((a, b) => mk[b].a - mk[a].a).slice(0, 60).map(k => { const w = mk[k]; return [k, w.pv, pz(w.a), n0(w.u), pz(w.b), w.b ? pc(w.a / w.b - 1) : "nuevo"].concat(RC ? [] : [pc(w.a ? 1 - w.c / w.a : NaN)]); }));
-    /* productos */
-    const pk = {}, u3 = [1, 2, 3].map(i => { const d = new Date(cy, cm - 1 - i, 1); return d.getFullYear() * 100 + d.getMonth() + 1; });
-    R.forEach(r => { const i = info[r[1]]; if (!i) return; const y = an(r), k = y * 100 + r[2], w = pk[i.cod] = pk[i.cod] || { i, a: 0, au: 0, m: {}, cu: 0, cq: 0 }, q = Number(r[4]) || 0;
-      if (y === cy) { w.a += Number(r[5]) || 0; w.au += q; } if (u3.includes(k) || k === cy * 100 + cm) w.m[k] = (w.m[k] || 0) + q; if (q > 0 && r[6] > 0) { w.cu += q * r[6]; w.cq += q; } });
-    const FC = (B.fc && B.fc.p) || {}, DESC = new Set(B.desc || []), stD = c => { try { const s = HB.stock(c); return s == null ? "" : n0(s); } catch (e) { return ""; } }, stT = c => B.stockT && B.stockT[c] != null ? n0(B.stockT[c]) : "";
-    Object.keys(FC).forEach(c => { if (!pk[c]) { const ix = P.findIndex(p => String(p[2]) === c); if (ix >= 0) pk[c] = { i: info[ix], a: 0, au: 0, m: {}, cu: 0, cq: 0 }; } });
-    const PL = Object.values(pk).sort((a, b) => b.a - a.a || (FC[b.i.cod] ? FC[b.i.cod][1] : 0) - (FC[a.i.cod] ? FC[a.i.cod][1] : 0)).slice(0, 180);
-    tab("Productos (los " + PL.length + " de mayor venta " + cy + "; unidades por mes; stock en unidades; pronóstico = venta mensual esperada de la distribuidora; clase ABC)",
-      ["Código", "Producto", "Marca", "Proveedor", cy + " $", cy + " unid."].concat(u3.slice().reverse().map(k => MES[k % 100 - 1] + " u"), [MES[cm - 1] + " u (en curso)", "Stock distribuidora", ...(T === "ventas" ? [] : ["Stock tienda"]), "Pronóstico u/mes", "Días de stock", "Clase"], RC ? [] : ["Costo unit. $"], ["Nota"]),
-      PL.map(w => { const c = w.i.cod, f = FC[c], s = (() => { try { return HB.stock(c); } catch (e) { return null; } })(), dias = f && f[0] > 0 && s != null ? Math.round(s / f[0] * 30) : "";
-        return [c, w.i.n, w.i.ma, w.i.pv, pz(w.a), n0(w.au)].concat(u3.slice().reverse().map(k => n0(w.m[k] || 0)), [n0(w.m[cy * 100 + cm] || 0), stD(c), ...(T === "ventas" ? [] : [stT(c)]), f ? n0(f[0]) : "", dias, f ? f[3] || "" : ""], RC ? [] : [w.cq ? pz(w.cu / w.cq) : ""], [DESC.has(c) ? "descontinuado (no se compra)" : s === 0 && w.au > 0 ? "SIN STOCK" : ""]); }));
-    /* clientes (sin RUT ni teléfonos) */
-    const CL = B.clientes || [], conCli = CL.length && R.some(r => r[0] > 0);
-    if (conCli) { const ck = {}; R.forEach(r => { if (r[7] === tv) return; const y = an(r), w = ck[r[0]] = ck[r[0]] || { a: 0, b: 0, m: 0, ult: 0, meses: new Set() }, v = Number(r[5]) || 0, f = y * 10000 + r[2] * 100 + (r[3] || 1);
-        if (y === cy) { w.a += v; if (r[2] === cm) w.m += v; } else if (y === cy - 1) w.b += v; if (v > 0) { if (f > w.ult) w.ult = f; w.meses.add(y * 100 + r[2]); } });
-      const CK = Object.keys(ck).sort((a, b) => ck[b].a - ck[a].a || ck[b].b - ck[a].b).slice(0, 150);
-      tab("Clientes de la distribuidora (" + CK.length + " de " + Object.keys(ck).length + " con compra; ordenados por venta " + cy + ")", ["Cliente", "Comuna", "Vendedor", cy + " $", (cy - 1) + " $", MES[cm - 1] + " $", "Última compra", "Meses con compra"],
-        CK.map(k => { const w = ck[k], c = CL[k] || []; return [c[0] || "?", c[1] || "", c[2] || "", pz(w.a), pz(w.b), pz(w.m), w.ult ? String(w.ult % 100).padStart(2, "0") + "-" + String(Math.floor(w.ult / 100) % 100).padStart(2, "0") + "-" + Math.floor(w.ult / 10000) : "", w.meses.size]; }));
-      L.push("Clientes con compra en " + MES[cm - 1] + " " + cy + ": " + Object.values(ck).filter(w => w.m > 0).length + "."); }
-    /* pedidos pendientes */
-    if (pend.length) { const pp = {}; pend.forEach(c => { const w = pp[c[0]] = pp[c[0]] || { f: c[1], cl: c[2], v: c[3], t: 0, it: [] }; w.t += Number(c[7]) || 0; w.it.push(n0(c[5]) + " × " + c[6]); });
-      tab("Pedidos y cotizaciones pendientes de facturar (Defontana)", ["N°", "Fecha", "Cliente", "Vendedor", "Neto $", "Detalle"], Object.keys(pp).slice(0, 80).map(k => { const w = pp[k]; return [k, w.f, w.cl, w.v, pz(w.t), w.it.join("; ").slice(0, 300)]; })); }
-    /* VENTAS: cobranza y prospectos (lo que el vendedor ve en Cobros y Prospectos) */
-    if (T === "ventas") { try { const docs = typeof cxMios === "function" ? cxMios() : []; if (docs.length) { const rs = cxResumen(docs), cls = cxClientes(docs).sort((a, b) => b.venc - a.venc || b.saldo - a.saldo).slice(0, 120);
-        L.push("", "## Cobranza (documentos por cobrar" + (typeof SES !== "undefined" && SES && SES.vendedor ? " de la cartera " + (SES.vendedor.cartera || SES.vendedor.nombre) : "") + ")", "Total por cobrar: " + pz(rs.total) + " · vencido: " + pz(rs.venc) + " (" + rs.nVenc + " documentos) · vencido más de 30 días: " + pz(rs.v30) + " · vence esta semana: " + pz(rs.sem) + " · clientes: " + rs.nCli + (rs.cheques ? " · cheques: " + pz(rs.cheques) : ""));
-        tab("Cobranza por cliente (vencido primero)", ["Cliente", "Cartera", "Saldo $", "Vencido $", "Días de atraso máx.", "Documentos (tipo n° · vence · saldo · días)"], cls.map(c => [c.cli, c.cart || "", pz(c.saldo), pz(c.venc), c.maxDias > 0 ? c.maxDias : 0, c.docs.slice(0, 6).map(d => d.tipo + " " + d.num + " · " + d.fv + " · " + pz(d.saldo) + " · " + (d.dias > 0 ? d.dias + " días vencido" : "vence en " + (-d.dias) + " días")).join("; ")])); } } catch (e) {}
-      try { const pr = typeof prMios === "function" ? prMios() : []; if (pr.length) { const ET = typeof PR_ETAPAS !== "undefined" ? PR_ETAPAS : [], cnt = typeof prConteo === "function" ? prConteo(pr) : [], hoyS = new Date().toISOString().slice(0, 10);
-        L.push("", "## Prospectos (clientes potenciales)", "Por etapa: " + ET.map((e, i) => e + ": " + (cnt[i] || 0)).join(" · ") + ". Hoy: " + hoyS + ".");
-        tab("Prospectos activos (próximo contacto primero)", ["Nombre", "Comuna", "Segmento", "Vendedor", "Etapa", "Próximo contacto", "Actualizado", "Notas"], pr.filter(o => o.etapa !== "Descartado").sort((a, b) => (a.proximo_contacto || "9").localeCompare(b.proximo_contacto || "9")).slice(0, 150)
-          .map(o => [o.nombre, o.comuna || "", o.segmento || "", o.vendedor || "", o.etapa || "", o.proximo_contacto || "", o.actualizado || "", String(o.notas || "").replace(/\s+/g, " ").slice(0, 120)])); } } catch (e) {} }
-    /* compras (no en VENTAS) */
-    const C = T === "ventas" ? null : B.compras && B.compras.rows; if (C && C.length) { const cmK = {}, cpv = {}; C.forEach(r => { const y = Math.floor(r[1] / 100), w = cmK[r[1]] = cmK[r[1]] || { u: 0, v: 0 }; w.u += Number(r[2]) || 0; w.v += Number(r[3]) || 0;
-        if (y === cy) { const ix = P.findIndex(p => String(p[2]) === String(r[0])), pv = ix >= 0 ? info[ix].pv : "Sin proveedor", q = cpv[pv] = cpv[pv] || { u: 0, v: 0 }; q.u += Number(r[2]) || 0; q.v += Number(r[3]) || 0; } });
-      tab("Compras mensuales (ingresos a bodega" + (B.compras.fecha ? ", Mayor al " + B.compras.fecha : "") + ")", ["Mes", "Unidades"].concat(RC ? [] : ["Valor neto $"]), Object.keys(cmK).map(Number).sort().map(k => [MES[k % 100 - 1] + "-" + Math.floor(k / 100), n0(cmK[k].u)].concat(RC ? [] : [pz(cmK[k].v)])));
-      tab("Compras " + cy + " por proveedor", ["Proveedor", "Unidades"].concat(RC ? [] : ["Valor neto $"]), Object.keys(cpv).sort((a, b) => cpv[b].v - cpv[a].v).map(k => [k, n0(cpv[k].u)].concat(RC ? [] : [pz(cpv[k].v)]))); }
-    if (DESC.size) L.push("", "Productos descontinuados (no se vuelven a comprar): " + [...DESC].map(c => { const ix = P.findIndex(p => String(p[2]) === c); return ix >= 0 ? P[ix][0] : c; }).join(", ") + ".");
-    let t = L.join("\n"); if (t.length > 200000) t = t.slice(0, 200000) + "\n(…resumen recortado)"; return t;
-  }
-
-  /* TIENDA: ventas (boletas) y stock de la bodega de la tienda */
-  function ctxTienda() { const D = DATA() || {}, R = D.rows || [], P = D.productos || [], L = [], tab = (t, cab, filas) => { if (!filas.length) return; L.push("", "## " + t, cab.join(" | ")); filas.forEach(f => L.push(f.join(" | "))); };
-    const cy = Number(String(D.corte || "").slice(0, 4)) || D.anio, cm = Number(String(D.corte || "").slice(5, 7)) || 12, cd = Number(String(D.corte || "").slice(8, 10)) || 0, dim = new Date(cy, cm, 0).getDate();
-    L.push("APP: " + NOM, "ALCANCE Y FUNCIONES: " + ALC, "Fecha de hoy: " + new Date().toLocaleDateString("es-CL") + ". Ventas de la tienda (boletas y facturas, neto sin IVA) al " + (D.corte || "?") + "; " + MES[cm - 1] + " " + cy + " va en curso. Stock de la tienda al " + (D.stockFecha || "?") + ".",
-      "La tienda abre todos los días salvo feriados irrenunciables. Plan: la meta de la tienda parte en $10 MM en nov-26 y sube con estacionalidad (plan total nov-26 a dic-27 con distribuidora: $1.000 MM).");
-    const mk = {}; R.forEach(r => { const k = (r[6] || D.anio) * 100 + r[1], o = mk[k] = mk[k] || { v: 0, u: 0, docs: new Set() }; o.v += Number(r[4]) || 0; o.u += Number(r[3]) || 0; if (r[7] && Number(r[4]) > 0) o.docs.add(r[7]); });
-    tab("Venta neta mensual de la tienda", ["Mes", "Venta $", "Unidades", "Tickets", "Ticket promedio $"], Object.keys(mk).map(Number).sort().map(k => { const o = mk[k], n = o.docs.size; return [MES[k % 100 - 1] + "-" + Math.floor(k / 100), pz(o.v), n0(o.u), n || "s/d", n ? pz(o.v / n) : "s/d"]; }));
-    let PL = []; try { PL = typeof PLAN !== "undefined" ? PLAN : []; } catch (e) {} tab("Meta mensual de la tienda (plan)", ["Mes", "Meta $"], PL.map(x => [MES[x.m - 1] + "-" + x.y, pz(x.meta)]));
-    const o = mk[cy * 100 + cm] || { v: 0, u: 0, docs: new Set() }, mt = (PL.find(x => x.ym === cy * 100 + cm) || {}).meta || 0, proy = cd ? o.v / cd * dim : 0;
-    L.push("", "## Avance de " + MES[cm - 1] + " " + cy, "Vendido: " + pz(o.v) + " · meta: " + (mt ? pz(mt) + " · avance " + pc(o.v / mt) : "sin dato") + " · días " + cd + " de " + dim + " · proyección de cierre al ritmo: " + pz(proy) + (mt ? " (" + pc(proy / mt) + " de la meta)" : ""));
-    const dd = {}; R.forEach(r => { if ((r[6] || D.anio) === cy && r[1] === cm) dd[r[2]] = (dd[r[2]] || 0) + (Number(r[4]) || 0); }); tab("Venta por día de " + MES[cm - 1], ["Día", "Venta $"], Object.keys(dd).map(Number).sort((a, b) => a - b).map(d => [d, pz(dd[d])]));
-    const ST = {}; (Array.isArray(D.stock) ? D.stock : []).forEach(x => { ST[String(x[0])] = Number(x[2]) || 0; });
-    const pk = {}, u3 = [1, 2, 3].map(i => { const d = new Date(cy, cm - 1 - i, 1); return d.getFullYear() * 100 + d.getMonth() + 1; });
-    R.forEach(r => { const p = P[r[0]]; if (!p) return; const y = r[6] || D.anio, k = y * 100 + r[1], w = pk[r[0]] = pk[r[0]] || { p, a: 0, au: 0, m: {} }, q = Number(r[3]) || 0; if (y === cy) { w.a += Number(r[4]) || 0; w.au += q; } if (u3.includes(k) || k === cy * 100 + cm) w.m[k] = (w.m[k] || 0) + q; });
-    const PLs = Object.values(pk).sort((a, b) => b.a - a.a).slice(0, 200);
-    tab("Productos de la tienda (los " + PLs.length + " de mayor venta " + cy + "; unidades por mes; stock en unidades de la bodega de la tienda)", ["Código", "Producto", "Categoría", cy + " $", cy + " unid."].concat(u3.slice().reverse().map(k => MES[k % 100 - 1] + " u"), [MES[cm - 1] + " u (en curso)", "Stock tienda", "Días de stock", "Nota"]),
-      PLs.map(w => { const c = String(w.p[2] || ""), s = ST[c], q3 = u3.reduce((t, k) => t + (w.m[k] || 0), 0) / 3, dias = s != null && q3 > 0 ? Math.round(s / q3 * 30) : "";
-        return [c, w.p[0], w.p[1] || "", pz(w.a), n0(w.au)].concat(u3.slice().reverse().map(k => n0(w.m[k] || 0)), [n0(w.m[cy * 100 + cm] || 0), s == null ? "" : n0(s), dias, s === 0 && q3 > 0 ? "SIN STOCK" : dias !== "" && dias < 15 ? "se acaba pronto" : ""]); }));
-    let t = L.join("\n"); if (t.length > 200000) t = t.slice(0, 200000) + "\n(…resumen recortado)"; return t; }
-
-  /* ===== MODO SIN COSTO (12-11-2026): respuestas calculadas en la propia app, sin internet ni API =====
-     Entiende las preguntas más comunes por palabras clave (meta, productos, marcas, stock, clientes, cobranza, prospectos,
-     pedidos, compras, ticket) y busca productos o clientes por nombre. Si algún día hay clave de Claude en el script, se usa Claude. */
-  const nor = s => String(s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9ñ ]+/g, " ").replace(/\s+/g, " ").trim();
-  let PREP = null;
-  function prep() { if (PREP) return PREP; const X = { cy: 0, cm: 0, cd: 0, prods: [], clis: [], mes: {}, dias: {} };
-    if (T === "tienda") { const D = DATA() || {}, R = D.rows || [], P = D.productos || [], ST = {}; (Array.isArray(D.stock) ? D.stock : []).forEach(x => { ST[String(x[0])] = Number(x[2]) || 0; });
-      X.cy = Number(String(D.corte || "").slice(0, 4)) || D.anio; X.cm = Number(String(D.corte || "").slice(5, 7)) || 12; X.cd = Number(String(D.corte || "").slice(8, 10)) || 0; X.corte = D.corte; X.stockFecha = D.stockFecha;
-      const pk = {}; R.forEach(r => { const y = r[6] || D.anio, k = y * 100 + r[1], v = Number(r[4]) || 0, q = Number(r[3]) || 0, o = X.mes[k] = X.mes[k] || { v: 0, u: 0, docs: new Set() }; o.v += v; o.u += q; if (r[7] && v > 0) o.docs.add(r[7]);
-        if (k === X.cy * 100 + X.cm) X.dias[r[2]] = (X.dias[r[2]] || 0) + v; const p = P[r[0]]; if (!p) return; const w = pk[r[0]] = pk[r[0]] || { n: p[0], cod: String(p[2] || ""), marca: tc(String(p[1] || "").split(" ")[0]), a: 0, au: 0, ma: 0, mu: 0, m: {} };
-        if (y === X.cy) { w.a += v; w.au += q; } else if (y === X.cy - 1 && (r[1] < X.cm || (r[1] === X.cm && (!X.cd || r[2] <= X.cd)))) w.b = (w.b || 0) + v; if (k === X.cy * 100 + X.cm) { w.ma += v; w.mu += q; } w.m[k] = (w.m[k] || 0) + q; });
-      X.prods = Object.values(pk); X.prods.forEach(w => { w.st = w.cod in ST ? ST[w.cod] : null; });
-      let PL = []; try { PL = typeof PLAN !== "undefined" ? PLAN : []; } catch (e) {} X.meta = (PL.find(x => x.ym === X.cy * 100 + X.cm) || {}).meta || 0; X.dim = new Date(X.cy, X.cm, 0).getDate(); X.prog = X.cd / X.dim;
-    } else { const B = HB.base() || {}, R = B.rows || [], P = B.productos || [], cats = B.cats || [], V = B.vend || [], tv = V.indexOf("Tienda Hellywoof"), CL = B.clientes || [];
-      X.cy = Number(String(B.corte || "").slice(0, 4)) || B.anio; X.cm = Number(String(B.corte || "").slice(5, 7)) || 12; X.cd = Number(String(B.corte || "").slice(8, 10)) || 0; X.corte = B.corte; X.stockFecha = B.stockFecha;
-      const info = P.map(p => { const pm = HB.prov(cats[p[1]]); return { n: p[0], cod: String(p[2]), pv: pm[0], marca: pm[1] || pm[0] }; }), pk = {}, ck = {};
-      R.forEach(r => { const y = r[8] || B.anio, k = y * 100 + r[2], v = Number(r[5]) || 0, q = Number(r[4]) || 0, t = r[7] === tv, o = X.mes[k] = X.mes[k] || { d: 0, t: 0, du: 0, vend: {} };
-        if (t) o.t += v; else { o.d += v; o.du += q; o.vend[V[r[7]]] = (o.vend[V[r[7]]] || 0) + v; if (k === X.cy * 100 + X.cm) X.dias[r[3]] = (X.dias[r[3]] || 0) + v; }
-        const i = info[r[1]]; if (i) { const w = pk[i.cod] = pk[i.cod] || Object.assign({ a: 0, au: 0, b: 0, ma: 0, mu: 0, m: {} }, i); if (y === X.cy) { w.a += v; w.au += q; } else if (y === X.cy - 1 && (r[2] < X.cm || (r[2] === X.cm && (!X.cd || r[3] <= X.cd)))) w.b += v; if (k === X.cy * 100 + X.cm) { w.ma += v; w.mu += q; } if (!t) w.m[k] = (w.m[k] || 0) + q; }
-        if (!t && CL.length && r[0] > 0 && v > 0) { const w = ck[r[0]] = ck[r[0]] || { i: r[0], a: 0, b: 0, ult: 0 }, f = y * 10000 + r[2] * 100 + (r[3] || 1); if (y === X.cy) w.a += v; else if (y === X.cy - 1) w.b += v; if (f > w.ult) w.ult = f; } });
-      const FC = (B.fc && B.fc.p) || {}; X.prods = Object.values(pk); X.prods.forEach(w => { let s = null; try { s = HB.stock(w.cod); } catch (e) {} w.st = s; w.fc = FC[w.cod] ? FC[w.cod][0] : 0; w.cls = FC[w.cod] ? FC[w.cod][3] : ""; });
-      X.clis = Object.values(ck).map(w => { const c = CL[w.i] || []; return Object.assign(w, { n: c[0] || "?", comuna: c[1] || "", vend: c[2] || "" }); });
-      X.meta = 0; try { X.meta = HB.meta(X.cy, X.cm) || 0; } catch (e) {} X.cots = B.cots || []; X.metas = B.metas || {}; X.compras = B.compras && B.compras.rows || [];
-      const hab = (y, m, h) => { let n = 0; const f = new Date(y, m, 0).getDate(); for (let d = 1; d <= Math.min(f, h || f); d++) { const w = new Date(y, m - 1, d).getDay(); if (w && w < 6) n++; } return n; }; X.prog = X.cd ? hab(X.cy, X.cm, X.cd) / Math.max(1, hab(X.cy, X.cm)) : 1; }
-    const u3 = [1, 2, 3].map(i => { const d = new Date(X.cy, X.cm - 1 - i, 1); return d.getFullYear() * 100 + d.getMonth() + 1; }); X.prods.forEach(w => { w.q3 = u3.reduce((t, k) => t + (w.m[k] || 0), 0) / 3; const base = w.fc > 0 ? w.fc : w.q3; w.dias = w.st != null && base > 0 ? Math.round(w.st / base * 30) : null; });
-    return PREP = X; }
-  const yo = () => { try { if (T === "ventas" && typeof SES !== "undefined" && SES && SES.vendedor) return { n: SES.vendedor.nombre || "", cart: SES.vendedor.cartera || SES.vendedor.nombre || "" }; } catch (e) {} return null; };
-  const tabla = (cab, filas) => filas.length ? "| " + cab.join(" | ") + " |\n|" + cab.map(() => "---").join("|") + "|\n" + filas.map(f => "| " + f.join(" | ") + " |").join("\n") : "";
-  const MM = v => "$" + (Math.abs(v) >= 1e6 ? (v / 1e6).toLocaleString("es-CL", { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + " MM" : n0(v));
-  function local(q) { const X = prep(), s = nor(q), has = (...w) => w.some(x => s.includes(x)), mesN = MES[X.cm - 1] + " " + X.cy, ym = X.cy * 100 + X.cm, pie = "\n\n_Datos al " + String(X.corte || "").split("-").reverse().join("-") + "._";
-    const nDias = (s.match(/(\d+)\s*dias?/) || [])[1]; const lim = nDias ? Number(nDias) : null;
-    /* meta y avance */
-    if (has("meta", "avance", "vamos", "proyecc", "cierre", "como va el mes", "resume")) { const o = X.mes[ym] || {}, fa = T === "tienda" ? (o.v || 0) : (o.d || 0), proy = X.prog > 0 ? fa / X.prog : 0, L = [];
-      L.push("**" + (T === "tienda" ? "Tienda" : "Distribuidora") + " · " + mesN + "**: llevamos " + MM(fa) + (X.meta ? " de una meta de " + MM(X.meta) + " (" + pc(fa / X.meta) + "), con el " + pc(X.prog) + " del mes transcurrido." : "."));
-      if (proy) L.push("- Proyección de cierre al ritmo actual (solo facturado): **" + MM(proy) + "**" + (X.meta ? " = " + pc(proy / X.meta) + " de la meta" + (proy >= X.meta ? " 🎯" : "; faltan " + MM(Math.max(0, X.meta - fa)) + " por facturar") : "") + ".");
-      if (T !== "tienda") { const pend = X.cots.reduce((t, c) => t + (Number(c[7]) || 0), 0); if (pend) L.push("- Pedidos pendientes por facturar (NP Defontana): " + MM(pend) + (X.meta ? " → con ellos el avance sería " + pc((fa + pend) / X.meta) : "") + "."); if (T === "admin" && o.t) L.push("- Tienda Hellywoof: " + MM(o.t) + " en el mes."); }
-      const me = yo(); if (me && o.vend) { const k = Object.keys(o.vend).find(v => nor(v) === nor(me.cart) || nor(v) === nor(me.n)), mt = Number(X.metas[k]) || 0; if (k) L.push("- **Tú (" + k + ")**: " + MM(o.vend[k]) + (mt ? " de " + MM(mt) + " (" + pc(o.vend[k] / mt) + ")" : "") + "."); }
-      return L.join("\n") + pie; }
-    if (T !== "tienda" && T !== "log" && has("vendedor", "equipo", "ranking", "cada vendedor")) { const o = X.mes[ym] || { vend: {} }; return "**Venta del mes por vendedor (" + mesN + ")**\n\n" + tabla(["Vendedor", "Facturado", "Meta", "Avance"], Object.keys(o.vend).sort((a, b) => o.vend[b] - o.vend[a]).map(k => { const mt = Number(X.metas[k]) || 0; return [k, MM(o.vend[k]), mt ? MM(mt) : "–", mt ? pc(o.vend[k] / mt) : "–"]; })) + pie; }
-    if (has("ticket")) { if (T !== "tienda") return "El ticket promedio de la distribuidora está en el Dashboard de HWF; estos datos no traen el número de documento." + pie; if (T === "tienda") { const o = X.mes[ym] || {}; return o.docs && o.docs.size ? "Ticket promedio de " + mesN + ": **" + MM(o.v / o.docs.size) + "** (" + o.docs.size + " tickets, " + MM(o.v) + " vendidos)." + pie : "Los datos de la tienda aún no traen el número de documento: el ticket promedio aparecerá con la próxima actualización." + pie; } }
-    if (has("se acaba", "poco stock", "dias de stock", "quedan sin", "por agotarse", "acabando", "cobertura", "menos de")) { const n = lim || 15, l = X.prods.filter(w => w.dias != null && w.dias > 0 && w.dias < n).sort((a, b) => a.dias - b.dias); return l.length ? "**Productos con menos de " + n + " días de stock**:\n\n" + tabla(["Producto", "Stock", "Venta u/mes", "Días"], l.slice(0, 20).map(w => [w.n, n0(w.st), n0(w.fc || w.q3), w.dias])) + pie : "Ningún producto con venta tiene menos de " + n + " días de stock." + pie; }
-    if (has("sin stock", "quiebre", "agot")) { const l = X.prods.filter(w => w.st === 0 && w.q3 > 0).sort((a, b) => b.q3 - a.q3); return l.length ? "**" + l.length + " productos sin stock que se venden** (stock al " + (X.stockFecha || "?") + "):\n\n" + tabla(["Producto", "Venta prom. u/mes"], l.slice(0, 15).map(w => [w.n, n0(w.q3)])) + (l.length > 15 ? "\n\ny " + (l.length - 15) + " más." : "") + pie : "No hay productos con venta que estén sin stock. 👍" + pie; }
-    if (has("sobrestock", "mas stock que venta", "exceso", "sobra")) { const l = X.prods.filter(w => w.dias != null && w.dias > 120).sort((a, b) => b.dias - a.dias); return l.length ? "**Productos con más de 120 días de stock**:\n\n" + tabla(["Producto", "Stock", "Venta u/mes", "Días"], l.slice(0, 20).map(w => [w.n, n0(w.st), n0(w.fc || w.q3), w.dias])) + pie : "No hay productos con más de 120 días de stock." + pie; }
-    if (has("marca")) { const m = {}; X.prods.forEach(w => { const o = m[w.marca] = m[w.marca] || { a: 0, b: 0 }; o.a += w.a; o.b += w.b; }); const L = Object.entries(m).filter(([, o]) => o.a > 0 || o.b > 0).map(([k, o]) => [k, o.a, o.b, o.b ? o.a / o.b - 1 : null]);
-      const C = L.filter(x => x[3] != null && x[2] >= 1e6), sube = C.slice().sort((a, b) => b[3] - a[3]).filter(x => x[3] > 0).slice(0, 5), baja = C.slice().sort((a, b) => a[3] - b[3]).filter(x => x[3] < 0).slice(0, 5), f = x => [x[0], MM(x[1]), MM(x[2]), (x[3] >= 0 ? "+" : "") + pc(x[3])];
-      if (!C.length) return "**Marcas con más venta en " + X.cy + "** (no hay datos suficientes del año anterior para comparar):\n\n" + tabla(["Marca", "Venta " + X.cy], L.sort((a, b) => b[1] - a[1]).slice(0, 10).map(x => [x[0], MM(x[1])])) + pie;
-      return "**Marcas, ene–" + MES[X.cm - 1] + " " + X.cy + " vs. mismo período " + (X.cy - 1) + "**\n\nCrecen:\n\n" + (tabla(["Marca", X.cy, X.cy - 1, "Var."], sube.map(f)) || "ninguna") + "\n\nCaen:\n\n" + (tabla(["Marca", X.cy, X.cy - 1, "Var."], baja.map(f)) || "ninguna") + "\n\n_Solo marcas que vendieron más de $1 MM el año anterior._" + pie; }
-    if (has("mas se vend", "mas vendid", "top", "mejores producto", "se venden mas", "estrella")) { const mes = has("mes"), l = X.prods.slice().sort((a, b) => mes ? b.ma - a.ma : b.a - a.a).slice(0, 10); return "**Productos más vendidos " + (mes ? "en " + mesN : "en " + X.cy) + "**:\n\n" + tabla(["Producto", "Venta", "Unidades"], l.map(w => [w.n, MM(mes ? w.ma : w.a), n0(mes ? w.mu : w.au)])) + pie; }
-    if (T !== "tienda" && T !== "log" && has("cliente") && has("no compra", "dormid", "sin compr", "hace", "recuperar", "perdid")) { const n = lim || 60, me = yo(), hoy = new Date(), dd = f => Math.round((hoy - new Date(Math.floor(f / 10000), Math.floor(f / 100) % 100 - 1, f % 100)) / 864e5);
-      const l = X.clis.filter(w => (!me || nor(w.vend) === nor(me.cart) || nor(w.vend) === nor(me.n)) && w.ult && dd(w.ult) > n && w.a + w.b > 0).sort((a, b) => (b.a + b.b) - (a.a + a.b));
-      return l.length ? "**" + l.length + " clientes" + (me ? " de tu cartera" : "") + " sin comprar hace más de " + n + " días** (los de mayor compra primero):\n\n" + tabla(["Cliente", "Comuna", "Última compra", "Días", "Compra " + X.cy], l.slice(0, 15).map(w => [w.n, w.comuna, String(w.ult % 100).padStart(2, "0") + "-" + String(Math.floor(w.ult / 100) % 100).padStart(2, "0") + "-" + Math.floor(w.ult / 10000), dd(w.ult), MM(w.a)])) + (l.length > 15 ? "\n\ny " + (l.length - 15) + " más." : "") + pie : "No hay clientes" + (me ? " de tu cartera" : "") + " sin comprar hace más de " + n + " días." + pie; }
-    if (T === "ventas" && has("cobr", "vencid", "deuda", "factura", "debe")) { try { const docs = cxMios(); if (!docs.length) return "No tienes documentos por cobrar cargados."; const rs = cxResumen(docs), cl = cxClientes(docs).filter(c => c.venc > 0).sort((a, b) => b.venc - a.venc);
-        return "**Cobranza de tu cartera**: por cobrar " + MM(rs.total) + ", vencido **" + MM(rs.venc) + "** (" + rs.nVenc + " documentos), más de 30 días " + MM(rs.v30) + ", vence esta semana " + MM(rs.sem) + ".\n\n" + tabla(["Cliente", "Vencido", "Días máx."], cl.slice(0, 12).map(c => [c.cli, MM(c.venc), c.maxDias])); } catch (e) {} }
-    if (T === "ventas" && has("prospect", "contactar", "potencial")) { try { const pr = prMios().filter(o => o.etapa !== "Descartado"), lim2 = new Date(Date.now() + 7 * 864e5).toISOString().slice(0, 10), l = pr.filter(o => o.proximo_contacto && o.proximo_contacto <= lim2).sort((a, b) => a.proximo_contacto.localeCompare(b.proximo_contacto));
-        return "**Prospectos**: " + pr.length + " activos. " + (l.length ? "Para contactar esta semana:\n\n" + tabla(["Prospecto", "Comuna", "Etapa", "Contacto"], l.slice(0, 15).map(o => [o.nombre, o.comuna || "", o.etapa, o.proximo_contacto])) : "No tienes contactos agendados para los próximos 7 días; revisa los que están en «1. Mapeo» para agendarlos."); } catch (e) {} }
-    if (T !== "tienda" && has("pendiente", "pedido", "np ", "cotizac", "despach")) { const pp = {}; X.cots.forEach(c => { const w = pp[c[0]] = pp[c[0]] || { f: c[1], cl: c[2], v: c[3], t: 0 }; w.t += Number(c[7]) || 0; }); const l = Object.entries(pp); const me = yo(), l2 = me ? l.filter(([, w]) => nor(w.v) === nor(me.cart) || nor(w.v) === nor(me.n)) : l;
-      return l2.length ? "**" + l2.length + " pedidos pendientes de facturar**" + (me ? " tuyos" : "") + ":\n\n" + tabla(["N°", "Fecha", "Cliente", "Vendedor", "Neto"], l2.slice(0, 20).map(([k, w]) => [k, w.f, w.cl, w.v, MM(w.t)])) + pie : "No hay pedidos pendientes de facturar." + pie; }
-    if ((T === "admin" || T === "log") && has("compr")) { const pv = {}; X.compras.forEach(r => { if (Math.floor(r[1] / 100) !== X.cy) return; const w = X.prods.find(p => p.cod === String(r[0])), k = w ? w.pv : "Sin proveedor", o = pv[k] = pv[k] || { u: 0, v: 0 }; o.u += Number(r[2]) || 0; o.v += Number(r[3]) || 0; });
-      return Object.keys(pv).length ? "**Compras " + X.cy + " por proveedor**:\n\n" + tabla(["Proveedor", "Unidades"].concat(RC ? [] : ["Valor neto"]), Object.entries(pv).sort((a, b) => b[1].u - a[1].u).map(([k, o]) => [k, n0(o.u)].concat(RC ? [] : [MM(o.v)]))) + pie : "No hay compras de " + X.cy + " en los datos." + pie; }
-    if (/\b(por dia|diaria|diario|hoy|ayer|cada dia)\b/.test(s)) { const d = Object.keys(X.dias).map(Number).sort((a, b) => a - b); return d.length ? "**Venta por día de " + mesN + "** (" + (T === "tienda" ? "tienda" : "distribuidora") + "):\n\n" + tabla(["Día", "Venta"], d.map(x => [x, MM(X.dias[x])])) + pie : "Aún no hay ventas por día este mes." + pie; }
-    /* producto o cliente nombrado en la pregunta */
-    const pal = s.split(" ").filter(w => w.length >= 4 && !/^(como|vamos|cuanto|cuantos|cuales|que|productos?|clientes?|stock|venta|ventas|tiene|tienen|este|esta|mes|ano|del|los|las|para|con|mas|menos|hay|quien|donde|cual)$/.test(w));
-    const pBus = pal.length ? X.prods.filter(w => { const n = nor(w.n + " " + w.marca + " " + w.cod); return pal.every(p => n.includes(p)); }) : [];
-    if (T === "ventas" || T === "admin") { const cBus = pal.length ? X.clis.filter(w => { const n = nor(w.n); return pal.every(p => n.includes(p)); }) : [];
-      if (cBus.length && cBus.length <= 5 && !has("producto")) return cBus.map(w => "**" + w.n + "** (" + w.comuna + " · " + w.vend + "): compró " + MM(w.a) + " en " + X.cy + " (" + MM(w.b) + " en " + (X.cy - 1) + "); última compra el " + String(w.ult % 100).padStart(2, "0") + "-" + String(Math.floor(w.ult / 100) % 100).padStart(2, "0") + "-" + Math.floor(w.ult / 10000) + ".").join("\n") + pie; }
-    if (pBus.length && pBus.length <= 12 && !has("se acaba", "sin stock", "quiebre", "agot", "mas se vend", "top", "mejores")) return "Encontré " + pBus.length + (pBus.length === 1 ? " producto" : " productos") + ":\n\n" + tabla(["Producto", X.cy + " $", X.cy + " u", MES[X.cm - 1] + " u", "Prom. 3 meses u", "Stock", "Días de stock"], pBus.sort((a, b) => b.a - a.a).map(w => [w.n, MM(w.a), n0(w.au), n0(w.mu), n0(w.q3), w.st == null ? "–" : n0(w.st), w.dias == null ? "–" : w.dias])) + pie;
-    return "Puedo responderte sin costo sobre: **meta y avance del mes**, " + (T === "tienda" ? "**ticket promedio**, " : T === "log" ? "**compras**, **pedidos pendientes**, " : "**vendedores**, **clientes sin compra** (p. ej. «clientes que no compran hace 90 días»), **pedidos pendientes**, ") + (T === "ventas" ? "**cobranza vencida**, **prospectos a contactar**, " : "") + "**productos más vendidos**, **marcas que crecen o caen**, **productos sin stock** o que **se acaban en N días**, **sobrestock**, **venta por día**, y puedes escribir el nombre de un producto" + (T === "ventas" || T === "admin" ? " o de un cliente" : "") + " para ver su detalle.";
-  }
-
-  /* ===== formato de la respuesta (markdown simple, escapado) ===== */
-  const inl = s => esc(s).replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>").replace(/(^|\s)_([^_]+)_(?=\s|$)/g, "$1<em>$2</em>");
-  function md(t) { const out = [], L = String(t || "").split("\n"); let i = 0;
-    while (i < L.length) { const l = L[i];
-      if (/^\s*\|.*\|\s*$/.test(l)) { const F = []; while (i < L.length && /^\s*\|.*\|\s*$/.test(L[i])) { F.push(L[i]); i++; }
-        const fil = F.filter(f => !/^\s*\|[\s:\-|]+\|\s*$/.test(f)).map(f => f.trim().replace(/^\||\|$/g, "").split("|").map(c => c.trim()));
-        out.push("<table>" + fil.map((f, j) => "<tr>" + f.map(c => j ? "<td>" + inl(c) + "</td>" : "<th>" + inl(c) + "</th>").join("") + "</tr>").join("") + "</table>"); continue; }
-      if (/^\s*[-•*]\s+/.test(l)) { const it = []; while (i < L.length && /^\s*[-•*]\s+/.test(L[i])) { it.push("<li>" + inl(L[i].replace(/^\s*[-•*]\s+/, "")) + "</li>"); i++; } out.push("<ul>" + it.join("") + "</ul>"); continue; }
-      if (/^#{1,4}\s/.test(l)) { out.push("<p><b>" + inl(l.replace(/^#+\s*/, "")) + "</b></p>"); i++; continue; }
-      if (l.trim()) out.push("<p>" + inl(l) + "</p>"); i++; }
-    return out.join(""); }
-
-  /* ===== interfaz ===== */
-  let H = [], CTX = null, OCUP = false;
-  const btn = document.createElement("button"); btn.id = "iaBtn"; btn.type = "button"; btn.innerHTML = "✨ Asistente"; btn.setAttribute("aria-label", "Abrir el asistente IA");
-  const pan = document.createElement("section"); pan.id = "iaPan"; pan.setAttribute("aria-label", "Asistente IA"); pan.setAttribute("role", "dialog");
-  pan.innerHTML = '<div class="ia-h"><b>✨ Asistente ' + esc(NOM.split(" ")[0]) + '</b><button type="button" id="iaNew" title="Nueva conversación">Nueva</button><button type="button" id="iaX" aria-label="Cerrar">✕</button></div>' +
-    '<div class="ia-m" id="iaMsgs" aria-live="polite"></div><form class="ia-f" id="iaF"><textarea id="iaQ" rows="1" maxlength="2000" placeholder="Pregunta sobre ventas, metas, clientes, stock…"></textarea><button type="submit" id="iaGo">Enviar</button></form>' +
-    '<div class="ia-n">Responde con los datos cargados en esta app' + (RC ? " (sin costos ni márgenes)" : "") + '. Puede equivocarse: revisa las cifras importantes.</div>';
-  document.body.appendChild(btn); document.body.appendChild(pan);
-  const $m = pan.querySelector("#iaMsgs"), $q = pan.querySelector("#iaQ"), $go = pan.querySelector("#iaGo");
-  const burbuja = (cls, html) => { const d = document.createElement("div"); d.className = "ia-b " + cls; d.innerHTML = html; $m.appendChild(d); $m.scrollTop = $m.scrollHeight; return d; };
-  function inicio() { $m.innerHTML = ""; burbuja("ia-a", "<p>Hola" + (usuario() && usuario() !== T ? ", " + esc(String(usuario()).split(" ")[0]) : "") + ". Pregúntame sobre los datos de esta app: " + ({ log: "ventas, metas, stock, compras, pedidos y rutas", ventas: "ventas, metas, stock de la distribuidora, prospectos y cobranza", tienda: "ventas de la tienda, metas y stock de la tienda" }[T] || "ventas, metas, clientes, productos y stock") + ".</p>");
-    const s = document.createElement("div"); s.className = "ia-s"; s.innerHTML = SUG.map(x => '<button type="button">' + esc(x) + "</button>").join(""); s.onclick = e => { const b = e.target.closest("button"); if (b) preguntar(b.textContent); }; $m.appendChild(s); }
-  async function preguntar(q) { q = String(q || "").trim(); if (!q || OCUP) return; OCUP = true; $go.disabled = true; $q.value = ""; burbuja("ia-u", esc(q)); const esp = burbuja("ia-a", '<span class="ia-p">Pensando…</span>');
-    let res; const loc = () => { let t; try { t = local(q); } catch (e) { t = "No pude calcular eso (" + (e && e.message) + ")."; } return { ok: true, respuesta: t, local: true }; };
-    let cl = null; try { cl = JSON.parse(localStorage.getItem("hwf-ia-claude") || "null"); } catch (e) {}
-    if (DEMO || !conn() || (cl && cl.no && Date.now() - cl.t < 864e5)) res = loc();   /* modo sin costo */
-    else { const c = conn();
-      { try { if (CTX == null) CTX = contexto(); } catch (e) { CTX = "No se pudo resumir los datos de la app (" + (e && e.message) + ")."; }
-        const ctrl = new AbortController(), tm = setTimeout(() => ctrl.abort(), 120000);
-        try { const r = await fetch(c.url, { method: "POST", body: JSON.stringify({ clave: c.clave, accion: "asistente", app: T, usuario: usuario(), contexto: CTX, historial: H.slice(-12), pregunta: q }), signal: ctrl.signal }), t = await r.text();
-          try { res = JSON.parse(t); } catch (e) { res = { ok: false, error: "El script de Google no reconoce el asistente todavía. Espera unos minutos a que se actualice." }; } }
-        catch (e) { res = null; } finally { clearTimeout(tm); }
-        if (!res || res.sinClave || !res.ok) { if (res && res.sinClave) try { localStorage.setItem("hwf-ia-claude", JSON.stringify({ no: 1, t: Date.now() })); } catch (e) {} res = loc(); } } }
-    if (res && res.ok) { esp.innerHTML = md(res.respuesta) + (res.local ? '<p class="ia-l">Modo sin costo · calculado en la app</p>' : ""); H.push({ role: "user", content: q }, { role: "assistant", content: res.respuesta }); }
-    else { esp.innerHTML = '<p class="ia-e">' + esc((res && res.error) || "No se pudo responder.") + "</p>"; }
-    $m.scrollTop = $m.scrollHeight; OCUP = false; $go.disabled = false; }
-  const abrir = () => { pan.classList.add("on"); btn.style.display = "none"; if (!$m.children.length) inicio(); setTimeout(() => $q.focus(), 50); };
-  const cerrar = () => { pan.classList.remove("on"); btn.style.display = ""; btn.focus(); };
-  btn.onclick = abrir; pan.querySelector("#iaX").onclick = cerrar;
-  pan.querySelector("#iaNew").onclick = () => { H = []; CTX = null; inicio(); };   /* nueva conversación: vuelve a leer los datos (por si se actualizaron) */
-  pan.querySelector("#iaF").onsubmit = e => { e.preventDefault(); preguntar($q.value); };
-  $q.addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); preguntar($q.value); } });
-  $q.addEventListener("input", () => { $q.style.height = "auto"; $q.style.height = Math.min(140, $q.scrollHeight) + "px"; });
-  document.addEventListener("keydown", e => { if (e.key === "Escape" && pan.classList.contains("on")) cerrar(); });
-  window.hwfAsistente = { contexto };   /* para pruebas */
-})();
-</script>
 <style>/* patch_resumendia */
 #rdOv{position:fixed;inset:0;z-index:1100;background:var(--bg,#F4F7F9);overflow:auto;-webkit-overflow-scrolling:touch;color:var(--ink,#13222D)}
 #rdOv .rd-w{max-width:880px;margin:0 auto;padding:16px 14px calc(96px + env(safe-area-inset-bottom));display:grid;gap:12px}
@@ -8694,6 +8429,274 @@ body.nb-sinia #navBotones{bottom:calc(84px + env(safe-area-inset-bottom))}
   function firma() { const s = document.getElementById("selMes"); return (s ? s.value : "") + "|" + vista; }
   poner(); const c = h0.querySelector("#adCard"); if (c) c.dataset.f = firma();
   [800, 2500, 6000].forEach(t => setTimeout(() => { if (!h0.querySelector("#adCard")) poner(); }, t));   /* por si los datos llegan después */
+})();
+</script>
+<style>/* patch_asistente */
+#iaBtn{position:fixed;right:14px;bottom:calc(84px + env(safe-area-inset-bottom));z-index:900;border:0;border-radius:999px;padding:12px 16px;font:600 .95rem system-ui,sans-serif;
+  background:linear-gradient(135deg,#0B3146,#1C7A4E);color:#fff;box-shadow:0 6px 18px rgba(11,49,70,.35);cursor:pointer;display:flex;gap:6px;align-items:center}
+#iaBtn:focus-visible{outline:3px solid #F5B400;outline-offset:2px}
+#iaPan{position:fixed;inset:0;z-index:1000;background:var(--bg,#F4F7F9);display:none;flex-direction:column;color:var(--ink,#13222D)}
+#iaPan.on{display:flex}
+@media(min-width:900px){#iaPan{inset:auto 18px 18px auto;width:min(520px,92vw);height:min(760px,86vh);border-radius:18px;box-shadow:0 18px 50px rgba(0,0,0,.28);overflow:hidden;border:1px solid var(--line,#DAE1E7)}}
+.ia-h{display:flex;align-items:center;gap:8px;padding:12px 14px;background:#0B3146;color:#fff}.ia-h b{flex:1;font-size:1.02rem}.ia-h button{background:rgba(255,255,255,.14);color:#fff;border:0;border-radius:10px;padding:8px 11px;font:inherit;cursor:pointer}
+.ia-m{flex:1;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:10px}
+.ia-b{flex-shrink:0;max-width:92%;padding:10px 12px;border-radius:14px;line-height:1.45;font-size:.95rem;word-wrap:break-word;overflow-x:auto}
+.ia-u{align-self:flex-end;background:#0B3146;color:#fff;border-bottom-right-radius:4px;white-space:pre-wrap}
+.ia-a{align-self:flex-start;background:var(--card,#fff);border:1px solid var(--line,#DAE1E7);border-bottom-left-radius:4px}
+.ia-a p{margin:.2em 0 .5em}.ia-a ul{margin:.2em 0 .5em;padding-left:1.2em}.ia-a table{border-collapse:collapse;font-size:.84rem;margin:.3em 0}.ia-a td,.ia-a th{border:1px solid var(--line,#DAE1E7);padding:3px 6px;text-align:left}
+.ia-a th{background:rgba(11,49,70,.06)}.ia-e{color:#B42318}
+.ia-s{flex-shrink:0;display:flex;flex-wrap:wrap;gap:6px}.ia-s button{border:1px solid var(--line,#C9D3DB);background:var(--card,#fff);color:inherit;border-radius:999px;padding:7px 11px;font:inherit;font-size:.86rem;cursor:pointer}
+.ia-f{display:flex;gap:8px;padding:10px;border-top:1px solid var(--line,#DAE1E7);background:var(--card,#fff)}
+.ia-f textarea{flex:1;resize:none;border:1px solid var(--line,#C9D3DB);border-radius:12px;padding:10px;font:inherit;font-size:16px;min-height:44px;max-height:140px;background:var(--bg,#fff);color:inherit}
+.ia-f button{border:0;border-radius:12px;padding:0 16px;background:#1C7A4E;color:#fff;font:600 .95rem system-ui,sans-serif;cursor:pointer}.ia-f button:disabled{opacity:.5}
+.ia-n{font-size:.74rem;color:var(--muted,#5B6874);padding:0 12px 8px;background:var(--card,#fff)}
+.ia-l{margin:.4em 0 0!important;font-size:.72rem;color:var(--muted,#5B6874)}.ia-a em{font-style:normal;color:var(--muted,#5B6874);font-size:.8rem}
+.ia-p{display:inline-block;animation:iaP 1.2s infinite}@keyframes iaP{50%{opacity:.3}}
+@media print{#iaBtn,#iaPan{display:none!important}}
+</style>
+<script>/* patch_asistente: asistente IA con los datos cargados en la app (pregunta → script de Google → API de Claude) */
+(function () {
+  const HB = window.hwfBi, TND = !HB && /TIENDA/.test(document.title) && typeof DATA === "function"; if ((!HB && !TND) || document.getElementById("iaBtn")) return;
+  /* VENTAS y TIENDA (12-11-2026): el asistente solo revisa ventas, stock de su bodega, prospectos y cobranza (sin costos ni compras) */
+  const T = HB ? HB.tipo : "tienda", RC = T !== "admin", DEMO = /DEMO/.test(document.title);
+  const NOM = { admin: "HWF (administración)", ventas: "VENTAS (app de los vendedores)", log: "LOGÍSTICA", tienda: "TIENDA (Tienda Hellywoof)" }[T] || T;
+  const ALC = {
+    ventas: "App de los vendedores de HWF. Secciones: Inicio (avance del mes, buenas noticias), Pedido (crear notas de pedido, se envían al script y llegan por correo con PDF y Excel; botones para PDF, enviar e imprimir), Clientes (cartera, ficha, última compra, sugerencias de productos), Ruta (planificar visitas del día, PDF), Cobranza (documentos por cobrar), Prospectos (clientes potenciales), Panel, Inteligencia de negocio (apartado propio: venta de la distribuidora por marca, formato y producto; exportar a PDF, Excel, correo e imprimir), Catálogos y precios (descargar en PDF para enviar por WhatsApp o imprimir). ESTE ASISTENTE SOLO REVISA: ventas, stock de la bodega distribuidora, prospectos y cobranza. No tiene costos, márgenes ni compras: si preguntan otra cosa, dilo.",
+    admin: "App de administración HWF (gerencia). Secciones: Inicio (avance del mes contra la meta, proyección de cierre), Ventas y ranking por vendedor, cliente y producto, Inventario con Inteligencia de negocio (unidades Ventas y Logística: ventas y compras en $ o unidades, filtros proveedor/marca/formato/producto, canal, análisis avanzado con Pareto, alertas y pronóstico, exportar PDF/Excel/correo/imprimir), Abastecimiento (compra sugerida por mes según pronóstico y stock de seguridad por clase ABC), Plan de ventas nov-26 a dic-27 ($1.000 MM: distribuidora 827,8 + tienda 172,2), Pago a proveedores (plan a 14 meses: Planet Pet a contado, Montaraz −50 % de la deuda), Catálogo y listas de precio (archivos en Drive), Cobranza, Prospectos y notas de pedido de la app.",
+    tienda: "App de la Tienda Hellywoof (venta en local con boleta). Secciones: Inicio, Ventas, Panel, Plan (meta mensual de la tienda), Stock (bodega de la tienda), Nutrición, Ranking y Catálogos y precios. ESTE ASISTENTE SOLO REVISA: ventas de la tienda y stock de la bodega de la tienda. No tiene costos ni márgenes: si preguntan otra cosa, dilo.",
+    log: "App de logística HWF. Secciones: Panel (buenas noticias, avance), Inteligencia de negocio (unidades Ventas y Logística: ventas, compras y stock por proveedor/marca/formato/producto y canal; exportar PDF/Excel/correo/imprimir), Abastecimiento (compra sugerida según pronóstico y stock de seguridad), Rutas de despacho (armar rutas del día, enviarlas a la app Chofer, seguimiento GPS y entregas con foto/firma; PDF), stock de todas las bodegas, pedidos pendientes y clientes para despacho."
+  }[T] || "";
+  const SUG = {
+    ventas: ["¿Cómo vamos con la meta del mes? ESTE ASISTENTE no tiene costos, márgenes, compras en pesos ni stock valorizado: si preguntan por eso, dilo.", "¿Qué clientes tienen facturas vencidas?", "¿Qué prospectos debo contactar esta semana?", "¿Qué productos están sin stock?"],
+    tienda: ["¿Cómo vamos con la meta del mes?", "¿Qué productos se venden más este mes?", "¿Qué productos se están acabando en la tienda?", "¿Cuál es el ticket promedio del mes?"],
+    admin: ["Resume cómo va el mes contra la meta", "¿Qué marcas crecen y cuáles caen este año?", "¿Qué productos clase A tienen poco stock?", "¿Cómo va cada vendedor este mes?"],
+    log: ["¿Qué productos se quedan sin stock en menos de 15 días?", "¿Cuánto compramos por proveedor este año?", "¿Qué pedidos están pendientes?", "¿Qué productos tienen más stock que venta?"]
+  }[T] || [];
+  const MES = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
+  const n0 = v => Math.round(Number(v) || 0).toLocaleString("es-CL"), pz = v => "$" + n0(v), pc = v => isFinite(v) ? (Math.round(v * 1000) / 10).toLocaleString("es-CL") + " %" : "–";
+  const tc = s => String(s || "").toLowerCase().replace(/(^|[\s\-])([a-záéíóúñ])/g, (m, a, b) => a + b.toUpperCase());
+  const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const conn = () => { try { if (typeof SYC === "function") { const c = SYC(); if (c && c.url) return c; } } catch (e) {}
+    try { if (typeof syCfg === "function") { const c = syCfg(); if (c && c.url) return c; } } catch (e) {}
+    try { if (typeof cfg === "function") { const c = cfg(); if (c && c.url) return c; } } catch (e) {} return null; };
+  const usuario = () => { try { if (T === "ventas" && typeof SES !== "undefined" && SES && SES.vendedor) return SES.vendedor.nombre || ""; } catch (e) {}
+    try { if (T === "tienda" && typeof TURK !== "undefined") { const t = JSON.parse(localStorage.getItem(TURK) || "null"); const n = t && (t.nombre || t.quien || (typeof t === "string" ? t : "")); if (n) return String(n); } } catch (e) {} return T; };
+  const habiles = (y, m, hasta) => { let n = 0; const fin = new Date(y, m, 0).getDate(); for (let d = 1; d <= Math.min(fin, hasta || fin); d++) { const w = new Date(y, m - 1, d).getDay(); if (w && w < 6) n++; } return n; };
+
+  /* ===== resumen de los datos de la app ===== */
+  function contexto() { if (T === "tienda") return ctxTienda();
+    const B = HB.base() || {}, R = B.rows || [], P = B.productos || [], cats = B.cats || [], V = B.vend || [], tv = V.indexOf("Tienda Hellywoof"), an = r => r[8] || B.anio;
+    let X = null; try { X = typeof DATA === "function" ? DATA() : null; } catch (e) {}
+    const cy = Number(String(B.corte || "").slice(0, 4)) || B.anio, cm = Number(String(B.corte || "").slice(5, 7)) || 12, cd = Number(String(B.corte || "").slice(8, 10)) || 0;
+    const L = [], hoy = new Date(), tab = (t, cab, filas) => { if (!filas.length) return; L.push("", "## " + t, cab.join(" | ")); filas.forEach(f => L.push(f.join(" | "))); };
+    L.push("APP: " + NOM, "ALCANCE Y FUNCIONES: " + ALC, "Usuario: " + usuario(),
+      "Fecha de hoy: " + hoy.toLocaleDateString("es-CL") + ". Ventas facturadas (Defontana, neto sin IVA) al " + (B.corte || "?") + "; " + MES[cm - 1] + " " + cy + " va en curso. Stock al " + (B.stockFecha || (X && X.stockFecha) || "?") + ".",
+      RC ? "Esta app NO muestra costos, márgenes ni compras en pesos: no los tienes." : "Costo = cantidad × costo unitario; margen = venta − costo.",
+      "Plan de ventas nov-26 a dic-27: $1.000 MM en 14 meses (distribuidora 827,8 MM + tienda 172,2 MM), con estacionalidad.");
+    const info = P.map(p => { const pm = HB.prov(cats[p[1]]); return { n: p[0], cod: String(p[2]), pv: pm[0], ma: pm[1] || pm[0] }; });
+    /* venta mensual */
+    const mesK = {}, z = () => ({ dv: 0, du: 0, dc: 0, tv: 0, tu: 0, tc: 0 });
+    R.forEach(r => { const k = an(r) * 100 + r[2], o = mesK[k] = mesK[k] || z(), q = Number(r[4]) || 0, v = Number(r[5]) || 0, c = q * (Number(r[6]) || 0);
+      if (r[7] === tv) { o.tv += v; o.tu += q; o.tc += c; } else { o.dv += v; o.du += q; o.dc += c; } });
+    const KM = Object.keys(mesK).map(Number).sort();
+    tab("Venta neta mensual", ["Mes", "Distribuidora $", "Distribuidora unid.", "Tienda $", "Tienda unid.", "Total $"].concat(RC ? [] : ["Margen distribuidora %", "Margen tienda %"]),
+      KM.map(k => { const o = mesK[k]; return [MES[k % 100 - 1] + "-" + Math.floor(k / 100), pz(o.dv), n0(o.du), pz(o.tv), n0(o.tu), pz(o.dv + o.tv)].concat(RC ? [] : [pc(o.dv ? 1 - o.dc / o.dv : NaN), pc(o.tv ? 1 - o.tc / o.tv : NaN)]); }));
+    /* metas y avance del mes */
+    const metas = []; for (let y = cy; y <= cy + 1; y++) for (let m = 1; m <= 12; m++) { let mt = 0; try { mt = HB.meta(y, m) || 0; } catch (e) {} if (mt > 0) metas.push([MES[m - 1] + "-" + y, pz(mt)]); }
+    tab("Meta mensual de la distribuidora (plan)", ["Mes", "Meta $"], metas);
+    const o = mesK[cy * 100 + cm] || z(); let mt = 0; try { mt = HB.meta(cy, cm) || 0; } catch (e) {}
+    const hT = habiles(cy, cm), hP = habiles(cy, cm, cd || undefined), proy = hP ? o.dv / hP * hT : 0;
+    const pend = (B.cots || (X && X.cots) || []); let pendT = 0; const pendV = {}, pendN = {}; pend.forEach(c => { const v = Number(c[7]) || 0; pendT += v; pendV[c[3]] = (pendV[c[3]] || 0) + v; (pendN[c[3]] = pendN[c[3]] || new Set()).add(c[0]); });
+    L.push("", "## Avance de " + MES[cm - 1] + " " + cy + " (distribuidora)", "Facturado: " + pz(o.dv) + " · meta: " + (mt ? pz(mt) : "sin dato") + (mt ? " · avance facturado " + pc(o.dv / mt) + " · avance con pendientes " + pc((o.dv + pendT) / mt) : "") +
+      " · pedidos/cotizaciones pendientes (NP Defontana): " + pz(pendT) + " · días hábiles " + hP + " de " + hT + " · proyección de cierre (solo facturado al ritmo): " + pz(proy) + (mt ? " (" + pc(proy / mt) + " de la meta)" : "") + " · tienda facturado: " + pz(o.tv));
+    /* vendedores */
+    const vk = {}; if (T !== "log") R.forEach(r => { if (an(r) !== cy) return; const k = V[r[7]] || "?", w = vk[k] = vk[k] || { m: {}, a: 0 }; w.m[r[2]] = (w.m[r[2]] || 0) + (Number(r[5]) || 0); w.a += Number(r[5]) || 0; });
+    const MT = B.metas || {};
+    tab("Venta neta por vendedor " + cy + " (meta del mes " + (B.metaMes ? MES[B.metaMes - 1] : MES[cm - 1]) + ")", ["Vendedor", "Año $", MES[cm - 1] + " $", "Meta del mes $", "Pendiente $", "N° pendientes"].concat(cm > 1 ? [MES[cm - 2] + " $"] : []),
+      Object.keys(vk).sort((a, b) => vk[b].a - vk[a].a).map(k => [k, pz(vk[k].a), pz(vk[k].m[cm] || 0), MT[k] ? pz(MT[k]) : "–", pz(pendV[k] || 0), pendN[k] ? pendN[k].size : 0].concat(cm > 1 ? [pz(vk[k].m[cm - 1] || 0)] : [])));
+    /* marcas: año en curso vs. mismo período del año anterior */
+    const mk = {}; R.forEach(r => { const y = an(r), i = info[r[1]]; if (!i || (y !== cy && y !== cy - 1) || r[2] > cm || (r[2] === cm && cd && r[3] > cd)) return;
+      const w = mk[i.ma] = mk[i.ma] || { pv: i.pv, a: 0, b: 0, u: 0, c: 0 }, v = Number(r[5]) || 0; if (y === cy) { w.a += v; w.u += Number(r[4]) || 0; w.c += (Number(r[4]) || 0) * (Number(r[6]) || 0); } else w.b += v; });
+    tab("Venta por marca: ene–" + MES[cm - 1] + " " + cy + " vs. mismo período " + (cy - 1), ["Marca", "Proveedor", cy + " $", cy + " unid.", (cy - 1) + " $", "Variación"].concat(RC ? [] : ["Margen %"]),
+      Object.keys(mk).sort((a, b) => mk[b].a - mk[a].a).slice(0, 60).map(k => { const w = mk[k]; return [k, w.pv, pz(w.a), n0(w.u), pz(w.b), w.b ? pc(w.a / w.b - 1) : "nuevo"].concat(RC ? [] : [pc(w.a ? 1 - w.c / w.a : NaN)]); }));
+    /* productos */
+    const pk = {}, u3 = [1, 2, 3].map(i => { const d = new Date(cy, cm - 1 - i, 1); return d.getFullYear() * 100 + d.getMonth() + 1; });
+    R.forEach(r => { const i = info[r[1]]; if (!i) return; const y = an(r), k = y * 100 + r[2], w = pk[i.cod] = pk[i.cod] || { i, a: 0, au: 0, m: {}, cu: 0, cq: 0 }, q = Number(r[4]) || 0;
+      if (y === cy) { w.a += Number(r[5]) || 0; w.au += q; } if (u3.includes(k) || k === cy * 100 + cm) w.m[k] = (w.m[k] || 0) + q; if (q > 0 && r[6] > 0) { w.cu += q * r[6]; w.cq += q; } });
+    const FC = (B.fc && B.fc.p) || {}, DESC = new Set(B.desc || []), stD = c => { try { const s = HB.stock(c); return s == null ? "" : n0(s); } catch (e) { return ""; } }, stT = c => B.stockT && B.stockT[c] != null ? n0(B.stockT[c]) : "";
+    Object.keys(FC).forEach(c => { if (!pk[c]) { const ix = P.findIndex(p => String(p[2]) === c); if (ix >= 0) pk[c] = { i: info[ix], a: 0, au: 0, m: {}, cu: 0, cq: 0 }; } });
+    const PL = Object.values(pk).sort((a, b) => b.a - a.a || (FC[b.i.cod] ? FC[b.i.cod][1] : 0) - (FC[a.i.cod] ? FC[a.i.cod][1] : 0)).slice(0, 180);
+    tab("Productos (los " + PL.length + " de mayor venta " + cy + "; unidades por mes; stock en unidades; pronóstico = venta mensual esperada de la distribuidora; clase ABC)",
+      ["Código", "Producto", "Marca", "Proveedor", cy + " $", cy + " unid."].concat(u3.slice().reverse().map(k => MES[k % 100 - 1] + " u"), [MES[cm - 1] + " u (en curso)", "Stock distribuidora", ...(T === "ventas" ? [] : ["Stock tienda"]), "Pronóstico u/mes", "Días de stock", "Clase"], RC ? [] : ["Costo unit. $"], ["Nota"]),
+      PL.map(w => { const c = w.i.cod, f = FC[c], s = (() => { try { return HB.stock(c); } catch (e) { return null; } })(), dias = f && f[0] > 0 && s != null ? Math.round(s / f[0] * 30) : "";
+        return [c, w.i.n, w.i.ma, w.i.pv, pz(w.a), n0(w.au)].concat(u3.slice().reverse().map(k => n0(w.m[k] || 0)), [n0(w.m[cy * 100 + cm] || 0), stD(c), ...(T === "ventas" ? [] : [stT(c)]), f ? n0(f[0]) : "", dias, f ? f[3] || "" : ""], RC ? [] : [w.cq ? pz(w.cu / w.cq) : ""], [DESC.has(c) ? "descontinuado (no se compra)" : s === 0 && w.au > 0 ? "SIN STOCK" : ""]); }));
+    /* clientes (sin RUT ni teléfonos) */
+    const CL = B.clientes || [], conCli = CL.length && R.some(r => r[0] > 0);
+    if (conCli) { const ck = {}; R.forEach(r => { if (r[7] === tv) return; const y = an(r), w = ck[r[0]] = ck[r[0]] || { a: 0, b: 0, m: 0, ult: 0, meses: new Set() }, v = Number(r[5]) || 0, f = y * 10000 + r[2] * 100 + (r[3] || 1);
+        if (y === cy) { w.a += v; if (r[2] === cm) w.m += v; } else if (y === cy - 1) w.b += v; if (v > 0) { if (f > w.ult) w.ult = f; w.meses.add(y * 100 + r[2]); } });
+      const CK = Object.keys(ck).sort((a, b) => ck[b].a - ck[a].a || ck[b].b - ck[a].b).slice(0, 150);
+      tab("Clientes de la distribuidora (" + CK.length + " de " + Object.keys(ck).length + " con compra; ordenados por venta " + cy + ")", ["Cliente", "Comuna", "Vendedor", cy + " $", (cy - 1) + " $", MES[cm - 1] + " $", "Última compra", "Meses con compra"],
+        CK.map(k => { const w = ck[k], c = CL[k] || []; return [c[0] || "?", c[1] || "", c[2] || "", pz(w.a), pz(w.b), pz(w.m), w.ult ? String(w.ult % 100).padStart(2, "0") + "-" + String(Math.floor(w.ult / 100) % 100).padStart(2, "0") + "-" + Math.floor(w.ult / 10000) : "", w.meses.size]; }));
+      L.push("Clientes con compra en " + MES[cm - 1] + " " + cy + ": " + Object.values(ck).filter(w => w.m > 0).length + "."); }
+    /* pedidos pendientes */
+    if (pend.length) { const pp = {}; pend.forEach(c => { const w = pp[c[0]] = pp[c[0]] || { f: c[1], cl: c[2], v: c[3], t: 0, it: [] }; w.t += Number(c[7]) || 0; w.it.push(n0(c[5]) + " × " + c[6]); });
+      tab("Pedidos y cotizaciones pendientes de facturar (Defontana)", ["N°", "Fecha", "Cliente", "Vendedor", "Neto $", "Detalle"], Object.keys(pp).slice(0, 80).map(k => { const w = pp[k]; return [k, w.f, w.cl, w.v, pz(w.t), w.it.join("; ").slice(0, 300)]; })); }
+    /* VENTAS: cobranza y prospectos (lo que el vendedor ve en Cobros y Prospectos) */
+    if (T === "ventas") { try { const docs = typeof cxMios === "function" ? cxMios() : []; if (docs.length) { const rs = cxResumen(docs), cls = cxClientes(docs).sort((a, b) => b.venc - a.venc || b.saldo - a.saldo).slice(0, 120);
+        L.push("", "## Cobranza (documentos por cobrar" + (typeof SES !== "undefined" && SES && SES.vendedor ? " de la cartera " + (SES.vendedor.cartera || SES.vendedor.nombre) : "") + ")", "Total por cobrar: " + pz(rs.total) + " · vencido: " + pz(rs.venc) + " (" + rs.nVenc + " documentos) · vencido más de 30 días: " + pz(rs.v30) + " · vence esta semana: " + pz(rs.sem) + " · clientes: " + rs.nCli + (rs.cheques ? " · cheques: " + pz(rs.cheques) : ""));
+        tab("Cobranza por cliente (vencido primero)", ["Cliente", "Cartera", "Saldo $", "Vencido $", "Días de atraso máx.", "Documentos (tipo n° · vence · saldo · días)"], cls.map(c => [c.cli, c.cart || "", pz(c.saldo), pz(c.venc), c.maxDias > 0 ? c.maxDias : 0, c.docs.slice(0, 6).map(d => d.tipo + " " + d.num + " · " + d.fv + " · " + pz(d.saldo) + " · " + (d.dias > 0 ? d.dias + " días vencido" : "vence en " + (-d.dias) + " días")).join("; ")])); } } catch (e) {}
+      try { const pr = typeof prMios === "function" ? prMios() : []; if (pr.length) { const ET = typeof PR_ETAPAS !== "undefined" ? PR_ETAPAS : [], cnt = typeof prConteo === "function" ? prConteo(pr) : [], hoyS = new Date().toISOString().slice(0, 10);
+        L.push("", "## Prospectos (clientes potenciales)", "Por etapa: " + ET.map((e, i) => e + ": " + (cnt[i] || 0)).join(" · ") + ". Hoy: " + hoyS + ".");
+        tab("Prospectos activos (próximo contacto primero)", ["Nombre", "Comuna", "Segmento", "Vendedor", "Etapa", "Próximo contacto", "Actualizado", "Notas"], pr.filter(o => o.etapa !== "Descartado").sort((a, b) => (a.proximo_contacto || "9").localeCompare(b.proximo_contacto || "9")).slice(0, 150)
+          .map(o => [o.nombre, o.comuna || "", o.segmento || "", o.vendedor || "", o.etapa || "", o.proximo_contacto || "", o.actualizado || "", String(o.notas || "").replace(/\s+/g, " ").slice(0, 120)])); } } catch (e) {} }
+    /* compras (no en VENTAS) */
+    const C = T === "ventas" ? null : B.compras && B.compras.rows; if (C && C.length) { const cmK = {}, cpv = {}; C.forEach(r => { const y = Math.floor(r[1] / 100), w = cmK[r[1]] = cmK[r[1]] || { u: 0, v: 0 }; w.u += Number(r[2]) || 0; w.v += Number(r[3]) || 0;
+        if (y === cy) { const ix = P.findIndex(p => String(p[2]) === String(r[0])), pv = ix >= 0 ? info[ix].pv : "Sin proveedor", q = cpv[pv] = cpv[pv] || { u: 0, v: 0 }; q.u += Number(r[2]) || 0; q.v += Number(r[3]) || 0; } });
+      tab("Compras mensuales (ingresos a bodega" + (B.compras.fecha ? ", Mayor al " + B.compras.fecha : "") + ")", ["Mes", "Unidades"].concat(RC ? [] : ["Valor neto $"]), Object.keys(cmK).map(Number).sort().map(k => [MES[k % 100 - 1] + "-" + Math.floor(k / 100), n0(cmK[k].u)].concat(RC ? [] : [pz(cmK[k].v)])));
+      tab("Compras " + cy + " por proveedor", ["Proveedor", "Unidades"].concat(RC ? [] : ["Valor neto $"]), Object.keys(cpv).sort((a, b) => cpv[b].v - cpv[a].v).map(k => [k, n0(cpv[k].u)].concat(RC ? [] : [pz(cpv[k].v)]))); }
+    if (DESC.size) L.push("", "Productos descontinuados (no se vuelven a comprar): " + [...DESC].map(c => { const ix = P.findIndex(p => String(p[2]) === c); return ix >= 0 ? P[ix][0] : c; }).join(", ") + ".");
+    let t = L.join("\n"); if (t.length > 200000) t = t.slice(0, 200000) + "\n(…resumen recortado)"; return t;
+  }
+
+  /* TIENDA: ventas (boletas) y stock de la bodega de la tienda */
+  function ctxTienda() { const D = DATA() || {}, R = D.rows || [], P = D.productos || [], L = [], tab = (t, cab, filas) => { if (!filas.length) return; L.push("", "## " + t, cab.join(" | ")); filas.forEach(f => L.push(f.join(" | "))); };
+    const cy = Number(String(D.corte || "").slice(0, 4)) || D.anio, cm = Number(String(D.corte || "").slice(5, 7)) || 12, cd = Number(String(D.corte || "").slice(8, 10)) || 0, dim = new Date(cy, cm, 0).getDate();
+    L.push("APP: " + NOM, "ALCANCE Y FUNCIONES: " + ALC, "Fecha de hoy: " + new Date().toLocaleDateString("es-CL") + ". Ventas de la tienda (boletas y facturas, neto sin IVA) al " + (D.corte || "?") + "; " + MES[cm - 1] + " " + cy + " va en curso. Stock de la tienda al " + (D.stockFecha || "?") + ".",
+      "La tienda abre todos los días salvo feriados irrenunciables. Plan: la meta de la tienda parte en $10 MM en nov-26 y sube con estacionalidad (plan total nov-26 a dic-27 con distribuidora: $1.000 MM).");
+    const mk = {}; R.forEach(r => { const k = (r[6] || D.anio) * 100 + r[1], o = mk[k] = mk[k] || { v: 0, u: 0, docs: new Set() }; o.v += Number(r[4]) || 0; o.u += Number(r[3]) || 0; if (r[7] && Number(r[4]) > 0) o.docs.add(r[7]); });
+    tab("Venta neta mensual de la tienda", ["Mes", "Venta $", "Unidades", "Tickets", "Ticket promedio $"], Object.keys(mk).map(Number).sort().map(k => { const o = mk[k], n = o.docs.size; return [MES[k % 100 - 1] + "-" + Math.floor(k / 100), pz(o.v), n0(o.u), n || "s/d", n ? pz(o.v / n) : "s/d"]; }));
+    let PL = []; try { PL = typeof PLAN !== "undefined" ? PLAN : []; } catch (e) {} tab("Meta mensual de la tienda (plan)", ["Mes", "Meta $"], PL.map(x => [MES[x.m - 1] + "-" + x.y, pz(x.meta)]));
+    const o = mk[cy * 100 + cm] || { v: 0, u: 0, docs: new Set() }, mt = (PL.find(x => x.ym === cy * 100 + cm) || {}).meta || 0, proy = cd ? o.v / cd * dim : 0;
+    L.push("", "## Avance de " + MES[cm - 1] + " " + cy, "Vendido: " + pz(o.v) + " · meta: " + (mt ? pz(mt) + " · avance " + pc(o.v / mt) : "sin dato") + " · días " + cd + " de " + dim + " · proyección de cierre al ritmo: " + pz(proy) + (mt ? " (" + pc(proy / mt) + " de la meta)" : ""));
+    const dd = {}; R.forEach(r => { if ((r[6] || D.anio) === cy && r[1] === cm) dd[r[2]] = (dd[r[2]] || 0) + (Number(r[4]) || 0); }); tab("Venta por día de " + MES[cm - 1], ["Día", "Venta $"], Object.keys(dd).map(Number).sort((a, b) => a - b).map(d => [d, pz(dd[d])]));
+    const ST = {}; (Array.isArray(D.stock) ? D.stock : []).forEach(x => { ST[String(x[0])] = Number(x[2]) || 0; });
+    const pk = {}, u3 = [1, 2, 3].map(i => { const d = new Date(cy, cm - 1 - i, 1); return d.getFullYear() * 100 + d.getMonth() + 1; });
+    R.forEach(r => { const p = P[r[0]]; if (!p) return; const y = r[6] || D.anio, k = y * 100 + r[1], w = pk[r[0]] = pk[r[0]] || { p, a: 0, au: 0, m: {} }, q = Number(r[3]) || 0; if (y === cy) { w.a += Number(r[4]) || 0; w.au += q; } if (u3.includes(k) || k === cy * 100 + cm) w.m[k] = (w.m[k] || 0) + q; });
+    const PLs = Object.values(pk).sort((a, b) => b.a - a.a).slice(0, 200);
+    tab("Productos de la tienda (los " + PLs.length + " de mayor venta " + cy + "; unidades por mes; stock en unidades de la bodega de la tienda)", ["Código", "Producto", "Categoría", cy + " $", cy + " unid."].concat(u3.slice().reverse().map(k => MES[k % 100 - 1] + " u"), [MES[cm - 1] + " u (en curso)", "Stock tienda", "Días de stock", "Nota"]),
+      PLs.map(w => { const c = String(w.p[2] || ""), s = ST[c], q3 = u3.reduce((t, k) => t + (w.m[k] || 0), 0) / 3, dias = s != null && q3 > 0 ? Math.round(s / q3 * 30) : "";
+        return [c, w.p[0], w.p[1] || "", pz(w.a), n0(w.au)].concat(u3.slice().reverse().map(k => n0(w.m[k] || 0)), [n0(w.m[cy * 100 + cm] || 0), s == null ? "" : n0(s), dias, s === 0 && q3 > 0 ? "SIN STOCK" : dias !== "" && dias < 15 ? "se acaba pronto" : ""]); }));
+    let t = L.join("\n"); if (t.length > 200000) t = t.slice(0, 200000) + "\n(…resumen recortado)"; return t; }
+
+  /* ===== MODO SIN COSTO (12-11-2026): respuestas calculadas en la propia app, sin internet ni API =====
+     Entiende las preguntas más comunes por palabras clave (meta, productos, marcas, stock, clientes, cobranza, prospectos,
+     pedidos, compras, ticket) y busca productos o clientes por nombre. Si algún día hay clave de Claude en el script, se usa Claude. */
+  const nor = s => String(s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9ñ ]+/g, " ").replace(/\s+/g, " ").trim();
+  let PREP = null;
+  function prep() { if (PREP) return PREP; const X = { cy: 0, cm: 0, cd: 0, prods: [], clis: [], mes: {}, dias: {} };
+    if (T === "tienda") { const D = DATA() || {}, R = D.rows || [], P = D.productos || [], ST = {}; (Array.isArray(D.stock) ? D.stock : []).forEach(x => { ST[String(x[0])] = Number(x[2]) || 0; });
+      X.cy = Number(String(D.corte || "").slice(0, 4)) || D.anio; X.cm = Number(String(D.corte || "").slice(5, 7)) || 12; X.cd = Number(String(D.corte || "").slice(8, 10)) || 0; X.corte = D.corte; X.stockFecha = D.stockFecha;
+      const pk = {}; R.forEach(r => { const y = r[6] || D.anio, k = y * 100 + r[1], v = Number(r[4]) || 0, q = Number(r[3]) || 0, o = X.mes[k] = X.mes[k] || { v: 0, u: 0, docs: new Set() }; o.v += v; o.u += q; if (r[7] && v > 0) o.docs.add(r[7]);
+        if (k === X.cy * 100 + X.cm) X.dias[r[2]] = (X.dias[r[2]] || 0) + v; const p = P[r[0]]; if (!p) return; const w = pk[r[0]] = pk[r[0]] || { n: p[0], cod: String(p[2] || ""), marca: tc(String(p[1] || "").split(" ")[0]), a: 0, au: 0, ma: 0, mu: 0, m: {} };
+        if (y === X.cy) { w.a += v; w.au += q; } else if (y === X.cy - 1 && (r[1] < X.cm || (r[1] === X.cm && (!X.cd || r[2] <= X.cd)))) w.b = (w.b || 0) + v; if (k === X.cy * 100 + X.cm) { w.ma += v; w.mu += q; } w.m[k] = (w.m[k] || 0) + q; });
+      X.prods = Object.values(pk); X.prods.forEach(w => { w.st = w.cod in ST ? ST[w.cod] : null; });
+      let PL = []; try { PL = typeof PLAN !== "undefined" ? PLAN : []; } catch (e) {} X.meta = (PL.find(x => x.ym === X.cy * 100 + X.cm) || {}).meta || 0; X.dim = new Date(X.cy, X.cm, 0).getDate(); X.prog = X.cd / X.dim;
+    } else { const B = HB.base() || {}, R = B.rows || [], P = B.productos || [], cats = B.cats || [], V = B.vend || [], tv = V.indexOf("Tienda Hellywoof"), CL = B.clientes || [];
+      X.cy = Number(String(B.corte || "").slice(0, 4)) || B.anio; X.cm = Number(String(B.corte || "").slice(5, 7)) || 12; X.cd = Number(String(B.corte || "").slice(8, 10)) || 0; X.corte = B.corte; X.stockFecha = B.stockFecha;
+      const info = P.map(p => { const pm = HB.prov(cats[p[1]]); return { n: p[0], cod: String(p[2]), pv: pm[0], marca: pm[1] || pm[0] }; }), pk = {}, ck = {};
+      R.forEach(r => { const y = r[8] || B.anio, k = y * 100 + r[2], v = Number(r[5]) || 0, q = Number(r[4]) || 0, t = r[7] === tv, o = X.mes[k] = X.mes[k] || { d: 0, t: 0, du: 0, vend: {} };
+        if (t) o.t += v; else { o.d += v; o.du += q; o.vend[V[r[7]]] = (o.vend[V[r[7]]] || 0) + v; if (k === X.cy * 100 + X.cm) X.dias[r[3]] = (X.dias[r[3]] || 0) + v; }
+        const i = info[r[1]]; if (i) { const w = pk[i.cod] = pk[i.cod] || Object.assign({ a: 0, au: 0, b: 0, ma: 0, mu: 0, m: {} }, i); if (y === X.cy) { w.a += v; w.au += q; } else if (y === X.cy - 1 && (r[2] < X.cm || (r[2] === X.cm && (!X.cd || r[3] <= X.cd)))) w.b += v; if (k === X.cy * 100 + X.cm) { w.ma += v; w.mu += q; } if (!t) w.m[k] = (w.m[k] || 0) + q; }
+        if (!t && CL.length && r[0] > 0 && v > 0) { const w = ck[r[0]] = ck[r[0]] || { i: r[0], a: 0, b: 0, ult: 0 }, f = y * 10000 + r[2] * 100 + (r[3] || 1); if (y === X.cy) w.a += v; else if (y === X.cy - 1) w.b += v; if (f > w.ult) w.ult = f; } });
+      const FC = (B.fc && B.fc.p) || {}; X.prods = Object.values(pk); X.prods.forEach(w => { let s = null; try { s = HB.stock(w.cod); } catch (e) {} w.st = s; w.fc = FC[w.cod] ? FC[w.cod][0] : 0; w.cls = FC[w.cod] ? FC[w.cod][3] : ""; });
+      X.clis = Object.values(ck).map(w => { const c = CL[w.i] || []; return Object.assign(w, { n: c[0] || "?", comuna: c[1] || "", vend: c[2] || "" }); });
+      X.meta = 0; try { X.meta = HB.meta(X.cy, X.cm) || 0; } catch (e) {} X.cots = B.cots || []; X.metas = B.metas || {}; X.compras = B.compras && B.compras.rows || [];
+      const hab = (y, m, h) => { let n = 0; const f = new Date(y, m, 0).getDate(); for (let d = 1; d <= Math.min(f, h || f); d++) { const w = new Date(y, m - 1, d).getDay(); if (w && w < 6) n++; } return n; }; X.prog = X.cd ? hab(X.cy, X.cm, X.cd) / Math.max(1, hab(X.cy, X.cm)) : 1; }
+    const u3 = [1, 2, 3].map(i => { const d = new Date(X.cy, X.cm - 1 - i, 1); return d.getFullYear() * 100 + d.getMonth() + 1; }); X.prods.forEach(w => { w.q3 = u3.reduce((t, k) => t + (w.m[k] || 0), 0) / 3; const base = w.fc > 0 ? w.fc : w.q3; w.dias = w.st != null && base > 0 ? Math.round(w.st / base * 30) : null; });
+    return PREP = X; }
+  const yo = () => { try { if (T === "ventas" && typeof SES !== "undefined" && SES && SES.vendedor) return { n: SES.vendedor.nombre || "", cart: SES.vendedor.cartera || SES.vendedor.nombre || "" }; } catch (e) {} return null; };
+  const tabla = (cab, filas) => filas.length ? "| " + cab.join(" | ") + " |\n|" + cab.map(() => "---").join("|") + "|\n" + filas.map(f => "| " + f.join(" | ") + " |").join("\n") : "";
+  const MM = v => "$" + (Math.abs(v) >= 1e6 ? (v / 1e6).toLocaleString("es-CL", { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + " MM" : n0(v));
+  function local(q) { const X = prep(), s = nor(q), has = (...w) => w.some(x => s.includes(x)), mesN = MES[X.cm - 1] + " " + X.cy, ym = X.cy * 100 + X.cm, pie = "\n\n_Datos al " + String(X.corte || "").split("-").reverse().join("-") + "._";
+    const nDias = (s.match(/(\d+)\s*dias?/) || [])[1]; const lim = nDias ? Number(nDias) : null;
+    /* meta y avance */
+    if (has("meta", "avance", "vamos", "proyecc", "cierre", "como va el mes", "resume")) { const o = X.mes[ym] || {}, fa = T === "tienda" ? (o.v || 0) : (o.d || 0), proy = X.prog > 0 ? fa / X.prog : 0, L = [];
+      L.push("**" + (T === "tienda" ? "Tienda" : "Distribuidora") + " · " + mesN + "**: llevamos " + MM(fa) + (X.meta ? " de una meta de " + MM(X.meta) + " (" + pc(fa / X.meta) + "), con el " + pc(X.prog) + " del mes transcurrido." : "."));
+      if (proy) L.push("- Proyección de cierre al ritmo actual (solo facturado): **" + MM(proy) + "**" + (X.meta ? " = " + pc(proy / X.meta) + " de la meta" + (proy >= X.meta ? " 🎯" : "; faltan " + MM(Math.max(0, X.meta - fa)) + " por facturar") : "") + ".");
+      if (T !== "tienda") { const pend = X.cots.reduce((t, c) => t + (Number(c[7]) || 0), 0); if (pend) L.push("- Pedidos pendientes por facturar (NP Defontana): " + MM(pend) + (X.meta ? " → con ellos el avance sería " + pc((fa + pend) / X.meta) : "") + "."); if (T === "admin" && o.t) L.push("- Tienda Hellywoof: " + MM(o.t) + " en el mes."); }
+      const me = yo(); if (me && o.vend) { const k = Object.keys(o.vend).find(v => nor(v) === nor(me.cart) || nor(v) === nor(me.n)), mt = Number(X.metas[k]) || 0; if (k) L.push("- **Tú (" + k + ")**: " + MM(o.vend[k]) + (mt ? " de " + MM(mt) + " (" + pc(o.vend[k] / mt) + ")" : "") + "."); }
+      return L.join("\n") + pie; }
+    if (T !== "tienda" && T !== "log" && has("vendedor", "equipo", "ranking", "cada vendedor")) { const o = X.mes[ym] || { vend: {} }; return "**Venta del mes por vendedor (" + mesN + ")**\n\n" + tabla(["Vendedor", "Facturado", "Meta", "Avance"], Object.keys(o.vend).sort((a, b) => o.vend[b] - o.vend[a]).map(k => { const mt = Number(X.metas[k]) || 0; return [k, MM(o.vend[k]), mt ? MM(mt) : "–", mt ? pc(o.vend[k] / mt) : "–"]; })) + pie; }
+    if (has("ticket")) { if (T !== "tienda") return "El ticket promedio de la distribuidora está en el Dashboard de HWF; estos datos no traen el número de documento." + pie; if (T === "tienda") { const o = X.mes[ym] || {}; return o.docs && o.docs.size ? "Ticket promedio de " + mesN + ": **" + MM(o.v / o.docs.size) + "** (" + o.docs.size + " tickets, " + MM(o.v) + " vendidos)." + pie : "Los datos de la tienda aún no traen el número de documento: el ticket promedio aparecerá con la próxima actualización." + pie; } }
+    if (has("se acaba", "poco stock", "dias de stock", "quedan sin", "por agotarse", "acabando", "cobertura", "menos de")) { const n = lim || 15, l = X.prods.filter(w => w.dias != null && w.dias > 0 && w.dias < n).sort((a, b) => a.dias - b.dias); return l.length ? "**Productos con menos de " + n + " días de stock**:\n\n" + tabla(["Producto", "Stock", "Venta u/mes", "Días"], l.slice(0, 20).map(w => [w.n, n0(w.st), n0(w.fc || w.q3), w.dias])) + pie : "Ningún producto con venta tiene menos de " + n + " días de stock." + pie; }
+    if (has("sin stock", "quiebre", "agot")) { const l = X.prods.filter(w => w.st === 0 && w.q3 > 0).sort((a, b) => b.q3 - a.q3); return l.length ? "**" + l.length + " productos sin stock que se venden** (stock al " + (X.stockFecha || "?") + "):\n\n" + tabla(["Producto", "Venta prom. u/mes"], l.slice(0, 15).map(w => [w.n, n0(w.q3)])) + (l.length > 15 ? "\n\ny " + (l.length - 15) + " más." : "") + pie : "No hay productos con venta que estén sin stock. 👍" + pie; }
+    if (has("sobrestock", "mas stock que venta", "exceso", "sobra")) { const l = X.prods.filter(w => w.dias != null && w.dias > 120).sort((a, b) => b.dias - a.dias); return l.length ? "**Productos con más de 120 días de stock**:\n\n" + tabla(["Producto", "Stock", "Venta u/mes", "Días"], l.slice(0, 20).map(w => [w.n, n0(w.st), n0(w.fc || w.q3), w.dias])) + pie : "No hay productos con más de 120 días de stock." + pie; }
+    if (has("marca")) { const m = {}; X.prods.forEach(w => { const o = m[w.marca] = m[w.marca] || { a: 0, b: 0 }; o.a += w.a; o.b += w.b; }); const L = Object.entries(m).filter(([, o]) => o.a > 0 || o.b > 0).map(([k, o]) => [k, o.a, o.b, o.b ? o.a / o.b - 1 : null]);
+      const C = L.filter(x => x[3] != null && x[2] >= 1e6), sube = C.slice().sort((a, b) => b[3] - a[3]).filter(x => x[3] > 0).slice(0, 5), baja = C.slice().sort((a, b) => a[3] - b[3]).filter(x => x[3] < 0).slice(0, 5), f = x => [x[0], MM(x[1]), MM(x[2]), (x[3] >= 0 ? "+" : "") + pc(x[3])];
+      if (!C.length) return "**Marcas con más venta en " + X.cy + "** (no hay datos suficientes del año anterior para comparar):\n\n" + tabla(["Marca", "Venta " + X.cy], L.sort((a, b) => b[1] - a[1]).slice(0, 10).map(x => [x[0], MM(x[1])])) + pie;
+      return "**Marcas, ene–" + MES[X.cm - 1] + " " + X.cy + " vs. mismo período " + (X.cy - 1) + "**\n\nCrecen:\n\n" + (tabla(["Marca", X.cy, X.cy - 1, "Var."], sube.map(f)) || "ninguna") + "\n\nCaen:\n\n" + (tabla(["Marca", X.cy, X.cy - 1, "Var."], baja.map(f)) || "ninguna") + "\n\n_Solo marcas que vendieron más de $1 MM el año anterior._" + pie; }
+    if (has("mas se vend", "mas vendid", "top", "mejores producto", "se venden mas", "estrella")) { const mes = has("mes"), l = X.prods.slice().sort((a, b) => mes ? b.ma - a.ma : b.a - a.a).slice(0, 10); return "**Productos más vendidos " + (mes ? "en " + mesN : "en " + X.cy) + "**:\n\n" + tabla(["Producto", "Venta", "Unidades"], l.map(w => [w.n, MM(mes ? w.ma : w.a), n0(mes ? w.mu : w.au)])) + pie; }
+    if (T !== "tienda" && T !== "log" && has("cliente") && has("no compra", "dormid", "sin compr", "hace", "recuperar", "perdid")) { const n = lim || 60, me = yo(), hoy = new Date(), dd = f => Math.round((hoy - new Date(Math.floor(f / 10000), Math.floor(f / 100) % 100 - 1, f % 100)) / 864e5);
+      const l = X.clis.filter(w => (!me || nor(w.vend) === nor(me.cart) || nor(w.vend) === nor(me.n)) && w.ult && dd(w.ult) > n && w.a + w.b > 0).sort((a, b) => (b.a + b.b) - (a.a + a.b));
+      return l.length ? "**" + l.length + " clientes" + (me ? " de tu cartera" : "") + " sin comprar hace más de " + n + " días** (los de mayor compra primero):\n\n" + tabla(["Cliente", "Comuna", "Última compra", "Días", "Compra " + X.cy], l.slice(0, 15).map(w => [w.n, w.comuna, String(w.ult % 100).padStart(2, "0") + "-" + String(Math.floor(w.ult / 100) % 100).padStart(2, "0") + "-" + Math.floor(w.ult / 10000), dd(w.ult), MM(w.a)])) + (l.length > 15 ? "\n\ny " + (l.length - 15) + " más." : "") + pie : "No hay clientes" + (me ? " de tu cartera" : "") + " sin comprar hace más de " + n + " días." + pie; }
+    if (T === "ventas" && has("cobr", "vencid", "deuda", "factura", "debe")) { try { const docs = cxMios(); if (!docs.length) return "No tienes documentos por cobrar cargados."; const rs = cxResumen(docs), cl = cxClientes(docs).filter(c => c.venc > 0).sort((a, b) => b.venc - a.venc);
+        return "**Cobranza de tu cartera**: por cobrar " + MM(rs.total) + ", vencido **" + MM(rs.venc) + "** (" + rs.nVenc + " documentos), más de 30 días " + MM(rs.v30) + ", vence esta semana " + MM(rs.sem) + ".\n\n" + tabla(["Cliente", "Vencido", "Días máx."], cl.slice(0, 12).map(c => [c.cli, MM(c.venc), c.maxDias])); } catch (e) {} }
+    if (T === "ventas" && has("prospect", "contactar", "potencial")) { try { const pr = prMios().filter(o => o.etapa !== "Descartado"), lim2 = new Date(Date.now() + 7 * 864e5).toISOString().slice(0, 10), l = pr.filter(o => o.proximo_contacto && o.proximo_contacto <= lim2).sort((a, b) => a.proximo_contacto.localeCompare(b.proximo_contacto));
+        return "**Prospectos**: " + pr.length + " activos. " + (l.length ? "Para contactar esta semana:\n\n" + tabla(["Prospecto", "Comuna", "Etapa", "Contacto"], l.slice(0, 15).map(o => [o.nombre, o.comuna || "", o.etapa, o.proximo_contacto])) : "No tienes contactos agendados para los próximos 7 días; revisa los que están en «1. Mapeo» para agendarlos."); } catch (e) {} }
+    if (T !== "tienda" && has("pendiente", "pedido", "np ", "cotizac", "despach")) { const pp = {}; X.cots.forEach(c => { const w = pp[c[0]] = pp[c[0]] || { f: c[1], cl: c[2], v: c[3], t: 0 }; w.t += Number(c[7]) || 0; }); const l = Object.entries(pp); const me = yo(), l2 = me ? l.filter(([, w]) => nor(w.v) === nor(me.cart) || nor(w.v) === nor(me.n)) : l;
+      return l2.length ? "**" + l2.length + " pedidos pendientes de facturar**" + (me ? " tuyos" : "") + ":\n\n" + tabla(["N°", "Fecha", "Cliente", "Vendedor", "Neto"], l2.slice(0, 20).map(([k, w]) => [k, w.f, w.cl, w.v, MM(w.t)])) + pie : "No hay pedidos pendientes de facturar." + pie; }
+    if ((T === "admin" || T === "log") && has("compr")) { const pv = {}; X.compras.forEach(r => { if (Math.floor(r[1] / 100) !== X.cy) return; const w = X.prods.find(p => p.cod === String(r[0])), k = w ? w.pv : "Sin proveedor", o = pv[k] = pv[k] || { u: 0, v: 0 }; o.u += Number(r[2]) || 0; o.v += Number(r[3]) || 0; });
+      return Object.keys(pv).length ? "**Compras " + X.cy + " por proveedor**:\n\n" + tabla(["Proveedor", "Unidades"].concat(RC ? [] : ["Valor neto"]), Object.entries(pv).sort((a, b) => b[1].u - a[1].u).map(([k, o]) => [k, n0(o.u)].concat(RC ? [] : [MM(o.v)]))) + pie : "No hay compras de " + X.cy + " en los datos." + pie; }
+    if (/\b(por dia|diaria|diario|hoy|ayer|cada dia)\b/.test(s)) { const d = Object.keys(X.dias).map(Number).sort((a, b) => a - b); return d.length ? "**Venta por día de " + mesN + "** (" + (T === "tienda" ? "tienda" : "distribuidora") + "):\n\n" + tabla(["Día", "Venta"], d.map(x => [x, MM(X.dias[x])])) + pie : "Aún no hay ventas por día este mes." + pie; }
+    /* producto o cliente nombrado en la pregunta */
+    const pal = s.split(" ").filter(w => w.length >= 4 && !/^(como|vamos|cuanto|cuantos|cuales|que|productos?|clientes?|stock|venta|ventas|tiene|tienen|este|esta|mes|ano|del|los|las|para|con|mas|menos|hay|quien|donde|cual)$/.test(w));
+    const pBus = pal.length ? X.prods.filter(w => { const n = nor(w.n + " " + w.marca + " " + w.cod); return pal.every(p => n.includes(p)); }) : [];
+    if (T === "ventas" || T === "admin") { const cBus = pal.length ? X.clis.filter(w => { const n = nor(w.n); return pal.every(p => n.includes(p)); }) : [];
+      if (cBus.length && cBus.length <= 5 && !has("producto")) return cBus.map(w => "**" + w.n + "** (" + w.comuna + " · " + w.vend + "): compró " + MM(w.a) + " en " + X.cy + " (" + MM(w.b) + " en " + (X.cy - 1) + "); última compra el " + String(w.ult % 100).padStart(2, "0") + "-" + String(Math.floor(w.ult / 100) % 100).padStart(2, "0") + "-" + Math.floor(w.ult / 10000) + ".").join("\n") + pie; }
+    if (pBus.length && pBus.length <= 12 && !has("se acaba", "sin stock", "quiebre", "agot", "mas se vend", "top", "mejores")) return "Encontré " + pBus.length + (pBus.length === 1 ? " producto" : " productos") + ":\n\n" + tabla(["Producto", X.cy + " $", X.cy + " u", MES[X.cm - 1] + " u", "Prom. 3 meses u", "Stock", "Días de stock"], pBus.sort((a, b) => b.a - a.a).map(w => [w.n, MM(w.a), n0(w.au), n0(w.mu), n0(w.q3), w.st == null ? "–" : n0(w.st), w.dias == null ? "–" : w.dias])) + pie;
+    return "Puedo responderte sin costo sobre: **meta y avance del mes**, " + (T === "tienda" ? "**ticket promedio**, " : T === "log" ? "**compras**, **pedidos pendientes**, " : "**vendedores**, **clientes sin compra** (p. ej. «clientes que no compran hace 90 días»), **pedidos pendientes**, ") + (T === "ventas" ? "**cobranza vencida**, **prospectos a contactar**, " : "") + "**productos más vendidos**, **marcas que crecen o caen**, **productos sin stock** o que **se acaban en N días**, **sobrestock**, **venta por día**, y puedes escribir el nombre de un producto" + (T === "ventas" || T === "admin" ? " o de un cliente" : "") + " para ver su detalle.";
+  }
+
+  /* ===== formato de la respuesta (markdown simple, escapado) ===== */
+  const inl = s => esc(s).replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>").replace(/(^|\s)_([^_]+)_(?=\s|$)/g, "$1<em>$2</em>");
+  function md(t) { const out = [], L = String(t || "").split("\n"); let i = 0;
+    while (i < L.length) { const l = L[i];
+      if (/^\s*\|.*\|\s*$/.test(l)) { const F = []; while (i < L.length && /^\s*\|.*\|\s*$/.test(L[i])) { F.push(L[i]); i++; }
+        const fil = F.filter(f => !/^\s*\|[\s:\-|]+\|\s*$/.test(f)).map(f => f.trim().replace(/^\||\|$/g, "").split("|").map(c => c.trim()));
+        out.push("<table>" + fil.map((f, j) => "<tr>" + f.map(c => j ? "<td>" + inl(c) + "</td>" : "<th>" + inl(c) + "</th>").join("") + "</tr>").join("") + "</table>"); continue; }
+      if (/^\s*[-•*]\s+/.test(l)) { const it = []; while (i < L.length && /^\s*[-•*]\s+/.test(L[i])) { it.push("<li>" + inl(L[i].replace(/^\s*[-•*]\s+/, "")) + "</li>"); i++; } out.push("<ul>" + it.join("") + "</ul>"); continue; }
+      if (/^#{1,4}\s/.test(l)) { out.push("<p><b>" + inl(l.replace(/^#+\s*/, "")) + "</b></p>"); i++; continue; }
+      if (l.trim()) out.push("<p>" + inl(l) + "</p>"); i++; }
+    return out.join(""); }
+
+  /* ===== interfaz ===== */
+  let H = [], CTX = null, OCUP = false;
+  const btn = document.createElement("button"); btn.id = "iaBtn"; btn.type = "button"; btn.innerHTML = "✨ Asistente"; btn.setAttribute("aria-label", "Abrir el asistente IA");
+  const pan = document.createElement("section"); pan.id = "iaPan"; pan.setAttribute("aria-label", "Asistente IA"); pan.setAttribute("role", "dialog");
+  pan.innerHTML = '<div class="ia-h"><b>✨ Asistente ' + esc(NOM.split(" ")[0]) + '</b><button type="button" id="iaNew" title="Nueva conversación">Nueva</button><button type="button" id="iaX" aria-label="Cerrar">✕</button></div>' +
+    '<div class="ia-m" id="iaMsgs" aria-live="polite"></div><form class="ia-f" id="iaF"><textarea id="iaQ" rows="1" maxlength="2000" placeholder="Pregunta sobre ventas, metas, clientes, stock…"></textarea><button type="submit" id="iaGo">Enviar</button></form>' +
+    '<div class="ia-n">Sin costo: responde con los datos de esta app' + (RC ? " (sin costos ni márgenes)" : "") + '; lo que no sabe calcular se lo pregunta a la IA gratis de Google (Gemini), sin RUT ni teléfonos. Revisa las cifras importantes.</div>';
+  document.body.appendChild(btn); document.body.appendChild(pan);
+  const $m = pan.querySelector("#iaMsgs"), $q = pan.querySelector("#iaQ"), $go = pan.querySelector("#iaGo");
+  const burbuja = (cls, html) => { const d = document.createElement("div"); d.className = "ia-b " + cls; d.innerHTML = html; $m.appendChild(d); $m.scrollTop = $m.scrollHeight; return d; };
+  function inicio() { $m.innerHTML = ""; burbuja("ia-a", "<p>Hola" + (usuario() && usuario() !== T ? ", " + esc(String(usuario()).split(" ")[0]) : "") + ". Pregúntame sobre los datos de esta app: " + ({ log: "ventas, metas, stock, compras, pedidos y rutas", ventas: "ventas, metas, stock de la distribuidora, prospectos y cobranza", tienda: "ventas de la tienda, metas y stock de la tienda" }[T] || "ventas, metas, clientes, productos y stock") + ".</p>");
+    const s = document.createElement("div"); s.className = "ia-s"; s.innerHTML = SUG.map(x => '<button type="button">' + esc(x) + "</button>").join(""); s.onclick = e => { const b = e.target.closest("button"); if (b) preguntar(b.textContent); }; $m.appendChild(s); }
+  async function preguntar(q) { q = String(q || "").trim(); if (!q || OCUP) return; OCUP = true; $go.disabled = true; $q.value = ""; burbuja("ia-u", esc(q)); const esp = burbuja("ia-a", '<span class="ia-p">Pensando…</span>');
+    let res; const loc = () => { let t; try { t = local(q); } catch (e) { t = "No pude calcular eso (" + (e && e.message) + ")."; } return { ok: true, respuesta: t, local: true }; };
+    let cl = null; try { cl = JSON.parse(localStorage.getItem("hwf-ia-claude") || "null"); } catch (e) {}
+    /* 12-11-2026: primero el asistente local (sin costo); si no entiende la pregunta, la IA gratis del script (Gemini) */
+    const r0 = loc(), entiende = !/^Puedo responderte sin costo sobre/.test(r0.respuesta);
+    if (entiende || DEMO || !conn() || (cl && cl.no && Date.now() - cl.t < 36e5)) res = r0;
+    else { const c = conn();
+      { try { if (CTX == null) CTX = contexto(); } catch (e) { CTX = "No se pudo resumir los datos de la app (" + (e && e.message) + ")."; }
+        const ctrl = new AbortController(), tm = setTimeout(() => ctrl.abort(), 120000);
+        try { const r = await fetch(c.url, { method: "POST", body: JSON.stringify({ clave: c.clave, accion: "asistente", app: T, usuario: usuario(), contexto: CTX, historial: H.slice(-12), pregunta: q }), signal: ctrl.signal }), t = await r.text();
+          try { res = JSON.parse(t); } catch (e) { res = { ok: false, error: "El script de Google no reconoce el asistente todavía. Espera unos minutos a que se actualice." }; } }
+        catch (e) { res = null; } finally { clearTimeout(tm); }
+        if (!res || res.sinClave || !res.ok) { if (res && res.sinClave) try { localStorage.setItem("hwf-ia-claude", JSON.stringify({ no: 1, t: Date.now() })); } catch (e) {}
+          res = Object.assign({}, r0, { respuesta: (res && !res.sinClave && res.error ? "_" + res.error + "_\n\n" : "") + r0.respuesta }); } } }
+    if (res && res.ok) { esp.innerHTML = md(res.respuesta) + (res.local ? '<p class="ia-l">Sin costo · calculado en la app</p>' : res.proveedor === "gemini" ? '<p class="ia-l">IA Gemini · plan gratis · revisa las cifras importantes</p>' : ""); H.push({ role: "user", content: q }, { role: "assistant", content: res.respuesta }); }
+    else { esp.innerHTML = '<p class="ia-e">' + esc((res && res.error) || "No se pudo responder.") + "</p>"; }
+    $m.scrollTop = $m.scrollHeight; OCUP = false; $go.disabled = false; }
+  const abrir = () => { pan.classList.add("on"); btn.style.display = "none"; if (!$m.children.length) inicio(); setTimeout(() => $q.focus(), 50); };
+  const cerrar = () => { pan.classList.remove("on"); btn.style.display = ""; btn.focus(); };
+  btn.onclick = abrir; pan.querySelector("#iaX").onclick = cerrar;
+  pan.querySelector("#iaNew").onclick = () => { H = []; CTX = null; inicio(); };   /* nueva conversación: vuelve a leer los datos (por si se actualizaron) */
+  pan.querySelector("#iaF").onsubmit = e => { e.preventDefault(); preguntar($q.value); };
+  $q.addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); preguntar($q.value); } });
+  $q.addEventListener("input", () => { $q.style.height = "auto"; $q.style.height = Math.min(140, $q.scrollHeight) + "px"; });
+  document.addEventListener("keydown", e => { if (e.key === "Escape" && pan.classList.contains("on")) cerrar(); });
+  window.hwfAsistente = { contexto };   /* para pruebas */
 })();
 </script>
 </body>
