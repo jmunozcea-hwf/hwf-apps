@@ -1237,6 +1237,7 @@ function npRitmo(cots, Y, M, n, real, lim, ant) {
       <button type="button" data-m="plan" aria-pressed="true">Plan de ventas</button>
       <button type="button" data-m="abast" aria-pressed="false">Abastecimiento</button>
       <button type="button" data-m="provee" aria-pressed="false">Pago a proveedores</button>
+      <button type="button" data-m="catalogo" aria-pressed="false">Catálogo y precios</button>
       <button type="button" data-m="ranking" aria-pressed="false">Ranking</button>
       <button type="button" data-m="cots" aria-pressed="false">NP Defontana</button>
       <button type="button" data-m="napp" aria-pressed="false">NP App</button>
@@ -5176,7 +5177,7 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261112153858";
+const HWF_VER = "20261112154200";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer)\/[^/]*$/, "/");
   let avisado = false;
@@ -5745,6 +5746,64 @@ setTimeout(() => { try { if (D && $("s-res") && !$("s-res").hidden && !$("kpCard
   HOST.engancha(poner); try { const c0 = HOST.cont(); if (c0 && c0.children.length && (E.un || HOST.t !== "ventas")) poner(); } catch (e) {}
   window.biEstado = () => E; window.biCalc = calc;
   window.hwfBi = { tipo: HOST.t, base: () => HOST.base(), stock: c => HOST.stock(c), meta: (y, m) => HOST.meta(y, m), prov: provDe };   /* lo usa patch_noticias */
+})();
+</script>
+<style>/* patch_catalogo */
+.ct-z{border:2px dashed var(--line,#C9D3DB);border-radius:14px;padding:14px;display:grid;gap:8px;margin-top:8px}.ct-z.sobre{border-color:#1C7A4E;background:rgba(28,122,78,.06)}
+.ct-f{display:grid;grid-template-columns:1fr auto;gap:6px 10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line,#E3E9EE)}.ct-f:last-child{border-bottom:0}
+.ct-f b{word-break:break-word}.ct-f small{display:block;color:var(--muted,#5B6874);font-size:.76rem}.ct-b{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}.ct-b .btn{min-height:38px;padding:6px 10px;font-size:.84rem}
+.ct-est{font-size:.84rem;color:var(--muted,#5B6874);min-height:1.2em}.ct-est.mal{color:#B42318}.ct-est.ok{color:#1C7A4E}
+@media(min-width:1000px){.ct-g{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}.ct-g>.card{margin:0}}
+</style>
+<script>/* patch_catalogo: subir catálogo y listas de precio a Drive (solo HWF) */
+(function () {
+  if (typeof pintarMas !== "function" || typeof syCall !== "function") return;
+  try { if (typeof NAV_MNOM !== "undefined") NAV_MNOM.catalogo = "Catálogo y precios"; const sp = document.querySelector('[data-sm="catalogo"] span'); if (sp) sp.textContent = "Catálogo y precios"; } catch (e) {}
+  const TIPOS = [["catalogo", "Catálogo", "El catálogo de productos (PDF, imágenes o Excel)."], ["precios", "Listas de precio", "Las listas de precio vigentes, por canal o por proveedor."]];
+  const MAX = 20 * 1024 * 1024, DEMO = typeof RK_DEMO !== "undefined" && RK_DEMO; let DAT = null, EST = "", ESTC = "", OCUP = false;
+  const tam = n => n >= 1048576 ? (n / 1048576).toLocaleString("es-CL", { maximumFractionDigits: 1 }) + " MB" : Math.max(1, Math.round(n / 1024)).toLocaleString("es-CL") + " KB";
+  const fecha = ms => { const d = new Date(ms); return String(d.getDate()).padStart(2, "0") + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + d.getFullYear() + " " + String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0"); };
+  const llamar = async (datos, seg) => { const cfg = typeof SYC === "function" ? SYC() : null; if (!cfg) return { ok: false, error: "Esta app no está conectada al script de Google." };
+    const ctrl = new AbortController(), tm = setTimeout(() => ctrl.abort(), (seg || 60) * 1000);
+    try { const r = await fetch(cfg.url, { method: "POST", body: JSON.stringify(Object.assign({ clave: cfg.clave }, datos)), signal: ctrl.signal }), t = await r.text(); try { return JSON.parse(t); } catch (e) { return { ok: false, error: "El script de Google no reconoce esta función todavía. Espera unos minutos a que se actualice y vuelve a intentar." }; } }
+    catch (e) { return { ok: false, error: "Sin conexión a internet o la subida tardó demasiado." }; } finally { clearTimeout(tm); } };
+  const aB64 = f => new Promise((ok, mal) => { const r = new FileReader(); r.onload = () => ok(String(r.result).split(",")[1] || ""); r.onerror = () => mal(new Error("No se pudo leer el archivo.")); r.readAsDataURL(f); });
+  const estado = (t, c) => { EST = t; ESTC = c || ""; const e = document.getElementById("ctEst"); if (e) { e.textContent = t; e.className = "ct-est " + ESTC; } };
+  async function cargar() { if (DEMO) { DAT = { ok: true, archivos: [] }; return; } const r = await llamar({ accion: "catListar" }); if (r && r.ok) DAT = r; else { DAT = DAT || { archivos: [] }; estado((r && r.error) || "No se pudo leer la carpeta.", "mal"); } }
+  async function subir(tipo, files) { if (OCUP) return; if (DEMO) { estado("En la demo no se suben archivos.", "mal"); return; } OCUP = true; let okN = 0;
+    for (const f of files) { if (f.size > MAX) { estado("«" + f.name + "» pesa " + tam(f.size) + ": el máximo es 20 MB.", "mal"); continue; }
+      estado("Subiendo «" + f.name + "» (" + tam(f.size) + ")…"); let b64; try { b64 = await aB64(f); } catch (e) { estado(e.message, "mal"); continue; }
+      const r = await llamar({ accion: "catSubir", tipo, nombre: f.name, mime: f.type || "application/octet-stream", b64 }, 180);
+      if (r && r.ok) { okN++; estado("«" + f.name + "» subido" + (r.reemplazo ? " (reemplazó la versión anterior)." : "."), "ok"); } else estado("No se pudo subir «" + f.name + "»: " + ((r && r.error) || "error"), "mal"); }
+    OCUP = false; if (okN) { const e = EST, c = ESTC; await cargar(); EST = e; ESTC = c; pintar(); } }
+  async function bajar(id, modo) { if (OCUP) return; OCUP = true; estado("Bajando el archivo…"); const r = await llamar({ accion: "catBajar", id }, 120); OCUP = false; if (!r || !r.ok) { estado((r && r.error) || "No se pudo bajar.", "mal"); return; }
+    const bin = atob(r.b64), u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); const bl = new Blob([u], { type: r.mime || "application/octet-stream" }); estado("");
+    if (modo === "enviar") { try { const f = new File([bl], r.nombre, { type: bl.type }); if (navigator.canShare && navigator.canShare({ files: [f] })) { await navigator.share({ files: [f], title: r.nombre }); return; } } catch (e) { if (e && e.name === "AbortError") return; } }
+    const url = URL.createObjectURL(bl); if (modo === "ver") { const w = window.open(url, "_blank"); if (w) { setTimeout(() => URL.revokeObjectURL(url), 120000); return; } }
+    const a = document.createElement("a"); a.href = url; a.download = r.nombre; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 8000); estado("«" + r.nombre + "» descargado.", "ok"); }
+  async function borrar(id, nombre) { if (OCUP || !confirm("¿Eliminar «" + nombre + "»? Queda en la papelera de Drive por 30 días.")) return; OCUP = true; estado("Eliminando…"); const r = await llamar({ accion: "catBorrar", id }); OCUP = false;
+    if (r && r.ok) { await cargar(); estado("«" + nombre + "» eliminado.", "ok"); pintar(); } else estado((r && r.error) || "No se pudo eliminar.", "mal"); }
+  function pintar() { const box = document.getElementById("masBody"); if (!box || (typeof vistaMas !== "undefined" && vistaMas !== "catalogo")) return; const A = (DAT && DAT.archivos) || [];
+    const lista = t => { const L = A.filter(x => x.tipo === t); return L.length ? L.map(x => `<div class="ct-f"><div><b>${esc(x.nombre)}</b><small>${fecha(x.fecha)} · ${tam(x.tam)}</small></div>
+      <div class="ct-b"><button type="button" class="btn" data-ver="${esc(x.id)}">Ver</button><button type="button" class="btn" data-env="${esc(x.id)}">Enviar</button><button type="button" class="btn" data-baj="${esc(x.id)}">Descargar</button><button type="button" class="btn" data-del="${esc(x.id)}" data-n="${esc(x.nombre)}">Eliminar</button></div></div>`).join("") : '<p class="muted" style="margin:6px 0 0">Todavía no hay archivos.</p>'; };
+    const otros = A.filter(x => x.tipo === "otros");
+    box.innerHTML = `<div class="card"><h2>Catálogo y listas de precio <span class="muted">archivos en Google Drive</span></h2>
+        <p class="muted" style="margin:0;font-size:.88rem">Sube aquí el catálogo y las listas de precio vigentes. Quedan guardados en Drive, en la carpeta «HWF Catálogo y listas de precio». Si subes un archivo con el mismo nombre, reemplaza al anterior. Máximo 20 MB por archivo.</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button type="button" class="btn" id="ctAct">↻ Actualizar lista</button>${DAT && DAT.carpeta ? `<a class="btn" target="_blank" rel="noopener" href="${esc(DAT.carpeta)}">Abrir la carpeta en Drive</a>` : ""}</div>
+        <div id="ctEst" class="ct-est ${ESTC}" role="status" style="margin-top:8px">${esc(EST)}</div>${DEMO ? '<p class="muted" style="margin:6px 0 0">Demo: aquí no se suben archivos reales.</p>' : ""}</div>
+      <div class="ct-g">${TIPOS.map(([t, n, d]) => `<div class="card"><h2>${n} <span class="muted">${A.filter(x => x.tipo === t).length} ${A.filter(x => x.tipo === t).length === 1 ? "archivo" : "archivos"}</span></h2>
+        <div class="ct-z" data-z="${t}"><span class="muted" style="font-size:.86rem">${d} Arrastra archivos aquí o elígelos.</span><input type="file" multiple data-in="${t}" accept=".pdf,.xlsx,.xls,.csv,.doc,.docx,.ppt,.pptx,.jpg,.jpeg,.png,.webp" hidden><button type="button" class="btn pri" data-sub="${t}">⬆ Subir ${t === "catalogo" ? "catálogo" : "lista de precio"}</button></div>
+        <div style="margin-top:6px">${lista(t)}</div></div>`).join("")}</div>
+      ${otros.length ? `<div class="card"><h2>Otros archivos de la carpeta <span class="muted">dejados a mano en Drive, fuera de las subcarpetas</span></h2>${lista("otros")}</div>` : ""}`;
+    document.getElementById("ctAct").onclick = async () => { estado("Leyendo la carpeta…"); await cargar(); if (!ESTC) EST = ""; pintar(); };
+    box.querySelectorAll("[data-sub]").forEach(b => b.onclick = () => box.querySelector('[data-in="' + b.dataset.sub + '"]').click());
+    box.querySelectorAll("[data-in]").forEach(i => i.onchange = () => { const fs = [...i.files]; i.value = ""; if (fs.length) subir(i.dataset.in, fs); });
+    box.querySelectorAll("[data-z]").forEach(z => { z.ondragover = e => { e.preventDefault(); z.classList.add("sobre"); }; z.ondragleave = () => z.classList.remove("sobre"); z.ondrop = e => { e.preventDefault(); z.classList.remove("sobre"); const fs = [...(e.dataTransfer.files || [])]; if (fs.length) subir(z.dataset.z, fs); }; });
+    box.querySelectorAll("[data-ver]").forEach(b => b.onclick = () => bajar(b.dataset.ver, "ver")); box.querySelectorAll("[data-env]").forEach(b => b.onclick = () => bajar(b.dataset.env, "enviar"));
+    box.querySelectorAll("[data-baj]").forEach(b => b.onclick = () => bajar(b.dataset.baj, "bajar")); box.querySelectorAll("[data-del]").forEach(b => b.onclick = () => borrar(b.dataset.del, b.dataset.n)); }
+  async function pintarCatalogo() { pintar(); if (!DAT) { estado("Leyendo la carpeta…"); await cargar(); if (!ESTC) EST = ""; pintar(); } }
+  const _pm = pintarMas; pintarMas = function () { if (typeof vistaMas !== "undefined" && vistaMas === "catalogo") return pintarCatalogo(); return _pm.apply(this, arguments); };
+  window.hwfCatalogo = { subir, cargar, datos: () => DAT };
 })();
 </script>
 <style>/* patch_sinrepetidos */
