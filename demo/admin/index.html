@@ -1206,6 +1206,7 @@ function npRitmo(cots, Y, M, n, real, lim, ant) {
     <div class="seg" id="masSeg">
       <button type="button" data-m="plan" aria-pressed="true">Plan de ventas</button>
       <button type="button" data-m="abast" aria-pressed="false">Abastecimiento</button>
+      <button type="button" data-m="provee" aria-pressed="false">Pago a proveedores</button>
       <button type="button" data-m="ranking" aria-pressed="false">Ranking</button>
       <button type="button" data-m="cots" aria-pressed="false">NP Defontana</button>
       <button type="button" data-m="napp" aria-pressed="false">NP App</button>
@@ -5134,7 +5135,7 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261112113353";
+const HWF_VER = "20261112113739";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer)\/[^/]*$/, "/");
   let avisado = false;
@@ -5519,6 +5520,93 @@ setTimeout(() => { try { if (D && $("s-res") && !$("s-res").hidden && !$("kpCard
   HOST.engancha(poner); try { const c0 = HOST.cont(); if (c0 && c0.children.length && E.on) poner(); } catch (e) {}
   window.biEstado = () => E; window.biCalc = calc;
   window.hwfBi = { tipo: HOST.t, base: () => HOST.base(), stock: c => HOST.stock(c), meta: (y, m) => HOST.meta(y, m), prov: provDe };   /* lo usa patch_noticias */
+})();
+</script>
+<style>/* patch_planprov */
+.pp-par{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px}.pp-par label{display:grid;gap:3px;font-size:.74rem;font-weight:700;color:var(--muted,#5B6874)}
+.pp-par input,.pp-par select{font:inherit;padding:8px 10px;border-radius:10px;border:1px solid var(--line,#C9D3DB);background:var(--card,#fff);color:var(--ink,#0F1E29);width:100%;min-width:0}
+@media(min-width:700px){.pp-par{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.pp-k{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px}.pp-k div{background:var(--sunk,#EEF2F5);border-radius:12px;padding:9px 11px;font-size:.74rem;color:var(--muted,#5B6874)}
+.pp-k b{display:block;font-size:1.1rem;color:var(--ink,#0F1E29);font-variant-numeric:tabular-nums}.pp-k small{display:block}
+@media(min-width:700px){.pp-k{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.pp-t{width:100%;border-collapse:collapse;font-size:.82rem;font-variant-numeric:tabular-nums}.pp-t th,.pp-t td{padding:6px 8px;border-bottom:1px solid var(--line,#E3E9EE);text-align:right;white-space:nowrap}
+.pp-t th:first-child,.pp-t td:first-child{text-align:left}.pp-t th{font-size:.68rem;text-transform:uppercase;letter-spacing:.03em;color:var(--muted,#5B6874)}.pp-t tr.act td{background:rgba(240,168,24,.14);font-weight:700}
+.pp-t tr.tot td{font-weight:800;border-top:2px solid var(--line,#C9D3DB)}.pp-t tr.hito td:first-child::after{content:" ◆";color:#E07B24}.pp-t input{width:92px;font:inherit;padding:4px 6px;border-radius:8px;border:1px solid var(--line,#C9D3DB);text-align:right}
+.pp-ley{display:flex;gap:12px;flex-wrap:wrap;font-size:.8rem;color:var(--muted,#5B6874);margin:6px 0}.pp-ley i{display:inline-block;width:16px;height:3px;border-radius:2px;margin-right:5px;vertical-align:4px}
+.pp-ok{color:#1C7A4E}.pp-mal{color:#B42318}.pp-nota{font-size:.78rem;color:var(--muted,#5B6874);margin:8px 0 0}.pp-av{background:#FFF6E0;border:1px solid #F0A818;border-radius:10px;padding:8px 10px;font-size:.82rem;color:#5C4400;margin-top:8px}
+</style>
+<script>/* patch_planprov: plan a 14 meses de pago a proveedores (Planet Pet al contado, Montaraz −50 %) — solo HWF */
+(function () {
+  if (typeof pintarMas !== "function" || typeof PLAN14 === "undefined") return;
+  try { if (typeof NAV_MNOM !== "undefined") NAV_MNOM.provee = "Pago a proveedores"; const sp = document.querySelector('[data-sm="provee"] span'); if (sp) sp.textContent = "Pago a proveedores"; } catch (e) {}
+  const LS = "hwf-planprov", MES = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
+  const leer = () => { let p = {}; try { p = JSON.parse(localStorage.getItem(LS) || "{}"); } catch (e) {} return Object.assign({ cxpP: 0, cxpM: 0, mesP: 14, redM: 50, desc: 0, iva: 19, real: {} }, p); };
+  const guardar = p => { try { localStorage.setItem(LS, JSON.stringify(p)); } catch (e) {} };
+  const fm = n => { const a = Math.abs(n); if (a < 500) return "$0"; return (n < 0 ? "−" : "") + "$" + (a >= 1e6 ? (a / 1e6).toLocaleString("es-CL", { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + " MM" : Math.round(a / 1e3).toLocaleString("es-CL") + " mil"); };
+  const lab = ym => MES[ym % 100 - 1] + "-" + String(Math.floor(ym / 100)).slice(2), ent = s => Number(String(s == null ? "" : s).replace(/[^\d]/g, "")) || 0;
+  function datos() { const B = (typeof D !== "undefined" && D && D.rows && D.rows.length) ? D : BASE, P = leer(), cy = Number(String(B.corte || "").slice(0, 4)) || B.anio, cm = Number(String(B.corte || "").slice(5, 7)) || 1;
+    const m3 = []; for (let i = 3; i >= 1; i--) { const d = new Date(cy, cm - 1 - i, 1); m3.push(d.getFullYear() * 100 + d.getMonth() + 1); }
+    const tv = (B.vend || []).indexOf("Tienda Hellywoof"), tipo = B.productos.map(p => { const c = String((B.cats || [])[p[1]] || "").toUpperCase(); return /PLANET/.test(c) ? "p" : /MONTARAZ/.test(c) ? "m" : ""; });
+    let cP = 0, cM = 0, vD = 0, cD = 0; (B.rows || []).forEach(r => { if (!m3.includes((r[8] || B.anio) * 100 + r[2])) return; const c = (r[4] || 0) * (r[6] || 0), t = tipo[r[1]]; if (t === "p") cP += c; else if (t === "m") cM += c; if (r[7] !== tv) { vD += r[5] || 0; cD += c; } });
+    cP /= 3; cM /= 3; vD /= 3; cD /= 3; const margen = vD > 0 ? 1 - cD / vD : 0, iva = 1 + (Number(P.iva) || 0) / 100, MS = PLAN14.slice().sort((a, b) => a.ym - b.ym), n = MS.length;
+    const estP = !(P.cxpP > 0), estM = !(P.cxpM > 0); if (estM) P.cxpM0 = Math.round(cM * iva / 1e5) * 1e5;   /* sin dato: Montaraz se estima en 30 días de compra y Planet en 45 */
+    if (estP) P.cxpP = Math.round(cP * iva * 1.5 / 1e5) * 1e5;
+    const cxpM0 = P.cxpM > 0 ? P.cxpM : P.cxpM0, N = Math.max(1, Math.min(n, Number(P.mesP) || n)), red = Math.max(0, Math.min(100, Number(P.redM))) / 100, dsc = Math.max(0, Number(P.desc) || 0) / 100;
+    let aP = P.cxpP, aM = cxpM0; const F = MS.map((m, i) => { const f = vD > 0 ? m.meta / vD : 1, compP = cP * f * iva, compM = cM * f * iva, k = i + 1;
+      const sP = P.cxpP * (1 - Math.min(k, N) / N), sM = cxpM0 * (1 - red * k / n), contado = k >= N, ahorro = contado ? compP * dsc : 0, redP = aP - sP, redMo = aM - sM;
+      const o = { ym: m.ym, compP, compM, sP, sM, redP, redM: redMo, pagoP: compP + redP - ahorro, pagoM: compM + redMo, extra: redP + redMo - ahorro, ahorro, contado, diasP: compP > 0 ? sP / (compP / 30) : 0, diasM: compM > 0 ? sM / (compM / 30) : 0, margen: m.meta * margen, meta: m.meta, real: (P.real || {})[m.ym] || null };
+      aP = sP; aM = sM; return o; });
+    return { B, P, F, cy, cm, ymHoy: cy * 100 + cm, cP: cP * iva, cM: cM * iva, margen, cxpM0, estM, estP, N, red, n, hayP: cP > 0, hayM: cM > 0 }; }
+  function grafico(X) { const W = 640, H = 230, L = 44, R = 10, T = 12, Bm = 26, n = X.F.length, mx = Math.max(1, X.P.cxpP, X.cxpM0), paso = mx > 4e7 ? 1e7 : 5e6, top = Math.ceil(mx / paso) * paso, x = i => L + (W - L - R) * i / n, y = v => T + (H - T - Bm) * (1 - v / top); let s = "";
+    for (let k = 0; k <= top + 1; k += paso) s += `<line x1="${L}" x2="${W - R}" y1="${y(k)}" y2="${y(k)}" stroke="#DDE3E8"/><text x="${L - 6}" y="${y(k) + 4}" text-anchor="end" font-size="11" fill="#5B6874">${k / 1e6}</text>`;
+    const serie = (ini, f, col) => { let p = `${x(0)},${y(ini)} `, d = `<circle cx="${x(0)}" cy="${y(ini)}" r="3.5" fill="${col}"/>`; X.F.forEach((o, i) => { p += `${x(i + 1)},${y(f(o))} `; d += `<circle cx="${x(i + 1)}" cy="${y(f(o))}" r="3.5" fill="${col}"><title>${lab(o.ym)}: ${fm(f(o))}</title></circle>`; }); return `<polyline points="${p}" fill="none" stroke="${col}" stroke-width="2.5"/>` + d; };
+    s += serie(X.cxpM0, o => o.sM, "#0B3146") + serie(X.P.cxpP, o => o.sP, "#E07B24");
+    X.F.forEach((o, i) => { if (i % 2 === 0 || i === n - 1) s += `<text x="${x(i + 1)}" y="${H - 8}" text-anchor="middle" font-size="10" fill="#5B6874">${lab(o.ym)}</text>`;
+      if (o.real) { if (o.real.p != null) s += `<rect x="${x(i + 1) - 4}" y="${y(o.real.p) - 4}" width="8" height="8" fill="#fff" stroke="#E07B24" stroke-width="2"><title>Real Planet ${lab(o.ym)}: ${fm(o.real.p)}</title></rect>`; if (o.real.m != null) s += `<rect x="${x(i + 1) - 4}" y="${y(o.real.m) - 4}" width="8" height="8" fill="#fff" stroke="#0B3146" stroke-width="2"><title>Real Montaraz ${lab(o.ym)}: ${fm(o.real.m)}</title></rect>`; } });
+    s += `<text x="${x(0)}" y="${H - 8}" text-anchor="middle" font-size="10" fill="#5B6874">hoy</text>`;
+    return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block" role="img" aria-label="Cuentas por pagar según el plan">${s}</svg>`; }
+  function pintarProvee() { const box = document.getElementById("masBody"); if (!box) return; let X; try { X = datos(); } catch (e) { box.innerHTML = '<div class="card"><h2>Pago a proveedores</h2><p class="muted">No se pudo calcular: ' + esc(String(e && e.message || e)) + "</p></div>"; return; }
+    const F = X.F, P = X.P, tot = k => F.reduce((t, o) => t + o[k], 0), extra = tot("extra"), mg = tot("margen"), fin = F[F.length - 1], llega = F[X.N - 1], ahorro = tot("ahorro");
+    const estado = (o, k) => { const r = o.real && o.real[k]; if (r == null) return ""; const plan = k === "p" ? o.sP : o.sM; return r <= plan * 1.03 + 1 ? ' <span class="pp-ok" title="igual o mejor que el plan">✓</span>' : ' <span class="pp-mal" title="sobre el plan">▲ ' + fm(r - plan) + "</span>"; };
+    box.innerHTML = `<div class="card"><h2>Pago a proveedores <span class="muted">plan a 14 meses · ${lab(F[0].ym)} → ${lab(fin.ym)}</span></h2>
+      <p class="muted" style="margin:0;font-size:.88rem"><b>Planet Pet:</b> pasar de comprar a crédito a comprar al contado. <b>Montaraz:</b> bajar las cuentas por pagar un ${Math.round(X.red * 100)} %. Todo con IVA.</p>
+      <div class="pp-par"><label>Planet: cuentas por pagar hoy ($)<input id="ppP" inputmode="numeric" value="${X.estP ? "" : Math.round(P.cxpP).toLocaleString("es-CL")}" placeholder="${Math.round(P.cxpP).toLocaleString("es-CL")} (estimado)"></label>
+        <label>Montaraz: cuentas por pagar hoy ($)<input id="ppM" inputmode="numeric" value="${P.cxpM > 0 ? Math.round(P.cxpM).toLocaleString("es-CL") : ""}" placeholder="${Math.round(X.cxpM0).toLocaleString("es-CL")} (estimado)"></label>
+        <label>Planet al contado desde<select id="ppN">${F.map((o, i) => `<option value="${i + 1}"${i + 1 === X.N ? " selected" : ""}>${lab(o.ym)} (mes ${i + 1})</option>`).join("")}</select></label>
+        <label>Montaraz: bajar la deuda en (%)<input id="ppR" type="number" min="0" max="100" step="5" value="${Math.round(X.red * 100)}"></label>
+        <label>Descuento de Planet por pago contado (%)<input id="ppD" type="number" min="0" max="15" step="0.5" value="${Number(P.desc) || 0}"></label>
+        <label>IVA (%)<input id="ppI" type="number" min="0" max="25" step="1" value="${Number(P.iva) || 0}"></label></div>
+      ${X.estM || X.estP ? `<div class="pp-av"><b>Falta${X.estM && X.estP ? "n datos" : " un dato"}:</b> escribe arriba la deuda actual con ${[X.estP ? "Planet Pet" : "", X.estM ? "Montaraz" : ""].filter(Boolean).join(" y ")}. Mientras tanto uso un estimado (${[X.estP ? "Planet " + fm(P.cxpP) + " = 45 días de compra" : "", X.estM ? "Montaraz " + fm(X.cxpM0) + " = 30 días de compra" : ""].filter(Boolean).join("; ")}). Al anotar el saldo real el plan se recalcula.</div>` : ""}
+      ${!X.hayP || !X.hayM ? `<div class="pp-av">No encontré ventas recientes de ${!X.hayP ? "Planet Pet" : ""}${!X.hayP && !X.hayM ? " ni de " : ""}${!X.hayM ? "Montaraz" : ""} para proyectar sus compras.</div>` : ""}
+      <div class="pp-k"><div>Caja adicional en 14 meses<b>${fm(extra)}</b><small>${fm(extra / F.length)} al mes en promedio</small></div>
+        <div>Parte del margen bruto proyectado<b>${mg > 0 ? (extra / mg * 100).toLocaleString("es-CL", { maximumFractionDigits: 1 }) + " %" : "—"}</b><small>margen del plan: ${fm(mg)} (${Math.round(X.margen * 100)} % de la venta)</small></div>
+        <div>Planet Pet<b>${fm(P.cxpP)} → $0</b><small>al contado desde ${lab(llega.ym)} · baja ${fm(P.cxpP / X.N)} al mes</small></div>
+        <div>Montaraz<b>${fm(X.cxpM0)} → ${fm(fin.sM)}</b><small>baja ${fm(X.cxpM0 * X.red / X.n)} al mes${ahorro > 0 ? " · ahorro por contado " + fm(ahorro) : ""}</small></div></div></div>
+    <div class="card"><h2>Cuentas por pagar según el plan <span class="muted">millones de $ · fin de cada mes</span></h2>
+      <div class="pp-ley"><span><i style="background:#E07B24"></i>Planet Pet</span><span><i style="background:#0B3146"></i>Montaraz</span><span>□ saldo real anotado</span></div>${grafico(X)}</div>
+    <div class="card"><h2>Mes a mes <span class="muted">pagos con IVA · anota el saldo real al cierre de cada mes</span></h2>
+      <div class="tbl" style="overflow-x:auto"><table class="pp-t"><thead><tr><th>Mes</th><th>Compras Planet</th><th>Pago Planet</th><th>Deuda Planet</th><th>Plazo</th><th>Real Planet</th><th>Compras Montaraz</th><th>Pago Montaraz</th><th>Deuda Montaraz</th><th>Real Montaraz</th><th>Caja adicional</th><th>% del margen</th></tr></thead><tbody>
+        ${F.map((o, i) => `<tr class="${o.ym === X.ymHoy ? "act" : ""}${(i + 1) % 3 === 0 || i === F.length - 1 ? " hito" : ""}"><td>${lab(o.ym)}</td><td>${fm(o.compP)}</td><td>${fm(o.pagoP)}</td><td>${fm(o.sP)}</td><td>${o.contado ? "contado" : Math.round(o.diasP) + " d"}</td>
+          <td><input data-ym="${o.ym}" data-k="p" inputmode="numeric" value="${o.real && o.real.p != null ? Math.round(o.real.p).toLocaleString("es-CL") : ""}" aria-label="Deuda real con Planet en ${lab(o.ym)}">${estado(o, "p")}</td>
+          <td>${fm(o.compM)}</td><td>${fm(o.pagoM)}</td><td>${fm(o.sM)}</td><td><input data-ym="${o.ym}" data-k="m" inputmode="numeric" value="${o.real && o.real.m != null ? Math.round(o.real.m).toLocaleString("es-CL") : ""}" aria-label="Deuda real con Montaraz en ${lab(o.ym)}">${estado(o, "m")}</td>
+          <td><b>${fm(o.extra)}</b></td><td>${o.margen > 0 ? Math.round(o.extra / o.margen * 100) + " %" : "—"}</td></tr>`).join("")}
+        <tr class="tot"><td>Total</td><td>${fm(tot("compP"))}</td><td>${fm(tot("pagoP"))}</td><td></td><td></td><td></td><td>${fm(tot("compM"))}</td><td>${fm(tot("pagoM"))}</td><td></td><td></td><td>${fm(extra)}</td><td>${mg > 0 ? Math.round(extra / mg * 100) + " %" : "—"}</td></tr></tbody></table></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button type="button" class="btn" id="ppCsv">Descargar (Excel/CSV)</button><button type="button" class="btn" id="ppRe">Volver a los valores iniciales</button></div>
+      <p class="pp-nota">◆ = control trimestral. Compras proyectadas = costo de lo vendido de cada proveedor en los 3 meses cerrados (distribuidora + tienda: Planet ${fm(X.cP)}, Montaraz ${fm(X.cM)} al mes con IVA), llevado a la meta mensual del plan de ventas. Pago del mes = compras + lo que baja la deuda${ahorro > 0 ? " − descuento por contado" : ""}. Caja adicional = lo que hay que pagar por sobre las compras del mes. Plazo = días de compra que quedan en la deuda de Planet. Los saldos y lo que anotes quedan guardados solo en este equipo.</p></div>
+    <div class="card"><h2>Cómo financiarlo <span class="muted">sin plata externa</span></h2>
+      <p class="muted" style="margin:0;font-size:.88rem">La caja adicional (${fm(extra / F.length)} al mes) sale de tres fuentes que ya miden las apps: <b>1)</b> comprar solo lo que sugiere Abastecimiento y liquidar el sobrestock (Inventario → Inteligencia de negocio); <b>2)</b> el margen de la venta que crece con el plan; <b>3)</b> el descuento por pago contado, si Planet lo otorga${ahorro > 0 ? " (" + fm(ahorro) + " en el período)" : ": pídelo y anótalo arriba"}. Si un trimestre la deuda real queda sobre el plan, mueve el mes de llegada al contado en vez de frenar compras de productos clave.</p></div>`;
+    const re = c => { const p = leer(); c(p); guardar(p); pintarProvee(); };
+    document.getElementById("ppP").onchange = e => re(p => p.cxpP = ent(e.target.value)); document.getElementById("ppM").onchange = e => re(p => p.cxpM = ent(e.target.value));
+    document.getElementById("ppN").onchange = e => re(p => p.mesP = Number(e.target.value)); document.getElementById("ppR").onchange = e => re(p => p.redM = Number(e.target.value));
+    document.getElementById("ppD").onchange = e => re(p => p.desc = Number(e.target.value)); document.getElementById("ppI").onchange = e => re(p => p.iva = Number(e.target.value));
+    box.querySelectorAll(".pp-t input").forEach(i => i.onchange = () => re(p => { p.real = p.real || {}; const o = p.real[i.dataset.ym] = p.real[i.dataset.ym] || {}; if (String(i.value).trim() === "") delete o[i.dataset.k]; else o[i.dataset.k] = ent(i.value); }));
+    document.getElementById("ppRe").onclick = () => { if (confirm("¿Borrar los saldos y lo anotado, y volver a los valores iniciales?")) { try { localStorage.removeItem(LS); } catch (e) {} pintarProvee(); } };
+    document.getElementById("ppCsv").onclick = () => { const f = [["Plan de pago a proveedores", lab(F[0].ym) + " a " + lab(fin.ym)], ["Planet hoy", Math.round(P.cxpP), "Montaraz hoy", Math.round(X.cxpM0), "Planet contado desde", lab(llega.ym), "Montaraz baja %", Math.round(X.red * 100)], [],
+        ["Mes", "Compras Planet", "Pago Planet", "Deuda Planet", "Plazo días", "Real Planet", "Compras Montaraz", "Pago Montaraz", "Deuda Montaraz", "Real Montaraz", "Caja adicional", "Margen bruto proyectado"]];
+      F.forEach(o => f.push([lab(o.ym), Math.round(o.compP), Math.round(o.pagoP), Math.round(o.sP), o.contado ? 0 : Math.round(o.diasP), o.real && o.real.p != null ? o.real.p : "", Math.round(o.compM), Math.round(o.pagoM), Math.round(o.sM), o.real && o.real.m != null ? o.real.m : "", Math.round(o.extra), Math.round(o.margen)]));
+      const t = "﻿" + f.map(r => r.join(";")).join("\r\n"), a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([t], { type: "text/csv;charset=utf-8" })); a.download = "Plan pago proveedores.csv"; document.body.appendChild(a); a.click(); a.remove(); }; }
+  const _pm = pintarMas; pintarMas = function () { if (typeof vistaMas !== "undefined" && vistaMas === "provee") return pintarProvee(); return _pm.apply(this, arguments); };
+  window.hwfPlanProv = datos;
 })();
 </script>
 <style>/* patch_sinrepetidos */
