@@ -452,7 +452,7 @@ if (!cfg()) pantallaConexion(); else if (!DATA()) { bajar(true).then(() => DATA(
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261112104711";
+const HWF_VER = "20261112113353";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer)\/[^/]*$/, "/");
   let avisado = false;
@@ -1035,6 +1035,83 @@ function vmPoner(cont, VM, antes) { try { if (!cont) return; const v = cont.quer
     s.querySelectorAll("tr[data-bp]").forEach(tr => tr.onclick = () => { const v = tr.dataset.bp, n = R.nv; if (n === "proveedor") E.prov = v; else if (n === "marca") E.marca = v; else E.prod = v; guarda(); poner(); window.scrollTo({ top: 0 }); }); }
   HOST.engancha(poner); try { const c0 = HOST.cont(); if (c0 && c0.children.length && E.on) poner(); } catch (e) {}
   window.biEstado = () => E; window.biCalc = calc;
+  window.hwfBi = { tipo: HOST.t, base: () => HOST.base(), stock: c => HOST.stock(c), meta: (y, m) => HOST.meta(y, m), prov: provDe };   /* lo usa patch_noticias */
+})();
+</script>
+<style>/* patch_noticias */
+.nt-card{background:linear-gradient(135deg,#0F5132,#1C7A4E);color:#fff;border-radius:18px;padding:14px 16px;margin:0 0 12px;display:grid;gap:8px;box-shadow:0 6px 18px rgba(15,81,50,.22)}
+.nt-card h3{margin:0;font-size:1.02rem;color:#fff;display:flex;gap:8px;align-items:baseline;justify-content:space-between;flex-wrap:wrap}.nt-card h3 small{font-weight:600;font-size:.72rem;color:#CDEBDC}
+.nt-i{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start;background:rgba(255,255,255,.12);border-radius:12px;padding:9px 11px}
+.nt-i span.e{font-size:1.25rem;line-height:1.2}.nt-i b{display:block;font-size:.93rem;color:#fff}.nt-i small{display:block;font-size:.8rem;color:#E3F4EA;line-height:1.35}
+.nt-plan{background:rgba(255,255,255,.12);border-radius:12px;padding:9px 11px;font-size:.8rem;color:#E3F4EA}.nt-plan b{color:#fff}
+.nt-bar{height:8px;border-radius:6px;background:rgba(255,255,255,.22);overflow:hidden;margin:6px 0 2px}.nt-bar i{display:block;height:100%;background:#F0A818;border-radius:6px}
+@media print{.nt-card{display:none}}
+</style>
+<script>/* patch_noticias: buenas noticias automáticas para el equipo (VENTAS y LOGÍSTICA) */
+(function () {
+  const HB = window.hwfBi; if (!HB || (HB.tipo !== "ventas" && HB.tipo !== "log")) return;
+  const MESL = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"], DIA = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
+  const mm = n => "$" + (Math.abs(n) >= 1e6 ? (n / 1e6).toLocaleString("es-CL", { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + " MM" : Math.round(n / 1e3).toLocaleString("es-CL") + " mil");
+  const pc = x => Math.round(x * 100) + " %", e = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const tc = s => String(s || "").toLowerCase().replace(/(^|[\s\-])([a-záéíóúñ])/g, (m, a, b) => a + b.toUpperCase());
+  const LS = "hwf-noti-" + HB.tipo, leer = () => { try { return JSON.parse(localStorage.getItem(LS) || "{}"); } catch (x) { return {}; } }, guardar = o => { try { localStorage.setItem(LS, JSON.stringify(o)); } catch (x) {} };
+  const habiles = (y, m, hasta) => { let n = 0; const fin = new Date(y, m, 0).getDate(); for (let d = 1; d <= Math.min(fin, hasta || fin); d++) { const w = new Date(y, m - 1, d).getDay(); if (w && w < 6) n++; } return n; };
+  function calcular() { const B = HB.base() || {}; if (!B.rows || !B.rows.length) return null;
+    const cy = Number(String(B.corte || "").slice(0, 4)) || B.anio, cm = Number(String(B.corte || "").slice(5, 7)), cd = Number(String(B.corte || "").slice(8, 10)) || new Date(cy, cm, 0).getDate(); if (!cm) return null;
+    const tv = (B.vend || []).indexOf("Tienda Hellywoof"), an = r => r[8] || B.anio, conDia = B.rows.some(r => r[3] > 0), conCli = !!(B.clientes && B.clientes.length && conDia), N = [], dim = new Date(cy, cm, 0).getDate();
+    /* venta del mes: total, distribuidora y mismo mes del año pasado a la misma fecha */
+    let vMes = 0, vDist = 0, vAnt = 0, vPlan = 0; const porDia = {}, ult = {}, prim = {}, mesCli = {}, marca = {}, marcaAnt = {}; let totA = 0;
+    B.rows.forEach(r => { const y = an(r), m = r[2], v = Number(r[5]) || 0, f = y * 10000 + m * 100 + (r[3] || 0);
+      if (y === cy && m === cm) { vMes += v; if (r[7] !== tv) vDist += v; if (conDia && r[7] !== tv) porDia[r[3]] = (porDia[r[3]] || 0) + v; }
+      if (y === cy - 1 && m === cm) vAnt += conDia ? (r[3] <= cd ? v : 0) : v * cd / dim;
+      if (y * 100 + m >= 202611) vPlan += v;
+      if (y === cy && m < cm || y === cy - 1 && m < cm) { const p = B.productos[r[1]], k = p ? (HB.prov(B.cats[p[1]])[1] || "") : ""; if (k) { if (y === cy) { marca[k] = (marca[k] || 0) + v; totA += v; } else marcaAnt[k] = (marcaAnt[k] || 0) + v; } }
+      if (conCli && r[7] !== tv && v > 0) { const c = r[0]; if (y === cy && m === cm) { (mesCli[c] = mesCli[c] || { v: 0, vend: r[7], f }).v += v; if (f < mesCli[c].f) mesCli[c].f = f; } else if (f < cy * 10000 + cm * 100 && (!ult[c] || f > ult[c])) ult[c] = f; if (!prim[c] || f < prim[c]) prim[c] = f; } });
+    const mesN = MESL[cm - 1], meta = (() => { try { return HB.meta(cy, cm) || 0; } catch (x) { return 0; } })(), tiempo = habiles(cy, cm, cd) / Math.max(1, habiles(cy, cm));
+    if (meta > 0 && vDist > 0) { const av = vDist / meta; if (av >= 1) N.push([100, "🏆", "¡Meta de " + mesN + " cumplida!", "La distribuidora ya facturó " + mm(vDist) + ", el " + pc(av) + " de la meta del mes."]);
+      else if (av >= tiempo) N.push([90, "🚀", "Vamos adelantados en " + mesN, "Llevamos el " + pc(av) + " de la meta con el " + pc(tiempo) + " del mes transcurrido: " + mm(vDist) + " facturados."]);
+      else if (av >= 0.5) N.push([40, "💪", "Ya pasamos la mitad de la meta", mm(vDist) + " facturados en " + mesN + ", el " + pc(av) + " de la meta."]); }
+    if (vAnt > 0 && vMes > vAnt * 1.01) N.push([85, "📈", "Vendemos más que el año pasado", "En " + mesN + " llevamos " + mm(vMes) + ", un " + pc(vMes / vAnt - 1) + " más que a la misma fecha de " + (cy - 1) + "."]);
+    /* clientes nuevos y reactivados (solo con detalle por cliente) */
+    let yo = null; try { yo = HB.tipo === "ventas" && typeof SES !== "undefined" && SES && SES.vendedor ? (SES.vendedor.cartera || SES.vendedor.nombre) : null; } catch (x) {}
+    const iYo = yo ? (B.vend || []).findIndex(v => String(v).toLowerCase() === String(yo).toLowerCase()) : -1;
+    if (conCli) { const fd = f => new Date(Math.floor(f / 10000), Math.floor(f / 100) % 100 - 1, Math.max(1, f % 100)), nom = c => tc((B.clientes[c] || [])[0] || ""), nuevos = [], vuelven = [];
+      Object.keys(mesCli).forEach(c => { const o = mesCli[c]; if (prim[c] >= cy * 10000 + cm * 100) nuevos.push([c, o]); else if (ult[c] && (fd(o.f) - fd(ult[c])) / 864e5 > 60) vuelven.push([c, o]); });
+      const lista = l => l.sort((a, b) => b[1].v - a[1].v).slice(0, 3).map(x => nom(x[0])).filter(Boolean).join(", ") + (l.length > 3 ? " y " + (l.length - 3) + " más" : "");
+      if (nuevos.length) N.push([80, "🤝", nuevos.length + (nuevos.length === 1 ? " cliente nuevo" : " clientes nuevos") + " en " + mesN, "Compraron por primera vez: " + lista(nuevos) + "."]);
+      if (vuelven.length) N.push([78, "🔄", vuelven.length + (vuelven.length === 1 ? " cliente volvió" : " clientes volvieron") + " a comprar", "Llevaban más de 60 días sin pedir: " + lista(vuelven) + "."]);
+      if (iYo >= 0) { const mios = nuevos.filter(x => x[1].vend === iYo).length + vuelven.filter(x => x[1].vend === iYo).length, vYo = Object.values(mesCli).filter(o => o.vend === iYo).reduce((t, o) => t + o.v, 0), mYo = Number((B.metas || {})[B.vend[iYo]]) || 0, nmb = String(yo).split(" ")[0];
+        if (mYo > 0 && vYo / mYo >= Math.min(1, tiempo)) N.push([95, "⭐", nmb + ", vas " + (vYo >= mYo ? "con tu meta cumplida" : "adelantado en tu meta"), "Llevas " + mm(vYo) + ", el " + pc(vYo / mYo) + " de tu meta de " + mesN + "."]);
+        if (mios) N.push([82, "👏", nmb + ", " + mios + (mios === 1 ? " cliente tuyo es nuevo o recuperado" : " clientes tuyos son nuevos o recuperados"), "Cada cliente que entra o vuelve suma al plan de todos."]); } }
+    /* mejor día en 3 meses (distribuidora) */
+    if (conDia) { const d3 = {}, lim = new Date(cy, cm - 4, 1), l0 = lim.getFullYear() * 100 + lim.getMonth() + 1; B.rows.forEach(r => { const y = an(r), ym = y * 100 + r[2]; if (r[7] === tv || ym < l0 || ym >= cy * 100 + cm) return; const k = ym * 100 + r[3]; d3[k] = (d3[k] || 0) + (Number(r[5]) || 0); });
+      const mxAnt = Math.max(0, ...Object.values(d3)), dias = Object.keys(porDia).map(Number), mejor = dias.sort((a, b) => porDia[b] - porDia[a])[0];
+      if (mejor && mxAnt > 0 && porDia[mejor] > mxAnt) N.push([75, "🔥", "Récord de venta en un día", "El " + DIA[new Date(cy, cm - 1, mejor).getDay()] + " " + mejor + " se facturaron " + mm(porDia[mejor]) + ": el mejor día de los últimos 3 meses."]); }
+    /* marca que más crece (meses cerrados del año vs. el año pasado) */
+    { const cand = Object.keys(marca).filter(k => marca[k] >= 0.03 * totA && marcaAnt[k] > 0).map(k => [k, marca[k] / marcaAnt[k] - 1]).sort((a, b) => b[1] - a[1])[0];
+      if (cand && cand[1] >= 0.1) N.push([50, "🌱", cand[0] + " crece " + pc(cand[1]), "Es la marca que más aumenta su venta este año frente a " + (cy - 1) + "."]); }
+    /* quiebres en productos clave (clase A del pronóstico), inventario y pedidos: mejoras contra la foto anterior */
+    const M = {}, FC = (B.fc && B.fc.p) || null, DESC = new Set(B.desc || []);
+    if (FC) { let q = 0, n = 0; Object.keys(FC).forEach(c => { if (FC[c][3] !== "A" || DESC.has(c)) return; n++; const st = HB.stock(c); if (st != null && !(st > 0)) q++; }); if (n) { M.quiebres = q; M.claveN = n; } }
+    if (HB.tipo === "log") { try { const D = DATA() || {}, hoy = new Date(cy, cm - 1, cd), np = {}; (D.cots || []).forEach(c => { const m = /(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})/.exec(String(c[1] || "")); if (!m) return; const dd = (hoy - new Date(+m[3], +m[2] - 1, +m[1])) / 864e5; if (np[c[0]] == null || dd > np[c[0]]) np[c[0]] = dd; });
+        const ks = Object.keys(np); if (ks.length) { M.pend = ks.length; M.atras = ks.filter(k => np[k] >= 3).length; } } catch (x) {} }
+    const G = leer(), prev = G.act && G.act.corte !== B.corte ? G.act : G.prev || null; if (!G.act || G.act.corte !== B.corte) guardar({ prev: G.act && G.act.corte !== B.corte ? G.act : G.prev || null, act: Object.assign({ corte: B.corte }, M) });
+    if (M.quiebres === 0) N.push([88, "✅", "Cero quiebres en los productos clave", "Los " + M.claveN + " productos que hacen el 80 % de la venta tienen stock: no se pierde ninguna venta por falta de producto."]);
+    else if (prev && prev.quiebres != null && M.quiebres != null && M.quiebres < prev.quiebres) N.push([70, "📦", "Menos quiebres en productos clave", "Bajamos de " + prev.quiebres + " a " + M.quiebres + " productos clave sin stock desde la revisión anterior."]);
+    if (M.pend != null) { if (M.atras === 0) N.push([86, "🚚", "Ningún pedido atrasado", "Los " + M.pend + " pedidos por despachar tienen menos de 3 días: los clientes reciben a tiempo."]);
+      else if (prev && prev.atras != null && M.atras < prev.atras) N.push([68, "🚚", "Menos pedidos esperando", "Los pedidos con 3 días o más bajaron de " + prev.atras + " a " + M.atras + "."]); }
+    /* plan de $1.000 MM (nov-26 → dic-27) */
+    const plan = vPlan > 0 && cy * 100 + cm >= 202611 ? { v: vPlan, p: Math.min(1, vPlan / 1e9) } : null;
+    return { N: N.sort((a, b) => b[0] - a[0]).slice(0, 5), plan, mesN, corte: B.corte }; }
+  function html(R) { if (!R || (!R.N.length && !R.plan)) return "";
+    return `<section class="nt-card" id="ntCard" aria-label="Buenas noticias"><h3>🎉 Buenas noticias <small>datos al ${e(String(R.corte || "").split("-").reverse().join("-"))}</small></h3>
+      ${R.N.map(n => `<div class="nt-i"><span class="e" aria-hidden="true">${n[1]}</span><div><b>${e(n[2])}</b><small>${e(n[3])}</small></div></div>`).join("") || '<div class="nt-i"><span class="e" aria-hidden="true">🌤️</span><div><b>Seguimos sumando</b><small>Cada pedido, cada entrega y cada cliente atendido acerca la meta. Aquí aparecerán los logros apenas se den.</small></div></div>'}
+      ${R.plan ? `<div class="nt-plan"><b>Plan de crecimiento: ${mm(R.plan.v)} de $1.000 MM</b> (${(R.plan.p * 100).toLocaleString("es-CL", { maximumFractionDigits: 1 })} %) · noviembre 2026 → diciembre 2027<div class="nt-bar"><i style="width:${Math.max(1.5, R.plan.p * 100)}%"></i></div>Lo construimos entre todos: ventas, bodega, despacho y tienda.</div>` : ""}</section>`; }
+  function poner() { try { const cont = document.getElementById(HB.tipo === "ventas" ? "crmInicio" : "s-dash"); if (!cont) return; const v = cont.querySelector("#ntCard"); if (v) v.remove(); const h = html(calcular()); if (!h) return;
+      const ancla = HB.tipo === "ventas" ? cont.querySelector("#vmCard") : cont.querySelector(".card"); if (ancla && HB.tipo === "ventas") ancla.insertAdjacentHTML("beforebegin", h); else if (ancla) ancla.insertAdjacentHTML("afterend", h); else cont.insertAdjacentHTML("afterbegin", h); } catch (x) {} }
+  const fn = HB.tipo === "ventas" ? "pintarInicio" : "pintarDash";
+  try { const _p = eval(fn); eval(fn + " = function () { const r = _p.apply(this, arguments); poner(); return r; }"); const c0 = document.getElementById(HB.tipo === "ventas" ? "crmInicio" : "s-dash"); if (c0 && c0.children.length) poner(); } catch (x) {}
+  window.hwfNoticias = calcular;
 })();
 </script>
 </body></html>

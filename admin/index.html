@@ -5175,7 +5175,7 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261112104711";
+const HWF_VER = "20261112113353";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer)\/[^/]*$/, "/");
   let avisado = false;
@@ -5594,6 +5594,7 @@ setTimeout(() => { try { if (D && $("s-res") && !$("s-res").hidden && !$("kpCard
     s.querySelectorAll("tr[data-bp]").forEach(tr => tr.onclick = () => { const v = tr.dataset.bp, n = R.nv; if (n === "proveedor") E.prov = v; else if (n === "marca") E.marca = v; else E.prod = v; guarda(); poner(); window.scrollTo({ top: 0 }); }); }
   HOST.engancha(poner); try { const c0 = HOST.cont(); if (c0 && c0.children.length && E.on) poner(); } catch (e) {}
   window.biEstado = () => E; window.biCalc = calc;
+  window.hwfBi = { tipo: HOST.t, base: () => HOST.base(), stock: c => HOST.stock(c), meta: (y, m) => HOST.meta(y, m), prov: provDe };   /* lo usa patch_noticias */
 })();
 </script>
 <style>/* patch_sinrepetidos */
