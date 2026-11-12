@@ -58,7 +58,7 @@ ol{margin:0;padding-left:20px;display:grid;gap:6px}
     <ol data-p="and"><li>Abre la app con el botón de arriba, en <b>Chrome</b>.</li><li>Toca el menú <b>⋮</b> (arriba a la derecha).</li><li>Elige <b>«Instalar app»</b> o <b>«Agregar a la pantalla principal»</b>.</li></ol>
     <ol data-p="ios" hidden><li>Abre la app con el botón de arriba, en <b>Safari</b>.</li><li>Toca <b>Compartir</b> (el cuadrado con la flecha hacia arriba).</li><li>Elige <b>«Agregar a inicio»</b> y luego <b>Agregar</b>.</li></ol>
     <ol data-p="pc" hidden><li>Abre la app con el botón de arriba, en <b>Chrome</b> o <b>Edge</b>.</li><li>En la barra de direcciones, toca el ícono de <b>instalar</b> (pantalla con flecha).</li><li>Confirma con <b>Instalar</b>.</li></ol>
-    <p class="muted">La primera vez la app pide el <b>código de conexión</b> (empieza con <b>HWF1:</b>). Te lo entrega logística. Luego elige tu nombre de la lista y elige el vehículo del día. Acepta los permisos de <b>ubicación</b> y <b>cámara</b>.</p>
+    <p class="muted">Abre esta página desde el <b>link que te manda logística por WhatsApp</b>: trae la conexión, así la app solo te pide <b>tu nombre</b> (el vehículo lo recuerda; la primera vez te pregunta cuál llevas). Acepta los permisos de <b>ubicación</b> y <b>cámara</b>.</p>
     <p class="muted" style="margin:0;padding:10px 12px;border:1px solid var(--line);border-radius:12px"><b>Android dice «ya instalada» o se abre Ventas:</b> tienes el ícono <b>antiguo</b> de Ventas / Nota de Pedido (instalado antes del 2-11 en la dirección principal), que se queda con todas las apps HWF. Se corrige solo en unos días al abrir Ventas; para hacerlo ya: 1) Abre Ventas y confirma que no tengas notas pendientes de enviar. 2) Mantén presionado ese ícono → <b>Desinstalar</b>. 3) Instala esta app con el botón de arriba. 4) Vuelve a instalar Ventas desde <a href="../instalar-ventas/">instalar Ventas</a> (la conexión no se pierde).</p>
   </section>
 
@@ -87,6 +87,14 @@ document.getElementById("forzar").onclick = async function () {
   m.textContent = "Listo. Cierra la app por completo y vuelve a abrirla: cargará la versión nueva.";
   btn.textContent = "Forzar versión nueva"; btn.disabled = false;
 };
+</script>
+<script>/* patch_chofernombre: si el link trae la conexión (#HWF1:…), queda guardada para la app y el botón la lleva */
+(function () { const LH = (String(location.hash).match(/HWF1:[A-Za-z0-9+\/=_%-]+/) || [])[0]; if (!LH) return;
+  try { const t = decodeURIComponent(LH), m = t.match(/HWF1:([A-Za-z0-9+\/=_-]+)/), o = JSON.parse(decodeURIComponent(escape(atob(m[1].replace(/-/g, "+").replace(/_/g, "/")))));
+    if (o.u && o.c) localStorage.setItem("hwf-cho:cfg", JSON.stringify({ url: o.u, clave: o.c })); } catch (e) { return; }
+  document.querySelectorAll('a[href="../chofer/"]').forEach(a => a.href = "../chofer/#" + LH);
+  try { history.replaceState(null, "", location.pathname); } catch (e) {}
+  const h = document.querySelector("header"); if (h) h.insertAdjacentHTML("beforeend", '<p style="margin-top:8px;background:rgba(255,255,255,.18);border-radius:10px;padding:8px 10px">✅ Conexión lista: al abrir la app solo te pedirá tu nombre.</p>'); })();
 </script>
 </body>
 </html>

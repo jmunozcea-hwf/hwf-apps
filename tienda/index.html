@@ -2269,7 +2269,7 @@ const stAbrev = n => ST_ABR.reduce((s, [r, t]) => s.replace(r, t), String(n || "
 try { if ($("sStock") && !$("sStock").hidden) pintarStock(); } catch (e) {}
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261112204455";
+const HWF_VER = "20261112210840";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer)\/[^/]*$/, "/");
   let avisado = false;
@@ -2295,6 +2295,269 @@ const HWF_VER = "20261112204455";
   for (const n of ["syLlamar", "syCall", "api"]) { try { const f = eval(n); if (typeof f !== "function") continue;
     const g = n === "api" ? async function (d) { return limpia(d, await f.apply(this, arguments)); } : async function (c, d) { return limpia(d, await f.apply(this, arguments)); };
     eval(n + " = g"); } catch (e) {} }
+})();
+</script>
+<style>/* patch_asistente */
+#iaBtn{position:fixed;right:14px;bottom:calc(84px + env(safe-area-inset-bottom));z-index:900;border:0;border-radius:999px;padding:12px 16px;font:600 .95rem system-ui,sans-serif;
+  background:linear-gradient(135deg,#0B3146,#1C7A4E);color:#fff;box-shadow:0 6px 18px rgba(11,49,70,.35);cursor:pointer;display:flex;gap:6px;align-items:center}
+#iaBtn:focus-visible{outline:3px solid #F5B400;outline-offset:2px}
+#iaPan{position:fixed;inset:0;z-index:1000;background:var(--bg,#F4F7F9);display:none;flex-direction:column;color:var(--ink,#13222D)}
+#iaPan.on{display:flex}
+@media(min-width:900px){#iaPan{inset:auto 18px 18px auto;width:min(520px,92vw);height:min(760px,86vh);border-radius:18px;box-shadow:0 18px 50px rgba(0,0,0,.28);overflow:hidden;border:1px solid var(--line,#DAE1E7)}}
+.ia-h{display:flex;align-items:center;gap:8px;padding:12px 14px;background:#0B3146;color:#fff}.ia-h b{flex:1;font-size:1.02rem}.ia-h button{background:rgba(255,255,255,.14);color:#fff;border:0;border-radius:10px;padding:8px 11px;font:inherit;cursor:pointer}
+.ia-m{flex:1;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:10px}
+.ia-b{flex-shrink:0;max-width:92%;padding:10px 12px;border-radius:14px;line-height:1.45;font-size:.95rem;word-wrap:break-word;overflow-x:auto}
+.ia-u{align-self:flex-end;background:#0B3146;color:#fff;border-bottom-right-radius:4px;white-space:pre-wrap}
+.ia-a{align-self:flex-start;background:var(--card,#fff);border:1px solid var(--line,#DAE1E7);border-bottom-left-radius:4px}
+.ia-a p{margin:.2em 0 .5em}.ia-a ul{margin:.2em 0 .5em;padding-left:1.2em}.ia-a table{border-collapse:collapse;font-size:.84rem;margin:.3em 0}.ia-a td,.ia-a th{border:1px solid var(--line,#DAE1E7);padding:3px 6px;text-align:left}
+.ia-a th{background:rgba(11,49,70,.06)}.ia-e{color:#B42318}
+.ia-s{flex-shrink:0;display:flex;flex-wrap:wrap;gap:6px}.ia-s button{border:1px solid var(--line,#C9D3DB);background:var(--card,#fff);color:inherit;border-radius:999px;padding:7px 11px;font:inherit;font-size:.86rem;cursor:pointer}
+.ia-f{display:flex;gap:8px;padding:10px;border-top:1px solid var(--line,#DAE1E7);background:var(--card,#fff)}
+.ia-f textarea{flex:1;resize:none;border:1px solid var(--line,#C9D3DB);border-radius:12px;padding:10px;font:inherit;font-size:16px;min-height:44px;max-height:140px;background:var(--bg,#fff);color:inherit}
+.ia-f button{border:0;border-radius:12px;padding:0 16px;background:#1C7A4E;color:#fff;font:600 .95rem system-ui,sans-serif;cursor:pointer}.ia-f button:disabled{opacity:.5}
+.ia-n{font-size:.74rem;color:var(--muted,#5B6874);padding:0 12px 8px;background:var(--card,#fff)}
+.ia-p{display:inline-block;animation:iaP 1.2s infinite}@keyframes iaP{50%{opacity:.3}}
+@media print{#iaBtn,#iaPan{display:none!important}}
+</style>
+<script>/* patch_asistente: asistente IA con los datos cargados en la app (pregunta → script de Google → API de Claude) */
+(function () {
+  const HB = window.hwfBi, TND = !HB && /TIENDA/.test(document.title) && typeof DATA === "function"; if ((!HB && !TND) || document.getElementById("iaBtn")) return;
+  /* VENTAS y TIENDA (12-11-2026): el asistente solo revisa ventas, stock de su bodega, prospectos y cobranza (sin costos ni compras) */
+  const T = HB ? HB.tipo : "tienda", RC = T === "ventas" || T === "tienda", DEMO = /DEMO/.test(document.title);
+  const NOM = { admin: "HWF (administración)", ventas: "VENTAS (app de los vendedores)", log: "LOGÍSTICA", tienda: "TIENDA (Tienda Hellywoof)" }[T] || T;
+  const ALC = {
+    ventas: "App de los vendedores de HWF. Secciones: Inicio (avance del mes, buenas noticias), Pedido (crear notas de pedido, se envían al script y llegan por correo con PDF y Excel; botones para PDF, enviar e imprimir), Clientes (cartera, ficha, última compra, sugerencias de productos), Ruta (planificar visitas del día, PDF), Cobranza (documentos por cobrar), Prospectos (clientes potenciales), Panel, Inteligencia de negocio (apartado propio: venta de la distribuidora por marca, formato y producto; exportar a PDF, Excel, correo e imprimir), Catálogos y precios (descargar en PDF para enviar por WhatsApp o imprimir). ESTE ASISTENTE SOLO REVISA: ventas, stock de la bodega distribuidora, prospectos y cobranza. No tiene costos, márgenes ni compras: si preguntan otra cosa, dilo.",
+    admin: "App de administración HWF (gerencia). Secciones: Inicio (avance del mes contra la meta, proyección de cierre), Ventas y ranking por vendedor, cliente y producto, Inventario con Inteligencia de negocio (unidades Ventas y Logística: ventas y compras en $ o unidades, filtros proveedor/marca/formato/producto, canal, análisis avanzado con Pareto, alertas y pronóstico, exportar PDF/Excel/correo/imprimir), Abastecimiento (compra sugerida por mes según pronóstico y stock de seguridad por clase ABC), Plan de ventas nov-26 a dic-27 ($1.000 MM: distribuidora 827,8 + tienda 172,2), Pago a proveedores (plan a 14 meses: Planet Pet a contado, Montaraz −50 % de la deuda), Catálogo y listas de precio (archivos en Drive), Cobranza, Prospectos y notas de pedido de la app.",
+    tienda: "App de la Tienda Hellywoof (venta en local con boleta). Secciones: Inicio, Ventas, Panel, Plan (meta mensual de la tienda), Stock (bodega de la tienda), Nutrición, Ranking y Catálogos y precios. ESTE ASISTENTE SOLO REVISA: ventas de la tienda y stock de la bodega de la tienda. No tiene costos ni márgenes: si preguntan otra cosa, dilo.",
+    log: "App de logística HWF. Secciones: Panel (buenas noticias, avance), Inteligencia de negocio (unidades Ventas y Logística: ventas, compras y stock por proveedor/marca/formato/producto y canal; exportar PDF/Excel/correo/imprimir), Abastecimiento (compra sugerida según pronóstico y stock de seguridad), Rutas de despacho (armar rutas del día, enviarlas a la app Chofer, seguimiento GPS y entregas con foto/firma; PDF), stock de todas las bodegas, pedidos pendientes y clientes para despacho."
+  }[T] || "";
+  const SUG = {
+    ventas: ["¿Cómo vamos con la meta del mes?", "¿Qué clientes tienen facturas vencidas?", "¿Qué prospectos debo contactar esta semana?", "¿Qué productos están sin stock?"],
+    tienda: ["¿Cómo vamos con la meta del mes?", "¿Qué productos se venden más este mes?", "¿Qué productos se están acabando en la tienda?", "¿Cuál es el ticket promedio del mes?"],
+    admin: ["Resume cómo va el mes contra la meta", "¿Qué marcas crecen y cuáles caen este año?", "¿Qué productos clase A tienen poco stock?", "¿Cómo va cada vendedor este mes?"],
+    log: ["¿Qué productos se quedan sin stock en menos de 15 días?", "¿Cuánto compramos por proveedor este año?", "¿Qué pedidos están pendientes?", "¿Qué productos tienen más stock que venta?"]
+  }[T] || [];
+  const MES = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
+  const n0 = v => Math.round(Number(v) || 0).toLocaleString("es-CL"), pz = v => "$" + n0(v), pc = v => isFinite(v) ? (Math.round(v * 1000) / 10).toLocaleString("es-CL") + " %" : "–";
+  const tc = s => String(s || "").toLowerCase().replace(/(^|[\s\-])([a-záéíóúñ])/g, (m, a, b) => a + b.toUpperCase());
+  const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const conn = () => { try { if (typeof SYC === "function") { const c = SYC(); if (c && c.url) return c; } } catch (e) {}
+    try { if (typeof syCfg === "function") { const c = syCfg(); if (c && c.url) return c; } } catch (e) {}
+    try { if (typeof cfg === "function") { const c = cfg(); if (c && c.url) return c; } } catch (e) {} return null; };
+  const usuario = () => { try { if (T === "ventas" && typeof SES !== "undefined" && SES && SES.vendedor) return SES.vendedor.nombre || ""; } catch (e) {}
+    try { if (T === "tienda" && typeof TURK !== "undefined") { const t = JSON.parse(localStorage.getItem(TURK) || "null"); const n = t && (t.nombre || t.quien || (typeof t === "string" ? t : "")); if (n) return String(n); } } catch (e) {} return T; };
+  const habiles = (y, m, hasta) => { let n = 0; const fin = new Date(y, m, 0).getDate(); for (let d = 1; d <= Math.min(fin, hasta || fin); d++) { const w = new Date(y, m - 1, d).getDay(); if (w && w < 6) n++; } return n; };
+
+  /* ===== resumen de los datos de la app ===== */
+  function contexto() { if (T === "tienda") return ctxTienda();
+    const B = HB.base() || {}, R = B.rows || [], P = B.productos || [], cats = B.cats || [], V = B.vend || [], tv = V.indexOf("Tienda Hellywoof"), an = r => r[8] || B.anio;
+    let X = null; try { X = typeof DATA === "function" ? DATA() : null; } catch (e) {}
+    const cy = Number(String(B.corte || "").slice(0, 4)) || B.anio, cm = Number(String(B.corte || "").slice(5, 7)) || 12, cd = Number(String(B.corte || "").slice(8, 10)) || 0;
+    const L = [], hoy = new Date(), tab = (t, cab, filas) => { if (!filas.length) return; L.push("", "## " + t, cab.join(" | ")); filas.forEach(f => L.push(f.join(" | "))); };
+    L.push("APP: " + NOM, "ALCANCE Y FUNCIONES: " + ALC, "Usuario: " + usuario(),
+      "Fecha de hoy: " + hoy.toLocaleDateString("es-CL") + ". Ventas facturadas (Defontana, neto sin IVA) al " + (B.corte || "?") + "; " + MES[cm - 1] + " " + cy + " va en curso. Stock al " + (B.stockFecha || (X && X.stockFecha) || "?") + ".",
+      RC ? "Esta app NO muestra costos, márgenes ni compras en pesos: no los tienes." : "Costo = cantidad × costo unitario; margen = venta − costo.",
+      "Plan de ventas nov-26 a dic-27: $1.000 MM en 14 meses (distribuidora 827,8 MM + tienda 172,2 MM), con estacionalidad.");
+    const info = P.map(p => { const pm = HB.prov(cats[p[1]]); return { n: p[0], cod: String(p[2]), pv: pm[0], ma: pm[1] || pm[0] }; });
+    /* venta mensual */
+    const mesK = {}, z = () => ({ dv: 0, du: 0, dc: 0, tv: 0, tu: 0, tc: 0 });
+    R.forEach(r => { const k = an(r) * 100 + r[2], o = mesK[k] = mesK[k] || z(), q = Number(r[4]) || 0, v = Number(r[5]) || 0, c = q * (Number(r[6]) || 0);
+      if (r[7] === tv) { o.tv += v; o.tu += q; o.tc += c; } else { o.dv += v; o.du += q; o.dc += c; } });
+    const KM = Object.keys(mesK).map(Number).sort();
+    tab("Venta neta mensual", ["Mes", "Distribuidora $", "Distribuidora unid.", "Tienda $", "Tienda unid.", "Total $"].concat(RC ? [] : ["Margen distribuidora %", "Margen tienda %"]),
+      KM.map(k => { const o = mesK[k]; return [MES[k % 100 - 1] + "-" + Math.floor(k / 100), pz(o.dv), n0(o.du), pz(o.tv), n0(o.tu), pz(o.dv + o.tv)].concat(RC ? [] : [pc(o.dv ? 1 - o.dc / o.dv : NaN), pc(o.tv ? 1 - o.tc / o.tv : NaN)]); }));
+    /* metas y avance del mes */
+    const metas = []; for (let y = cy; y <= cy + 1; y++) for (let m = 1; m <= 12; m++) { let mt = 0; try { mt = HB.meta(y, m) || 0; } catch (e) {} if (mt > 0) metas.push([MES[m - 1] + "-" + y, pz(mt)]); }
+    tab("Meta mensual de la distribuidora (plan)", ["Mes", "Meta $"], metas);
+    const o = mesK[cy * 100 + cm] || z(); let mt = 0; try { mt = HB.meta(cy, cm) || 0; } catch (e) {}
+    const hT = habiles(cy, cm), hP = habiles(cy, cm, cd || undefined), proy = hP ? o.dv / hP * hT : 0;
+    const pend = (B.cots || (X && X.cots) || []); let pendT = 0; const pendV = {}, pendN = {}; pend.forEach(c => { const v = Number(c[7]) || 0; pendT += v; pendV[c[3]] = (pendV[c[3]] || 0) + v; (pendN[c[3]] = pendN[c[3]] || new Set()).add(c[0]); });
+    L.push("", "## Avance de " + MES[cm - 1] + " " + cy + " (distribuidora)", "Facturado: " + pz(o.dv) + " · meta: " + (mt ? pz(mt) : "sin dato") + (mt ? " · avance facturado " + pc(o.dv / mt) + " · avance con pendientes " + pc((o.dv + pendT) / mt) : "") +
+      " · pedidos/cotizaciones pendientes (NP Defontana): " + pz(pendT) + " · días hábiles " + hP + " de " + hT + " · proyección de cierre (solo facturado al ritmo): " + pz(proy) + (mt ? " (" + pc(proy / mt) + " de la meta)" : "") + " · tienda facturado: " + pz(o.tv));
+    /* vendedores */
+    const vk = {}; R.forEach(r => { if (an(r) !== cy) return; const k = V[r[7]] || "?", w = vk[k] = vk[k] || { m: {}, a: 0 }; w.m[r[2]] = (w.m[r[2]] || 0) + (Number(r[5]) || 0); w.a += Number(r[5]) || 0; });
+    const MT = B.metas || {};
+    tab("Venta neta por vendedor " + cy + " (meta del mes " + (B.metaMes ? MES[B.metaMes - 1] : MES[cm - 1]) + ")", ["Vendedor", "Año $", MES[cm - 1] + " $", "Meta del mes $", "Pendiente $", "N° pendientes"].concat(cm > 1 ? [MES[cm - 2] + " $"] : []),
+      Object.keys(vk).sort((a, b) => vk[b].a - vk[a].a).map(k => [k, pz(vk[k].a), pz(vk[k].m[cm] || 0), MT[k] ? pz(MT[k]) : "–", pz(pendV[k] || 0), pendN[k] ? pendN[k].size : 0].concat(cm > 1 ? [pz(vk[k].m[cm - 1] || 0)] : [])));
+    /* marcas: año en curso vs. mismo período del año anterior */
+    const mk = {}; R.forEach(r => { const y = an(r), i = info[r[1]]; if (!i || (y !== cy && y !== cy - 1) || r[2] > cm || (r[2] === cm && cd && r[3] > cd)) return;
+      const w = mk[i.ma] = mk[i.ma] || { pv: i.pv, a: 0, b: 0, u: 0, c: 0 }, v = Number(r[5]) || 0; if (y === cy) { w.a += v; w.u += Number(r[4]) || 0; w.c += (Number(r[4]) || 0) * (Number(r[6]) || 0); } else w.b += v; });
+    tab("Venta por marca: ene–" + MES[cm - 1] + " " + cy + " vs. mismo período " + (cy - 1), ["Marca", "Proveedor", cy + " $", cy + " unid.", (cy - 1) + " $", "Variación"].concat(RC ? [] : ["Margen %"]),
+      Object.keys(mk).sort((a, b) => mk[b].a - mk[a].a).slice(0, 60).map(k => { const w = mk[k]; return [k, w.pv, pz(w.a), n0(w.u), pz(w.b), w.b ? pc(w.a / w.b - 1) : "nuevo"].concat(RC ? [] : [pc(w.a ? 1 - w.c / w.a : NaN)]); }));
+    /* productos */
+    const pk = {}, u3 = [1, 2, 3].map(i => { const d = new Date(cy, cm - 1 - i, 1); return d.getFullYear() * 100 + d.getMonth() + 1; });
+    R.forEach(r => { const i = info[r[1]]; if (!i) return; const y = an(r), k = y * 100 + r[2], w = pk[i.cod] = pk[i.cod] || { i, a: 0, au: 0, m: {}, cu: 0, cq: 0 }, q = Number(r[4]) || 0;
+      if (y === cy) { w.a += Number(r[5]) || 0; w.au += q; } if (u3.includes(k) || k === cy * 100 + cm) w.m[k] = (w.m[k] || 0) + q; if (q > 0 && r[6] > 0) { w.cu += q * r[6]; w.cq += q; } });
+    const FC = (B.fc && B.fc.p) || {}, DESC = new Set(B.desc || []), stD = c => { try { const s = HB.stock(c); return s == null ? "" : n0(s); } catch (e) { return ""; } }, stT = c => B.stockT && B.stockT[c] != null ? n0(B.stockT[c]) : "";
+    Object.keys(FC).forEach(c => { if (!pk[c]) { const ix = P.findIndex(p => String(p[2]) === c); if (ix >= 0) pk[c] = { i: info[ix], a: 0, au: 0, m: {}, cu: 0, cq: 0 }; } });
+    const PL = Object.values(pk).sort((a, b) => b.a - a.a || (FC[b.i.cod] ? FC[b.i.cod][1] : 0) - (FC[a.i.cod] ? FC[a.i.cod][1] : 0)).slice(0, 180);
+    tab("Productos (los " + PL.length + " de mayor venta " + cy + "; unidades por mes; stock en unidades; pronóstico = venta mensual esperada de la distribuidora; clase ABC)",
+      ["Código", "Producto", "Marca", "Proveedor", cy + " $", cy + " unid."].concat(u3.slice().reverse().map(k => MES[k % 100 - 1] + " u"), [MES[cm - 1] + " u (en curso)", "Stock distribuidora", ...(T === "ventas" ? [] : ["Stock tienda"]), "Pronóstico u/mes", "Días de stock", "Clase"], RC ? [] : ["Costo unit. $"], ["Nota"]),
+      PL.map(w => { const c = w.i.cod, f = FC[c], s = (() => { try { return HB.stock(c); } catch (e) { return null; } })(), dias = f && f[0] > 0 && s != null ? Math.round(s / f[0] * 30) : "";
+        return [c, w.i.n, w.i.ma, w.i.pv, pz(w.a), n0(w.au)].concat(u3.slice().reverse().map(k => n0(w.m[k] || 0)), [n0(w.m[cy * 100 + cm] || 0), stD(c), ...(T === "ventas" ? [] : [stT(c)]), f ? n0(f[0]) : "", dias, f ? f[3] || "" : ""], RC ? [] : [w.cq ? pz(w.cu / w.cq) : ""], [DESC.has(c) ? "descontinuado (no se compra)" : s === 0 && w.au > 0 ? "SIN STOCK" : ""]); }));
+    /* clientes (sin RUT ni teléfonos) */
+    const CL = B.clientes || [], conCli = CL.length && R.some(r => r[0] > 0);
+    if (conCli) { const ck = {}; R.forEach(r => { if (r[7] === tv) return; const y = an(r), w = ck[r[0]] = ck[r[0]] || { a: 0, b: 0, m: 0, ult: 0, meses: new Set() }, v = Number(r[5]) || 0, f = y * 10000 + r[2] * 100 + (r[3] || 1);
+        if (y === cy) { w.a += v; if (r[2] === cm) w.m += v; } else if (y === cy - 1) w.b += v; if (v > 0) { if (f > w.ult) w.ult = f; w.meses.add(y * 100 + r[2]); } });
+      const CK = Object.keys(ck).sort((a, b) => ck[b].a - ck[a].a || ck[b].b - ck[a].b).slice(0, 150);
+      tab("Clientes de la distribuidora (" + CK.length + " de " + Object.keys(ck).length + " con compra; ordenados por venta " + cy + ")", ["Cliente", "Comuna", "Vendedor", cy + " $", (cy - 1) + " $", MES[cm - 1] + " $", "Última compra", "Meses con compra"],
+        CK.map(k => { const w = ck[k], c = CL[k] || []; return [c[0] || "?", c[1] || "", c[2] || "", pz(w.a), pz(w.b), pz(w.m), w.ult ? String(w.ult % 100).padStart(2, "0") + "-" + String(Math.floor(w.ult / 100) % 100).padStart(2, "0") + "-" + Math.floor(w.ult / 10000) : "", w.meses.size]; }));
+      L.push("Clientes con compra en " + MES[cm - 1] + " " + cy + ": " + Object.values(ck).filter(w => w.m > 0).length + "."); }
+    /* pedidos pendientes */
+    if (pend.length) { const pp = {}; pend.forEach(c => { const w = pp[c[0]] = pp[c[0]] || { f: c[1], cl: c[2], v: c[3], t: 0, it: [] }; w.t += Number(c[7]) || 0; w.it.push(n0(c[5]) + " × " + c[6]); });
+      tab("Pedidos y cotizaciones pendientes de facturar (Defontana)", ["N°", "Fecha", "Cliente", "Vendedor", "Neto $", "Detalle"], Object.keys(pp).slice(0, 80).map(k => { const w = pp[k]; return [k, w.f, w.cl, w.v, pz(w.t), w.it.join("; ").slice(0, 300)]; })); }
+    /* VENTAS: cobranza y prospectos (lo que el vendedor ve en Cobros y Prospectos) */
+    if (T === "ventas") { try { const docs = typeof cxMios === "function" ? cxMios() : []; if (docs.length) { const rs = cxResumen(docs), cls = cxClientes(docs).sort((a, b) => b.venc - a.venc || b.saldo - a.saldo).slice(0, 120);
+        L.push("", "## Cobranza (documentos por cobrar" + (typeof SES !== "undefined" && SES && SES.vendedor ? " de la cartera " + (SES.vendedor.cartera || SES.vendedor.nombre) : "") + ")", "Total por cobrar: " + pz(rs.total) + " · vencido: " + pz(rs.venc) + " (" + rs.nVenc + " documentos) · vencido más de 30 días: " + pz(rs.v30) + " · vence esta semana: " + pz(rs.sem) + " · clientes: " + rs.nCli + (rs.cheques ? " · cheques: " + pz(rs.cheques) : ""));
+        tab("Cobranza por cliente (vencido primero)", ["Cliente", "Cartera", "Saldo $", "Vencido $", "Días de atraso máx.", "Documentos (tipo n° · vence · saldo · días)"], cls.map(c => [c.cli, c.cart || "", pz(c.saldo), pz(c.venc), c.maxDias > 0 ? c.maxDias : 0, c.docs.slice(0, 6).map(d => d.tipo + " " + d.num + " · " + d.fv + " · " + pz(d.saldo) + " · " + (d.dias > 0 ? d.dias + " días vencido" : "vence en " + (-d.dias) + " días")).join("; ")])); } } catch (e) {}
+      try { const pr = typeof prMios === "function" ? prMios() : []; if (pr.length) { const ET = typeof PR_ETAPAS !== "undefined" ? PR_ETAPAS : [], cnt = typeof prConteo === "function" ? prConteo(pr) : [], hoyS = new Date().toISOString().slice(0, 10);
+        L.push("", "## Prospectos (clientes potenciales)", "Por etapa: " + ET.map((e, i) => e + ": " + (cnt[i] || 0)).join(" · ") + ". Hoy: " + hoyS + ".");
+        tab("Prospectos activos (próximo contacto primero)", ["Nombre", "Comuna", "Segmento", "Vendedor", "Etapa", "Próximo contacto", "Actualizado", "Notas"], pr.filter(o => o.etapa !== "Descartado").sort((a, b) => (a.proximo_contacto || "9").localeCompare(b.proximo_contacto || "9")).slice(0, 150)
+          .map(o => [o.nombre, o.comuna || "", o.segmento || "", o.vendedor || "", o.etapa || "", o.proximo_contacto || "", o.actualizado || "", String(o.notas || "").replace(/\s+/g, " ").slice(0, 120)])); } } catch (e) {} }
+    /* compras (no en VENTAS) */
+    const C = T === "ventas" ? null : B.compras && B.compras.rows; if (C && C.length) { const cmK = {}, cpv = {}; C.forEach(r => { const y = Math.floor(r[1] / 100), w = cmK[r[1]] = cmK[r[1]] || { u: 0, v: 0 }; w.u += Number(r[2]) || 0; w.v += Number(r[3]) || 0;
+        if (y === cy) { const ix = P.findIndex(p => String(p[2]) === String(r[0])), pv = ix >= 0 ? info[ix].pv : "Sin proveedor", q = cpv[pv] = cpv[pv] || { u: 0, v: 0 }; q.u += Number(r[2]) || 0; q.v += Number(r[3]) || 0; } });
+      tab("Compras mensuales (ingresos a bodega" + (B.compras.fecha ? ", Mayor al " + B.compras.fecha : "") + ")", ["Mes", "Unidades"].concat(RC ? [] : ["Valor neto $"]), Object.keys(cmK).map(Number).sort().map(k => [MES[k % 100 - 1] + "-" + Math.floor(k / 100), n0(cmK[k].u)].concat(RC ? [] : [pz(cmK[k].v)])));
+      tab("Compras " + cy + " por proveedor", ["Proveedor", "Unidades"].concat(RC ? [] : ["Valor neto $"]), Object.keys(cpv).sort((a, b) => cpv[b].v - cpv[a].v).map(k => [k, n0(cpv[k].u)].concat(RC ? [] : [pz(cpv[k].v)]))); }
+    if (DESC.size) L.push("", "Productos descontinuados (no se vuelven a comprar): " + [...DESC].map(c => { const ix = P.findIndex(p => String(p[2]) === c); return ix >= 0 ? P[ix][0] : c; }).join(", ") + ".");
+    let t = L.join("\n"); if (t.length > 200000) t = t.slice(0, 200000) + "\n(…resumen recortado)"; return t;
+  }
+
+  /* TIENDA: ventas (boletas) y stock de la bodega de la tienda */
+  function ctxTienda() { const D = DATA() || {}, R = D.rows || [], P = D.productos || [], L = [], tab = (t, cab, filas) => { if (!filas.length) return; L.push("", "## " + t, cab.join(" | ")); filas.forEach(f => L.push(f.join(" | "))); };
+    const cy = Number(String(D.corte || "").slice(0, 4)) || D.anio, cm = Number(String(D.corte || "").slice(5, 7)) || 12, cd = Number(String(D.corte || "").slice(8, 10)) || 0, dim = new Date(cy, cm, 0).getDate();
+    L.push("APP: " + NOM, "ALCANCE Y FUNCIONES: " + ALC, "Fecha de hoy: " + new Date().toLocaleDateString("es-CL") + ". Ventas de la tienda (boletas y facturas, neto sin IVA) al " + (D.corte || "?") + "; " + MES[cm - 1] + " " + cy + " va en curso. Stock de la tienda al " + (D.stockFecha || "?") + ".",
+      "La tienda abre todos los días salvo feriados irrenunciables. Plan: la meta de la tienda parte en $10 MM en nov-26 y sube con estacionalidad (plan total nov-26 a dic-27 con distribuidora: $1.000 MM).");
+    const mk = {}; R.forEach(r => { const k = (r[6] || D.anio) * 100 + r[1], o = mk[k] = mk[k] || { v: 0, u: 0, docs: new Set() }; o.v += Number(r[4]) || 0; o.u += Number(r[3]) || 0; if (r[7] && Number(r[4]) > 0) o.docs.add(r[7]); });
+    tab("Venta neta mensual de la tienda", ["Mes", "Venta $", "Unidades", "Tickets", "Ticket promedio $"], Object.keys(mk).map(Number).sort().map(k => { const o = mk[k], n = o.docs.size; return [MES[k % 100 - 1] + "-" + Math.floor(k / 100), pz(o.v), n0(o.u), n || "s/d", n ? pz(o.v / n) : "s/d"]; }));
+    let PL = []; try { PL = typeof PLAN !== "undefined" ? PLAN : []; } catch (e) {} tab("Meta mensual de la tienda (plan)", ["Mes", "Meta $"], PL.map(x => [MES[x.m - 1] + "-" + x.y, pz(x.meta)]));
+    const o = mk[cy * 100 + cm] || { v: 0, u: 0, docs: new Set() }, mt = (PL.find(x => x.ym === cy * 100 + cm) || {}).meta || 0, proy = cd ? o.v / cd * dim : 0;
+    L.push("", "## Avance de " + MES[cm - 1] + " " + cy, "Vendido: " + pz(o.v) + " · meta: " + (mt ? pz(mt) + " · avance " + pc(o.v / mt) : "sin dato") + " · días " + cd + " de " + dim + " · proyección de cierre al ritmo: " + pz(proy) + (mt ? " (" + pc(proy / mt) + " de la meta)" : ""));
+    const dd = {}; R.forEach(r => { if ((r[6] || D.anio) === cy && r[1] === cm) dd[r[2]] = (dd[r[2]] || 0) + (Number(r[4]) || 0); }); tab("Venta por día de " + MES[cm - 1], ["Día", "Venta $"], Object.keys(dd).map(Number).sort((a, b) => a - b).map(d => [d, pz(dd[d])]));
+    const ST = {}; (Array.isArray(D.stock) ? D.stock : []).forEach(x => { ST[String(x[0])] = Number(x[2]) || 0; });
+    const pk = {}, u3 = [1, 2, 3].map(i => { const d = new Date(cy, cm - 1 - i, 1); return d.getFullYear() * 100 + d.getMonth() + 1; });
+    R.forEach(r => { const p = P[r[0]]; if (!p) return; const y = r[6] || D.anio, k = y * 100 + r[1], w = pk[r[0]] = pk[r[0]] || { p, a: 0, au: 0, m: {} }, q = Number(r[3]) || 0; if (y === cy) { w.a += Number(r[4]) || 0; w.au += q; } if (u3.includes(k) || k === cy * 100 + cm) w.m[k] = (w.m[k] || 0) + q; });
+    const PLs = Object.values(pk).sort((a, b) => b.a - a.a).slice(0, 200);
+    tab("Productos de la tienda (los " + PLs.length + " de mayor venta " + cy + "; unidades por mes; stock en unidades de la bodega de la tienda)", ["Código", "Producto", "Categoría", cy + " $", cy + " unid."].concat(u3.slice().reverse().map(k => MES[k % 100 - 1] + " u"), [MES[cm - 1] + " u (en curso)", "Stock tienda", "Días de stock", "Nota"]),
+      PLs.map(w => { const c = String(w.p[2] || ""), s = ST[c], q3 = u3.reduce((t, k) => t + (w.m[k] || 0), 0) / 3, dias = s != null && q3 > 0 ? Math.round(s / q3 * 30) : "";
+        return [c, w.p[0], w.p[1] || "", pz(w.a), n0(w.au)].concat(u3.slice().reverse().map(k => n0(w.m[k] || 0)), [n0(w.m[cy * 100 + cm] || 0), s == null ? "" : n0(s), dias, s === 0 && q3 > 0 ? "SIN STOCK" : dias !== "" && dias < 15 ? "se acaba pronto" : ""]); }));
+    let t = L.join("\n"); if (t.length > 200000) t = t.slice(0, 200000) + "\n(…resumen recortado)"; return t; }
+
+  /* ===== formato de la respuesta (markdown simple, escapado) ===== */
+  const inl = s => esc(s).replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>");
+  function md(t) { const out = [], L = String(t || "").split("\n"); let i = 0;
+    while (i < L.length) { const l = L[i];
+      if (/^\s*\|.*\|\s*$/.test(l)) { const F = []; while (i < L.length && /^\s*\|.*\|\s*$/.test(L[i])) { F.push(L[i]); i++; }
+        const fil = F.filter(f => !/^\s*\|[\s:\-|]+\|\s*$/.test(f)).map(f => f.trim().replace(/^\||\|$/g, "").split("|").map(c => c.trim()));
+        out.push("<table>" + fil.map((f, j) => "<tr>" + f.map(c => j ? "<td>" + inl(c) + "</td>" : "<th>" + inl(c) + "</th>").join("") + "</tr>").join("") + "</table>"); continue; }
+      if (/^\s*[-•*]\s+/.test(l)) { const it = []; while (i < L.length && /^\s*[-•*]\s+/.test(L[i])) { it.push("<li>" + inl(L[i].replace(/^\s*[-•*]\s+/, "")) + "</li>"); i++; } out.push("<ul>" + it.join("") + "</ul>"); continue; }
+      if (/^#{1,4}\s/.test(l)) { out.push("<p><b>" + inl(l.replace(/^#+\s*/, "")) + "</b></p>"); i++; continue; }
+      if (l.trim()) out.push("<p>" + inl(l) + "</p>"); i++; }
+    return out.join(""); }
+
+  /* ===== interfaz ===== */
+  let H = [], CTX = null, OCUP = false;
+  const btn = document.createElement("button"); btn.id = "iaBtn"; btn.type = "button"; btn.innerHTML = "✨ Asistente"; btn.setAttribute("aria-label", "Abrir el asistente IA");
+  const pan = document.createElement("section"); pan.id = "iaPan"; pan.setAttribute("aria-label", "Asistente IA"); pan.setAttribute("role", "dialog");
+  pan.innerHTML = '<div class="ia-h"><b>✨ Asistente ' + esc(NOM.split(" ")[0]) + '</b><button type="button" id="iaNew" title="Nueva conversación">Nueva</button><button type="button" id="iaX" aria-label="Cerrar">✕</button></div>' +
+    '<div class="ia-m" id="iaMsgs" aria-live="polite"></div><form class="ia-f" id="iaF"><textarea id="iaQ" rows="1" maxlength="2000" placeholder="Pregunta sobre ventas, metas, clientes, stock…"></textarea><button type="submit" id="iaGo">Enviar</button></form>' +
+    '<div class="ia-n">Responde con los datos cargados en esta app' + (RC ? " (sin costos ni márgenes)" : "") + '. Puede equivocarse: revisa las cifras importantes.</div>';
+  document.body.appendChild(btn); document.body.appendChild(pan);
+  const $m = pan.querySelector("#iaMsgs"), $q = pan.querySelector("#iaQ"), $go = pan.querySelector("#iaGo");
+  const burbuja = (cls, html) => { const d = document.createElement("div"); d.className = "ia-b " + cls; d.innerHTML = html; $m.appendChild(d); $m.scrollTop = $m.scrollHeight; return d; };
+  function inicio() { $m.innerHTML = ""; burbuja("ia-a", "<p>Hola" + (usuario() && usuario() !== T ? ", " + esc(String(usuario()).split(" ")[0]) : "") + ". Pregúntame sobre los datos de esta app: " + ({ log: "ventas, metas, stock, compras, pedidos y rutas", ventas: "ventas, metas, stock de la distribuidora, prospectos y cobranza", tienda: "ventas de la tienda, metas y stock de la tienda" }[T] || "ventas, metas, clientes, productos y stock") + ".</p>");
+    const s = document.createElement("div"); s.className = "ia-s"; s.innerHTML = SUG.map(x => '<button type="button">' + esc(x) + "</button>").join(""); s.onclick = e => { const b = e.target.closest("button"); if (b) preguntar(b.textContent); }; $m.appendChild(s); }
+  async function preguntar(q) { q = String(q || "").trim(); if (!q || OCUP) return; OCUP = true; $go.disabled = true; $q.value = ""; burbuja("ia-u", esc(q)); const esp = burbuja("ia-a", '<span class="ia-p">Pensando…</span>');
+    let res;
+    if (DEMO) res = { ok: false, error: "En la demo el asistente no está conectado: en la app real responde con los datos de HWF." };
+    else { const c = conn(); if (!c) res = { ok: false, error: "Esta app no está conectada al script de Google." };
+      else { try { if (CTX == null) CTX = contexto(); } catch (e) { CTX = "No se pudo resumir los datos de la app (" + (e && e.message) + ")."; }
+        const ctrl = new AbortController(), tm = setTimeout(() => ctrl.abort(), 120000);
+        try { const r = await fetch(c.url, { method: "POST", body: JSON.stringify({ clave: c.clave, accion: "asistente", app: T, usuario: usuario(), contexto: CTX, historial: H.slice(-12), pregunta: q }), signal: ctrl.signal }), t = await r.text();
+          try { res = JSON.parse(t); } catch (e) { res = { ok: false, error: "El script de Google no reconoce el asistente todavía. Espera unos minutos a que se actualice." }; } }
+        catch (e) { res = { ok: false, error: "Sin conexión a internet o la respuesta tardó demasiado." }; } finally { clearTimeout(tm); } } }
+    if (res && res.ok) { esp.innerHTML = md(res.respuesta); H.push({ role: "user", content: q }, { role: "assistant", content: res.respuesta }); }
+    else { esp.innerHTML = '<p class="ia-e">' + esc((res && res.error) || "No se pudo responder.") + "</p>"; }
+    $m.scrollTop = $m.scrollHeight; OCUP = false; $go.disabled = false; }
+  const abrir = () => { pan.classList.add("on"); btn.style.display = "none"; if (!$m.children.length) inicio(); setTimeout(() => $q.focus(), 50); };
+  const cerrar = () => { pan.classList.remove("on"); btn.style.display = ""; btn.focus(); };
+  btn.onclick = abrir; pan.querySelector("#iaX").onclick = cerrar;
+  pan.querySelector("#iaNew").onclick = () => { H = []; CTX = null; inicio(); };   /* nueva conversación: vuelve a leer los datos (por si se actualizaron) */
+  pan.querySelector("#iaF").onsubmit = e => { e.preventDefault(); preguntar($q.value); };
+  $q.addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); preguntar($q.value); } });
+  $q.addEventListener("input", () => { $q.style.height = "auto"; $q.style.height = Math.min(140, $q.scrollHeight) + "px"; });
+  document.addEventListener("keydown", e => { if (e.key === "Escape" && pan.classList.contains("on")) cerrar(); });
+  window.hwfAsistente = { contexto };   /* para pruebas */
+})();
+</script>
+<style>/* patch_catventas */
+.cv-box{display:grid;gap:12px}.cv-card{background:var(--card,var(--surface,#fff));border:1px solid var(--line,#DAE1E7);border-radius:16px;padding:14px}
+.cv-card h2{margin:0 0 6px;font-size:1.05rem}.cv-card h2 span{font-weight:600;font-size:.8rem;color:var(--muted,#5B6874)}
+.cv-f{display:grid;gap:8px;padding:12px 0;border-bottom:1px solid var(--line,#E3E9EE)}.cv-f:last-child{border-bottom:0}.cv-f b{word-break:break-word}.cv-f small{display:block;color:var(--muted,#5B6874);font-size:.76rem}
+.cv-b{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.cv-b button{border:1px solid var(--line,#C9D3DB);background:var(--card,#fff);color:inherit;border-radius:10px;min-height:42px;font:inherit;font-weight:700;font-size:.82rem;cursor:pointer;padding:6px}
+.cv-b button.wa{background:#1FA855;border-color:#1FA855;color:#fff}.cv-b button:disabled{opacity:.5}
+.cv-est{font-size:.86rem;color:var(--muted,#5B6874);min-height:1.2em}.cv-est.mal{color:#B42318}.cv-est.ok{color:#1C7A4E}
+@media(min-width:1000px){.cv-g{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}}
+</style>
+<script>/* patch_catventas: catálogos y listas de precio en PDF (WhatsApp, imprimir, descargar) */
+(function () {
+  const VEN = typeof NAV_ORDEN !== "undefined" && typeof setModo === "function" && !!document.getElementById("mInicio");
+  const TND = !VEN && document.getElementById("tNav") && typeof ir === "function"; if (!VEN && !TND) return;
+  const DEMO = /DEMO/.test(document.title), esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const conn = () => { try { if (typeof syCfg === "function") { const c = syCfg(); if (c && c.url) return c; } } catch (e) {} try { if (typeof cfg === "function") { const c = cfg(); if (c && c.url) return c; } } catch (e) {} return null; };
+  const llamar = async (d, seg) => { const c = conn(); if (!c) return { ok: false, error: "Esta app no está conectada al script de Google." }; const ctrl = new AbortController(), tm = setTimeout(() => ctrl.abort(), (seg || 60) * 1000);
+    try { const r = await fetch(c.url, { method: "POST", body: JSON.stringify(Object.assign({ clave: c.clave }, d)), signal: ctrl.signal }), t = await r.text(); try { return JSON.parse(t); } catch (e) { return { ok: false, error: "El script de Google aún no tiene esta función. Espera unos minutos y vuelve a intentar." }; } }
+    catch (e) { return { ok: false, error: "Sin conexión a internet o la descarga tardó demasiado." }; } finally { clearTimeout(tm); } };
+  const fecha = ms => { const d = new Date(ms); return String(d.getDate()).padStart(2, "0") + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + d.getFullYear(); };
+  const tam = n => n >= 1048576 ? (n / 1048576).toLocaleString("es-CL", { maximumFractionDigits: 1 }) + " MB" : Math.max(1, Math.round(n / 1024)) + " KB";
+  let DAT = null, EST = "", ESTC = "", OCUP = false; const PDF = {};
+  const estado = (t, c) => { EST = t; ESTC = c || ""; const e = document.getElementById("cvEst"); if (e) { e.textContent = t; e.className = "cv-est " + ESTC; } };
+  async function cargar() { if (DEMO) { DAT = { archivos: [] }; return; } estado("Leyendo los archivos…"); const r = await llamar({ accion: "catListar" }); if (r && r.ok) { DAT = r; estado(""); } else { DAT = DAT || { archivos: [] }; estado((r && r.error) || "No se pudo leer la carpeta.", "mal"); } }
+  async function pdfDe(id) { if (PDF[id]) return PDF[id]; estado("Preparando el PDF… (la primera vez puede tardar unos segundos)"); const r = await llamar({ accion: "catPdf", id }, 150);
+    if (!r || !r.ok) { estado((r && r.error) || "No se pudo preparar el PDF.", "mal"); return null; }
+    const bin = atob(r.b64), u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); estado(""); return PDF[id] = { blob: new Blob([u], { type: "application/pdf" }), nombre: r.nombre }; }
+  const bajar = P => { const url = URL.createObjectURL(P.blob), a = document.createElement("a"); a.href = url; a.download = P.nombre; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 10000); };
+  async function accion(id, modo, btn) { if (OCUP) return; OCUP = true; if (btn) btn.disabled = true;
+    try { const P = await pdfDe(id); if (!P) return;
+      if (modo === "wa") { const f = new File([P.blob], P.nombre, { type: "application/pdf" });
+        try { if (navigator.canShare && navigator.canShare({ files: [f] })) { await navigator.share({ files: [f], title: P.nombre, text: "Te envío " + P.nombre.replace(/\.pdf$/i, "") + " de HWF." }); estado("Listo: elige WhatsApp en el menú para enviarlo.", "ok"); return; } } catch (e) { if (e && e.name === "AbortError") return; }
+        bajar(P); estado("Este equipo no permite adjuntar directo: el PDF se descargó; adjúntalo en WhatsApp (📎 → Documento).", "ok"); return; }
+      if (modo === "imp") { const url = URL.createObjectURL(P.blob), fr = document.createElement("iframe"); fr.style.cssText = "position:fixed;right:0;bottom:0;width:0;height:0;border:0"; fr.src = url; document.body.appendChild(fr);
+        fr.onload = () => { try { fr.contentWindow.focus(); fr.contentWindow.print(); } catch (e) { window.open(url, "_blank"); } setTimeout(() => { fr.remove(); URL.revokeObjectURL(url); }, 60000); };
+        if (/Android|iPhone|iPad/i.test(navigator.userAgent)) { fr.onload = null; fr.remove(); if (!window.open(url, "_blank")) bajar(P); estado("Se abrió el PDF: usa ⋮ → Imprimir (o Compartir → Imprimir).", "ok"); } return; }
+      bajar(P); estado("«" + P.nombre + "» descargado.", "ok"); }
+    finally { OCUP = false; if (btn) btn.disabled = false; } }
+  function pintaCat(box) { if (!box) return; const A = ((DAT && DAT.archivos) || []).filter(x => x.tipo === "catalogo" || x.tipo === "precios").sort((a, b) => b.fecha - a.fecha);
+    const lista = t => { const L = A.filter(x => x.tipo === t); return L.length ? L.map(x => `<div class="cv-f"><div><b>${esc(x.nombre.replace(/\.[^.]+$/, ""))}</b><small>actualizado el ${fecha(x.fecha)} · ${tam(x.tam)}${/pdf/i.test(x.mime) ? "" : " · se entrega como PDF"}</small></div>
+      <div class="cv-b"><button type="button" class="wa" data-cv="wa" data-id="${esc(x.id)}">📲 WhatsApp</button><button type="button" data-cv="imp" data-id="${esc(x.id)}">🖨 Imprimir</button><button type="button" data-cv="pdf" data-id="${esc(x.id)}">⬇ PDF</button></div></div>`).join("") : '<p class="cv-est">Todavía no hay archivos. Los sube HWF en su app (Catálogo y precios).</p>'; };
+    box.innerHTML = `<div class="cv-box"><div class="cv-card"><h2>Catálogos y listas de precio <span>siempre en PDF</span></h2>
+        <p class="cv-est" style="margin:0">Envía el catálogo o la lista de precio por WhatsApp con el PDF adjunto, imprímelo o descárgalo. Siempre está la última versión que subió HWF.</p>
+        <div style="display:flex;gap:8px;margin-top:10px"><button type="button" class="btn" id="cvAct" style="min-height:40px">↻ Actualizar</button></div>
+        <div id="cvEst" class="cv-est ${ESTC}" role="status" style="margin-top:8px">${esc(EST)}</div>${DEMO ? '<p class="cv-est">Demo: aquí no hay archivos reales.</p>' : ""}</div>
+      <div class="cv-g"><div class="cv-card"><h2>Catálogo</h2>${lista("catalogo")}</div><div class="cv-card"><h2>Listas de precio</h2>${lista("precios")}</div></div></div>`;
+    box.querySelector("#cvAct").onclick = async () => { await cargar(); pintaCat(box); };
+    box.querySelectorAll("[data-cv]").forEach(b => b.onclick = () => accion(b.dataset.id, b.dataset.cv, b)); }
+  async function abrir(box) { pintaCat(box); if (!DAT) { await cargar(); pintaCat(box); } }
+  const ICO = '<svg viewBox="0 0 32 32" aria-hidden="true" class="hic"><defs><linearGradient id="hic-cat" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FF8A6B"/><stop offset="1" stop-color="#D9483B"/></linearGradient></defs><rect width="32" height="32" rx="9" fill="url(#hic-cat)"/><g transform="translate(5.5 5.5) scale(.875)" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6M9 13h6M9 17h6"/></g></svg>';
+  if (VEN) {   /* VENTAS: apartado propio del menú (como Técnicas de venta) */
+    const b = document.createElement("button"); b.type = "button"; b.setAttribute("role", "tab"); b.id = "mCat"; b.setAttribute("aria-selected", "false"); b.textContent = "Catálogos y precios";
+    const ref = document.getElementById("mNut") || document.getElementById("mInicio"); ref.after(b);
+    const d = document.createElement("div"); d.id = "crmCat"; d.hidden = true; (document.getElementById("crmNut") || document.getElementById("crmInicio")).after(d);
+    const _sm = setModo; setModo = function (m) { const r = _sm.apply(this, arguments), on = m === "cat"; b.setAttribute("aria-selected", on); d.hidden = !on; document.body.classList.toggle("m-cat", on);
+      if (on) { ["crmFicha", "crmLista", "crmAgenda", "crmRuta", "crmInicio", "crmCobranza", "crmEmbudo", "crmNut", "crmDash", "crmAvance", "crmMeta", "crmTec", "crmBi"].forEach(id => { const x = document.getElementById(id); if (x) x.hidden = true; }); abrir(d); window.scrollTo({ top: 0 }); }
+      return r; };
+    b.onclick = () => setModo("cat");
+    try { const _af = abrirFicha; abrirFicha = function () { d.hidden = true; b.setAttribute("aria-selected", "false"); return _af.apply(this, arguments); }; } catch (e) {}
+    try { if (!NAV_ORDEN.some(x => x[0] === "cat")) { const i = NAV_ORDEN.findIndex(x => x[0] === "nut"); NAV_ORDEN.splice(i >= 0 ? i + 1 : NAV_ORDEN.length, 0, ["cat", "mCat"]); } } catch (e) {}
+    document.head.insertAdjacentHTML("beforeend", "<style>body.m-cat #crmMeta{display:none!important}</style>");
+    new MutationObserver(() => { const it = document.querySelector('#snPanel [data-sm="cat"] .sn-e'); if (it && !it.dataset.cv) { it.dataset.cv = "1"; it.innerHTML = ICO; } }).observe(document.body, { childList: true, subtree: true });
+  } else {   /* TIENDA: botón en la barra y sección propia */
+    const nav = document.getElementById("tNav"), s = document.createElement("section"); s.className = "t-sec"; s.id = "sCat"; s.hidden = true; document.querySelector("main").appendChild(s);
+    SEC.cat = "sCat"; const b = document.createElement("button"); b.type = "button"; b.dataset.s = "cat"; b.innerHTML = "<span>📄</span>Catálogos"; const adm = document.getElementById("navAdm"); if (adm) adm.before(b); else nav.appendChild(b);
+    if (!b.onclick && !nav.onclick) b.onclick = () => ir("cat");
+    const _p = pintar; pintar = function (x) { if (x === "cat") return abrir(s); return _p.apply(this, arguments); };
+    document.head.insertAdjacentHTML("beforeend", "<style>#tNav{grid-template-columns:none!important;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr)}</style>");
+  }
 })();
 </script>
 </body></html>

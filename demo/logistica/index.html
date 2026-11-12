@@ -372,7 +372,7 @@ function pintarResultado() { const box = $("rRes"); if (!RT || !RT.res) { box.in
     <div class="row np"><button type="button" class="btn pri" id="rEnv">📤 Enviar rutas a choferes</button><button type="button" class="btn" onclick="window.print()">🖨 Imprimir hojas de ruta</button></div>
     <p class="nota np">Cada chofer abre la app <b>CHOFER HWF</b>, elige su vehículo y recibe su ruta de hoy (${esc(lsGet("fecha", ""))}) con navegación, GPS y registro de entrega con fotos, firma y forma de pago. Seguimiento en vivo en la pestaña «Seguimiento».</p></div>
   ${R.usos.map(u => { const v = u.v; return u.viajes.map((r, vi) => { const c = RT.carga(r), k = RT.len(r), h = RT.horas(r, v), comb = k * P.diesel / v.kml, vari = k * v.var, fijo = vi ? 0 : v.fijo;
-    const txt = `Ruta ${v.nombre}${u.viajes.length > 1 ? " (vuelta " + (vi + 1) + ")" : ""} ${lsGet("fecha", "")}:\n` + r.map((x, i) => `${i + 1}. ${RT.S[x].cli} · ${RT.S[x].comuna}${RT.S[x].dir ? " · " + RT.S[x].dir : ""} · ${nf(RT.S[x].kg)} kg${RT.S[x].tel ? " · " + RT.S[x].tel : ""}`).join("\n") + "\n" + link(r).join("\n");
+    const txt = `Ruta ${v.nombre}${u.viajes.length > 1 ? " (vuelta " + (vi + 1) + ")" : ""} ${lsGet("fecha", "")}:\n` + r.map((x, i) => `${i + 1}. ${RT.S[x].cli} · ${RT.S[x].comuna}${RT.S[x].dir ? " · " + RT.S[x].dir : ""} · ${nf(RT.S[x].kg)} kg${RT.S[x].tel ? " · " + RT.S[x].tel : ""}`).join("\n") + "\n" + link(r).join("\n") + (typeof choLink === "function" ? choLink() : "");
     return `<div class="card rt"><h3><span class="sw" style="background:${COL[v.id]}"></span>${esc(v.nombre)}${u.viajes.length > 1 ? ` · vuelta ${vi + 1}` : ""}<span class="muted" style="margin-left:auto;font-size:.82rem">${nf(k)} km · ${nf(h, 1)} h · ${mm(comb + vari + fijo)}</span></h3>
       <div class="kp"><div class="k"><span>Carga</span><b>${nf(c.kg)} kg</b><div class="bar"><i style="width:${Math.min(100, c.kg / v.kg * 100)}%"></i></div><small>${nf(c.kg / v.kg * 100)}% de ${nf(v.kg)} kg · ${nf(c.m3, 1)} de ${nf(v.m3, 1)} m³</small></div>
         <div class="k"><span>Costo</span><b>${mm(comb + vari + fijo)}</b><small>diésel ${mm(comb)} · mantención ${mm(vari)}${fijo ? " · fijo " + mm(fijo) : ""}</small></div></div>
@@ -452,7 +452,7 @@ if (!cfg()) pantallaConexion(); else if (!DATA()) { bajar(true).then(() => DATA(
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261112204455";
+const HWF_VER = "20261112210840";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer)\/[^/]*$/, "/");
   let avisado = false;
@@ -916,13 +916,24 @@ function vmPoner(cont, VM, antes) { try { if (!cont) return; const v = cont.quer
     const stock = {}, stockT = {}; let hayT = false; Object.keys(D.bodegas || {}).forEach(b => { const esT = /TIENDA|HELLY/i.test(b), esD = /DISTRIBU/i.test(b); if (!esT && !esD) return; if (esT) hayT = true; (D.bodegas[b] || []).forEach(([c, , st]) => { const m = esT ? stockT : stock; m[c] = (m[c] || 0) + (Number(st) || 0); }); });
     const B = { corte: D.corte, anio: cy, vend: ["Distribuidora", "Tienda Hellywoof"], productos, cats, rows, compras: D.compras || null, fc: D.fc || null, desc: D.desc || [], stock, stockT: hayT ? stockT : null, parcial: !(D.bi && D.bi.rows) };
     LOGC = { f: firma, B }; return B; };
+  /* VENTAS (12-11-2026): la Inteligencia de negocio es un apartado propio del menú, aparte del Panel */
+  function montarVentas(f) { if (document.getElementById("mBi") || !document.getElementById("mDash")) return;
+    const b = document.createElement("button"); b.type = "button"; b.setAttribute("role", "tab"); b.id = "mBi"; b.setAttribute("aria-selected", "false"); b.textContent = "Inteligencia de negocio"; document.getElementById("mDash").after(b);
+    const d = document.createElement("div"); d.id = "crmBi"; d.hidden = true; document.getElementById("crmDash").after(d);
+    const _sm = setModo; setModo = function (m) { const r = _sm.apply(this, arguments), on = m === "bi"; b.setAttribute("aria-selected", on); d.hidden = !on; document.body.classList.toggle("m-bi", on);
+      if (on) { ["crmFicha", "crmLista", "crmAgenda", "crmRuta", "crmInicio", "crmCobranza", "crmEmbudo", "crmNut", "crmDash", "crmAvance", "crmMeta", "crmTec"].forEach(id => { const x = document.getElementById(id); if (x) x.hidden = true; }); try { f(); } catch (e) {} window.scrollTo({ top: 0 }); }
+      return r; };
+    document.head.insertAdjacentHTML("beforeend", "<style>body.m-bi #crmMeta{display:none!important}</style>");
+    b.onclick = () => setModo("bi");
+    try { const _af = abrirFicha; abrirFicha = function () { d.hidden = true; b.setAttribute("aria-selected", "false"); return _af.apply(this, arguments); }; } catch (e) {}
+    try { if (typeof NAV_ORDEN !== "undefined" && !NAV_ORDEN.some(x => x[0] === "bi")) NAV_ORDEN.splice(Math.max(0, NAV_ORDEN.findIndex(x => x[0] === "dash")) + 1, 0, ["bi", "mBi"]); } catch (e) {} }
   const HOST = (() => { try {
     if (typeof pintarInventario === "function" && document.getElementById("s-inv")) return { t: "admin", et: "Stock", cont: () => document.getElementById("s-inv"), base: () => (typeof D !== "undefined" && D && D.rows && D.rows.length) ? D : BASE, alt: () => (typeof BASE !== "undefined" ? BASE : {}),
       stock: c => stockDe(c), meta: (y, m) => metaPlan14(y, m), demo: () => typeof RK_DEMO !== "undefined" && RK_DEMO, engancha: f => envuelve("pintarInventario", f) };
     if (typeof pintarInv === "function" && typeof DATA === "function" && document.getElementById("s-inv")) return { t: "log", et: "Stock", cont: () => document.getElementById("s-inv"), base: baseLog, alt: () => ({}),
       stock: c => { const B = baseLog(); return tiene(B.stock, c) ? B.stock[c] : null; }, meta: (y, m) => metaD(y * 100 + m), demo: () => /DEMO/.test(document.title), engancha: f => envuelve("pintarInv", f) };
-    if (typeof pintarDash === "function" && document.getElementById("crmDash") && typeof DB !== "undefined") return { t: "ventas", et: "Panel", cont: () => document.getElementById("crmDash"), base: () => (DB && DB.d) || {}, alt: () => ({}),
-      stock: c => { const st = DB && DB.d && DB.d.stock; return tiene(st, c) ? st[c] : null; }, meta: (y, m) => metaPlan14(y, m), demo: () => /DEMO/.test(document.title), engancha: f => envuelve("pintarDash", f) };
+    if (typeof pintarDash === "function" && document.getElementById("crmDash") && typeof DB !== "undefined") return { t: "ventas", et: "Panel", cont: () => document.getElementById("crmBi"), base: () => (DB && DB.d) || {}, alt: () => ({}),
+      stock: c => { const st = DB && DB.d && DB.d.stock; return tiene(st, c) ? st[c] : null; }, meta: (y, m) => metaPlan14(y, m), demo: () => /DEMO/.test(document.title), engancha: f => montarVentas(f) };
   } catch (e) {} return null; })();
   if (!HOST) return;
   /* VENTAS: sin costos (pedido de Jorge 13-11-2026). No se muestran compras en pesos, costo vendido, márgenes, stock valorizado ni alzas de costo;
@@ -931,7 +942,8 @@ function vmPoner(cont, VM, antes) { try { if (!cont) return; const v = cont.quer
   const LS = HOST.t === "admin" ? "hwf-bi" : "hwf-bi-" + HOST.t; let E = { on: false, un: "", u: "$", prov: "", marca: "", prod: "", fmt: "", canal: "", anio: 0 }; try { E = Object.assign(E, JSON.parse(localStorage.getItem(LS) || "{}")); } catch (e) {}
   /* unidades (13-11-2026): "v" Ventas · "l" Logística · "" = la pantalla propia de la app (solo VENTAS: Panel). En HWF y LOGÍSTICA ya no hay
      pestaña «Stock»: el detalle de stock queda debajo de la unidad Logística */
-  if (E.un !== "v" && E.un !== "l") E.un = HOST.t === "ventas" ? (E.on ? "v" : "") : "l"; if (HOST.t === "ventas" && E.un === "l") E.un = "v";   /* en VENTAS la Inteligencia de negocio muestra solo la unidad Ventas */
+  if (E.un !== "v" && E.un !== "l") E.un = "l"; if (HOST.t === "ventas") { E.un = "v"; E.canal = "d"; }   /* VENTAS: solo unidad Ventas y solo distribuidora (12-11-2026) */
+  E.prov = "";   /* sin filtro de proveedor (12-11-2026): marca, formato y producto */
   E.on = !!E.un;
   const guarda = () => { try { localStorage.setItem(LS, JSON.stringify(E)); } catch (e) {} };
   const MES = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
@@ -943,7 +955,7 @@ function vmPoner(cont, VM, antes) { try { if (!cont) return; const v = cont.quer
   /* formato (tamaño del envase) desde el nombre: «Agility Adulto 20 Kg» → «20 Kg» */
   const fmtDe = n => { const m = /(\d+(?:[.,]\d+)?)\s*(kgs?|kilos?|grs?|gramos|g|ml|cc|lts?|litros?|l|caps?|unid(?:ades)?|un|u)\b/i.exec(String(n || "")); if (!m) return "Sin formato";
     const u = m[2].toLowerCase(), U = /^k/.test(u) ? "Kg" : /^g/.test(u) ? "g" : /^(ml|cc)/.test(u) ? "ml" : /^l/.test(u) ? "L" : /^c/.test(u) ? "caps" : "un"; return m[1].replace(".", ",") + " " + U; };
-  const nivel = () => (E.marca || E.prod) ? "producto" : E.prov ? "marca" : "proveedor";
+  const nivel = () => (E.marca || E.prod) ? "producto" : "marca";
   /* canal: "" total · "d" distribuidora · "t" tienda. Ventas por vendedor (Tienda Hellywoof); compras por bodega de ingreso,
      y en distribuidora/tienda se suman los traspasos netos entre bodegas (así las dos partes suman el total comprado) */
   const CAN = { "": "total (distribuidora + tienda)", d: "distribuidora", t: "tienda" };
@@ -1003,9 +1015,8 @@ function vmPoner(cont, VM, antes) { try { if (!cont) return; const v = cont.quer
       return `<tr${clic ? ` data-bp="${esc(o.cod != null ? o.cod : o.n)}"` : ""}><td>${esc(o.n)}${o.cod != null ? `<small>${esc(o.cod)}${o.x ? " · " + esc(o.x) : ""}${st != null ? " · stock " + fu(st) : ""}</small>` : ""}</td><td>${F(vv)}</td><td class="bi-l">${hay ? Fc(cc) : "—"}</td><td class="bi-l ${dcl(cc - rr)}">${hay ? Fc(cc - rr) : "—"}</td><td class="bi-v">${v ? Math.round(vv / v * 100) + "%" : "—"}</td></tr>`; };
     const G = ord(R.prov).filter(o => o.vq || o.cq || o.vv || o.cv), NV = R.nv, hayF = !!(E.prov || E.marca || E.fmt || E.prod), filt = [E.prov, E.marca, E.fmt, E.prod ? (R.prods.find(x => x[0] === E.prod) || [])[1] : ""].filter(Boolean).join(" · ");
     return `<div class="card"><h2>Inteligencia de negocio · ${E.un === "v" ? "Ventas" : "Logística"} <span class="muted">${E.un === "v" ? "ventas, crecimiento y concentración" : "compras, inventario y abastecimiento"} · ${E.canal ? CAN[E.canal] + " · " : ""}${E.anio}</span></h2>
-      <div class="bi-fil"><label class="bi-full">Negocio<span class="bi-u" id="biCanal">${[["", "Total"], ["d", "Distribuidora"], ["t", "Tienda"]].map(([k, t]) => `<button type="button" data-c="${k}" aria-pressed="${E.canal === k}">${t}</button>`).join("")}</span></label>
+      <div class="bi-fil">${HOST.t === "ventas" ? "" : `<label class="bi-full">Negocio<span class="bi-u" id="biCanal">${[["", "Total"], ["d", "Distribuidora"], ["t", "Tienda"]].map(([k, t]) => `<button type="button" data-c="${k}" aria-pressed="${E.canal === k}">${t}</button>`).join("")}</span></label>`}
         <label>Ver en<span class="bi-u" id="biU"><button type="button" data-u="$" aria-pressed="${P}">Pesos $</button><button type="button" data-u="u" aria-pressed="${!P}">Unidades</button></span></label>
-        <label>Proveedor<select id="biProv"><option value="">Todos los proveedores</option>${R.provs.map(p => `<option${p === E.prov ? " selected" : ""}>${esc(p)}</option>`).join("")}</select></label>
         <label>Marca<select id="biMarca"><option value="">Todas las marcas</option>${R.marcas.map(p => `<option${p === E.marca ? " selected" : ""}>${esc(p)}</option>`).join("")}</select></label>
         <label>Formato<select id="biFmt"><option value="">Todos los formatos</option>${R.fmts.map(p => `<option${p === E.fmt ? " selected" : ""}>${esc(p)}</option>`).join("")}</select></label>
         <label class="bi-full">Producto<select id="biProd"><option value="">Todos los productos (${R.prods.length})</option>${R.prods.map(([c, n]) => `<option value="${esc(c)}"${c === E.prod ? " selected" : ""}>${esc(n)}</option>`).join("")}</select></label>
@@ -1017,7 +1028,7 @@ function vmPoner(cont, VM, antes) { try { if (!cont) return; const v = cont.quer
         <div data-u="l">Compras${PC ? " a costo" : RC && P ? " (unidades)" : ""}<b>${hay ? Fc(c) : "—"}</b><small>${hay ? (E.canal ? "compras directas ± traspasos entre bodegas" : "ingresos de mercadería") : R.sinBod ? "por bodega: con la próxima actualización de datos" : R.X.C ? "sin datos de compras para " + E.anio : "aún sin datos de compras"}</small></div>
         <div data-u="${PC ? "v" : "l"}">${PC ? "Costo de lo vendido" : "Compras ÷ ventas" + (RC && P ? " (unidades)" : "")}<b>${PC ? fm(t.vc) : (hay && t.vq ? Math.round(c / t.vq * 100) + "%" : "—")}</b><small>${PC ? (t.vv ? "margen " + Math.round((1 - t.vc / t.vv) * 100) + "%" : "") : "100% = se compra lo que se vende"}</small></div>
         <div data-u="l">Compras − ${PC ? "costo vendido" : "ventas" + (RC && P ? " (unidades)" : "")}<b class="${hay ? dcl(dif) : ""}">${hay ? Fc(dif) : "—"}</b><small>${hay ? (dif > 0 ? "se compró más de lo vendido: sube el inventario" : dif < 0 ? "se compró menos: baja el inventario" : "") : ""}</small></div></div></div>
-    <div class="card"><h2>Por mes <span class="muted">${hayF ? esc(filt) : "todos los proveedores"} · ${P ? "millones de $" : "unidades"}</span></h2>
+    <div class="card"><h2>Por mes <span class="muted">${hayF ? esc(filt) : "todas las marcas"} · ${P ? "millones de $" : "unidades"}</span></h2>
       <div class="bi-ley"><span><i style="background:#0B3146;height:3px;width:16px;vertical-align:4px"></i>Ventas${P ? " netas" : ""}</span>${(RC && P) || E.un === "v" ? "" : '<span><i style="background:#E07B24;height:3px;width:16px;vertical-align:4px"></i>Compras</span>'}${PC && E.un !== "l" ? '<span><i style="background:none;border-top:2px dashed #5B6874;height:0;border-radius:0;vertical-align:4px"></i>Costo de lo vendido</span>' : ""}</div>
       ${grafico(R)}
       <div class="tbl" style="overflow-x:auto;margin-top:8px"><table class="bi-t"><thead><tr><th>Mes</th><th>Ventas</th>${PC ? '<th class="bi-v">Costo vendido</th>' : ""}<th class="bi-l">Compras${RC && P ? " (u)" : ""}</th><th class="bi-l">Compras − ${PC ? "costo" : "ventas"}${RC && P ? " (u)" : ""}</th>${PC ? '<th class="bi-v">Margen</th>' : ""}</tr></thead><tbody>
@@ -1026,17 +1037,17 @@ function vmPoner(cont, VM, antes) { try { if (!cont) return; const v = cont.quer
       <div class="tbl" style="overflow-x:auto"><table class="bi-t"><thead><tr><th>${NV[0].toUpperCase() + NV.slice(1)}</th><th>Ventas</th><th class="bi-l">Compras${RC && P ? " (u)" : ""}</th><th class="bi-l">Compras − ${PC ? "costo" : "ventas"}${RC && P ? " (u)" : ""}</th><th class="bi-v">% venta</th></tr></thead><tbody>
         ${G.slice(0, 200).map(o => filaG(o, !E.prod)).join("") || '<tr><td colspan="5" class="muted">Sin movimientos.</td></tr>'}</tbody></table></div>
       ${hayF ? '<button type="button" class="btn" id="biTodos" style="margin-top:10px">‹ Volver un nivel</button>' : ""}
-      <p class="bi-nota">Ventas: facturas − notas de crédito, neto sin IVA (${CAN[E.canal]}).${E.canal ? " En «" + CAN[E.canal] + "» las compras son las ingresadas a su bodega más los traspasos netos recibidos de la otra bodega (la distribuidora los entrega, la tienda los recibe): distribuidora + tienda = total comprado." : ""} Compras: ingresos de mercadería («Parte de entrada») del Mayor Auxiliar de inventario${R.X.C ? ", informe del " + esc(String(R.X.C.fecha || "")) : ""}, ${RC ? "aquí en unidades" : "a costo sin IVA"}; no incluye devoluciones de clientes ni traspasos entre bodegas.${R.X.demo ? " Demo: compras ficticias." : ""}${R.X.C ? (hay ? "" : " <b>No hay compras de " + E.anio + " en el informe</b>: para verlas, sube a META un Mayor Auxiliar que incluya ese año.") : " <b>Las compras aparecerán con la próxima actualización de datos</b> (necesita el informe Mayor Auxiliar en la carpeta META)."} Proveedor y marca = categoría Defontana del producto; formato = tamaño del envase tomado del nombre. Rojo = se compró más de lo que salió; verde = menos.</p></div>`; }
+      <p class="bi-nota">Ventas: facturas − notas de crédito, neto sin IVA (${CAN[E.canal]}).${E.canal ? " En «" + CAN[E.canal] + "» las compras son las ingresadas a su bodega más los traspasos netos recibidos de la otra bodega (la distribuidora los entrega, la tienda los recibe): distribuidora + tienda = total comprado." : ""} Compras: ingresos de mercadería («Parte de entrada») del Mayor Auxiliar de inventario${R.X.C ? ", informe del " + esc(String(R.X.C.fecha || "")) : ""}, ${RC ? "aquí en unidades" : "a costo sin IVA"}; no incluye devoluciones de clientes ni traspasos entre bodegas.${R.X.demo ? " Demo: compras ficticias." : ""}${R.X.C ? (hay ? "" : " <b>No hay compras de " + E.anio + " en el informe</b>: para verlas, sube a META un Mayor Auxiliar que incluya ese año.") : " <b>Las compras aparecerán con la próxima actualización de datos</b> (necesita el informe Mayor Auxiliar en la carpeta META)."} Marca = categoría Defontana del producto; formato = tamaño del envase tomado del nombre. Rojo = se compró más de lo que salió; verde = menos.</p></div>`; }
   function csvRC(R) { const f = [["Año", E.anio, "Proveedor", E.prov || "Todos", "Marca", E.marca || "Todas", "Formato", E.fmt || "Todos", "Producto", E.prod || "Todos", "Negocio", CAN[E.canal]], [], ["Mes", "Ventas unidades", "Ventas $ neto", "Compras unidades"]];
     R.mes.slice(0, R.ult + 1).forEach((o, i) => f.push([MES[i], Math.round(o.vq), Math.round(o.vv), Math.round(o.cq)]));
-    f.push([], ["Producto", "Código", "Marca", "Formato", "Proveedor", "Ventas unidades", "Ventas $ neto", "Compras unidades"]);
-    R.prod.slice().sort((a, b) => b.vv - a.vv).forEach(o => f.push([o.n, o.cod || "", o.x || "", o.ft || "", o.pv || "", Math.round(o.vq), Math.round(o.vv), Math.round(o.cq)]));
+    f.push([], ["Producto", "Código", "Marca", "Formato", "Ventas unidades", "Ventas $ neto", "Compras unidades"]);
+    R.prod.slice().sort((a, b) => b.vv - a.vv).forEach(o => f.push([o.n, o.cod || "", o.x || "", o.ft || "", Math.round(o.vq), Math.round(o.vv), Math.round(o.cq)]));
     const t = "\uFEFF" + f.map(r => r.map(x => { const s = String(x == null ? "" : x); return /[;"\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; }).join(";")).join("\r\n");
     const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([t], { type: "text/csv;charset=utf-8" })); a.download = `Ventas y compras ${E.anio}${E.prov ? " " + E.prov : ""}.csv`; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); }
   function csv(R) { if (RC) return csvRC(R); const P = E.u === "$", f = [["Año", E.anio, "Proveedor", E.prov || "Todos", "Marca", E.marca || "Todas", "Formato", E.fmt || "Todos", "Producto", E.prod || "Todos", "Negocio", CAN[E.canal], "Unidad", P ? "Pesos" : "Unidades"], [], ["Mes", "Ventas unidades", "Ventas $ neto", "Costo vendido $", "Compras unidades", "Compras $ costo"]];
     R.mes.slice(0, R.ult + 1).forEach((o, i) => f.push([MES[i], Math.round(o.vq), Math.round(o.vv), Math.round(o.vc), Math.round(o.cq), Math.round(o.cv)]));
-    f.push([], ["Producto", "Código", "Marca", "Formato", "Proveedor", "Ventas unidades", "Ventas $ neto", "Costo vendido $", "Compras unidades", "Compras $ costo"]);
-    R.prod.slice().sort((a, b) => b.vv - a.vv).forEach(o => f.push([o.n, o.cod || "", o.x || "", o.ft || "", o.pv || "", Math.round(o.vq), Math.round(o.vv), Math.round(o.vc), Math.round(o.cq), Math.round(o.cv)]));
+    f.push([], ["Producto", "Código", "Marca", "Formato", "Ventas unidades", "Ventas $ neto", "Costo vendido $", "Compras unidades", "Compras $ costo"]);
+    R.prod.slice().sort((a, b) => b.vv - a.vv).forEach(o => f.push([o.n, o.cod || "", o.x || "", o.ft || "", Math.round(o.vq), Math.round(o.vv), Math.round(o.vc), Math.round(o.cq), Math.round(o.cv)]));
     try { const Z = R.avz; if (Z) { f.push([], ["INDICADORES", "Venta $", "Margen %", "Margen $", "vs año anterior %", "Stock a costo $", "Días inventario", "Rotación", "Rentabilidad inventario", "Compras ÷ costo %", "Alza costo %"]);
       Z.A.GL.forEach(a => { const i = ind(a), r = x => x == null ? "" : Math.round(x * 1000) / 10; f.push([a.n, Math.round(a.v), r(i.mg), Math.round(i.mgP), r(i.yoy), Math.round(a.sv), i.dias == null ? "" : Math.round(i.dias), i.rot == null ? "" : Math.round(i.rot * 10) / 10, i.gm == null ? "" : Math.round(i.gm * 100) / 100, r(i.cc), r(i.alza)]); });
       [["SIN STOCK Y CON VENTA", Z.qb, o => Math.round(o.v3 / 3)], ["SOBRESTOCK (+120 días)", Z.sob, o => Math.round(o.sv)], ["STOCK SIN VENTA 3 MESES", Z.muerto, o => Math.round(o.sv)], ["ALZA DE COSTO", Z.alz, o => Math.round(o.alza * 1000) / 10]].forEach(([t, l, g]) => { if (!l.length) return; f.push([], [t, "Código", "Grupo", "Valor"]); l.forEach(o => f.push([o.n, o.cod, o.grp, g(o)])); }); } } catch (e) {}
@@ -1118,12 +1129,12 @@ function vmPoner(cont, VM, antes) { try { if (!cont) return; const v = cont.quer
           <tr class="tot"><td>Total</td><td>${fm(T.fv)}</td><td class="bi-c bi-l">${fm(T.v > 0 ? T.fv * T.c / T.v : 0)}</td><td class="bi-c bi-l">${fm(T.sv)}</td><td class="bi-l">${IT.cob == null ? "—" : IT.cob.toLocaleString("es-CL", { maximumFractionDigits: 1 }) + " meses"}</td></tr></tbody></table></div>
         <p class="bi-nota">Venta esperada = pronóstico por producto (el mismo de Abastecimiento) llevado a la meta del plan de la distribuidora de los próximos 3 meses, más la venta base de la tienda. Cobertura = meses de la venta esperada que cubre el stock (${A.invTxt}; en rojo, menos de medio mes). La compra producto a producto está en Más → Abastecimiento.</p></div>` : ""}`; }
   /* ===== exportar la unidad en pantalla: Excel, PDF, correo e imprimir ===== */
-  const unidadTxt = () => E.un === "v" ? "Ventas" : "Logística", filtroTxt = () => [CAN[E.canal], E.prov, E.marca, E.fmt, E.prod ? "producto " + E.prod : "", String(E.anio), E.u === "$" ? "pesos" : "unidades"].filter(Boolean).join(" · ");
+  const unidadTxt = () => E.un === "v" ? "Ventas" : "Logística", filtroTxt = () => [CAN[E.canal], E.marca, E.fmt, E.prod ? "producto " + E.prod : "", String(E.anio), E.u === "$" ? "pesos" : "unidades"].filter(Boolean).join(" · ");
   function hojas(R) { const V = E.un === "v", r0 = x => Math.round(x || 0), r1 = x => x == null ? "" : Math.round(x * 1000) / 10, H = [];
     const cm = ["Mes", "Ventas unidades", "Ventas $ neto"].concat(V ? (RC ? [] : ["Costo vendido $", "Margen %"]) : ["Compras unidades"].concat(RC ? [] : ["Compras $ costo"]));
     H.push(["Por mes", [["Inteligencia de negocio · " + unidadTxt(), filtroTxt()], [], cm].concat(R.mes.slice(0, R.ult + 1).map((o, i) => [MES[i] + " " + E.anio, r0(o.vq), r0(o.vv)].concat(V ? (RC ? [] : [r0(o.vc), o.vv ? r1(1 - o.vc / o.vv) : ""]) : [r0(o.cq)].concat(RC ? [] : [r0(o.cv)]))))]);
-    const cd = ["Producto", "Código", "Marca", "Formato", "Proveedor", "Ventas unidades", "Ventas $ neto"].concat(V ? (RC ? [] : ["Costo vendido $"]) : ["Compras unidades"].concat(RC ? [] : ["Compras $ costo"]).concat(["Stock unidades"]));
-    H.push(["Productos", [cd].concat(R.prod.slice().sort((a, b) => b.vv - a.vv).map(o => { const st = o.cod != null ? HOST.stock(o.cod) : null; return [o.n, o.cod || "", o.x || "", o.ft || "", o.pv || "", r0(o.vq), r0(o.vv)].concat(V ? (RC ? [] : [r0(o.vc)]) : [r0(o.cq)].concat(RC ? [] : [r0(o.cv)]).concat([st == null ? "" : st])); }))]);
+    const cd = ["Producto", "Código", "Marca", "Formato", "Ventas unidades", "Ventas $ neto"].concat(V ? (RC ? [] : ["Costo vendido $"]) : ["Compras unidades"].concat(RC ? [] : ["Compras $ costo"]).concat(["Stock unidades"]));
+    H.push(["Productos", [cd].concat(R.prod.slice().sort((a, b) => b.vv - a.vv).map(o => { const st = o.cod != null ? HOST.stock(o.cod) : null; return [o.n, o.cod || "", o.x || "", o.ft || "", r0(o.vq), r0(o.vv)].concat(V ? (RC ? [] : [r0(o.vc)]) : [r0(o.cq)].concat(RC ? [] : [r0(o.cv)]).concat([st == null ? "" : st])); }))]);
     const Z = R.avz; if (Z) { const ci = [R.nv[0].toUpperCase() + R.nv.slice(1), "Venta $"].concat(V ? (RC ? [] : ["Margen %", "Margen $"]).concat(["vs año anterior %"]) : (RC ? [] : ["Stock a costo $"]).concat(["Días inventario", "Rotación"]).concat(RC ? [] : ["Rentabilidad inventario", "Compras ÷ costo %", "Alza costo %"]));
       H.push(["Indicadores", [ci].concat(Z.A.GL.map(a => { const i = ind(a); return [a.n, r0(a.v)].concat(V ? (RC ? [] : [r1(i.mg), r0(i.mgP)]).concat([r1(i.yoy)]) : (RC ? [] : [r0(a.sv)]).concat([i.dias == null ? "" : Math.round(i.dias), i.rot == null ? "" : Math.round(i.rot * 10) / 10]).concat(RC ? [] : [i.gm == null ? "" : Math.round(i.gm * 100) / 100, r1(i.cc), r1(i.alza)])); }))]);
       if (!V) { const al = [["Alerta", "Producto", "Código", "Grupo", "Valor"]]; [["Sin stock y con venta ($ venta/mes)", Z.qb, o => r0(o.v3 / 3)], ["Sobrestock +120 días (días)", Z.sob, o => Math.round(o.dias)], ["Stock sin venta 3 meses (unidades)", Z.muerto, o => o.st]].concat(RC ? [] : [["Alza de costo (%)", Z.alz, o => r1(o.alza)]]).forEach(([t, l, g]) => l.forEach(o => al.push([t, o.n, o.cod, o.grp, g(o)]))); if (al.length > 1) H.push(["Alertas", al]); } }
@@ -1162,19 +1173,16 @@ function vmPoner(cont, VM, antes) { try { if (!cont) return; const v = cont.quer
     if (modo === "pdf") K.bajar(P); else if (modo === "imprimir") K.imprimir(P);
     else { let puede = false; try { puede = !!(navigator.canShare && navigator.canShare({ files: [new File([P.bytes], P.nombre, { type: "application/pdf" })] })); } catch (e) {}
       if (puede) K.enviar(P); else { K.bajar(P); try { location.href = "mailto:?subject=" + encodeURIComponent(P.nombre.replace(/\.pdf$/, "")) + "&body=" + encodeURIComponent(P.msg + "\n\n(Adjunta el PDF que se acaba de descargar.)"); } catch (e) {} } } }
-  function poner() { const s = HOST.cont(); if (!s) return; const viejo = s.querySelector("#biSeg"); if (viejo) viejo.remove(); const vb = s.querySelector("#biBox"); if (vb) vb.remove();
-    const soloV = HOST.t === "ventas", ocultar = soloV ? !!E.un : E.un === "v";   /* HWF y LOGÍSTICA: el stock se ve bajo la unidad Logística */
-    [...s.children].forEach(c => c.classList.toggle("bi-oculto", ocultar));
-    s.insertAdjacentHTML("afterbegin", `<div class="bi-seg" id="biSeg" role="group" aria-label="Unidad de inteligencia de negocio">${soloV ? `<button type="button" data-bi="" aria-pressed="${!E.un}">${HOST.et}</button>` : ""}<button type="button" data-bi="v" aria-pressed="${E.un === "v"}">${soloV ? "Inteligencia de negocio" : "Ventas"}</button>${soloV ? "" : `<button type="button" data-bi="l" aria-pressed="${E.un === "l"}">Logística</button>`}</div>`);
-    s.querySelector("#biSeg").onclick = e => { const b = e.target.closest("[data-bi]"); if (!b) return; E.un = b.dataset.bi; E.on = !!E.un; guarda(); poner(); };
-    if (!E.un) return;
+  function poner() { const s = HOST.cont(); if (!s) return; ["#biSeg", "#biBox"].forEach(k => { const x = s.querySelector(k); if (x) x.remove(); });
+    const soloV = HOST.t === "ventas"; if (soloV) { E.un = "v"; E.canal = "d"; }
+    if (!soloV) [...s.children].forEach(c => c.classList.toggle("bi-oculto", E.un === "v"));   /* HWF y LOGÍSTICA: el stock se ve bajo la unidad Logística */
+    marcarMenu(); s.insertAdjacentHTML("afterbegin", '<div id="biSeg" hidden></div>');
     let R; try { R = calc(); } catch (e) { s.querySelector("#biSeg").insertAdjacentHTML("afterend", '<div id="biBox"><div class="card"><p class="muted">No se pudo calcular: ' + esc(String(e && e.message || e)) + "</p></div></div>"); return; }
     s.querySelector("#biSeg").insertAdjacentHTML("afterend", '<div id="biBox">' + sinC(html(R) + avzHtml(R)) + "</div>"); const q = id => s.querySelector("#" + id);
     { const bx = q("biBox"), otra = E.un === "v" ? "l" : "v"; bx.querySelectorAll('[data-u="' + otra + '"], .bi-' + otra).forEach(x => x.remove());   /* deja solo lo de la unidad elegida */
       bx.querySelectorAll(".card").forEach(c => { const ps = c.querySelectorAll("p[data-u]"); if (c.querySelector("h2") && /^Hallazgos/.test(c.querySelector("h2").textContent) && !ps.length && !c.querySelector(".muted + p")) c.insertAdjacentHTML("beforeend", '<p class="muted">Sin hallazgos para esta unidad con los filtros elegidos.</p>'); }); }
     q("biU").onclick = e => { const b = e.target.closest("[data-u]"); if (b) { E.u = b.dataset.u; guarda(); poner(); } };
-    q("biCanal").onclick = e => { const b = e.target.closest("[data-c]"); if (b) { E.canal = b.dataset.c; guarda(); poner(); } };
-    q("biProv").onchange = () => { E.prov = q("biProv").value; E.marca = E.prod = ""; guarda(); poner(); };
+    if (q("biCanal")) q("biCanal").onclick = e => { const b = e.target.closest("[data-c]"); if (b) { E.canal = b.dataset.c; guarda(); poner(); } };
     q("biMarca").onchange = () => { E.marca = q("biMarca").value; E.prod = ""; guarda(); poner(); };
     q("biFmt").onchange = () => { E.fmt = q("biFmt").value; E.prod = ""; guarda(); poner(); };
     q("biProd").onchange = () => { E.prod = q("biProd").value; guarda(); poner(); };
@@ -1182,7 +1190,22 @@ function vmPoner(cont, VM, antes) { try { if (!cont) return; const v = cont.quer
     if (q("biAnio")) q("biAnio").onchange = () => { E.anio = Number(q("biAnio").value); guarda(); poner(); };
     if (q("biTodos")) q("biTodos").onclick = () => { if (E.prod) E.prod = ""; else if (E.marca) E.marca = ""; else if (E.fmt && !E.prov) E.fmt = ""; else if (E.prov) E.prov = ""; else E.fmt = ""; guarda(); poner(); };
     q("biCsv").onclick = () => excel(R); q("biPdf").onclick = () => conPdf(R, "pdf"); q("biMail").onclick = () => conPdf(R, "correo"); q("biPrint").onclick = () => conPdf(R, "imprimir");
-    s.querySelectorAll("tr[data-bp]").forEach(tr => tr.onclick = () => { const v = tr.dataset.bp, n = R.nv; if (n === "proveedor") E.prov = v; else if (n === "marca") E.marca = v; else E.prod = v; guarda(); poner(); window.scrollTo({ top: 0 }); }); }
+    s.querySelectorAll("tr[data-bp]").forEach(tr => tr.onclick = () => { const v = tr.dataset.bp, n = R.nv; if (n === "marca") E.marca = v; else E.prod = v; guarda(); poner(); window.scrollTo({ top: 0 }); }); }
+  /* HWF (menú lateral) y LOGÍSTICA (barra inferior): «Inteligencia de negocio · Ventas» y «· Logística» como entradas separadas (12-11-2026) */
+  function marcarMenu() { document.querySelectorAll("[data-biu]").forEach(b => { const en = HOST.t === "log" ? (typeof SEC !== "undefined" && SEC === "inv") : !document.getElementById("s-inv").hidden; b.setAttribute("aria-current", String(en && b.dataset.biu === E.un)); }); }
+  if (HOST.t !== "ventas") {
+    document.addEventListener("click", e => { const b = e.target.closest("[data-biu]"); if (!b) return; E.un = b.dataset.biu; E.on = true; guarda(); setTimeout(() => { poner(); marcarMenu(); }, 40); }, true);
+    if (HOST.t === "log") { const inv = document.querySelector('#nav [data-s="inv"]');
+      if (inv && !inv.dataset.biu) { const pon = (b, t) => { const tn = [...b.childNodes].reverse().find(n => n.nodeType === 3); if (tn) tn.textContent = t; else b.append(t); };
+        const v = inv.cloneNode(true); inv.dataset.biu = "l"; pon(inv, "BI Logística"); v.dataset.biu = "v"; pon(v, "BI Ventas"); inv.before(v);
+        const ic = v.querySelector(".ic"); if (ic) ic.innerHTML = '<svg viewBox="0 0 32 32" aria-hidden="true" class="hic"><defs><linearGradient id="hic-nbiv" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3FBF7F"/><stop offset="1" stop-color="#1C7A4E"/></linearGradient></defs><rect width="32" height="32" rx="9" fill="url(#hic-nbiv)"/><g transform="translate(5.5 5.5) scale(.875)" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></g></svg>';
+        document.head.insertAdjacentHTML("beforeend", "<style>.bn{grid-template-columns:repeat(" + document.querySelectorAll("#nav > button").length + ",minmax(0,1fr))!important}.bn button{font-size:.6rem!important;line-height:1.1;overflow-wrap:anywhere;padding-left:1px!important;padding-right:1px!important}</style>"); } }
+    else { const ajusta = () => { const pan = document.getElementById("snPanel"), inv = pan && pan.querySelector('.sn-i[data-t="inv"]:not([data-biu])'); if (!inv) return;
+        const ic = s => { const x = pan.querySelector(s + " .sn-e"); return x ? x.innerHTML : ""; }, iv = ic('[data-m="plan"]') || "📈", il = ic('.sn-i[data-t="inv"]') || "📦";
+        const mk = (u, t, ico) => { const b = inv.cloneNode(false); b.dataset.biu = u; b.innerHTML = '<span class="sn-e">' + ico + "</span>" + t; return b; }; inv.replaceWith(mk("v", "Inteligencia de negocio · Ventas", iv), mk("l", "Inteligencia de negocio · Logística", il)); marcarMenu(); };
+      new MutationObserver(ajusta).observe(document.body, { childList: true, subtree: true }); ajusta(); } }
+  if (HOST.t === "ventas") new MutationObserver(() => { const it = document.querySelector('#snPanel [data-sm="bi"] .sn-e'); if (it && !it.dataset.bi) { it.dataset.bi = "1";
+    it.innerHTML = '<svg viewBox="0 0 32 32" aria-hidden="true" class="hic"><defs><linearGradient id="hic-bi" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3FBF7F"/><stop offset="1" stop-color="#1C7A4E"/></linearGradient></defs><rect width="32" height="32" rx="9" fill="url(#hic-bi)"/><g transform="translate(5.5 5.5) scale(.875)" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></g></svg>'; } }).observe(document.body, { childList: true, subtree: true });
   HOST.engancha(poner); try { const c0 = HOST.cont(); if (c0 && c0.children.length && (E.un || HOST.t !== "ventas")) poner(); } catch (e) {}
   window.biEstado = () => E; window.biCalc = calc;
   window.hwfBi = { tipo: HOST.t, base: () => HOST.base(), stock: c => HOST.stock(c), meta: (y, m) => HOST.meta(y, m), prov: provDe };   /* lo usa patch_noticias */
@@ -1212,16 +1235,19 @@ function vmPoner(cont, VM, antes) { try { if (!cont) return; const v = cont.quer
 </style>
 <script>/* patch_asistente: asistente IA con los datos cargados en la app (pregunta → script de Google → API de Claude) */
 (function () {
-  const HB = window.hwfBi; if (!HB || document.getElementById("iaBtn")) return;
-  const T = HB.tipo, RC = T === "ventas", DEMO = /DEMO/.test(document.title);
-  const NOM = { admin: "HWF (administración)", ventas: "VENTAS (app de los vendedores)", log: "LOGÍSTICA" }[T] || T;
+  const HB = window.hwfBi, TND = !HB && /TIENDA/.test(document.title) && typeof DATA === "function"; if ((!HB && !TND) || document.getElementById("iaBtn")) return;
+  /* VENTAS y TIENDA (12-11-2026): el asistente solo revisa ventas, stock de su bodega, prospectos y cobranza (sin costos ni compras) */
+  const T = HB ? HB.tipo : "tienda", RC = T === "ventas" || T === "tienda", DEMO = /DEMO/.test(document.title);
+  const NOM = { admin: "HWF (administración)", ventas: "VENTAS (app de los vendedores)", log: "LOGÍSTICA", tienda: "TIENDA (Tienda Hellywoof)" }[T] || T;
   const ALC = {
-    ventas: "App de los vendedores de HWF. Secciones: Inicio (avance del mes, buenas noticias), Pedido (crear notas de pedido, se envían al script y llegan por correo con PDF y Excel; botones para PDF, enviar e imprimir), Clientes (cartera, ficha, última compra, sugerencias de productos), Ruta (planificar visitas del día, PDF), Cobranza (documentos por cobrar), Prospectos (clientes potenciales), Panel e Inteligencia de negocio (unidad Ventas: gráficos y tablas por proveedor, marca, formato, producto, canal total/distribuidora/tienda; exportar a PDF, Excel, correo e imprimir). NO muestra costos, márgenes ni compras en pesos.",
+    ventas: "App de los vendedores de HWF. Secciones: Inicio (avance del mes, buenas noticias), Pedido (crear notas de pedido, se envían al script y llegan por correo con PDF y Excel; botones para PDF, enviar e imprimir), Clientes (cartera, ficha, última compra, sugerencias de productos), Ruta (planificar visitas del día, PDF), Cobranza (documentos por cobrar), Prospectos (clientes potenciales), Panel, Inteligencia de negocio (apartado propio: venta de la distribuidora por marca, formato y producto; exportar a PDF, Excel, correo e imprimir), Catálogos y precios (descargar en PDF para enviar por WhatsApp o imprimir). ESTE ASISTENTE SOLO REVISA: ventas, stock de la bodega distribuidora, prospectos y cobranza. No tiene costos, márgenes ni compras: si preguntan otra cosa, dilo.",
     admin: "App de administración HWF (gerencia). Secciones: Inicio (avance del mes contra la meta, proyección de cierre), Ventas y ranking por vendedor, cliente y producto, Inventario con Inteligencia de negocio (unidades Ventas y Logística: ventas y compras en $ o unidades, filtros proveedor/marca/formato/producto, canal, análisis avanzado con Pareto, alertas y pronóstico, exportar PDF/Excel/correo/imprimir), Abastecimiento (compra sugerida por mes según pronóstico y stock de seguridad por clase ABC), Plan de ventas nov-26 a dic-27 ($1.000 MM: distribuidora 827,8 + tienda 172,2), Pago a proveedores (plan a 14 meses: Planet Pet a contado, Montaraz −50 % de la deuda), Catálogo y listas de precio (archivos en Drive), Cobranza, Prospectos y notas de pedido de la app.",
+    tienda: "App de la Tienda Hellywoof (venta en local con boleta). Secciones: Inicio, Ventas, Panel, Plan (meta mensual de la tienda), Stock (bodega de la tienda), Nutrición, Ranking y Catálogos y precios. ESTE ASISTENTE SOLO REVISA: ventas de la tienda y stock de la bodega de la tienda. No tiene costos ni márgenes: si preguntan otra cosa, dilo.",
     log: "App de logística HWF. Secciones: Panel (buenas noticias, avance), Inteligencia de negocio (unidades Ventas y Logística: ventas, compras y stock por proveedor/marca/formato/producto y canal; exportar PDF/Excel/correo/imprimir), Abastecimiento (compra sugerida según pronóstico y stock de seguridad), Rutas de despacho (armar rutas del día, enviarlas a la app Chofer, seguimiento GPS y entregas con foto/firma; PDF), stock de todas las bodegas, pedidos pendientes y clientes para despacho."
   }[T] || "";
   const SUG = {
-    ventas: ["¿Cómo vamos con la meta del mes?", "¿Qué clientes míos no compran hace más de 60 días?", "¿Qué productos se venden más este año?", "¿Qué productos están sin stock?"],
+    ventas: ["¿Cómo vamos con la meta del mes?", "¿Qué clientes tienen facturas vencidas?", "¿Qué prospectos debo contactar esta semana?", "¿Qué productos están sin stock?"],
+    tienda: ["¿Cómo vamos con la meta del mes?", "¿Qué productos se venden más este mes?", "¿Qué productos se están acabando en la tienda?", "¿Cuál es el ticket promedio del mes?"],
     admin: ["Resume cómo va el mes contra la meta", "¿Qué marcas crecen y cuáles caen este año?", "¿Qué productos clase A tienen poco stock?", "¿Cómo va cada vendedor este mes?"],
     log: ["¿Qué productos se quedan sin stock en menos de 15 días?", "¿Cuánto compramos por proveedor este año?", "¿Qué pedidos están pendientes?", "¿Qué productos tienen más stock que venta?"]
   }[T] || [];
@@ -1232,11 +1258,12 @@ function vmPoner(cont, VM, antes) { try { if (!cont) return; const v = cont.quer
   const conn = () => { try { if (typeof SYC === "function") { const c = SYC(); if (c && c.url) return c; } } catch (e) {}
     try { if (typeof syCfg === "function") { const c = syCfg(); if (c && c.url) return c; } } catch (e) {}
     try { if (typeof cfg === "function") { const c = cfg(); if (c && c.url) return c; } } catch (e) {} return null; };
-  const usuario = () => { try { if (T === "ventas" && typeof SES !== "undefined" && SES && SES.vendedor) return SES.vendedor.nombre || ""; } catch (e) {} return T; };
+  const usuario = () => { try { if (T === "ventas" && typeof SES !== "undefined" && SES && SES.vendedor) return SES.vendedor.nombre || ""; } catch (e) {}
+    try { if (T === "tienda" && typeof TURK !== "undefined") { const t = JSON.parse(localStorage.getItem(TURK) || "null"); const n = t && (t.nombre || t.quien || (typeof t === "string" ? t : "")); if (n) return String(n); } } catch (e) {} return T; };
   const habiles = (y, m, hasta) => { let n = 0; const fin = new Date(y, m, 0).getDate(); for (let d = 1; d <= Math.min(fin, hasta || fin); d++) { const w = new Date(y, m - 1, d).getDay(); if (w && w < 6) n++; } return n; };
 
   /* ===== resumen de los datos de la app ===== */
-  function contexto() {
+  function contexto() { if (T === "tienda") return ctxTienda();
     const B = HB.base() || {}, R = B.rows || [], P = B.productos || [], cats = B.cats || [], V = B.vend || [], tv = V.indexOf("Tienda Hellywoof"), an = r => r[8] || B.anio;
     let X = null; try { X = typeof DATA === "function" ? DATA() : null; } catch (e) {}
     const cy = Number(String(B.corte || "").slice(0, 4)) || B.anio, cm = Number(String(B.corte || "").slice(5, 7)) || 12, cd = Number(String(B.corte || "").slice(8, 10)) || 0;
@@ -1279,9 +1306,9 @@ function vmPoner(cont, VM, antes) { try { if (!cont) return; const v = cont.quer
     Object.keys(FC).forEach(c => { if (!pk[c]) { const ix = P.findIndex(p => String(p[2]) === c); if (ix >= 0) pk[c] = { i: info[ix], a: 0, au: 0, m: {}, cu: 0, cq: 0 }; } });
     const PL = Object.values(pk).sort((a, b) => b.a - a.a || (FC[b.i.cod] ? FC[b.i.cod][1] : 0) - (FC[a.i.cod] ? FC[a.i.cod][1] : 0)).slice(0, 180);
     tab("Productos (los " + PL.length + " de mayor venta " + cy + "; unidades por mes; stock en unidades; pronóstico = venta mensual esperada de la distribuidora; clase ABC)",
-      ["Código", "Producto", "Marca", "Proveedor", cy + " $", cy + " unid."].concat(u3.slice().reverse().map(k => MES[k % 100 - 1] + " u"), [MES[cm - 1] + " u (en curso)", "Stock distribuidora", "Stock tienda", "Pronóstico u/mes", "Días de stock", "Clase"], RC ? [] : ["Costo unit. $"], ["Nota"]),
+      ["Código", "Producto", "Marca", "Proveedor", cy + " $", cy + " unid."].concat(u3.slice().reverse().map(k => MES[k % 100 - 1] + " u"), [MES[cm - 1] + " u (en curso)", "Stock distribuidora", ...(T === "ventas" ? [] : ["Stock tienda"]), "Pronóstico u/mes", "Días de stock", "Clase"], RC ? [] : ["Costo unit. $"], ["Nota"]),
       PL.map(w => { const c = w.i.cod, f = FC[c], s = (() => { try { return HB.stock(c); } catch (e) { return null; } })(), dias = f && f[0] > 0 && s != null ? Math.round(s / f[0] * 30) : "";
-        return [c, w.i.n, w.i.ma, w.i.pv, pz(w.a), n0(w.au)].concat(u3.slice().reverse().map(k => n0(w.m[k] || 0)), [n0(w.m[cy * 100 + cm] || 0), stD(c), stT(c), f ? n0(f[0]) : "", dias, f ? f[3] || "" : ""], RC ? [] : [w.cq ? pz(w.cu / w.cq) : ""], [DESC.has(c) ? "descontinuado (no se compra)" : s === 0 && w.au > 0 ? "SIN STOCK" : ""]); }));
+        return [c, w.i.n, w.i.ma, w.i.pv, pz(w.a), n0(w.au)].concat(u3.slice().reverse().map(k => n0(w.m[k] || 0)), [n0(w.m[cy * 100 + cm] || 0), stD(c), ...(T === "ventas" ? [] : [stT(c)]), f ? n0(f[0]) : "", dias, f ? f[3] || "" : ""], RC ? [] : [w.cq ? pz(w.cu / w.cq) : ""], [DESC.has(c) ? "descontinuado (no se compra)" : s === 0 && w.au > 0 ? "SIN STOCK" : ""]); }));
     /* clientes (sin RUT ni teléfonos) */
     const CL = B.clientes || [], conCli = CL.length && R.some(r => r[0] > 0);
     if (conCli) { const ck = {}; R.forEach(r => { if (r[7] === tv) return; const y = an(r), w = ck[r[0]] = ck[r[0]] || { a: 0, b: 0, m: 0, ult: 0, meses: new Set() }, v = Number(r[5]) || 0, f = y * 10000 + r[2] * 100 + (r[3] || 1);
@@ -1293,14 +1320,42 @@ function vmPoner(cont, VM, antes) { try { if (!cont) return; const v = cont.quer
     /* pedidos pendientes */
     if (pend.length) { const pp = {}; pend.forEach(c => { const w = pp[c[0]] = pp[c[0]] || { f: c[1], cl: c[2], v: c[3], t: 0, it: [] }; w.t += Number(c[7]) || 0; w.it.push(n0(c[5]) + " × " + c[6]); });
       tab("Pedidos y cotizaciones pendientes de facturar (Defontana)", ["N°", "Fecha", "Cliente", "Vendedor", "Neto $", "Detalle"], Object.keys(pp).slice(0, 80).map(k => { const w = pp[k]; return [k, w.f, w.cl, w.v, pz(w.t), w.it.join("; ").slice(0, 300)]; })); }
-    /* compras */
-    const C = B.compras && B.compras.rows; if (C && C.length) { const cmK = {}, cpv = {}; C.forEach(r => { const y = Math.floor(r[1] / 100), w = cmK[r[1]] = cmK[r[1]] || { u: 0, v: 0 }; w.u += Number(r[2]) || 0; w.v += Number(r[3]) || 0;
+    /* VENTAS: cobranza y prospectos (lo que el vendedor ve en Cobros y Prospectos) */
+    if (T === "ventas") { try { const docs = typeof cxMios === "function" ? cxMios() : []; if (docs.length) { const rs = cxResumen(docs), cls = cxClientes(docs).sort((a, b) => b.venc - a.venc || b.saldo - a.saldo).slice(0, 120);
+        L.push("", "## Cobranza (documentos por cobrar" + (typeof SES !== "undefined" && SES && SES.vendedor ? " de la cartera " + (SES.vendedor.cartera || SES.vendedor.nombre) : "") + ")", "Total por cobrar: " + pz(rs.total) + " · vencido: " + pz(rs.venc) + " (" + rs.nVenc + " documentos) · vencido más de 30 días: " + pz(rs.v30) + " · vence esta semana: " + pz(rs.sem) + " · clientes: " + rs.nCli + (rs.cheques ? " · cheques: " + pz(rs.cheques) : ""));
+        tab("Cobranza por cliente (vencido primero)", ["Cliente", "Cartera", "Saldo $", "Vencido $", "Días de atraso máx.", "Documentos (tipo n° · vence · saldo · días)"], cls.map(c => [c.cli, c.cart || "", pz(c.saldo), pz(c.venc), c.maxDias > 0 ? c.maxDias : 0, c.docs.slice(0, 6).map(d => d.tipo + " " + d.num + " · " + d.fv + " · " + pz(d.saldo) + " · " + (d.dias > 0 ? d.dias + " días vencido" : "vence en " + (-d.dias) + " días")).join("; ")])); } } catch (e) {}
+      try { const pr = typeof prMios === "function" ? prMios() : []; if (pr.length) { const ET = typeof PR_ETAPAS !== "undefined" ? PR_ETAPAS : [], cnt = typeof prConteo === "function" ? prConteo(pr) : [], hoyS = new Date().toISOString().slice(0, 10);
+        L.push("", "## Prospectos (clientes potenciales)", "Por etapa: " + ET.map((e, i) => e + ": " + (cnt[i] || 0)).join(" · ") + ". Hoy: " + hoyS + ".");
+        tab("Prospectos activos (próximo contacto primero)", ["Nombre", "Comuna", "Segmento", "Vendedor", "Etapa", "Próximo contacto", "Actualizado", "Notas"], pr.filter(o => o.etapa !== "Descartado").sort((a, b) => (a.proximo_contacto || "9").localeCompare(b.proximo_contacto || "9")).slice(0, 150)
+          .map(o => [o.nombre, o.comuna || "", o.segmento || "", o.vendedor || "", o.etapa || "", o.proximo_contacto || "", o.actualizado || "", String(o.notas || "").replace(/\s+/g, " ").slice(0, 120)])); } } catch (e) {} }
+    /* compras (no en VENTAS) */
+    const C = T === "ventas" ? null : B.compras && B.compras.rows; if (C && C.length) { const cmK = {}, cpv = {}; C.forEach(r => { const y = Math.floor(r[1] / 100), w = cmK[r[1]] = cmK[r[1]] || { u: 0, v: 0 }; w.u += Number(r[2]) || 0; w.v += Number(r[3]) || 0;
         if (y === cy) { const ix = P.findIndex(p => String(p[2]) === String(r[0])), pv = ix >= 0 ? info[ix].pv : "Sin proveedor", q = cpv[pv] = cpv[pv] || { u: 0, v: 0 }; q.u += Number(r[2]) || 0; q.v += Number(r[3]) || 0; } });
       tab("Compras mensuales (ingresos a bodega" + (B.compras.fecha ? ", Mayor al " + B.compras.fecha : "") + ")", ["Mes", "Unidades"].concat(RC ? [] : ["Valor neto $"]), Object.keys(cmK).map(Number).sort().map(k => [MES[k % 100 - 1] + "-" + Math.floor(k / 100), n0(cmK[k].u)].concat(RC ? [] : [pz(cmK[k].v)])));
       tab("Compras " + cy + " por proveedor", ["Proveedor", "Unidades"].concat(RC ? [] : ["Valor neto $"]), Object.keys(cpv).sort((a, b) => cpv[b].v - cpv[a].v).map(k => [k, n0(cpv[k].u)].concat(RC ? [] : [pz(cpv[k].v)]))); }
     if (DESC.size) L.push("", "Productos descontinuados (no se vuelven a comprar): " + [...DESC].map(c => { const ix = P.findIndex(p => String(p[2]) === c); return ix >= 0 ? P[ix][0] : c; }).join(", ") + ".");
     let t = L.join("\n"); if (t.length > 200000) t = t.slice(0, 200000) + "\n(…resumen recortado)"; return t;
   }
+
+  /* TIENDA: ventas (boletas) y stock de la bodega de la tienda */
+  function ctxTienda() { const D = DATA() || {}, R = D.rows || [], P = D.productos || [], L = [], tab = (t, cab, filas) => { if (!filas.length) return; L.push("", "## " + t, cab.join(" | ")); filas.forEach(f => L.push(f.join(" | "))); };
+    const cy = Number(String(D.corte || "").slice(0, 4)) || D.anio, cm = Number(String(D.corte || "").slice(5, 7)) || 12, cd = Number(String(D.corte || "").slice(8, 10)) || 0, dim = new Date(cy, cm, 0).getDate();
+    L.push("APP: " + NOM, "ALCANCE Y FUNCIONES: " + ALC, "Fecha de hoy: " + new Date().toLocaleDateString("es-CL") + ". Ventas de la tienda (boletas y facturas, neto sin IVA) al " + (D.corte || "?") + "; " + MES[cm - 1] + " " + cy + " va en curso. Stock de la tienda al " + (D.stockFecha || "?") + ".",
+      "La tienda abre todos los días salvo feriados irrenunciables. Plan: la meta de la tienda parte en $10 MM en nov-26 y sube con estacionalidad (plan total nov-26 a dic-27 con distribuidora: $1.000 MM).");
+    const mk = {}; R.forEach(r => { const k = (r[6] || D.anio) * 100 + r[1], o = mk[k] = mk[k] || { v: 0, u: 0, docs: new Set() }; o.v += Number(r[4]) || 0; o.u += Number(r[3]) || 0; if (r[7] && Number(r[4]) > 0) o.docs.add(r[7]); });
+    tab("Venta neta mensual de la tienda", ["Mes", "Venta $", "Unidades", "Tickets", "Ticket promedio $"], Object.keys(mk).map(Number).sort().map(k => { const o = mk[k], n = o.docs.size; return [MES[k % 100 - 1] + "-" + Math.floor(k / 100), pz(o.v), n0(o.u), n || "s/d", n ? pz(o.v / n) : "s/d"]; }));
+    let PL = []; try { PL = typeof PLAN !== "undefined" ? PLAN : []; } catch (e) {} tab("Meta mensual de la tienda (plan)", ["Mes", "Meta $"], PL.map(x => [MES[x.m - 1] + "-" + x.y, pz(x.meta)]));
+    const o = mk[cy * 100 + cm] || { v: 0, u: 0, docs: new Set() }, mt = (PL.find(x => x.ym === cy * 100 + cm) || {}).meta || 0, proy = cd ? o.v / cd * dim : 0;
+    L.push("", "## Avance de " + MES[cm - 1] + " " + cy, "Vendido: " + pz(o.v) + " · meta: " + (mt ? pz(mt) + " · avance " + pc(o.v / mt) : "sin dato") + " · días " + cd + " de " + dim + " · proyección de cierre al ritmo: " + pz(proy) + (mt ? " (" + pc(proy / mt) + " de la meta)" : ""));
+    const dd = {}; R.forEach(r => { if ((r[6] || D.anio) === cy && r[1] === cm) dd[r[2]] = (dd[r[2]] || 0) + (Number(r[4]) || 0); }); tab("Venta por día de " + MES[cm - 1], ["Día", "Venta $"], Object.keys(dd).map(Number).sort((a, b) => a - b).map(d => [d, pz(dd[d])]));
+    const ST = {}; (Array.isArray(D.stock) ? D.stock : []).forEach(x => { ST[String(x[0])] = Number(x[2]) || 0; });
+    const pk = {}, u3 = [1, 2, 3].map(i => { const d = new Date(cy, cm - 1 - i, 1); return d.getFullYear() * 100 + d.getMonth() + 1; });
+    R.forEach(r => { const p = P[r[0]]; if (!p) return; const y = r[6] || D.anio, k = y * 100 + r[1], w = pk[r[0]] = pk[r[0]] || { p, a: 0, au: 0, m: {} }, q = Number(r[3]) || 0; if (y === cy) { w.a += Number(r[4]) || 0; w.au += q; } if (u3.includes(k) || k === cy * 100 + cm) w.m[k] = (w.m[k] || 0) + q; });
+    const PLs = Object.values(pk).sort((a, b) => b.a - a.a).slice(0, 200);
+    tab("Productos de la tienda (los " + PLs.length + " de mayor venta " + cy + "; unidades por mes; stock en unidades de la bodega de la tienda)", ["Código", "Producto", "Categoría", cy + " $", cy + " unid."].concat(u3.slice().reverse().map(k => MES[k % 100 - 1] + " u"), [MES[cm - 1] + " u (en curso)", "Stock tienda", "Días de stock", "Nota"]),
+      PLs.map(w => { const c = String(w.p[2] || ""), s = ST[c], q3 = u3.reduce((t, k) => t + (w.m[k] || 0), 0) / 3, dias = s != null && q3 > 0 ? Math.round(s / q3 * 30) : "";
+        return [c, w.p[0], w.p[1] || "", pz(w.a), n0(w.au)].concat(u3.slice().reverse().map(k => n0(w.m[k] || 0)), [n0(w.m[cy * 100 + cm] || 0), s == null ? "" : n0(s), dias, s === 0 && q3 > 0 ? "SIN STOCK" : dias !== "" && dias < 15 ? "se acaba pronto" : ""]); }));
+    let t = L.join("\n"); if (t.length > 200000) t = t.slice(0, 200000) + "\n(…resumen recortado)"; return t; }
 
   /* ===== formato de la respuesta (markdown simple, escapado) ===== */
   const inl = s => esc(s).replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>");
@@ -1324,7 +1379,7 @@ function vmPoner(cont, VM, antes) { try { if (!cont) return; const v = cont.quer
   document.body.appendChild(btn); document.body.appendChild(pan);
   const $m = pan.querySelector("#iaMsgs"), $q = pan.querySelector("#iaQ"), $go = pan.querySelector("#iaGo");
   const burbuja = (cls, html) => { const d = document.createElement("div"); d.className = "ia-b " + cls; d.innerHTML = html; $m.appendChild(d); $m.scrollTop = $m.scrollHeight; return d; };
-  function inicio() { $m.innerHTML = ""; burbuja("ia-a", "<p>Hola" + (usuario() && usuario() !== T ? ", " + esc(String(usuario()).split(" ")[0]) : "") + ". Pregúntame sobre los datos de esta app: ventas, metas, " + (T === "log" ? "stock, compras, pedidos y rutas" : "clientes, productos y stock") + ".</p>");
+  function inicio() { $m.innerHTML = ""; burbuja("ia-a", "<p>Hola" + (usuario() && usuario() !== T ? ", " + esc(String(usuario()).split(" ")[0]) : "") + ". Pregúntame sobre los datos de esta app: " + ({ log: "ventas, metas, stock, compras, pedidos y rutas", ventas: "ventas, metas, stock de la distribuidora, prospectos y cobranza", tienda: "ventas de la tienda, metas y stock de la tienda" }[T] || "ventas, metas, clientes, productos y stock") + ".</p>");
     const s = document.createElement("div"); s.className = "ia-s"; s.innerHTML = SUG.map(x => '<button type="button">' + esc(x) + "</button>").join(""); s.onclick = e => { const b = e.target.closest("button"); if (b) preguntar(b.textContent); }; $m.appendChild(s); }
   async function preguntar(q) { q = String(q || "").trim(); if (!q || OCUP) return; OCUP = true; $go.disabled = true; $q.value = ""; burbuja("ia-u", esc(q)); const esp = burbuja("ia-a", '<span class="ia-p">Pensando…</span>');
     let res;
@@ -1348,5 +1403,10 @@ function vmPoner(cont, VM, antes) { try { if (!cont) return; const v = cont.quer
   document.addEventListener("keydown", e => { if (e.key === "Escape" && pan.classList.contains("on")) cerrar(); });
   window.hwfAsistente = { contexto };   /* para pruebas */
 })();
+</script>
+<script>/* patch_chofernombre: link de instalación de Chofer HWF con la conexión (solo en el teléfono, nunca en el repo) */
+function choLink() { try { const c = typeof cfg === "function" ? cfg() : null; if (!c || !c.url || !c.clave) return "";
+    const b = btoa(unescape(encodeURIComponent(JSON.stringify({ u: c.url, c: c.clave })))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+    return "\n\nApp Chofer HWF (si aún no la tienes, ábrela desde aquí: se conecta sola y solo pide tu nombre):\n" + location.origin + location.pathname.replace(/\/(demo\/)?logistica\/[^/]*$/, "/") + "instalar-chofer/#HWF1:" + b; } catch (e) { return ""; } }
 </script>
 </body></html>
