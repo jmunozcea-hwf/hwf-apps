@@ -5175,7 +5175,7 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261111214411";
+const HWF_VER = "20261112094526";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer)\/[^/]*$/, "/");
   let avisado = false;
@@ -5367,7 +5367,7 @@ setTimeout(() => { try { if (D && $("s-res") && !$("s-res").hidden && !$("kpCard
 <script>/* patch_bi: Inventario → Inteligencia de negocio (ventas y compras, $ o unidades, por proveedor) */
 (function () {
   if (typeof pintarInventario !== "function") return;
-  const LS = "hwf-bi"; let E = { on: false, u: "$", prov: "", marca: "", prod: "", fmt: "", anio: 0 }; try { E = Object.assign(E, JSON.parse(localStorage.getItem(LS) || "{}")); } catch (e) {}
+  const LS = "hwf-bi"; let E = { on: false, u: "$", prov: "", marca: "", prod: "", fmt: "", canal: "", anio: 0 }; try { E = Object.assign(E, JSON.parse(localStorage.getItem(LS) || "{}")); } catch (e) {}
   const guarda = () => { try { localStorage.setItem(LS, JSON.stringify(E)); } catch (e) {} };
   const MES = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
   const SUF = ["PLANET PET", "MONTARAZ", "COMERCIAL PET-FOOD", "NADAL", "COMECAN", "MY PET CHILE", "HALLMARK SA", "SABORES ALTO PERFIL SPA"];
@@ -5379,6 +5379,11 @@ setTimeout(() => { try { if (D && $("s-res") && !$("s-res").hidden && !$("kpCard
   const fmtDe = n => { const m = /(\d+(?:[.,]\d+)?)\s*(kgs?|kilos?|grs?|gramos|g|ml|cc|lts?|litros?|l|caps?|unid(?:ades)?|un|u)\b/i.exec(String(n || "")); if (!m) return "Sin formato";
     const u = m[2].toLowerCase(), U = /^k/.test(u) ? "Kg" : /^g/.test(u) ? "g" : /^(ml|cc)/.test(u) ? "ml" : /^l/.test(u) ? "L" : /^c/.test(u) ? "caps" : "un"; return m[1].replace(".", ",") + " " + U; };
   const nivel = () => (E.marca || E.prod) ? "producto" : E.prov ? "marca" : "proveedor";
+  /* canal: "" total · "d" distribuidora · "t" tienda. Ventas por vendedor (Tienda Hellywoof); compras por bodega de ingreso,
+     y en distribuidora/tienda se suman los traspasos netos entre bodegas (así las dos partes suman el total comprado) */
+  const CAN = { "": "total (distribuidora + tienda)", d: "distribuidora", t: "tienda" };
+  const vCanal = (r, tv) => !E.canal || (E.canal === "t" ? r[7] === tv : r[7] !== tv);
+  const compra = r => !E.canal ? [r[2] || 0, r[3] || 0] : r.length < 5 ? null : (E.canal === "t") === !!r[4] ? [(r[2] || 0) + (r[5] || 0), (r[3] || 0) + (r[6] || 0)] : [0, 0];
   const pasa = i => (!E.prov || i.pv === E.prov) && (!E.marca || i.ma === E.marca) && (!E.fmt || i.ft === E.fmt) && (!E.prod || i.cod === E.prod);
   const fmtOrd = (a, b) => { const k = x => { const m = /^([\d,]+) (\S+)/.exec(x); return m ? [["Kg", "g", "L", "ml", "caps", "un"].indexOf(m[2]), parseFloat(m[1].replace(",", "."))] : [9, 0]; }, A = k(a), B_ = k(b); return A[0] - B_[0] || A[1] - B_[1]; };
   const fm = n => { const a = Math.abs(n); return (n < 0 ? "−" : "") + "$" + (a >= 1e6 ? (a / 1e6).toLocaleString("es-CL", { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + " MM" : a >= 1e4 ? Math.round(a / 1e3).toLocaleString("es-CL") + " mil" : Math.round(a).toLocaleString("es-CL")); };
@@ -5389,8 +5394,8 @@ setTimeout(() => { try { if (D && $("s-res") && !$("s-res").hidden && !$("kpCard
     const info = P.map(p => { const [pv, ma] = provDe(cats[p[1]]); return { n: p[0], cod: String(p[2]), pv, ma: ma || "Sin marca", ft: fmtDe(p[0]) }; });
     let C = B.compras || (typeof BASE !== "undefined" && BASE.compras) || null, demo = false;
     if (!C && typeof RK_DEMO !== "undefined" && RK_DEMO) { demo = true;   /* demo: compras ficticias a partir del costo vendido */
-      const m = {}; (B.rows || []).forEach(r => { const y = r[8] || B.anio, k = r[1] + "|" + (y * 100 + r[2]); const o = m[k] = m[k] || [String(P[r[1]][2]), y * 100 + r[2], 0, 0]; o[2] += r[4] || 0; o[3] += (r[4] || 0) * (r[6] || 0); });
-      C = { fecha: "ficticias (demo)", nom: {}, rows: Object.values(m).map((o, i) => { const f = 0.8 + ((i * 37) % 41) / 100; return [o[0], o[1], Math.max(0, Math.round(o[2] * f)), Math.max(0, Math.round(o[3] * f))]; }) }; }
+      const tvD = (B.vend || []).indexOf("Tienda Hellywoof"), m = {}; (B.rows || []).forEach(r => { const y = r[8] || B.anio, t = r[7] === tvD ? 1 : 0, k = r[1] + "|" + (y * 100 + r[2]) + "|" + t; const o = m[k] = m[k] || [String(P[r[1]][2]), y * 100 + r[2], 0, 0, t]; o[2] += r[4] || 0; o[3] += (r[4] || 0) * (r[6] || 0); });
+      C = { fecha: "ficticias (demo)", nom: {}, rows: Object.values(m).map((o, i) => { const f = 0.8 + ((i * 37) % 41) / 100; return [o[0], o[1], Math.max(0, Math.round(o[2] * f)), Math.max(0, Math.round(o[3] * f)), o[4], 0, 0]; }) }; }
     return { B, P, info, porCod, C, demo, extra: {} }; }
   function calc() { const X = datos(), B = X.B, anios = new Set();
     (B.rows || []).forEach(r => anios.add(r[8] || B.anio)); if (X.C) X.C.rows.forEach(r => anios.add(Math.floor(r[1] / 100)));
@@ -5399,18 +5404,19 @@ setTimeout(() => { try { if (D && $("s-res") && !$("s-res").hidden && !$("kpCard
     const suma = (i, m, f) => { provs.add(i.pv); if (!E.prov || i.pv === E.prov) { marcas.add(i.ma); if (!E.marca || i.ma === E.marca) { fmts.add(i.ft); if (!E.fmt || i.ft === E.fmt) prods[i.cod] = i.n; } }
       if (!pasa(i)) return; f(mes[m]); const gk = nv === "proveedor" ? i.pv : nv === "marca" ? i.ma : i.cod;
       f(prov[gk] = prov[gk] || Object.assign(z(), nv === "producto" ? { n: i.n, cod: i.cod, x: i.ma + " · " + i.ft } : { n: gk })); f(prod[i.cod] = prod[i.cod] || Object.assign(z(), { n: i.n, cod: i.cod, x: i.ma, ft: i.ft, pv: i.pv })); };
-    (B.rows || []).forEach(r => { if ((r[8] || B.anio) !== E.anio) return; const i = X.info[r[1]]; if (!i) return;
+    const tv = (B.vend || []).indexOf("Tienda Hellywoof"); let sinBod = false;
+    (B.rows || []).forEach(r => { if ((r[8] || B.anio) !== E.anio || !vCanal(r, tv)) return; const i = X.info[r[1]]; if (!i) return;
       suma(i, r[2] - 1, o => { o.vq += r[4] || 0; o.vv += r[5] || 0; o.vc += (r[4] || 0) * (r[6] || 0); }); });
     let hayC = false;
-    if (X.C) X.C.rows.forEach(r => { if (Math.floor(r[1] / 100) !== E.anio) return; hayC = true; const k = X.porCod[String(r[0])], i = k != null ? X.info[k] : (X.extra[r[0]] = X.extra[r[0]] || { n: (X.C.nom || {})[r[0]] || "Código " + r[0], cod: String(r[0]), pv: "Sin proveedor", ma: "Sin marca", ft: fmtDe((X.C.nom || {})[r[0]]) });
-      suma(i, r[1] % 100 - 1, o => { o.cq += r[2] || 0; o.cv += r[3] || 0; }); });
+    if (X.C) X.C.rows.forEach(r => { if (Math.floor(r[1] / 100) !== E.anio) return; const cc = compra(r); if (!cc) { sinBod = true; return; } hayC = true; const k = X.porCod[String(r[0])], i = k != null ? X.info[k] : (X.extra[r[0]] = X.extra[r[0]] || { n: (X.C.nom || {})[r[0]] || "Código " + r[0], cod: String(r[0]), pv: "Sin proveedor", ma: "Sin marca", ft: fmtDe((X.C.nom || {})[r[0]]) });
+      suma(i, r[1] % 100 - 1, o => { o.cq += cc[0]; o.cv += cc[1]; }); });
     if (E.prov && !provs.has(E.prov)) { E.prov = E.marca = E.prod = ""; return calc(); }
     if (E.marca && !marcas.has(E.marca)) { E.marca = E.prod = ""; return calc(); }
     if (E.fmt && !fmts.has(E.fmt)) { E.fmt = ""; return calc(); }
     if (E.prod && !(E.prod in prods)) { E.prod = ""; return calc(); }
     const tot = mes.reduce((t, o) => { Object.keys(t).forEach(k => t[k] += o[k]); return t; }, z());
     let ult = 11; while (ult > 0 && !(mes[ult].vv || mes[ult].cv || mes[ult].vq || mes[ult].cq)) ult--;
-    return { X, B, AN, hayC, mes, tot, ult, prov: Object.values(prov), prod: Object.values(prod), provs: [...provs].sort((a, b) => a.localeCompare(b, "es")), marcas: [...marcas].sort((a, b) => a.localeCompare(b, "es")), fmts: [...fmts].sort(fmtOrd), prods: Object.keys(prods).map(c => [c, prods[c]]).sort((a, b) => a[1].localeCompare(b[1], "es")), nv }; }
+    return { X, B, AN, hayC, sinBod, mes, tot, ult, prov: Object.values(prov), prod: Object.values(prod), provs: [...provs].sort((a, b) => a.localeCompare(b, "es")), marcas: [...marcas].sort((a, b) => a.localeCompare(b, "es")), fmts: [...fmts].sort(fmtOrd), prods: Object.keys(prods).map(c => [c, prods[c]]).sort((a, b) => a[1].localeCompare(b[1], "es")), nv }; }
   function grafico(R) { const W = 640, H = 250, L = 44, Rr = 8, T = 12, Bm = 26, n = R.ult + 1, v = o => E.u === "$" ? o.vv : o.vq, c = o => E.u === "$" ? o.cv : o.cq;
     const mx = Math.max(1, ...R.mes.slice(0, n).map(o => Math.max(v(o), c(o), E.u === "$" ? o.vc : 0))), esc_ = E.u === "$" ? 1e6 : 1, paso = (() => { const p = Math.pow(10, Math.floor(Math.log10(mx / esc_ || 1))), q = mx / esc_ / p; return (q > 5 ? 2 : q > 2 ? 1 : 0.5) * p * esc_; })();
     const top = Math.ceil(mx / paso) * paso, y = x => T + (H - T - Bm) * (1 - x / top), g = (W - L - Rr) / n; let s = "";
@@ -5431,8 +5437,9 @@ setTimeout(() => { try { if (D && $("s-res") && !$("s-res").hidden && !$("kpCard
     const filaG = (o, clic) => { const vv = P ? o.vv : o.vq, cc = P ? o.cv : o.cq, rr = P ? o.vc : o.vq, st = o.cod != null && typeof stockDe === "function" ? stockDe(o.cod) : null;
       return `<tr${clic ? ` data-bp="${esc(o.cod != null ? o.cod : o.n)}"` : ""}><td>${esc(o.n)}${o.cod != null ? `<small>${esc(o.cod)}${o.x ? " · " + esc(o.x) : ""}${st != null ? " · stock " + fu(st) : ""}</small>` : ""}</td><td>${F(vv)}</td><td>${hay ? F(cc) : "—"}</td><td class="${dcl(cc - rr)}">${hay ? F(cc - rr) : "—"}</td><td>${v ? Math.round(vv / v * 100) + "%" : "—"}</td></tr>`; };
     const G = ord(R.prov).filter(o => o.vq || o.cq || o.vv || o.cv), NV = R.nv, hayF = !!(E.prov || E.marca || E.fmt || E.prod), filt = [E.prov, E.marca, E.fmt, E.prod ? (R.prods.find(x => x[0] === E.prod) || [])[1] : ""].filter(Boolean).join(" · ");
-    return `<div class="card"><h2>Inteligencia de negocio <span class="muted">ventas y compras · ${E.anio}</span></h2>
-      <div class="bi-fil"><label>Ver en<span class="bi-u" id="biU"><button type="button" data-u="$" aria-pressed="${P}">Pesos $</button><button type="button" data-u="u" aria-pressed="${!P}">Unidades</button></span></label>
+    return `<div class="card"><h2>Inteligencia de negocio <span class="muted">ventas y compras · ${E.canal ? CAN[E.canal] + " · " : ""}${E.anio}</span></h2>
+      <div class="bi-fil"><label>Negocio<span class="bi-u" id="biCanal">${[["", "Total"], ["d", "Distribuidora"], ["t", "Tienda"]].map(([k, t]) => `<button type="button" data-c="${k}" aria-pressed="${E.canal === k}">${t}</button>`).join("")}</span></label>
+        <label>Ver en<span class="bi-u" id="biU"><button type="button" data-u="$" aria-pressed="${P}">Pesos $</button><button type="button" data-u="u" aria-pressed="${!P}">Unidades</button></span></label>
         <label>Proveedor<select id="biProv"><option value="">Todos los proveedores</option>${R.provs.map(p => `<option${p === E.prov ? " selected" : ""}>${esc(p)}</option>`).join("")}</select></label>
         <label>Marca<select id="biMarca"><option value="">Todas las marcas</option>${R.marcas.map(p => `<option${p === E.marca ? " selected" : ""}>${esc(p)}</option>`).join("")}</select></label>
         <label>Formato<select id="biFmt"><option value="">Todos los formatos</option>${R.fmts.map(p => `<option${p === E.fmt ? " selected" : ""}>${esc(p)}</option>`).join("")}</select></label>
@@ -5440,8 +5447,8 @@ setTimeout(() => { try { if (D && $("s-res") && !$("s-res").hidden && !$("kpCard
         ${hayF ? '<button type="button" class="btn" id="biLimpia">Quitar filtros</button>' : ""}
         ${R.AN.length > 1 ? `<label>Año<select id="biAnio">${R.AN.map(a => `<option${a === E.anio ? " selected" : ""}>${a}</option>`).join("")}</select></label>` : ""}
         <button type="button" class="btn" id="biCsv">Descargar (Excel/CSV)</button></div>
-      <div class="bi-k"><div>Ventas ${P ? "netas" : ""}<b>${F(v)}</b><small>${MES[0]}–${MES[R.ult]} · distribuidora + tienda</small></div>
-        <div>Compras${P ? " a costo" : ""}<b>${hay ? F(c) : "—"}</b><small>${hay ? "ingresos de mercadería" : R.X.C ? "sin datos de compras para " + E.anio : "aún sin datos de compras"}</small></div>
+      <div class="bi-k"><div>Ventas ${P ? "netas" : ""}<b>${F(v)}</b><small>${MES[0]}–${MES[R.ult]} · ${CAN[E.canal]}</small></div>
+        <div>Compras${P ? " a costo" : ""}<b>${hay ? F(c) : "—"}</b><small>${hay ? (E.canal ? "compras directas ± traspasos entre bodegas" : "ingresos de mercadería") : R.sinBod ? "por bodega: con la próxima actualización de datos" : R.X.C ? "sin datos de compras para " + E.anio : "aún sin datos de compras"}</small></div>
         <div>${P ? "Costo de lo vendido" : "Compras ÷ ventas"}<b>${P ? fm(t.vc) : (hay && v ? Math.round(c / v * 100) + "%" : "—")}</b><small>${P ? (t.vv ? "margen " + Math.round((1 - t.vc / t.vv) * 100) + "%" : "") : "100% = se compra lo que se vende"}</small></div>
         <div>Compras − ${P ? "costo vendido" : "ventas"}<b class="${hay ? dcl(dif) : ""}">${hay ? F(dif) : "—"}</b><small>${hay ? (dif > 0 ? "se compró más de lo vendido: sube el inventario" : dif < 0 ? "se compró menos: baja el inventario" : "") : ""}</small></div></div></div>
     <div class="card"><h2>Por mes <span class="muted">${hayF ? esc(filt) : "todos los proveedores"} · ${P ? "millones de $" : "unidades"}</span></h2>
@@ -5453,8 +5460,8 @@ setTimeout(() => { try { if (D && $("s-res") && !$("s-res").hidden && !$("kpCard
       <div class="tbl" style="overflow-x:auto"><table class="bi-t"><thead><tr><th>${NV[0].toUpperCase() + NV.slice(1)}</th><th>Ventas</th><th>Compras</th><th>Compras − ${P ? "costo" : "ventas"}</th><th>% venta</th></tr></thead><tbody>
         ${G.slice(0, 200).map(o => filaG(o, !E.prod)).join("") || '<tr><td colspan="5" class="muted">Sin movimientos.</td></tr>'}</tbody></table></div>
       ${hayF ? '<button type="button" class="btn" id="biTodos" style="margin-top:10px">‹ Volver un nivel</button>' : ""}
-      <p class="bi-nota">Ventas: facturas − notas de crédito, neto sin IVA (distribuidora + tienda). Compras: ingresos de mercadería («Parte de entrada») del Mayor Auxiliar de inventario${R.X.C ? ", informe del " + esc(String(R.X.C.fecha || "")) : ""}, a costo sin IVA; no incluye devoluciones de clientes ni traspasos entre bodegas.${R.X.demo ? " Demo: compras ficticias." : ""}${R.X.C ? (hay ? "" : " <b>No hay compras de " + E.anio + " en el informe</b>: para verlas, sube a META un Mayor Auxiliar que incluya ese año.") : " <b>Las compras aparecerán con la próxima actualización de datos</b> (necesita el informe Mayor Auxiliar en la carpeta META)."} Proveedor y marca = categoría Defontana del producto; formato = tamaño del envase tomado del nombre. Rojo = se compró más de lo que salió; verde = menos.</p></div>`; }
-  function csv(R) { const P = E.u === "$", f = [["Año", E.anio, "Proveedor", E.prov || "Todos", "Marca", E.marca || "Todas", "Formato", E.fmt || "Todos", "Producto", E.prod || "Todos", "Unidad", P ? "Pesos" : "Unidades"], [], ["Mes", "Ventas unidades", "Ventas $ neto", "Costo vendido $", "Compras unidades", "Compras $ costo"]];
+      <p class="bi-nota">Ventas: facturas − notas de crédito, neto sin IVA (${CAN[E.canal]}).${E.canal ? " En «" + CAN[E.canal] + "» las compras son las ingresadas a su bodega más los traspasos netos recibidos de la otra bodega (la distribuidora los entrega, la tienda los recibe): distribuidora + tienda = total comprado." : ""} Compras: ingresos de mercadería («Parte de entrada») del Mayor Auxiliar de inventario${R.X.C ? ", informe del " + esc(String(R.X.C.fecha || "")) : ""}, a costo sin IVA; no incluye devoluciones de clientes ni traspasos entre bodegas.${R.X.demo ? " Demo: compras ficticias." : ""}${R.X.C ? (hay ? "" : " <b>No hay compras de " + E.anio + " en el informe</b>: para verlas, sube a META un Mayor Auxiliar que incluya ese año.") : " <b>Las compras aparecerán con la próxima actualización de datos</b> (necesita el informe Mayor Auxiliar en la carpeta META)."} Proveedor y marca = categoría Defontana del producto; formato = tamaño del envase tomado del nombre. Rojo = se compró más de lo que salió; verde = menos.</p></div>`; }
+  function csv(R) { const P = E.u === "$", f = [["Año", E.anio, "Proveedor", E.prov || "Todos", "Marca", E.marca || "Todas", "Formato", E.fmt || "Todos", "Producto", E.prod || "Todos", "Negocio", CAN[E.canal], "Unidad", P ? "Pesos" : "Unidades"], [], ["Mes", "Ventas unidades", "Ventas $ neto", "Costo vendido $", "Compras unidades", "Compras $ costo"]];
     R.mes.slice(0, R.ult + 1).forEach((o, i) => f.push([MES[i], Math.round(o.vq), Math.round(o.vv), Math.round(o.vc), Math.round(o.cq), Math.round(o.cv)]));
     f.push([], ["Producto", "Código", "Marca", "Formato", "Proveedor", "Ventas unidades", "Ventas $ neto", "Costo vendido $", "Compras unidades", "Compras $ costo"]);
     R.prod.slice().sort((a, b) => b.vv - a.vv).forEach(o => f.push([o.n, o.cod || "", o.x || "", o.ft || "", o.pv || "", Math.round(o.vq), Math.round(o.vv), Math.round(o.vc), Math.round(o.cq), Math.round(o.cv)]));
@@ -5468,19 +5475,19 @@ setTimeout(() => { try { if (D && $("s-res") && !$("s-res").hidden && !$("kpCard
     const lim = E.anio === cy ? cm - 1 : 12, m3 = []; for (let i = 3; i >= 1; i--) { const d = new Date(cy, cm - 1 - i, 1); m3.push(d.getFullYear() * 100 + d.getMonth() + 1); }
     const tv = (B.vend || []).indexOf("Tienda Hellywoof"), DESC = new Set(B.desc || []);
     const prod = {}, g = i => prod[i] = prod[i] || { i, v: 0, c: 0, q: 0, va: 0, v3: 0, c3: 0, q3: 0, cu: 0, cuF: 0, cq: 0, cv: 0, pm: {} };
-    (B.rows || []).forEach(r => { const inf = X.info[r[1]]; if (!inf || !pasa(inf)) return; const y = r[8] || B.anio, o = g(r[1]), ym = y * 100 + r[2], f = ym * 100 + (r[3] || 0);
+    (B.rows || []).forEach(r => { const inf = X.info[r[1]]; if (!inf || !pasa(inf) || !vCanal(r, tv)) return; const y = r[8] || B.anio, o = g(r[1]), ym = y * 100 + r[2], f = ym * 100 + (r[3] || 0);
       if (y === E.anio && r[2] <= lim) { o.v += r[5] || 0; o.c += (r[4] || 0) * (r[6] || 0); o.q += r[4] || 0; }
       if (y === E.anio - 1 && r[2] <= lim) o.va += r[5] || 0;
-      if (m3.includes(ym) && r[7] !== tv) { o.v3 += r[5] || 0; o.c3 += (r[4] || 0) * (r[6] || 0); o.q3 += r[4] || 0; }
+      if (m3.includes(ym) && r[7] !== tv && E.canal !== "t") { o.v3 += r[5] || 0; o.c3 += (r[4] || 0) * (r[6] || 0); o.q3 += r[4] || 0; }
       if (r[6] > 0 && f >= o.cuF) { o.cuF = f; o.cu = r[6]; } });
-    if (X.C) X.C.rows.forEach(r => { const k = X.porCod[String(r[0])]; if (k == null || Math.floor(r[1] / 100) !== E.anio) return; const inf = X.info[k]; if (!pasa(inf)) return; const o = g(k); o.cq += r[2] || 0; o.cv += r[3] || 0; if (r[2] > 0) o.pm[r[1]] = (r[3] || 0) / r[2]; });
+    if (X.C) X.C.rows.forEach(r => { const k = X.porCod[String(r[0])]; if (k == null || Math.floor(r[1] / 100) !== E.anio) return; const inf = X.info[k]; if (!pasa(inf)) return; const cc = compra(r); if (!cc) return; const o = g(k); o.cq += cc[0]; o.cv += cc[1]; if (r[2] > 0) o.pm[r[1]] = (r[3] || 0) / r[2]; });
     const FC = (B.fc && B.fc.p) || null; let baseD = 0; if (FC) Object.keys(FC).forEach(k => baseD += FC[k][1] || 0);
     let metaD3 = 0; try { for (let i = 0; i < 3; i++) { const d = new Date(cy, cm - 1 + i, 1); metaD3 += metaPlan14(d.getFullYear(), d.getMonth() + 1); } } catch (e) { metaD3 = 0; }
     const fD = FC && baseD > 0 && metaD3 > 0 ? metaD3 / baseD : 3;
-    const L = Object.values(prod).map(o => { const inf = X.info[o.i], st = typeof stockDe === "function" ? stockDe(inf.cod) : null; o.n = inf.n; o.cod = inf.cod; o.grp = nivel() === "producto" ? inf.n : nivel() === "marca" ? inf.ma : inf.pv;
+    const L = Object.values(prod).map(o => { const inf = X.info[o.i], st = typeof stockDe === "function" && E.canal !== "t" ? stockDe(inf.cod) : null; o.n = inf.n; o.cod = inf.cod; o.grp = nivel() === "producto" ? inf.n : nivel() === "marca" ? inf.ma : inf.pv;
       o.st = st == null ? null : Math.max(0, Number(st) || 0); o.sv = (o.st || 0) * o.cu; o.dias = o.c3 > 0 ? o.sv / (o.c3 / 91) : (o.sv > 0 ? Infinity : 0);
       const ks = Object.keys(o.pm).sort(); o.alza = null; if (ks.length >= 2) { const r = o.pm[ks[ks.length - 1]] / o.pm[ks[0]]; if (r > 0.5 && r < 2) o.alza = r - 1; }
-      const f = FC && FC[inf.cod]; o.fvd = f ? (f[1] || 0) * fD : 0; o.fv = o.fvd + (f ? (f[5] || 0) * 3 : 0); o.desc = DESC.has(inf.cod); return o; });
+      const f = FC && FC[inf.cod]; o.fvd = f && E.canal !== "t" ? (f[1] || 0) * fD : 0; o.fv = o.fvd + (f && E.canal !== "d" ? (f[5] || 0) * 3 : 0); o.desc = DESC.has(inf.cod); return o; });
     const G = {}; L.forEach(o => { const a = G[o.grp] = G[o.grp] || { n: o.grp, v: 0, c: 0, va: 0, v3: 0, c3: 0, sv: 0, cq: 0, cv: 0, an: 0, ad: 0, fv: 0, fvd: 0, np: 0 };
       a.v += o.v; a.c += o.c; a.va += o.va; a.v3 += o.v3; a.c3 += o.c3; a.sv += o.sv; a.cq += o.cq; a.cv += o.cv; a.fv += o.fv; a.fvd += o.fvd; if (o.v > 0) a.np++; if (o.alza != null && o.cv > 0) { a.an += o.alza * o.cv; a.ad += o.cv; } });
     const GL = Object.values(G).filter(a => a.v || a.cv || a.sv).sort((a, b) => b.v - a.v), T = GL.reduce((t, a) => { ["v", "c", "va", "v3", "c3", "sv", "cv", "an", "ad", "fv", "fvd"].forEach(k => t[k] = (t[k] || 0) + a[k]); return t; }, { n: "Total" });
@@ -5503,7 +5510,7 @@ setTimeout(() => { try { if (D && $("s-res") && !$("s-res").hidden && !$("kpCard
     const qb = A.L.filter(o => o.st != null && o.st <= 0 && o.q3 > 0 && !o.desc).sort((a, b) => b.v3 - a.v3), sob = A.L.filter(o => o.sv > 0 && o.q3 > 0 && o.dias > 120).sort((a, b) => b.sv - a.sv),
       muerto = A.L.filter(o => o.sv > 0 && !(o.q3 > 0)).sort((a, b) => b.sv - a.sv), alz = A.L.filter(o => o.alza != null && o.alza > 0.05 && o.cv > 0).sort((a, b) => b.alza * b.cv - a.alza * a.cv);
     if (qb.length) H.push(["!", `<b>Quiebres:</b> ${qb.length} productos que vende la distribuidora están sin stock; vendían ${fm(qb.reduce((t, o) => t + o.v3, 0) / 3)} al mes.`]);
-    if (IT.dias != null) H.push(["▣", `<b>Inventario:</b> ${fm(T.sv)} a costo = ${Math.round(IT.dias)} días de venta; rota ${IT.rot.toLocaleString("es-CL", { maximumFractionDigits: 1 })} veces al año.` + (sob.length || muerto.length ? ` Sobrestock (más de 120 días): ${fm(sob.reduce((t, o) => t + o.sv, 0))}; sin venta en 3 meses: ${fm(muerto.reduce((t, o) => t + o.sv, 0))}.` : "")]);
+    if (IT.dias != null) H.push(["▣", `<b>Inventario${E.canal ? "" : " de la distribuidora"}:</b> ${fm(T.sv)} a costo = ${Math.round(IT.dias)} días de venta; rota ${IT.rot.toLocaleString("es-CL", { maximumFractionDigits: 1 })} veces al año.` + (sob.length || muerto.length ? ` Sobrestock (más de 120 días): ${fm(sob.reduce((t, o) => t + o.sv, 0))}; sin venta en 3 meses: ${fm(muerto.reduce((t, o) => t + o.sv, 0))}.` : "")]);
     /* --- tabla de indicadores --- */
     const cl = (x, bueno) => x == null ? "" : (bueno ? x > 0 : x < 0) ? "bi-pos" : (bueno ? x < 0 : x > 0) ? "bi-neg" : "";
     const fila = (a, tot) => { const i = ind(a); return `<tr${tot ? ' class="tot"' : ""}><td>${esc(a.n)}${tot ? "" : `<small>${a.np} productos · ${T.v ? pc(a.v / T.v) : "—"} de la venta</small>`}</td><td>${fm(a.v)}</td><td>${i.mg == null ? "—" : pc(i.mg)}</td><td>${fm(i.mgP)}</td>
@@ -5522,7 +5529,7 @@ setTimeout(() => { try { if (D && $("s-res") && !$("s-res").hidden && !$("kpCard
       <div class="card"><h2>Indicadores por ${que} <span class="muted">${per} · en pesos</span></h2>
         <div class="tbl" style="overflow-x:auto"><table class="bi-t"><thead><tr><th>${que[0].toUpperCase() + que.slice(1)}</th><th>Venta</th><th>Margen</th><th>Margen $</th><th>vs ${E.anio - 1}</th><th>Stock a costo</th><th>Días inv.</th><th>Rotación</th><th title="margen bruto anual por cada $1 de inventario">Rentab. inv.</th><th>Compras ÷ costo</th><th>Alza costo</th></tr></thead><tbody>
           ${A.GL.map(a => fila(a)).join("")}${fila(Object.assign({ np: 0 }, T), true)}</tbody></table></div>
-        <p class="bi-nota">Margen = 1 − costo ÷ venta. vs ${E.anio - 1} = mismos meses cerrados. Días de inventario = stock a costo de la bodega distribuidora ÷ costo vendido diario de la distribuidora en los últimos 3 meses cerrados (la tienda tiene bodega propia); rotación = veces al año. Rentabilidad del inventario = margen bruto anual por cada $1 de stock (sobre $1 es bueno). Compras ÷ costo: 100% = se repone lo que sale. Alza de costo = precio de compra de la última compra contra la primera del año.</p></div>
+        <p class="bi-nota">Margen = 1 − costo ÷ venta. vs ${E.anio - 1} = mismos meses cerrados. Días de inventario = stock a costo de la bodega distribuidora ÷ costo vendido diario de la distribuidora en los últimos 3 meses cerrados (la tienda tiene bodega propia); rotación = veces al año. Rentabilidad del inventario = margen bruto anual por cada $1 de stock (sobre $1 es bueno). Compras ÷ costo: 100% = se repone lo que sale. Alza de costo = precio de compra de la última compra contra la primera del año.${E.canal === "t" ? " <b>Tienda:</b> el stock de su bodega no llega a esta app, por eso inventario, días, rotación y quiebres salen con «—» (están en la app TIENDA y en LOGÍSTICA)." : ""}</p></div>
       ${pareto ? `<div class="card"><h2>Concentración de productos <span class="muted">curva 80/20</span></h2>${pareto}
         <div class="bi-k"><div>Clase A · 80 % de la venta<b>${nA} productos</b><small>${pc(nA / ps.length)} del surtido</small></div><div>Clase B · siguiente 15 %<b>${nB - nA} productos</b><small>${pc((nB - nA) / ps.length)} del surtido</small></div>
           <div>Clase C · último 5 %<b>${ps.length - nB} productos</b><small>${pc((ps.length - nB) / ps.length)} del surtido</small></div><div>Productos con venta<b>${ps.length}</b><small>eje horizontal: % de productos · vertical: % de venta acumulada</small></div></div></div>` : ""}
@@ -5544,6 +5551,7 @@ setTimeout(() => { try { if (D && $("s-res") && !$("s-res").hidden && !$("kpCard
     let R; try { R = calc(); } catch (e) { s.insertAdjacentHTML("beforeend", '<div id="biBox"><div class="card"><p class="muted">No se pudo calcular: ' + esc(String(e && e.message || e)) + "</p></div></div>"); return; }
     s.insertAdjacentHTML("beforeend", '<div id="biBox">' + html(R) + avzHtml(R) + "</div>"); const q = id => s.querySelector("#" + id);
     q("biU").onclick = e => { const b = e.target.closest("[data-u]"); if (b) { E.u = b.dataset.u; guarda(); poner(); } };
+    q("biCanal").onclick = e => { const b = e.target.closest("[data-c]"); if (b) { E.canal = b.dataset.c; guarda(); poner(); } };
     q("biProv").onchange = () => { E.prov = q("biProv").value; E.marca = E.prod = ""; guarda(); poner(); };
     q("biMarca").onchange = () => { E.marca = q("biMarca").value; E.prod = ""; guarda(); poner(); };
     q("biFmt").onchange = () => { E.fmt = q("biFmt").value; E.prod = ""; guarda(); poner(); };
