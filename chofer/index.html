@@ -229,7 +229,7 @@ function arrancar() { const P = perfil(); if (!P || !cfg()) return puerta(); if 
 if (!cfg() || !perfil()) puerta(); else arrancar();
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 </script><script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261112102654";
+const HWF_VER = "20261112103142";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer)\/[^/]*$/, "/");
   let avisado = false;
@@ -425,6 +425,41 @@ const HWF_VER = "20261112102654";
         box.querySelectorAll(".card.rt").forEach((c, i) => { if (c.querySelector(".rPdf1")) return; const fila = [...c.querySelectorAll(".row")].pop(); if (!fila) return; const b = boton("📄 PDF"); b.classList.add("rPdf1"); fila.appendChild(b); b.onclick = () => generar("PDF de la ruta", () => pdfLog(i)); }); } catch (e) {} };
     let tp = null; try { new MutationObserver(() => { clearTimeout(tp); tp = setTimeout(poner, 60); }).observe(document.body, { childList: true, subtree: true }); poner(); } catch (e) {}
     window.hwfPdfLog = pdfLog;
+  }
+
+  /* ---------- HWF (Admin): PDF de la nota de pedido de la app que se está revisando ---------- */
+  if (typeof naPintar === "function" && document.getElementById("sheetIn")) {
+    const EST_N = { pen: "Por revisar", mod: "Modificada", apr: "Aprobada", rec: "Rechazada" };
+    const pdfNota = () => { if (typeof NAACT === "undefined" || !NAACT || !NAACT.p) return null; const p = NAACT.p, its = (NAACT.items || []).filter(x => x.q > 0), d = Pdf(), PIE = "Distribuidora HWF · nota de pedido de la app · " + (p.vend || "");
+      const fecha = typeof naFecha === "function" ? naFecha(p) : "", est = EST_N[typeof naEst === "function" ? naEst(p.num) : "pen"] || "", tcx = typeof tc === "function" ? tc : x => x;
+      cabecera(d, "Nota de pedido", "N° " + (p.num || ""), "Emisión " + fecha + (est ? " · " + est : ""));
+      const campos = [["Cliente", tcx(p.cliente)], ["RUT", p.rut], ["Giro", p.giro], ["Contacto", p.contacto], ["Teléfono", p.fono], ["Correo", p.mail], ["Dirección facturación", p.dir], ["Comuna / Ciudad", p.comuna],
+        ["Fecha de entrega", typeof naFISO === "function" ? naFISO(p.entrega) : p.entrega], ["Despacho", p.despacho], ["Dirección de entrega", p.dirEnt], ["Vendedor", p.vend + (p.cart && p.cart !== p.vend ? " (cartera " + p.cart + ")" : "")]];
+      const cw = (d.W - 2 * M - 16) / 2; let y = d.y;
+      for (let i = 0; i < campos.length; i += 2) { let alto = 0; [0, 1].forEach(k => { const f = campos[i + k]; if (!f) return; const x = M + k * (cw + 16); d.texto(x, y, f[0].toUpperCase(), { sz: 7, b: 1, c: GR });
+          const ls = d.partir(f[1] || "—", cw, 10, 0).slice(0, 2); ls.forEach((l, j) => d.texto(x, y + 12 + j * 12, d.corta(l, cw, 10), { sz: 10 })); alto = Math.max(alto, ls.length); }); y += 16 + alto * 12; }
+      y += 6; const X = { cod: M + 4, des: M + 62, can: M + 322, pre: M + 392, dsc: M + 436, val: d.W - M - 4 }, wDes = 222;
+      const enc = () => { d.rect(M, y, d.W - 2 * M, 20, AZ); const o = { sz: 8, b: 1, c: [255, 255, 255] }; d.texto(X.cod, y + 13, "CÓDIGO", o); d.texto(X.des, y + 13, "DESCRIPCIÓN", o); d.texto(X.can, y + 13, "CANT.", Object.assign({ al: "r" }, o));
+        d.texto(X.pre, y + 13, "PRECIO NETO", Object.assign({ al: "r" }, o)); d.texto(X.dsc, y + 13, "DESC.", Object.assign({ al: "r" }, o)); d.texto(X.val, y + 13, "VALOR NETO", Object.assign({ al: "r" }, o)); y += 20; };
+      enc(); let neto = 0, uni = 0;
+      its.forEach((x, i) => { const ls = d.partir(String(x.desc || "") + (x.promo ? " · " + x.promo : ""), wDes, 9, 0).slice(0, 3), h = 8 + ls.length * 11; neto += Number(x.v) || 0; uni += Number(x.q) || 0;
+        if (y + h > d.H - 60) { pie(d, PIE); d.pagina(); cabecera(d, "Nota de pedido", "N° " + (p.num || ""), tcx(p.cliente) || ""); y = d.y; enc(); }
+        if (i % 2) d.rect(M, y, d.W - 2 * M, h, SU);
+        d.texto(X.cod, y + 12, d.corta(x.cod, 54, 9), { sz: 9, c: GR }); ls.forEach((l, j) => d.texto(X.des, y + 12 + j * 11, l, { sz: 9 })); d.texto(X.can, y + 12, num(x.q), { sz: 9, al: "r" });
+        d.texto(X.pre, y + 12, x.pl ? pesos(x.pl) : x.pu ? pesos(x.pu) : "—", { sz: 9, al: "r" }); const ds = Number(x.dsc) || 0; d.texto(X.dsc, y + 12, ds ? num(ds <= 1 ? ds * 100 : ds, 1) + "%" : "—", { sz: 9, al: "r" });
+        d.texto(X.val, y + 12, x.v ? pesos(x.v) : "sin cargo", { sz: 9, b: 1, al: "r" }); y += h; });
+      if (!its.length) { d.texto(M + 4, y + 14, "Esta nota no trae el detalle de productos.", { sz: 9, c: GR }); y += 24; neto = Number(p.neto) || 0; }
+      d.linea(M, y, d.W - M, y, AZ, 1); y += 8; neto = Math.round(neto); const iva = Math.round(neto * 0.19), obs = d.partir(p.obs || "", d.W - 2 * M, 9, 0);
+      if (y + 86 + (p.obs ? 26 + obs.length * 11 : 0) > d.H - 60) { pie(d, PIE); d.pagina(); cabecera(d, "Nota de pedido", "N° " + (p.num || ""), tcx(p.cliente) || ""); y = d.y; }
+      const xt = d.W - M - 4, xl = d.W - M - 150; d.texto(M + 4, y + 12, its.length + " líneas · " + num(uni) + " unidades", { sz: 9, c: GR });
+      [["Neto", pesos(neto)], ["IVA 19%", pesos(iva)]].forEach(([a, b], i) => { d.texto(xl, y + 12 + i * 15, a, { sz: 10, c: GR }); d.texto(xt, y + 12 + i * 15, b, { sz: 10, al: "r" }); });
+      d.rect(xl - 8, y + 36, d.W - M - xl + 8, 24, AZ); d.texto(xl, y + 52, "TOTAL", { sz: 11, b: 1, c: [255, 255, 255] }); d.texto(xt, y + 52, pesos(neto + iva), { sz: 12, b: 1, c: [255, 255, 255], al: "r" }); y += 76;
+      if (p.obs) { d.texto(M, y, "OBSERVACIONES", { sz: 7, b: 1, c: GR }); obs.forEach((l, j) => d.texto(M, y + 13 + j * 11, l, { sz: 9 })); }
+      pie(d, PIE); return { bytes: d.bytes(), paginas: d.paginas(), nombre: `Nota de pedido ${limpio(p.num)} ${limpio(tcx(p.cliente) || "cliente")}.pdf`.replace(/\s+/g, " "), msg: `Nota de pedido ${p.num || ""} · ${tcx(p.cliente) || ""} · total ${pesos(neto + iva)} (neto ${pesos(neto)})` }; };
+    const poner = () => { try { const sh = document.getElementById("sheetIn"), acc = sh && sh.querySelector(".np-acc"); if (!acc || !sh.querySelector("#naApr") || sh.querySelector("#naPdf")) return;
+        const b = boton("📄 PDF de la nota (enviar o imprimir)", "naPdf"); b.style.cssText = "width:100%;margin:8px 0"; acc.parentNode.insertBefore(b, acc); b.onclick = () => generar("PDF de la nota de pedido", pdfNota); } catch (e) {} };
+    let ta = null; try { new MutationObserver(() => { clearTimeout(ta); ta = setTimeout(poner, 60); }).observe(document.getElementById("sheetIn"), { childList: true, subtree: true }); poner(); } catch (e) {}
+    window.hwfPdfNota = pdfNota;
   }
 
   /* ---------- CHOFER ---------- */
