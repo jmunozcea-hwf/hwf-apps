@@ -402,7 +402,7 @@ if (!cfg() || !DATA()) pantallaConexion(); else { arrancar(); bajar(true).then(n
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261112154200";
+const HWF_VER = "20261112204331";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer)\/[^/]*$/, "/");
   let avisado = false;
@@ -1135,6 +1135,167 @@ function vmPoner(cont, VM, antes) { try { if (!cont) return; const v = cont.quer
   HOST.engancha(poner); try { const c0 = HOST.cont(); if (c0 && c0.children.length && (E.un || HOST.t !== "ventas")) poner(); } catch (e) {}
   window.biEstado = () => E; window.biCalc = calc;
   window.hwfBi = { tipo: HOST.t, base: () => HOST.base(), stock: c => HOST.stock(c), meta: (y, m) => HOST.meta(y, m), prov: provDe };   /* lo usa patch_noticias */
+})();
+</script>
+<style>/* patch_asistente */
+#iaBtn{position:fixed;right:14px;bottom:calc(84px + env(safe-area-inset-bottom));z-index:900;border:0;border-radius:999px;padding:12px 16px;font:600 .95rem system-ui,sans-serif;
+  background:linear-gradient(135deg,#0B3146,#1C7A4E);color:#fff;box-shadow:0 6px 18px rgba(11,49,70,.35);cursor:pointer;display:flex;gap:6px;align-items:center}
+#iaBtn:focus-visible{outline:3px solid #F5B400;outline-offset:2px}
+#iaPan{position:fixed;inset:0;z-index:1000;background:var(--bg,#F4F7F9);display:none;flex-direction:column;color:var(--ink,#13222D)}
+#iaPan.on{display:flex}
+@media(min-width:900px){#iaPan{inset:auto 18px 18px auto;width:min(520px,92vw);height:min(760px,86vh);border-radius:18px;box-shadow:0 18px 50px rgba(0,0,0,.28);overflow:hidden;border:1px solid var(--line,#DAE1E7)}}
+.ia-h{display:flex;align-items:center;gap:8px;padding:12px 14px;background:#0B3146;color:#fff}.ia-h b{flex:1;font-size:1.02rem}.ia-h button{background:rgba(255,255,255,.14);color:#fff;border:0;border-radius:10px;padding:8px 11px;font:inherit;cursor:pointer}
+.ia-m{flex:1;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:10px}
+.ia-b{flex-shrink:0;max-width:92%;padding:10px 12px;border-radius:14px;line-height:1.45;font-size:.95rem;word-wrap:break-word;overflow-x:auto}
+.ia-u{align-self:flex-end;background:#0B3146;color:#fff;border-bottom-right-radius:4px;white-space:pre-wrap}
+.ia-a{align-self:flex-start;background:var(--card,#fff);border:1px solid var(--line,#DAE1E7);border-bottom-left-radius:4px}
+.ia-a p{margin:.2em 0 .5em}.ia-a ul{margin:.2em 0 .5em;padding-left:1.2em}.ia-a table{border-collapse:collapse;font-size:.84rem;margin:.3em 0}.ia-a td,.ia-a th{border:1px solid var(--line,#DAE1E7);padding:3px 6px;text-align:left}
+.ia-a th{background:rgba(11,49,70,.06)}.ia-e{color:#B42318}
+.ia-s{flex-shrink:0;display:flex;flex-wrap:wrap;gap:6px}.ia-s button{border:1px solid var(--line,#C9D3DB);background:var(--card,#fff);color:inherit;border-radius:999px;padding:7px 11px;font:inherit;font-size:.86rem;cursor:pointer}
+.ia-f{display:flex;gap:8px;padding:10px;border-top:1px solid var(--line,#DAE1E7);background:var(--card,#fff)}
+.ia-f textarea{flex:1;resize:none;border:1px solid var(--line,#C9D3DB);border-radius:12px;padding:10px;font:inherit;font-size:16px;min-height:44px;max-height:140px;background:var(--bg,#fff);color:inherit}
+.ia-f button{border:0;border-radius:12px;padding:0 16px;background:#1C7A4E;color:#fff;font:600 .95rem system-ui,sans-serif;cursor:pointer}.ia-f button:disabled{opacity:.5}
+.ia-n{font-size:.74rem;color:var(--muted,#5B6874);padding:0 12px 8px;background:var(--card,#fff)}
+.ia-p{display:inline-block;animation:iaP 1.2s infinite}@keyframes iaP{50%{opacity:.3}}
+@media print{#iaBtn,#iaPan{display:none!important}}
+</style>
+<script>/* patch_asistente: asistente IA con los datos cargados en la app (pregunta → script de Google → API de Claude) */
+(function () {
+  const HB = window.hwfBi; if (!HB || document.getElementById("iaBtn")) return;
+  const T = HB.tipo, RC = T === "ventas", DEMO = /DEMO/.test(document.title);
+  const NOM = { admin: "HWF (administración)", ventas: "VENTAS (app de los vendedores)", log: "LOGÍSTICA" }[T] || T;
+  const ALC = {
+    ventas: "App de los vendedores de HWF. Secciones: Inicio (avance del mes, buenas noticias), Pedido (crear notas de pedido, se envían al script y llegan por correo con PDF y Excel; botones para PDF, enviar e imprimir), Clientes (cartera, ficha, última compra, sugerencias de productos), Ruta (planificar visitas del día, PDF), Cobranza (documentos por cobrar), Prospectos (clientes potenciales), Panel e Inteligencia de negocio (unidad Ventas: gráficos y tablas por proveedor, marca, formato, producto, canal total/distribuidora/tienda; exportar a PDF, Excel, correo e imprimir). NO muestra costos, márgenes ni compras en pesos.",
+    admin: "App de administración HWF (gerencia). Secciones: Inicio (avance del mes contra la meta, proyección de cierre), Ventas y ranking por vendedor, cliente y producto, Inventario con Inteligencia de negocio (unidades Ventas y Logística: ventas y compras en $ o unidades, filtros proveedor/marca/formato/producto, canal, análisis avanzado con Pareto, alertas y pronóstico, exportar PDF/Excel/correo/imprimir), Abastecimiento (compra sugerida por mes según pronóstico y stock de seguridad por clase ABC), Plan de ventas nov-26 a dic-27 ($1.000 MM: distribuidora 827,8 + tienda 172,2), Pago a proveedores (plan a 14 meses: Planet Pet a contado, Montaraz −50 % de la deuda), Catálogo y listas de precio (archivos en Drive), Cobranza, Prospectos y notas de pedido de la app.",
+    log: "App de logística HWF. Secciones: Panel (buenas noticias, avance), Inteligencia de negocio (unidades Ventas y Logística: ventas, compras y stock por proveedor/marca/formato/producto y canal; exportar PDF/Excel/correo/imprimir), Abastecimiento (compra sugerida según pronóstico y stock de seguridad), Rutas de despacho (armar rutas del día, enviarlas a la app Chofer, seguimiento GPS y entregas con foto/firma; PDF), stock de todas las bodegas, pedidos pendientes y clientes para despacho."
+  }[T] || "";
+  const SUG = {
+    ventas: ["¿Cómo vamos con la meta del mes?", "¿Qué clientes míos no compran hace más de 60 días?", "¿Qué productos se venden más este año?", "¿Qué productos están sin stock?"],
+    admin: ["Resume cómo va el mes contra la meta", "¿Qué marcas crecen y cuáles caen este año?", "¿Qué productos clase A tienen poco stock?", "¿Cómo va cada vendedor este mes?"],
+    log: ["¿Qué productos se quedan sin stock en menos de 15 días?", "¿Cuánto compramos por proveedor este año?", "¿Qué pedidos están pendientes?", "¿Qué productos tienen más stock que venta?"]
+  }[T] || [];
+  const MES = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
+  const n0 = v => Math.round(Number(v) || 0).toLocaleString("es-CL"), pz = v => "$" + n0(v), pc = v => isFinite(v) ? (Math.round(v * 1000) / 10).toLocaleString("es-CL") + " %" : "–";
+  const tc = s => String(s || "").toLowerCase().replace(/(^|[\s\-])([a-záéíóúñ])/g, (m, a, b) => a + b.toUpperCase());
+  const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const conn = () => { try { if (typeof SYC === "function") { const c = SYC(); if (c && c.url) return c; } } catch (e) {}
+    try { if (typeof syCfg === "function") { const c = syCfg(); if (c && c.url) return c; } } catch (e) {}
+    try { if (typeof cfg === "function") { const c = cfg(); if (c && c.url) return c; } } catch (e) {} return null; };
+  const usuario = () => { try { if (T === "ventas" && typeof SES !== "undefined" && SES && SES.vendedor) return SES.vendedor.nombre || ""; } catch (e) {} return T; };
+  const habiles = (y, m, hasta) => { let n = 0; const fin = new Date(y, m, 0).getDate(); for (let d = 1; d <= Math.min(fin, hasta || fin); d++) { const w = new Date(y, m - 1, d).getDay(); if (w && w < 6) n++; } return n; };
+
+  /* ===== resumen de los datos de la app ===== */
+  function contexto() {
+    const B = HB.base() || {}, R = B.rows || [], P = B.productos || [], cats = B.cats || [], V = B.vend || [], tv = V.indexOf("Tienda Hellywoof"), an = r => r[8] || B.anio;
+    let X = null; try { X = typeof DATA === "function" ? DATA() : null; } catch (e) {}
+    const cy = Number(String(B.corte || "").slice(0, 4)) || B.anio, cm = Number(String(B.corte || "").slice(5, 7)) || 12, cd = Number(String(B.corte || "").slice(8, 10)) || 0;
+    const L = [], hoy = new Date(), tab = (t, cab, filas) => { if (!filas.length) return; L.push("", "## " + t, cab.join(" | ")); filas.forEach(f => L.push(f.join(" | "))); };
+    L.push("APP: " + NOM, "ALCANCE Y FUNCIONES: " + ALC, "Usuario: " + usuario(),
+      "Fecha de hoy: " + hoy.toLocaleDateString("es-CL") + ". Ventas facturadas (Defontana, neto sin IVA) al " + (B.corte || "?") + "; " + MES[cm - 1] + " " + cy + " va en curso. Stock al " + (B.stockFecha || (X && X.stockFecha) || "?") + ".",
+      RC ? "Esta app NO muestra costos, márgenes ni compras en pesos: no los tienes." : "Costo = cantidad × costo unitario; margen = venta − costo.",
+      "Plan de ventas nov-26 a dic-27: $1.000 MM en 14 meses (distribuidora 827,8 MM + tienda 172,2 MM), con estacionalidad.");
+    const info = P.map(p => { const pm = HB.prov(cats[p[1]]); return { n: p[0], cod: String(p[2]), pv: pm[0], ma: pm[1] || pm[0] }; });
+    /* venta mensual */
+    const mesK = {}, z = () => ({ dv: 0, du: 0, dc: 0, tv: 0, tu: 0, tc: 0 });
+    R.forEach(r => { const k = an(r) * 100 + r[2], o = mesK[k] = mesK[k] || z(), q = Number(r[4]) || 0, v = Number(r[5]) || 0, c = q * (Number(r[6]) || 0);
+      if (r[7] === tv) { o.tv += v; o.tu += q; o.tc += c; } else { o.dv += v; o.du += q; o.dc += c; } });
+    const KM = Object.keys(mesK).map(Number).sort();
+    tab("Venta neta mensual", ["Mes", "Distribuidora $", "Distribuidora unid.", "Tienda $", "Tienda unid.", "Total $"].concat(RC ? [] : ["Margen distribuidora %", "Margen tienda %"]),
+      KM.map(k => { const o = mesK[k]; return [MES[k % 100 - 1] + "-" + Math.floor(k / 100), pz(o.dv), n0(o.du), pz(o.tv), n0(o.tu), pz(o.dv + o.tv)].concat(RC ? [] : [pc(o.dv ? 1 - o.dc / o.dv : NaN), pc(o.tv ? 1 - o.tc / o.tv : NaN)]); }));
+    /* metas y avance del mes */
+    const metas = []; for (let y = cy; y <= cy + 1; y++) for (let m = 1; m <= 12; m++) { let mt = 0; try { mt = HB.meta(y, m) || 0; } catch (e) {} if (mt > 0) metas.push([MES[m - 1] + "-" + y, pz(mt)]); }
+    tab("Meta mensual de la distribuidora (plan)", ["Mes", "Meta $"], metas);
+    const o = mesK[cy * 100 + cm] || z(); let mt = 0; try { mt = HB.meta(cy, cm) || 0; } catch (e) {}
+    const hT = habiles(cy, cm), hP = habiles(cy, cm, cd || undefined), proy = hP ? o.dv / hP * hT : 0;
+    const pend = (B.cots || (X && X.cots) || []); let pendT = 0; const pendV = {}, pendN = {}; pend.forEach(c => { const v = Number(c[7]) || 0; pendT += v; pendV[c[3]] = (pendV[c[3]] || 0) + v; (pendN[c[3]] = pendN[c[3]] || new Set()).add(c[0]); });
+    L.push("", "## Avance de " + MES[cm - 1] + " " + cy + " (distribuidora)", "Facturado: " + pz(o.dv) + " · meta: " + (mt ? pz(mt) : "sin dato") + (mt ? " · avance facturado " + pc(o.dv / mt) + " · avance con pendientes " + pc((o.dv + pendT) / mt) : "") +
+      " · pedidos/cotizaciones pendientes (NP Defontana): " + pz(pendT) + " · días hábiles " + hP + " de " + hT + " · proyección de cierre (solo facturado al ritmo): " + pz(proy) + (mt ? " (" + pc(proy / mt) + " de la meta)" : "") + " · tienda facturado: " + pz(o.tv));
+    /* vendedores */
+    const vk = {}; R.forEach(r => { if (an(r) !== cy) return; const k = V[r[7]] || "?", w = vk[k] = vk[k] || { m: {}, a: 0 }; w.m[r[2]] = (w.m[r[2]] || 0) + (Number(r[5]) || 0); w.a += Number(r[5]) || 0; });
+    const MT = B.metas || {};
+    tab("Venta neta por vendedor " + cy + " (meta del mes " + (B.metaMes ? MES[B.metaMes - 1] : MES[cm - 1]) + ")", ["Vendedor", "Año $", MES[cm - 1] + " $", "Meta del mes $", "Pendiente $", "N° pendientes"].concat(cm > 1 ? [MES[cm - 2] + " $"] : []),
+      Object.keys(vk).sort((a, b) => vk[b].a - vk[a].a).map(k => [k, pz(vk[k].a), pz(vk[k].m[cm] || 0), MT[k] ? pz(MT[k]) : "–", pz(pendV[k] || 0), pendN[k] ? pendN[k].size : 0].concat(cm > 1 ? [pz(vk[k].m[cm - 1] || 0)] : [])));
+    /* marcas: año en curso vs. mismo período del año anterior */
+    const mk = {}; R.forEach(r => { const y = an(r), i = info[r[1]]; if (!i || (y !== cy && y !== cy - 1) || r[2] > cm || (r[2] === cm && cd && r[3] > cd)) return;
+      const w = mk[i.ma] = mk[i.ma] || { pv: i.pv, a: 0, b: 0, u: 0, c: 0 }, v = Number(r[5]) || 0; if (y === cy) { w.a += v; w.u += Number(r[4]) || 0; w.c += (Number(r[4]) || 0) * (Number(r[6]) || 0); } else w.b += v; });
+    tab("Venta por marca: ene–" + MES[cm - 1] + " " + cy + " vs. mismo período " + (cy - 1), ["Marca", "Proveedor", cy + " $", cy + " unid.", (cy - 1) + " $", "Variación"].concat(RC ? [] : ["Margen %"]),
+      Object.keys(mk).sort((a, b) => mk[b].a - mk[a].a).slice(0, 60).map(k => { const w = mk[k]; return [k, w.pv, pz(w.a), n0(w.u), pz(w.b), w.b ? pc(w.a / w.b - 1) : "nuevo"].concat(RC ? [] : [pc(w.a ? 1 - w.c / w.a : NaN)]); }));
+    /* productos */
+    const pk = {}, u3 = [1, 2, 3].map(i => { const d = new Date(cy, cm - 1 - i, 1); return d.getFullYear() * 100 + d.getMonth() + 1; });
+    R.forEach(r => { const i = info[r[1]]; if (!i) return; const y = an(r), k = y * 100 + r[2], w = pk[i.cod] = pk[i.cod] || { i, a: 0, au: 0, m: {}, cu: 0, cq: 0 }, q = Number(r[4]) || 0;
+      if (y === cy) { w.a += Number(r[5]) || 0; w.au += q; } if (u3.includes(k) || k === cy * 100 + cm) w.m[k] = (w.m[k] || 0) + q; if (q > 0 && r[6] > 0) { w.cu += q * r[6]; w.cq += q; } });
+    const FC = (B.fc && B.fc.p) || {}, DESC = new Set(B.desc || []), stD = c => { try { const s = HB.stock(c); return s == null ? "" : n0(s); } catch (e) { return ""; } }, stT = c => B.stockT && B.stockT[c] != null ? n0(B.stockT[c]) : "";
+    Object.keys(FC).forEach(c => { if (!pk[c]) { const ix = P.findIndex(p => String(p[2]) === c); if (ix >= 0) pk[c] = { i: info[ix], a: 0, au: 0, m: {}, cu: 0, cq: 0 }; } });
+    const PL = Object.values(pk).sort((a, b) => b.a - a.a || (FC[b.i.cod] ? FC[b.i.cod][1] : 0) - (FC[a.i.cod] ? FC[a.i.cod][1] : 0)).slice(0, 180);
+    tab("Productos (los " + PL.length + " de mayor venta " + cy + "; unidades por mes; stock en unidades; pronóstico = venta mensual esperada de la distribuidora; clase ABC)",
+      ["Código", "Producto", "Marca", "Proveedor", cy + " $", cy + " unid."].concat(u3.slice().reverse().map(k => MES[k % 100 - 1] + " u"), [MES[cm - 1] + " u (en curso)", "Stock distribuidora", "Stock tienda", "Pronóstico u/mes", "Días de stock", "Clase"], RC ? [] : ["Costo unit. $"], ["Nota"]),
+      PL.map(w => { const c = w.i.cod, f = FC[c], s = (() => { try { return HB.stock(c); } catch (e) { return null; } })(), dias = f && f[0] > 0 && s != null ? Math.round(s / f[0] * 30) : "";
+        return [c, w.i.n, w.i.ma, w.i.pv, pz(w.a), n0(w.au)].concat(u3.slice().reverse().map(k => n0(w.m[k] || 0)), [n0(w.m[cy * 100 + cm] || 0), stD(c), stT(c), f ? n0(f[0]) : "", dias, f ? f[3] || "" : ""], RC ? [] : [w.cq ? pz(w.cu / w.cq) : ""], [DESC.has(c) ? "descontinuado (no se compra)" : s === 0 && w.au > 0 ? "SIN STOCK" : ""]); }));
+    /* clientes (sin RUT ni teléfonos) */
+    const CL = B.clientes || [], conCli = CL.length && R.some(r => r[0] > 0);
+    if (conCli) { const ck = {}; R.forEach(r => { if (r[7] === tv) return; const y = an(r), w = ck[r[0]] = ck[r[0]] || { a: 0, b: 0, m: 0, ult: 0, meses: new Set() }, v = Number(r[5]) || 0, f = y * 10000 + r[2] * 100 + (r[3] || 1);
+        if (y === cy) { w.a += v; if (r[2] === cm) w.m += v; } else if (y === cy - 1) w.b += v; if (v > 0) { if (f > w.ult) w.ult = f; w.meses.add(y * 100 + r[2]); } });
+      const CK = Object.keys(ck).sort((a, b) => ck[b].a - ck[a].a || ck[b].b - ck[a].b).slice(0, 150);
+      tab("Clientes de la distribuidora (" + CK.length + " de " + Object.keys(ck).length + " con compra; ordenados por venta " + cy + ")", ["Cliente", "Comuna", "Vendedor", cy + " $", (cy - 1) + " $", MES[cm - 1] + " $", "Última compra", "Meses con compra"],
+        CK.map(k => { const w = ck[k], c = CL[k] || []; return [c[0] || "?", c[1] || "", c[2] || "", pz(w.a), pz(w.b), pz(w.m), w.ult ? String(w.ult % 100).padStart(2, "0") + "-" + String(Math.floor(w.ult / 100) % 100).padStart(2, "0") + "-" + Math.floor(w.ult / 10000) : "", w.meses.size]; }));
+      L.push("Clientes con compra en " + MES[cm - 1] + " " + cy + ": " + Object.values(ck).filter(w => w.m > 0).length + "."); }
+    /* pedidos pendientes */
+    if (pend.length) { const pp = {}; pend.forEach(c => { const w = pp[c[0]] = pp[c[0]] || { f: c[1], cl: c[2], v: c[3], t: 0, it: [] }; w.t += Number(c[7]) || 0; w.it.push(n0(c[5]) + " × " + c[6]); });
+      tab("Pedidos y cotizaciones pendientes de facturar (Defontana)", ["N°", "Fecha", "Cliente", "Vendedor", "Neto $", "Detalle"], Object.keys(pp).slice(0, 80).map(k => { const w = pp[k]; return [k, w.f, w.cl, w.v, pz(w.t), w.it.join("; ").slice(0, 300)]; })); }
+    /* compras */
+    const C = B.compras && B.compras.rows; if (C && C.length) { const cmK = {}, cpv = {}; C.forEach(r => { const y = Math.floor(r[1] / 100), w = cmK[r[1]] = cmK[r[1]] || { u: 0, v: 0 }; w.u += Number(r[2]) || 0; w.v += Number(r[3]) || 0;
+        if (y === cy) { const ix = P.findIndex(p => String(p[2]) === String(r[0])), pv = ix >= 0 ? info[ix].pv : "Sin proveedor", q = cpv[pv] = cpv[pv] || { u: 0, v: 0 }; q.u += Number(r[2]) || 0; q.v += Number(r[3]) || 0; } });
+      tab("Compras mensuales (ingresos a bodega" + (B.compras.fecha ? ", Mayor al " + B.compras.fecha : "") + ")", ["Mes", "Unidades"].concat(RC ? [] : ["Valor neto $"]), Object.keys(cmK).map(Number).sort().map(k => [MES[k % 100 - 1] + "-" + Math.floor(k / 100), n0(cmK[k].u)].concat(RC ? [] : [pz(cmK[k].v)])));
+      tab("Compras " + cy + " por proveedor", ["Proveedor", "Unidades"].concat(RC ? [] : ["Valor neto $"]), Object.keys(cpv).sort((a, b) => cpv[b].v - cpv[a].v).map(k => [k, n0(cpv[k].u)].concat(RC ? [] : [pz(cpv[k].v)]))); }
+    if (DESC.size) L.push("", "Productos descontinuados (no se vuelven a comprar): " + [...DESC].map(c => { const ix = P.findIndex(p => String(p[2]) === c); return ix >= 0 ? P[ix][0] : c; }).join(", ") + ".");
+    let t = L.join("\n"); if (t.length > 200000) t = t.slice(0, 200000) + "\n(…resumen recortado)"; return t;
+  }
+
+  /* ===== formato de la respuesta (markdown simple, escapado) ===== */
+  const inl = s => esc(s).replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>");
+  function md(t) { const out = [], L = String(t || "").split("\n"); let i = 0;
+    while (i < L.length) { const l = L[i];
+      if (/^\s*\|.*\|\s*$/.test(l)) { const F = []; while (i < L.length && /^\s*\|.*\|\s*$/.test(L[i])) { F.push(L[i]); i++; }
+        const fil = F.filter(f => !/^\s*\|[\s:\-|]+\|\s*$/.test(f)).map(f => f.trim().replace(/^\||\|$/g, "").split("|").map(c => c.trim()));
+        out.push("<table>" + fil.map((f, j) => "<tr>" + f.map(c => j ? "<td>" + inl(c) + "</td>" : "<th>" + inl(c) + "</th>").join("") + "</tr>").join("") + "</table>"); continue; }
+      if (/^\s*[-•*]\s+/.test(l)) { const it = []; while (i < L.length && /^\s*[-•*]\s+/.test(L[i])) { it.push("<li>" + inl(L[i].replace(/^\s*[-•*]\s+/, "")) + "</li>"); i++; } out.push("<ul>" + it.join("") + "</ul>"); continue; }
+      if (/^#{1,4}\s/.test(l)) { out.push("<p><b>" + inl(l.replace(/^#+\s*/, "")) + "</b></p>"); i++; continue; }
+      if (l.trim()) out.push("<p>" + inl(l) + "</p>"); i++; }
+    return out.join(""); }
+
+  /* ===== interfaz ===== */
+  let H = [], CTX = null, OCUP = false;
+  const btn = document.createElement("button"); btn.id = "iaBtn"; btn.type = "button"; btn.innerHTML = "✨ Asistente"; btn.setAttribute("aria-label", "Abrir el asistente IA");
+  const pan = document.createElement("section"); pan.id = "iaPan"; pan.setAttribute("aria-label", "Asistente IA"); pan.setAttribute("role", "dialog");
+  pan.innerHTML = '<div class="ia-h"><b>✨ Asistente ' + esc(NOM.split(" ")[0]) + '</b><button type="button" id="iaNew" title="Nueva conversación">Nueva</button><button type="button" id="iaX" aria-label="Cerrar">✕</button></div>' +
+    '<div class="ia-m" id="iaMsgs" aria-live="polite"></div><form class="ia-f" id="iaF"><textarea id="iaQ" rows="1" maxlength="2000" placeholder="Pregunta sobre ventas, metas, clientes, stock…"></textarea><button type="submit" id="iaGo">Enviar</button></form>' +
+    '<div class="ia-n">Responde con los datos cargados en esta app' + (RC ? " (sin costos ni márgenes)" : "") + '. Puede equivocarse: revisa las cifras importantes.</div>';
+  document.body.appendChild(btn); document.body.appendChild(pan);
+  const $m = pan.querySelector("#iaMsgs"), $q = pan.querySelector("#iaQ"), $go = pan.querySelector("#iaGo");
+  const burbuja = (cls, html) => { const d = document.createElement("div"); d.className = "ia-b " + cls; d.innerHTML = html; $m.appendChild(d); $m.scrollTop = $m.scrollHeight; return d; };
+  function inicio() { $m.innerHTML = ""; burbuja("ia-a", "<p>Hola" + (usuario() && usuario() !== T ? ", " + esc(String(usuario()).split(" ")[0]) : "") + ". Pregúntame sobre los datos de esta app: ventas, metas, " + (T === "log" ? "stock, compras, pedidos y rutas" : "clientes, productos y stock") + ".</p>");
+    const s = document.createElement("div"); s.className = "ia-s"; s.innerHTML = SUG.map(x => '<button type="button">' + esc(x) + "</button>").join(""); s.onclick = e => { const b = e.target.closest("button"); if (b) preguntar(b.textContent); }; $m.appendChild(s); }
+  async function preguntar(q) { q = String(q || "").trim(); if (!q || OCUP) return; OCUP = true; $go.disabled = true; $q.value = ""; burbuja("ia-u", esc(q)); const esp = burbuja("ia-a", '<span class="ia-p">Pensando…</span>');
+    let res;
+    if (DEMO) res = { ok: false, error: "En la demo el asistente no está conectado: en la app real responde con los datos de HWF." };
+    else { const c = conn(); if (!c) res = { ok: false, error: "Esta app no está conectada al script de Google." };
+      else { try { if (CTX == null) CTX = contexto(); } catch (e) { CTX = "No se pudo resumir los datos de la app (" + (e && e.message) + ")."; }
+        const ctrl = new AbortController(), tm = setTimeout(() => ctrl.abort(), 120000);
+        try { const r = await fetch(c.url, { method: "POST", body: JSON.stringify({ clave: c.clave, accion: "asistente", app: T, usuario: usuario(), contexto: CTX, historial: H.slice(-12), pregunta: q }), signal: ctrl.signal }), t = await r.text();
+          try { res = JSON.parse(t); } catch (e) { res = { ok: false, error: "El script de Google no reconoce el asistente todavía. Espera unos minutos a que se actualice." }; } }
+        catch (e) { res = { ok: false, error: "Sin conexión a internet o la respuesta tardó demasiado." }; } finally { clearTimeout(tm); } } }
+    if (res && res.ok) { esp.innerHTML = md(res.respuesta); H.push({ role: "user", content: q }, { role: "assistant", content: res.respuesta }); }
+    else { esp.innerHTML = '<p class="ia-e">' + esc((res && res.error) || "No se pudo responder.") + "</p>"; }
+    $m.scrollTop = $m.scrollHeight; OCUP = false; $go.disabled = false; }
+  const abrir = () => { pan.classList.add("on"); btn.style.display = "none"; if (!$m.children.length) inicio(); setTimeout(() => $q.focus(), 50); };
+  const cerrar = () => { pan.classList.remove("on"); btn.style.display = ""; btn.focus(); };
+  btn.onclick = abrir; pan.querySelector("#iaX").onclick = cerrar;
+  pan.querySelector("#iaNew").onclick = () => { H = []; CTX = null; inicio(); };   /* nueva conversación: vuelve a leer los datos (por si se actualizaron) */
+  pan.querySelector("#iaF").onsubmit = e => { e.preventDefault(); preguntar($q.value); };
+  $q.addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); preguntar($q.value); } });
+  $q.addEventListener("input", () => { $q.style.height = "auto"; $q.style.height = Math.min(140, $q.scrollHeight) + "px"; });
+  document.addEventListener("keydown", e => { if (e.key === "Escape" && pan.classList.contains("on")) cerrar(); });
+  window.hwfAsistente = { contexto };   /* para pruebas */
 })();
 </script>
 </body></html>
