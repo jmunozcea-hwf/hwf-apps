@@ -1,6 +1,5 @@
 <!doctype html><html lang="es-CL"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>CHOFER HWF</title>
-<meta name="apple-mobile-web-app-title" content="CHOFER"><meta name="theme-color" content="#0B3146"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon-192.png">
+<title>Chofer HWF</title><meta name="theme-color" content="#0B3146"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon-192.png">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
 <style>
 :root{--navy:#0B3146;--oro:#F0A818;--verde:#1C7A4E;--rojo:#B42318;--bg:#F2F5F7;--ink:#0F1E29;--muted:#5B6874;--line:#DAE1E7;--sunk:#EEF2F5}
@@ -35,7 +34,7 @@ label.f{display:grid;gap:4px;font-size:.8rem;font-weight:700;color:var(--muted);
 .toast{position:fixed;left:50%;bottom:calc(88px + env(safe-area-inset-bottom));transform:translateX(-50%);background:#0F1E29;color:#fff;padding:10px 16px;border-radius:12px;z-index:200;max-width:90vw}
 [hidden]{display:none!important}
 </style></head><body>
-<div class="top"><div><h1>🚚 CHOFER HWF</h1><small id="tSub">—</small></div><span class="gp" id="gps">GPS…</span></div>
+<div class="top"><div><h1>🚚 Chofer HWF</h1><small id="tSub">—</small></div><span class="gp" id="gps">GPS…</span></div>
 <main><section id="s-ruta"></section><section id="s-mapa" hidden><div class="card" style="padding:8px"><div id="mapa"></div></div></section><section id="s-resumen" hidden></section></main>
 <nav class="bn" id="nav"><button type="button" data-s="ruta"><span class="ic"><svg viewBox="0 0 32 32" aria-hidden="true" class="hic"><defs><linearGradient id="hic-cruta" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1F5673"/><stop offset="1" stop-color="#0B3146"/></linearGradient></defs><rect width="32" height="32" rx="9" fill="url(#hic-cruta)"/><path d="M4 4h24v10C20 9 11 9 4 13z" fill="#fff" opacity=".12"/><g transform="translate(5.5 5.5) scale(.875)" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 6h10M10 12h10M10 18h10"/><path d="M3.5 6l1.5 1.5L7.5 5M3.5 12l1.5 1.5L7.5 11M3.5 18l1.5 1.5L7.5 17"/></g></svg></span>Ruta</button><button type="button" data-s="mapa"><span class="ic"><svg viewBox="0 0 32 32" aria-hidden="true" class="hic"><defs><linearGradient id="hic-cmapa" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FF8A6B"/><stop offset="1" stop-color="#D9483B"/></linearGradient></defs><rect width="32" height="32" rx="9" fill="url(#hic-cmapa)"/><path d="M4 4h24v10C20 9 11 9 4 13z" fill="#fff" opacity=".12"/><g transform="translate(5.5 5.5) scale(.875)" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3z"/><path d="M9 3v15M15 6v15"/></g></svg></span>Mapa</button><button type="button" data-s="resumen"><span class="ic"><svg viewBox="0 0 32 32" aria-hidden="true" class="hic"><defs><linearGradient id="hic-cresumen" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3FBF7F"/><stop offset="1" stop-color="#1C7A4E"/></linearGradient></defs><rect width="32" height="32" rx="9" fill="url(#hic-cresumen)"/><path d="M4 4h24v10C20 9 11 9 4 13z" fill="#fff" opacity=".12"/><g transform="translate(5.5 5.5) scale(.875)" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M15 9.5c-.5-1-1.6-1.5-3-1.5-1.7 0-3 .8-3 2s1.3 1.7 3 2 3 .8 3 2-1.3 2-3 2c-1.4 0-2.5-.5-3-1.5M12 6.5v1.5M12 16v1.5"/></g></svg></span>Resumen</button></nav><div class="toast" id="toast" hidden></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
@@ -61,27 +60,19 @@ async function api(d) { const c = cfg(); if (!c) return { ok: false, error: "Sin
     return o; } catch (e) { return { ok: false, red: true, error: "Sin señal o el script no respondió." }; } }
 function dec(t) { t = String(t || "").replace(/\s+/g, ""); try { t = decodeURIComponent(t); } catch (e) {} const m = t.match(/HWF1:([A-Za-z0-9+\/=_-]+)/); if (!m) return null;
   try { const o = JSON.parse(decodeURIComponent(escape(atob(m[1].replace(/-/g, "+").replace(/_/g, "/"))))); return o.u && o.c ? { url: o.u, clave: o.c } : null; } catch (e) { return null; } }
-function puerta(modo) { document.querySelectorAll(".gate").forEach(x => x.remove()); const o = document.createElement("div"); o.className = "gate"; const p = lsGet("perfil", {}) || {};   /* patch_chofernombre */
-  const LH = (String(location.hash).match(/HWF1:[A-Za-z0-9+\/=_%-]+/) || [])[0]; if (LH) { const c0 = dec(LH); if (c0) lsSet("cfg", c0); try { history.replaceState(null, "", location.pathname); } catch (e) {} }
-  const nomOk = s => String(s || "").trim().replace(/\s+/g, " ").toLowerCase().replace(/(^|\s)([a-záéíóúñü])/g, (m, a, b) => a + b.toUpperCase());
-  if (modo === "veh") { const R = rutaHoy(), con = R ? [...new Set((R.ruta.rutas || []).map(r => r.veh))] : [], L = VEH.slice().sort((a, b) => (con.includes(b[0]) ? 1 : 0) - (con.includes(a[0]) ? 1 : 0));
-    o.innerHTML = `<div class="c"><h1>🚚 Hola, ${esc(p.chofer || "")}</h1><p class="muted" style="margin:0">¿Qué vehículo llevas hoy?</p>
-      <div style="display:grid;gap:8px">${L.map(([k, n]) => `<button type="button" class="btn${con.includes(k) ? " pri" : ""}" data-veh="${k}" style="justify-content:space-between">${esc(n)}${con.includes(k) ? " <small>ruta de hoy</small>" : ""}</button>`).join("")}</div>
-      <label class="f">Kilometraje al salir (opcional)<input id="gO" type="number" inputmode="numeric" placeholder="Ej.: 125430"></label><div class="e" id="gE"></div></div>`;
-    document.body.appendChild(o);
-    o.querySelectorAll("[data-veh]").forEach(b => b.onclick = () => { const P = Object.assign({}, perfil() || {}, { veh: b.dataset.veh, fecha: hoy() }); lsSet("perfil", P); const vd = lsGet("vehDe", {}) || {}; vd[P.chofer] = P.veh; lsSet("vehDe", vd); jornadaIniciar($("gO").value); o.remove(); arrancar(); });
-    return; }
-  o.innerHTML = `<div class="c"><h1>🚚 Chofer HWF</h1><label class="f">Tu nombre<input id="gN" list="gNl" autocomplete="name" autocapitalize="words" placeholder="Escribe tu nombre" value="${esc(p.chofer || "")}"></label>
-    <datalist id="gNl">${CHOFERES.map(n => `<option value="${esc(n)}">`).join("")}</datalist>
-    ${cfg() ? "" : `<details id="gCx"><summary style="cursor:pointer;font-weight:600">Este teléfono aún no está conectado</summary><p class="muted" style="margin:6px 0">Abre el link que te mandó logística por WhatsApp, o pégalo aquí (una sola vez).</p>
-      <textarea id="gC" rows="3" placeholder="Link o código HWF1:…"></textarea></details>`}
-    <div class="e" id="gE"></div><button type="button" class="btn pri" id="gB">Entrar</button></div>`;
+function puerta() { const o = document.createElement("div"); o.className = "gate"; const p = lsGet("perfil", {});
+  o.innerHTML = `<div class="c"><h1>🚚 Chofer HWF</h1>${cfg() ? "" : `<p class="muted" style="margin:0">Pega el link o el código de conexión (empieza con <b>HWF1:</b>) que te entrega logística.</p>
+    <textarea id="gC" rows="3" placeholder="Link o código HWF1:…"></textarea><details><summary style="cursor:pointer;font-weight:600">Conectar con URL y clave</summary><div style="display:grid;gap:8px;margin-top:8px"><input id="gU" type="url" placeholder="https://script.google.com/macros/s/…/exec"><input id="gK" placeholder="Clave"></div></details>`}
+    <label class="f">Chofer<select id="gN"><option value="">Elige tu nombre…</option>${CHOFERES.map(n => `<option${p.chofer === n ? " selected" : ""}>${n}</option>`).join("")}</select></label>
+    <label class="f">Vehículo de hoy<select id="gV">${VEH.map(([k, n]) => `<option value="${k}"${p.veh === k ? " selected" : ""}>${n}</option>`).join("")}</select></label>
+    <label class="f">Kilometraje del odómetro al salir (opcional)<input id="gO" type="number" inputmode="numeric" placeholder="Ej.: 125430"></label>
+    <div class="e" id="gE"></div><button type="button" class="btn pri" id="gB">Comenzar jornada</button><p class="muted" style="margin:0;font-size:.8rem">Queda en el registro diario de conducción: chofer, vehículo, hora de inicio y término, kilómetros y entregas.</p></div>`;
   document.body.appendChild(o);
-  const entrar = () => { if (!cfg()) { const c = dec(($("gC") || {}).value || ""); if (!c) { $("gE").textContent = "Falta conectar este teléfono: abre el link que te mandó logística."; const d = $("gCx"); if (d) d.open = true; return; } lsSet("cfg", c); }
-    const n = nomOk($("gN").value); if (n.length < 2) { $("gE").textContent = "Escribe tu nombre."; return; }
-    const R = rutaHoy(), con = R ? [...new Set((R.ruta.rutas || []).map(r => r.veh))] : [], vd = lsGet("vehDe", {}) || {}, veh = (p.chofer === n && p.veh) || vd[n] || (con.length === 1 ? con[0] : "");
-    lsSet("perfil", { chofer: n, veh, fecha: hoy() }); o.remove(); if (veh) { jornadaIniciar(""); arrancar(); } else puerta("veh"); };
-  $("gB").onclick = entrar; $("gN").onkeydown = e => { if (e.key === "Enter") entrar(); }; }
+  $("gB").onclick = () => { if (!cfg()) { let c = dec($("gC").value); const u = ($("gU").value || "").trim(), k = ($("gK").value || "").trim();
+      if (!c && /^https:\/\/script\.google(usercontent)?\.com\/.+\/exec$/.test(u) && k.length >= 4) c = { url: u, clave: k }; if (!c) { $("gE").textContent = "Link, código o URL/clave no válido."; return; } lsSet("cfg", c); }
+    const n = $("gN").value; if (!n) { $("gE").textContent = "Elige tu nombre."; return; }
+    lsSet("perfil", { chofer: n, veh: $("gV").value, fecha: hoy() }); jornadaIniciar($("gO").value); o.remove(); arrancar(); };
+  const LH = (String(location.hash).match(/HWF1:[A-Za-z0-9+\/=_%-]+/) || [])[0]; if (LH && $("gC")) { try { history.replaceState(null, "", location.pathname); } catch (e) {} $("gC").value = decodeURIComponent(LH); } }
 const perfil = () => lsGet("perfil", null), vehNom = id => (VEH.find(v => v[0] === id) || [id, id])[1];
 
 /* ===== ruta del día ===== */
@@ -168,6 +159,7 @@ function registrar(p) { const o = document.createElement("div"); o.className = "
     const P = perfil(), d = new Date(), e = { id: "E" + P.veh + "-" + p.id + "-" + Date.now().toString(36), fecha: hoy(), hora: d.toTimeString().slice(0, 5), veh: P.veh, vehNombre: vehNom(P.veh), chofer: P.chofer,
       parada: p.id, cli: p.cli, num: p.num || "", estado: ESTXT[est], recibe: conRec ? $("eNom").value.trim() : "", rut: conRec ? $("eRut").value.trim() : "", pago: conRec ? $("ePago").value : "", monto: conRec ? Number($("eMon").value) || 0 : 0,
       obs: $("eObs").value.trim(), lat: POS ? POS.lat : "", lng: POS ? POS.lng : "", fotos: fotos.slice(), firma: conRec && !pad.vacio() ? pad.png() : "" };
+    if ((est === "ok" || est === "parcial") && POS && POS.acc < 150) { const pLat = Number(p.lat) || 0, pLng = Number(p.lng) || 0; if (!pLat || !pLng || dist(POS, { lat: pLat, lng: pLng }) >= 100) e.geoUpd = { cli: p.cli, dir: p.dir || "", comuna: p.comuna || "" }; }
     const C = cola(); C.push(e); if (!lsSet("cola", C)) return; const E = estados(); E[p.id] = { est, hora: e.hora, pago: e.pago, monto: e.monto }; lsSet("est_" + hoy(), E);
     o.remove(); toast("Entrega guardada."); pintar(SEC); enviarCola(); gpsEnviar(true); }; }
 
@@ -179,9 +171,9 @@ function pintar(s) { ({ ruta: pintarRuta, mapa: pintarMapa, resumen: pintarResum
 const navUrl = p => `https://www.google.com/maps/dir/?api=1${POS ? `&origin=${POS.lat},${POS.lng}` : ""}&destination=${p.lat},${p.lng}&travelmode=driving`;
 const telNorm = t => String(t || "").replace(/[^\d+]/g, ""), waNorm = t => { const d = String(t || "").replace(/\D/g, ""); return d.length === 9 ? "56" + d : d; };
 function pintarRuta() { const X = misParadas(), E = estados(), P = perfil();
-  if (!X.paradas.length) { $("s-ruta").innerHTML = `<div class="card"><h2>Ruta de hoy · ${esc(vehNom(P.veh))}</h2><p class="muted">${rutaHoy() ? "Logística no asignó paradas a este vehículo hoy." : "Todavía no llega la ruta de hoy. Aparecerá sola cuando logística la envíe."}</p>
+  if (!X.paradas.length) { $("s-ruta").innerHTML = `<div class="card"><h2>Ruta de hoy · ${esc(vehNom(P.veh))}</h2><p class="muted">${rutaHoy() ? "Logística no asignó paradas a este vehículo hoy." : "Todavía no hay ruta de hoy en este teléfono."}</p>
       <div class="g2"><button type="button" class="btn pri" id="bR">⟳ Bajar ruta del día</button><button type="button" class="btn" id="bV">Cambiar vehículo</button></div></div>`;
-    $("bR").onclick = async () => { $("bR").disabled = true; await bajarRuta(); pintarRuta(); }; $("bV").onclick = () => puerta("veh"); return; }
+    $("bR").onclick = async () => { $("bR").disabled = true; await bajarRuta(); pintarRuta(); }; $("bV").onclick = () => puerta(); return; }
   const pend = X.paradas.filter(p => !E[p.id]), sig = pend[0], hechas = X.paradas.length - pend.length;
   const pill = p => { const e = E[p.id]; return !e ? '<span class="pill p-n">pendiente</span>' : e.est === "ok" ? '<span class="pill p-ok">entregado</span>' : e.est === "parcial" ? '<span class="pill p-wa">parcial</span>' : '<span class="pill p-bad">' + (e.est === "rech" ? "rechazado" : "no estaba") + "</span>"; };
   $("s-ruta").innerHTML = `${sig ? `<div class="card nx"><span class="t">Siguiente parada · ${sig.ord} de ${X.paradas.length}${X.vueltas > 1 ? " · vuelta " + sig.vuelta : ""}</span><h3>${esc(sig.cli)}</h3>
@@ -194,7 +186,7 @@ function pintarRuta() { const X = misParadas(), E = estados(), P = perfil();
         <div style="display:grid;gap:4px"><a class="btn" style="min-height:36px;padding:6px 10px" target="_blank" rel="noopener" href="${esc(navUrl(p))}">🧭</a><button type="button" class="btn" style="min-height:36px;padding:6px 10px" data-reg="${esc(p.id)}">${e ? "✏️" : "✅"}</button></div></div>`; }).join("")}
       <div class="g2" style="margin-top:10px"><button type="button" class="btn" id="bR">⟳ Actualizar ruta</button><button type="button" class="btn" id="bV">Cambiar vehículo</button></div></div>`;
   $("s-ruta").querySelectorAll("[data-reg]").forEach(b => b.onclick = () => { const p = X.paradas.find(x => x.id === b.dataset.reg); if (p) registrar(p); });
-  $("bR").onclick = async () => { $("bR").disabled = true; await bajarRuta(); pintarRuta(); }; $("bV").onclick = () => puerta("veh"); }
+  $("bR").onclick = async () => { $("bR").disabled = true; await bajarRuta(); pintarRuta(); }; $("bV").onclick = () => puerta(); }
 let mapa = null, miMarca = null;
 function pintarMapa() { const X = misParadas(), E = estados(); if (!window.L) { $("mapa").innerHTML = '<p class="nota" style="padding:12px">Mapa no disponible sin internet.</p>'; return; }
   setTimeout(() => { if (mapa) mapa.remove(); mapa = L.map("mapa"); L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 18, attribution: "© OpenStreetMap" }).addTo(mapa);
@@ -220,7 +212,7 @@ function pintarResumen() { const X = misParadas(), E = estados(), P = perfil(), 
           <div class="k"><span>Km (GPS)</span><b>${nf(J.kmGps, 1)}</b>${J.kmOdo ? `<small class="muted">odómetro: ${nf(J.kmOdo)} km</small>` : ""}</div><div class="k"><span>Entregas</span><b>${esc(J.activa ? jornadaStats().entregas : J.entregas)}</b></div></div>
         ${J.activa ? `<button type="button" class="btn oro" style="width:100%;margin-top:10px" id="bJFin">🏁 Terminar jornada</button>` : `<p class="nota">Jornada registrada${lsGet("colaJ", {})[J.id] ? " (se enviará con señal)" : ""}.</p><button type="button" class="btn" id="bJIni">Iniciar otra jornada</button>`}</div>`; })()}`;
   $("bEnv").onclick = () => { enviarCola(); toast(navigator.onLine ? "Enviando…" : "Sin señal: se enviarán solas."); };
-  if ($("bJIni")) $("bJIni").onclick = () => puerta(perfil() && perfil().chofer ? "veh" : undefined);
+  if ($("bJIni")) $("bJIni").onclick = () => puerta();
   if ($("bJFin")) $("bJFin").onclick = () => { const o = document.createElement("div"); o.className = "ov"; const J = jornada();
     o.innerHTML = `<div class="in"><div class="card"><h2>🏁 Terminar jornada</h2><p class="muted" style="margin:0 0 10px">${esc(J.chofer)} · ${esc(J.vehNombre)} · desde ${esc(J.inicio)} · ${nf(J.kmGps, 1)} km por GPS</p>
       <label class="f">Kilometraje del odómetro al llegar (opcional)<input id="jO" type="number" inputmode="numeric" placeholder="${J.odoIni !== "" ? "Salida: " + J.odoIni : "Ej.: 125610"}"></label>
@@ -231,13 +223,13 @@ function pintarResumen() { const X = misParadas(), E = estados(), P = perfil(), 
     $("jSi").onclick = () => { const of = $("jO").value; if (of !== "" && J.odoIni !== "" && Number(of) < Number(J.odoIni)) { toast("El odómetro final es menor que el de salida."); return; }
       jornadaCerrar({ odoFin: of === "" ? "" : Number(of), litros: Number($("jL").value) || 0, comb: Number($("jC").value) || 0, obs: $("jX").value.trim() }); o.remove(); toast("Jornada registrada."); pintarResumen(); pintarCola(); }; }; }
 
-function arrancar() { const P = perfil(); if (!P || !cfg()) return puerta(); if (!P.veh && P.fecha === hoy()) return puerta("veh"); if (!P.veh && P.fecha === hoy()) return puerta("veh"); if (P.fecha !== hoy()) { const J = jornada(); if (J && J.activa) jornadaCerrar({ obs: "Cerrada automáticamente al día siguiente" }); return puerta(); }
+function arrancar() { const P = perfil(); if (!P || !cfg()) return puerta(); if (P.fecha !== hoy()) { const J = jornada(); if (J && J.activa) jornadaCerrar({ obs: "Cerrada automáticamente al día siguiente" }); return puerta(); }
   pintarCola(); ir(SEC); gpsIniciar(); pantallaEncendida(); bajarRuta(true).then(n => { if (n) pintar(SEC); }); enviarCola();
   /* limpia estados de días anteriores */ try { Object.keys(localStorage).filter(k => /^hwf-cho:est_\d{4}-\d{2}-\d{2}$/.test(k) && k !== "hwf-cho:est_" + hoy()).forEach(k => localStorage.removeItem(k)); } catch (e) {} }
-puerta(); /* patch_choferingreso: siempre la portada de ingreso */
+if (!cfg() || !perfil()) puerta(); else arrancar();
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 </script><script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261113092924";
+const HWF_VER = "20261113093657";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -254,359 +246,6 @@ const HWF_VER = "20261113092924";
     document.body.appendChild(d); }
   setTimeout(revisar, 4000); setInterval(revisar, 30 * 60 * 1000);
   document.addEventListener("visibilitychange", () => { if (!document.hidden) revisar(); });
-})();
-</script>
-
-
-<script>/* patch_puente */
-(function () {
-  const ACC = ["rutaGuardar", "rutaLeer", "gps", "entrega", "logEstado", "jornada"], K = "hwf-puente";
-  let st = {}; try { st = JSON.parse(localStorage.getItem(K)) || {}; } catch (e) {}
-  const guarda = () => { try { localStorage.setItem(K, JSON.stringify(st)); } catch (e) {} };
-  const z = n => String(n).padStart(2, "0"), hoyL = () => { const d = new Date(); return `${d.getFullYear()}-${z(d.getMonth() + 1)}-${z(d.getDate())}`; };
-  const okF = f => /^\d{4}-\d\d-\d\d$/.test(String(f || "")) ? String(f) : hoyL(), ts = () => Math.floor(Date.now() / 1000);
-  const desconocida = r => r && r.ok === false && /desconocid/i.test(String(r.error || ""));
-  const b64e = s => btoa(unescape(encodeURIComponent(s))), b64d = s => decodeURIComponent(escape(atob(s)));
-  const corta = (s, n) => String(s == null ? "" : s).slice(0, n);
-  /* fotos y firma pendientes (IndexedDB) */
-  const idb = () => new Promise((ok, no) => { try { const q = indexedDB.open("hwf-puente", 1); q.onupgradeneeded = () => q.result.createObjectStore("ent"); q.onsuccess = () => ok(q.result); q.onerror = () => no(q.error); } catch (e) { no(e); } });
-  const idbPut = async (k, v) => { try { const db = await idb(); await new Promise(r => { const t = db.transaction("ent", "readwrite"); t.objectStore("ent").put(v, k); t.oncomplete = r; t.onerror = r; }); } catch (e) {} };
-  const idbAll = async () => { try { const db = await idb(); return await new Promise(r => { const t = db.transaction("ent"), s = t.objectStore("ent"), out = []; const c = s.openCursor(); c.onsuccess = () => { const x = c.result; if (x) { out.push([x.key, x.value]); x.continue(); } else r(out); }; c.onerror = () => r(out); }); } catch (e) { return []; } };
-  const idbDel = async k => { try { const db = await idb(); await new Promise(r => { const t = db.transaction("ent", "readwrite"); t.objectStore("ent").delete(k); t.oncomplete = r; t.onerror = r; }); } catch (e) {} };
-  function instalar(nombre, llamar) {
-    let subiendo = false;
-    async function subirPendientes() { if (subiendo) return; subiendo = true;
-      try { for (const [k, e] of await idbAll()) { const r = await llamar({ accion: "entrega", entrega: e }); if (desconocida(r)) break; if (r && r.ok) await idbDel(k); } } catch (e) {} subiendo = false; }
-    const pt = (fecha, clave, v, det) => llamar({ accion: "puntaje", puntaje: { fecha: okF(fecha), vendedor: clave, puntos: v, max: 0, cumplidas: 0, misiones: 0, detalle: det } });
-    async function filas(fecha) { const r = await llamar({ accion: "ranking", desde: okF(fecha) }); return r && r.ok ? (r.filas || []).filter(f => f[0] === okF(fecha) && String(f[1]).charAt(0) === "~") : null; }
-    const J = s => { try { return JSON.parse(s); } catch (e) { return null; } };
-    function leerRuta(F) { const por = {};
-      F.filter(f => /^~R\|\d+$/.test(f[1])).forEach(f => { const m = /^(\d+)\|(\d+)\|(.*)$/.exec(f[6]); if (!m) return; const v = m[1], i = Number(f[1].split("|")[1]); (por[v] = por[v] || { n: Number(m[2]), p: {} }).p[i] = m[3]; });
-      const vs = Object.keys(por).sort((a, b) => b - a);
-      for (const v of vs) { const o = por[v]; let s = ""; for (let i = 0; i < o.n; i++) { if (o.p[i] == null) { s = null; break; } s += o.p[i]; } if (s != null) { try { return JSON.parse(b64d(s)); } catch (e) {} } }
-      return null; }
-    async function puente(d) {
-      if (d.accion === "gps") return pt(hoyL(), "~G|" + corta(d.veh, 20), ts(), JSON.stringify({ c: corta(d.chofer, 40), a: +(+d.lat).toFixed(6), o: +(+d.lng).toFixed(6), p: Math.round(+d.acc || 0), s: +d.vel || 0, t: new Date().toISOString() }));
-      if (d.accion === "rutaGuardar") { const s = b64e(JSON.stringify(d.rutas || [])), N = 850, n = Math.max(1, Math.ceil(s.length / N)), v = ts();
-        for (let i = 0; i < n; i++) { const r = await pt(d.fecha, "~R|" + i, v, v + "|" + n + "|" + s.slice(i * N, (i + 1) * N)); if (!r || !r.ok) return { ok: false, error: "No se pudo enviar la ruta (parte " + (i + 1) + " de " + n + "). Intenta de nuevo." }; }
-        return { ok: true, fecha: d.fecha, rutas: (d.rutas || []).length, paradas: (d.rutas || []).reduce((t, x) => t + (x.paradas || []).length, 0), puente: true }; }
-      if (d.accion === "rutaLeer") { const F = await filas(d.fecha); if (!F) return { ok: false, error: "Sin conexión con el script." }; const R = leerRuta(F); return R ? { ok: true, fecha: d.fecha, ruta: { fecha: d.fecha, rutas: R }, puente: true } : { ok: true, vacio: true }; }
-      if (d.accion === "entrega") { const e = d.entrega || {}, id = corta(e.id || ("E" + Date.now()), 60);
-        let o = { id, h: corta(e.hora, 8), v: corta(e.vehNombre || e.veh, 30), c: corta(e.chofer, 30), p: e.parada, cl: corta(e.cli, 80), n: corta(e.num, 20), e: corta(e.estado, 20), r: corta(e.recibe, 50), pg: corta(e.pago, 30), m: Number(e.monto) || 0, o: corta(e.obs, 160), f: (e.fotos || []).length, fi: e.firma ? 1 : 0, la: e.lat, lo: e.lng };
-        let s = JSON.stringify(o); if (s.length > 880) { o.o = corta(o.o, 40); o.cl = corta(o.cl, 40); s = JSON.stringify(o).slice(0, 880); }
-        const r = await pt(e.fecha, "~E|" + id, ts(), s); if (r && r.ok && ((e.fotos || []).length || e.firma)) await idbPut(id, e);
-        return r && r.ok ? { ok: true, id, puente: true } : r; }
-      if (d.accion === "jornada") { const j = d.jornada || {}, id = corta(j.id, 60); if (!id) return { ok: false, error: "Jornada sin identificador." };
-        const o = { id, f: okF(j.fecha), c: corta(j.chofer, 40), v: corta(j.vehNombre || j.veh, 40), i: corta(j.inicio, 8), t: corta(j.fin, 8), h: +j.horas || 0, kg: +j.kmGps || 0, oi: j.odoIni, of: j.odoFin, ko: +j.kmOdo || 0, en: corta(j.entregas, 20), co: +j.cobrado || 0, li: +j.litros || 0, cb: +j.comb || 0, ob: corta(j.obs, 200), ac: j.activa ? 1 : 0 };
-        const r = await pt(j.fecha, "~J|" + id, ts(), JSON.stringify(o)); return r && r.ok ? { ok: true, id, puente: true } : r; }
-      if (d.accion === "logEstado") { const F = await filas(d.fecha); if (!F) return { ok: false, error: "Sin conexión con el script." };
-        const gps = {}, ent = [], jor = [];
-        F.forEach(f => { const k = String(f[1]), x = J(f[6]); if (!x) return;
-          if (k.startsWith("~G|")) { const veh = k.slice(3); gps[veh] = { veh, chofer: x.c, lat: x.a, lng: x.o, acc: x.p, vel: x.s, ts: x.t }; }
-          else if (k.startsWith("~E|")) ent.push({ id: x.id, hora: x.h, veh: x.v, chofer: x.c, parada: x.p, cli: x.cl, num: x.n, estado: x.e, recibe: x.r, pago: x.pg, monto: x.m, obs: x.o, fotos: x.f ? x.f + " (pendientes de subir)" : "", firma: x.fi ? "pendiente de subir" : "" });
-          else if (k.startsWith("~J|")) jor.push({ id: x.id, chofer: x.c, veh: x.v, inicio: x.i, fin: x.t, horas: x.h, kmGps: x.kg, odoIni: x.oi, odoFin: x.of, kmOdo: x.ko, entregas: x.en, cobrado: x.co, litros: x.li, comb: x.cb, obs: x.ob, activa: !!x.ac }); });
-        ent.sort((a, b) => String(a.hora).localeCompare(String(b.hora)));
-        return { ok: true, fecha: d.fecha, gps, entregas: ent, recorrido: {}, jornadas: jor, puente: true }; }
-      return { ok: false, error: "Acción desconocida." }; }
-    return async function (d, real) {
-      if (!d || ACC.indexOf(d.accion) < 0) return real();
-      const usar = st.on && Date.now() - (st.t || 0) < 30 * 60000;
-      if (!usar) { const r = await real(); if (!desconocida(r)) { if (st.on) { st = {}; guarda(); } if (r && r.ok) subirPendientes(); return r; } st = { on: true, t: Date.now() }; guarda(); }
-      return puente(d); };
-  }
-  const envolver = (nombre, fn, armar) => { const p = instalar(nombre, armar); return p; };
-  if (typeof syLlamar === "function") { const f = syLlamar; const p = instalar("log", d => f(cfg(), d)); syLlamar = async function (c, d) { const a = arguments, t = this; return p(d, () => f.apply(t, a)); }; }
-  if (typeof api === "function") { const f = api; const p = instalar("cho", d => f(d)); api = async function (d) { const a = arguments, t = this; return p(d, () => f.apply(t, a)); }; }
-})();
-</script>
-<script>/* patch_avisoscript */
-(function () {
-  const K = "hwf-aviso-script", hoy = () => new Date().toISOString().slice(0, 10);
-  function aviso(acc) { try { if (document.getElementById("hwfAvisoScript") || localStorage.getItem(K) === hoy()) return; } catch (e) {}
-    const d = document.createElement("div"); d.id = "hwfAvisoScript"; d.setAttribute("role", "alert");
-    d.style.cssText = "position:fixed;left:10px;right:10px;top:calc(8px + env(safe-area-inset-top));z-index:100000;background:#B42318;color:#fff;border-radius:14px;padding:12px 14px;font:14px/1.4 system-ui,sans-serif;box-shadow:0 8px 24px rgba(0,0,0,.3);max-width:620px;margin:0 auto";
-    d.innerHTML = '<b>El script de Google no está actualizado</b><br>No reconoce «' + String(acc || "") + '»: el GPS, las entregas, las rutas y el seguimiento no se guardan. Avísale a Jorge: en Apps Script hay que ejecutar <b>instalarAutoActualizacion</b>. Mientras tanto, las entregas quedan guardadas en este teléfono.'
-      + '<div style="text-align:right;margin-top:6px"><button type="button" style="font:inherit;font-weight:700;border:0;border-radius:10px;padding:6px 14px;background:#fff;color:#B42318">Entendido</button></div>';
-    d.querySelector("button").onclick = () => { try { localStorage.setItem(K, hoy()); } catch (e) {} d.remove(); };
-    (document.body || document.documentElement).appendChild(d); }
-  const revisa = (r, d) => { try { if (r && r.ok === false && /desconocid/i.test(String(r.error || ""))) aviso(d && d.accion); } catch (e) {} return r; };
-  if (typeof syLlamar === "function") { const f = syLlamar; syLlamar = async function (c, d) { return revisa(await f.apply(this, arguments), d); }; }
-  if (typeof api === "function") { const f = api; api = async function (d) { return revisa(await f.apply(this, arguments), d); }; }
-})();
-</script>
-<style>/* patch_pdf_log */
-.pdfm{position:fixed;inset:0;z-index:9000;background:rgba(11,49,70,.55);display:grid;place-items:end center;padding:12px}
-.pdfm .c{background:#fff;color:#0F1E29;border-radius:18px;padding:16px;width:100%;max-width:460px;display:grid;gap:10px;box-shadow:0 10px 40px rgba(0,0,0,.3)}
-.pdfm h3{margin:0;font-size:1.05rem}.pdfm p{margin:0;font-size:.84rem;color:#5B6874}.pdfm .n{font-weight:800;word-break:break-word}
-.pdfm .b{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.pdfm .b button{border:1px solid #C9D3DB;background:#fff;color:#0F1E29;border-radius:12px;padding:12px 8px;font:inherit;font-weight:800;cursor:pointer}
-.pdfm .b button.pri{background:#0B3146;border-color:#0B3146;color:#fff}
-@media print{.pdfm{display:none!important}}
-</style>
-<script>/* patch_pdf_log: PDF de rutas en LOGÍSTICA y CHOFER (enviar, imprimir, descargar) */
-(function () {
-  /* ---------- generador PDF mínimo: A4, Helvetica / Helvetica-Bold, texto, líneas y rectángulos ---------- */
-  const HW = [278,278,355,556,556,889,667,191,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,278,278,584,584,584,556,1015,667,667,722,722,667,611,778,722,278,500,667,556,833,722,778,667,778,722,667,611,722,667,944,667,667,611,278,278,278,469,556,333,556,556,500,556,556,278,556,556,222,222,500,222,833,556,556,556,556,333,500,278,556,500,722,500,500,500,334,260,334,584];
-  const MAPA = { 8211: 150, 8212: 151, 8216: 145, 8217: 146, 8220: 147, 8221: 148, 8226: 149, 8364: 128, 8230: 133, 8594: 45, 8250: 62, 8722: 45, 215: 120, 8804: 60, 8805: 62 };   /* − → - (para no perder el signo de los negativos) */
-  const cod = s => { const o = []; for (const ch of String(s == null ? "" : s)) { let c = ch.codePointAt(0); if (c > 255) c = MAPA[c] || 0; if (c >= 32) o.push(c); } return o; };
-  const ancho = (s, sz, b) => cod(s).reduce((t, c) => t + (c <= 126 ? HW[c - 32] : c === 237 || c === 205 || c === 236 ? 278 : c >= 192 && c <= 221 ? 690 : 556), 0) / 1000 * sz * (b ? 1.06 : 1);
-  function Pdf() { const W = 595.28, H = 841.89, pags = []; let ops = [];
-    const n = x => (Math.round(x * 100) / 100).toString(), col = c => c.map(v => n(v / 255)).join(" ");
-    const api = { W, H, y: 0,
-      pagina() { ops = []; pags.push(ops); api.y = 0; return api; },
-      rect(x, y, w, h, c) { ops.push(`${col(c)} rg ${n(x)} ${n(H - y - h)} ${n(w)} ${n(h)} re f`); return api; },
-      linea(x1, y1, x2, y2, c, g) { ops.push(`${col(c || [201, 211, 219])} RG ${n(g || 0.7)} w ${n(x1)} ${n(H - y1)} m ${n(x2)} ${n(H - y2)} l S`); return api; },
-      texto(x, y, s, o) { o = o || {}; const sz = o.sz || 10, b = !!o.b, w = ancho(s, sz, b), xx = o.al === "r" ? x - w : o.al === "c" ? x - w / 2 : x;
-        const t = cod(s).map(c => (c === 40 || c === 41 || c === 92 ? "\\" : "") + String.fromCharCode(c)).join("");
-        ops.push(`BT /F${b ? 2 : 1} ${n(sz)} Tf ${col(o.c || [15, 30, 41])} rg 1 0 0 1 ${n(xx)} ${n(H - y)} Tm (${t}) Tj ET`); return api; },
-      partir(s, max, sz, b) { const out = []; String(s == null ? "" : s).split(/\n/).forEach(par => { let l = ""; par.split(/\s+/).filter(Boolean).forEach(p => { const t = l ? l + " " + p : p;
-          if (ancho(t, sz, b) <= max || !l) l = t; else { out.push(l); l = p; } }); out.push(l); }); return out.filter((x, i) => x || i === 0); },
-      corta(s, max, sz, b) { s = String(s == null ? "" : s); if (ancho(s, sz, b) <= max) return s; while (s.length > 1 && ancho(s + "...", sz, b) > max) s = s.slice(0, -1); return s.trim() + "..."; },
-      paginas: () => pags.length,
-      bytes() { const objs = [], add = s => (objs.push(s), objs.length); add(""); add("");
-        const f1 = add("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>"), f2 = add("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>"), kids = [];
-        pags.forEach(p => { const st = p.join("\n"), c = add(`<< /Length ${st.length} >>\nstream\n${st}\nendstream`);
-          kids.push(add(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${n(W)} ${n(H)}] /Resources << /Font << /F1 ${f1} 0 R /F2 ${f2} 0 R >> >> /Contents ${c} 0 R >>`)); });
-        objs[0] = "<< /Type /Catalog /Pages 2 0 R >>"; objs[1] = `<< /Type /Pages /Kids [${kids.map(k => k + " 0 R").join(" ")}] /Count ${kids.length} >>`;
-        let out = "%PDF-1.4\n%\xE2\xE3\xCF\xD3\n"; const off = []; objs.forEach((o, i) => { off.push(out.length); out += `${i + 1} 0 obj\n${o}\nendobj\n`; });
-        const xr = out.length; out += `xref\n0 ${objs.length + 1}\n0000000000 65535 f \n` + off.map(o => String(o).padStart(10, "0") + " 00000 n \n").join("") + `trailer\n<< /Size ${objs.length + 1} /Root 1 0 R >>\nstartxref\n${xr}\n%%EOF`;
-        const u = new Uint8Array(out.length); for (let i = 0; i < out.length; i++) u[i] = out.charCodeAt(i) & 255; return u; } };
-    return api.pagina(); }
-  const AZ = [11, 49, 70], GR = [91, 104, 116], SU = [238, 242, 245], M = 40;
-  const cabecera = (d, titulo, der1, der2) => { d.rect(0, 0, d.W, 74, AZ); d.texto(M, 36, "HWF", { sz: 24, b: 1, c: [255, 255, 255] }); d.texto(M, 54, "Distribuidora HWF Mascotas", { sz: 9, c: [207, 220, 229] });
-    d.texto(d.W - M, 32, titulo, { sz: 15, b: 1, c: [255, 255, 255], al: "r" }); if (der1) d.texto(d.W - M, 48, der1, { sz: 10, c: [255, 255, 255], al: "r" }); if (der2) d.texto(d.W - M, 61, der2, { sz: 9, c: [207, 220, 229], al: "r" }); d.y = 96; };
-  const pie = (d, txt) => { const t = d.paginas(); d._pies = d._pies || []; d._pies.push(() => 0); d.linea(M, d.H - 44, d.W - M, d.H - 44); d.texto(M, d.H - 30, txt, { sz: 8, c: GR }); d.texto(d.W - M, d.H - 30, "Página " + t, { sz: 8, c: GR, al: "r" }); };
-  const dd = s => { if (!s) return ""; const p = String(s).split("-"); return p.length === 3 ? `${p[2]}-${p[1]}-${p[0]}` : String(s); };
-  const pesos = v => "$" + Math.round(v).toLocaleString("es-CL"), limpio = s => String(s || "").replace(/[\\/:*?"<>|]/g, "").trim();
-  const avisa = m => { try { toast(m); } catch (e) {} };
-  function bajar(P) { const bl = new Blob([P.bytes], { type: "application/pdf" });
-    try { if (typeof NATIVO !== "undefined" && NATIVO && NATIVO.guardar) { NATIVO.guardar(toB64(P.bytes.buffer), P.nombre); return; } } catch (e) {}
-    const a = document.createElement("a"); a.href = URL.createObjectURL(bl); a.download = P.nombre; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 8000); avisa("PDF descargado. Revisa la carpeta Descargas."); }
-  async function enviar(P) { const f = new File([P.bytes], P.nombre, { type: "application/pdf" });
-    try { if (navigator.canShare && navigator.canShare({ files: [f] })) { await navigator.share({ files: [f], title: P.nombre.replace(/\.pdf$/, ""), text: P.msg }); return; } } catch (e) { if (e && e.name === "AbortError") return; }
-    bajar(P); avisa("Este equipo no permite compartir el archivo: quedó descargado para adjuntarlo."); }
-  function imprimir(P) { const url = URL.createObjectURL(new Blob([P.bytes], { type: "application/pdf" })), tactil = matchMedia("(pointer:coarse)").matches;
-    if (!tactil) { try { const fr = document.createElement("iframe"); fr.style.cssText = "position:fixed;right:0;bottom:0;width:1px;height:1px;border:0;opacity:0"; fr.src = url; document.body.appendChild(fr);
-        fr.onload = () => { try { fr.contentWindow.focus(); fr.contentWindow.print(); } catch (e) { window.open(url, "_blank"); } setTimeout(() => { fr.remove(); URL.revokeObjectURL(url); }, 120000); }; return; } catch (e) {} }
-    const w = window.open(url, "_blank"); if (!w) { bajar(P); avisa("Abre el PDF descargado y elige Imprimir."); } else avisa("Se abrió el PDF: usa el menú ⋮ → Imprimir."); setTimeout(() => URL.revokeObjectURL(url), 120000); }
-  function cuadro(titulo, P) { const v = document.querySelector(".pdfm"); if (v) v.remove(); const m = document.createElement("div"); m.className = "pdfm";
-    m.innerHTML = `<div class="c" role="dialog" aria-label="${esc(titulo)}"><h3>${esc(titulo)}</h3><div class="n">${esc(P.nombre)}</div><p>${P.paginas} ${P.paginas === 1 ? "página" : "páginas"} · ${Math.max(1, Math.round(P.bytes.length / 1024))} KB. «Enviar» abre las apps del teléfono (WhatsApp, correo…) con el PDF adjunto.</p>
-      <div class="b"><button type="button" data-a="x">Cerrar</button><button type="button" data-a="d">Descargar</button><button type="button" data-a="i">Imprimir</button><button type="button" class="pri" data-a="e">Enviar</button></div></div>`;
-    m.onclick = e => { const b = e.target.closest("[data-a]"); if (!b) { if (e.target === m) m.remove(); return; } const a = b.dataset.a; if (a === "x") m.remove(); else if (a === "d") bajar(P); else if (a === "i") imprimir(P); else enviar(P); };
-    document.body.appendChild(m); }
-  const num = (n, d) => (Number(n) || 0).toLocaleString("es-CL", { maximumFractionDigits: d || 0 }), item = i => Array.isArray(i) ? num(i[0], 1) + " × " + i[1] : String(i || "");
-  /* hoja de una ruta: paradas = [{cli, dir, comuna, tel, kg, monto, num, vend, items, estado}] */
-  function hoja(d, T, primera) { T = Object.assign({}, T, { fecha: dd(T.fecha) }); const PIE = "Hoja de ruta · " + T.veh + " · " + T.fecha; if (!primera) d.pagina(); cabecera(d, "Hoja de ruta", T.fecha, T.veh + (T.sub ? " · " + T.sub : "")); let y = d.y;
-    if (T.origen) { d.texto(M, y, "Salida: " + d.corta(T.origen, d.W - 2 * M - 40, 9), { sz: 9, c: GR }); y += 16; }
-    const kw = (d.W - 2 * M - (T.k.length - 1) * 8) / T.k.length; T.k.forEach(([a, b], i) => { const x = M + i * (kw + 8); d.rect(x, y, kw, 38, SU); d.texto(x + 8, y + 13, a, { sz: 6.5, b: 1, c: GR }); d.texto(x + 8, y + 29, d.corta(b, kw - 14, 12, 1), { sz: 12, b: 1 }); }); y += 52;
-    const X = { n: M + 6, cli: M + 30, kg: M + 344, mon: M + 410, tel: d.W - M - 4 }, wCli = 268;
-    const enc = () => { d.rect(M, y, d.W - 2 * M, 20, AZ); const o = { sz: 8, b: 1, c: [255, 255, 255] }; d.texto(X.n, y + 13, "N°", o); d.texto(X.cli, y + 13, "CLIENTE, DIRECCIÓN Y PRODUCTOS", o); d.texto(X.kg, y + 13, "KG", Object.assign({ al: "r" }, o)); d.texto(X.mon, y + 13, "MONTO NETO", Object.assign({ al: "r" }, o)); d.texto(X.tel, y + 13, "TELÉFONO", Object.assign({ al: "r" }, o)); y += 20; };
-    enc();
-    T.paradas.forEach((s, i) => { const dir = [s.dir, s.comuna].filter(Boolean).join(", "), ld = d.partir(dir || "Sin dirección", wCli, 8, 0).slice(0, 2), sub = [s.num ? "NP " + s.num : "", s.vend || ""].filter(Boolean).join(" · ");
-      const its = (s.items || []).map(item).filter(Boolean), li = []; its.forEach(t => d.partir(t, wCli - 8, 7.5, 0).slice(0, 2).forEach((l, j) => li.push((j ? "   " : "· ") + l))); const lit = li.slice(0, 14); if (li.length > 14) lit.push("· y " + (its.length - 13) + " productos más");
-      const h = 20 + ld.length * 10 + (sub ? 10 : 0) + lit.length * 9 + (s.estado ? 11 : 0) + 20;
-      if (y + h > d.H - 60) { pie(d, PIE); d.pagina(); cabecera(d, "Hoja de ruta", T.fecha, T.veh + (T.sub ? " · " + T.sub : "")); y = d.y; enc(); }
-      if (i % 2) d.rect(M, y, d.W - 2 * M, h, SU);
-      let yy = y + 14; d.texto(X.n, yy, String(s.ord || i + 1), { sz: 11, b: 1, c: AZ }); d.texto(X.cli, yy, d.corta(s.cli || "", wCli, 10, 1), { sz: 10, b: 1 });
-      d.texto(X.kg, yy, s.kg ? num(s.kg) : "—", { sz: 9, al: "r" }); d.texto(X.mon, yy, s.monto ? pesos(s.monto) : "—", { sz: 9, al: "r" }); d.texto(X.tel, yy, String(s.tel || ""), { sz: 9, al: "r" });
-      ld.forEach(l => { yy += 10; d.texto(X.cli, yy, l, { sz: 8, c: GR }); }); if (sub) { yy += 10; d.texto(X.cli, yy, d.corta(sub, wCli, 8), { sz: 8, c: GR }); }
-      lit.forEach(l => { yy += 9; d.texto(X.cli + 4, yy, l, { sz: 7.5 }); });
-      if (s.estado) { yy += 11; d.texto(X.cli, yy, d.corta(s.estado, d.W - 2 * M - 40, 8, 1), { sz: 8, b: 1, c: s.ok ? [28, 122, 78] : [180, 35, 24] }); }
-      d.linea(X.kg - 30, y + h - 9, d.W - M - 4, y + h - 9, [154, 168, 180], 0.5); d.texto(X.kg - 30, y + h - 2, "recibe (nombre, RUT y firma)", { sz: 6, c: GR }); y += h; });
-    d.linea(M, y, d.W - M, y, AZ, 1); const tk = T.paradas.reduce((t, s) => t + (Number(s.kg) || 0), 0), tm = T.paradas.reduce((t, s) => t + (Number(s.monto) || 0), 0);
-    if (y + 26 > d.H - 60) { pie(d, PIE); d.pagina(); cabecera(d, "Hoja de ruta", T.fecha, T.veh); y = d.y; }
-    d.texto(X.cli, y + 15, "Total " + T.paradas.length + " paradas", { sz: 9, b: 1 }); d.texto(X.kg, y + 15, num(tk), { sz: 9, b: 1, al: "r" }); d.texto(X.mon, y + 15, tm ? pesos(tm) : "—", { sz: 9, b: 1, al: "r" });
-    pie(d, PIE); }
-  const boton = (txt, id) => { const b = document.createElement("button"); b.type = "button"; b.className = "btn np"; if (id) b.id = id; b.textContent = txt; return b; };
-  const generar = (titulo, f) => { let P; try { P = f(); } catch (e) { avisa("No se pudo generar el PDF: " + (e && e.message || e)); return; } if (!P) { avisa("No hay paradas para el PDF."); return; } cuadro(titulo, P); };
-
-  if (!window.hwfPdfKit) window.hwfPdfKit = { Pdf, cabecera, pie, bajar, enviar, imprimir, AZ, GR, SU, M, pesos, limpio };   /* lo usa la Inteligencia de negocio (patch_bi) */
-  /* ---------- LOGÍSTICA ---------- */
-  if (typeof pintarResultado === "function" && typeof flota === "function") {
-    const rutasLog = () => { if (typeof RT === "undefined" || !RT || !RT.res) return []; const P = par(), hoyTxt = (() => { const x = new Date(); return x.getFullYear() + "-" + String(x.getMonth() + 1).padStart(2, "0") + "-" + String(x.getDate()).padStart(2, "0"); })(), fecha = lsGet("fecha", "") || ((document.getElementById("rFecha") || {}).value) || hoyTxt, L = [];
-      RT.res.usos.forEach(u => u.viajes.forEach((r, vi) => { const c = RT.carga(r), k = RT.len(r), h = RT.horas(r, u.v);
-        L.push({ veh: u.v.nombre, sub: u.viajes.length > 1 ? "vuelta " + (vi + 1) : "", fecha, origen: (P.origen && (P.origen.nombre || "")) || "", k: [["PARADAS", String(r.length)], ["RECORRIDO", num(k) + " km"], ["TIEMPO", num(h, 1) + " h"], ["CARGA", num(c.kg) + " kg"], ["OCUPACIÓN", num(c.kg / u.v.kg * 100) + " %"]],
-          paradas: r.map(x => { const s = RT.S[x]; return { cli: s.cli, dir: s.dir || "", comuna: (s.comuna || "") + (s.fuente === "comuna" ? " (ubicación aprox.)" : ""), tel: s.tel || "", kg: s.kg, monto: s.monto || 0, num: s.num || "", vend: s.vend || "", items: s.items || [] }; }) }); })); return L; };
-    const pdfLog = idx => { const L = rutasLog(), S = idx == null ? L : [L[idx]].filter(Boolean); if (!S.length) return null; const d = Pdf(); S.forEach((T, i) => hoja(d, T, i === 0));
-      return { bytes: d.bytes(), paginas: d.paginas(), nombre: `Rutas ${limpio(S[0].fecha)}${idx == null ? "" : " " + limpio(S[0].veh) + (S[0].sub ? " " + S[0].sub : "")}.pdf`.replace(/\s+/g, " "),
-        msg: idx == null ? `Hojas de ruta ${S[0].fecha}: ${S.length} ${S.length === 1 ? "ruta" : "rutas"}, ${S.reduce((t, x) => t + x.paradas.length, 0)} paradas.` : `Hoja de ruta ${S[0].veh} ${S[0].fecha}: ${S[0].paradas.length} paradas.` }; };
-    const poner = () => { try { const box = document.getElementById("rRes"); if (!box || typeof RT === "undefined" || !RT || !RT.res) return; const env = box.querySelector("#rEnv");
-        if (env && !box.querySelector("#rPdfTodas")) { const b = boton("📄 PDF de todas las rutas", "rPdfTodas"); env.parentNode.appendChild(b); b.onclick = () => generar("PDF de las rutas", () => pdfLog(null)); }
-        box.querySelectorAll(".card.rt").forEach((c, i) => { if (c.querySelector(".rPdf1")) return; const fila = [...c.querySelectorAll(".row")].pop(); if (!fila) return; const b = boton("📄 PDF"); b.classList.add("rPdf1"); fila.appendChild(b); b.onclick = () => generar("PDF de la ruta", () => pdfLog(i)); }); } catch (e) {} };
-    let tp = null; try { new MutationObserver(() => { clearTimeout(tp); tp = setTimeout(poner, 60); }).observe(document.body, { childList: true, subtree: true }); poner(); } catch (e) {}
-    window.hwfPdfLog = pdfLog;
-  }
-
-  /* ---------- HWF (Admin): PDF de la nota de pedido de la app que se está revisando ---------- */
-  if (typeof naPintar === "function" && document.getElementById("sheetIn")) {
-    const EST_N = { pen: "Por revisar", mod: "Modificada", apr: "Aprobada", rec: "Rechazada" };
-    const pdfNota = () => { if (typeof NAACT === "undefined" || !NAACT || !NAACT.p) return null; const p = NAACT.p, its = (NAACT.items || []).filter(x => x.q > 0), d = Pdf(), PIE = "Distribuidora HWF · nota de pedido de la app · " + (p.vend || "");
-      const fecha = typeof naFecha === "function" ? naFecha(p) : "", est = EST_N[typeof naEst === "function" ? naEst(p.num) : "pen"] || "", tcx = typeof tc === "function" ? tc : x => x;
-      cabecera(d, "Nota de pedido", "N° " + (p.num || ""), "Emisión " + fecha + (est ? " · " + est : ""));
-      const campos = [["Cliente", tcx(p.cliente)], ["RUT", p.rut], ["Giro", p.giro], ["Contacto", p.contacto], ["Teléfono", p.fono], ["Correo", p.mail], ["Dirección facturación", p.dir], ["Comuna / Ciudad", p.comuna],
-        ["Fecha de entrega", typeof naFISO === "function" ? naFISO(p.entrega) : p.entrega], ["Despacho", p.despacho], ["Dirección de entrega", p.dirEnt], ["Vendedor", p.vend + (p.cart && p.cart !== p.vend ? " (cartera " + p.cart + ")" : "")]];
-      const cw = (d.W - 2 * M - 16) / 2; let y = d.y;
-      for (let i = 0; i < campos.length; i += 2) { let alto = 0; [0, 1].forEach(k => { const f = campos[i + k]; if (!f) return; const x = M + k * (cw + 16); d.texto(x, y, f[0].toUpperCase(), { sz: 7, b: 1, c: GR });
-          const ls = d.partir(f[1] || "—", cw, 10, 0).slice(0, 2); ls.forEach((l, j) => d.texto(x, y + 12 + j * 12, d.corta(l, cw, 10), { sz: 10 })); alto = Math.max(alto, ls.length); }); y += 16 + alto * 12; }
-      y += 6; const X = { cod: M + 4, des: M + 62, can: M + 322, pre: M + 392, dsc: M + 436, val: d.W - M - 4 }, wDes = 222;
-      const enc = () => { d.rect(M, y, d.W - 2 * M, 20, AZ); const o = { sz: 8, b: 1, c: [255, 255, 255] }; d.texto(X.cod, y + 13, "CÓDIGO", o); d.texto(X.des, y + 13, "DESCRIPCIÓN", o); d.texto(X.can, y + 13, "CANT.", Object.assign({ al: "r" }, o));
-        d.texto(X.pre, y + 13, "PRECIO NETO", Object.assign({ al: "r" }, o)); d.texto(X.dsc, y + 13, "DESC.", Object.assign({ al: "r" }, o)); d.texto(X.val, y + 13, "VALOR NETO", Object.assign({ al: "r" }, o)); y += 20; };
-      enc(); let neto = 0, uni = 0;
-      its.forEach((x, i) => { const ls = d.partir(String(x.desc || "") + (x.promo ? " · " + x.promo : ""), wDes, 9, 0).slice(0, 3), h = 8 + ls.length * 11; neto += Number(x.v) || 0; uni += Number(x.q) || 0;
-        if (y + h > d.H - 60) { pie(d, PIE); d.pagina(); cabecera(d, "Nota de pedido", "N° " + (p.num || ""), tcx(p.cliente) || ""); y = d.y; enc(); }
-        if (i % 2) d.rect(M, y, d.W - 2 * M, h, SU);
-        d.texto(X.cod, y + 12, d.corta(x.cod, 54, 9), { sz: 9, c: GR }); ls.forEach((l, j) => d.texto(X.des, y + 12 + j * 11, l, { sz: 9 })); d.texto(X.can, y + 12, num(x.q), { sz: 9, al: "r" });
-        d.texto(X.pre, y + 12, x.pl ? pesos(x.pl) : x.pu ? pesos(x.pu) : "—", { sz: 9, al: "r" }); const ds = Number(x.dsc) || 0; d.texto(X.dsc, y + 12, ds ? num(ds <= 1 ? ds * 100 : ds, 1) + "%" : "—", { sz: 9, al: "r" });
-        d.texto(X.val, y + 12, x.v ? pesos(x.v) : "sin cargo", { sz: 9, b: 1, al: "r" }); y += h; });
-      if (!its.length) { d.texto(M + 4, y + 14, "Esta nota no trae el detalle de productos.", { sz: 9, c: GR }); y += 24; neto = Number(p.neto) || 0; }
-      d.linea(M, y, d.W - M, y, AZ, 1); y += 8; neto = Math.round(neto); const iva = Math.round(neto * 0.19), obs = d.partir(p.obs || "", d.W - 2 * M, 9, 0);
-      if (y + 86 + (p.obs ? 26 + obs.length * 11 : 0) > d.H - 60) { pie(d, PIE); d.pagina(); cabecera(d, "Nota de pedido", "N° " + (p.num || ""), tcx(p.cliente) || ""); y = d.y; }
-      const xt = d.W - M - 4, xl = d.W - M - 150; d.texto(M + 4, y + 12, its.length + " líneas · " + num(uni) + " unidades", { sz: 9, c: GR });
-      [["Neto", pesos(neto)], ["IVA 19%", pesos(iva)]].forEach(([a, b], i) => { d.texto(xl, y + 12 + i * 15, a, { sz: 10, c: GR }); d.texto(xt, y + 12 + i * 15, b, { sz: 10, al: "r" }); });
-      d.rect(xl - 8, y + 36, d.W - M - xl + 8, 24, AZ); d.texto(xl, y + 52, "TOTAL", { sz: 11, b: 1, c: [255, 255, 255] }); d.texto(xt, y + 52, pesos(neto + iva), { sz: 12, b: 1, c: [255, 255, 255], al: "r" }); y += 76;
-      if (p.obs) { d.texto(M, y, "OBSERVACIONES", { sz: 7, b: 1, c: GR }); obs.forEach((l, j) => d.texto(M, y + 13 + j * 11, l, { sz: 9 })); }
-      pie(d, PIE); return { bytes: d.bytes(), paginas: d.paginas(), nombre: `Nota de pedido ${limpio(p.num)} ${limpio(tcx(p.cliente) || "cliente")}.pdf`.replace(/\s+/g, " "), msg: `Nota de pedido ${p.num || ""} · ${tcx(p.cliente) || ""} · total ${pesos(neto + iva)} (neto ${pesos(neto)})` }; };
-    const poner = () => { try { const sh = document.getElementById("sheetIn"), acc = sh && sh.querySelector(".np-acc"); if (!acc || !sh.querySelector("#naApr") || sh.querySelector("#naPdf")) return;
-        const b = boton("📄 PDF de la nota (enviar o imprimir)", "naPdf"); b.style.cssText = "width:100%;margin:8px 0"; acc.parentNode.insertBefore(b, acc); b.onclick = () => generar("PDF de la nota de pedido", pdfNota); } catch (e) {} };
-    let ta = null; try { new MutationObserver(() => { clearTimeout(ta); ta = setTimeout(poner, 60); }).observe(document.getElementById("sheetIn"), { childList: true, subtree: true }); poner(); } catch (e) {}
-    window.hwfPdfNota = pdfNota;
-  }
-
-  /* ---------- CHOFER ---------- */
-  if (typeof misParadas === "function" && typeof estados === "function") {
-    const EST = { ok: "Entregado", parcial: "Entrega parcial", rech: "Rechazado", no: "No estaba" };
-    const pdfCho = () => { const X = misParadas(), E = typeof estados === "function" ? estados() : {}, P = (typeof perfil === "function" && perfil()) || {}; if (!X.paradas || !X.paradas.length) return null;
-      const hechas = X.paradas.filter(p => E[p.id]).length, f = (typeof hoy === "function" ? hoy() : ""), veh = typeof vehNom === "function" ? vehNom(P.veh) : String(P.veh || ""), d = Pdf();
-      hoja(d, { veh, sub: P.chofer || P.nombre || "", fecha: f, origen: (X.origen && X.origen.nombre) || "", k: [["PARADAS", String(X.paradas.length)], ["REGISTRADAS", hechas + " de " + X.paradas.length], ["RECORRIDO", num(X.km || 0) + " km"], ["CARGA", num(X.paradas.reduce((t, p) => t + (Number(p.kg) || 0), 0)) + " kg"]],
-        paradas: X.paradas.map(p => { const e = E[p.id]; return { ord: p.ord, cli: p.cli, dir: p.dir || "", comuna: p.comuna || "", tel: p.tel || "", kg: p.kg, monto: p.monto || 0, num: p.num || "", vend: p.vend || "", items: p.items || [],
-          estado: e ? [(EST[e.est] || e.est || ""), e.hora || "", e.pago || "", e.recibe ? "recibe " + e.recibe : "", e.obs || ""].filter(Boolean).join(" · ") : "", ok: e && e.est === "ok" }; }) }, true);
-      return { bytes: d.bytes(), paginas: d.paginas(), nombre: `Ruta ${limpio(f)} ${limpio(veh)}.pdf`.replace(/\s+/g, " "), msg: `Ruta ${veh} ${f}: ${hechas} de ${X.paradas.length} paradas registradas.` }; };
-    const poner = () => { try { ["s-ruta", "s-resumen"].forEach(id => { const s = document.getElementById(id); if (!s || s.querySelector(".cPdf")) return; let n = 0; try { n = misParadas().paradas.length; } catch (e) {} if (!n) return;
-        const cs = s.querySelectorAll(".card"), c = cs[cs.length - 1]; if (!c) return; const b = boton("📄 PDF de mi ruta (enviar o imprimir)"); b.classList.add("cPdf"); b.style.cssText = "width:100%;margin-top:10px"; c.appendChild(b); b.onclick = () => generar("PDF de mi ruta", pdfCho); }); } catch (e) {} };
-    let tc2 = null; try { new MutationObserver(() => { clearTimeout(tc2); tc2 = setTimeout(poner, 60); }).observe(document.body, { childList: true, subtree: true }); poner(); } catch (e) {}
-    window.hwfPdfCho = pdfCho;
-  }
-})();
-</script>
-<style>/* patch_sinactualizar */#bR{display:none!important}</style>
-<script>/* patch_sinactualizar: los datos se actualizan solos */
-(function () {
-  const IDS = ["bR"]; let corriendo = false;
-  function auto() {
-    if (corriendo || document.hidden) return; corriendo = true;
-    const T = typeof toast === "function" ? toast : null; if (T) try { toast = () => {}; } catch (e) {}
-    try { IDS.forEach(id => { const b = document.getElementById(id); if (b && !b.disabled && b.isConnected) b.click(); }); } catch (e) {}
-    setTimeout(() => { if (T) try { toast = T; } catch (e) {} corriendo = false; }, 6000);
-  }
-  document.addEventListener("visibilitychange", () => { if (!document.hidden) setTimeout(auto, 800); });
-  setInterval(auto, 5 * 60 * 1000);
-})();
-</script>
-<style>/* patch_menusel */
-.ms-oc{display:none!important}
-.ms-btn{display:flex;align-items:center;gap:12px;width:100%;margin:0 0 12px;border:1.5px solid var(--line,#C9D3DB);border-radius:16px;padding:10px 14px;background:var(--surface,#fff);color:var(--ink,#0F1E29);font:inherit;cursor:pointer;text-align:left;box-shadow:0 2px 8px rgba(11,49,70,.07);min-height:56px}
-.ms-btn:active{transform:scale(.99)}
-.ms-btn .ms-t{flex:1;min-width:0;display:flex;flex-direction:column}
-.ms-btn .ms-t small{font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted,#5B6874)}
-.ms-btn .ms-t b{font-size:1.02rem;display:flex;align-items:center;gap:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ms-btn .ms-n{font-size:.75rem;font-weight:800;color:#0B3146;background:#E6EEF3;border-radius:999px;padding:3px 9px}
-.ms-btn .ms-a{width:28px;height:28px;border-radius:50%;background:#0B3146;color:#fff;display:grid;place-items:center;font-size:.8rem;flex:0 0 28px}
-.ms-velo{position:fixed;inset:0;background:rgba(8,25,36,.45);z-index:9998;opacity:0;transition:opacity .2s}
-.ms-velo.on{opacity:1}
-.ms-hoja{position:fixed;left:0;right:0;bottom:0;z-index:9999;background:var(--surface,#fff);border-radius:22px 22px 0 0;padding:8px 14px calc(16px + env(safe-area-inset-bottom));max-height:78vh;overflow:auto;transform:translateY(100%);transition:transform .22s ease;box-shadow:0 -10px 30px rgba(0,0,0,.18)}
-.ms-hoja.on{transform:none}
-.ms-hoja .ms-asa{width:44px;height:5px;border-radius:3px;background:#C9D3DB;margin:4px auto 10px}
-.ms-hoja h3{margin:0 4px 10px;font-size:1.05rem}
-.ms-hoja .ms-op{display:flex;align-items:center;gap:12px;width:100%;border:0;border-radius:14px;background:none;padding:13px 12px;font:inherit;font-size:1rem;font-weight:650;color:var(--ink,#0F1E29);cursor:pointer;text-align:left;min-height:52px}
-.ms-hoja .ms-op:hover{background:var(--sunk,#EEF2F5)}
-.ms-hoja .ms-op[aria-current="true"]{background:#0B3146;color:#fff}
-.ms-hoja .ms-op .ms-ok{margin-left:auto;font-weight:900}
-.ms-hoja .ms-op .hic-pw,.ms-btn .hic-pw{width:26px;height:26px;flex:0 0 26px;margin:0}
-@media(min-width:700px){.ms-hoja{left:50%;right:auto;bottom:auto;top:50%;width:420px;border-radius:20px;transform:translate(-50%,-46%);opacity:0;pointer-events:none;transition:opacity .18s,transform .18s}.ms-hoja.on{transform:translate(-50%,-50%);opacity:1;pointer-events:auto}.ms-hoja .ms-asa{display:none}.ms-btn{max-width:520px}}
-</style>
-<script>/* patch_menusel: grupos de filtros → menú desplegable */
-(function () {
-  const SEL = '.seg, .pr-chips, .cx-chips, .rk-seg, .pra-seg, .pt-seg, .db-seg, .ad-seg, .nu-tabs, .tc-tabs, .t-seg, #prFil, #prSegF, #cxFil, #cxSegF, #invSeg, #proSeg, #bnSegAp, [role=tablist]';
-  const FUERA = "#masSeg, #snPanel, #snPanLog, nav, .modos, #tNav, .ms-hoja, header, .auth-body, #auth, .login";
-  const activo = b => b.getAttribute("aria-pressed") === "true" || b.getAttribute("aria-selected") === "true" || /(^|\s)(on|act|activo|active|sel)(\s|$)/.test(b.className);
-  const botones = g => [...g.children].filter(b => b.tagName === "BUTTON" && b.style.display !== "none" && !b.hidden);
-  const txt = b => (b.textContent || "").replace(/\s+/g, " ").trim();
-  let nc = 0;
-  const cont = b => { const c = b.cloneNode(true); let h = c.innerHTML; nc++;
-    [...c.querySelectorAll("[id]")].forEach(x => { const id = x.id, nu = id + "-ms" + nc; h = h.split('id="' + id + '"').join('id="' + nu + '"').split("#" + id + ")").join("#" + nu + ")"); });
-    return h; };
-  function titulo(g) {
-    const l = g.getAttribute("aria-label"); if (l) return l;
-    let p = g.previousElementSibling; while (p && p.classList.contains("ms-btn")) p = p.previousElementSibling;
-    if (p && /^(H2|H3|LABEL)$/.test(p.tagName) && txt(p).length < 40) return txt(p);
-    return "Ver";
-  }
-  let velo, hoja, abierto = null;
-  function cerrar() { if (!hoja) return; hoja.classList.remove("on"); velo.classList.remove("on"); setTimeout(() => { if (!abierto) { velo.remove(); hoja.remove(); velo = hoja = null; } }, 230); abierto = null; }
-  function abrir(g, btn) {
-    if (!velo) { velo = document.createElement("div"); velo.className = "ms-velo"; velo.onclick = cerrar; hoja = document.createElement("div"); hoja.className = "ms-hoja"; hoja.setAttribute("role", "dialog"); hoja.setAttribute("aria-modal", "true"); document.body.append(velo, hoja); }
-    abierto = g; const bs = botones(g);
-    hoja.innerHTML = `<div class="ms-asa"></div><h3>${btn.querySelector("small").textContent}</h3>` + bs.map((b, i) => `<button type="button" class="ms-op" data-i="${i}" aria-current="${activo(b)}">${cont(b)}${activo(b) ? '<span class="ms-ok">✓</span>' : ""}</button>`).join("");
-    hoja.querySelectorAll(".ms-op").forEach(o => o.onclick = () => { const b = bs[Number(o.dataset.i)]; cerrar(); if (b && b.isConnected) b.click(); setTimeout(() => pintar(g), 30); });
-    requestAnimationFrame(() => { velo.classList.add("on"); hoja.classList.add("on"); const a = hoja.querySelector('[aria-current="true"]'); if (a) a.focus(); });
-  }
-  document.addEventListener("keydown", e => { if (e.key === "Escape" && abierto) cerrar(); });
-  function pintar(g) {
-    const btn = g._msBtn; if (!btn) return; const bs = botones(g); const a = bs.filter(activo);
-    const b = a[0] || bs[0]; if (!b) return;
-    btn.querySelector("b").innerHTML = cont(b);
-    btn.querySelector(".ms-n").textContent = bs.length + " opciones";
-  }
-  function convertir(g) {
-    if (g._msBtn || g.closest(FUERA) || g.closest(".ms-oc")) return;
-    const bs = botones(g); if (bs.length < 2 || bs.filter(activo).length > 1 || bs.length !== g.children.length) return;
-    const btn = document.createElement("button"); btn.type = "button"; btn.className = "ms-btn"; btn.setAttribute("aria-haspopup", "dialog");
-    btn.innerHTML = `<span class="ms-t"><small>${titulo(g).replace(/[<>&]/g, "")}</small><b></b></span><span class="ms-n"></span><span class="ms-a">▼</span>`;
-    btn.onclick = () => abrir(g, btn);
-    g._msBtn = btn; g.parentNode.insertBefore(btn, g); g.classList.add("ms-oc");
-    new MutationObserver(() => pintar(g)).observe(g, { subtree: true, childList: true, attributes: true, attributeFilter: ["aria-pressed", "aria-selected", "class"] });
-    pintar(g);
-  }
-  function aplicar() {
-    try {
-      document.querySelectorAll(".ms-btn").forEach(b => { const g = b.nextElementSibling; if (!g || g._msBtn !== b) b.remove(); });
-      document.querySelectorAll(SEL).forEach(convertir);
-    } catch (e) {}
-  }
-  aplicar(); setTimeout(aplicar, 500); setTimeout(aplicar, 1600);
-  let pend = false; new MutationObserver(() => { if (pend) return; pend = true; setTimeout(() => { pend = false; aplicar(); }, 60); }).observe(document.body, { childList: true, subtree: true });
-})();
-</script>
-<script>/* patch_pares: última tarjeta sola en su fila → ancho completo */
-(function () {
-  const FUERA = "nav, #snPanel, #snPanLog, .modos, #masSeg, .ms-hoja, table, .cal-it, header";
-  let sels = null;
-  function selectores() {
-    const s = new Set(['[style*="grid"]']);
-    const rec = rs => { for (const r of rs) { try { if (r.cssRules && !r.selectorText) rec(r.cssRules); else if (r.style && /grid/.test(r.style.display || "")) r.selectorText.split(",").forEach(x => { x = x.trim(); if (x && !/:/.test(x)) s.add(x); }); } catch (e) {} } };
-    for (const ss of document.styleSheets) { try { rec(ss.cssRules); } catch (e) {} }
-    return [...s].join(",");
-  }
-  function aplicar() {
-    try {
-      if (!sels) sels = selectores();
-      document.querySelectorAll("[data-par]").forEach(e => { e.style.gridColumn = ""; e.removeAttribute("data-par"); });
-      document.querySelectorAll(sels).forEach(g => {
-        if (g.closest(FUERA)) return;
-        const cs = getComputedStyle(g); if (cs.display !== "grid") return;
-        const cols = cs.gridTemplateColumns.split(" ").filter(Boolean); if (cols.length < 2) return;
-        const w = cols.map(parseFloat); if (!w.every(x => Math.abs(x - w[0]) < 2)) return;
-        const hs = [...g.children].filter(c => c.offsetParent !== null && getComputedStyle(c).position !== "absolute");
-        if (hs.length < 2) return;
-        const filas = {}; hs.forEach(c => { const k = Math.round(c.offsetTop / 4); (filas[k] = filas[k] || []).push(c); });
-        Object.values(filas).forEach(f => { if (f.length !== 1) return; const c = f[0]; if (c.offsetWidth > g.clientWidth * .7) return;
-          c.style.gridColumn = "1 / -1"; c.setAttribute("data-par", ""); });
-      });
-    } catch (e) {}
-  }
-  let pend = false; const prog = () => { if (pend) return; pend = true; setTimeout(() => { pend = false; aplicar(); }, 120); };
-  prog(); setTimeout(prog, 1500);
-  new MutationObserver(m => { if (m.every(x => x.type === "attributes" && x.attributeName === "data-par")) return; prog(); }).observe(document.body, { childList: true, subtree: true });
-  addEventListener("resize", prog);
 })();
 </script>
 </body></html>

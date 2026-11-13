@@ -402,7 +402,7 @@ if (!cfg() || !DATA()) pantallaConexion(); else { arrancar(); bajar(true).then(n
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261113092924";
+const HWF_VER = "20261113093657";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -1853,6 +1853,31 @@ body.log-sn main{padding-bottom:0!important}
   };
   /* repintar si ya estamos en rutas */
   try { if (typeof SEC !== 'undefined' && SEC === 'rutas') pintarRutas(); } catch (e) {}
+})();
+</script>
+<script>/* patch_geochofer_log: pre-popular geoMem() con ubicaciones capturadas por el Chofer */
+(function () {
+  if (typeof lsGet !== 'function' || typeof lsSet !== 'function' || typeof geoMem !== 'function') return;
+  function inyectarGeo() {
+    const D = typeof DATA === 'function' ? DATA() : null;
+    if (!D || !D.geo) return;
+    const G = geoMem(); let n = 0;
+    Object.keys(D.geo).forEach(function (k) {
+      if (!G[k]) { G[k] = [D.geo[k][0], D.geo[k][1], 'chofer']; n++; }
+    });
+    if (n) lsSet('geo', G);
+  }
+  try { inyectarGeo(); } catch (e) {}
+  /* también al actualizar datos */
+  if (typeof actualizarDesdeServer === 'function') {
+    const _orig = actualizarDesdeServer;
+    actualizarDesdeServer = function () {
+      const r = _orig.apply(this, arguments);
+      if (r && typeof r.then === 'function') r.then(inyectarGeo).catch(function () {});
+      else try { inyectarGeo(); } catch (e) {}
+      return r;
+    };
+  }
 })();
 </script>
 </body></html>
