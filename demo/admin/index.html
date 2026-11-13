@@ -5153,7 +5153,7 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261113092924";
+const HWF_VER = "20261113094237";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -6922,6 +6922,126 @@ function npVer(n) {
 
   /* inyectar en el contenido ya presente */
   inyectarMaps(document.body);
+})();
+</script>
+<style>/* patch_exportar_cli */
+#expCliBtn{font:inherit;font-size:.8rem;font-weight:700;padding:5px 10px;border:1.5px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);cursor:pointer;white-space:nowrap}
+.exp-pop{position:fixed;z-index:200;background:#fff;border-radius:14px;box-shadow:0 4px 20px rgba(11,49,70,.18);padding:8px;min-width:190px;display:grid;gap:4px}
+.exp-pop button{font:inherit;font-size:.86rem;font-weight:700;padding:10px 14px;border:0;background:none;border-radius:10px;cursor:pointer;text-align:left;color:var(--ink)}
+.exp-pop button:hover{background:var(--sunk)}
+</style>
+<script>/* patch_exportar_cli: exportar lista de clientes como Excel/WhatsApp/PDF */
+(function () {
+  if (typeof pintarClientes !== 'function') return;
+
+  /* -- agregar botón Exportar al .tools de la sección Clientes -- */
+  const _origPintar = pintarClientes;
+  pintarClientes = function () {
+    _origPintar.apply(this, arguments);
+    const tools = document.querySelector('#s-cli .tools');
+    if (tools && !document.getElementById('expCliBtn')) {
+      const btn = document.createElement('button');
+      btn.type = 'button'; btn.id = 'expCliBtn'; btn.setAttribute('aria-label', 'Exportar lista de clientes');
+      btn.textContent = '⬇️ Exportar';
+      btn.onclick = function (e) { e.stopPropagation(); expCliMenu(btn); };
+      tools.appendChild(btn);
+    }
+  };
+
+  /* -- reconstruir la lista completa con los mismos filtros que listaCli -- */
+  function getFullList() {
+    if (typeof A === 'undefined' || !A.clientes) return [];
+    const q = typeof norm === 'function' ? norm((document.getElementById('cliQ') || {}).value || '') : '';
+    const v = (document.getElementById('cliV') || {}).value || '';
+    const vistaBtn = document.querySelector('#cliSeg [aria-pressed="true"]');
+    const vk = vistaBtn ? vistaBtn.dataset.k : 'todos';
+    const ct = typeof corte === 'function' ? corte() : { m: new Date().getMonth() + 1, d: new Date().getDate() };
+    const yr = typeof Y !== 'undefined' ? Y : new Date().getFullYear();
+    const dias = function (f) { return f ? Math.round((new Date(yr, ct.m - 1, ct.d) - new Date(yr, Math.floor(f / 100) - 1, f % 100)) / 864e5) : 999; };
+    let l = (A.clientes || []).filter(function (c) {
+      return (!v || c.cart === v) && (!q || (typeof norm === 'function' ? norm(c.nombre + ' ' + c.comuna) : (c.nombre + ' ' + c.comuna).toLowerCase()).includes(q));
+    });
+    if (vk === 'sin') l = l.filter(function (c) { return c.hab > 0 && c.mes <= 0; }).sort(function (a, b) { return b.hab - a.hab; });
+    else if (vk === 'bajo') l = l.filter(function (c) { return c.hab > 0 && c.mes > 0 && c.mes < c.hab * 0.6; }).sort(function (a, b) { return (b.hab - b.mes) - (a.hab - a.mes); });
+    else if (vk === 'dorm') l = l.filter(function (c) { return dias(c.ult) > 60; }).sort(function (a, b) { return b.ytd - a.ytd; });
+    else if (vk === 'top') l = l.sort(function (a, b) { return b.ytd - a.ytd; }).slice(0, 40);
+    else if (vk === 'nuevos') l = l.filter(function (c) { return c.primera && Math.floor(c.primera / 100) >= 2; }).sort(function (a, b) { return b.primera - a.primera; });
+    else l = l.sort(function (a, b) { return a.nombre.localeCompare(b.nombre, 'es'); });
+    return l;
+  }
+
+  /* -- menú flotante -- */
+  let _pop = null;
+  function cerrarPop() { if (_pop) { _pop.remove(); _pop = null; } }
+  document.addEventListener('click', cerrarPop);
+
+  function expCliMenu(btn) {
+    cerrarPop();
+    const p = document.createElement('div'); p.className = 'exp-pop'; _pop = p;
+    [['📊 Descargar Excel', expCliExcel],
+     ['💬 Enviar por WhatsApp', expCliWA],
+     ['🖨️ Imprimir / PDF', expCliPrint]].forEach(function (par) {
+      const b = document.createElement('button'); b.type = 'button'; b.textContent = par[0];
+      b.onclick = function (e) { e.stopPropagation(); cerrarPop(); par[1](); }; p.appendChild(b);
+    });
+    const r = btn.getBoundingClientRect();
+    p.style.top = (r.bottom + 6 + window.scrollY) + 'px';
+    p.style.left = Math.max(8, r.left) + 'px';
+    document.body.appendChild(p);
+  }
+
+  /* -- Excel (CSV con BOM UTF-8, separador ; compatible con Excel español) -- */
+  function expCliExcel() {
+    const list = getFullList(), titulo = (document.getElementById('cliT') || {}).textContent || 'Clientes';
+    if (!list.length) { typeof toast === 'function' && toast('No hay clientes para exportar.'); return; }
+    const hoy = new Date();
+    const diafn = function (ult) { if (!ult) return ''; const d = new Date(hoy.getFullYear(), Math.floor(ult / 100) - 1, ult % 100); return Math.round((hoy - d) / 864e5); };
+    const cab = ['Nombre', 'Ciudad', 'Vendedor', 'Mes ($)', 'Habitual ($)', 'Año ($)', 'Días sin compra'].join(';') + '\n';
+    const rows = list.map(function (c) {
+      return [c.nombre || '', c.comuna || '', c.cart || '', Math.round(c.mes || 0), Math.round(c.hab || 0), Math.round(c.ytd || 0), diafn(c.ult) || ''].map(function (v) { return '"' + String(v).replace(/"/g, '""') + '"'; }).join(';');
+    }).join('\n');
+    const csv = '﻿' + cab + rows;
+    const nombre = titulo.slice(0, 50).replace(/[^a-zA-Z0-9 ñÑáéíóúÁÉÍÓÚüÜ]/g, '_') + '.csv';
+    try {
+      const a = document.createElement('a'); a.download = nombre;
+      a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function () { URL.revokeObjectURL(a.href); }, 8000);
+      typeof toast === 'function' && toast('Descargando ' + list.length + ' clientes…');
+    } catch (e) { typeof toast === 'function' && toast('Este navegador no permite descargar archivos.'); }
+  }
+
+  /* -- WhatsApp -- */
+  function expCliWA() {
+    const list = getFullList(), titulo = (document.getElementById('cliT') || {}).textContent || 'Clientes';
+    if (!list.length) { typeof toast === 'function' && toast('No hay clientes para exportar.'); return; }
+    const fmtM = function (n) { if (!n) return '—'; return '$' + (n >= 1000000 ? (n / 1000000).toLocaleString('es-CL', { maximumFractionDigits: 1 }) + ' MM' : Math.round(n / 1000).toLocaleString('es-CL') + ' mil'); };
+    const lim = 60, lineas = ['*' + titulo + '*', ''];
+    list.slice(0, lim).forEach(function (c) { lineas.push('• ' + (c.nombre || '') + ' · ' + (c.comuna || '') + ' · ' + ((c.cart || '').split(' ')[0]) + ' · ' + fmtM(c.hab || c.mes || c.ytd)); });
+    if (list.length > lim) lineas.push('… y ' + (list.length - lim) + ' más');
+    window.open('https://wa.me/?text=' + encodeURIComponent(lineas.join('\n')), '_blank', 'noopener');
+  }
+
+  /* -- Imprimir / PDF -- */
+  function expCliPrint() {
+    const list = getFullList(), titulo = (document.getElementById('cliT') || {}).textContent || 'Clientes';
+    if (!list.length) { typeof toast === 'function' && toast('No hay clientes para exportar.'); return; }
+    const fmtM = function (n) { return !n ? '—' : '$' + (n / 1000000).toLocaleString('es-CL', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + ' MM'; };
+    const hoy = new Date();
+    const diafn = function (ult) { if (!ult) return '—'; return Math.round((hoy - new Date(hoy.getFullYear(), Math.floor(ult / 100) - 1, ult % 100)) / 864e5) + ' d'; };
+    const filas = list.map(function (c) {
+      return '<tr><td>' + esc(c.nombre || '') + '</td><td>' + esc(c.comuna || '') + '</td><td>' + esc(c.cart || '') + '</td><td>' + fmtM(c.mes) + '</td><td>' + fmtM(c.hab) + '</td><td>' + fmtM(c.ytd) + '</td><td>' + diafn(c.ult) + '</td></tr>';
+    }).join('');
+    const fecha = hoy.toLocaleDateString('es-CL');
+    const html = '<!doctype html><html lang="es-CL"><head><meta charset="utf-8"><title>' + titulo + '</title>' +
+      '<style>body{font:11px system-ui,sans-serif;margin:16px}h2{font-size:.95rem;margin:0 0 8px}small{color:#5B6874}table{border-collapse:collapse;width:100%;font-size:10px}th,td{border:1px solid #ccc;padding:3px 6px;text-align:left}th{background:#0B3146;color:#fff;font-size:9px;text-transform:uppercase}tr:nth-child(even){background:#f4f7f9}@media print{@page{margin:.8cm}body{margin:0}}</style>' +
+      '</head><body><h2>' + titulo + ' <small>HWF · ' + fecha + '</small></h2>' +
+      '<table><thead><tr><th>Nombre</th><th>Ciudad</th><th>Vendedor</th><th>Mes</th><th>Habitual</th><th>Año</th><th>Sin compra</th></tr></thead><tbody>' + filas + '</tbody></table></body></html>';
+    const w = window.open('', '_blank');
+    if (!w) { typeof toast === 'function' && toast('Permite las ventanas emergentes para imprimir.'); return; }
+    w.document.write(html); w.document.close();
+    w.addEventListener('load', function () { w.print(); });
+  }
 })();
 </script>
 </body>
