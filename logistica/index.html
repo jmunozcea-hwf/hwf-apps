@@ -402,7 +402,7 @@ if (!cfg() || !DATA()) pantallaConexion(); else { arrancar(); bajar(true).then(n
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261112214856";
+const HWF_VER = "20261113012420";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer)\/[^/]*$/, "/");
   let avisado = false;
@@ -1176,57 +1176,6 @@ function vmPoner(cont, VM, antes) { try { if (!cont) return; const v = cont.quer
 function choLink() { try { const c = typeof cfg === "function" ? cfg() : null; if (!c || !c.url || !c.clave) return "";
     const b = btoa(unescape(encodeURIComponent(JSON.stringify({ u: c.url, c: c.clave })))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
     return "\n\nApp Chofer HWF (si aún no la tienes, ábrela desde aquí: se conecta sola y solo pide tu nombre):\n" + location.origin + location.pathname.replace(/\/(demo\/)?logistica\/[^/]*$/, "/") + "instalar-chofer/#HWF1:" + b; } catch (e) { return ""; } }
-</script>
-<style>/* patch_navbotones */
-#navBotones{position:fixed;right:14px;bottom:calc(140px + env(safe-area-inset-bottom));z-index:890;display:grid;gap:8px}
-#navBotones button{width:44px;height:44px;border-radius:50%;border:1px solid var(--line,#C9D3DB);background:var(--card,var(--surface,#fff));color:var(--ink,#0F1E29);font:700 1.15rem system-ui,sans-serif;cursor:pointer;box-shadow:0 3px 10px rgba(11,49,70,.18);display:grid;place-items:center;padding:0}
-#navBotones button:focus-visible{outline:3px solid #F5B400;outline-offset:2px}#navBotones .nb-x{color:#B42318}
-body.nb-sinia #navBotones{bottom:calc(84px + env(safe-area-inset-bottom))}
-#nbSalir{position:fixed;inset:0;z-index:1200;background:rgba(11,49,70,.55);display:grid;place-items:center;padding:16px}#nbSalir div{background:var(--card,#fff);color:var(--ink,#0F1E29);border-radius:18px;padding:18px;max-width:380px;display:grid;gap:10px}
-#nbSalir h2{margin:0;font-size:1.1rem}#nbSalir p{margin:0;font-size:.9rem;color:var(--muted,#5B6874)}#nbSalir .nb-f{display:flex;gap:8px;justify-content:flex-end}#nbSalir button{border-radius:12px;padding:10px 14px;font:700 .95rem system-ui,sans-serif;cursor:pointer;border:1px solid var(--line,#C9D3DB);background:var(--card,#fff);color:inherit}#nbSalir .nb-si{background:#B42318;border-color:#B42318;color:#fff}
-@media print{#navBotones,#nbSalir{display:none!important}}
-</style>
-<script>/* patch_navbotones: botones Atrás y Salir */
-(function () {
-  if (document.getElementById("navBotones")) return;
-  const APP = typeof NAV_ORDEN !== "undefined" && typeof setModo === "function" && document.getElementById("mInicio") ? "ventas" : document.getElementById("s-res") && document.querySelector("nav.bottom") ? "admin" : typeof ir === "function" ? "ir" : "";
-  if (!APP) return;
-  const vis = el => el && !el.hidden && getComputedStyle(el).display !== "none";
-  /* 1) cerrar lo que esté abierto */
-  function cerrarAbierto() { const ia = document.getElementById("iaPan"); if (ia && ia.classList.contains("on")) { const x = document.getElementById("iaX"); if (x) x.click(); return true; }
-    const sn = document.getElementById("snPanel"); if (sn && sn.classList.contains("on")) { const v = document.getElementById("snVelo"); if (v) v.click(); return true; }
-    const rd = document.getElementById("rdOv"); if (rd) { const b = document.getElementById("rdIr"); if (b) b.click(); return true; }
-    const sal = document.getElementById("nbSalir"); if (sal) { sal.remove(); return true; }
-    if (APP === "ventas") { const me = document.getElementById("mEnv"); if (vis(me) && typeof cerrarModal === "function") { cerrarModal(); return true; } }
-    const mo = [...document.querySelectorAll(".modal,.ov,.t-ov,[role=dialog]")].find(x => vis(x) && x.id !== "iaPan" && !x.classList.contains("gate") && x.id !== "tGate" && x.id !== "hwfGate");
-    if (mo) { const c = mo.querySelector('[aria-label="Cerrar"],.x,.cerrar,[data-cerrar]'); if (c) { c.click(); return true; } }
-    return false; }
-  /* 2) historial de secciones */
-  const pila = []; let actual = null, volviendo = false;
-  if (APP === "ir") { try { actual = typeof SEC === "string" ? SEC : (typeof MODO !== "undefined" ? MODO : null); } catch (e) {}
-    const _ir = ir; ir = function (s) { if (!volviendo && actual && actual !== s) { pila.push(actual); if (pila.length > 30) pila.shift(); } actual = s; return _ir.apply(this, arguments); }; }
-  if (APP === "admin") { actual = "t:res";
-    document.addEventListener("click", e => { if (volviendo) return; const t = e.target.closest("nav.bottom [data-t], #masSeg [data-m], [data-biu]"); if (!t) return;
-      const k = t.dataset.biu ? "b:" + t.dataset.biu : t.dataset.t ? "t:" + t.dataset.t : "m:" + t.dataset.m; if (k === "t:mas" || k === "t:inv") return; if (actual && actual !== k) { pila.push(actual); if (pila.length > 30) pila.shift(); } actual = k; }, true); }
-  function irA(k) { volviendo = true; try {
-      if (APP === "ir") ir(k);
-      else { const [t, v] = k.split(":"); if (t === "t") { const b = document.querySelector('nav.bottom [data-t="' + v + '"]'); if (b) b.click(); }
-        else if (t === "m") { const m = document.querySelector('nav.bottom [data-t="mas"]'); if (m) m.click(); const b = document.querySelector('#masSeg [data-m="' + v + '"]'); if (b) b.click(); }
-        else if (t === "b") { const f = document.createElement("span"); f.dataset.biu = v; f.hidden = true; document.body.appendChild(f); f.click(); f.remove(); const b = document.querySelector('nav.bottom [data-t="inv"]'); if (b) b.click(); } }
-      actual = k; window.scrollTo({ top: 0 }); } finally { volviendo = false; } }
-  function atras() { if (cerrarAbierto()) return;
-    if (APP === "ventas") { if (typeof navPila !== "undefined" && navPila.length > 1) history.back(); else if (typeof MODO !== "undefined" && MODO !== "inicio") setModo("inicio"); return; }
-    if (pila.length) irA(pila.pop()); else { const ini = APP === "admin" ? "t:res" : document.querySelector('[data-s="inicio"]') ? "inicio" : document.querySelector('[data-s="dash"]') ? "dash" : null; if (ini && ini !== actual) irA(ini); } }
-  function salir() { if (document.getElementById("nbSalir")) return; const o = document.createElement("div"); o.id = "nbSalir"; o.setAttribute("role", "alertdialog");
-    o.innerHTML = '<div><h2>¿Salir de la app?</h2><p>Lo que esté pendiente de enviar queda guardado en este equipo y se envía solo cuando vuelvas a abrirla.</p><div class="nb-f"><button type="button" id="nbNo">Seguir aquí</button><button type="button" class="nb-si" id="nbSi">Salir</button></div></div>';
-    document.body.appendChild(o); o.onclick = e => { if (e.target === o) o.remove(); }; o.querySelector("#nbNo").onclick = () => o.remove();
-    o.querySelector("#nbSi").onclick = () => { try { window.close(); } catch (e) {} setTimeout(() => { if (document.visibilityState === "visible") o.querySelector("div").innerHTML = '<h2>Listo para cerrar</h2><p>Este teléfono no deja que la app se cierre sola: usa el botón de inicio o el de apps recientes del teléfono y desliza la app hacia arriba. Al volver la encontrarás tal como la dejaste.</p><div class="nb-f"><button type="button" id="nbOk">Entendido</button></div>', o.querySelector("#nbOk").onclick = () => o.remove(); }, 400); }; }
-  const box = document.createElement("div"); box.id = "navBotones"; box.innerHTML = '<button type="button" id="nbAtras" aria-label="Atrás" title="Atrás">‹</button><button type="button" class="nb-x" id="nbSal" aria-label="Salir de la app" title="Salir de la app">⏻</button>';
-  document.body.appendChild(box); box.querySelector("#nbAtras").onclick = atras; box.querySelector("#nbSal").onclick = salir;
-  const ajusta = () => document.body.classList.toggle("nb-sinia", !document.getElementById("iaBtn")); ajusta(); setTimeout(ajusta, 1500);
-  /* oculto mientras hay una pantalla de ingreso */
-  setInterval(() => { const g = [...document.querySelectorAll(".gate,#gate,#tGate,#hwfGate,.t-ov,#rdOv")].some(vis); box.style.display = g ? "none" : ""; }, 800);
-})();
 </script>
 <style>/* patch_asistente */
 #iaBtn{position:fixed;right:14px;bottom:calc(84px + env(safe-area-inset-bottom));z-index:900;border:0;border-radius:999px;padding:12px 16px;font:600 .95rem system-ui,sans-serif;
