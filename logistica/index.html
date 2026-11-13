@@ -402,7 +402,7 @@ if (!cfg() || !DATA()) pantallaConexion(); else { arrancar(); bajar(true).then(n
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261113012644";
+const HWF_VER = "20261113013154";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer)\/[^/]*$/, "/");
   let avisado = false;
@@ -1552,4 +1552,21 @@ body.log-sn main{padding-bottom:0!important}
   /* mantener sincronizado también el #nav original para patch_bi que lo usa */
 })();
 </script>
+<style>/* patch_kpipares2: último item solo en su fila siempre ocupa el ancho completo */
+/* .db-k: 2 col en móvil, 3 en tablet, 4 en desktop */
+.db-k > *:last-child:nth-child(2n+1){grid-column:1/-1}
+@media(min-width:700px){
+  .db-k > *:last-child:nth-child(2n+1){grid-column:unset}
+  .db-k > *:last-child:nth-child(3n+1){grid-column:1/-1}
+}
+@media(min-width:1150px){
+  .db-k > *:last-child:nth-child(3n+1){grid-column:unset}
+  .db-k > *:last-child:nth-child(4n+1){grid-column:1/-1}
+}
+/* .two: siempre 2 col (1 col en <380px → no aplica) */
+@media(min-width:381px){.two > *:last-child:nth-child(2n+1){grid-column:1/-1}}
+/* .kpi3: 3 col (2 col en <420px) */
+@media(max-width:419px){.kpi3 > *:last-child:nth-child(2n+1){grid-column:1/-1}}
+@media(min-width:420px){.kpi3 > *:last-child:nth-child(3n+1){grid-column:1/-1}}
+</style>
 </body></html>
