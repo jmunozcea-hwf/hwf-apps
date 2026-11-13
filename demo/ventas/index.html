@@ -3128,17 +3128,17 @@ function pintarRuta() {
   box.querySelectorAll("[data-rn]").forEach(b => b.onclick = () => { const x = r[+b.dataset.rn];
     abrirExterno(x.pt.tipo === "comuna" ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent([x.c.direccion, tc(x.c.comuna), "Chile"].filter(Boolean).join(", "))}` : `https://www.google.com/maps/dir/?api=1&destination=${x.pt.lat},${x.pt.lng}`); });
   box.querySelectorAll("[data-rq]").forEach(b => b.onclick = () => { const ex = RUTA.excl.concat([b.dataset.rq]); calcularRuta({ excl: ex, o: RUTA.o, origenTxt: RUTA.origenTxt }); });
-  if (window.L) setTimeout(() => {
-    if (!$("rMapa")) return;
-    MAPA = L.map("rMapa", { zoomControl: true, attributionControl: true });
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: "© OpenStreetMap" }).addTo(MAPA);
+  /* patch_mapa_gmaps */ setTimeout(() => {
+    const mapDiv = $("rMapa");
+    if (!mapDiv) return;
     const pts = [[o.lat, o.lng]].concat(r.map(x => [x.pt.lat, x.pt.lng]));
-    L.polyline(pts, { color: "#0B3146", weight: 3, opacity: .7, dashArray: "6 6" }).addTo(MAPA);
-    L.marker([o.lat, o.lng], { icon: L.divIcon({ className: "", html: '<div class="r-pin yo">●</div>', iconSize: [28, 28], iconAnchor: [14, 14] }) }).addTo(MAPA).bindPopup("Partida");
-    r.forEach((x, i) => L.marker([x.pt.lat + (x.pt.tipo === "comuna" ? (i % 5 - 2) * 0.0015 : 0), x.pt.lng + (x.pt.tipo === "comuna" ? (Math.floor(i / 5) - 1) * 0.0015 : 0)],
-      { icon: L.divIcon({ className: "", html: `<div class="r-pin ${x.pt.tipo === "comuna" ? "aprox" : ""}">${i + 1}</div>`, iconSize: [28, 28], iconAnchor: [14, 14] }) })
-      .addTo(MAPA).bindPopup(esc(tc(x.c.nombre))));
-    MAPA.fitBounds(pts, { padding: [24, 24], maxZoom: 15 });
+    const cLat = pts.reduce((s, p) => s + p[0], 0) / pts.length;
+    const cLng = pts.reduce((s, p) => s + p[1], 0) / pts.length;
+    const latR = Math.max(...pts.map(p => p[0])) - Math.min(...pts.map(p => p[0]));
+    const lngR = Math.max(...pts.map(p => p[1])) - Math.min(...pts.map(p => p[1]));
+    const rng = Math.max(latR, lngR);
+    const z = rng < 0.04 ? 14 : rng < 0.1 ? 13 : rng < 0.25 ? 12 : rng < 0.6 ? 11 : rng < 1.2 ? 10 : 9;
+    mapDiv.innerHTML = `<iframe src="https://www.google.com/maps/?ll=${cLat.toFixed(5)},${cLng.toFixed(5)}&z=${z}&output=embed" width="100%" height="300" frameborder="0" style="border-radius:12px;border:0;display:block" allowfullscreen loading="lazy" title="Mapa de la ruta"></iframe>`;
   }, 50);
 }
 /* Ubicar clientes por dirección (OpenStreetMap). Se hace en el teléfono, una consulta por segundo, y queda guardado. */
@@ -7133,7 +7133,7 @@ function confirmarNota() {
   x.onclick = () => cerrarModal(); card.insertBefore(x, card.firstChild); })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261113095502";
+const HWF_VER = "20261113101359";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
