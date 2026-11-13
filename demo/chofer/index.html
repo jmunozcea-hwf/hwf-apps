@@ -106,19 +106,27 @@ async function api(d) { const c = cfg(); if (!c) return { ok: false, error: "Sin
     return o; } catch (e) { return { ok: false, red: true, error: "Sin señal o el script no respondió." }; } }
 function dec(t) { t = String(t || "").replace(/\s+/g, ""); try { t = decodeURIComponent(t); } catch (e) {} const m = t.match(/HWF1:([A-Za-z0-9+\/=_-]+)/); if (!m) return null;
   try { const o = JSON.parse(decodeURIComponent(escape(atob(m[1].replace(/-/g, "+").replace(/_/g, "/"))))); return o.u && o.c ? { url: o.u, clave: o.c } : null; } catch (e) { return null; } }
-function puerta() { const o = document.createElement("div"); o.className = "gate"; const p = lsGet("perfil", {});
-  o.innerHTML = `<div class="c"><h1>🚚 DEMO CHOFER</h1>${cfg() ? "" : `<p class="muted" style="margin:0">Pega el link o el código de conexión (empieza con <b>HWF1:</b>) que te entrega logística.</p>
-    <textarea id="gC" rows="3" placeholder="Link o código HWF1:…"></textarea><details><summary style="cursor:pointer;font-weight:600">Conectar con URL y clave</summary><div style="display:grid;gap:8px;margin-top:8px"><input id="gU" type="url" placeholder="https://script.google.com/macros/s/…/exec"><input id="gK" placeholder="Clave"></div></details>`}
-    <label class="f">Chofer<select id="gN"><option value="">Elige tu nombre…</option>${CHOFERES.map(n => `<option${p.chofer === n ? " selected" : ""}>${n}</option>`).join("")}</select></label>
-    <label class="f">Vehículo de hoy<select id="gV">${VEH.map(([k, n]) => `<option value="${k}"${p.veh === k ? " selected" : ""}>${n}</option>`).join("")}</select></label>
-    <label class="f">Kilometraje del odómetro al salir (opcional)<input id="gO" type="number" inputmode="numeric" placeholder="Ej.: 125430"></label>
-    <div class="e" id="gE"></div><button type="button" class="btn pri" id="gB">Comenzar jornada</button><p class="muted" style="margin:0;font-size:.8rem">Queda en el registro diario de conducción: chofer, vehículo, hora de inicio y término, kilómetros y entregas.</p></div>`;
+function puerta(modo) { document.querySelectorAll(".gate").forEach(x => x.remove()); const o = document.createElement("div"); o.className = "gate"; const p = lsGet("perfil", {}) || {};   /* patch_chofernombre */
+  const LH = (String(location.hash).match(/HWF1:[A-Za-z0-9+\/=_%-]+/) || [])[0]; if (LH) { const c0 = dec(LH); if (c0) lsSet("cfg", c0); try { history.replaceState(null, "", location.pathname); } catch (e) {} }
+  const nomOk = s => String(s || "").trim().replace(/\s+/g, " ").toLowerCase().replace(/(^|\s)([a-záéíóúñü])/g, (m, a, b) => a + b.toUpperCase());
+  if (modo === "veh") { const R = rutaHoy(), con = R ? [...new Set((R.ruta.rutas || []).map(r => r.veh))] : [], L = VEH.slice().sort((a, b) => (con.includes(b[0]) ? 1 : 0) - (con.includes(a[0]) ? 1 : 0));
+    o.innerHTML = `<div class="c"><h1>🚚 Hola, ${esc(p.chofer || "")}</h1><p class="muted" style="margin:0">¿Qué vehículo llevas hoy?</p>
+      <div style="display:grid;gap:8px">${L.map(([k, n]) => `<button type="button" class="btn${con.includes(k) ? " pri" : ""}" data-veh="${k}" style="justify-content:space-between">${esc(n)}${con.includes(k) ? " <small>ruta de hoy</small>" : ""}</button>`).join("")}</div>
+      <label class="f">Kilometraje al salir (opcional)<input id="gO" type="number" inputmode="numeric" placeholder="Ej.: 125430"></label><div class="e" id="gE"></div></div>`;
+    document.body.appendChild(o);
+    o.querySelectorAll("[data-veh]").forEach(b => b.onclick = () => { const P = Object.assign({}, perfil() || {}, { veh: b.dataset.veh, fecha: hoy() }); lsSet("perfil", P); const vd = lsGet("vehDe", {}) || {}; vd[P.chofer] = P.veh; lsSet("vehDe", vd); jornadaIniciar($("gO").value); o.remove(); arrancar(); });
+    return; }
+  o.innerHTML = `<div class="c"><h1>🚚 DEMO CHOFER</h1><label class="f">Tu nombre<input id="gN" list="gNl" autocomplete="name" autocapitalize="words" placeholder="Escribe tu nombre" value="${esc(p.chofer || "")}"></label>
+    <datalist id="gNl">${CHOFERES.map(n => `<option value="${esc(n)}">`).join("")}</datalist>
+    ${cfg() ? "" : `<details id="gCx"><summary style="cursor:pointer;font-weight:600">Este teléfono aún no está conectado</summary><p class="muted" style="margin:6px 0">Abre el link que te mandó logística por WhatsApp, o pégalo aquí (una sola vez).</p>
+      <textarea id="gC" rows="3" placeholder="Link o código HWF1:…"></textarea></details>`}
+    <div class="e" id="gE"></div><button type="button" class="btn pri" id="gB">Entrar</button></div>`;
   document.body.appendChild(o);
-  $("gB").onclick = () => { if (!cfg()) { let c = dec($("gC").value); const u = ($("gU").value || "").trim(), k = ($("gK").value || "").trim();
-      if (!c && /^https:\/\/script\.google(usercontent)?\.com\/.+\/exec$/.test(u) && k.length >= 4) c = { url: u, clave: k }; if (!c) { $("gE").textContent = "Link, código o URL/clave no válido."; return; } lsSet("cfg", c); }
-    const n = $("gN").value; if (!n) { $("gE").textContent = "Elige tu nombre."; return; }
-    lsSet("perfil", { chofer: n, veh: $("gV").value, fecha: hoy() }); jornadaIniciar($("gO").value); o.remove(); arrancar(); };
-  const LH = (String(location.hash).match(/HWF1:[A-Za-z0-9+\/=_%-]+/) || [])[0]; if (LH && $("gC")) { try { history.replaceState(null, "", location.pathname); } catch (e) {} $("gC").value = decodeURIComponent(LH); } }
+  const entrar = () => { if (!cfg()) { const c = dec(($("gC") || {}).value || ""); if (!c) { $("gE").textContent = "Falta conectar este teléfono: abre el link que te mandó logística."; const d = $("gCx"); if (d) d.open = true; return; } lsSet("cfg", c); }
+    const n = nomOk($("gN").value); if (n.length < 2) { $("gE").textContent = "Escribe tu nombre."; return; }
+    const R = rutaHoy(), con = R ? [...new Set((R.ruta.rutas || []).map(r => r.veh))] : [], vd = lsGet("vehDe", {}) || {}, veh = (p.chofer === n && p.veh) || vd[n] || (con.length === 1 ? con[0] : "");
+    lsSet("perfil", { chofer: n, veh, fecha: hoy() }); o.remove(); if (veh) { jornadaIniciar(""); arrancar(); } else puerta("veh"); };
+  $("gB").onclick = entrar; $("gN").onkeydown = e => { if (e.key === "Enter") entrar(); }; }
 const perfil = () => lsGet("perfil", null), vehNom = id => (VEH.find(v => v[0] === id) || [id, id])[1];
 
 /* ===== ruta del día ===== */
@@ -216,9 +224,9 @@ function pintar(s) { ({ ruta: pintarRuta, mapa: pintarMapa, resumen: pintarResum
 const navUrl = p => `https://www.google.com/maps/dir/?api=1${POS ? `&origin=${POS.lat},${POS.lng}` : ""}&destination=${p.lat},${p.lng}&travelmode=driving`;
 const telNorm = t => String(t || "").replace(/[^\d+]/g, ""), waNorm = t => { const d = String(t || "").replace(/\D/g, ""); return d.length === 9 ? "56" + d : d; };
 function pintarRuta() { const X = misParadas(), E = estados(), P = perfil();
-  if (!X.paradas.length) { $("s-ruta").innerHTML = `<div class="card"><h2>Ruta de hoy · ${esc(vehNom(P.veh))}</h2><p class="muted">${rutaHoy() ? "Logística no asignó paradas a este vehículo hoy." : "Todavía no hay ruta de hoy en este teléfono."}</p>
+  if (!X.paradas.length) { $("s-ruta").innerHTML = `<div class="card"><h2>Ruta de hoy · ${esc(vehNom(P.veh))}</h2><p class="muted">${rutaHoy() ? "Logística no asignó paradas a este vehículo hoy." : "Todavía no llega la ruta de hoy. Aparecerá sola cuando logística la envíe."}</p>
       <div class="g2"><button type="button" class="btn pri" id="bR">⟳ Bajar ruta del día</button><button type="button" class="btn" id="bV">Cambiar vehículo</button></div></div>`;
-    $("bR").onclick = async () => { $("bR").disabled = true; await bajarRuta(); pintarRuta(); }; $("bV").onclick = () => puerta(); return; }
+    $("bR").onclick = async () => { $("bR").disabled = true; await bajarRuta(); pintarRuta(); }; $("bV").onclick = () => puerta("veh"); return; }
   const pend = X.paradas.filter(p => !E[p.id]), sig = pend[0], hechas = X.paradas.length - pend.length;
   const pill = p => { const e = E[p.id]; return !e ? '<span class="pill p-n">pendiente</span>' : e.est === "ok" ? '<span class="pill p-ok">entregado</span>' : e.est === "parcial" ? '<span class="pill p-wa">parcial</span>' : '<span class="pill p-bad">' + (e.est === "rech" ? "rechazado" : "no estaba") + "</span>"; };
   $("s-ruta").innerHTML = `${sig ? `<div class="card nx"><span class="t">Siguiente parada · ${sig.ord} de ${X.paradas.length}${X.vueltas > 1 ? " · vuelta " + sig.vuelta : ""}</span><h3>${esc(sig.cli)}</h3>
@@ -231,7 +239,7 @@ function pintarRuta() { const X = misParadas(), E = estados(), P = perfil();
         <div style="display:grid;gap:4px"><a class="btn" style="min-height:36px;padding:6px 10px" target="_blank" rel="noopener" href="${esc(navUrl(p))}">🧭</a><button type="button" class="btn" style="min-height:36px;padding:6px 10px" data-reg="${esc(p.id)}">${e ? "✏️" : "✅"}</button></div></div>`; }).join("")}
       <div class="g2" style="margin-top:10px"><button type="button" class="btn" id="bR">⟳ Actualizar ruta</button><button type="button" class="btn" id="bV">Cambiar vehículo</button></div></div>`;
   $("s-ruta").querySelectorAll("[data-reg]").forEach(b => b.onclick = () => { const p = X.paradas.find(x => x.id === b.dataset.reg); if (p) registrar(p); });
-  $("bR").onclick = async () => { $("bR").disabled = true; await bajarRuta(); pintarRuta(); }; $("bV").onclick = () => puerta(); }
+  $("bR").onclick = async () => { $("bR").disabled = true; await bajarRuta(); pintarRuta(); }; $("bV").onclick = () => puerta("veh"); }
 let mapa = null, miMarca = null;
 function pintarMapa() { const X = misParadas(), E = estados(); if (!window.L) { $("mapa").innerHTML = '<p class="nota" style="padding:12px">Mapa no disponible sin internet.</p>'; return; }
   setTimeout(() => { if (mapa) mapa.remove(); mapa = L.map("mapa"); L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 18, attribution: "© OpenStreetMap" }).addTo(mapa);
@@ -257,7 +265,7 @@ function pintarResumen() { const X = misParadas(), E = estados(), P = perfil(), 
           <div class="k"><span>Km (GPS)</span><b>${nf(J.kmGps, 1)}</b>${J.kmOdo ? `<small class="muted">odómetro: ${nf(J.kmOdo)} km</small>` : ""}</div><div class="k"><span>Entregas</span><b>${esc(J.activa ? jornadaStats().entregas : J.entregas)}</b></div></div>
         ${J.activa ? `<button type="button" class="btn oro" style="width:100%;margin-top:10px" id="bJFin">🏁 Terminar jornada</button>` : `<p class="nota">Jornada registrada${lsGet("colaJ", {})[J.id] ? " (se enviará con señal)" : ""}.</p><button type="button" class="btn" id="bJIni">Iniciar otra jornada</button>`}</div>`; })()}`;
   $("bEnv").onclick = () => { enviarCola(); toast(navigator.onLine ? "Enviando…" : "Sin señal: se enviarán solas."); };
-  if ($("bJIni")) $("bJIni").onclick = () => puerta();
+  if ($("bJIni")) $("bJIni").onclick = () => puerta(perfil() && perfil().chofer ? "veh" : undefined);
   if ($("bJFin")) $("bJFin").onclick = () => { const o = document.createElement("div"); o.className = "ov"; const J = jornada();
     o.innerHTML = `<div class="in"><div class="card"><h2>🏁 Terminar jornada</h2><p class="muted" style="margin:0 0 10px">${esc(J.chofer)} · ${esc(J.vehNombre)} · desde ${esc(J.inicio)} · ${nf(J.kmGps, 1)} km por GPS</p>
       <label class="f">Kilometraje del odómetro al llegar (opcional)<input id="jO" type="number" inputmode="numeric" placeholder="${J.odoIni !== "" ? "Salida: " + J.odoIni : "Ej.: 125610"}"></label>
@@ -268,13 +276,13 @@ function pintarResumen() { const X = misParadas(), E = estados(), P = perfil(), 
     $("jSi").onclick = () => { const of = $("jO").value; if (of !== "" && J.odoIni !== "" && Number(of) < Number(J.odoIni)) { toast("El odómetro final es menor que el de salida."); return; }
       jornadaCerrar({ odoFin: of === "" ? "" : Number(of), litros: Number($("jL").value) || 0, comb: Number($("jC").value) || 0, obs: $("jX").value.trim() }); o.remove(); toast("Jornada registrada."); pintarResumen(); pintarCola(); }; }; }
 
-function arrancar() { const P = perfil(); if (!P || !cfg()) return puerta(); if (P.fecha !== hoy()) { const J = jornada(); if (J && J.activa) jornadaCerrar({ obs: "Cerrada automáticamente al día siguiente" }); return puerta(); }
+function arrancar() { const P = perfil(); if (!P || !cfg()) return puerta(); if (!P.veh && P.fecha === hoy()) return puerta("veh"); if (P.fecha !== hoy()) { const J = jornada(); if (J && J.activa) jornadaCerrar({ obs: "Cerrada automáticamente al día siguiente" }); return puerta(); }
   pintarCola(); ir(SEC); gpsIniciar(); pantallaEncendida(); bajarRuta(true).then(n => { if (n) pintar(SEC); }); enviarCola();
   /* limpia estados de días anteriores */ try { Object.keys(localStorage).filter(k => /^hwf-chodemo:est_\d{4}-\d{2}-\d{2}$/.test(k) && k !== "hwf-chodemo:est_" + hoy()).forEach(k => localStorage.removeItem(k)); } catch (e) {} }
 puerta(); /* patch_choferingreso: siempre la portada de ingreso */
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 </script><script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261113015657";
+const HWF_VER = "20261113015822";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer)\/[^/]*$/, "/");
   let avisado = false;

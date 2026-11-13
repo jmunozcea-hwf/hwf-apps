@@ -179,7 +179,7 @@ function pintar(s) { ({ ruta: pintarRuta, mapa: pintarMapa, resumen: pintarResum
 const navUrl = p => `https://www.google.com/maps/dir/?api=1${POS ? `&origin=${POS.lat},${POS.lng}` : ""}&destination=${p.lat},${p.lng}&travelmode=driving`;
 const telNorm = t => String(t || "").replace(/[^\d+]/g, ""), waNorm = t => { const d = String(t || "").replace(/\D/g, ""); return d.length === 9 ? "56" + d : d; };
 function pintarRuta() { const X = misParadas(), E = estados(), P = perfil();
-  if (!X.paradas.length) { $("s-ruta").innerHTML = `<div class="card"><h2>Ruta de hoy · ${esc(vehNom(P.veh))}</h2><p class="muted">${rutaHoy() ? "Logística no asignó paradas a este vehículo hoy." : "Todavía no hay ruta de hoy en este teléfono."}</p>
+  if (!X.paradas.length) { $("s-ruta").innerHTML = `<div class="card"><h2>Ruta de hoy · ${esc(vehNom(P.veh))}</h2><p class="muted">${rutaHoy() ? "Logística no asignó paradas a este vehículo hoy." : "Todavía no llega la ruta de hoy. Aparecerá sola cuando logística la envíe."}</p>
       <div class="g2"><button type="button" class="btn pri" id="bR">⟳ Bajar ruta del día</button><button type="button" class="btn" id="bV">Cambiar vehículo</button></div></div>`;
     $("bR").onclick = async () => { $("bR").disabled = true; await bajarRuta(); pintarRuta(); }; $("bV").onclick = () => puerta("veh"); return; }
   const pend = X.paradas.filter(p => !E[p.id]), sig = pend[0], hechas = X.paradas.length - pend.length;
@@ -231,13 +231,13 @@ function pintarResumen() { const X = misParadas(), E = estados(), P = perfil(), 
     $("jSi").onclick = () => { const of = $("jO").value; if (of !== "" && J.odoIni !== "" && Number(of) < Number(J.odoIni)) { toast("El odómetro final es menor que el de salida."); return; }
       jornadaCerrar({ odoFin: of === "" ? "" : Number(of), litros: Number($("jL").value) || 0, comb: Number($("jC").value) || 0, obs: $("jX").value.trim() }); o.remove(); toast("Jornada registrada."); pintarResumen(); pintarCola(); }; }; }
 
-function arrancar() { const P = perfil(); if (!P || !cfg()) return puerta(); if (!P.veh && P.fecha === hoy()) return puerta("veh"); if (P.fecha !== hoy()) { const J = jornada(); if (J && J.activa) jornadaCerrar({ obs: "Cerrada automáticamente al día siguiente" }); return puerta(); }
+function arrancar() { const P = perfil(); if (!P || !cfg()) return puerta(); if (!P.veh && P.fecha === hoy()) return puerta("veh"); if (!P.veh && P.fecha === hoy()) return puerta("veh"); if (P.fecha !== hoy()) { const J = jornada(); if (J && J.activa) jornadaCerrar({ obs: "Cerrada automáticamente al día siguiente" }); return puerta(); }
   pintarCola(); ir(SEC); gpsIniciar(); pantallaEncendida(); bajarRuta(true).then(n => { if (n) pintar(SEC); }); enviarCola();
   /* limpia estados de días anteriores */ try { Object.keys(localStorage).filter(k => /^hwf-cho:est_\d{4}-\d{2}-\d{2}$/.test(k) && k !== "hwf-cho:est_" + hoy()).forEach(k => localStorage.removeItem(k)); } catch (e) {} }
 puerta(); /* patch_choferingreso: siempre la portada de ingreso */
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 </script><script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261113015657";
+const HWF_VER = "20261113015822";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer)\/[^/]*$/, "/");
   let avisado = false;
