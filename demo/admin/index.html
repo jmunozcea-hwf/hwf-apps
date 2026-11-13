@@ -5153,7 +5153,7 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261113151340";
+const HWF_VER = "20261113151702";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -6990,53 +6990,6 @@ function npVer(n) {
   }
 })();
 </script>
-<script>/* patch_cart_ultima_fa: asignar clientes por última factura en Admin BI */
-(function () {
-  if (typeof cartDe !== "function" || typeof D === "undefined") return;
-  let _pvSig = null, _pvMap = null;
-
-  const _pvNrm = s => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
-  const _pvN1  = s => _pvNrm(s).split(/\s+/)[0]; /* solo primer nombre, compatible con cualquier apellido */
-  const _pvActivos1 = new Set(["claudia", "diego", "matias"]); /* primer nombre de cada vendedor activo */
-  const _pvAngelica1 = "angelica";
-  function _pvBuildMap(D) {
-    /* 1. última factura por cliente */
-    const m = {};
-    (D.rows || []).forEach(r => {
-      if (Number(r[5]) <= 0) return;
-      const v = D.vend[r[7]]; if (!v || /HELLYW/i.test(v)) return;
-      const f = (r[8] || D.anio) * 10000 + r[2] * 100 + r[3];
-      if (!m[r[0]] || f > m[r[0]].f) m[r[0]] = { f, v };
-    });
-    /* 2. índice nombre-normalizado → ci (para cruzar con cotizaciones) */
-    const nomCi = {};
-    (D.clientes || []).forEach((c, ci) => { nomCi[_pvNrm(c[0])] = ci; });
-    /* 3. cotizaciones de vendedores activos → ci → vendedor (compara por primer nombre) */
-    const cotVend = {};
-    (D.cots || []).forEach(c => {
-      const vn1 = _pvN1(c[3]); if (!_pvActivos1.has(vn1)) return;
-      const ci = nomCi[_pvNrm(c[2])]; if (ci == null) return;
-      cotVend[ci] = c[3]; /* última cotización activa gana */
-    });
-    /* 4. redistribuir clientes de Angélica (compara por primer nombre) */
-    Object.keys(m).forEach(k => {
-      const ci = Number(k);
-      if (_pvN1(m[ci].v) !== _pvAngelica1) return;
-      /* buscar la forma "Claudia ..." que ya aparece en D.vend para ser consistente */
-      const claudiaVend = (D.vend || []).find(v => _pvN1(v) === "claudia") || "Claudia";
-      m[ci].v = cotVend[ci] || claudiaVend;
-    });
-    return m;
-  }
-  function pvBuildMapCached() {
-    if (_pvMap && _pvSig === D.corte) return _pvMap;
-    _pvSig = D.corte; _pvMap = _pvBuildMap(D); return _pvMap;
-  }
-  const _cdOrig = cartDe;
-  cartDe = function (ci) { const m = pvBuildMapCached(); return (m[ci] && m[ci].v) || _cdOrig(ci); };
-  if (typeof calcular === "function") try { calcular(); } catch (e) {}
-})();
-</script>
 <style>/* patch_pantallas: usar el ancho del monitor en PC */
 @media (min-width:1400px){
   main{max-width:none!important;margin-left:220px!important;margin-right:0!important}
@@ -7060,6 +7013,56 @@ function npVer(n) {
 @media (min-width:1900px){ html{font-size:17px} }
 @media (min-width:2500px){ html{font-size:18.5px} }
 </style>
+<script>/* patch_cart_ultima_fa: asignar clientes por última factura en Admin BI */
+(function () {
+  if (typeof cartDe !== "function" || typeof D === "undefined") return;
+  let _pvSig = null, _pvMap = null;
+
+  const _pvNrm = s => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
+  const _pvN1  = s => _pvNrm(s).split(/\s+/)[0]; /* solo primer nombre, compatible con cualquier apellido */
+  const _pvActivos1 = new Set(["claudia", "diego", "matias"]); /* primer nombre de cada vendedor activo */
+  const _pvAngelica1 = "angelica";
+  const _pvSinCartera1 = new Set(["generico", "leslie"]); /* sin cartera propia → Claudia */
+  function _pvBuildMap(D) {
+    /* 1. última factura por cliente */
+    const m = {};
+    (D.rows || []).forEach(r => {
+      if (Number(r[5]) <= 0) return;
+      const v = D.vend[r[7]]; if (!v || /HELLYW/i.test(v)) return;
+      const f = (r[8] || D.anio) * 10000 + r[2] * 100 + r[3];
+      if (!m[r[0]] || f > m[r[0]].f) m[r[0]] = { f, v };
+    });
+    /* 2. índice nombre-normalizado → ci (para cruzar con cotizaciones) */
+    const nomCi = {};
+    (D.clientes || []).forEach((c, ci) => { nomCi[_pvNrm(c[0])] = ci; });
+    /* 3. cotizaciones de vendedores activos → ci → vendedor (compara por primer nombre) */
+    const cotVend = {};
+    (D.cots || []).forEach(c => {
+      const vn1 = _pvN1(c[3]); if (!_pvActivos1.has(vn1)) return;
+      const ci = nomCi[_pvNrm(c[2])]; if (ci == null) return;
+      cotVend[ci] = c[3]; /* última cotización activa gana */
+    });
+    /* 4. redistribuir clientes de Angélica (compara por primer nombre) */
+    Object.keys(m).forEach(k => {
+      const ci = Number(k);
+      const vn = _pvN1(m[ci].v);
+      /* buscar la forma "Claudia ..." que ya aparece en D.vend para ser consistente */
+      const claudiaVend = (D.vend || []).find(v => _pvN1(v) === "claudia") || "Claudia";
+      if (_pvSinCartera1.has(vn)) { m[ci].v = claudiaVend; return; }   /* Genérico y Leslie ya no llevan cartera: pasan a Claudia */
+      if (vn !== _pvAngelica1) return;
+      m[ci].v = cotVend[ci] || claudiaVend;
+    });
+    return m;
+  }
+  function pvBuildMapCached() {
+    if (_pvMap && _pvSig === D.corte) return _pvMap;
+    _pvSig = D.corte; _pvMap = _pvBuildMap(D); return _pvMap;
+  }
+  const _cdOrig = cartDe;
+  cartDe = function (ci) { const m = pvBuildMapCached(); return (m[ci] && m[ci].v) || _cdOrig(ci); };
+  if (typeof calcular === "function") try { calcular(); } catch (e) {}
+})();
+</script>
 <style>/* patch_verificar_cart */
 .vc-open{display:flex;align-items:center;gap:12px;width:100%;margin:0 0 12px;border:1.5px solid var(--line,#C9D3DB);border-radius:16px;padding:10px 14px;background:var(--surface,#fff);color:var(--ink,#0F1E29);font:inherit;cursor:pointer;text-align:left}
 .vc-open:active{transform:scale(.99)}
@@ -7118,22 +7121,8 @@ function npVer(n) {
     return Object.values(seen).sort();
   }
 
-  /* -- calcular asignación automática sin overrides (solo última factura) -- */
-  function autoMap() {
-    const m = {};
-    (D.rows || []).forEach(r => {
-      if ((r[5] || 0) <= 0) return;
-      const v = D.vend[r[7]]; if (!v || /HELLYW/i.test(v)) return;
-      const anio = r[8] || D.anio;
-      const f = anio * 10000 + r[2] * 100 + r[3];
-      if (!m[r[0]] || f > m[r[0]].f) m[r[0]] = { f, v };
-    });
-    return m;
-  }
-
   /* -- renderizar panel -- */
   function vcRender(wrap) {
-    const auto = autoMap();
     const vends = getVends();
     const clientes = D.clientes || [];
 
@@ -7142,7 +7131,7 @@ function npVer(n) {
     function filas() {
       const ov = ovRead();
       let list = clientes.map((c, ci) => {
-        const autoV = (auto[ci] && auto[ci].v) || c[2] || '';
+        const autoV = _cdBase(ci) || c[2] || '';
         const ovV = ov[String(ci)] || null;
         const actual = ovV || autoV;
         return { ci, nombre: c[0] || '', comuna: c[1] || '', autoV, ovV, actual };
@@ -7220,7 +7209,7 @@ function npVer(n) {
       if (btnExp) btnExp.onclick = function () {
         const ov = ovRead();
         const all = clientes.map((c, ci) => {
-          const autoV = (auto[ci] && auto[ci].v) || c[2] || '';
+          const autoV = _cdBase(ci) || c[2] || '';
           const ovV = ov[String(ci)] || '';
           return [c[0] || '', c[1] || '', autoV, ovV].map(v => '"' + String(v).replace(/"/g, '""') + '"').join(';');
         });
