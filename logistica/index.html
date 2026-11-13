@@ -402,7 +402,7 @@ if (!cfg() || !DATA()) pantallaConexion(); else { arrancar(); bajar(true).then(n
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261113014543";
+const HWF_VER = "20261113015657";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer)\/[^/]*$/, "/");
   let avisado = false;
@@ -1482,76 +1482,6 @@ body.ia-izq #iaBtn{right:auto;left:14px}
   window.hwfAsistente = { contexto };   /* para pruebas */
 })();
 </script>
-<style>/* patch_sidenavlog: sidenav lateral en LOGÍSTICA */
-body.log-sn nav.bn#nav{display:none!important}
-body.log-sn main{padding-bottom:0!important}
-#snBtnLog{position:fixed;left:14px;bottom:calc(16px + env(safe-area-inset-bottom));z-index:9500;width:56px;height:56px;border-radius:50%;border:0;background:#0B3146;color:#fff;font-size:1.5rem;
-  box-shadow:0 4px 16px rgba(11,49,70,.4);cursor:pointer;display:grid;place-items:center}
-#snBtnLog small{position:absolute;bottom:-18px;left:50%;transform:translateX(-50%);font-size:.66rem;font-weight:800;color:#0B3146;white-space:nowrap;background:rgba(255,255,255,.9);border-radius:6px;padding:0 4px}
-#snVeloLog{position:fixed;inset:0;z-index:9600;background:rgba(10,20,30,.35);opacity:0;pointer-events:none;transition:opacity .2s}#snVeloLog.on{opacity:1;pointer-events:auto}
-#snPanLog{position:fixed;top:0;bottom:0;left:0;z-index:9700;width:min(290px,84vw);background:var(--surface,#fff);box-shadow:4px 0 24px rgba(0,0,0,.2);transform:translateX(-105%);transition:transform .22s ease;overflow-y:auto;overscroll-behavior:contain;padding:8px 8px 24px}
-#snPanLog.on{transform:none}
-#snPanLog .sn-top{display:flex;align-items:center;justify-content:space-between;padding:4px 8px 8px;border-bottom:1px solid var(--line,#DAE1E7);margin-bottom:6px}
-#snPanLog .sn-top b{font-size:1.05rem;color:#0B3146}#snPanLog .sn-x{border:0;background:none;font-size:1.5rem;cursor:pointer;color:var(--muted,#5B6874)}
-#snPanLog button.sn-i{display:flex;align-items:center;gap:12px;width:100%;border:0;background:none;font:inherit;font-weight:700;font-size:.95rem;color:var(--ink,#0F1E29);padding:11px 10px;border-radius:12px;cursor:pointer;text-align:left}
-#snPanLog button.sn-i:hover{background:var(--sunk,#EEF2F5)}#snPanLog button.sn-i[aria-current="true"]{background:#E6EEF3;color:#0B3146}
-#snPanLog .sn-e{font-size:0;width:34px;min-width:34px;height:34px;flex:0 0 34px}#snPanLog .sn-e svg{width:34px;height:34px;display:block}
-#snPanLog .sn-g{font-size:.7rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted,#5B6874);padding:12px 10px 4px;border-top:1px solid var(--line,#E3E9EE);margin-top:6px}
-#snPanLog .sn-g.sn-g0{border-top:0;margin-top:0;padding-top:4px}
-@media print{#snBtnLog,#snVeloLog,#snPanLog{display:none!important}}
-</style>
-<script>/* patch_sidenavlog: sidenav lateral para LOGÍSTICA */
-(function () {
-  if (!document.querySelector('#nav[class~="bn"][id="nav"]') || typeof ir !== "function") return;
-  if (document.getElementById("snBtnLog")) return;
-  document.body.classList.add("log-sn");
-  /* copiar los botones del #nav original al panel */
-  const navOrig = document.getElementById("nav");
-  const items = [...navOrig.querySelectorAll(":scope > button[data-s]")];
-
-  const btn = document.createElement("button"); btn.id = "snBtnLog"; btn.type = "button"; btn.setAttribute("aria-label", "Abrir menú"); btn.innerHTML = "☰<small>Menú</small>";
-  const velo = document.createElement("div"); velo.id = "snVeloLog";
-  const pan = document.createElement("nav"); pan.id = "snPanLog"; pan.setAttribute("aria-label", "Secciones");
-
-  pan.innerHTML = '<div class="sn-top"><b>LOGÍSTICA HWF</b><button type="button" class="sn-x" id="snXLog" aria-label="Cerrar menú">✕</button></div>';
-
-  items.forEach(orig => {
-    const b = document.createElement("button"); b.type = "button"; b.className = "sn-i"; b.dataset.s = orig.dataset.s;
-    if (orig.dataset.biu) b.dataset.biu = orig.dataset.biu;
-    /* icono: clonar el span.ic que tiene el SVG */
-    const ic = orig.querySelector(".ic"); const e = document.createElement("span"); e.className = "sn-e";
-    if (ic) e.innerHTML = ic.innerHTML; else e.textContent = "•";
-    const lbl = document.createElement("span"); lbl.textContent = orig.textContent.replace(/\s+/g, " ").trim();
-    b.appendChild(e); b.appendChild(lbl);
-    pan.appendChild(b);
-  });
-
-  document.body.appendChild(btn); document.body.appendChild(velo); document.body.appendChild(pan);
-
-  function abrir() { pan.classList.add("on"); velo.classList.add("on"); btn.setAttribute("aria-expanded", "true"); }
-  function cerrar() { pan.classList.remove("on"); velo.classList.remove("on"); btn.setAttribute("aria-expanded", "false"); }
-  btn.onclick = abrir; velo.onclick = cerrar; pan.querySelector("#snXLog").onclick = cerrar;
-  pan.addEventListener("keydown", e => { if (e.key === "Escape") cerrar(); });
-
-  pan.onclick = e => {
-    const b = e.target.closest(".sn-i[data-s]");
-    if (!b) return;
-    cerrar();
-    ir(b.dataset.s);
-  };
-
-  /* marcar ítem activo */
-  function marcar() {
-    const s = typeof SEC !== "undefined" ? SEC : null;
-    pan.querySelectorAll(".sn-i[data-s]").forEach(b => b.setAttribute("aria-current", String(b.dataset.s === s)));
-  }
-  /* interceptar ir() para marcar */
-  const _ir = ir;
-  ir = function(s) { const r = _ir.apply(this, arguments); marcar(); return r; };
-  marcar();
-  /* mantener sincronizado también el #nav original para patch_bi que lo usa */
-})();
-</script>
 <style>/* patch_kpipares2: último item solo en su fila siempre ocupa el ancho completo */
 /* .db-k: 2 col en móvil, 3 en tablet, 4 en desktop */
 .db-k > *:last-child:nth-child(2n+1){grid-column:1/-1}
@@ -1568,10 +1498,6 @@ body.log-sn main{padding-bottom:0!important}
 /* .kpi3: 3 col (2 col en <420px) */
 @media(max-width:419px){.kpi3 > *:last-child:nth-child(2n+1){grid-column:1/-1}}
 @media(min-width:420px){.kpi3 > *:last-child:nth-child(3n+1){grid-column:1/-1}}
-</style>
-<style>/* patch_logsimple */
-#tRef{display:none!important}
-@media(max-width:699px){body .kp{grid-template-columns:repeat(2,minmax(0,1fr))!important}body .kp>*{min-width:0}}
 </style>
 <script>/* patch_pares: última tarjeta sola en su fila → ancho completo */
 (function () {
@@ -1683,4 +1609,97 @@ body.log-sn main{padding-bottom:0!important}
   let pend = false; new MutationObserver(() => { if (pend) return; pend = true; setTimeout(() => { pend = false; aplicar(); }, 60); }).observe(document.body, { childList: true, subtree: true });
 })();
 </script>
+<style>/* patch_logsimple */
+#tRef{display:none!important}
+@media(max-width:699px){body .kp{grid-template-columns:repeat(2,minmax(0,1fr))!important}body .kp>*{min-width:0}}
+</style>
+<style>/* patch_sinactualizar */#tRef,#sAct{display:none!important}</style>
+<script>/* patch_sinactualizar: los datos se actualizan solos */
+(function () {
+  const IDS = ["tRef", "sAct"]; let corriendo = false;
+  function auto() {
+    if (corriendo || document.hidden) return; corriendo = true;
+    const T = typeof toast === "function" ? toast : null; if (T) try { toast = () => {}; } catch (e) {}
+    try { IDS.forEach(id => { const b = document.getElementById(id); if (b && !b.disabled && b.isConnected) b.click(); }); } catch (e) {}
+    setTimeout(() => { if (T) try { toast = T; } catch (e) {} corriendo = false; }, 6000);
+  }
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) setTimeout(auto, 800); });
+  setInterval(auto, 5 * 60 * 1000);
+})();
+</script>
+<style>/* patch_sidenavlog: sidenav lateral en LOGÍSTICA */
+body.log-sn nav.bn#nav,body.log-sn #tNav{display:none!important}
+body.log-sn main{padding-bottom:0!important}
+#snBtnLog{position:fixed;left:14px;bottom:calc(16px + env(safe-area-inset-bottom));z-index:9500;width:56px;height:56px;border-radius:50%;border:0;background:#0B3146;color:#fff;font-size:1.5rem;
+  box-shadow:0 4px 16px rgba(11,49,70,.4);cursor:pointer;display:grid;place-items:center}
+#snBtnLog small{position:absolute;bottom:-18px;left:50%;transform:translateX(-50%);font-size:.66rem;font-weight:800;color:#0B3146;white-space:nowrap;background:rgba(255,255,255,.9);border-radius:6px;padding:0 4px}
+#snVeloLog{position:fixed;inset:0;z-index:9600;background:rgba(10,20,30,.35);opacity:0;pointer-events:none;transition:opacity .2s}#snVeloLog.on{opacity:1;pointer-events:auto}
+#snPanLog{position:fixed;top:0;bottom:0;left:0;z-index:9700;width:min(290px,84vw);background:var(--surface,#fff);box-shadow:4px 0 24px rgba(0,0,0,.2);transform:translateX(-105%);transition:transform .22s ease;overflow-y:auto;overscroll-behavior:contain;padding:8px 8px 24px}
+#snPanLog.on{transform:none}
+#snPanLog .sn-top{display:flex;align-items:center;justify-content:space-between;padding:4px 8px 8px;border-bottom:1px solid var(--line,#DAE1E7);margin-bottom:6px}
+#snPanLog .sn-top b{font-size:1.05rem;color:#0B3146}#snPanLog .sn-x{border:0;background:none;font-size:1.5rem;cursor:pointer;color:var(--muted,#5B6874)}
+#snPanLog button.sn-i{display:flex;align-items:center;gap:12px;width:100%;border:0;background:none;font:inherit;font-weight:700;font-size:.95rem;color:var(--ink,#0F1E29);padding:11px 10px;border-radius:12px;cursor:pointer;text-align:left}
+#snPanLog button.sn-i:hover{background:var(--sunk,#EEF2F5)}#snPanLog button.sn-i[aria-current="true"]{background:#E6EEF3;color:#0B3146}
+#snPanLog .sn-e{font-size:0;width:34px;min-width:34px;height:34px;flex:0 0 34px}#snPanLog .sn-e svg{width:34px;height:34px;display:block}
+#snPanLog .sn-g{font-size:.7rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted,#5B6874);padding:12px 10px 4px;border-top:1px solid var(--line,#E3E9EE);margin-top:6px}
+#snPanLog .sn-g.sn-g0{border-top:0;margin-top:0;padding-top:4px}
+@media print{#snBtnLog,#snVeloLog,#snPanLog{display:none!important}}
+</style>
+<script>/* patch_sidenavlog: sidenav lateral para LOGÍSTICA y TIENDA */
+(function () {
+  const LOG = document.querySelector('nav.bn#nav'), TND = document.getElementById("tNav");
+  const navOrig = LOG || TND; if (!navOrig || typeof ir !== "function" || document.getElementById("snBtnLog")) return;
+  const TIT = LOG ? "LOGÍSTICA HWF" : "TIENDA HWF";
+  const GR = LOG ? { dash: "Operación", abast: "Compras", inv: "BI" } : { inicio: "Tienda", stock: "Productos", plan: "Resultados", guia: "Vender mejor", adm: "Administración" };
+  document.body.classList.add("log-sn");
+  const btn = document.createElement("button"); btn.id = "snBtnLog"; btn.type = "button"; btn.setAttribute("aria-label", "Abrir menú"); btn.innerHTML = "☰<small>Menú</small>";
+  const velo = document.createElement("div"); velo.id = "snVeloLog";
+  const pan = document.createElement("nav"); pan.id = "snPanLog"; pan.setAttribute("aria-label", "Secciones");
+  const activo = o => /^(true|page)$/.test(o.getAttribute("aria-current") || "") || o.getAttribute("aria-pressed") === "true" || /(^|\s)(on|act)(\s|$)/.test(o.className);
+  function construir() {
+    pan.innerHTML = `<div class="sn-top"><b>${TIT}</b><button type="button" class="sn-x" aria-label="Cerrar menú">✕</button></div>`;
+    pan.querySelector(".sn-x").onclick = cerrar;
+    let ng = 0;
+    [...navOrig.querySelectorAll(":scope > button[data-s]")].filter(o => !o.hidden && o.style.display !== "none").forEach(orig => {
+      if (GR[orig.dataset.s] && !pan.querySelector(`[data-g="${orig.dataset.s}"]`)) { const g = document.createElement("div"); g.className = "sn-g" + (ng++ ? "" : " sn-g0"); g.dataset.g = orig.dataset.s; g.textContent = GR[orig.dataset.s]; pan.appendChild(g); }
+      const b = document.createElement("button"); b.type = "button"; b.className = "sn-i"; b.dataset.s = orig.dataset.s; b._orig = orig;
+      const ic = orig.querySelector(".ic") || orig.querySelector("span"), e = document.createElement("span"); e.className = "sn-e";
+      if (ic && ic.querySelector("svg")) { let h = ic.innerHTML; [...ic.querySelectorAll("[id]")].forEach(x => { const nu = x.id + "-sn"; h = h.split('id="' + x.id + '"').join('id="' + nu + '"').split("#" + x.id + ")").join("#" + nu + ")"); }); e.innerHTML = h; } else { e.textContent = ic ? ic.textContent.trim() : "•"; e.style.fontSize = "1.45rem"; e.style.display = "grid"; e.style.placeItems = "center"; }
+      const lbl = document.createElement("span"); lbl.textContent = ((orig.textContent || "").replace(ic ? ic.textContent : "", "")).replace(/\s+/g, " ").trim();
+      b.setAttribute("aria-current", String(activo(orig))); b.append(e, lbl); pan.appendChild(b); });
+  }
+  document.body.append(btn, velo, pan);
+  function abrir() { construir(); pan.classList.add("on"); velo.classList.add("on"); btn.setAttribute("aria-expanded", "true"); }
+  function cerrar() { pan.classList.remove("on"); velo.classList.remove("on"); btn.setAttribute("aria-expanded", "false"); }
+  btn.onclick = abrir; velo.onclick = cerrar;
+  document.addEventListener("keydown", e => { if (e.key === "Escape") cerrar(); });
+  pan.onclick = e => { const b = e.target.closest(".sn-i[data-s]"); if (!b) return; cerrar(); const o = b._orig; if (o && o.isConnected) o.click(); else ir(b.dataset.s); window.scrollTo({ top: 0 }); };
+})();
+</script>
+<style>/* patch_bimoderno */
+#biBox .card{border-radius:20px;box-shadow:0 2px 14px rgba(11,49,70,.07)}
+#biBox .card>h2{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px;padding-left:12px;border-left:4px solid #3FBF7F;line-height:1.25}
+#biBox .bi-fil{background:linear-gradient(180deg,#F4F7F9,#EEF3F6);border:1px solid #E1E8ED;border-radius:16px;padding:12px;gap:10px 10px!important}
+#biBox .bi-fil label{font-size:.7rem!important;font-weight:800!important;letter-spacing:.06em;text-transform:uppercase;color:#5B6874!important;gap:5px!important}
+#biBox .bi-fil select,#biBox .bi-fil input{border-radius:12px!important;border:1px solid #D5DEE5!important;background:#fff!important;min-height:42px;font-weight:600;text-transform:none;letter-spacing:0;box-shadow:0 1px 2px rgba(11,49,70,.05)}
+#biBox .bi-u{display:flex!important;width:100%;background:#E3EAEF!important;border:0!important;border-radius:999px!important;padding:3px;gap:2px;overflow:visible!important;flex-wrap:nowrap!important}
+#biBox .bi-u button{flex:1 1 0;min-width:0;border:0!important;border-radius:999px!important;background:transparent!important;color:#4A5966!important;padding:8px 6px!important;font-size:.84rem;font-weight:700;text-transform:none;letter-spacing:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:background .15s,color .15s,box-shadow .15s}
+#biBox .bi-u button[aria-pressed="true"]{background:#fff!important;color:#0B3146!important;box-shadow:0 2px 6px rgba(11,49,70,.18)}
+#biBox .bi-exp{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px!important}
+#biBox .bi-exp .btn{min-height:44px;border-radius:12px;border:1px solid #E1E8ED;background:#fff;font-size:.78rem;font-weight:700;padding:6px 4px;line-height:1.15;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+#biBox .bi-k{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+#biBox .bi-k>div{border-radius:16px;padding:12px 14px;background:#F2F6F8;border:1px solid #E1E8ED;font-size:.74rem;font-weight:700;color:#5B6874}
+#biBox .bi-k>div b{display:block;font-size:1.35rem;color:#0F1E29;margin:2px 0;font-weight:900}
+#biBox .bi-k>div:first-child{background:linear-gradient(135deg,#0B3146,#1F5673);color:#CFE3EE;border:0}
+#biBox .bi-k>div:first-child b{color:#fff;font-size:1.6rem}#biBox .bi-k>div:first-child small{color:#A9C7D6}
+#biBox .bi-k>div:only-child{grid-column:1/-1}
+#biBox table thead th{font-size:.68rem;letter-spacing:.06em;color:#5B6874;background:#F4F7F9;border-bottom:0}
+#biBox table thead th:first-child{border-radius:10px 0 0 10px}#biBox table thead th:last-child{border-radius:0 10px 10px 0}
+#biBox table tbody tr:nth-child(even) td{background:#FAFCFD}
+#biBox table tbody tr td{border-bottom:1px solid #EEF2F5}
+#biBox .bi-nota{background:#F6F9FB;border-radius:12px;padding:8px 10px}
+#biBox .bi-fil label:has(#biFmt),#biBox .bi-fil label:has(#biAnio){grid-column:1/-1}
+#biBox .bi-u button{white-space:normal;line-height:1.15;font-size:.8rem}
+@media(max-width:420px){#biBox .bi-exp .btn{font-size:.7rem}}
+</style>
 </body></html>

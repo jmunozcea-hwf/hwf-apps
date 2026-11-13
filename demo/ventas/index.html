@@ -7133,7 +7133,7 @@ function confirmarNota() {
   x.onclick = () => cerrarModal(); card.insertBefore(x, card.firstChild); })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261113014543";
+const HWF_VER = "20261113015657";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer)\/[^/]*$/, "/");
   let avisado = false;
@@ -8754,5 +8754,45 @@ body.ia-izq #iaBtn{right:auto;left:14px}
   let pend = false; new MutationObserver(() => { if (pend) return; pend = true; setTimeout(() => { pend = false; aplicar(); }, 60); }).observe(document.body, { childList: true, subtree: true });
 })();
 </script>
+<style>/* patch_sinactualizar */#cxAct,#rgAct,#prAct{display:none!important}</style>
+<script>/* patch_sinactualizar: los datos se actualizan solos */
+(function () {
+  const IDS = ["cxAct", "rgAct", "prAct"]; let corriendo = false;
+  function auto() {
+    if (corriendo || document.hidden) return; corriendo = true;
+    const T = typeof toast === "function" ? toast : null; if (T) try { toast = () => {}; } catch (e) {}
+    try { IDS.forEach(id => { const b = document.getElementById(id); if (b && !b.disabled && b.isConnected) b.click(); }); } catch (e) {}
+    setTimeout(() => { if (T) try { toast = T; } catch (e) {} corriendo = false; }, 6000);
+  }
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) setTimeout(auto, 800); });
+  setInterval(auto, 5 * 60 * 1000);
+})();
+</script>
+<style>/* patch_bimoderno */
+#biBox .card{border-radius:20px;box-shadow:0 2px 14px rgba(11,49,70,.07)}
+#biBox .card>h2{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px;padding-left:12px;border-left:4px solid #3FBF7F;line-height:1.25}
+#biBox .bi-fil{background:linear-gradient(180deg,#F4F7F9,#EEF3F6);border:1px solid #E1E8ED;border-radius:16px;padding:12px;gap:10px 10px!important}
+#biBox .bi-fil label{font-size:.7rem!important;font-weight:800!important;letter-spacing:.06em;text-transform:uppercase;color:#5B6874!important;gap:5px!important}
+#biBox .bi-fil select,#biBox .bi-fil input{border-radius:12px!important;border:1px solid #D5DEE5!important;background:#fff!important;min-height:42px;font-weight:600;text-transform:none;letter-spacing:0;box-shadow:0 1px 2px rgba(11,49,70,.05)}
+#biBox .bi-u{display:flex!important;width:100%;background:#E3EAEF!important;border:0!important;border-radius:999px!important;padding:3px;gap:2px;overflow:visible!important;flex-wrap:nowrap!important}
+#biBox .bi-u button{flex:1 1 0;min-width:0;border:0!important;border-radius:999px!important;background:transparent!important;color:#4A5966!important;padding:8px 6px!important;font-size:.84rem;font-weight:700;text-transform:none;letter-spacing:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:background .15s,color .15s,box-shadow .15s}
+#biBox .bi-u button[aria-pressed="true"]{background:#fff!important;color:#0B3146!important;box-shadow:0 2px 6px rgba(11,49,70,.18)}
+#biBox .bi-exp{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px!important}
+#biBox .bi-exp .btn{min-height:44px;border-radius:12px;border:1px solid #E1E8ED;background:#fff;font-size:.78rem;font-weight:700;padding:6px 4px;line-height:1.15;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+#biBox .bi-k{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+#biBox .bi-k>div{border-radius:16px;padding:12px 14px;background:#F2F6F8;border:1px solid #E1E8ED;font-size:.74rem;font-weight:700;color:#5B6874}
+#biBox .bi-k>div b{display:block;font-size:1.35rem;color:#0F1E29;margin:2px 0;font-weight:900}
+#biBox .bi-k>div:first-child{background:linear-gradient(135deg,#0B3146,#1F5673);color:#CFE3EE;border:0}
+#biBox .bi-k>div:first-child b{color:#fff;font-size:1.6rem}#biBox .bi-k>div:first-child small{color:#A9C7D6}
+#biBox .bi-k>div:only-child{grid-column:1/-1}
+#biBox table thead th{font-size:.68rem;letter-spacing:.06em;color:#5B6874;background:#F4F7F9;border-bottom:0}
+#biBox table thead th:first-child{border-radius:10px 0 0 10px}#biBox table thead th:last-child{border-radius:0 10px 10px 0}
+#biBox table tbody tr:nth-child(even) td{background:#FAFCFD}
+#biBox table tbody tr td{border-bottom:1px solid #EEF2F5}
+#biBox .bi-nota{background:#F6F9FB;border-radius:12px;padding:8px 10px}
+#biBox .bi-fil label:has(#biFmt),#biBox .bi-fil label:has(#biAnio){grid-column:1/-1}
+#biBox .bi-u button{white-space:normal;line-height:1.15;font-size:.8rem}
+@media(max-width:420px){#biBox .bi-exp .btn{font-size:.7rem}}
+</style>
 </body>
 </html>

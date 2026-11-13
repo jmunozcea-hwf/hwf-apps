@@ -1572,11 +1572,11 @@ function pintarClientes() {
   const vistas = { sin: "Habituales sin compra", con: "Habituales con compra", bajo: "Bajo su habitual", dorm: "Dormidos +60 días", top: "Top del año", nuevos: "Nuevos " + Y, todos: "Todos" };
   const carts = [...new Set(A.clientes.map(c => c.cart))];
   $("s-cli").innerHTML = `<div class="seg" id="cliSeg" aria-label="Ver clientes">${Object.entries(vistas).map(([k, t]) => `<button type="button" data-k="${k}" aria-pressed="${k === vistaCli}">${t}</button>`).join("")}</div>
-    <div class="tools"><input id="cliQ" type="search" placeholder="Buscar cliente, fantasía, RUT o dirección" aria-label="Buscar cliente"><select id="cliV" aria-label="Cartera"><option value="">Todas las carteras</option>${carts.map(c => `<option>${esc(c)}</option>`).join("")}</select></div>
+    ${typeof cliSegHtml === "function" ? cliSegHtml() : ""}<div class="tools"><input id="cliQ" type="search" placeholder="Buscar cliente, fantasía, RUT o dirección" aria-label="Buscar cliente"><select id="cliV" aria-label="Cartera"><option value="">Todas las carteras</option>${carts.map(c => `<option>${esc(c)}</option>`).join("")}</select></div>
     <div class="card"><h2 id="cliT"></h2><div class="lst" id="cliL"></div></div>
     <div class="card"><h2>Concentración de la venta del año</h2><div class="chartbox" style="height:200px"><canvas id="cPar"></canvas></div><p class="muted" id="parTxt" style="margin:8px 0 0;font-size:.85rem"></p></div>`;
   $("cliSeg").onclick = e => { const b = e.target.closest("[data-k]"); if (!b) return; vistaCli = b.dataset.k; $("cliSeg").querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x === b)); listaCli(); };
-  $("cliQ").oninput = listaCli; $("cliV").onchange = listaCli;
+  $("cliQ").oninput = listaCli; if (typeof cliSegWire === "function") cliSegWire(); $("cliV").onchange = listaCli;
   listaCli();
   const orden = A.clientes.slice().sort((a, b) => b.ytd - a.ytd), tot = orden.reduce((s, c) => s + Math.max(0, c.ytd), 0);
   let acc = 0; const pts = orden.map((c, i) => { acc += Math.max(0, c.ytd); return { x: (i + 1) / orden.length * 100, y: acc / tot * 100 }; });
@@ -1589,7 +1589,7 @@ function pintarClientes() {
 function listaCli() {
   const q = norm($("cliQ").value), v = $("cliV").value, ct = corte();
   const corteN = ct.m * 100 + ct.d, dias = f => f ? Math.round((new Date(Y, ct.m - 1, ct.d) - new Date(Y, Math.floor(f / 100) - 1, f % 100)) / 864e5) : 999;
-  let l = A.clientes.filter(c => (!v || c.cart === v) && (!q || norm(c.nombre + " " + c.comuna + " " + cliBusca(c.ci, c.nombre)).includes(q)));
+  let l = A.clientes.filter(c => (!v || c.cart === v) && (typeof cliSegOk !== "function" || cliSegOk(c)) && (!q || norm(c.nombre + " " + c.comuna + " " + cliBusca(c.ci, c.nombre)).includes(q)));
   let t, val;
   if (vistaCli === "sin") { l = l.filter(c => c.hab > 0 && c.mes <= 0).sort((a, b) => b.hab - a.hab); t = `${l.length} clientes · ${mm(l.reduce((s, c) => s + c.hab, 0))} de compra habitual`; val = c => mm(c.hab) + "<small>habitual</small>"; }
   else if (vistaCli === "con") { l = l.filter(c => c.hab > 0 && c.mes > 0).sort((a, b) => b.mes - a.mes); t = `${l.length} clientes habituales ya compraron · ${mm(l.reduce((s, c) => s + c.mes, 0))} en el mes`; val = c => mm(c.mes) + `<small>${Math.round(c.mes / c.hab * 100)}% de ${mm(c.hab)}</small>`; }
@@ -5194,7 +5194,7 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261113014543";
+const HWF_VER = "20261113015657";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer)\/[^/]*$/, "/");
   let avisado = false;
@@ -6749,5 +6749,114 @@ try { if (typeof navContadores === "function") setTimeout(navContadores, 50); } 
   let pend = false; new MutationObserver(() => { if (pend) return; pend = true; setTimeout(() => { pend = false; aplicar(); }, 60); }).observe(document.body, { childList: true, subtree: true });
 })();
 </script>
+<script>/* patch_clifiltros: tipo de cliente y segmento ABC */
+let cliTipo = "", cliAbc = "";
+const CLI_TIPOS = [["vet", "🩺 Veterinarias y clínicas", /veterinari|clinica|\bvet\b|hospital/], ["pelu", "✂️ Peluquerías caninas", /peluquer|groom|estetica/],
+  ["agri", "🌾 Agrícolas y forrajerías", /agricol|forraj|\bagro|semiller|ferreter|campo/], ["pet", "🐾 Pet shops y mascoterías", /pet ?shop|petstore|mascot|\bpets?\b|animal|perr|gat[oa]s?\b|huella/],
+  ["alm", "🛒 Almacenes y minimarkets", /almacen|minimarket|market|botiller|supermerc|despensa|bazar/], ["dist", "🚚 Distribuidoras", /distribu|mayorist/],
+  ["cri", "🏠 Criaderos, hoteles y guarderías", /criadero|hotel|guarderia|canil|kennel|refugio/],
+  ["emp", "🏢 Otras empresas", /\b(spa|ltda|limitada|eirl|s\.?a\.?|sociedad|comercial|inversiones|empresa|servicios)\b/], ["per", "👤 Personas", /./]];
+function cliTipoDe(c) { if (c._tipo) return c._tipo; const n = String(c.nombre || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase(); return c._tipo = (CLI_TIPOS.find(t => t[2].test(n)) || CLI_TIPOS[CLI_TIPOS.length - 1])[0]; }
+function cliAbcDe(c) { if (cliAbcDe.n !== A.clientes.length) { const o = A.clientes.slice().sort((a, b) => b.ytd - a.ytd), tot = o.reduce((s, x) => s + Math.max(0, x.ytd), 0); let acc = 0;
+    o.forEach(x => { x._abc = x.ytd <= 0 ? "" : acc < tot * .8 ? "A" : acc < tot * .95 ? "B" : "C"; acc += Math.max(0, x.ytd); }); cliAbcDe.n = A.clientes.length; } return c._abc; }
+const cliSegOk = c => (!cliTipo || cliTipoDe(c) === cliTipo) && (!cliAbc || cliAbcDe(c) === cliAbc);
+function cliSegHtml() {
+  const n = {}, m = {}; A.clientes.forEach(c => { n[cliTipoDe(c)] = (n[cliTipoDe(c)] || 0) + 1; const a = cliAbcDe(c); if (a) m[a] = (m[a] || 0) + 1; });
+  return `<div class="seg" id="cliTipoS" aria-label="Tipo de cliente"><button type="button" data-t="" aria-pressed="${!cliTipo}">Todos los tipos (${A.clientes.length})</button>${CLI_TIPOS.filter(t => n[t[0]]).map(t => `<button type="button" data-t="${t[0]}" aria-pressed="${cliTipo === t[0]}">${t[1]} (${n[t[0]]})</button>`).join("")}</div>
+    <div class="seg" id="cliAbcS" aria-label="Segmento por venta del año"><button type="button" data-a="" aria-pressed="${!cliAbc}">Todos los segmentos</button>${[["A", "⭐ A · 80% de la venta"], ["B", "B · siguiente 15%"], ["C", "C · último 5%"]].map(([k, t]) => `<button type="button" data-a="${k}" aria-pressed="${cliAbc === k}">${t} (${m[k] || 0})</button>`).join("")}</div>`;
+}
+function cliSegWire() {
+  const g = (id, at, set) => { const e = document.getElementById(id); if (e) e.onclick = ev => { const b = ev.target.closest("[data-" + at + "]"); if (!b) return; set(b.dataset[at]); e.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x === b)); listaCli(); }; };
+  g("cliTipoS", "t", v => cliTipo = v); g("cliAbcS", "a", v => cliAbc = v);
+}
+</script>
+<script>/* patch_npalertas: NP Defontana con alertas, sin aprobaciones */
+const NP_AL = Object.assign({}, typeof NA_AL !== "undefined" ? NA_AL : {}, { atras: ["⏳", "Atrasada", "med"], precio: ["🏷️", "Bajo su último precio", "med"] });
+let npVend = "", npBusca = "";
+function npAlertas(q) {
+  const lin = q.lin.filter(x => x.q > 0), al = []; let cv = 0, cc = 0; const bajo = [], pre = [];
+  lin.forEach(x => { const inf = npInfo(x.d), v = x.q * x.pu; if (inf && inf.cu > 0) { cc += x.q * inf.cu; cv += v; if (x.pu > 0 && x.pu < inf.cu) bajo.push(x); }
+    if (inf && inf.pu > 0 && x.pu > 0 && x.pu < inf.pu * .9) pre.push(x); });
+  const mg = cv > 0 ? 1 - cc / cv : null, MIN = typeof NA_DROP_MIN !== "undefined" ? NA_DROP_MIN : 100000, MG = typeof NA_MG_MIN !== "undefined" ? NA_MG_MIN : .15;
+  if (q.t < MIN) al.push(["drop", `${mm(q.t)} neto · mínimo sugerido ${mm(MIN)}`]);
+  if (mg != null && mg < MG) al.push(["margen", `margen ${Math.round(mg * 100)}% · objetivo ${Math.round(MG * 100)}% o más`]);
+  if (bajo.length) al.push(["costo", bajo.slice(0, 3).map(x => tc(x.d)).join(", ") + (bajo.length > 3 ? ` y ${bajo.length - 3} más` : "") + " bajo su costo"]);
+  if (pre.length) al.push(["precio", pre.slice(0, 3).map(x => tc(x.d)).join(", ") + " más de 10% bajo el último precio facturado"]);
+  try { const dd = (typeof cxTodos === "function" ? cxTodos() : []).filter(d => d.saldo > 0 && d.dias > 0 && norm(d.cli || "") === norm(q.cl || ""));
+    if (dd.length) al.push(["deuda", `${mm(dd.reduce((s, d) => s + d.saldo, 0))} vencido · hasta ${Math.max(...dd.map(d => d.dias))} días`]); } catch (e) {}
+  const dias = npDias(q.f); if (dias > 7) al.push(["atras", `pendiente hace ${dias} días`]);
+  const c = typeof naCliMap === "function" ? naCliMap()[norm(q.cl || "")] : null;
+  if (!c) al.push(["nuevo", "no tiene compras anteriores registradas"]);
+  else if (c.hab > 0 && q.t < c.hab * .5) al.push(["hab", `${mm(q.t)} vs ${mm(c.hab)} habitual al mes`]);
+  return { al, mg };
+}
+const npSev = r => r.al.some(a => NP_AL[a[0]][2] === "mal") ? "mal" : r.al.some(a => NP_AL[a[0]][2] === "med") ? "med" : "ok";
+const npBadges = r => r.al.length ? r.al.map(a => `<span class="na-b ${NP_AL[a[0]][2]}">${NP_AL[a[0]][0]} ${NP_AL[a[0]][1]}</span>`).join("") : '<span class="na-b ok">✓ Sin alertas</span>';
+pintarCots = function () {
+  const T = npLista().filter(q => q.est !== "rec"), carts = [...new Set(T.map(q => q.cart))].sort(), qq = norm(npBusca).split(" ").filter(Boolean);
+  const L = T.filter(q => (!npVend || q.cart === npVend) && qq.every(w => norm([q.n, q.cl, q.vd, q.cart].join(" ")).includes(w)));
+  const R = new Map(L.map(q => [q, npAlertas(q)])), cuenta = {}; R.forEach(r => r.al.forEach(a => cuenta[a[0]] = (cuenta[a[0]] || 0) + 1));
+  const SV = { mal: 0, med: 1, ok: 2 }, vis = L.slice().sort((a, b) => npMesK(b.f).localeCompare(npMesK(a.f)) || SV[npSev(R.get(a))] - SV[npSev(R.get(b))] || b.t - a.t);
+  const tot = L.reduce((s, q) => s + q.t, 0), mgs = L.filter(q => R.get(q).mg != null), mgP = mgs.length ? mgs.reduce((s, q) => s + R.get(q).mg * q.t, 0) / Math.max(1, mgs.reduce((s, q) => s + q.t, 0)) : null;
+  $("masBody").innerHTML = `<div class="card"><h2>Notas de pedido Defontana <span class="muted">pendientes de facturar</span></h2>
+      <div class="na-k"><div><span>Notas</span><b class="num">${L.length}</b></div><div><span>Neto total</span><b class="num">${mm(tot)}</b></div>
+        <div><span>Drop size promedio</span><b class="num">${mm(L.length ? tot / L.length : 0)}</b></div><div><span>Margen promedio</span><b class="num">${mgP == null ? "—" : Math.round(mgP * 100) + "%"}</b></div></div>
+      ${Object.keys(cuenta).length ? `<div class="na-al">${Object.keys(NP_AL).filter(k => cuenta[k]).map(k => `<span class="na-b ${NP_AL[k][2]}">${NP_AL[k][0]} ${NP_AL[k][1]} · ${cuenta[k]}</span>`).join("")}</div>` : (L.length ? '<div class="na-al"><span class="na-b ok">✓ Todas las notas sin alertas</span></div>' : "")}
+      ${npBarrasMes(L)}
+      <div class="np-top" style="margin-top:10px"><button class="btn" type="button" id="npXls">Exportar a Excel</button></div>
+      <label class="np-chk"><input type="checkbox" id="npDrv" ${npDrive() ? "checked" : ""}> Al descargar, subir también a Google Drive</label></div>
+    <input class="na-busca" id="npQ" type="search" placeholder="Buscar cliente o N° de nota" value="${esc(npBusca)}">
+    ${carts.length > 1 ? `<div class="seg" id="npSegV" aria-label="Vendedor"><button type="button" data-v="" aria-pressed="${!npVend}">Todos los vendedores</button>${carts.map(v => `<button type="button" data-v="${esc(v)}" aria-pressed="${npVend === v}">${esc(v.split(" ")[0])}</button>`).join("")}</div>` : ""}
+    <div>${vis.length ? npGrupos(vis, x => { const r = R.get(x); return `<button type="button" class="na-n ${npSev(r)}" data-np="${esc(x.n)}"><span class="na-f"><b>${esc(tc(x.cl))}</b><b class="num">${mm(x.t)}</b></span>
+        <small>N° ${esc(x.n)} · ${esc(x.f)} (${npDias(x.f)} días) · ${esc(x.cart)} · ${x.lin.filter(l => l.q > 0).length} productos${r.mg != null ? ` · margen ${Math.round(r.mg * 100)}%` : ""}</small>
+        <span class="na-al">${npBadges(r)}</span></button>`; }) : `<div class="card"><p class="muted" style="margin:0">No hay notas de pedido pendientes en esta vista.</p></div>`}</div>`;
+  $("npXls").onclick = () => npExportar(L);
+  $("npDrv").onchange = e => { store.set("adm-drive", e.target.checked); toast(e.target.checked ? "Los Excel se guardarán en Descargas y se abrirá Google Drive para subirlos." : "Los Excel se guardarán solo en Descargas."); };
+  $("npQ").oninput = e => { npBusca = e.target.value; clearTimeout(pintarCots.t); pintarCots.t = setTimeout(() => { pintarCots(); const i = $("npQ"); i.focus(); i.setSelectionRange(i.value.length, i.value.length); }, 250); };
+  if ($("npSegV")) $("npSegV").onclick = e => { const b = e.target.closest("[data-v]"); if (b) { npVend = b.dataset.v; pintarCots(); } };
+  $("masBody").querySelectorAll("[data-np]").forEach(b => b.onclick = () => npVer(b.dataset.np));
+};
+function npVer(n) {
+  const q = npLista().find(x => x.n === n); if (!q) return;
+  const r = npAlertas(q), lin = q.lin.filter(x => x.q > 0);
+  $("masBody").innerHTML = `<button class="btn" type="button" id="npVolver" style="margin-bottom:10px">← Volver a las notas</button>
+    <div class="card"><h2>${esc(tc(q.cl))} <span class="muted">N° ${esc(q.n)}</span></h2>
+      <p class="muted" style="margin:0 0 6px">${esc(q.f)} (${npDias(q.f)} días) · ${esc(q.vd || q.cart)}</p>
+      <div class="na-k"><div><span>Neto</span><b class="num">${mm(q.t)}</b></div><div><span>Margen</span><b class="num">${r.mg == null ? "—" : Math.round(r.mg * 100) + "%"}</b></div></div>
+      <div class="na-res">${r.al.length ? r.al.map(a => `<div class="${NP_AL[a[0]][2]}"><i>${NP_AL[a[0]][0]}</i><div><b>${NP_AL[a[0]][1]}</b><small>${esc(a[1])}</small></div></div>`).join("") : '<div class="inf"><i>✅</i><div><b>Sin alertas</b><small>Monto, margen, precios y cliente dentro de lo normal.</small></div></div>'}</div></div>
+    <div class="card"><h2>Productos <span class="muted">${lin.length}</span></h2><div class="na-pl">
+      ${lin.map(x => { const inf = npInfo(x.d), v = x.q * x.pu, m = inf && inf.cu > 0 && v > 0 ? 1 - x.q * inf.cu / v : null, MG = typeof NA_MG_MIN !== "undefined" ? NA_MG_MIN : .15;
+        return `<div><span><b>${esc(tc(x.d))}</b><small>${x.q} × ${mm(x.pu)}${inf && inf.pu ? ` · último precio ${mm(inf.pu)}` : ""}${m == null ? "" : ` · <span class="${m < MG ? "bajo" : ""}">margen ${Math.round(m * 100)}%</span>`}</small></span><b class="num">${mm(v)}</b></div>`; }).join("")}
+    </div></div>`;
+  $("npVolver").onclick = () => { pintarCots(); window.scrollTo({ top: 0 }); };
+  window.scrollTo({ top: 0 });
+}
+</script>
+<style>/* patch_bimoderno */
+#biBox .card{border-radius:20px;box-shadow:0 2px 14px rgba(11,49,70,.07)}
+#biBox .card>h2{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px;padding-left:12px;border-left:4px solid #3FBF7F;line-height:1.25}
+#biBox .bi-fil{background:linear-gradient(180deg,#F4F7F9,#EEF3F6);border:1px solid #E1E8ED;border-radius:16px;padding:12px;gap:10px 10px!important}
+#biBox .bi-fil label{font-size:.7rem!important;font-weight:800!important;letter-spacing:.06em;text-transform:uppercase;color:#5B6874!important;gap:5px!important}
+#biBox .bi-fil select,#biBox .bi-fil input{border-radius:12px!important;border:1px solid #D5DEE5!important;background:#fff!important;min-height:42px;font-weight:600;text-transform:none;letter-spacing:0;box-shadow:0 1px 2px rgba(11,49,70,.05)}
+#biBox .bi-u{display:flex!important;width:100%;background:#E3EAEF!important;border:0!important;border-radius:999px!important;padding:3px;gap:2px;overflow:visible!important;flex-wrap:nowrap!important}
+#biBox .bi-u button{flex:1 1 0;min-width:0;border:0!important;border-radius:999px!important;background:transparent!important;color:#4A5966!important;padding:8px 6px!important;font-size:.84rem;font-weight:700;text-transform:none;letter-spacing:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:background .15s,color .15s,box-shadow .15s}
+#biBox .bi-u button[aria-pressed="true"]{background:#fff!important;color:#0B3146!important;box-shadow:0 2px 6px rgba(11,49,70,.18)}
+#biBox .bi-exp{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px!important}
+#biBox .bi-exp .btn{min-height:44px;border-radius:12px;border:1px solid #E1E8ED;background:#fff;font-size:.78rem;font-weight:700;padding:6px 4px;line-height:1.15;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+#biBox .bi-k{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+#biBox .bi-k>div{border-radius:16px;padding:12px 14px;background:#F2F6F8;border:1px solid #E1E8ED;font-size:.74rem;font-weight:700;color:#5B6874}
+#biBox .bi-k>div b{display:block;font-size:1.35rem;color:#0F1E29;margin:2px 0;font-weight:900}
+#biBox .bi-k>div:first-child{background:linear-gradient(135deg,#0B3146,#1F5673);color:#CFE3EE;border:0}
+#biBox .bi-k>div:first-child b{color:#fff;font-size:1.6rem}#biBox .bi-k>div:first-child small{color:#A9C7D6}
+#biBox .bi-k>div:only-child{grid-column:1/-1}
+#biBox table thead th{font-size:.68rem;letter-spacing:.06em;color:#5B6874;background:#F4F7F9;border-bottom:0}
+#biBox table thead th:first-child{border-radius:10px 0 0 10px}#biBox table thead th:last-child{border-radius:0 10px 10px 0}
+#biBox table tbody tr:nth-child(even) td{background:#FAFCFD}
+#biBox table tbody tr td{border-bottom:1px solid #EEF2F5}
+#biBox .bi-nota{background:#F6F9FB;border-radius:12px;padding:8px 10px}
+#biBox .bi-fil label:has(#biFmt),#biBox .bi-fil label:has(#biAnio){grid-column:1/-1}
+#biBox .bi-u button{white-space:normal;line-height:1.15;font-size:.8rem}
+@media(max-width:420px){#biBox .bi-exp .btn{font-size:.7rem}}
+</style>
 </body>
 </html>

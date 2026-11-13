@@ -234,10 +234,10 @@ function pintarResumen() { const X = misParadas(), E = estados(), P = perfil(), 
 function arrancar() { const P = perfil(); if (!P || !cfg()) return puerta(); if (!P.veh && P.fecha === hoy()) return puerta("veh"); if (P.fecha !== hoy()) { const J = jornada(); if (J && J.activa) jornadaCerrar({ obs: "Cerrada automáticamente al día siguiente" }); return puerta(); }
   pintarCola(); ir(SEC); gpsIniciar(); pantallaEncendida(); bajarRuta(true).then(n => { if (n) pintar(SEC); }); enviarCola();
   /* limpia estados de días anteriores */ try { Object.keys(localStorage).filter(k => /^hwf-cho:est_\d{4}-\d{2}-\d{2}$/.test(k) && k !== "hwf-cho:est_" + hoy()).forEach(k => localStorage.removeItem(k)); } catch (e) {} }
-if (!cfg() || !perfil()) puerta(); else arrancar();
+puerta(); /* patch_choferingreso: siempre la portada de ingreso */
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 </script><script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261113014543";
+const HWF_VER = "20261113015657";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer)\/[^/]*$/, "/");
   let avisado = false;
@@ -595,6 +595,20 @@ const HWF_VER = "20261113014543";
   }
   aplicar(); setTimeout(aplicar, 500); setTimeout(aplicar, 1600);
   let pend = false; new MutationObserver(() => { if (pend) return; pend = true; setTimeout(() => { pend = false; aplicar(); }, 60); }).observe(document.body, { childList: true, subtree: true });
+})();
+</script>
+<style>/* patch_sinactualizar */#bR{display:none!important}</style>
+<script>/* patch_sinactualizar: los datos se actualizan solos */
+(function () {
+  const IDS = ["bR"]; let corriendo = false;
+  function auto() {
+    if (corriendo || document.hidden) return; corriendo = true;
+    const T = typeof toast === "function" ? toast : null; if (T) try { toast = () => {}; } catch (e) {}
+    try { IDS.forEach(id => { const b = document.getElementById(id); if (b && !b.disabled && b.isConnected) b.click(); }); } catch (e) {}
+    setTimeout(() => { if (T) try { toast = T; } catch (e) {} corriendo = false; }, 6000);
+  }
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) setTimeout(auto, 800); });
+  setInterval(auto, 5 * 60 * 1000);
 })();
 </script>
 </body></html>

@@ -2269,7 +2269,7 @@ const stAbrev = n => ST_ABR.reduce((s, [r, t]) => s.replace(r, t), String(n || "
 try { if ($("sStock") && !$("sStock").hidden) pintarStock(); } catch (e) {}
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261113014543";
+const HWF_VER = "20261113015657";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer)\/[^/]*$/, "/");
   let avisado = false;
@@ -2872,6 +2872,69 @@ body.ia-izq #iaBtn{right:auto;left:14px}
   }
   aplicar(); setTimeout(aplicar, 500); setTimeout(aplicar, 1600);
   let pend = false; new MutationObserver(() => { if (pend) return; pend = true; setTimeout(() => { pend = false; aplicar(); }, 60); }).observe(document.body, { childList: true, subtree: true });
+})();
+</script>
+<style>/* patch_sinactualizar */#admAct,#cvAct,#cxAct,#prAct{display:none!important}</style>
+<script>/* patch_sinactualizar: los datos se actualizan solos */
+(function () {
+  const IDS = ["admAct", "cvAct", "cxAct", "prAct"]; let corriendo = false;
+  function auto() {
+    if (corriendo || document.hidden) return; corriendo = true;
+    const T = typeof toast === "function" ? toast : null; if (T) try { toast = () => {}; } catch (e) {}
+    try { IDS.forEach(id => { const b = document.getElementById(id); if (b && !b.disabled && b.isConnected) b.click(); }); } catch (e) {}
+    setTimeout(() => { if (T) try { toast = T; } catch (e) {} corriendo = false; }, 6000);
+  }
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) setTimeout(auto, 800); });
+  setInterval(auto, 5 * 60 * 1000);
+})();
+</script>
+<style>/* patch_sidenavlog: sidenav lateral en LOGÍSTICA */
+body.log-sn nav.bn#nav,body.log-sn #tNav{display:none!important}
+body.log-sn main{padding-bottom:0!important}
+#snBtnLog{position:fixed;left:14px;bottom:calc(16px + env(safe-area-inset-bottom));z-index:9500;width:56px;height:56px;border-radius:50%;border:0;background:#0B3146;color:#fff;font-size:1.5rem;
+  box-shadow:0 4px 16px rgba(11,49,70,.4);cursor:pointer;display:grid;place-items:center}
+#snBtnLog small{position:absolute;bottom:-18px;left:50%;transform:translateX(-50%);font-size:.66rem;font-weight:800;color:#0B3146;white-space:nowrap;background:rgba(255,255,255,.9);border-radius:6px;padding:0 4px}
+#snVeloLog{position:fixed;inset:0;z-index:9600;background:rgba(10,20,30,.35);opacity:0;pointer-events:none;transition:opacity .2s}#snVeloLog.on{opacity:1;pointer-events:auto}
+#snPanLog{position:fixed;top:0;bottom:0;left:0;z-index:9700;width:min(290px,84vw);background:var(--surface,#fff);box-shadow:4px 0 24px rgba(0,0,0,.2);transform:translateX(-105%);transition:transform .22s ease;overflow-y:auto;overscroll-behavior:contain;padding:8px 8px 24px}
+#snPanLog.on{transform:none}
+#snPanLog .sn-top{display:flex;align-items:center;justify-content:space-between;padding:4px 8px 8px;border-bottom:1px solid var(--line,#DAE1E7);margin-bottom:6px}
+#snPanLog .sn-top b{font-size:1.05rem;color:#0B3146}#snPanLog .sn-x{border:0;background:none;font-size:1.5rem;cursor:pointer;color:var(--muted,#5B6874)}
+#snPanLog button.sn-i{display:flex;align-items:center;gap:12px;width:100%;border:0;background:none;font:inherit;font-weight:700;font-size:.95rem;color:var(--ink,#0F1E29);padding:11px 10px;border-radius:12px;cursor:pointer;text-align:left}
+#snPanLog button.sn-i:hover{background:var(--sunk,#EEF2F5)}#snPanLog button.sn-i[aria-current="true"]{background:#E6EEF3;color:#0B3146}
+#snPanLog .sn-e{font-size:0;width:34px;min-width:34px;height:34px;flex:0 0 34px}#snPanLog .sn-e svg{width:34px;height:34px;display:block}
+#snPanLog .sn-g{font-size:.7rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted,#5B6874);padding:12px 10px 4px;border-top:1px solid var(--line,#E3E9EE);margin-top:6px}
+#snPanLog .sn-g.sn-g0{border-top:0;margin-top:0;padding-top:4px}
+@media print{#snBtnLog,#snVeloLog,#snPanLog{display:none!important}}
+</style>
+<script>/* patch_sidenavlog: sidenav lateral para LOGÍSTICA y TIENDA */
+(function () {
+  const LOG = document.querySelector('nav.bn#nav'), TND = document.getElementById("tNav");
+  const navOrig = LOG || TND; if (!navOrig || typeof ir !== "function" || document.getElementById("snBtnLog")) return;
+  const TIT = LOG ? "LOGÍSTICA HWF" : "TIENDA HWF";
+  const GR = LOG ? { dash: "Operación", abast: "Compras", inv: "BI" } : { inicio: "Tienda", stock: "Productos", plan: "Resultados", guia: "Vender mejor", adm: "Administración" };
+  document.body.classList.add("log-sn");
+  const btn = document.createElement("button"); btn.id = "snBtnLog"; btn.type = "button"; btn.setAttribute("aria-label", "Abrir menú"); btn.innerHTML = "☰<small>Menú</small>";
+  const velo = document.createElement("div"); velo.id = "snVeloLog";
+  const pan = document.createElement("nav"); pan.id = "snPanLog"; pan.setAttribute("aria-label", "Secciones");
+  const activo = o => /^(true|page)$/.test(o.getAttribute("aria-current") || "") || o.getAttribute("aria-pressed") === "true" || /(^|\s)(on|act)(\s|$)/.test(o.className);
+  function construir() {
+    pan.innerHTML = `<div class="sn-top"><b>${TIT}</b><button type="button" class="sn-x" aria-label="Cerrar menú">✕</button></div>`;
+    pan.querySelector(".sn-x").onclick = cerrar;
+    let ng = 0;
+    [...navOrig.querySelectorAll(":scope > button[data-s]")].filter(o => !o.hidden && o.style.display !== "none").forEach(orig => {
+      if (GR[orig.dataset.s] && !pan.querySelector(`[data-g="${orig.dataset.s}"]`)) { const g = document.createElement("div"); g.className = "sn-g" + (ng++ ? "" : " sn-g0"); g.dataset.g = orig.dataset.s; g.textContent = GR[orig.dataset.s]; pan.appendChild(g); }
+      const b = document.createElement("button"); b.type = "button"; b.className = "sn-i"; b.dataset.s = orig.dataset.s; b._orig = orig;
+      const ic = orig.querySelector(".ic") || orig.querySelector("span"), e = document.createElement("span"); e.className = "sn-e";
+      if (ic && ic.querySelector("svg")) { let h = ic.innerHTML; [...ic.querySelectorAll("[id]")].forEach(x => { const nu = x.id + "-sn"; h = h.split('id="' + x.id + '"').join('id="' + nu + '"').split("#" + x.id + ")").join("#" + nu + ")"); }); e.innerHTML = h; } else { e.textContent = ic ? ic.textContent.trim() : "•"; e.style.fontSize = "1.45rem"; e.style.display = "grid"; e.style.placeItems = "center"; }
+      const lbl = document.createElement("span"); lbl.textContent = ((orig.textContent || "").replace(ic ? ic.textContent : "", "")).replace(/\s+/g, " ").trim();
+      b.setAttribute("aria-current", String(activo(orig))); b.append(e, lbl); pan.appendChild(b); });
+  }
+  document.body.append(btn, velo, pan);
+  function abrir() { construir(); pan.classList.add("on"); velo.classList.add("on"); btn.setAttribute("aria-expanded", "true"); }
+  function cerrar() { pan.classList.remove("on"); velo.classList.remove("on"); btn.setAttribute("aria-expanded", "false"); }
+  btn.onclick = abrir; velo.onclick = cerrar;
+  document.addEventListener("keydown", e => { if (e.key === "Escape") cerrar(); });
+  pan.onclick = e => { const b = e.target.closest(".sn-i[data-s]"); if (!b) return; cerrar(); const o = b._orig; if (o && o.isConnected) o.click(); else ir(b.dataset.s); window.scrollTo({ top: 0 }); };
 })();
 </script>
 </body></html>
