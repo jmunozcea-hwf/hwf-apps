@@ -402,7 +402,7 @@ if (!cfg() || !DATA()) pantallaConexion(); else { arrancar(); bajar(true).then(n
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261113012518";
+const HWF_VER = "20261113012644";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer)\/[^/]*$/, "/");
   let avisado = false;
@@ -1480,6 +1480,76 @@ body.ia-izq #iaBtn{right:auto;left:14px}
   $q.addEventListener("input", () => { $q.style.height = "auto"; $q.style.height = Math.min(140, $q.scrollHeight) + "px"; });
   document.addEventListener("keydown", e => { if (e.key === "Escape" && pan.classList.contains("on")) cerrar(); });
   window.hwfAsistente = { contexto };   /* para pruebas */
+})();
+</script>
+<style>/* patch_sidenavlog: sidenav lateral en LOGÍSTICA */
+body.log-sn nav.bn#nav{display:none!important}
+body.log-sn main{padding-bottom:0!important}
+#snBtnLog{position:fixed;left:14px;bottom:calc(16px + env(safe-area-inset-bottom));z-index:9500;width:56px;height:56px;border-radius:50%;border:0;background:#0B3146;color:#fff;font-size:1.5rem;
+  box-shadow:0 4px 16px rgba(11,49,70,.4);cursor:pointer;display:grid;place-items:center}
+#snBtnLog small{position:absolute;bottom:-18px;left:50%;transform:translateX(-50%);font-size:.66rem;font-weight:800;color:#0B3146;white-space:nowrap;background:rgba(255,255,255,.9);border-radius:6px;padding:0 4px}
+#snVeloLog{position:fixed;inset:0;z-index:9600;background:rgba(10,20,30,.35);opacity:0;pointer-events:none;transition:opacity .2s}#snVeloLog.on{opacity:1;pointer-events:auto}
+#snPanLog{position:fixed;top:0;bottom:0;left:0;z-index:9700;width:min(290px,84vw);background:var(--surface,#fff);box-shadow:4px 0 24px rgba(0,0,0,.2);transform:translateX(-105%);transition:transform .22s ease;overflow-y:auto;overscroll-behavior:contain;padding:8px 8px 24px}
+#snPanLog.on{transform:none}
+#snPanLog .sn-top{display:flex;align-items:center;justify-content:space-between;padding:4px 8px 8px;border-bottom:1px solid var(--line,#DAE1E7);margin-bottom:6px}
+#snPanLog .sn-top b{font-size:1.05rem;color:#0B3146}#snPanLog .sn-x{border:0;background:none;font-size:1.5rem;cursor:pointer;color:var(--muted,#5B6874)}
+#snPanLog button.sn-i{display:flex;align-items:center;gap:12px;width:100%;border:0;background:none;font:inherit;font-weight:700;font-size:.95rem;color:var(--ink,#0F1E29);padding:11px 10px;border-radius:12px;cursor:pointer;text-align:left}
+#snPanLog button.sn-i:hover{background:var(--sunk,#EEF2F5)}#snPanLog button.sn-i[aria-current="true"]{background:#E6EEF3;color:#0B3146}
+#snPanLog .sn-e{font-size:0;width:34px;min-width:34px;height:34px;flex:0 0 34px}#snPanLog .sn-e svg{width:34px;height:34px;display:block}
+#snPanLog .sn-g{font-size:.7rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted,#5B6874);padding:12px 10px 4px;border-top:1px solid var(--line,#E3E9EE);margin-top:6px}
+#snPanLog .sn-g.sn-g0{border-top:0;margin-top:0;padding-top:4px}
+@media print{#snBtnLog,#snVeloLog,#snPanLog{display:none!important}}
+</style>
+<script>/* patch_sidenavlog: sidenav lateral para LOGÍSTICA */
+(function () {
+  if (!document.querySelector('#nav[class~="bn"][id="nav"]') || typeof ir !== "function") return;
+  if (document.getElementById("snBtnLog")) return;
+  document.body.classList.add("log-sn");
+  /* copiar los botones del #nav original al panel */
+  const navOrig = document.getElementById("nav");
+  const items = [...navOrig.querySelectorAll(":scope > button[data-s]")];
+
+  const btn = document.createElement("button"); btn.id = "snBtnLog"; btn.type = "button"; btn.setAttribute("aria-label", "Abrir menú"); btn.innerHTML = "☰<small>Menú</small>";
+  const velo = document.createElement("div"); velo.id = "snVeloLog";
+  const pan = document.createElement("nav"); pan.id = "snPanLog"; pan.setAttribute("aria-label", "Secciones");
+
+  pan.innerHTML = '<div class="sn-top"><b>LOGÍSTICA HWF</b><button type="button" class="sn-x" id="snXLog" aria-label="Cerrar menú">✕</button></div>';
+
+  items.forEach(orig => {
+    const b = document.createElement("button"); b.type = "button"; b.className = "sn-i"; b.dataset.s = orig.dataset.s;
+    if (orig.dataset.biu) b.dataset.biu = orig.dataset.biu;
+    /* icono: clonar el span.ic que tiene el SVG */
+    const ic = orig.querySelector(".ic"); const e = document.createElement("span"); e.className = "sn-e";
+    if (ic) e.innerHTML = ic.innerHTML; else e.textContent = "•";
+    const lbl = document.createElement("span"); lbl.textContent = orig.textContent.replace(/\s+/g, " ").trim();
+    b.appendChild(e); b.appendChild(lbl);
+    pan.appendChild(b);
+  });
+
+  document.body.appendChild(btn); document.body.appendChild(velo); document.body.appendChild(pan);
+
+  function abrir() { pan.classList.add("on"); velo.classList.add("on"); btn.setAttribute("aria-expanded", "true"); }
+  function cerrar() { pan.classList.remove("on"); velo.classList.remove("on"); btn.setAttribute("aria-expanded", "false"); }
+  btn.onclick = abrir; velo.onclick = cerrar; pan.querySelector("#snXLog").onclick = cerrar;
+  pan.addEventListener("keydown", e => { if (e.key === "Escape") cerrar(); });
+
+  pan.onclick = e => {
+    const b = e.target.closest(".sn-i[data-s]");
+    if (!b) return;
+    cerrar();
+    ir(b.dataset.s);
+  };
+
+  /* marcar ítem activo */
+  function marcar() {
+    const s = typeof SEC !== "undefined" ? SEC : null;
+    pan.querySelectorAll(".sn-i[data-s]").forEach(b => b.setAttribute("aria-current", String(b.dataset.s === s)));
+  }
+  /* interceptar ir() para marcar */
+  const _ir = ir;
+  ir = function(s) { const r = _ir.apply(this, arguments); marcar(); return r; };
+  marcar();
+  /* mantener sincronizado también el #nav original para patch_bi que lo usa */
 })();
 </script>
 </body></html>
