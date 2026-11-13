@@ -7174,7 +7174,7 @@ function confirmarNota() {
   x.onclick = () => cerrarModal(); card.insertBefore(x, card.firstChild); })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261113022908";
+const HWF_VER = "20261113023458";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -8834,66 +8834,6 @@ function prUnifV(l) {
   let pend = false; new MutationObserver(() => { if (pend) return; pend = true; setTimeout(() => { pend = false; aplicar(); }, 60); }).observe(document.body, { childList: true, subtree: true });
 })();
 </script>
-<style>/* patch_vendedor */
-#btnSalir,.db-sc{display:none!important}
-.auth-body .seg[role=tablist],#fIn,#fReg,#offMsg{display:none!important}
-.pv-in{display:grid;gap:10px}.pv-in label{font-weight:800;font-size:.9rem}
-.pv-in input{font:inherit;font-size:1.1rem;padding:14px;border:1.5px solid var(--line,#DAE1E7);border-radius:14px}
-.pv-in .pv-ok{background:#1C7A4E;color:#fff;border:0;border-radius:14px;padding:15px;font:inherit;font-weight:800;font-size:1.05rem;cursor:pointer}
-.pv-in .pv-e{color:#B42318;font-size:.88rem;min-height:1em}.pv-in small{color:var(--muted,#5B6874)}
-.pv-emp{background:#fff;border-radius:16px;padding:14px;display:grid;gap:10px;box-shadow:0 2px 10px rgba(11,49,70,.08)}
-.pv-emp h3{margin:0;font-size:1.05rem}.pv-emp .pv-g{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
-.pv-emp .pv-g>div{background:var(--sunk,#EEF2F5);border-radius:12px;padding:10px}.pv-emp .pv-g span{display:block;font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--muted,#5B6874)}
-.pv-emp .pv-g b{font-size:1.2rem}.pv-emp .pv-bar{height:10px;border-radius:6px;background:#E3EAEF;overflow:hidden;display:flex}.pv-emp .pv-bar i{display:block;height:100%}
-</style>
-<script>/* patch_vendedor: ingreso por nombre, resumen de la empresa y solo los datos propios */
-(function () {
-  if (typeof mostrarAcceso !== "function" || typeof CRM_BASE === "undefined") return;
-  const nrm = s => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
-  const VENDS = () => (CRM_BASE.metas || []).map(m => m.vendedor).filter(v => v && !/tienda|gen[eé]rico/i.test(v));
-  const esAdmin = () => !!(SES && SES.vendedor && SES.vendedor.admin);
-  const ULT = "hwf-pv-ultimo";
-  mostrarAcceso = function () {
-    document.body.classList.add("locked"); $("auth").hidden = false;
-    let ult = ""; try { ult = localStorage.getItem(ULT) || ""; } catch (e) {}
-    const q = $("quien");
-    q.innerHTML = `<div class="pv-in"><label for="pvNom">Tu nombre</label>
-      <input id="pvNom" autocomplete="name" autocapitalize="words" placeholder="Escribe tu nombre" value="${esc(ult)}">
-      <div class="pv-e" id="pvE"></div><button type="button" class="pv-ok" id="pvB">Entrar</button>
-      <small>Verás el resumen de la empresa y luego solo tus clientes, tus metas y tus notas.</small></div>`;
-    q.hidden = false; window.scrollTo(0, 0);
-    const go = () => { const n = nrm($("pvNom").value); if (n.length < 2) { $("pvE").textContent = "Escribe tu nombre."; return; }
-      const L = VENDS(), v = L.find(x => nrm(x) === n) || L.find(x => nrm(x).split(" ")[0] === n.split(" ")[0]);
-      if (!v) { $("pvE").textContent = "No encontramos ese nombre en el equipo de ventas. Pide a HWF que te agregue."; return; }
-      try { localStorage.setItem(ULT, v); } catch (e) {}
-      guardarSesion({ token: "local", local: true, vendedor: { nombre: v, usuario: nrm(v).replace(/\s+/g, "."), cartera: v } });
-      try { CRMD = null; } catch (e) {} entrarApp(); setModo("inicio"); toast("Hola, " + v.split(" ")[0] + "."); };
-    $("pvB").onclick = go; $("pvNom").onkeydown = e => { if (e.key === "Enter") go(); };
-  };
-  /* Panel: siempre «Solo mis datos» */
-  if (typeof dbAlcance === "function" && typeof dbMiCart === "function") { const _a = dbAlcance; dbAlcance = function () { return esAdmin() ? _a() : (dbMiCart() || ""); }; }
-  /* avance del equipo: solo el total de la empresa, sin nombres */
-  if (typeof avEquipo === "function") { const _e = avEquipo; avEquipo = function () { const html = _e.apply(this, arguments); if (esAdmin() || !html) return html;
-    try { const d = document.createElement("div"); d.innerHTML = html; const filas = d.querySelectorAll(".av-eq > *"); filas.forEach((f, i) => { if (i < filas.length - 1) f.remove(); });
-      const h = d.querySelector("h3"); if (h) h.firstChild.textContent = "Avance de la empresa "; const t = d.querySelector(".av-eq > * b, .av-eq > * span"); return d.innerHTML; } catch (e) { return html; } }; }
-  /* resumen de la empresa al entrar (primero en el resumen de la mañana) */
-  function empresa() {
-    if (typeof avFilas !== "function") return "";
-    const F = avFilas(), T = F.reduce((s, x) => ({ meta: s.meta + (x.meta || 0), fa: s.fa + (x.fa || 0), np: s.np + (x.np || 0) }), { meta: 0, fa: 0, np: 0 });
-    if (!T.meta && !T.fa) return ""; const tot = T.fa + T.np, pc = T.meta ? Math.round(tot / T.meta * 100) : 0, mes = typeof nombreMes === "function" ? nombreMes() : "";
-    const w = v => T.meta ? Math.min(100, v / T.meta * 100).toFixed(1) : 0;
-    return `<div class="pv-emp" id="pvEmp"><h3>🏢 La empresa en ${esc(mes)}</h3>
-      <div class="pv-bar"><i style="width:${w(T.fa)}%;background:#1C7A4E"></i><i style="width:${w(T.np)}%;background:#F0A818"></i></div>
-      <div class="pv-g"><div><span>Facturado</span><b>${fmt(T.fa)}</b></div><div><span>Meta del equipo</span><b>${fmt(T.meta)}</b></div>
-        <div><span>Notas por facturar</span><b>${fmt(T.np)}</b></div><div><span>Avance</span><b>${pc}%</b></div></div></div>`;
-  }
-  new MutationObserver(() => { const o = document.getElementById("rdOv"); if (!o || o.querySelector("#pvEmp")) return; const w = o.querySelector(".rd-w"), hd = o.querySelector(".rd-h");
-    const html = empresa(); if (!html || !w) return; if (hd) hd.insertAdjacentHTML("afterend", html); else w.insertAdjacentHTML("afterbegin", html); }).observe(document.body, { childList: true, subtree: true });
-  /* portada de ingreso cada vez que se abre la app */
-  try { if (!esAdmin()) { localStorage.removeItem(SKEY); SES = null; } } catch (e) {}
-  if (!SES) { try { mostrarAcceso(); } catch (e) {} }
-})();
-</script>
 <script>/* patch_pares: última tarjeta sola en su fila → ancho completo */
 (function () {
   const FUERA = "nav, #snPanel, #snPanLog, .modos, #masSeg, .ms-hoja, table, .cal-it, header";
@@ -8925,6 +8865,76 @@ function prUnifV(l) {
   prog(); setTimeout(prog, 1500);
   new MutationObserver(m => { if (m.every(x => x.type === "attributes" && x.attributeName === "data-par")) return; prog(); }).observe(document.body, { childList: true, subtree: true });
   addEventListener("resize", prog);
+})();
+</script>
+<style>/* patch_vendedor */
+#btnSalir,.db-sc{display:none!important}
+.auth-body .seg[role=tablist],#fIn,#fReg,#offMsg{display:none!important}
+.pv-in{display:grid;gap:10px}.pv-in label{font-weight:800;font-size:.9rem}
+.pv-in select{font:inherit;font-size:1.1rem;padding:14px;border:1.5px solid var(--line,#DAE1E7);border-radius:14px;background:var(--bg,#fff);color:inherit;cursor:pointer;width:100%}
+.pv-in .pv-ok{background:#1C7A4E;color:#fff;border:0;border-radius:14px;padding:15px;font:inherit;font-weight:800;font-size:1.05rem;cursor:pointer}
+.pv-in .pv-e{color:#B42318;font-size:.88rem;min-height:1em}.pv-in small{color:var(--muted,#5B6874)}
+.pv-emp{background:#fff;border-radius:16px;padding:14px;display:grid;gap:10px;box-shadow:0 2px 10px rgba(11,49,70,.08)}
+.pv-emp h3{margin:0;font-size:1.05rem}.pv-emp .pv-g{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.pv-emp .pv-g>div{background:var(--sunk,#EEF2F5);border-radius:12px;padding:10px}.pv-emp .pv-g span{display:block;font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--muted,#5B6874)}
+.pv-emp .pv-g b{font-size:1.2rem}.pv-emp .pv-bar{height:10px;border-radius:6px;background:#E3EAEF;overflow:hidden;display:flex}.pv-emp .pv-bar i{display:block;height:100%}
+</style>
+<script>/* patch_vendedor: menú desplegable, resumen de la empresa, datos propios */
+(function () {
+  if (typeof mostrarAcceso !== "function" || typeof CRM_BASE === "undefined") return;
+  const nrm = s => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
+  const VENDS = () => (CRM_BASE.metas || []).map(m => m.vendedor).filter(v => v && !/tienda|gen[eé]rico/i.test(v));
+  const esAdmin = () => !!(SES && SES.vendedor && SES.vendedor.admin);
+  const ULT = "hwf-pv-ultimo";
+  const MENU = ["Claudia", "Diego", "Matias", "Invitado"];
+  mostrarAcceso = function () {
+    document.body.classList.add("locked"); $("auth").hidden = false;
+    let ult = ""; try { ult = localStorage.getItem(ULT) || ""; } catch (e) {}
+    const opts = MENU.map(n => `<option value="${n}"${n === ult ? " selected" : ""}>${n}</option>`).join("");
+    const q = $("quien");
+    q.innerHTML = `<div class="pv-in"><label for="pvNom">¿Quién eres?</label>
+      <select id="pvNom"><option value="">— elige tu nombre —</option>${opts}</select>
+      <div class="pv-e" id="pvE"></div><button type="button" class="pv-ok" id="pvB">Entrar</button>
+      <small>Verás el resumen de la empresa y luego solo tus clientes, tus metas y tus notas.</small></div>`;
+    q.hidden = false; window.scrollTo(0, 0);
+    const go = () => {
+      const sel = $("pvNom").value;
+      if (!sel) { $("pvE").textContent = "Elige tu nombre."; return; }
+      try { localStorage.setItem(ULT, sel); } catch (e) {}
+      if (nrm(sel) === "invitado") {
+        guardarSesion({ token: "local", local: true, vendedor: { nombre: "Invitado", usuario: "invitado", cartera: "Genérico", admin: true } });
+        try { CRMD = null; } catch (e) {} entrarApp(); setModo("inicio"); toast("Bienvenido."); return;
+      }
+      const L = VENDS(), n = nrm(sel);
+      const v = L.find(x => nrm(x) === n) || L.find(x => nrm(x).split(" ")[0] === n.split(" ")[0]);
+      if (!v) { $("pvE").textContent = "No encontramos ese nombre en el equipo. Pide a HWF que te agregue."; return; }
+      guardarSesion({ token: "local", local: true, vendedor: { nombre: v, usuario: nrm(v).replace(/\s+/g, "."), cartera: v } });
+      try { CRMD = null; } catch (e) {} entrarApp(); setModo("inicio"); toast("Hola, " + v.split(" ")[0] + ".");
+    };
+    $("pvB").onclick = go; $("pvNom").onkeydown = e => { if (e.key === "Enter") go(); };
+  };
+  /* Panel: siempre «Solo mis datos» para vendedores; Invitado ve todo */
+  if (typeof dbAlcance === "function" && typeof dbMiCart === "function") { const _a = dbAlcance; dbAlcance = function () { return esAdmin() ? _a() : (dbMiCart() || ""); }; }
+  /* avance del equipo: solo el total de la empresa, sin nombres */
+  if (typeof avEquipo === "function") { const _e = avEquipo; avEquipo = function () { const html = _e.apply(this, arguments); if (esAdmin() || !html) return html;
+    try { const d = document.createElement("div"); d.innerHTML = html; const filas = d.querySelectorAll(".av-eq > *"); filas.forEach((f, i) => { if (i < filas.length - 1) f.remove(); });
+      const h = d.querySelector("h3"); if (h) h.firstChild.textContent = "Avance de la empresa "; return d.innerHTML; } catch (e) { return html; } }; }
+  /* resumen de la empresa al entrar (primero en el resumen de la mañana) */
+  function empresa() {
+    if (typeof avFilas !== "function") return "";
+    const F = avFilas(), T = F.reduce((s, x) => ({ meta: s.meta + (x.meta || 0), fa: s.fa + (x.fa || 0), np: s.np + (x.np || 0) }), { meta: 0, fa: 0, np: 0 });
+    if (!T.meta && !T.fa) return ""; const tot = T.fa + T.np, pc = T.meta ? Math.round(tot / T.meta * 100) : 0, mes = typeof nombreMes === "function" ? nombreMes() : "";
+    const w = v => T.meta ? Math.min(100, v / T.meta * 100).toFixed(1) : 0;
+    return `<div class="pv-emp" id="pvEmp"><h3>🏢 La empresa en ${esc(mes)}</h3>
+      <div class="pv-bar"><i style="width:${w(T.fa)}%;background:#1C7A4E"></i><i style="width:${w(T.np)}%;background:#F0A818"></i></div>
+      <div class="pv-g"><div><span>Facturado</span><b>${fmt(T.fa)}</b></div><div><span>Meta del equipo</span><b>${fmt(T.meta)}</b></div>
+        <div><span>Notas por facturar</span><b>${fmt(T.np)}</b></div><div><span>Avance</span><b>${pc}%</b></div></div></div>`;
+  }
+  new MutationObserver(() => { const o = document.getElementById("rdOv"); if (!o || o.querySelector("#pvEmp")) return; const w = o.querySelector(".rd-w"), hd = o.querySelector(".rd-h");
+    const html = empresa(); if (!html || !w) return; if (hd) hd.insertAdjacentHTML("afterend", html); else w.insertAdjacentHTML("afterbegin", html); }).observe(document.body, { childList: true, subtree: true });
+  /* portada de ingreso cada vez que se abre la app */
+  try { if (!esAdmin()) { localStorage.removeItem(SKEY); SES = null; } } catch (e) {}
+  if (!SES) { try { mostrarAcceso(); } catch (e) {} }
 })();
 </script>
 </body>
