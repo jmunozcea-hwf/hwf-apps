@@ -402,7 +402,7 @@ if (!cfg() || !DATA()) pantallaConexion(); else { arrancar(); bajar(true).then(n
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261113092206";
+const HWF_VER = "20261113092924";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -1698,6 +1698,161 @@ body.log-sn main{padding-bottom:0!important}
   prog(); setTimeout(prog, 1500);
   new MutationObserver(m => { if (m.every(x => x.type === "attributes" && x.attributeName === "data-par")) return; prog(); }).observe(document.body, { childList: true, subtree: true });
   addEventListener("resize", prog);
+})();
+</script>
+<style>/* patch_filtro_log */
+.lfc-row{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.lfc-row label{font-size:.82rem;font-weight:700;color:var(--muted,#5B6874);text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}
+#logCanSel{font:inherit;font-size:.82rem;font-weight:700;padding:5px 10px;border:1.5px solid var(--line,#DAE1E7);border-radius:8px;background:var(--surface,#fff);color:inherit;cursor:pointer}
+</style>
+<script>/* patch_filtro_log: filtro de canal Distribuidora / Tienda en Logística */
+(function () {
+  if (typeof pintarInv !== 'function' || typeof pintarAbast !== 'function' || typeof esDistB !== 'function') return;
+  if (typeof lsGet !== 'function' || typeof lsSet !== 'function') return;
+
+  let logCan = lsGet('logCan', ''); /* '' = todas, 'd' = distribuidora, 't' = tienda */
+
+  function bodsDeCanal(D) {
+    const all = Object.keys(D && D.bodegas || {});
+    if (logCan === 'd') return all.filter(esDistB);
+    if (logCan === 't') return all.filter(esTiendaB);
+    return all;
+  }
+
+  /* inyecta el selector de canal al inicio de una sección (una vez por pintado) */
+  function inyectarSel(secId, repintar) {
+    const sec = document.getElementById(secId);
+    if (!sec) return;
+    if (sec.querySelector('.lfc-row')) return; /* ya inyectado */
+    const card = sec.querySelector('.card');
+    if (!card) return;
+    const opts = [['', 'Todas'], ['d', 'Distribuidora'], ['t', 'Tienda']].map(([k, t]) =>
+      '<option value="' + k + '"' + (logCan === k ? ' selected' : '') + '>' + t + '</option>').join('');
+    const row = document.createElement('div');
+    row.className = 'lfc-row';
+    row.innerHTML = '<label>Canal:</label><select id="logCanSel_' + secId + '">' + opts + '</select>';
+    card.insertBefore(row, card.firstChild);
+    document.getElementById('logCanSel_' + secId).onchange = function () {
+      logCan = this.value;
+      lsSet('logCan', logCan);
+      repintar();
+    };
+  }
+
+  /* oculta chips de bodegas del canal contrario en un contenedor */
+  function filtrarChips(elId) {
+    if (!logCan) return;
+    const el = document.getElementById(elId);
+    if (!el) return;
+    el.querySelectorAll('[data-b]').forEach(function (btn) {
+      const b = btn.dataset.b;
+      if (b === '__todas') { btn.style.display = ''; return; }
+      btn.style.display = (logCan === 'd' && !esDistB(b)) || (logCan === 't' && !esTiendaB(b)) ? 'none' : '';
+    });
+  }
+
+  /* wrappers de pintarInv */
+  const _origInv = pintarInv;
+  pintarInv = function () {
+    if (logCan) {
+      const D = typeof DATA === 'function' ? DATA() : null;
+      if (D) {
+        const bods = bodsDeCanal(D);
+        if (bods.length && typeof invB !== 'undefined' && !bods.includes(invB)) invB = bods[0];
+      }
+    }
+    const r = _origInv.apply(this, arguments);
+    inyectarSel('s-inv', pintarInv);
+    filtrarChips('invB');
+    return r;
+  };
+
+  /* wrappers de pintarAbast */
+  const _origAbast = pintarAbast;
+  pintarAbast = function () {
+    if (logCan) {
+      const D = typeof DATA === 'function' ? DATA() : null;
+      if (D) {
+        const bods = Object.keys(D.bodegas || {}).filter(function (b) { return esDistB(b) || esTiendaB(b); });
+        const canal = bods.filter(function (b) { return logCan === 'd' ? esDistB(b) : esTiendaB(b); });
+        if (canal.length && typeof abB !== 'undefined' && !canal.includes(abB)) abB = canal[0];
+      }
+    }
+    const r = _origAbast.apply(this, arguments);
+    inyectarSel('s-abast', pintarAbast);
+    filtrarChips('abB');
+    return r;
+  };
+
+  /* wrapper de pintarDash (solo inyecta el selector, no filtra bodegas) */
+  if (typeof pintarDash === 'function') {
+    const _origDash = pintarDash;
+    pintarDash = function () {
+      const r = _origDash.apply(this, arguments);
+      inyectarSel('s-dash', function () { if (typeof SEC !== 'undefined' && typeof pintar === 'function') pintar(SEC); });
+      return r;
+    };
+  }
+
+  /* repintar la sección activa para mostrar el selector */
+  try { if (typeof SEC !== 'undefined' && typeof pintar === 'function') pintar(SEC); } catch (e) {}
+})();
+</script>
+<script>/* patch_gmaps: links de Google Maps en lista de paradas de Logística */
+(function () {
+  if (typeof pintarRutas !== 'function') return;
+  const _orig = pintarRutas;
+  pintarRutas = function () {
+    const r = _orig.apply(this, arguments);
+    /* inyectar links de Maps en cada parada de la lista */
+    const lista = document.getElementById('rLista');
+    if (!lista) return r;
+    lista.querySelectorAll('.st').forEach(function (row) {
+      if (row.querySelector('.gm-link')) return; /* ya tiene link */
+      /* obtener datos desde los checks y el texto */
+      const chk = row.querySelector('[data-id]');
+      if (!chk) return;
+      const id = chk.dataset.id;
+      /* buscar la parada en DATA().cots + manuales */
+      const D = typeof DATA === 'function' ? DATA() : null;
+      if (!D) return;
+      /* reconstruir parada desde el resumen visible (texto de <small>) */
+      const smalls = row.querySelectorAll('small');
+      const infoTxt = smalls[0] ? smalls[0].textContent : '';
+      /* extraer cliente desde <span class="n"> */
+      const nEl = row.querySelector('.n');
+      if (!nEl) return;
+      const cli = nEl.textContent.trim();
+      /* buscar en geomem (coordenadas exactas) o usar dirección */
+      const G = typeof geoMem === 'function' ? geoMem() : {};
+      const nrm = typeof norm === 'function' ? norm : function (s) { return String(s || '').toLowerCase().trim(); };
+      const geo = G[nrm(cli)];
+      let href = '';
+      if (geo && geo[0] && geo[1]) {
+        href = 'https://www.google.com/maps/dir/?api=1&destination=' + geo[0] + ',' + geo[1];
+      } else {
+        /* extraer comuna y dirección del texto de la small */
+        const comunaMatch = infoTxt.split('·')[0].trim();
+        if (comunaMatch) href = 'https://maps.google.com/?q=' + encodeURIComponent(comunaMatch + ' Chile');
+      }
+      if (!href) return;
+      const a = document.createElement('a');
+      a.className = 'btn gm-link';
+      a.href = href;
+      a.target = '_blank';
+      a.rel = 'noopener';
+      a.setAttribute('aria-label', 'Ver en Google Maps: ' + cli);
+      a.style.cssText = 'padding:5px 9px;text-align:center;text-decoration:none';
+      a.textContent = '🗺️';
+      /* insertar en el div de botones (último div del .st) */
+      const btns = row.querySelectorAll('div');
+      const lastDiv = btns[btns.length - 1];
+      if (lastDiv) lastDiv.insertBefore(a, lastDiv.firstChild);
+    });
+    return r;
+  };
+  /* repintar si ya estamos en rutas */
+  try { if (typeof SEC !== 'undefined' && SEC === 'rutas') pintarRutas(); } catch (e) {}
 })();
 </script>
 </body></html>

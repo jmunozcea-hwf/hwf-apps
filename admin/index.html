@@ -5194,7 +5194,7 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261113092206";
+const HWF_VER = "20261113092924";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -6952,6 +6952,52 @@ function npVer(n) {
 
   admFiltVPicker();
   new MutationObserver(admFiltVPicker).observe(document.body, { childList: true, subtree: true });
+})();
+</script>
+<script>/* patch_gmaps: links de Google Maps en ficha de cliente de Admin */
+(function () {
+  /* función utilitaria: link de Maps con coords o con dirección */
+  if (typeof window !== 'undefined') window.gmLink = function (dir, comuna, lat, lng) {
+    if (lat && lng) return 'https://www.google.com/maps/dir/?api=1&destination=' + lat + ',' + lng;
+    const q = [dir, comuna, 'Chile'].filter(Boolean).join(', ');
+    return q ? 'https://maps.google.com/?q=' + encodeURIComponent(q) : '';
+  };
+
+  /* inyectar botón de Maps en fichas de NP y de cliente: buscar tablas de datos con dirección */
+  function inyectarMaps(root) {
+    if (!root) return;
+    root.querySelectorAll('dl dt, table td').forEach(function (el) {
+      const txt = el.textContent;
+      if (!/Dirección|Facturación/i.test(txt)) return;
+      const val = el.nextElementSibling;
+      if (!val || !val.textContent.trim()) return;
+      if (val.querySelector('.gm-btn')) return; /* ya tiene */
+      const q = val.textContent.trim() + ' Chile';
+      const href = 'https://maps.google.com/?q=' + encodeURIComponent(q);
+      const a = document.createElement('a');
+      a.className = 'gm-btn';
+      a.href = href;
+      a.target = '_blank';
+      a.rel = 'noopener';
+      a.textContent = ' 🗺️';
+      a.style.cssText = 'text-decoration:none;font-size:.88rem;margin-left:4px';
+      a.setAttribute('aria-label', 'Ver en Google Maps');
+      val.appendChild(a);
+    });
+  }
+
+  /* observar cambios en el DOM para inyectar cuando aparecen fichas */
+  new MutationObserver(function (muts) {
+    muts.forEach(function (m) {
+      m.addedNodes.forEach(function (n) {
+        if (n.nodeType !== 1) return;
+        inyectarMaps(n);
+      });
+    });
+  }).observe(document.body, { childList: true, subtree: true });
+
+  /* inyectar en el contenido ya presente */
+  inyectarMaps(document.body);
 })();
 </script>
 </body>
