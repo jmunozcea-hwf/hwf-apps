@@ -3935,7 +3935,7 @@ function plProy(P) { const t = habiles(P.Y, P.M, 1, P.CD), T = habiles(P.Y, P.M,
 function plDiasCalle(P) { try { const _cx = typeof cxTodos === "function" ? cxTodos() : []; if (!_cx.length) return null; const s = _cx.reduce((t, d) => t + Math.max(0, d.saldo || 0), 0); return P.v3 ? s / (P.v3 / 91) : null; } catch (e) { return null; } }
 function pintarPlan() {
   const P = plDatos(), proy = plProy(P), falta = Math.max(0, PLAN.meta - proy), dc = plDiasCalle(P), di = typeof invIndice === "function" ? invIndice() : null;
-  const vends = [...new Set(P.L.map(c => c.cart))].filter(Boolean).sort();
+  const vends = [...new Set(P.L.map(c => c.cart))].filter(Boolean).filter(v => !/gen[eé]rico|leslie/i.test(v)).sort(); /* patch_sinleslie */
   const fila = v => { const l = P.L.filter(c => c.cart === v), cnt = f => l.filter(f).length, vm = l.reduce((s, c) => s + c.vMes, 0), n = cnt(c => c.nuevo);
     return `<tr><td><b>${esc(v)}</b></td><td class="r num">${mm(vm)}</td><td class="r num">${cnt(c => c.vMes > 0)}</td><td class="r num">${cnt(c => c.v12 > 0 && c.diasSin >= 30 && c.diasSin < 60)}</td>
       <td class="r num">${cnt(c => c.v12 > 0 && c.diasSin >= 60 && c.diasSin < 90)}</td><td class="r num">${cnt(c => c.v12 > 0 && c.diasSin >= 90 && c.diasSin <= 365)}</td><td class="r num">${cnt(c => c.reac)}</td>
@@ -5153,7 +5153,7 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261113121451";
+const HWF_VER = "20261113130220";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
