@@ -3395,7 +3395,7 @@ function syPintar() {
   b.className = "btn " + (!cfg ? "" : n ? (syError ? "err" : "cola") : "ok");
   b.innerHTML = `<span class="pt"></span> ${!cfg ? "Conectar con HWF" : n ? `${n} por enviar` : "HWF"}`;
 }
-const SY_EST = { pen: "Por revisar", mod: "Modificada", apr: "Aprobada", rec: "Rechazada" };
+const SY_EST = { pen: "Recibida en HWF", mod: "Modificada", apr: "Aprobada", rec: "Rechazada" };
 function syAbrir() {
   const cfg = syCfg(), n = Object.keys(lsGet(SYCOLA, {})).length, cart = SES && SES.vendedor.cartera;
   const E = Object.entries(lsGet(SYENV, {})).filter(([, x]) => !cart || x.cart === cart).sort((a, b) => String(b[1].num).localeCompare(String(a[1].num))).slice(0, 25);
@@ -3404,7 +3404,7 @@ function syAbrir() {
       ${cfg ? `<div class="gps ${syError ? "bad" : "ok"}">${syError ? esc(syError) : "Conectado. Cada nota que exportas se envía sola a HWF."}${n ? ` · ${n} por enviar` : ""}</div>` :
         `<p class="hint" style="margin:0">Pega el código de conexión que te envió el administrador (empieza con HWF1:).</p>`}
       <div class="f"><label for="syCod">Código de conexión</label><textarea class="sy-cod" id="syCod" placeholder="HWF1:...">${cfg ? "Conectado (pega un código nuevo para cambiarlo)" : ""}</textarea></div>
-      ${E.length ? `<div class="blk" style="padding:10px 12px"><h3>Mis notas enviadas</h3><div class="hist">${E.map(([, x]) => `<div><b>${esc(tc(x.cliente))}</b> <span class="sy-est ${x.cola ? "cola" : x.est}">${x.cola ? "Por enviar" : SY_EST[x.est] || "Por revisar"}</span>
+      ${E.length ? `<div class="blk" style="padding:10px 12px"><h3>Mis notas enviadas</h3><div class="hist">${E.map(([, x]) => `<div><b>${esc(tc(x.cliente))}</b> <span class="sy-est ${x.cola ? "cola" : x.est}">${x.cola ? "Por enviar" : SY_EST[x.est] || "Recibida en HWF"}</span>
         <small>N° ${esc(x.num)} · ${fmt(x.netoRev != null && x.est !== "pen" ? x.netoRev : x.neto)}${x.nota ? " · " + esc(x.nota) : ""}</small></div>`).join("")}</div></div>` : ""}
     </div>`,
     [["Cerrar", "", cerrarModal], ...(cfg ? [["Enviar y actualizar", "", async ev => { ev.currentTarget.disabled = true; await syEnviar(true); await syEstados(); syAbrir(); }]] : []),
@@ -3443,7 +3443,7 @@ syPintar(); setTimeout(() => { syEnviar(); syEstados(); }, 1500);
 /* ================================================================
    REGISTRO DE NOTAS DE PEDIDO (antes del apartado Cliente)
    ================================================================ */
-const RG = { cola: ["Por enviar", "Se envían solas cuando hay internet"], esp: ["En espera de aprobación", "Recibidas por HWF"], apr: ["Aprobadas", "Listas para despacho"], rec: ["Rechazadas", "Revisa el comentario"] };
+const RG = { cola: ["Por enviar", "Se envían solas cuando hay internet"], esp: ["Enviadas a HWF", "Recibidas por HWF"] };
 let rgFiltro = null, rgTodas = false;
 /* el envío es automático: se quita el botón "HWF" de la cabecera */
 { const bSy = $("btnSync"); if (bSy) bSy.remove(); }
@@ -3457,18 +3457,18 @@ function pintarRegistro() {
   if (!$("rgTabs")) return;
   const nCola = Object.keys(lsGet(SYCOLA, {})).length;
   $("rgSync").textContent = !syCfg() ? "Envío automático desactivado." : syError && nCola ? `No se pudo enviar (${String(syError).replace(/\.$/, "")}). Se reintentará solo cada minuto.` : nCola ? "Enviando a HWF…" : "Cada nota que exportas se envía sola a HWF.";
-  const L = rgNotas(), c = { cola: [], esp: [], apr: [], rec: [] };
-  L.forEach(x => c[rgEst(x)].push(x));
-  if (!rgFiltro) rgFiltro = c.cola.length ? "cola" : c.esp.length ? "esp" : "apr";
+  const L = rgNotas(), c = { cola: [], esp: [] };
+  L.forEach(x => c[rgEst(x) === "cola" ? "cola" : "esp"].push(x));
+  if (!c[rgFiltro]) rgFiltro = c.cola.length ? "cola" : "esp";
   const monto = x => x.netoRev != null && x.est !== "pen" ? x.netoRev : x.neto;
   $("rgTabs").innerHTML = Object.keys(RG).map(k => `<button type="button" class="rg-tab ${k}" data-rg="${k}" aria-pressed="${rgFiltro === k}"><b>${c[k].length}</b><span>${RG[k][0]}</span><small>${fmt(c[k].reduce((s, x) => s + (Number(monto(x)) || 0), 0))}</small></button>`).join("");
   const vis = c[rgFiltro] || [], max = rgTodas ? vis.length : 5;
   $("rgList").innerHTML = !L.length ? '<p class="rg-vacio">Aún no tienes notas de pedido. Cada nota que exportes a Excel queda registrada aquí y se envía a HWF.</p>'
     : !vis.length ? `<p class="rg-vacio">No tienes notas ${RG[rgFiltro][0].toLowerCase()}.</p>`
-    : vis.slice(0, max).map(x => { const e = rgEst(x);
+    : vis.slice(0, max).map(x => { const e = rgEst(x) === "cola" ? "cola" : "esp";
         return `<button type="button" class="rg-it ${e}" data-rgid="${esc(x.id)}"><b>${esc(tc(x.cliente || "Sin cliente"))}</b><span class="v">${fmt(monto(x))}</span>
           <small>N° ${esc(x.num)}${x.fecha ? " · " + fd2(x.fecha) : ""}${x.items ? ` · ${x.items.length} ${x.items.length === 1 ? "producto" : "productos"}` : ""}${x.nota ? " · " + esc(x.nota) : ""}</small>
-          <span><span class="rg-est ${e}">${e === "esp" && x.est === "mod" ? "Modificada · en espera" : RG[e][0].replace(/s$/, "").replace("Aprobada", "Aprobada").replace("Rechazada", "Rechazada")}</span></span></button>`; }).join("")
+          <span><span class="rg-est ${e}">${e === "cola" ? "Por enviar" : "Enviada a HWF"}</span></span></button>`; }).join("")
       + (vis.length > 5 ? `<button class="btn" type="button" id="rgMas">${rgTodas ? "Ver menos" : `Ver las ${vis.length}`}</button>` : "");
   $("rgTabs").querySelectorAll("[data-rg]").forEach(b => b.onclick = () => { rgFiltro = b.dataset.rg; rgTodas = false; pintarRegistro(); });
   $("rgList").querySelectorAll("[data-rgid]").forEach(b => b.onclick = () => rgDetalle(b.dataset.rgid));
@@ -7174,7 +7174,7 @@ function confirmarNota() {
   x.onclick = () => cerrarModal(); card.insertBefore(x, card.firstChild); })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261113013154";
+const HWF_VER = "20261113014543";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer)\/[^/]*$/, "/");
   let avisado = false;
@@ -8711,5 +8711,115 @@ body.ia-izq #iaBtn{right:auto;left:14px}
 @media(max-width:419px){.kpi3 > *:last-child:nth-child(2n+1){grid-column:1/-1}}
 @media(min-width:420px){.kpi3 > *:last-child:nth-child(3n+1){grid-column:1/-1}}
 </style>
+<script>/* patch_pares: última tarjeta sola en su fila → ancho completo */
+(function () {
+  const FUERA = "nav, #snPanel, #snPanLog, .modos, #masSeg, .ms-hoja, table, .cal-it, header";
+  let sels = null;
+  function selectores() {
+    const s = new Set(['[style*="grid"]']);
+    const rec = rs => { for (const r of rs) { try { if (r.cssRules && !r.selectorText) rec(r.cssRules); else if (r.style && /grid/.test(r.style.display || "")) r.selectorText.split(",").forEach(x => { x = x.trim(); if (x && !/:/.test(x)) s.add(x); }); } catch (e) {} } };
+    for (const ss of document.styleSheets) { try { rec(ss.cssRules); } catch (e) {} }
+    return [...s].join(",");
+  }
+  function aplicar() {
+    try {
+      if (!sels) sels = selectores();
+      document.querySelectorAll("[data-par]").forEach(e => { e.style.gridColumn = ""; e.removeAttribute("data-par"); });
+      document.querySelectorAll(sels).forEach(g => {
+        if (g.closest(FUERA)) return;
+        const cs = getComputedStyle(g); if (cs.display !== "grid") return;
+        const cols = cs.gridTemplateColumns.split(" ").filter(Boolean); if (cols.length < 2) return;
+        const w = cols.map(parseFloat); if (!w.every(x => Math.abs(x - w[0]) < 2)) return;
+        const hs = [...g.children].filter(c => c.offsetParent !== null && getComputedStyle(c).position !== "absolute");
+        if (hs.length < 2) return;
+        const ult = hs[hs.length - 1], top = ult.offsetTop;
+        if (hs.filter(c => Math.abs(c.offsetTop - top) < 4).length !== 1) return;
+        if (hs.length > 1 && Math.abs(hs[hs.length - 2].offsetTop - top) < 4) return;
+        if (ult.offsetWidth > g.clientWidth * .7) return;
+        ult.style.gridColumn = "1 / -1"; ult.setAttribute("data-par", "");
+      });
+    } catch (e) {}
+  }
+  let pend = false; const prog = () => { if (pend) return; pend = true; setTimeout(() => { pend = false; aplicar(); }, 120); };
+  prog(); setTimeout(prog, 1500);
+  new MutationObserver(m => { if (m.every(x => x.type === "attributes" && x.attributeName === "data-par")) return; prog(); }).observe(document.body, { childList: true, subtree: true });
+  addEventListener("resize", prog);
+})();
+</script>
+<style>/* patch_menusel */
+.ms-oc{display:none!important}
+.ms-btn{display:flex;align-items:center;gap:12px;width:100%;margin:0 0 12px;border:1.5px solid var(--line,#C9D3DB);border-radius:16px;padding:10px 14px;background:var(--surface,#fff);color:var(--ink,#0F1E29);font:inherit;cursor:pointer;text-align:left;box-shadow:0 2px 8px rgba(11,49,70,.07);min-height:56px}
+.ms-btn:active{transform:scale(.99)}
+.ms-btn .ms-t{flex:1;min-width:0;display:flex;flex-direction:column}
+.ms-btn .ms-t small{font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted,#5B6874)}
+.ms-btn .ms-t b{font-size:1.02rem;display:flex;align-items:center;gap:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ms-btn .ms-n{font-size:.75rem;font-weight:800;color:#0B3146;background:#E6EEF3;border-radius:999px;padding:3px 9px}
+.ms-btn .ms-a{width:28px;height:28px;border-radius:50%;background:#0B3146;color:#fff;display:grid;place-items:center;font-size:.8rem;flex:0 0 28px}
+.ms-velo{position:fixed;inset:0;background:rgba(8,25,36,.45);z-index:9998;opacity:0;transition:opacity .2s}
+.ms-velo.on{opacity:1}
+.ms-hoja{position:fixed;left:0;right:0;bottom:0;z-index:9999;background:var(--surface,#fff);border-radius:22px 22px 0 0;padding:8px 14px calc(16px + env(safe-area-inset-bottom));max-height:78vh;overflow:auto;transform:translateY(100%);transition:transform .22s ease;box-shadow:0 -10px 30px rgba(0,0,0,.18)}
+.ms-hoja.on{transform:none}
+.ms-hoja .ms-asa{width:44px;height:5px;border-radius:3px;background:#C9D3DB;margin:4px auto 10px}
+.ms-hoja h3{margin:0 4px 10px;font-size:1.05rem}
+.ms-hoja .ms-op{display:flex;align-items:center;gap:12px;width:100%;border:0;border-radius:14px;background:none;padding:13px 12px;font:inherit;font-size:1rem;font-weight:650;color:var(--ink,#0F1E29);cursor:pointer;text-align:left;min-height:52px}
+.ms-hoja .ms-op:hover{background:var(--sunk,#EEF2F5)}
+.ms-hoja .ms-op[aria-current="true"]{background:#0B3146;color:#fff}
+.ms-hoja .ms-op .ms-ok{margin-left:auto;font-weight:900}
+.ms-hoja .ms-op .hic-pw,.ms-btn .hic-pw{width:26px;height:26px;flex:0 0 26px;margin:0}
+@media(min-width:700px){.ms-hoja{left:50%;right:auto;bottom:auto;top:50%;width:420px;border-radius:20px;transform:translate(-50%,-46%);opacity:0;pointer-events:none;transition:opacity .18s,transform .18s}.ms-hoja.on{transform:translate(-50%,-50%);opacity:1;pointer-events:auto}.ms-hoja .ms-asa{display:none}.ms-btn{max-width:520px}}
+</style>
+<script>/* patch_menusel: grupos de filtros → menú desplegable */
+(function () {
+  const SEL = '.seg, .rk-seg, .pra-seg, .pt-seg, .db-seg, .ad-seg, .nu-tabs, .tc-tabs, .t-seg, #prFil, #prSegF, #cxFil, #cxSegF, #invSeg, #proSeg, #bnSegAp, [role=tablist]';
+  const FUERA = "#masSeg, #snPanel, #snPanLog, nav, .modos, #tNav, .ms-hoja, header, .auth-body, #auth, .login";
+  const activo = b => b.getAttribute("aria-pressed") === "true" || b.getAttribute("aria-selected") === "true" || /(^|\s)(on|act|activo|active|sel)(\s|$)/.test(b.className);
+  const botones = g => [...g.children].filter(b => b.tagName === "BUTTON" && b.style.display !== "none" && !b.hidden);
+  const txt = b => (b.textContent || "").replace(/\s+/g, " ").trim();
+  let nc = 0;
+  const cont = b => { const c = b.cloneNode(true); let h = c.innerHTML; nc++;
+    [...c.querySelectorAll("[id]")].forEach(x => { const id = x.id, nu = id + "-ms" + nc; h = h.split('id="' + id + '"').join('id="' + nu + '"').split("#" + id + ")").join("#" + nu + ")"); });
+    return h; };
+  function titulo(g) {
+    const l = g.getAttribute("aria-label"); if (l) return l;
+    let p = g.previousElementSibling; while (p && p.classList.contains("ms-btn")) p = p.previousElementSibling;
+    if (p && /^(H2|H3|LABEL)$/.test(p.tagName) && txt(p).length < 40) return txt(p);
+    return "Ver";
+  }
+  let velo, hoja, abierto = null;
+  function cerrar() { if (!hoja) return; hoja.classList.remove("on"); velo.classList.remove("on"); setTimeout(() => { if (!abierto) { velo.remove(); hoja.remove(); velo = hoja = null; } }, 230); abierto = null; }
+  function abrir(g, btn) {
+    if (!velo) { velo = document.createElement("div"); velo.className = "ms-velo"; velo.onclick = cerrar; hoja = document.createElement("div"); hoja.className = "ms-hoja"; hoja.setAttribute("role", "dialog"); hoja.setAttribute("aria-modal", "true"); document.body.append(velo, hoja); }
+    abierto = g; const bs = botones(g);
+    hoja.innerHTML = `<div class="ms-asa"></div><h3>${btn.querySelector("small").textContent}</h3>` + bs.map((b, i) => `<button type="button" class="ms-op" data-i="${i}" aria-current="${activo(b)}">${cont(b)}${activo(b) ? '<span class="ms-ok">✓</span>' : ""}</button>`).join("");
+    hoja.querySelectorAll(".ms-op").forEach(o => o.onclick = () => { const b = bs[Number(o.dataset.i)]; cerrar(); if (b && b.isConnected) b.click(); setTimeout(() => pintar(g), 30); });
+    requestAnimationFrame(() => { velo.classList.add("on"); hoja.classList.add("on"); const a = hoja.querySelector('[aria-current="true"]'); if (a) a.focus(); });
+  }
+  document.addEventListener("keydown", e => { if (e.key === "Escape" && abierto) cerrar(); });
+  function pintar(g) {
+    const btn = g._msBtn; if (!btn) return; const bs = botones(g); const a = bs.filter(activo);
+    const b = a[0] || bs[0]; if (!b) return;
+    btn.querySelector("b").innerHTML = cont(b);
+    btn.querySelector(".ms-n").textContent = bs.length + " opciones";
+  }
+  function convertir(g) {
+    if (g._msBtn || g.closest(FUERA) || g.closest(".ms-oc")) return;
+    const bs = botones(g); if (bs.length < 2 || bs.filter(activo).length > 1 || bs.length !== g.children.length) return;
+    const btn = document.createElement("button"); btn.type = "button"; btn.className = "ms-btn"; btn.setAttribute("aria-haspopup", "dialog");
+    btn.innerHTML = `<span class="ms-t"><small>${titulo(g).replace(/[<>&]/g, "")}</small><b></b></span><span class="ms-n"></span><span class="ms-a">▼</span>`;
+    btn.onclick = () => abrir(g, btn);
+    g._msBtn = btn; g.parentNode.insertBefore(btn, g); g.classList.add("ms-oc");
+    new MutationObserver(() => pintar(g)).observe(g, { subtree: true, childList: true, attributes: true, attributeFilter: ["aria-pressed", "aria-selected", "class"] });
+    pintar(g);
+  }
+  function aplicar() {
+    try {
+      document.querySelectorAll(".ms-btn").forEach(b => { const g = b.nextElementSibling; if (!g || g._msBtn !== b) b.remove(); });
+      document.querySelectorAll(SEL).forEach(convertir);
+    } catch (e) {}
+  }
+  aplicar(); setTimeout(aplicar, 500); setTimeout(aplicar, 1600);
+  let pend = false; new MutationObserver(() => { if (pend) return; pend = true; setTimeout(() => { pend = false; aplicar(); }, 60); }).observe(document.body, { childList: true, subtree: true });
+})();
+</script>
 </body>
 </html>
