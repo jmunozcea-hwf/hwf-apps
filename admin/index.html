@@ -5194,7 +5194,7 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261113091402";
+const HWF_VER = "20261113091559";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -6860,8 +6860,12 @@ function npVer(n) {
 (function () {
   if (typeof cartDe !== "function" || typeof D === "undefined") return;
   let _pvSig = null, _pvMap = null;
-  function pvBuildMap() {
-    if (_pvMap && _pvSig === D.corte) return _pvMap;
+
+  const _pvNrm = s => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
+  const _pvActivos = new Set(["claudia hamame", "diego munoz cea", "matias espinoza"]);
+  const _pvAngelica = "angelica carvajal";
+  function _pvBuildMap(D) {
+    /* 1. última factura por cliente */
     const m = {};
     (D.rows || []).forEach(r => {
       if (Number(r[5]) <= 0) return;
@@ -6869,10 +6873,30 @@ function npVer(n) {
       const f = (r[8] || D.anio) * 10000 + r[2] * 100 + r[3];
       if (!m[r[0]] || f > m[r[0]].f) m[r[0]] = { f, v };
     });
-    _pvSig = D.corte; _pvMap = m; return m;
+    /* 2. índice nombre-normalizado → ci (para cruzar con cotizaciones) */
+    const nomCi = {};
+    (D.clientes || []).forEach((c, ci) => { nomCi[_pvNrm(c[0])] = ci; });
+    /* 3. cotizaciones de vendedores activos → ci → vendedor */
+    const cotVend = {};
+    (D.cots || []).forEach(c => {
+      const vn = _pvNrm(c[3]); if (!_pvActivos.has(vn)) return;
+      const ci = nomCi[_pvNrm(c[2])]; if (ci == null) return;
+      cotVend[ci] = c[3]; /* última cotización activa gana */
+    });
+    /* 4. redistribuir clientes de Angélica */
+    Object.keys(m).forEach(k => {
+      const ci = Number(k);
+      if (_pvNrm(m[ci].v) !== _pvAngelica) return;
+      m[ci].v = cotVend[ci] || "Claudia Hamame";
+    });
+    return m;
+  }
+  function pvBuildMapCached() {
+    if (_pvMap && _pvSig === D.corte) return _pvMap;
+    _pvSig = D.corte; _pvMap = _pvBuildMap(D); return _pvMap;
   }
   const _cdOrig = cartDe;
-  cartDe = function (ci) { const m = pvBuildMap(); return (m[ci] && m[ci].v) || _cdOrig(ci); };
+  cartDe = function (ci) { const m = pvBuildMapCached(); return (m[ci] && m[ci].v) || _cdOrig(ci); };
   if (typeof calcular === "function") try { calcular(); } catch (e) {}
 })();
 </script>
