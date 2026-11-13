@@ -5153,7 +5153,7 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261113090615";
+const HWF_VER = "20261113091402";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -6778,6 +6778,26 @@ function npVer(n) {
   prog(); setTimeout(prog, 1500);
   new MutationObserver(m => { if (m.every(x => x.type === "attributes" && x.attributeName === "data-par")) return; prog(); }).observe(document.body, { childList: true, subtree: true });
   addEventListener("resize", prog);
+})();
+</script>
+<script>/* patch_cart_ultima_fa: asignar clientes por última factura en Admin BI */
+(function () {
+  if (typeof cartDe !== "function" || typeof D === "undefined") return;
+  let _pvSig = null, _pvMap = null;
+  function pvBuildMap() {
+    if (_pvMap && _pvSig === D.corte) return _pvMap;
+    const m = {};
+    (D.rows || []).forEach(r => {
+      if (Number(r[5]) <= 0) return;
+      const v = D.vend[r[7]]; if (!v || /HELLYW/i.test(v)) return;
+      const f = (r[8] || D.anio) * 10000 + r[2] * 100 + r[3];
+      if (!m[r[0]] || f > m[r[0]].f) m[r[0]] = { f, v };
+    });
+    _pvSig = D.corte; _pvMap = m; return m;
+  }
+  const _cdOrig = cartDe;
+  cartDe = function (ci) { const m = pvBuildMap(); return (m[ci] && m[ci].v) || _cdOrig(ci); };
+  if (typeof calcular === "function") try { calcular(); } catch (e) {}
 })();
 </script>
 </body>
