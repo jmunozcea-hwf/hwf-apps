@@ -5177,7 +5177,7 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261113012420";
+const HWF_VER = "20261113012518";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer)\/[^/]*$/, "/");
   let avisado = false;
@@ -6187,9 +6187,44 @@ function vmPoner(cont, VM, antes) { try { if (!cont) return; const v = cont.quer
   [800, 2500, 6000].forEach(t => setTimeout(() => { if (!h0.querySelector("#adCard")) poner(); }, t));   /* por si los datos llegan después */
 })();
 </script>
+<style>/* patch_menuorden */
+#snPanel .sn-g{font-size:.7rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted,#5B6874);padding:12px 10px 4px;border-top:1px solid var(--line,#E3E9EE);margin-top:6px}
+#snPanel .sn-i .sn-e:has(svg){width:34px;min-width:34px;height:34px}#snPanel .sn-i .sn-e svg{width:34px;height:34px;display:block}
+#snPanel .sn-g.sn-g0{border-top:0;margin-top:0;padding-top:4px}
+</style>
+<script>/* patch_menuorden: menús reordenados y agrupados */
+(function () {
+  const VEN = typeof NAV_ORDEN !== "undefined" && typeof setModo === "function" && !!document.getElementById("mInicio"), ADM = !VEN && !!document.querySelector("nav.bottom") && !!document.getElementById("s-res");
+  const LOG = !VEN && !ADM && !!document.querySelector('#nav [data-s="rutas"]'), TND = !VEN && !ADM && !!document.getElementById("tNav");
+  const GV = [["Mi día", ["inicio", "pedido", "clientes", "agenda", "ruta", "cobranza", "embudo", "cat"]], ["Análisis", ["dash", "avance", "bi"]], ["Aprender", ["nut", "tec"]]];
+  const GA = [["Ventas", ["t:res", "t:ven", "t:cli", "t:pro", "m:ranking", "m:plan", "m:zonas", "m:terreno", "m:bonif"]], ["Pedidos y cobranza", ["m:cots", "m:napp", "m:cobranza", "m:embudo"]],
+    ["BI y compras", ["b:v", "b:l", "m:abast", "m:provee"]], ["Archivos y datos", ["m:catalogo", "m:cambios", "m:datos"]]];
+  const pos = (G, k) => { let n = 0; for (const [, l] of G) { const i = l.indexOf(k); if (i >= 0) return n + i; n += l.length; } return 999; };
+  if (VEN) { const ord = () => { const a = NAV_ORDEN.slice(); a.sort((x, y) => pos(GV, x[0]) - pos(GV, y[0])); NAV_ORDEN.splice(0, NAV_ORDEN.length, ...a); };
+    ord(); setTimeout(ord, 0); setTimeout(ord, 1500);   /* BI, Catálogos y Técnicas se agregan al cargar */ }
+  /* títulos de grupo en el menú lateral (VENTAS y HWF) */
+  function grupos() { const pan = document.getElementById("snPanel"); if (!pan || pan.querySelector(":scope > .sn-g")) return;
+    const items = [...pan.querySelectorAll(":scope > .sn-i")]; if (!items.length) return; if (ADM && pan.querySelector('.sn-i[data-t="inv"]:not([data-biu])')) return;   /* espera a que BI reemplace Inventario */
+    pan.querySelectorAll(":scope > .sn-g").forEach(x => x.remove());
+    const key = b => VEN ? b.dataset.sm : b.dataset.biu ? "b:" + b.dataset.biu : b.dataset.t ? "t:" + b.dataset.t : "m:" + b.dataset.m, G = VEN ? GV : GA;
+    if (ADM) { const ico = s => { const x = pan.querySelector(s + " .sn-e"); return x ? x.innerHTML : ""; };   /* íconos que faltaban */
+      [["m:provee", '[data-m="cobranza"]'], ["m:catalogo", '[data-m="cots"]']].forEach(([k, s]) => { const it = items.find(b => key(b) === k), e = it && it.querySelector(".sn-e"); if (e && e.textContent.trim() === "•") e.innerHTML = ico(s) || "•"; }); const bv = items.find(b => key(b) === "b:v"), ev = bv && bv.querySelector(".sn-e"), pl = ico('[data-m="plan"]'); if (ev && pl) ev.innerHTML = pl; }
+    items.sort((a, b) => pos(G, key(a)) - pos(G, key(b))); let g0 = -1, n = 0;
+    items.forEach(b => { const p = pos(G, key(b)); let gi = -1, acc = 0; G.forEach(([, l], i) => { if (p >= acc && p < acc + l.length) gi = i; acc += l.length; }); if (gi < 0) gi = G.length;
+      if (gi !== g0) { const h = document.createElement("div"); h.className = "sn-g" + (n ? "" : " sn-g0"); h.textContent = gi < G.length ? G[gi][0] : "Otros"; pan.appendChild(h); g0 = gi; n++; } pan.appendChild(b); });
+  }
+  if (VEN || ADM) { const sn = () => document.getElementById("snPanel"); const mo = new MutationObserver(() => setTimeout(grupos, 0)); const t = setInterval(() => { if (sn()) { mo.observe(sn(), { childList: true }); clearInterval(t); } }, 300); }
+  /* barras inferiores */
+  const barra = (sel, orden) => { const nav = document.querySelector(sel); if (!nav) return; const bs = [...nav.querySelectorAll(":scope > button")], k = b => b.dataset.biu ? "b:" + b.dataset.biu : b.dataset.s;
+    bs.sort((a, b) => { const i = orden.indexOf(k(a)), j = orden.indexOf(k(b)); return (i < 0 ? 99 : i) - (j < 0 ? 99 : j); }).forEach(b => nav.appendChild(b)); };
+  if (LOG) { const o = ["dash", "rutas", "seg", "flota", "abast", "b:v", "b:l"]; barra("#nav", o); setTimeout(() => barra("#nav", o), 500); }
+  if (TND) { const o = ["inicio", "ventas", "stock", "cat", "plan", "dash", "guia", "nut", "rank", "adm"]; barra("#tNav", o); setTimeout(() => barra("#tNav", o), 500); }
+})();
+</script>
 <style>/* patch_asistente */
 #iaBtn{position:fixed;right:14px;bottom:calc(84px + env(safe-area-inset-bottom));z-index:900;border:0;border-radius:999px;padding:12px 16px;font:600 .95rem system-ui,sans-serif;
   background:linear-gradient(135deg,#0B3146,#1C7A4E);color:#fff;box-shadow:0 6px 18px rgba(11,49,70,.35);cursor:pointer;display:flex;gap:6px;align-items:center}
+body.ia-izq #iaBtn{right:auto;left:14px}
 #iaBtn:focus-visible{outline:3px solid #F5B400;outline-offset:2px}
 #iaPan{position:fixed;inset:0;z-index:1000;background:var(--bg,#F4F7F9);display:none;flex-direction:column;color:var(--ink,#13222D)}
 #iaPan.on{display:flex}
@@ -6423,6 +6458,8 @@ function vmPoner(cont, VM, antes) { try { if (!cont) return; const v = cont.quer
     '<div class="ia-m" id="iaMsgs" aria-live="polite"></div><form class="ia-f" id="iaF"><textarea id="iaQ" rows="1" maxlength="2000" placeholder="Pregunta sobre ventas, metas, clientes, stock…"></textarea><button type="submit" id="iaGo">Enviar</button></form>' +
     '<div class="ia-n">Sin costo: responde con los datos de esta app' + (RC ? " (sin costos ni márgenes)" : "") + '; lo que no sabe calcular se lo pregunta a la IA gratis de Google (Gemini), sin RUT ni teléfonos. Revisa las cifras importantes.</div>';
   document.body.appendChild(btn); document.body.appendChild(pan);
+  /* en VENTAS y TIENDA mover a la izquierda para no tapar botones de la derecha (Enviar pedido, etc.) */
+  if (T === "ventas" || T === "tienda") document.body.classList.add("ia-izq");
   const $m = pan.querySelector("#iaMsgs"), $q = pan.querySelector("#iaQ"), $go = pan.querySelector("#iaGo");
   const burbuja = (cls, html) => { const d = document.createElement("div"); d.className = "ia-b " + cls; d.innerHTML = html; $m.appendChild(d); $m.scrollTop = $m.scrollHeight; return d; };
   function inicio() { $m.innerHTML = ""; burbuja("ia-a", "<p>Hola" + (usuario() && usuario() !== T ? ", " + esc(String(usuario()).split(" ")[0]) : "") + ". Pregúntame sobre los datos de esta app: " + ({ log: "ventas, metas, stock, compras, pedidos y rutas", ventas: "ventas, metas, stock de la distribuidora, prospectos y cobranza", tienda: "ventas de la tienda, metas y stock de la tienda" }[T] || "ventas, metas, clientes, productos y stock") + ".</p>");
@@ -6453,40 +6490,6 @@ function vmPoner(cont, VM, antes) { try { if (!cont) return; const v = cont.quer
   $q.addEventListener("input", () => { $q.style.height = "auto"; $q.style.height = Math.min(140, $q.scrollHeight) + "px"; });
   document.addEventListener("keydown", e => { if (e.key === "Escape" && pan.classList.contains("on")) cerrar(); });
   window.hwfAsistente = { contexto };   /* para pruebas */
-})();
-</script>
-<style>/* patch_menuorden */
-#snPanel .sn-g{font-size:.7rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted,#5B6874);padding:12px 10px 4px;border-top:1px solid var(--line,#E3E9EE);margin-top:6px}
-#snPanel .sn-i .sn-e:has(svg){width:34px;min-width:34px;height:34px}#snPanel .sn-i .sn-e svg{width:34px;height:34px;display:block}
-#snPanel .sn-g.sn-g0{border-top:0;margin-top:0;padding-top:4px}
-</style>
-<script>/* patch_menuorden: menús reordenados y agrupados */
-(function () {
-  const VEN = typeof NAV_ORDEN !== "undefined" && typeof setModo === "function" && !!document.getElementById("mInicio"), ADM = !VEN && !!document.querySelector("nav.bottom") && !!document.getElementById("s-res");
-  const LOG = !VEN && !ADM && !!document.querySelector('#nav [data-s="rutas"]'), TND = !VEN && !ADM && !!document.getElementById("tNav");
-  const GV = [["Mi día", ["inicio", "pedido", "clientes", "agenda", "ruta", "cobranza", "embudo", "cat"]], ["Análisis", ["dash", "avance", "bi"]], ["Aprender", ["nut", "tec"]]];
-  const GA = [["Ventas", ["t:res", "t:ven", "t:cli", "t:pro", "m:ranking", "m:plan", "m:zonas", "m:terreno", "m:bonif"]], ["Pedidos y cobranza", ["m:cots", "m:napp", "m:cobranza", "m:embudo"]],
-    ["BI y compras", ["b:v", "b:l", "m:abast", "m:provee"]], ["Archivos y datos", ["m:catalogo", "m:cambios", "m:datos"]]];
-  const pos = (G, k) => { let n = 0; for (const [, l] of G) { const i = l.indexOf(k); if (i >= 0) return n + i; n += l.length; } return 999; };
-  if (VEN) { const ord = () => { const a = NAV_ORDEN.slice(); a.sort((x, y) => pos(GV, x[0]) - pos(GV, y[0])); NAV_ORDEN.splice(0, NAV_ORDEN.length, ...a); };
-    ord(); setTimeout(ord, 0); setTimeout(ord, 1500);   /* BI, Catálogos y Técnicas se agregan al cargar */ }
-  /* títulos de grupo en el menú lateral (VENTAS y HWF) */
-  function grupos() { const pan = document.getElementById("snPanel"); if (!pan || pan.querySelector(":scope > .sn-g")) return;
-    const items = [...pan.querySelectorAll(":scope > .sn-i")]; if (!items.length) return; if (ADM && pan.querySelector('.sn-i[data-t="inv"]:not([data-biu])')) return;   /* espera a que BI reemplace Inventario */
-    pan.querySelectorAll(":scope > .sn-g").forEach(x => x.remove());
-    const key = b => VEN ? b.dataset.sm : b.dataset.biu ? "b:" + b.dataset.biu : b.dataset.t ? "t:" + b.dataset.t : "m:" + b.dataset.m, G = VEN ? GV : GA;
-    if (ADM) { const ico = s => { const x = pan.querySelector(s + " .sn-e"); return x ? x.innerHTML : ""; };   /* íconos que faltaban */
-      [["m:provee", '[data-m="cobranza"]'], ["m:catalogo", '[data-m="cots"]']].forEach(([k, s]) => { const it = items.find(b => key(b) === k), e = it && it.querySelector(".sn-e"); if (e && e.textContent.trim() === "•") e.innerHTML = ico(s) || "•"; }); const bv = items.find(b => key(b) === "b:v"), ev = bv && bv.querySelector(".sn-e"), pl = ico('[data-m="plan"]'); if (ev && pl) ev.innerHTML = pl; }
-    items.sort((a, b) => pos(G, key(a)) - pos(G, key(b))); let g0 = -1, n = 0;
-    items.forEach(b => { const p = pos(G, key(b)); let gi = -1, acc = 0; G.forEach(([, l], i) => { if (p >= acc && p < acc + l.length) gi = i; acc += l.length; }); if (gi < 0) gi = G.length;
-      if (gi !== g0) { const h = document.createElement("div"); h.className = "sn-g" + (n ? "" : " sn-g0"); h.textContent = gi < G.length ? G[gi][0] : "Otros"; pan.appendChild(h); g0 = gi; n++; } pan.appendChild(b); });
-  }
-  if (VEN || ADM) { const sn = () => document.getElementById("snPanel"); const mo = new MutationObserver(() => setTimeout(grupos, 0)); const t = setInterval(() => { if (sn()) { mo.observe(sn(), { childList: true }); clearInterval(t); } }, 300); }
-  /* barras inferiores */
-  const barra = (sel, orden) => { const nav = document.querySelector(sel); if (!nav) return; const bs = [...nav.querySelectorAll(":scope > button")], k = b => b.dataset.biu ? "b:" + b.dataset.biu : b.dataset.s;
-    bs.sort((a, b) => { const i = orden.indexOf(k(a)), j = orden.indexOf(k(b)); return (i < 0 ? 99 : i) - (j < 0 ? 99 : j); }).forEach(b => nav.appendChild(b)); };
-  if (LOG) { const o = ["dash", "rutas", "seg", "flota", "abast", "b:v", "b:l"]; barra("#nav", o); setTimeout(() => barra("#nav", o), 500); }
-  if (TND) { const o = ["inicio", "ventas", "stock", "cat", "plan", "dash", "guia", "nut", "rank", "adm"]; barra("#tNav", o); setTimeout(() => barra("#tNav", o), 500); }
 })();
 </script>
 </body>
