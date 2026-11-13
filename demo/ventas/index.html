@@ -3959,7 +3959,7 @@ function pintarCobranza() {
       <div class="cx-k"><div><span>Vencido</span><b>${fmt(R.venc)}</b><small>${R.nVenc} ${R.nVenc === 1 ? "cliente" : "clientes"}</small>${R.v30 ? `<small>${fmt(R.v30)} con más de 30 días</small>` : ""}</div>
         <div class="s"><span>Vence en 7 días</span><b>${fmt(R.sem)}</b><small>${R.hoy ? `${fmt(R.hoy)} vence hoy` : "incluye hoy"}</small></div></div></div>
     <div class="cx-info"><span>Informe Defontana del ${esc(C.emision || "—")}${C.hasta ? ` · vencimientos hasta el ${cxFecha(C.hasta)}` : ""}. Los días de atraso se recalculan cada día.</span></div>
-    ${verTodos ? `<div class="cx-chips" id="cxCobs"><button type="button" data-cob="" aria-pressed="${!cxCob}">Todos</button>${cobs.map(v => `<button type="button" data-cob="${esc(v)}" aria-pressed="${cxCob === v}">${esc(v.split(" ")[0])}</button>`).join("")}</div>` : ""}
+    ${verTodos ? `<div class="cx-chips" id="cxCobs" aria-label="Cobrador"><button type="button" data-cob="" aria-pressed="${!cxCob}">Todos</button>${cobs.map(v => `<button type="button" data-cob="${esc(v)}" aria-pressed="${cxCob === v}">${esc(v.split(" ")[0])}</button>`).join("")}</div>` : ""}
     <div class="cx-chips" id="cxFil">${[["todos", "Todos"], ["venc", "Vencidos"], ["sem", "Vencen en 7 días"], ["cheq", "Cheques"]].map(([k, t]) => `<button type="button" data-f="${k}" aria-pressed="${cxFiltro === k}">${t} (${nF[k]})</button>`).join("")}</div>
     <div class="search"><input id="cxQ" type="search" placeholder="Buscar cliente o RUT" aria-label="Buscar cliente en cobranza" value="${esc(cxQ)}"></div>
     ${cl.map((c, i) => `<div class="cx-cli ${c.est}">
@@ -4190,7 +4190,7 @@ abrirFicha = function (cod) { $("crmEmbudo").hidden = true; document.body.classL
 
 function pintarEmbudo() {
   const box = $("crmEmbudo"); if (!SES) return;
-  const todos = prMios(), vends = [...new Set(todos.map(o => o.vendedor))].filter(Boolean).sort(), verTodos = prSinCartera();
+  const todos = (typeof prUnifV === "function" ? prUnifV(prMios()) : prMios()), vends = [...new Set(todos.map(o => o.vendedor))].filter(Boolean).sort(), verTodos = prSinCartera();
   const base = todos.filter(o => !prVend || o.vendedor === prVend), cnt = prConteo(base), max = Math.max(1, ...cnt), hoy = prHoyISO();
   const q = prN(prQ);
   let l = base.filter(o => (prFiltro < 0 ? o.etapa !== "Descartado" : prIdx(o.etapa) === prFiltro) && prBusca(o, prQ) && prPasaF(o));   /* patch_prlibre */
@@ -4203,7 +4203,7 @@ function pintarEmbudo() {
     <div class="pr-hero"><h2>${verTodos && !prVend ? "Prospectos de todos los vendedores" : "Prospectos libres y tuyos · todo Chile"}${prVend ? " · " + esc(prVend) : ""} <small style="font-weight:600;opacity:.85">${base.length} prospectos · ${avanz} con nota de pedido o más</small></h2>
       <div class="pr-fun">${PR_ETAPAS.map((e, i) => `<button type="button" data-et="${i}" aria-pressed="${prFiltro === i}"><span>${esc(PR_CORTO[i])}</span><i style="width:${Math.round(cnt[i] / max * 100)}%;${i === 7 ? "opacity:.5" : ""}"></i><b>${cnt[i]}</b></button>`).join("")}</div></div>
     <div class="pr-info"><span>${s && s.bajado ? "Sincronizado con HWF" : "Prospectos de todo Chile"}${pend ? ` · <span class="pr-pend">${pend} ${pend === 1 ? "cambio" : "cambios"} por enviar</span>` : ""}</span><span class="pr-bt"><button class="btn primary" type="button" id="prNuevo">＋ Crear prospecto</button><button class="btn" type="button" id="prAct">Actualizar</button></span></div>
-    ${verTodos && vends.length > 1 ? `<div class="pr-chips" id="prVends"><button type="button" data-v="" aria-pressed="${!prVend}">Todos</button>${vends.map(v => `<button type="button" data-v="${esc(v)}" aria-pressed="${prVend === v}">${esc(v)}</button>`).join("")}</div>` : ""}
+    ${verTodos && vends.length > 1 ? `<div class="pr-chips" id="prVends" aria-label="Vendedor"><button type="button" data-v="" aria-pressed="${!prVend}">Todos</button>${vends.map(v => `<button type="button" data-v="${esc(v)}" aria-pressed="${prVend === v}">${esc(v)}</button>`).join("")}</div>` : ""}
     <div class="pr-chips" id="prFil"><button type="button" data-f="-1" aria-pressed="${prFiltro === -1}">Activos</button><button type="button" data-f="-2" aria-pressed="${prFiltro === -2}">Contactar hoy (${vencen})</button>${prFiltro >= 0 ? `<button type="button" data-f="${prFiltro}" aria-pressed="true">${esc(PR_CORTO[prFiltro])} ✕</button>` : ""}</div>
     <div class="search"><input id="prQ" type="search" placeholder="Buscar: nombre, comuna, dirección, rubro, teléfono…" aria-label="Buscar prospecto" value="${esc(prQ)}"></div>${prFiltrosHtml(todos)}
     ${l.map(o => { const i = prIdx(o.etapa), vence = o.proximo_contacto && o.proximo_contacto <= hoy && i !== 7, mov = prMovil(o), tel = prNum(o.telefono) || prNum(o.whatsapp);
@@ -7133,9 +7133,9 @@ function confirmarNota() {
   x.onclick = () => cerrarModal(); card.insertBefore(x, card.firstChild); })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261113015822";
+const HWF_VER = "20261113020943";
 (function () {
-  const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer)\/[^/]*$/, "/");
+  const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
   async function revisar() {
     if (avisado || !navigator.onLine) return;
@@ -8679,6 +8679,54 @@ body.ia-izq #iaBtn{right:auto;left:14px}
   addEventListener("resize", prog);
 })();
 </script>
+<style>/* patch_bimoderno */
+#biBox .card{border-radius:20px;box-shadow:0 2px 14px rgba(11,49,70,.07)}
+#biBox .card>h2{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px;padding-left:12px;border-left:4px solid #3FBF7F;line-height:1.25}
+#biBox .bi-fil{background:linear-gradient(180deg,#F4F7F9,#EEF3F6);border:1px solid #E1E8ED;border-radius:16px;padding:12px;gap:10px 10px!important}
+#biBox .bi-fil label{font-size:.7rem!important;font-weight:800!important;letter-spacing:.06em;text-transform:uppercase;color:#5B6874!important;gap:5px!important}
+#biBox .bi-fil select,#biBox .bi-fil input{border-radius:12px!important;border:1px solid #D5DEE5!important;background:#fff!important;min-height:42px;font-weight:600;text-transform:none;letter-spacing:0;box-shadow:0 1px 2px rgba(11,49,70,.05)}
+#biBox .bi-u{display:flex!important;width:100%;background:#E3EAEF!important;border:0!important;border-radius:999px!important;padding:3px;gap:2px;overflow:visible!important;flex-wrap:nowrap!important}
+#biBox .bi-u button{flex:1 1 0;min-width:0;border:0!important;border-radius:999px!important;background:transparent!important;color:#4A5966!important;padding:8px 6px!important;font-size:.84rem;font-weight:700;text-transform:none;letter-spacing:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:background .15s,color .15s,box-shadow .15s}
+#biBox .bi-u button[aria-pressed="true"]{background:#fff!important;color:#0B3146!important;box-shadow:0 2px 6px rgba(11,49,70,.18)}
+#biBox .bi-exp{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px!important}
+#biBox .bi-exp .btn{min-height:44px;border-radius:12px;border:1px solid #E1E8ED;background:#fff;font-size:.78rem;font-weight:700;padding:6px 4px;line-height:1.15;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+#biBox .bi-k{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+#biBox .bi-k>div{border-radius:16px;padding:12px 14px;background:#F2F6F8;border:1px solid #E1E8ED;font-size:.74rem;font-weight:700;color:#5B6874}
+#biBox .bi-k>div b{display:block;font-size:1.35rem;color:#0F1E29;margin:2px 0;font-weight:900}
+#biBox .bi-k>div:first-child{background:linear-gradient(135deg,#0B3146,#1F5673);color:#CFE3EE;border:0}
+#biBox .bi-k>div:first-child b{color:#fff;font-size:1.6rem}#biBox .bi-k>div:first-child small{color:#A9C7D6}
+#biBox .bi-k>div:only-child{grid-column:1/-1}
+#biBox table thead th{font-size:.68rem;letter-spacing:.06em;color:#5B6874;background:#F4F7F9;border-bottom:0}
+#biBox table thead th:first-child{border-radius:10px 0 0 10px}#biBox table thead th:last-child{border-radius:0 10px 10px 0}
+#biBox table tbody tr:nth-child(even) td{background:#FAFCFD}
+#biBox table tbody tr td{border-bottom:1px solid #EEF2F5}
+#biBox .bi-nota{background:#F6F9FB;border-radius:12px;padding:8px 10px}
+#biBox .bi-fil label:has(#biFmt),#biBox .bi-fil label:has(#biAnio){grid-column:1/-1}
+#biBox .bi-u button{white-space:normal;line-height:1.15;font-size:.8rem}
+@media(max-width:420px){#biBox .bi-exp .btn{font-size:.7rem}}
+</style>
+<script>/* patch_prfiltros: un nombre por vendedor en los prospectos */
+function prUnifV(l) {
+  const n = s => String(s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+  const full = [...new Set(l.map(o => String(o.vendedor || "").trim()).filter(v => v.includes(" ")))];
+  return l.map(o => { const v = String(o.vendedor || "").trim(); if (!v || v.includes(" ")) return o;
+    const f = full.filter(x => n(x).startsWith(n(v) + " ")); return f.length === 1 ? Object.assign({}, o, { vendedor: f[0] }) : o; });
+}
+</script>
+<style>/* patch_sinactualizar */#cxAct,#rgAct,#prAct,#cvAct,#dvBtn{display:none!important}</style>
+<script>/* patch_sinactualizar: los datos se actualizan solos */
+(function () {
+  const IDS = ["cxAct", "rgAct", "prAct", "cvAct", "dvBtn"]; let corriendo = false;
+  function auto() {
+    if (corriendo || document.hidden) return; corriendo = true;
+    const T = typeof toast === "function" ? toast : null; if (T) try { toast = () => {}; } catch (e) {}
+    try { IDS.forEach(id => { const b = document.getElementById(id); if (b && !b.disabled && b.isConnected) b.click(); }); } catch (e) {}
+    setTimeout(() => { if (T) try { toast = T; } catch (e) {} corriendo = false; }, 6000);
+  }
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) setTimeout(auto, 800); });
+  setInterval(auto, 5 * 60 * 1000);
+})();
+</script>
 <style>/* patch_menusel */
 .ms-oc{display:none!important}
 .ms-btn{display:flex;align-items:center;gap:12px;width:100%;margin:0 0 12px;border:1.5px solid var(--line,#C9D3DB);border-radius:16px;padding:10px 14px;background:var(--surface,#fff);color:var(--ink,#0F1E29);font:inherit;cursor:pointer;text-align:left;box-shadow:0 2px 8px rgba(11,49,70,.07);min-height:56px}
@@ -8703,7 +8751,7 @@ body.ia-izq #iaBtn{right:auto;left:14px}
 </style>
 <script>/* patch_menusel: grupos de filtros → menú desplegable */
 (function () {
-  const SEL = '.seg, .rk-seg, .pra-seg, .pt-seg, .db-seg, .ad-seg, .nu-tabs, .tc-tabs, .t-seg, #prFil, #prSegF, #cxFil, #cxSegF, #invSeg, #proSeg, #bnSegAp, [role=tablist]';
+  const SEL = '.seg, .pr-chips, .cx-chips, .rk-seg, .pra-seg, .pt-seg, .db-seg, .ad-seg, .nu-tabs, .tc-tabs, .t-seg, #prFil, #prSegF, #cxFil, #cxSegF, #invSeg, #proSeg, #bnSegAp, [role=tablist]';
   const FUERA = "#masSeg, #snPanel, #snPanLog, nav, .modos, #tNav, .ms-hoja, header, .auth-body, #auth, .login";
   const activo = b => b.getAttribute("aria-pressed") === "true" || b.getAttribute("aria-selected") === "true" || /(^|\s)(on|act|activo|active|sel)(\s|$)/.test(b.className);
   const botones = g => [...g.children].filter(b => b.tagName === "BUTTON" && b.style.display !== "none" && !b.hidden);
@@ -8754,45 +8802,5 @@ body.ia-izq #iaBtn{right:auto;left:14px}
   let pend = false; new MutationObserver(() => { if (pend) return; pend = true; setTimeout(() => { pend = false; aplicar(); }, 60); }).observe(document.body, { childList: true, subtree: true });
 })();
 </script>
-<style>/* patch_sinactualizar */#cxAct,#rgAct,#prAct{display:none!important}</style>
-<script>/* patch_sinactualizar: los datos se actualizan solos */
-(function () {
-  const IDS = ["cxAct", "rgAct", "prAct"]; let corriendo = false;
-  function auto() {
-    if (corriendo || document.hidden) return; corriendo = true;
-    const T = typeof toast === "function" ? toast : null; if (T) try { toast = () => {}; } catch (e) {}
-    try { IDS.forEach(id => { const b = document.getElementById(id); if (b && !b.disabled && b.isConnected) b.click(); }); } catch (e) {}
-    setTimeout(() => { if (T) try { toast = T; } catch (e) {} corriendo = false; }, 6000);
-  }
-  document.addEventListener("visibilitychange", () => { if (!document.hidden) setTimeout(auto, 800); });
-  setInterval(auto, 5 * 60 * 1000);
-})();
-</script>
-<style>/* patch_bimoderno */
-#biBox .card{border-radius:20px;box-shadow:0 2px 14px rgba(11,49,70,.07)}
-#biBox .card>h2{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px;padding-left:12px;border-left:4px solid #3FBF7F;line-height:1.25}
-#biBox .bi-fil{background:linear-gradient(180deg,#F4F7F9,#EEF3F6);border:1px solid #E1E8ED;border-radius:16px;padding:12px;gap:10px 10px!important}
-#biBox .bi-fil label{font-size:.7rem!important;font-weight:800!important;letter-spacing:.06em;text-transform:uppercase;color:#5B6874!important;gap:5px!important}
-#biBox .bi-fil select,#biBox .bi-fil input{border-radius:12px!important;border:1px solid #D5DEE5!important;background:#fff!important;min-height:42px;font-weight:600;text-transform:none;letter-spacing:0;box-shadow:0 1px 2px rgba(11,49,70,.05)}
-#biBox .bi-u{display:flex!important;width:100%;background:#E3EAEF!important;border:0!important;border-radius:999px!important;padding:3px;gap:2px;overflow:visible!important;flex-wrap:nowrap!important}
-#biBox .bi-u button{flex:1 1 0;min-width:0;border:0!important;border-radius:999px!important;background:transparent!important;color:#4A5966!important;padding:8px 6px!important;font-size:.84rem;font-weight:700;text-transform:none;letter-spacing:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:background .15s,color .15s,box-shadow .15s}
-#biBox .bi-u button[aria-pressed="true"]{background:#fff!important;color:#0B3146!important;box-shadow:0 2px 6px rgba(11,49,70,.18)}
-#biBox .bi-exp{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px!important}
-#biBox .bi-exp .btn{min-height:44px;border-radius:12px;border:1px solid #E1E8ED;background:#fff;font-size:.78rem;font-weight:700;padding:6px 4px;line-height:1.15;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
-#biBox .bi-k{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
-#biBox .bi-k>div{border-radius:16px;padding:12px 14px;background:#F2F6F8;border:1px solid #E1E8ED;font-size:.74rem;font-weight:700;color:#5B6874}
-#biBox .bi-k>div b{display:block;font-size:1.35rem;color:#0F1E29;margin:2px 0;font-weight:900}
-#biBox .bi-k>div:first-child{background:linear-gradient(135deg,#0B3146,#1F5673);color:#CFE3EE;border:0}
-#biBox .bi-k>div:first-child b{color:#fff;font-size:1.6rem}#biBox .bi-k>div:first-child small{color:#A9C7D6}
-#biBox .bi-k>div:only-child{grid-column:1/-1}
-#biBox table thead th{font-size:.68rem;letter-spacing:.06em;color:#5B6874;background:#F4F7F9;border-bottom:0}
-#biBox table thead th:first-child{border-radius:10px 0 0 10px}#biBox table thead th:last-child{border-radius:0 10px 10px 0}
-#biBox table tbody tr:nth-child(even) td{background:#FAFCFD}
-#biBox table tbody tr td{border-bottom:1px solid #EEF2F5}
-#biBox .bi-nota{background:#F6F9FB;border-radius:12px;padding:8px 10px}
-#biBox .bi-fil label:has(#biFmt),#biBox .bi-fil label:has(#biAnio){grid-column:1/-1}
-#biBox .bi-u button{white-space:normal;line-height:1.15;font-size:.8rem}
-@media(max-width:420px){#biBox .bi-exp .btn{font-size:.7rem}}
-</style>
 </body>
 </html>

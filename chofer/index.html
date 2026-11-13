@@ -237,9 +237,9 @@ function arrancar() { const P = perfil(); if (!P || !cfg()) return puerta(); if 
 puerta(); /* patch_choferingreso: siempre la portada de ingreso */
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 </script><script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261113015822";
+const HWF_VER = "20261113020943";
 (function () {
-  const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer)\/[^/]*$/, "/");
+  const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
   async function revisar() {
     if (avisado || !navigator.onLine) return;
@@ -522,6 +522,20 @@ const HWF_VER = "20261113015822";
   addEventListener("resize", prog);
 })();
 </script>
+<style>/* patch_sinactualizar */#bR{display:none!important}</style>
+<script>/* patch_sinactualizar: los datos se actualizan solos */
+(function () {
+  const IDS = ["bR"]; let corriendo = false;
+  function auto() {
+    if (corriendo || document.hidden) return; corriendo = true;
+    const T = typeof toast === "function" ? toast : null; if (T) try { toast = () => {}; } catch (e) {}
+    try { IDS.forEach(id => { const b = document.getElementById(id); if (b && !b.disabled && b.isConnected) b.click(); }); } catch (e) {}
+    setTimeout(() => { if (T) try { toast = T; } catch (e) {} corriendo = false; }, 6000);
+  }
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) setTimeout(auto, 800); });
+  setInterval(auto, 5 * 60 * 1000);
+})();
+</script>
 <style>/* patch_menusel */
 .ms-oc{display:none!important}
 .ms-btn{display:flex;align-items:center;gap:12px;width:100%;margin:0 0 12px;border:1.5px solid var(--line,#C9D3DB);border-radius:16px;padding:10px 14px;background:var(--surface,#fff);color:var(--ink,#0F1E29);font:inherit;cursor:pointer;text-align:left;box-shadow:0 2px 8px rgba(11,49,70,.07);min-height:56px}
@@ -546,7 +560,7 @@ const HWF_VER = "20261113015822";
 </style>
 <script>/* patch_menusel: grupos de filtros → menú desplegable */
 (function () {
-  const SEL = '.seg, .rk-seg, .pra-seg, .pt-seg, .db-seg, .ad-seg, .nu-tabs, .tc-tabs, .t-seg, #prFil, #prSegF, #cxFil, #cxSegF, #invSeg, #proSeg, #bnSegAp, [role=tablist]';
+  const SEL = '.seg, .pr-chips, .cx-chips, .rk-seg, .pra-seg, .pt-seg, .db-seg, .ad-seg, .nu-tabs, .tc-tabs, .t-seg, #prFil, #prSegF, #cxFil, #cxSegF, #invSeg, #proSeg, #bnSegAp, [role=tablist]';
   const FUERA = "#masSeg, #snPanel, #snPanLog, nav, .modos, #tNav, .ms-hoja, header, .auth-body, #auth, .login";
   const activo = b => b.getAttribute("aria-pressed") === "true" || b.getAttribute("aria-selected") === "true" || /(^|\s)(on|act|activo|active|sel)(\s|$)/.test(b.className);
   const botones = g => [...g.children].filter(b => b.tagName === "BUTTON" && b.style.display !== "none" && !b.hidden);
@@ -595,20 +609,6 @@ const HWF_VER = "20261113015822";
   }
   aplicar(); setTimeout(aplicar, 500); setTimeout(aplicar, 1600);
   let pend = false; new MutationObserver(() => { if (pend) return; pend = true; setTimeout(() => { pend = false; aplicar(); }, 60); }).observe(document.body, { childList: true, subtree: true });
-})();
-</script>
-<style>/* patch_sinactualizar */#bR{display:none!important}</style>
-<script>/* patch_sinactualizar: los datos se actualizan solos */
-(function () {
-  const IDS = ["bR"]; let corriendo = false;
-  function auto() {
-    if (corriendo || document.hidden) return; corriendo = true;
-    const T = typeof toast === "function" ? toast : null; if (T) try { toast = () => {}; } catch (e) {}
-    try { IDS.forEach(id => { const b = document.getElementById(id); if (b && !b.disabled && b.isConnected) b.click(); }); } catch (e) {}
-    setTimeout(() => { if (T) try { toast = T; } catch (e) {} corriendo = false; }, 6000);
-  }
-  document.addEventListener("visibilitychange", () => { if (!document.hidden) setTimeout(auto, 800); });
-  setInterval(auto, 5 * 60 * 1000);
 })();
 </script>
 </body></html>
