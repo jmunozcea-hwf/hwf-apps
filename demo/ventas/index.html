@@ -2505,7 +2505,7 @@ function pintarCRM() {
   const m = d && d.meta;
   if (m && m.meta) {
     const pct = Math.min(1, m.avance / m.meta), hoyActs = actividades().filter(a => String(a.fecha).slice(0, 10) === hoyISO() || new Date(a.fecha).toDateString() === new Date().toDateString());
-    $("crmMeta").innerHTML = `<div class="l1"><span class="hint">Meta ${(npMesTxt(), nombreMes())} · ${esc(d.cartera)}</span><span class="hint">${d.clientes.length} clientes · ${hoyActs.filter(a => a.tipo === "Visita").length} visitas hoy</span></div>
+    $("crmMeta").innerHTML = `<div class="l1"><span class="hint">Meta ${((typeof npMesTxt === "function" && npMesTxt()), nombreMes())} · ${esc(d.cartera)}</span><span class="hint">${d.clientes.length} clientes · ${hoyActs.filter(a => a.tipo === "Visita").length} visitas hoy</span></div>
       <div class="l1"><span class="big num">${fmt(m.avance)} <span class="hint" style="font-size:.9rem">de ${fmt(m.meta)}</span></span><b class="num">${Math.round(pct * 100)}%</b></div>
       <div class="pbar"><i style="width:${Math.round(pct * 100)}%"></i></div>
       <div class="hint">${m.falta > 0 ? `Faltan <b>${fmt(m.falta)}</b>. ` : "Meta cumplida. "}Incluye ventas al ${fd2(m.fecha_corte)}${m.venta_app ? ` y ${fmt(m.venta_app)} en pedidos exportados desde la app` : ""}.</div>`;
@@ -7133,7 +7133,7 @@ function confirmarNota() {
   x.onclick = () => cerrarModal(); card.insertBefore(x, card.firstChild); })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261113021918";
+const HWF_VER = "20261113022430";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
