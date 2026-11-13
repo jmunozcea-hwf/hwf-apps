@@ -452,7 +452,7 @@ if (!cfg()) pantallaConexion(); else if (!DATA()) { bajar(true).then(() => DATA(
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261113101359";
+const HWF_VER = "20261113121451";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -864,16 +864,6 @@ function vmPoner(cont, VM, antes) { try { if (!cont) return; const v = cont.quer
   }
 })();
 </script>
-<style>/* patch_pantallas: usar el ancho del monitor en PC */
-@media (min-width:1400px){
-  main,.wrap{max-width:min(96vw,2400px)!important}
-  .pp-k,.kpis,.kp{grid-template-columns:repeat(auto-fit,minmax(210px,1fr))!important}
-  #vmCard svg,.vm-svg{max-height:420px}
-  .nt-card{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:10px}.nt-card h3,.nt-card .nt-plan{grid-column:1/-1}
-}
-@media (min-width:1900px){ html{font-size:17px} }
-@media (min-width:2500px){ html{font-size:18.5px} }
-</style>
 <style>/* patch_bi */
 .bi-seg{display:flex;gap:6px;margin:0 0 12px;background:var(--sunk,#EEF2F5);padding:4px;border-radius:12px}
 .bi-seg button{flex:1;border:0;background:transparent;padding:9px 8px;border-radius:9px;font:inherit;font-weight:700;color:var(--muted,#5B6874);cursor:pointer}
@@ -1930,4 +1920,27 @@ body.log-sn main{padding-bottom:0!important}
   }
 })();
 </script>
+<style>/* patch_pantallas: usar el ancho del monitor en PC */
+@media (min-width:1400px){
+  main,.wrap{max-width:min(96vw,2400px)!important}
+  .pp-k,.kpis,.kp{grid-template-columns:repeat(auto-fit,minmax(210px,1fr))!important}
+  #vmCard svg,.vm-svg{max-height:420px}
+  .nt-card{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:10px}.nt-card h3,.nt-card .nt-plan{grid-column:1/-1}
+}
+/* tablet y PC: el gráfico no se estira con el ancho y las tarjetas de inicio se reparten en columnas */
+@media (min-width:900px){ .ad-svg{max-height:min(440px,55vh)} }
+@media (min-width:1000px){
+  #crmInicio,#s-res{grid-template-columns:repeat(auto-fit,minmax(min(100%,460px),1fr))!important;align-items:start}
+  #crmInicio>*,#s-res>*{min-width:0}
+  #crmInicio>#adCard,#crmInicio>#vmCard,#crmInicio>#kpCard,#crmInicio>.in-hero,#crmInicio>.av2,
+  #s-res>#adCard,#s-res>#vmCard,#s-res>#kpCard,#s-res>.av2{grid-column:1/-1}
+}
+/* teléfonos angostos: selectores y botones del encabezado se achican en vez de salirse de la pantalla */
+@media (max-width:400px){
+  header select,header .btn,header button{min-width:0;max-width:112px}
+  header select{padding-left:8px;padding-right:2px;font-size:.78rem}
+}
+@media (min-width:1900px){ html{font-size:17px} }
+@media (min-width:2500px){ html{font-size:18.5px} }
+</style>
 </body></html>

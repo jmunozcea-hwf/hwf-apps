@@ -5153,7 +5153,7 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261113101359";
+const HWF_VER = "20261113121451";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -6026,16 +6026,6 @@ function vmPoner(cont, VM, antes) { try { if (!cont) return; const v = cont.quer
   }
 })();
 </script>
-<style>/* patch_pantallas: usar el ancho del monitor en PC */
-@media (min-width:1400px){
-  main{max-width:none!important;margin-left:220px!important;margin-right:0!important}
-  .pp-k,.kpis,.kp{grid-template-columns:repeat(auto-fit,minmax(210px,1fr))!important}
-  #vmCard svg,.vm-svg{max-height:420px}
-  .nt-card{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:10px}.nt-card h3,.nt-card .nt-plan{grid-column:1/-1}
-}
-@media (min-width:1900px){ html{font-size:17px} }
-@media (min-width:2500px){ html{font-size:18.5px} }
-</style>
 <script>/* patch_kpipares: cuadros del Dashboard en pares */
 (function () {
   const res = document.getElementById("s-res"); if (!res || !window.hwfBi) return;
@@ -7247,5 +7237,28 @@ function npVer(n) {
   setTimeout(inyectarBoton, 400);
 })();
 </script>
+<style>/* patch_pantallas: usar el ancho del monitor en PC */
+@media (min-width:1400px){
+  main{max-width:none!important;margin-left:220px!important;margin-right:0!important}
+  .pp-k,.kpis,.kp{grid-template-columns:repeat(auto-fit,minmax(210px,1fr))!important}
+  #vmCard svg,.vm-svg{max-height:420px}
+  .nt-card{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:10px}.nt-card h3,.nt-card .nt-plan{grid-column:1/-1}
+}
+/* tablet y PC: el gráfico no se estira con el ancho y las tarjetas de inicio se reparten en columnas */
+@media (min-width:900px){ .ad-svg{max-height:min(440px,55vh)} }
+@media (min-width:1000px){
+  #crmInicio,#s-res{grid-template-columns:repeat(auto-fit,minmax(min(100%,460px),1fr))!important;align-items:start}
+  #crmInicio>*,#s-res>*{min-width:0}
+  #crmInicio>#adCard,#crmInicio>#vmCard,#crmInicio>#kpCard,#crmInicio>.in-hero,#crmInicio>.av2,
+  #s-res>#adCard,#s-res>#vmCard,#s-res>#kpCard,#s-res>.av2{grid-column:1/-1}
+}
+/* teléfonos angostos: selectores y botones del encabezado se achican en vez de salirse de la pantalla */
+@media (max-width:400px){
+  header select,header .btn,header button{min-width:0;max-width:112px}
+  header select{padding-left:8px;padding-right:2px;font-size:.78rem}
+}
+@media (min-width:1900px){ html{font-size:17px} }
+@media (min-width:2500px){ html{font-size:18.5px} }
+</style>
 </body>
 </html>
