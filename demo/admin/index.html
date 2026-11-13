@@ -5153,7 +5153,7 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261113094237";
+const HWF_VER = "20261113095319";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -7042,6 +7042,201 @@ function npVer(n) {
     w.document.write(html); w.document.close();
     w.addEventListener('load', function () { w.print(); });
   }
+})();
+</script>
+<style>/* patch_verificar_cart */
+#vcPanel{padding:12px 0}
+#vcPanel h3{margin:0 0 10px;font-size:1rem}
+.vc-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+.vc-bar select,#vcQ{font:inherit;font-size:.82rem;padding:7px 10px;border:1.5px solid var(--line);border-radius:10px;background:var(--bg,#fff);color:var(--ink);min-width:120px}
+#vcQ{flex:1;min-width:140px}
+.vc-info{font-size:.78rem;color:var(--muted);margin-left:auto;white-space:nowrap}
+.vc-tbl{width:100%;border-collapse:collapse;font-size:.82rem}
+.vc-tbl th{text-align:left;font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);padding:6px 8px;border-bottom:2px solid var(--line)}
+.vc-tbl td{padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:middle}
+.vc-tbl tr.vc-ov td{background:#FFF8E6}
+.vc-tbl tr.vc-ov td:first-child::before{content:"✏️ ";font-size:.7rem}
+.vc-sel{font:inherit;font-size:.8rem;padding:4px 6px;border:1.5px solid var(--line);border-radius:8px;background:var(--bg,#fff);color:var(--ink);cursor:pointer;width:100%}
+.vc-sel.changed{border-color:#F0A818;background:#FFF8E6;font-weight:700}
+.vc-foot{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.vc-foot button{font:inherit;font-size:.82rem;padding:7px 14px;border:0;border-radius:10px;cursor:pointer;font-weight:700}
+#vcReset{background:#FEE4E2;color:#B42318}
+#vcExport{background:#E6EEF3;color:#0B3146}
+#vcSave{background:#D1FAE5;color:#065F46}
+</style>
+<script>/* patch_verificar_cart: verificación y corrección manual de carteras en Admin */
+(function () {
+  if (typeof cartDe !== 'function' || typeof D === 'undefined') return;
+
+  const LS_KEY = 'hwf-cart-ov';
+
+  /* -- leer / guardar overrides -- */
+  function ovRead() { try { return JSON.parse(localStorage.getItem(LS_KEY) || '{}'); } catch (e) { return {}; } }
+  function ovSave(ov) { try { localStorage.setItem(LS_KEY, JSON.stringify(ov)); } catch (e) {} }
+
+  /* -- interceptar cartDe para aplicar overrides primero -- */
+  const _cdBase = cartDe;
+  cartDe = function (ci) {
+    const ov = ovRead();
+    return ov[String(ci)] || _cdBase(ci);
+  };
+
+  /* -- lista de vendedores activos -- */
+  function getVends() {
+    const nrm = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
+    if (typeof CARTERAS === 'function') return CARTERAS();
+    /* fallback: leer de D.vend */
+    return [...new Set((D.vend || []).filter(v => v && !/tienda|gen[eé]rico/i.test(v)))];
+  }
+
+  /* -- calcular asignación automática sin overrides (solo última factura) -- */
+  function autoMap() {
+    const nrm = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
+    const m = {};
+    (D.rows || []).forEach(r => {
+      if ((r[5] || 0) <= 0) return;
+      const v = D.vend[r[7]]; if (!v || /HELLYW/i.test(v)) return;
+      const anio = r[8] || D.anio;
+      const f = anio * 10000 + r[2] * 100 + r[3];
+      if (!m[r[0]] || f > m[r[0]].f) m[r[0]] = { f, v };
+    });
+    return m;
+  }
+
+  /* -- renderizar panel -- */
+  function vcRender(wrap) {
+    const ov = ovRead();
+    const auto = autoMap();
+    const vends = getVends();
+    const clientes = D.clientes || [];
+
+    let filtV = '', filtQ = '';
+
+    function filas() {
+      let list = clientes.map((c, ci) => {
+        const autoV = (auto[ci] && auto[ci].v) || c[2] || '';
+        const ovV = ov[String(ci)] || null;
+        const actual = ovV || autoV;
+        return { ci, nombre: c[0] || '', comuna: c[1] || '', autoV, ovV, actual };
+      });
+      if (filtV) list = list.filter(x => x.actual === filtV);
+      if (filtQ) {
+        const q = filtQ.toLowerCase();
+        list = list.filter(x => (x.nombre + ' ' + x.comuna).toLowerCase().includes(q));
+      }
+      return list;
+    }
+
+    function html() {
+      const list = filas();
+      const ovCount = Object.keys(ov).length;
+      const opts = vends.map(v => `<option value="${esc(v)}">${esc(v.split(' ')[0])}</option>`).join('');
+      const fOpts = [`<option value="">Todos</option>`].concat(vends.map(v => `<option value="${esc(v)}"${v === filtV ? ' selected' : ''}>${esc(v.split(' ')[0])}</option>`)).join('');
+      const rows = list.map(x => {
+        const isOv = !!x.ovV;
+        const selOpts = vends.map(v => `<option value="${esc(v)}"${v === x.actual ? ' selected' : ''}>${esc(v.split(' ')[0])}</option>`).join('');
+        return `<tr class="${isOv ? 'vc-ov' : ''}" data-ci="${x.ci}">
+          <td>${esc(x.nombre)}</td>
+          <td>${esc(x.comuna)}</td>
+          <td style="color:var(--muted);font-size:.75rem">${esc(x.autoV.split(' ')[0])}</td>
+          <td><select class="vc-sel${isOv ? ' changed' : ''}" data-ci="${x.ci}"><option value="">— auto —</option>${selOpts}</select></td>
+        </tr>`;
+      }).join('');
+      return `<div id="vcPanel">
+        <h3>Verificar asignación de clientes</h3>
+        <div class="vc-bar">
+          <input id="vcQ" type="search" placeholder="Buscar nombre o ciudad…" value="${esc(filtQ)}">
+          <select id="vcFiltV">${fOpts}</select>
+          <span class="vc-info">${ovCount ? `${ovCount} corrección${ovCount > 1 ? 'es' : ''} manual${ovCount > 1 ? 'es' : ''}` : 'Sin correcciones'}</span>
+        </div>
+        <div style="overflow-x:auto"><table class="vc-tbl">
+          <thead><tr><th>Cliente</th><th>Ciudad</th><th>Auto</th><th>Asignado a</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table></div>
+        <div class="vc-foot">
+          <button id="vcReset" type="button">🗑️ Borrar correcciones</button>
+          <button id="vcExport" type="button">⬇️ Exportar CSV</button>
+        </div>
+      </div>`;
+    }
+
+    function mount() {
+      wrap.innerHTML = html();
+
+      wrap.querySelector('#vcQ').oninput = function () { filtQ = this.value; mount(); };
+      wrap.querySelector('#vcFiltV').onchange = function () { filtV = this.value; mount(); };
+
+      wrap.querySelectorAll('.vc-sel').forEach(sel => {
+        sel.onchange = function () {
+          const ci = String(this.dataset.ci);
+          const ov2 = ovRead();
+          if (this.value) ov2[ci] = this.value; else delete ov2[ci];
+          ovSave(ov2);
+          if (typeof calcular === 'function') try { calcular(); } catch (e) {}
+          mount();
+          typeof toast === 'function' && toast(this.value ? `${this.value.split(' ')[0]} asignado.` : 'Vuelve al automático.');
+        };
+      });
+
+      const btnReset = wrap.querySelector('#vcReset');
+      if (btnReset) btnReset.onclick = function () {
+        if (!confirm('¿Borrar todas las correcciones manuales?')) return;
+        ovSave({});
+        if (typeof calcular === 'function') try { calcular(); } catch (e) {}
+        mount();
+        typeof toast === 'function' && toast('Correcciones borradas.');
+      };
+
+      const btnExp = wrap.querySelector('#vcExport');
+      if (btnExp) btnExp.onclick = function () {
+        const all = clientes.map((c, ci) => {
+          const autoV = (auto[ci] && auto[ci].v) || c[2] || '';
+          const ovV = ov[String(ci)] || '';
+          return [c[0] || '', c[1] || '', autoV, ovV].map(v => '"' + String(v).replace(/"/g, '""') + '"').join(';');
+        });
+        const csv = '﻿' + 'Cliente;Ciudad;Automático;Corrección manual\n' + all.join('\n');
+        const a = document.createElement('a'); a.download = 'carteras_hwf.csv';
+        a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(() => URL.revokeObjectURL(a.href), 8000);
+        typeof toast === 'function' && toast('Descargando carteras…');
+      };
+    }
+
+    mount();
+  }
+
+  /* -- inyectar botón en sección Más -- */
+  function inyectarBoton() {
+    const mas = document.getElementById('s-mas');
+    if (!mas || mas.querySelector('#vcBtn')) return;
+    const ov = ovRead();
+    const n = Object.keys(ov).length;
+    const btn = document.createElement('button');
+    btn.type = 'button'; btn.id = 'vcBtn';
+    btn.className = 'ms-btn'; /* reutiliza el estilo de patch_menusel */
+    btn.innerHTML = `<div class="ms-t"><small>Administración</small><b>📋 Verificar carteras${n ? ` <span class="ms-n">${n}</span>` : ''}</b></div><div class="ms-a">›</div>`;
+    btn.onclick = function () {
+      let wrap = document.getElementById('vcWrap');
+      if (!wrap) {
+        wrap = document.createElement('div'); wrap.id = 'vcWrap';
+        wrap.style.cssText = 'position:fixed;inset:0;z-index:300;background:var(--bg,#fff);overflow-y:auto;padding:16px 16px calc(80px + env(safe-area-inset-bottom,0px))';
+        const cerrar = document.createElement('button');
+        cerrar.type = 'button'; cerrar.style.cssText = 'float:right;font:inherit;font-size:.85rem;font-weight:700;padding:6px 12px;border:0;border-radius:10px;background:var(--sunk);color:var(--ink);cursor:pointer;margin-bottom:8px';
+        cerrar.textContent = '← Volver'; cerrar.onclick = () => wrap.remove();
+        wrap.appendChild(cerrar);
+        const cont = document.createElement('div'); cont.id = 'vcCont'; wrap.appendChild(cont);
+        document.body.appendChild(wrap);
+        vcRender(cont);
+      } else {
+        wrap.remove();
+      }
+    };
+    mas.insertBefore(btn, mas.firstChild);
+  }
+
+  new MutationObserver(inyectarBoton).observe(document.body, { childList: true, subtree: true });
+  setTimeout(inyectarBoton, 400);
 })();
 </script>
 </body>
