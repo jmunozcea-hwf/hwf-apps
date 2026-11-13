@@ -7174,7 +7174,7 @@ function confirmarNota() {
   x.onclick = () => cerrarModal(); card.insertBefore(x, card.firstChild); })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261113023458";
+const HWF_VER = "20261113090615";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -8878,8 +8878,12 @@ function prUnifV(l) {
 .pv-emp h3{margin:0;font-size:1.05rem}.pv-emp .pv-g{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
 .pv-emp .pv-g>div{background:var(--sunk,#EEF2F5);border-radius:12px;padding:10px}.pv-emp .pv-g span{display:block;font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--muted,#5B6874)}
 .pv-emp .pv-g b{font-size:1.2rem}.pv-emp .pv-bar{height:10px;border-radius:6px;background:#E3EAEF;overflow:hidden;display:flex}.pv-emp .pv-bar i{display:block;height:100%}
+#pvPickWrap{display:flex;align-items:center;gap:6px;margin-right:4px}
+#pvPickWrap label{font-size:.72rem;font-weight:700;color:rgba(255,255,255,.75);white-space:nowrap;text-transform:uppercase;letter-spacing:.04em}
+#pvPick{font:inherit;font-size:.8rem;font-weight:700;padding:5px 8px;border:1.5px solid rgba(255,255,255,.3);border-radius:8px;background:rgba(255,255,255,.12);color:#fff;cursor:pointer;min-width:90px}
+#pvPick option{background:#1C3A2A;color:#fff}
 </style>
-<script>/* patch_vendedor: menú desplegable, resumen de la empresa, datos propios */
+<script>/* patch_vendedor: menú desplegable, resumen de la empresa, datos propios, selector de vendedor admin */
 (function () {
   if (typeof mostrarAcceso !== "function" || typeof CRM_BASE === "undefined") return;
   const nrm = s => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
@@ -8887,6 +8891,8 @@ function prUnifV(l) {
   const esAdmin = () => !!(SES && SES.vendedor && SES.vendedor.admin);
   const ULT = "hwf-pv-ultimo";
   const MENU = ["Claudia", "Diego", "Matias", "Invitado"];
+  let pvVisor = null; /* null = todos; nombre = filtrar por ese vendedor */
+
   mostrarAcceso = function () {
     document.body.classList.add("locked"); $("auth").hidden = false;
     let ult = ""; try { ult = localStorage.getItem(ULT) || ""; } catch (e) {}
@@ -8913,13 +8919,50 @@ function prUnifV(l) {
     };
     $("pvB").onclick = go; $("pvNom").onkeydown = e => { if (e.key === "Enter") go(); };
   };
-  /* Panel: siempre «Solo mis datos» para vendedores; Invitado ve todo */
-  if (typeof dbAlcance === "function" && typeof dbMiCart === "function") { const _a = dbAlcance; dbAlcance = function () { return esAdmin() ? _a() : (dbMiCart() || ""); }; }
-  /* avance del equipo: solo el total de la empresa, sin nombres */
+
+  /* dbAlcance: vendedor → solo sus datos; Invitado sin visor → todo; Invitado con visor → cartera del visor */
+  if (typeof dbAlcance === "function" && typeof dbMiCart === "function") {
+    const _a = dbAlcance;
+    dbAlcance = function () {
+      if (!esAdmin()) return dbMiCart() || "";
+      if (pvVisor) {
+        const orig = SES.vendedor.cartera;
+        SES.vendedor.cartera = pvVisor;
+        const r = dbMiCart() || "";
+        SES.vendedor.cartera = orig;
+        return r;
+      }
+      return _a();
+    };
+  }
+
+  /* avEquipo: solo total de la empresa para vendedores */
   if (typeof avEquipo === "function") { const _e = avEquipo; avEquipo = function () { const html = _e.apply(this, arguments); if (esAdmin() || !html) return html;
     try { const d = document.createElement("div"); d.innerHTML = html; const filas = d.querySelectorAll(".av-eq > *"); filas.forEach((f, i) => { if (i < filas.length - 1) f.remove(); });
       const h = d.querySelector("h3"); if (h) h.firstChild.textContent = "Avance de la empresa "; return d.innerHTML; } catch (e) { return html; } }; }
-  /* resumen de la empresa al entrar (primero en el resumen de la mañana) */
+
+  /* selector de vendedor en el header (solo Invitado/admin) */
+  function pvPicker() {
+    if (!esAdmin()) return;
+    const ha = document.querySelector(".head-actions");
+    if (!ha || ha.querySelector("#pvPickWrap")) return;
+    const L = VENDS();
+    if (!L.length) return;
+    const opts = [`<option value="">Todos</option>`].concat(L.map(n => `<option value="${n}">${n.split(" ")[0]}</option>`)).join("");
+    const wrap = document.createElement("div");
+    wrap.id = "pvPickWrap";
+    wrap.innerHTML = `<label for="pvPick">Ver:</label><select id="pvPick">${opts}</select>`;
+    ha.insertBefore(wrap, ha.firstChild);
+    document.getElementById("pvPick").onchange = function () {
+      pvVisor = this.value || null;
+      try { CRMD = null; } catch (e) {}
+      const tab = document.querySelector('[role="tab"][aria-selected="true"]');
+      if (tab) tab.click();
+      toast(pvVisor ? "Viendo a " + pvVisor.split(" ")[0] : "Viendo todo el equipo");
+    };
+  }
+
+  /* resumen de la empresa al entrar */
   function empresa() {
     if (typeof avFilas !== "function") return "";
     const F = avFilas(), T = F.reduce((s, x) => ({ meta: s.meta + (x.meta || 0), fa: s.fa + (x.fa || 0), np: s.np + (x.np || 0) }), { meta: 0, fa: 0, np: 0 });
@@ -8930,8 +8973,17 @@ function prUnifV(l) {
       <div class="pv-g"><div><span>Facturado</span><b>${fmt(T.fa)}</b></div><div><span>Meta del equipo</span><b>${fmt(T.meta)}</b></div>
         <div><span>Notas por facturar</span><b>${fmt(T.np)}</b></div><div><span>Avance</span><b>${pc}%</b></div></div></div>`;
   }
-  new MutationObserver(() => { const o = document.getElementById("rdOv"); if (!o || o.querySelector("#pvEmp")) return; const w = o.querySelector(".rd-w"), hd = o.querySelector(".rd-h");
-    const html = empresa(); if (!html || !w) return; if (hd) hd.insertAdjacentHTML("afterend", html); else w.insertAdjacentHTML("afterbegin", html); }).observe(document.body, { childList: true, subtree: true });
+
+  new MutationObserver(() => {
+    const o = document.getElementById("rdOv"); if (!o || o.querySelector("#pvEmp")) return;
+    const w = o.querySelector(".rd-w"), hd = o.querySelector(".rd-h");
+    const html = empresa(); if (!html || !w) return;
+    if (hd) hd.insertAdjacentHTML("afterend", html); else w.insertAdjacentHTML("afterbegin", html);
+  }).observe(document.body, { childList: true, subtree: true });
+
+  /* inyectar picker cuando aparece .head-actions */
+  new MutationObserver(pvPicker).observe(document.body, { childList: true, subtree: true });
+
   /* portada de ingreso cada vez que se abre la app */
   try { if (!esAdmin()) { localStorage.removeItem(SKEY); SES = null; } } catch (e) {}
   if (!SES) { try { mostrarAcceso(); } catch (e) {} }
