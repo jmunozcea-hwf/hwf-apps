@@ -5194,7 +5194,7 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261113151702";
+const HWF_VER = "20261114084656";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -7332,6 +7332,283 @@ function npVer(n) {
 
   new MutationObserver(inyectarBoton).observe(document.body, { childList: true, subtree: true });
   setTimeout(inyectarBoton, 400);
+})();
+</script>
+<style>/* patch_margenes */
+#s-mar{display:grid;gap:14px;align-content:start}
+.mg-ctl{display:grid;gap:10px}
+.mg-ctl h2{margin:0}
+.mg-f{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.mg-f label{display:grid;gap:3px;font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+.mg-f select,.mg-f input{font:inherit;font-size:.9rem;font-weight:600;text-transform:none;letter-spacing:0;color:var(--ink);border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:9px 12px;min-height:42px;width:100%;min-width:0}
+.mg-acc{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.mg-acc button{font:inherit;font-size:.82rem;font-weight:700;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:7px 13px;min-height:36px;cursor:pointer}
+.mg-chip{display:inline-flex;align-items:center;gap:6px;background:var(--sunk);border-radius:999px;padding:5px 10px;font-size:.8rem;font-weight:700}
+.mg-chip button{border:0;background:transparent;cursor:pointer;font-size:.9rem;line-height:1;padding:0 2px;color:var(--muted);min-height:0}
+.mg-sub{font-size:.8rem;color:var(--muted);font-weight:600}
+.mg-kp{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.mg-k{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:11px 13px;min-width:0}
+.mg-k span{display:block;font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+.mg-k b{display:block;font-size:1.35rem;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mg-k small{display:block;font-size:.74rem;color:var(--muted);margin-top:2px}
+.mg-k b.ok,.mg-ok{color:#1C7A4E}.mg-k b.wa,.mg-wa{color:#9A5B00}.mg-k b.ba,.mg-ba{color:#B42318}
+.mg-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,440px),1fr));gap:14px;align-items:start}
+.mg-svg{width:100%;height:auto;display:block;max-height:280px}
+.mg-svg text{font-family:inherit}
+.mg-dim{display:flex;gap:6px;flex-wrap:wrap}
+.mg-dim button{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:7px 14px;font:inherit;font-weight:700;font-size:.86rem;min-height:38px;cursor:pointer}
+.mg-dim button[aria-pressed="true"]{background:var(--navy,#0B3146);color:#fff;border-color:transparent}
+.mg-t th[data-o]{cursor:pointer;white-space:nowrap;user-select:none}
+.mg-t th[data-o][aria-sort]::after{content:attr(data-f);margin-left:4px;font-size:.7rem}
+.mg-t tbody tr{cursor:pointer}.mg-t tbody tr:hover td{background:var(--sunk)}
+.mg-t td.r,.mg-t th.r{text-align:right;white-space:nowrap}
+.mg-t td.n{max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mg-bar{display:block;height:4px;border-radius:3px;background:var(--sunk);margin-top:3px;min-width:60px}.mg-bar i{display:block;height:100%;border-radius:3px;background:#1C7A4E}
+.mg-bar.wa i{background:#B26A00}.mg-bar.ba i{background:#B42318}
+.mg-l{display:grid;gap:0}
+.mg-li{display:flex;justify-content:space-between;gap:10px;padding:8px 2px;border-bottom:1px solid var(--line);font-size:.88rem;cursor:pointer}
+.mg-li:last-child{border-bottom:0}.mg-li b{display:block;font-weight:700;white-space:normal}.mg-li small{color:var(--muted)}
+.mg-li .v{text-align:right;white-space:nowrap;font-weight:700}
+.mg-nota{font-size:.78rem;color:var(--muted);margin:0;line-height:1.45}
+.mg-vac{padding:18px 4px;text-align:center;color:var(--muted)}
+</style>
+<script>/* patch_margenes: pestaña Márgenes en HWF Admin */
+(function () {
+  if (typeof refrescar !== "function" || typeof cartDe !== "function" || typeof corte !== "function" || typeof D === "undefined" || typeof NAV_TABS === "undefined") return;
+  const navPro = document.querySelector('nav.bottom [data-t="pro"]');
+  if (!navPro || document.getElementById("s-mar")) return;
+
+  const $m = id => document.getElementById(id);
+  const MN = ["", "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+  const MS = ["", "Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+  const TNOM = "Tienda Hellywoof", LSK = "hwf-mar";
+  const nrm = s => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
+  const e2 = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const money = n => "$" + Math.round(Number(n) || 0).toLocaleString("es-CL");
+  const comp = n => { n = Number(n) || 0; const a = Math.abs(n); return (n < 0 ? "−" : "") + "$" + (a >= 1e6 ? (a / 1e6).toLocaleString("es-CL", { maximumFractionDigits: 1 }) + " MM" : a >= 1e3 ? Math.round(a / 1e3).toLocaleString("es-CL") + " mil" : Math.round(a).toLocaleString("es-CL")); };
+  const tc2 = s => String(s || "").toLowerCase().replace(/(^|[\s\-])([a-záéíóúñ])/g, (m, a, b) => a + b.toUpperCase());
+
+  /* marca y formato: igual que el BI (categoría Defontana → proveedor/marca; formato desde el nombre) */
+  const SUF = ["PLANET PET", "MONTARAZ", "COMERCIAL PET-FOOD", "NADAL", "COMECAN", "MY PET CHILE", "HALLMARK SA", "SABORES ALTO PERFIL SPA"];
+  const provDe = cat => { const c = String(cat || "").trim().toUpperCase(); if (!c || c === "SIN CATEGORÍA" || c === "SIN CATEGORIA") return ["Sin proveedor", ""];
+    for (const s of SUF) if (c === s || c.endsWith(" " + s)) return [tc2(s), tc2(c.slice(0, c.length - s.length).trim()) || tc2(s)]; return [tc2(c), tc2(c)]; };
+  const fmtDe = n => { const m = /(\d+(?:[.,]\d+)?)\s*(kgs?|kilos?|grs?|gramos|g|ml|cc|lts?|litros?|l|caps?|unid(?:ades)?|un|u)\b/i.exec(String(n || "")); if (!m) return "Sin formato";
+    const u = m[2].toLowerCase(), U = /^k/.test(u) ? "Kg" : /^g/.test(u) ? "g" : /^(ml|cc)/.test(u) ? "ml" : /^l/.test(u) ? "L" : /^c/.test(u) ? "caps" : "un"; return m[1].replace(".", ",") + " " + U; };
+  const fmtOrd = f => { const m = /^([\d,]+)\s*(.*)$/.exec(f); return m ? [m[2], parseFloat(m[1].replace(",", "."))] : ["zz", 0]; };
+
+  const DIMS = [["cli", "Cliente"], ["ven", "Vendedor"], ["mar", "Marca"], ["pro", "Producto"], ["fmt", "Formato"]];
+  let F = { neg: "dist", per: "ytd", ven: "", mar: "", fmt: "", cli: "", pro: "", dim: "mar", ord: "ut", dir: -1, todos: false };
+  try { Object.assign(F, JSON.parse(localStorage.getItem(LSK) || "{}")); } catch (e) {}
+  const guarda = () => { try { localStorage.setItem(LSK, JSON.stringify(F)); } catch (e) {} };
+
+  /* ---------- datos derivados ---------- */
+  let INFO = null, INFOK = "", PN = [], CN = [];
+  const prepara = () => {
+    const k = D.corte + "|" + D.productos.length + "|" + D.clientes.length + "|" + D.rows.length; if (INFO && INFOK === k) return; INFOK = k;
+    INFO = D.productos.map(p => { const [pv, ma] = provDe((D.cats || [])[p[1]]); return { n: p[0], cod: String(p[2]), pv, ma: ma || "Sin marca", ft: fmtDe(p[0]) }; });
+    PN = INFO.map(i => nrm(i.n)); CN = D.clientes.map(c => nrm(c[0]));
+  };
+  const hayAnt = () => D.rows.some(r => r[8]);
+  const rango = () => {
+    const c = corte(), y = c.y, m = c.m, h = y * 12 + m;
+    if (F.per === "u3") return { a: h - 2, b: h, p: [h - 5, h - 3], nom: "Últimos 3 meses", pn: "3 meses anteriores", y: Math.floor((h - 1) / 12) };
+    if (F.per === "ant") return { a: (y - 1) * 12 + 1, b: (y - 1) * 12 + 12, p: null, nom: "Año " + (y - 1), pn: "", y: y - 1 };
+    if (/^m\d+$/.test(F.per)) { const n = Number(F.per.slice(1)); return { a: y * 12 + n, b: y * 12 + n, p: [y * 12 + n - 1, y * 12 + n - 1], nom: MN[n] + " " + y, pn: "mes anterior", y }; }
+    return { a: y * 12 + 1, b: h, p: [(y - 1) * 12 + 1, (y - 1) * 12 + m], nom: "Enero–" + MN[m] + " " + y, pn: "mismo período " + (y - 1), y };
+  };
+  const mgf = (v, c) => v > 0 ? (v - c) / v : null;
+  const pctS = m => m == null ? "—" : (typeof mgPct === "function" ? mgPct(m) : (Math.round(m * 1000) / 10).toString().replace(".", ",") + "%");
+  const niv = m => m == null ? "" : typeof mgNivel === "function" ? mgNivel(m) : (m < 0.15 ? "bad" : m < 0.22 ? "warn" : "ok");
+  const cls = n => n === "bad" ? "ba" : n === "warn" ? "wa" : n === "ok" ? "ok" : "";
+  const pp = x => (x > 0.0005 ? "+" : x < -0.0005 ? "−" : "") + (Math.abs(x) * 100).toFixed(1).replace(".", ",") + " pp";
+
+  const calc = () => {
+    prepara();
+    const R = rango(), I = INFO, CART = D.clientes.map((c, i) => cartDe(i)), esTi = D.vend.map(v => v === TNOM);
+    const fCli = nrm(F.cli), fPro = nrm(F.pro);
+    const ym = {}, dim = { cli: {}, ven: {}, mar: {}, pro: {}, fmt: {} };
+    const T = { v: 0, c: 0, gq: 0, gc: 0, gn: 0, z: 0, zv: 0, n: 0 };
+    const add = (o, k, n, v, c, g, gc) => { const x = o[k] || (o[k] = { k, n, v: 0, c: 0, g: 0, gc: 0 }); x.v += v; x.c += c; x.g += g; x.gc += gc; };
+    D.rows.forEach(r => {
+      const ti = esTi[r[7]];
+      if (F.neg === "dist" ? ti : F.neg === "tienda" ? !ti : false) return;
+      const ven = ti ? TNOM : CART[r[0]];
+      if (F.ven && ven !== F.ven) return;
+      const inf = I[r[1]]; if (!inf) return;
+      if (F.mar && inf.ma !== F.mar) return;
+      if (F.fmt && inf.ft !== F.fmt) return;
+      if (fCli && CN[r[0]].indexOf(fCli) < 0) return;
+      if (fPro && PN[r[1]].indexOf(fPro) < 0) return;
+      const t = (r[8] || D.anio) * 12 + r[2], v = r[5], c = r[4] * r[6];
+      const y = ym[t] || (ym[t] = { v: 0, c: 0 }); y.v += v; y.c += c;
+      if (t < R.a || t > R.b) return;
+      const g = r[4] > 0 && v <= 0 ? r[4] : 0, gc = g ? c : 0;
+      T.v += v; T.c += c; T.n++; T.gq += g; T.gc += gc; if (g) T.gn++;
+      if (r[4] > 0 && v > 0 && r[6] <= 0) { T.z++; T.zv += v; }
+      add(dim.cli, r[0], D.clientes[r[0]][0], v, c, g, gc); add(dim.ven, ven, ven, v, c, g, gc);
+      add(dim.mar, inf.ma, inf.ma, v, c, g, gc); add(dim.pro, r[1], inf.n, v, c, g, gc); add(dim.fmt, inf.ft, inf.ft, v, c, g, gc);
+    });
+    let P = null;
+    if (R.p) { let v = 0, c = 0; for (let t = R.p[0]; t <= R.p[1]; t++) if (ym[t]) { v += ym[t].v; c += ym[t].c; } if (v > 0) P = { v, c }; }
+    return { R, T, ym, dim, P };
+  };
+
+  /* ---------- gráficos ---------- */
+  const meses = X => { const ct = corte(), n = X.R.y === ct.y ? ct.m : 12, l = []; for (let m = 1; m <= n; m++) l.push(m); return l; };
+  function grafMargen(X) {
+    const ms = meses(X), W = 640, H = 220, L = 62, Rg = 14, Tp = 22, Bt = 30, n = ms.length, y0 = X.R.y;
+    const cur = ms.map(m => { const o = X.ym[y0 * 12 + m]; return o && o.v > 0 ? mgf(o.v, o.c) : null; });
+    const prv = ms.map(m => { const o = X.ym[(y0 - 1) * 12 + m]; return o && o.v > 0 ? mgf(o.v, o.c) : null; });
+    const vals = cur.concat(prv).filter(v => v != null); if (!vals.length) return '<p class="mg-vac">Sin ventas con estos filtros.</p>';
+    let lo = Math.min(0, ...vals), hi = Math.max(0.3, ...vals); const pad = (hi - lo) * 0.08; lo -= pad; hi += pad;
+    const x = i => L + (n > 1 ? i * (W - L - Rg) / (n - 1) : (W - L - Rg) / 2), y = v => Tp + (H - Tp - Bt) * (1 - (v - lo) / (hi - lo));
+    const paso = (hi - lo) > 0.6 ? 0.2 : 0.1; let g = "";
+    for (let t = Math.ceil(lo / paso) * paso; t <= hi; t += paso) g += `<line x1="${L}" x2="${W - Rg}" y1="${y(t)}" y2="${y(t)}" stroke="${Math.abs(t) < 1e-9 ? "#8B98A5" : "#E3EAEF"}" stroke-width="1"/><text x="${L - 6}" y="${y(t) + 4}" text-anchor="end" font-size="11" fill="#5B6874">${Math.round(t * 100)}%</text>`;
+    const linea = (arr, col, dash) => { let d = "", on = false; arr.forEach((v, i) => { if (v == null) { on = false; return; } d += (on ? "L" : "M") + x(i).toFixed(1) + " " + y(v).toFixed(1); on = true; }); return d ? `<path d="${d}" fill="none" stroke="${col}" stroke-width="2.4" ${dash ? 'stroke-dasharray="5 4"' : ""} stroke-linejoin="round"/>` : ""; };
+    let pts = "";
+    cur.forEach((v, i) => { if (v == null) return; const en = (y0 * 12 + ms[i]) >= X.R.a && (y0 * 12 + ms[i]) <= X.R.b, nv = niv(v);
+      pts += `<circle cx="${x(i)}" cy="${y(v)}" r="${en ? 5 : 3.5}" fill="${en ? "#0B3146" : "#fff"}" stroke="#0B3146" stroke-width="2"><title>${MN[ms[i]]}: ${pctS(v)}</title></circle>`;
+      if (n <= 12) pts += `<text x="${x(i)}" y="${y(v) - 10}" text-anchor="middle" font-size="10.5" font-weight="700" fill="${nv === "bad" ? "#B42318" : nv === "warn" ? "#9A5B00" : "#0B3146"}">${(Math.round(v * 1000) / 10).toString().replace(".", ",")}</text>`; });
+    const xl = ms.map((m, i) => `<text x="${x(i)}" y="${H - 9}" text-anchor="middle" font-size="11" fill="#5B6874">${MS[m]}</text>`).join("");
+    return `<svg class="mg-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Margen porcentual por mes">${g}${linea(prv, "#9AA7B2", true)}${linea(cur, "#0B3146", false)}${pts}${xl}</svg>
+      <p class="mg-nota" style="margin-top:4px"><b style="color:#0B3146">●</b> ${y0}${prv.some(v => v != null) ? ` · <span style="color:#7B8894">- - ${y0 - 1}</span>` : ""} · punto lleno = mes dentro del período</p>`;
+  }
+  function grafUtil(X) {
+    const ms = meses(X), W = 640, H = 220, L = 52, Rg = 14, Tp = 20, Bt = 30, n = ms.length, y0 = X.R.y;
+    const ut = ms.map(m => { const o = X.ym[y0 * 12 + m]; return o ? o.v - o.c : 0; });
+    if (!ut.some(v => v)) return '<p class="mg-vac">Sin ventas con estos filtros.</p>';
+    const hi = Math.max(0, ...ut), lo = Math.min(0, ...ut), rg = (hi - lo) || 1, y = v => Tp + (H - Tp - Bt) * (1 - (v - lo) / rg), bw = Math.min(40, (W - L - Rg) / n * 0.62), cx = i => L + (i + 0.5) * (W - L - Rg) / n;
+    let b = `<line x1="${L}" x2="${W - Rg}" y1="${y(0)}" y2="${y(0)}" stroke="#8B98A5"/>`;
+    ut.forEach((v, i) => { const en = (y0 * 12 + ms[i]) >= X.R.a && (y0 * 12 + ms[i]) <= X.R.b, ya = y(Math.max(v, 0)), yb = y(Math.min(v, 0));
+      b += `<rect x="${cx(i) - bw / 2}" y="${ya}" width="${bw}" height="${Math.max(1, yb - ya)}" rx="3" fill="${v < 0 ? "#B42318" : en ? "#1C7A4E" : "#A9D3BE"}"><title>${MN[ms[i]]}: ${money(v)}</title></rect>`;
+      if (n <= 12) b += `<text x="${cx(i)}" y="${(v >= 0 ? ya - 5 : yb + 12)}" text-anchor="middle" font-size="10.5" font-weight="700" fill="#33414D">${comp(v).replace("$", "")}</text>`;
+      b += `<text x="${cx(i)}" y="${H - 9}" text-anchor="middle" font-size="11" fill="#5B6874">${MS[ms[i]]}</text>`; });
+    return `<svg class="mg-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Utilidad bruta por mes">${b}</svg>`;
+  }
+
+  /* ---------- tabla y listas ---------- */
+  const valOrd = (x, o) => o === "n" ? nrm(x.n) : o === "v" ? x.v : o === "c" ? x.c : o === "g" ? x.gc : o === "mg" ? (mgf(x.v, x.c) == null ? null : mgf(x.v, x.c)) : x.v - x.c;
+  function filasDim(X) {
+    const o = F.ord, d = F.dir; const L = Object.values(X.dim[F.dim]).filter(x => x.v || x.c || x.g);
+    return L.sort((a, b) => { let p = valOrd(a, o), q = valOrd(b, o); if (p == null && q == null) return 0; if (p == null) return 1; if (q == null) return -1; return p < q ? -d : p > q ? d : 0; });
+  }
+  const tablaDim = (X, L) => {
+    const lim = F.todos ? L.length : 15, h = (o, t, r) => `<th${r ? ' class="r"' : ""} data-o="${o}"${F.ord === o ? ` aria-sort="${F.dir < 0 ? "descending" : "ascending"}" data-f="${F.dir < 0 ? "▼" : "▲"}"` : ""}>${t}</th>`;
+    const mx = Math.max(0.5, ...L.map(x => mgf(x.v, x.c) || 0));
+    const fl = L.slice(0, lim).map(x => { const m = mgf(x.v, x.c), nv = niv(m), w = m == null ? 0 : Math.max(0, Math.min(100, m / mx * 100));
+      return `<tr data-k="${e2(x.k)}"><td class="n" title="${e2(x.n)}">${e2(F.dim === "pro" || F.dim === "cli" ? tc2(x.n) : x.n)}</td><td class="r">${money(x.v)}</td><td class="r">${money(x.c)}</td><td class="r ${x.v - x.c < 0 ? "mg-ba" : ""}">${money(x.v - x.c)}</td><td class="r mg-${cls(nv)}"><b>${pctS(m)}</b><span class="mg-bar ${cls(nv)}"><i style="width:${w.toFixed(0)}%"></i></span></td><td class="r">${x.g ? x.g.toLocaleString("es-CL") + " u · " + comp(x.gc) : "—"}</td></tr>`; }).join("");
+    const T = X.T;
+    return `<div class="tbl"><table class="mg-t"><thead><tr>${h("n", DIMS.find(d => d[0] === F.dim)[1])}${h("v", "Venta neta", 1)}${h("c", "Costo", 1)}${h("ut", "Utilidad", 1)}${h("mg", "Margen", 1)}${h("g", "Sin cobro", 1)}</tr></thead><tbody>${fl}</tbody>
+      <tfoot><tr><td><b>Total</b></td><td class="r"><b>${money(T.v)}</b></td><td class="r"><b>${money(T.c)}</b></td><td class="r"><b>${money(T.v - T.c)}</b></td><td class="r"><b>${pctS(mgf(T.v, T.c))}</b></td><td class="r"><b>${T.gq ? T.gq.toLocaleString("es-CL") + " u · " + comp(T.gc) : "—"}</b></td></tr></tfoot></table></div>
+      ${L.length > 15 ? `<div class="mg-acc" style="margin-top:8px"><button type="button" id="mgTodos">${F.todos ? "Ver menos" : "Ver todos (" + L.length.toLocaleString("es-CL") + ")"}</button></div>` : ""}`;
+  };
+  function listas(X) {
+    const P = Object.values(X.dim.pro);
+    const pierde = P.filter(x => x.v - x.c < 0).sort((a, b) => (a.v - a.c) - (b.v - b.c)).slice(0, 8);
+    const regalo = P.filter(x => x.gc > 0).sort((a, b) => b.gc - a.gc).slice(0, 8);
+    const li = (x, d, v) => `<div class="mg-li" data-pro="${e2(x.n)}"><div><b>${e2(tc2(x.n))}</b><small>${d}</small></div><div class="v">${v}</div></div>`;
+    return `<div class="mg-2"><div class="card"><h2>Productos que restan utilidad <span class="muted">${pierde.length ? "venta menor que el costo" : ""}</span></h2><div class="mg-l">${pierde.length ? pierde.map(x => li(x, `venta ${money(x.v)} · margen ${pctS(mgf(x.v, x.c))}${x.g ? " · " + x.g.toLocaleString("es-CL") + " u sin cobro" : ""}`, `<span class="mg-ba">${money(x.v - x.c)}</span>`)).join("") : '<p class="mg-vac">Ningún producto con pérdida en este período.</p>'}</div></div>
+      <div class="card"><h2>Entregado sin cobro <span class="muted">bonificaciones y regalos, a su costo</span></h2><div class="mg-l">${regalo.length ? regalo.map(x => li(x, `${x.g.toLocaleString("es-CL")} unidades`, comp(x.gc))).join("") : '<p class="mg-vac">Sin unidades entregadas sin cobro.</p>'}</div></div></div>`;
+  }
+
+  /* ---------- controles ---------- */
+  const opt = (v, t, sel) => `<option value="${e2(v)}"${sel ? " selected" : ""}>${e2(t)}</option>`;
+  function opciones() {
+    prepara(); const ct = corte(), I = INFO;
+    $m("mgNeg").innerHTML = [["dist", "Distribuidora"], ["tienda", "Tienda"], ["total", "Total"]].map(([v, t]) => opt(v, t, v === F.neg)).join("");
+    let per = [["ytd", "Año " + ct.y + " a la fecha"]]; for (let m = ct.m; m >= 1; m--) per.push(["m" + m, MN[m] + " " + ct.y]); per.push(["u3", "Últimos 3 meses"]); if (hayAnt()) per.push(["ant", "Año " + (ct.y - 1)]);
+    if (!per.some(p => p[0] === F.per)) F.per = "ytd";
+    $m("mgPer").innerHTML = per.map(([v, t]) => opt(v, t, v === F.per)).join("");
+    const vs = [...new Set(((typeof CARTERAS === "function" ? CARTERAS() : []).concat(F.neg !== "dist" ? [TNOM] : [])))].sort((a, b) => a.localeCompare(b, "es"));
+    if (F.ven && !vs.includes(F.ven)) vs.push(F.ven);
+    $m("mgVen").innerHTML = opt("", "Todos", !F.ven) + vs.map(v => opt(v, v, v === F.ven)).join("");
+    const mar = [...new Set(I.map(i => i.ma))].sort((a, b) => a.localeCompare(b, "es")); if (F.mar && !mar.includes(F.mar)) F.mar = "";
+    $m("mgMar").innerHTML = opt("", "Todas", !F.mar) + mar.map(v => opt(v, v, v === F.mar)).join("");
+    const fm = [...new Set(I.filter(i => !F.mar || i.ma === F.mar).map(i => i.ft))].sort((a, b) => { const p = fmtOrd(a), q = fmtOrd(b); return p[0] < q[0] ? -1 : p[0] > q[0] ? 1 : p[1] - q[1]; }); if (F.fmt && !fm.includes(F.fmt)) F.fmt = "";
+    $m("mgFmt").innerHTML = opt("", "Todos", !F.fmt) + fm.map(v => opt(v, v, v === F.fmt)).join("");
+  }
+  function chips() {
+    const l = [["ven", "Vendedor"], ["mar", "Marca"], ["fmt", "Formato"], ["cli", "Cliente"], ["pro", "Producto"]].filter(([k]) => F[k]);
+    return l.length ? l.map(([k, t]) => `<span class="mg-chip">${t}: ${e2(F[k])}<button type="button" data-q="${k}" aria-label="Quitar filtro ${t}">✕</button></span>`).join("") : "";
+  }
+  function exportar(X) {
+    const L = filasDim(X), d = DIMS.find(x => x[0] === F.dim)[1], q = s => '"' + String(s).replace(/"/g, '""') + '"';
+    const f = [[d, "Venta neta", "Costo", "Utilidad", "Margen %", "Unidades sin cobro", "Costo sin cobro"]].concat(L.map(x => [x.n, Math.round(x.v), Math.round(x.c), Math.round(x.v - x.c), mgf(x.v, x.c) == null ? "" : (Math.round(mgf(x.v, x.c) * 1000) / 10).toString().replace(".", ","), x.g, Math.round(x.gc)]));
+    const t = "﻿" + [["Márgenes", X.R.nom, F.neg === "dist" ? "Distribuidora" : F.neg === "tienda" ? "Tienda" : "Total"]].concat([[]], f).map(r => r.map(q).join(";")).join("\n");
+    const a = document.createElement("a"); a.download = `Margenes por ${d.toLowerCase()} ${X.R.nom}.csv`; a.href = URL.createObjectURL(new Blob([t], { type: "text/csv;charset=utf-8" }));
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 8000);
+  }
+
+  let XC = null, tmr = 0;
+  function pintar() {
+    const X = XC = calc(), T = X.T, m = mgf(T.v, T.c), P = X.P, pm = P ? mgf(P.v, P.c) : null, ut = T.v - T.c;
+    const neg = Object.values(X.dim.pro).filter(x => x.v - x.c < 0).length, L = filasDim(X);
+    const kp = (t, b, s, c) => `<div class="mg-k"><span>${t}</span><b${c ? ` class="${c}"` : ""}>${b}</b>${s ? `<small>${s}</small>` : ""}</div>`;
+    const vs = P ? `${X.T.v >= P.v ? "▲" : "▼"} ${Math.abs(Math.round((X.T.v / P.v - 1) * 100))}% vs ${X.R.pn}` : "";
+    const ms = pm != null && m != null ? `${pp(m - pm)} vs ${X.R.pn} (${pctS(pm)})` : "";
+    const us = P ? `${ut >= P.v - P.c ? "▲" : "▼"} ${comp(Math.abs(ut - (P.v - P.c)))} vs ${X.R.pn}` : "";
+    const ca = D.costoAjuste && D.costoAjuste.lineas ? `El script corrigió ${D.costoAjuste.lineas.toLocaleString("es-CL")} líneas con costo casi nulo (+${comp(D.costoAjuste.costo)} de costo)${D.costoAjuste.gratisProveedor && D.costoAjuste.gratisProveedor.lineas ? `; ${D.costoAjuste.gratisProveedor.lineas} líneas con ${D.costoAjuste.gratisProveedor.unidades.toLocaleString("es-CL")} unidades bonificadas por Montaraz/Planet quedan a costo $0` : ""}. ` : "";
+    const sc = T.z ? `${T.z.toLocaleString("es-CL")} líneas con venta (${comp(T.zv)}) no traen costo en Defontana: su margen puede estar sobreestimado. ` : "";
+    $m("mgOut").innerHTML = `
+      <div class="mg-acc"><span class="mg-sub">${F.neg === "dist" ? "Distribuidora" : F.neg === "tienda" ? "Tienda" : "Distribuidora + tienda"} · ${e2(X.R.nom)}</span>${chips()}</div>
+      ${T.n ? `<div class="mg-kp">${kp("Venta neta", comp(T.v), vs)}${kp("Margen", pctS(m), ms, cls(niv(m)))}${kp("Utilidad bruta", comp(ut), us, ut < 0 ? "ba" : "")}${kp("Costo", comp(T.c), "cantidad × costo unitario")}${kp("Entregado sin cobro", T.gq ? comp(T.gc) : "$0", T.gq ? T.gq.toLocaleString("es-CL") + " unidades · " + T.gn + " líneas" : "sin bonificaciones")}${kp("Productos con pérdida", neg.toLocaleString("es-CL"), neg ? "venta menor que el costo" : "ninguno", neg ? "ba" : "ok")}</div>
+      <div class="mg-2"><div class="card"><h2>Margen por mes <span class="muted">% sobre la venta neta</span></h2>${grafMargen(X)}</div><div class="card"><h2>Utilidad por mes <span class="muted">venta − costo</span></h2>${grafUtil(X)}</div></div>
+      <div class="card"><h2>Detalle</h2><div class="mg-dim" id="mgDim" role="group" aria-label="Ver por">${DIMS.map(([k, t]) => `<button type="button" data-d="${k}" aria-pressed="${k === F.dim}">${t}</button>`).join("")}</div>
+        <p class="mg-nota" style="margin:8px 0">Toca una fila para filtrar. Toca el título de una columna para ordenar.</p>${tablaDim(X, L)}
+        <div class="mg-acc" style="margin-top:10px"><button type="button" id="mgExp">⬇️ Exportar CSV</button></div></div>
+      ${listas(X)}
+      <p class="mg-nota">Margen = (venta neta − costo) ÷ venta neta. Venta: facturas − notas de crédito, sin IVA. Costo: cantidad × costo unitario de Defontana; las unidades entregadas sin cobro suman su costo. Vendedor = cartera (última factura). ${ca}${sc}</p>`
+      : `<div class="card"><p class="mg-vac">No hay ventas con estos filtros. Prueba con otro período o quita algún filtro.</p></div>`}`;
+    enlaza();
+  }
+  function enlaza() {
+    const out = $m("mgOut");
+    out.querySelectorAll("[data-q]").forEach(b => b.onclick = () => { F[b.dataset.q] = ""; if (b.dataset.q === "cli") $m("mgCli").value = ""; if (b.dataset.q === "pro") $m("mgPro").value = ""; guarda(); opciones(); pintar(); });
+    const dm = $m("mgDim"); if (dm) dm.onclick = e => { const b = e.target.closest("[data-d]"); if (!b) return; F.dim = b.dataset.d; F.todos = false; guarda(); pintar(); };
+    out.querySelectorAll("th[data-o]").forEach(h => h.onclick = () => { const o = h.dataset.o; if (F.ord === o) F.dir = -F.dir; else { F.ord = o; F.dir = o === "n" ? 1 : -1; } guarda(); pintar(); });
+    const td = $m("mgTodos"); if (td) td.onclick = () => { F.todos = !F.todos; guarda(); pintar(); };
+    const ex = $m("mgExp"); if (ex) ex.onclick = () => exportar(XC);
+    out.querySelectorAll(".mg-t tbody tr").forEach(tr => tr.onclick = () => { const k = tr.dataset.k, x = XC.dim[F.dim][k]; if (!x) return;
+      if (F.dim === "ven") F.ven = x.k; else if (F.dim === "mar") { F.mar = x.k; F.fmt = ""; } else if (F.dim === "fmt") F.fmt = x.k; else if (F.dim === "cli") { F.cli = x.n; $m("mgCli").value = x.n; } else { F.pro = x.n; $m("mgPro").value = x.n; }
+      guarda(); opciones(); pintar(); window.scrollTo({ top: $m("s-mar").offsetTop - 70, behavior: "smooth" }); });
+    out.querySelectorAll(".mg-li").forEach(li => li.onclick = () => { F.pro = li.dataset.pro; $m("mgPro").value = F.pro; guarda(); opciones(); pintar(); });
+  }
+  function armar() {
+    const s = $m("s-mar");
+    if (!$m("mgCtl")) {
+      s.innerHTML = `<div class="card mg-ctl" id="mgCtl"><h2>Márgenes <span class="muted">venta, costo y utilidad</span></h2>
+        <div class="mg-f"><label>Negocio<select id="mgNeg"></select></label><label>Período<select id="mgPer"></select></label><label>Vendedor<select id="mgVen"></select></label>
+          <label>Marca<select id="mgMar"></select></label><label>Formato<select id="mgFmt"></select></label>
+          <label>Cliente<input id="mgCli" type="search" placeholder="Buscar cliente" autocomplete="off"></label><label>Producto<input id="mgPro" type="search" placeholder="Buscar producto" autocomplete="off"></label></div>
+        <div class="mg-acc"><button type="button" id="mgLimp">Limpiar filtros</button></div></div><div id="mgOut"></div>`;
+      const cambio = (k, el) => el.onchange = () => { F[k] = el.value; if (k === "mar") F.fmt = ""; F.todos = false; guarda(); opciones(); pintar(); };
+      [["neg", "mgNeg"], ["per", "mgPer"], ["ven", "mgVen"], ["mar", "mgMar"], ["fmt", "mgFmt"]].forEach(([k, id]) => cambio(k, $m(id)));
+      [["cli", "mgCli"], ["pro", "mgPro"]].forEach(([k, id]) => $m(id).oninput = () => { clearTimeout(tmr); tmr = setTimeout(() => { F[k] = $m(id).value.trim(); F.todos = false; guarda(); pintar(); }, 250); });
+      $m("mgLimp").onclick = () => { F.ven = F.mar = F.fmt = F.cli = F.pro = ""; $m("mgCli").value = ""; $m("mgPro").value = ""; F.todos = false; guarda(); opciones(); pintar(); };
+      $m("mgCli").value = F.cli; $m("mgPro").value = F.pro;
+    }
+    opciones(); pintar();
+  }
+  window.pintarMargenes = armar;
+
+  /* ---------- integración con la navegación de Admin ---------- */
+  const sec = document.createElement("section"); sec.className = "sec"; sec.id = "s-mar"; sec.hidden = true; $m("s-pro").after(sec);
+  const btn = document.createElement("button"); btn.type = "button"; btn.dataset.t = "mar"; btn.setAttribute("aria-selected", "false");
+  btn.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4"/><path d="M4 20h16"/><path d="M8 16l3.5-4.5 3 2.5L19 8"/><path d="M16 8h3v3"/></svg>Márgenes';
+  navPro.after(btn);
+  if (!NAV_TABS.includes("mar")) NAV_TABS.splice(NAV_TABS.indexOf("pro") + 1, 0, "mar");
+  if (typeof NAV_TNOM !== "undefined") NAV_TNOM.mar = "Márgenes";
+  const _ref = refrescar;
+  refrescar = function () {
+    if (TAB !== "mar") return _ref.apply(this, arguments);
+    calcular();
+    try { const ct = corte(); $m("subT").textContent = `Ventas al ${String(ct.d).padStart(2, "0")}-${String(ct.m).padStart(2, "0")}-${ct.y}${typeof admCierre === "function" ? admCierre() : ""}`; } catch (e) {}
+    armar();
+  };
+  document.querySelector("nav.bottom").addEventListener("click", e => { if (!e.target.closest("[data-t]")) return; sec.hidden = TAB !== "mar"; });
+  /* el menú ☰ se arma leyendo nav.bottom; su tabla de emojis es privada: le ponemos el ícono a «Márgenes» */
+  const pan = document.getElementById("snPanel");
+  if (pan) new MutationObserver(() => { const e = pan.querySelector('.sn-i[data-t="mar"] .sn-e'); if (e && e.textContent !== "💹") e.textContent = "💹"; }).observe(pan, { childList: true });
 })();
 </script>
 </body>
