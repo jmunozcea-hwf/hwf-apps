@@ -6,3 +6,4 @@ c_higiene.webp   Pexels 9952105  · Foden Nguyen (recorte)
 nosotros.jpg     Pexels 6821106  · Nadia Vasil'eva
 premios.jpg      Unsplash photo-1568640347023-a616a30bc3bd
 Para cambiar una foto: reemplazar el archivo con el mismo nombre.
+img/marcas/*.webp  Logos oficiales de las marcas distribuidas (sitios de Alican, Ownat, Poema y Pura Natura); marcas registradas de sus dueños.
