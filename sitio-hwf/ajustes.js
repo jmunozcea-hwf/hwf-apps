@@ -13,7 +13,7 @@ window.AJUSTES = {
   subtitulo: "Distribuidora mayorista de alimentos, arenas y accesorios. Potencia tu pet shop con stock inmediato y los mejores precios por volumen.",
   titulo_pestana: "HWF · Distribuidora mayorista para mascotas",
 
-  whatsapp: "",            // número de ventas con código de país, ej: "+56 9 1234 5678" (vacío = WhatsApp pide elegir contacto)
+  whatsapp: "+56 9 6606 3522",   // número de ventas con código de país, ej: "+56 9 1234 5678" (vacío = WhatsApp pide elegir contacto)
   email: "",               // ej: "ventas@hwf.cl"
   direccion: "",           // ej: "Av. Ejemplo 123, Ciudad"
   horario: "Lunes a viernes",
