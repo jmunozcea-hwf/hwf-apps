@@ -402,7 +402,7 @@ if (!cfg() || !DATA()) pantallaConexion(); else { arrancar(); bajar(true).then(n
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261115220750";
+const HWF_VER = "20261115222157";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -1644,6 +1644,89 @@ body.log-sn main{padding-bottom:0!important}
   window.addEventListener("resize", pronto); document.addEventListener("DOMContentLoaded", pronto); pronto();
 })();
 </script>
+<style>/* patch_botonesfix */
+.pr-et{align-self:start;justify-self:end;height:auto!important;line-height:1.35;padding:3px 10px}
+.pr-it>small{align-self:start}
+@media(max-width:899px){
+  body::after{content:"";display:block;height:calc(140px + env(safe-area-inset-bottom))}
+  #iaBtn{width:52px!important;height:52px!important;border:2px solid #fff!important;box-shadow:0 4px 14px rgba(11,49,70,.32)!important}
+  #iaBtn svg{width:28px;height:28px}
+}
+</style>
+<script>/* patch_soloexcelpdf */
+(function () {
+  if (window.hwfSoloExcelPdf) return; window.hwfSoloExcelPdf = 1;
+  /* ---------- CSV → filas ---------- */
+  function leerCsv(t) { t = String(t || "").replace(/^﻿/, ""); const L5 = t.split(/\r?\n/).slice(0, 5).join("\n"), sep = (L5.match(/;/g) || []).length > (L5.match(/,/g) || []).length ? ";" : ",";
+    const F = []; let f = [], c = "", q = false;
+    for (let i = 0; i < t.length; i++) { const ch = t[i];
+      if (q) { if (ch === '"') { if (t[i + 1] === '"') { c += '"'; i++; } else q = false; } else c += ch; continue; }
+      if (ch === '"') q = true; else if (ch === sep) { f.push(c); c = ""; } else if (ch === "\n" || ch === "\r") { if (ch === "\r" && t[i + 1] === "\n") i++; f.push(c); F.push(f); f = []; c = ""; } else c += ch; }
+    if (c !== "" || f.length) { f.push(c); F.push(f); }
+    const num = v => { const s = String(v).trim(); if (s === "" || /^0\d/.test(s) || s.length > 15) return v;
+      if (/^-?\d+(\.\d+)?$/.test(s)) return Number(s); if (sep === ";" && /^-?\d+,\d+$/.test(s)) return Number(s.replace(",", ".")); return v; };
+    return F.map(r => r.map(num)); }
+  /* ---------- ZIP sin compresión ---------- */
+  const CRC = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+  const crc32 = b => { let c = 0xFFFFFFFF; for (let i = 0; i < b.length; i++) c = CRC[(c ^ b[i]) & 255] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; };
+  function zip(arch) { const te = new TextEncoder(), partes = [], cen = []; let off = 0;
+    const u16 = v => [v & 255, (v >>> 8) & 255], u32 = v => [v & 255, (v >>> 8) & 255, (v >>> 16) & 255, (v >>> 24) & 255];
+    arch.forEach(([n, s]) => { const nb = te.encode(n), db = typeof s === "string" ? te.encode(s) : s, cr = crc32(db);
+      const loc = new Uint8Array([].concat(u32(0x04034b50), u16(20), u16(0x0800), u16(0), u16(0), u16(0x21), u32(cr), u32(db.length), u32(db.length), u16(nb.length), u16(0)));
+      partes.push(loc, nb, db);
+      cen.push(new Uint8Array([].concat(u32(0x02014b50), u16(20), u16(20), u16(0x0800), u16(0), u16(0), u16(0x21), u32(cr), u32(db.length), u32(db.length), u16(nb.length), u16(0), u16(0), u16(0), u16(0), u32(0), u32(off))), nb);
+      off += loc.length + nb.length + db.length; });
+    const tam = cen.reduce((t, x) => t + x.length, 0);
+    return new Blob(partes.concat(cen, [new Uint8Array([].concat(u32(0x06054b50), u16(0), u16(0), u16(arch.length), u16(arch.length), u32(tam), u32(off), u16(0)))]), { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }); }
+  /* ---------- filas → .xlsx ---------- */
+  function xlsx(filas, hoja) { const x = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])).replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, "");
+    const col = i => { let s = ""; i++; while (i) { const m = (i - 1) % 26; s = String.fromCharCode(65 + m) + s; i = Math.floor((i - 1) / 26); } return s; };
+    const cab = filas.findIndex(r => r.filter(v => v !== "" && v != null).length >= 2), anchos = [];
+    const sd = filas.map((r, ri) => '<row r="' + (ri + 1) + '">' + r.map((v, ci) => { if (v === "" || v == null) return ""; const ref = col(ci) + (ri + 1), st = ri === cab ? ' s="1"' : "";
+      anchos[ci] = Math.max(anchos[ci] || 8, Math.min(60, String(v).length + 2));
+      return typeof v === "number" && isFinite(v) ? '<c r="' + ref + '"' + st + "><v>" + v + "</v></c>" : '<c r="' + ref + '" t="inlineStr"' + st + '><is><t xml:space="preserve">' + x(v) + "</t></is></c>"; }).join("") + "</row>").join("");
+    const cols = anchos.length ? "<cols>" + anchos.map((w, i) => '<col min="' + (i + 1) + '" max="' + (i + 1) + '" width="' + (w || 8) + '" customWidth="1"/>').join("") + "</cols>" : "";
+    const nom = x(String(hoja || "Datos").replace(/[\\\/\?\*\[\]:]/g, " ").slice(0, 31) || "Datos");
+    return zip([
+      ["[Content_Types].xml", '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>'],
+      ["_rels/.rels", '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>'],
+      ["xl/workbook.xml", '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="' + nom + '" sheetId="1" r:id="rId1"/></sheets></workbook>'],
+      ["xl/_rels/workbook.xml.rels", '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>'],
+      ["xl/styles.xml", '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><name val="Calibri"/></font></fonts><fills count="2"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill></fills><borders count="1"><border/></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="2"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>'],
+      ["xl/worksheets/sheet1.xml", '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">' + cols + "<sheetData>" + sd + "</sheetData></worksheet>"]]); }
+  /* ---------- imagen → PDF (una página del tamaño de la imagen) ---------- */
+  function pdfDeCanvas(cv) { const jpg = atob(cv.toDataURL("image/jpeg", 0.92).split(",")[1]), w = cv.width, h = cv.height, pw = Math.round(w * 0.75), ph = Math.round(h * 0.75);
+    const img = new Uint8Array(jpg.length); for (let i = 0; i < jpg.length; i++) img[i] = jpg.charCodeAt(i);
+    const cont = "q " + pw + " 0 0 " + ph + " 0 0 cm /Im0 Do Q", te = new TextEncoder(), P = [], off = []; let n = 0;
+    const add = b => { const u = typeof b === "string" ? te.encode(b) : b; P.push(u); n += u.length; };
+    add("%PDF-1.4\n");
+    const obj = (i, s) => { off[i] = n; add(i + " 0 obj\n" + s + "\nendobj\n"); };
+    obj(1, "<< /Type /Catalog /Pages 2 0 R >>"); obj(2, "<< /Type /Pages /Kids [3 0 R] /Count 1 >>");
+    obj(3, "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 " + pw + " " + ph + "] /Resources << /XObject << /Im0 4 0 R >> >> /Contents 5 0 R >>");
+    off[4] = n; add("4 0 obj\n<< /Type /XObject /Subtype /Image /Width " + w + " /Height " + h + " /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length " + img.length + " >>\nstream\n"); add(img); add("\nendstream\nendobj\n");
+    obj(5, "<< /Length " + cont.length + " >>\nstream\n" + cont + "\nendstream");
+    const xr = n; add("xref\n0 6\n0000000000 65535 f \n" + [1, 2, 3, 4, 5].map(i => String(off[i]).padStart(10, "0") + " 00000 n \n").join("") + "trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n" + xr + "\n%%EOF");
+    return new Blob(P, { type: "application/pdf" }); }
+  function cargarImagen(src) { return new Promise((ok, mal) => { const im = new Image(); im.onload = () => { const cv = document.createElement("canvas"); cv.width = im.naturalWidth; cv.height = im.naturalHeight; const g = cv.getContext("2d"); g.fillStyle = "#fff"; g.fillRect(0, 0, cv.width, cv.height); g.drawImage(im, 0, 0); ok(cv); }; im.onerror = mal; im.src = src; }); }
+  const leerTexto = href => { const r = new XMLHttpRequest(); r.open("GET", href, false); r.overrideMimeType("text/plain; charset=utf-8"); r.send(); return r.responseText; };   /* síncrono: el código original puede revocar el blob justo después del clic */
+  const _click = HTMLAnchorElement.prototype.click;
+  function bajar(blob, nombre) { const u = URL.createObjectURL(blob), a = document.createElement("a"); a.href = u; a.download = nombre; document.body.appendChild(a); _click.call(a); a.remove(); setTimeout(() => URL.revokeObjectURL(u), 60000); }
+  HTMLAnchorElement.prototype.click = function () { const n = this.download || "", h = this.getAttribute("href") || this.href || "";
+    try {
+      if (/\.csv$/i.test(n) && /^(blob:|data:)/.test(h)) { const filas = leerCsv(/^data:/.test(h) ? decodeURIComponent(h.split(",").slice(1).join(",")) : leerTexto(h)); bajar(xlsx(filas, n.replace(/\.csv$/i, "")), n.replace(/\.csv$/i, ".xlsx")); return; }
+      if (/\.(png|jpe?g)$/i.test(n) && /^(data:image\/|blob:)/.test(h)) { cargarImagen(h).then(cv => bajar(pdfDeCanvas(cv), n.replace(/\.(png|jpe?g)$/i, ".pdf"))).catch(() => _click.call(this)); return; }
+    } catch (e) { console.error(e); }
+    return _click.apply(this, arguments); };
+  /* compartir (WhatsApp, correo…): imágenes → PDF, CSV → Excel */
+  if (navigator.share) { const _share = navigator.share.bind(navigator), _can = navigator.canShare ? navigator.canShare.bind(navigator) : null;
+    const conv = async fs => Promise.all(fs.map(async f => {
+      if (/^image\//.test(f.type) || /\.(png|jpe?g)$/i.test(f.name)) { const u = URL.createObjectURL(f); try { const cv = await cargarImagen(u); return new File([pdfDeCanvas(cv)], f.name.replace(/\.(png|jpe?g)$/i, "") + ".pdf", { type: "application/pdf" }); } finally { URL.revokeObjectURL(u); } }
+      if (/csv/.test(f.type) || /\.csv$/i.test(f.name)) { const t = await f.text(); return new File([xlsx(leerCsv(t), f.name.replace(/\.csv$/i, ""))], f.name.replace(/\.csv$/i, ".xlsx"), { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }); }
+      return f; }));
+    navigator.share = async function (d) { if (d && d.files && d.files.length) { const files = await conv([...d.files]); d = Object.assign({}, d, { files }); if (_can && !_can(d)) { const f = d.files[0]; bajar(f, f.name); return; } } return _share(d); }; }
+  window.hwfXlsx = (filas, hoja) => xlsx(filas, hoja); window.hwfLeerCsv = leerCsv;   /* para pruebas */
+})();
+</script>
 <style>/* patch_asistente */
 #iaBtn{position:fixed;right:14px;bottom:calc(84px + env(safe-area-inset-bottom));z-index:900;border:0;border-radius:50%;width:58px;height:58px;padding:0;justify-content:center;font:600 .95rem system-ui,sans-serif;
   background:linear-gradient(135deg,#0B3146,#1C7A4E);color:#fff;box-shadow:0 6px 18px rgba(11,49,70,.35);cursor:pointer;display:flex;gap:6px;align-items:center}
@@ -1672,7 +1755,7 @@ body.ia-izq #iaBtn{right:auto;left:14px}
 (function () {
   const HB = window.hwfBi, TND = !HB && /TIENDA/.test(document.title) && typeof DATA === "function"; if ((!HB && !TND) || document.getElementById("iaBtn")) return;
   /* VENTAS y TIENDA (12-11-2026): el asistente solo revisa ventas, stock de su bodega, prospectos y cobranza (sin costos ni compras) */
-  const T = HB ? HB.tipo : "tienda", RC = T !== "admin", DEMO = /DEMO/.test(document.title);
+  const T = HB ? HB.tipo : "tienda", RC = !(T === "admin" || T === "ventas"), DEMO = /DEMO/.test(document.title);
   const NOM = { admin: "HWF (administración)", ventas: "VENTAS (app de los vendedores)", log: "LOGÍSTICA", tienda: "TIENDA (Tienda Hellywoof)" }[T] || T;
   const ALC = {
     ventas: "App de los vendedores de HWF. Secciones: Inicio (avance del mes, buenas noticias), Pedido (crear notas de pedido, se envían al script y llegan por correo con PDF y Excel; botones para PDF, enviar e imprimir), Clientes (cartera, ficha, última compra, sugerencias de productos), Ruta (planificar visitas del día, PDF), Cobranza (documentos por cobrar), Prospectos (clientes potenciales), Panel, BI (apartado propio: venta de la distribuidora por marca, formato y producto; exportar a PDF, Excel, correo e imprimir), Catálogos y precios (descargar en PDF para enviar por WhatsApp o imprimir). ESTE ASISTENTE SOLO REVISA: ventas, stock de la bodega distribuidora, prospectos y cobranza. No tiene costos, márgenes ni compras: si preguntan otra cosa, dilo.",
@@ -1681,9 +1764,9 @@ body.ia-izq #iaBtn{right:auto;left:14px}
     log: "App de logística HWF. Secciones: Panel (buenas noticias, avance), BI (unidades Ventas y Logística: ventas, compras y stock por proveedor/marca/formato/producto y canal; exportar PDF/Excel/correo/imprimir), Abastecimiento (compra sugerida según pronóstico y stock de seguridad), Rutas de despacho (armar rutas del día, enviarlas a la app Chofer, seguimiento GPS y entregas con foto/firma; PDF), stock de todas las bodegas, pedidos pendientes y clientes para despacho."
   }[T] || "";
   const SUG = {
-    ventas: ["¿Cómo vamos con la meta del mes? ESTE ASISTENTE no tiene costos, márgenes, compras en pesos ni stock valorizado: si preguntan por eso, dilo.", "¿Qué clientes tienen facturas vencidas?", "¿Cuál es mi ruta de hoy?", "¿Qué prospectos debo contactar esta semana?", "¿Qué productos están sin stock?"],
+    ventas: ["¿Cómo vamos con la meta del mes?", "¿Cuál es mi ruta de hoy?", "Ventas por marca este mes", "Margen por producto este año", "¿Qué clientes tienen facturas vencidas?", "¿Qué prospectos debo contactar esta semana?"],
     tienda: ["¿Cómo vamos con la meta del mes?", "¿Qué productos se venden más este mes?", "¿Qué productos se están acabando en la tienda?", "¿Cuál es el ticket promedio del mes?"],
-    admin: ["Resume cómo va el mes contra la meta", "¿Qué marcas crecen y cuáles caen este año?", "¿Qué productos clase A tienen poco stock?", "¿Cómo va cada vendedor este mes?"],
+    admin: ["Resume cómo va el mes contra la meta", "Margen por vendedor este año", "Ventas por proveedor este mes vs año anterior", "Resumen de cobranza", "¿Cómo van los prospectos?", "¿Qué productos clase A tienen poco stock?"],
     log: ["¿Qué productos se quedan sin stock en menos de 15 días?", "¿Cuánto compramos por proveedor este año?", "¿Qué despachos hay por comuna?", "¿Qué pedidos están pendientes?", "¿Qué productos tienen más stock que venta?"]
   }[T] || [];
   const MES = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
@@ -1869,8 +1952,80 @@ body.ia-izq #iaBtn{right:auto;left:14px}
     const sd = L.filter(p => !p.dir).length;
     return sinRuta + "**" + L.length + " despachos pendientes por comuna**:\n\n" + tabla(["Comuna", "Pedidos", "Kg", "Monto"], Object.entries(g).sort((a, b) => b[1].n - a[1].n).map(([k, o]) => [k, o.n, n0(o.kg), MM(o.m)])) + (sd ? "\n\n" + sd + " sin dirección registrada (se ubican por el centro de la comuna)." : "") + "\n\nPregúntame «despachos en Rengo» para ver el detalle, o arma las rutas en **Rutas → Armar rutas óptimas**."; }
 
+
+  /* ===== BI en el asistente (15-11-2026): «ventas por marca este mes», «margen por vendedor en octubre», «unidades de Poema
+     por cliente», «ventas de la tienda por mes 2025», «cuánto vendimos de Ownat vs año anterior»… Misma base y definiciones que el
+     BI: venta neta (facturas − NC, sin IVA); costo = cantidad × costo unitario; margen = 1 − costo ÷ venta; distribuidora
+     salvo que se pida «tienda» o «total». Ventas y HWF ven margen; Logística y Tienda no. */
+  const MESL = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
+  function biQ(s, has) {
+    if (!HB || T === "tienda" || has("compr", "abastec", "stock", "inventario")) return null; const B = HB.base() || {}, R = B.rows || []; if (!R.length) return null;
+    const P = B.productos || [], cats = B.cats || [], V = B.vend || [], CL = B.clientes || [], tv = V.indexOf("Tienda Hellywoof");
+    const DIMS = [["marca", ["por marca", "cada marca", "las marcas", "marcas"]], ["prov", ["por proveedor", "proveedores"]], ["prod", ["por producto", "productos", "por sku"]],
+      ["cli", ["por cliente", "clientes que", "mejores clientes", "top clientes"]], ["vend", ["por vendedor", "vendedores", "cada vendedor"]], ["comuna", ["por comuna", "comunas"]], ["mes", ["por mes", "mensual", "mes a mes", "cada mes"]]];
+    const dimE = DIMS.find(([, w]) => has(...w)), DIM = dimE ? dimE[0] : null;
+    const MG = has("margen", "rentab", "ganancia", "utilidad", "costo"), UN = has("unidades", "cantidad", "sacos", "bultos");
+    const pideV = has("venta", "vend", "factur", "cuanto", "margen", "rentab", "unidades", "compar", " vs ", "versus", "top ", "ranking");
+    if (!DIM && !(pideV && (has("cuanto", "margen", "rentab", "compar", " vs ", "versus", "total") || MESL.some(m => s.includes(m))))) return null;
+    if (MG && RC) return "En esta app no se muestran costos ni márgenes. Puedo darte ventas y unidades" + (DIM ? " por " + { marca: "marca", prov: "proveedor", prod: "producto", cli: "cliente", vend: "vendedor", comuna: "comuna", mes: "mes" }[DIM] : "") + ".";
+    const cy = Number(String(B.corte || "").slice(0, 4)) || B.anio, cm = Number(String(B.corte || "").slice(5, 7)) || 12;
+    /* período */
+    let y = cy, m1 = 1, m2 = cm, per = "ene–" + MES[cm - 1] + " " + cy;
+    const ya = (s.match(/\b(20\d\d)\b/) || [])[1], mi = MESL.findIndex(m => new RegExp("\\b" + m + "\\b").test(s));
+    if (has("año pasado", "ano pasado", "anio pasado")) { y = cy - 1; m1 = 1; m2 = 12; per = String(y); }
+    if (ya) { y = Number(ya); m1 = 1; m2 = y === cy ? cm : 12; per = y === cy ? "ene–" + MES[cm - 1] + " " + y : String(y); }
+    if (mi >= 0) { if (!ya) y = mi + 1 > cm ? cy - 1 : cy; m1 = m2 = mi + 1; per = MESL[mi] + " " + y; }
+    else if (has("este mes", "mes actual", "del mes", "en el mes")) { y = cy; m1 = m2 = cm; per = MESL[cm - 1] + " " + cy + " (en curso)"; }
+    else if (has("trimestre", "3 meses", "tres meses")) { m2 = y === cy ? cm : 12; m1 = Math.max(1, m2 - 2); per = MES[m1 - 1] + "–" + MES[m2 - 1] + " " + y; }
+    /* negocio */
+    const canal = has("tienda") && !has("sin tienda") ? "t" : has("total", "con tienda", "todo el negocio") ? "" : "d", CAN = { "": "total (distribuidora + tienda)", d: "distribuidora", t: "tienda" }[canal];
+    /* filtros por nombre: marca, proveedor, vendedor, comuna, cliente (o «mis …» en Ventas) */
+    const info = P.map(p => { const pm = HB.prov(cats[p[1]]); return { n: p[0], cod: String(p[2]), pv: pm[0], marca: pm[1] || pm[0] }; });
+    const unicos = a => [...new Set(a.filter(Boolean))], enS = n => { const k = nor(n); return k.length >= 3 && new RegExp("(^| )" + k.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "( |$)").test(s); };
+    const fMarca = unicos(info.map(i => i.marca)).filter(enS).sort((a, b) => b.length - a.length)[0] || "";
+    const fProv = !fMarca ? unicos(info.map(i => i.pv)).filter(enS)[0] || "" : "";
+    const fVend = unicos(V).find(v => nor(v).split(" ").filter(w => w.length >= 4).some(w => new RegExp("(^| )" + w + "( |$)").test(s))) || "";
+    const fCom = unicos(CL.map(c => c[1])).filter(enS).sort((a, b) => b.length - a.length)[0] || "";
+    const me = yo(), mios = T === "ventas" && me && (has("mis ", "mi venta", "mis venta", "yo ", "mi cartera", "mios", "mias") || /\b(facture|vendi|vendido yo|llevo)\b/.test(s));
+    const okVend = vi => { const v = V[vi] || ""; if (canal === "t" && vi !== tv) return false; if (canal === "d" && vi === tv) return false;
+      if (fVend && v !== fVend) return false; if (mios && !(nor(v) === nor(me.cart) || nor(v) === nor(me.n))) return false; return true; };
+    const clave = r => { const i = info[r[1]] || {}; if (DIM === "marca") return i.marca || "Sin marca"; if (DIM === "prov") return i.pv || "Sin proveedor"; if (DIM === "prod") return i.n || "?";
+      if (DIM === "cli") return r[1] != null && CL[r[0]] ? CL[r[0]][0] : r[7] === tv ? "Boletas tienda" : "Sin cliente"; if (DIM === "vend") return V[r[7]] || "?"; if (DIM === "comuna") return CL[r[0]] ? tc(CL[r[0]][1] || "") || "Sin comuna" : "Sin comuna"; if (DIM === "mes") return r[2]; return "Total"; };
+    const acc = (yy) => { const G = {}; R.forEach(r => { const ry = r[8] || B.anio; if (ry !== yy || r[2] < m1 || r[2] > m2) return; if (yy === cy - 1 && y === cy && r[2] === cm && Number(String(B.corte).slice(8, 10)) && r[3] > Number(String(B.corte).slice(8, 10))) return;
+        if (!okVend(r[7])) return; const i = info[r[1]] || {}; if (fMarca && i.marca !== fMarca) return; if (fProv && i.pv !== fProv) return; if (fCom && !(CL[r[0]] && nor(CL[r[0]][1]) === nor(fCom))) return;
+        const k = clave(r), o = G[k] = G[k] || { v: 0, u: 0, c: 0 }; o.v += Number(r[5]) || 0; o.u += Number(r[4]) || 0; o.c += (Number(r[4]) || 0) * (Number(r[6]) || 0); }); return G; };
+    const A = acc(y), Bp = acc(y - 1), tot = o => Object.values(o).reduce((t, x) => ({ v: t.v + x.v, u: t.u + x.u, c: t.c + x.c }), { v: 0, u: 0, c: 0 }), TA = tot(A), TB = tot(Bp);
+    const mg = o => o.v > 0 ? 1 - o.c / o.v : null, sg = v => v == null || !isFinite(v) ? "–" : (v >= 0 ? "+" : "") + pc(v), varr = (a, b) => b > 0 ? a / b - 1 : null;
+    const filtro = [fMarca && "marca " + fMarca, fProv && "proveedor " + fProv, fVend && "vendedor " + fVend, fCom && "comuna " + tc(fCom), mios && "tu cartera"].filter(Boolean).join(" · ");
+    const tit = (MG ? "Margen" : UN ? "Unidades" : "Ventas") + (DIM ? " por " + { marca: "marca", prov: "proveedor", prod: "producto", cli: "cliente", vend: "vendedor", comuna: "comuna", mes: "mes" }[DIM] : "") + " · " + per + " · " + CAN + (filtro ? " · " + filtro : "");
+    const pie2 = "\n\n_Venta neta (facturas − notas de crédito, sin IVA)" + (RC ? "" : "; margen = 1 − costo ÷ venta") + "; comparación con el mismo período de " + (y - 1) + ". Datos al " + String(B.corte || "").split("-").reverse().join("-") + "._";
+    if (!TA.v && !TA.u) return "**" + tit + "**: no hay ventas con esos filtros." + pie2;
+    const resumen = "**" + tit + "**\n\nTotal: **" + MM(TA.v) + "** (" + n0(TA.u) + " unidades" + (RC ? "" : ", margen " + pc(mg(TA))) + ")" + (TB.v > 0 ? ", " + sg(varr(TA.v, TB.v)) + " vs " + (y - 1) + " (" + MM(TB.v) + ")." : ". Sin ventas de " + (y - 1) + " en los datos para comparar.");
+    if (!DIM) return resumen + pie2;
+    let L = Object.entries(A).map(([k, o]) => ({ k, o, b: (Bp[k] || { v: 0 }).v }));
+    if (DIM === "mes") L.sort((a, b) => a.k - b.k); else L.sort((a, b) => MG ? (b.o.v - b.o.c) - (a.o.v - a.o.c) : UN ? b.o.u - a.o.u : b.o.v - a.o.v);
+    const n = DIM === "mes" ? 12 : 15, cab = [DIM === "mes" ? "Mes" : "Nombre", "Venta", "% del total", "Unid."].concat(RC ? [] : ["Margen %", "Margen $"]).concat(TB.v > 0 ? ["vs " + (y - 1)] : []);
+    const fil = L.slice(0, n).map(x => [DIM === "mes" ? MESL[x.k - 1] : x.k, MM(x.o.v), pc(TA.v ? x.o.v / TA.v : 0), n0(x.o.u)].concat(RC ? [] : [mg(x.o) == null ? "–" : pc(mg(x.o)), MM(x.o.v - x.o.c)]).concat(TB.v > 0 ? [sg(varr(x.o.v, x.b))] : []));
+    return resumen + "\n\n" + tabla(cab, fil) + (L.length > n ? "\n\ny " + (L.length - n) + " más (en el BI ves la lista completa y puedes exportarla a Excel)." : "") + pie2; }
+  /* HWF Admin: cobranza y prospectos de toda la empresa */
+  function adminExtra(s, has) {
+    if (T !== "admin") return null;
+    if (has("cobranza", "cobrar", "vencid", "deuda", "por cobrar", "morosos", "deben")) { try { const docs = cxTodos(), rs = cxResumen(docs), cart = {};
+        docs.forEach(d => { const o = cart[d.cart || "Sin cartera"] = cart[d.cart || "Sin cartera"] || { t: 0, v: 0, n: 0 }; o.t += d.saldo || 0; if (d.dias > 0) { o.v += d.saldo || 0; o.n++; } });
+        const cl = {}; docs.forEach(d => { if (!(d.dias > 0)) return; const o = cl[d.cli] = cl[d.cli] || { v: 0, d: 0, cart: d.cart }; o.v += d.saldo || 0; o.d = Math.max(o.d, d.dias); });
+        return "**Cobranza de HWF**: por cobrar " + MM(rs.total) + ", vencido **" + MM(rs.venc) + "** (" + rs.nVenc + " documentos), más de 30 días " + MM(rs.v30) + ", vence esta semana " + MM(rs.sem) + ".\n\nPor cartera:\n\n" +
+          tabla(["Cartera", "Por cobrar", "Vencido", "Docs vencidos"], Object.entries(cart).sort((a, b) => b[1].v - a[1].v).map(([k, o]) => [k, MM(o.t), MM(o.v), o.n])) + "\n\nClientes con más vencido:\n\n" +
+          tabla(["Cliente", "Cartera", "Vencido", "Días máx."], Object.entries(cl).sort((a, b) => b[1].v - a[1].v).slice(0, 12).map(([k, o]) => [k, o.cart || "", MM(o.v), o.d])); } catch (e) { return null; } }
+    if (has("prospect", "embudo", "potencial")) { try { const L = prTodos().filter(o => o.etapa !== "Descartado"), hoy = new Date().toISOString().slice(0, 10), et = {}, vd = {};
+        L.forEach(o => { et[o.etapa] = (et[o.etapa] || 0) + 1; const v = vd[o.vendedor || "Sin asignar"] = vd[o.vendedor || "Sin asignar"] || { n: 0, at: 0, cl: 0 }; v.n++; if (o.proximo_contacto && o.proximo_contacto < hoy) v.at++; if (/Cliente activo|Recompra|Primer pedido/.test(o.etapa || "")) v.cl++; });
+        return "**Prospectos**: " + L.length + " activos.\n\nPor etapa:\n\n" + tabla(["Etapa", "Prospectos"], Object.entries(et).sort((a, b) => String(a[0]).localeCompare(String(b[0]))).map(([k, n]) => [k, n])) +
+          "\n\nPor vendedor:\n\n" + tabla(["Vendedor", "Prospectos", "Contacto atrasado", "Ya compran"], Object.entries(vd).sort((a, b) => b[1].n - a[1].n).map(([k, o]) => [k, o.n, o.at, o.cl])); } catch (e) { return null; } }
+    return null; }
+
   function local(q) { const X = prep(), s = nor(q), has = (...w) => w.some(x => s.includes(x)), mesN = MES[X.cm - 1] + " " + X.cy, ym = X.cy * 100 + X.cm, pie = "\n\n_Datos al " + String(X.corte || "").split("-").reverse().join("-") + "._";
     const nDias = (s.match(/(\d+)\s*dias?/) || [])[1]; const lim = nDias ? Number(nDias) : null;
+    /* HWF: cobranza y prospectos de toda la empresa */
+    { const r = adminExtra(s, has); if (r) return r; }
     /* rutas, direcciones y despachos */
     if (T === "ventas") { const r = rutaVentas(s, has); if (r) return r; }
     if (T === "log") { const r = rutaLog(s, has); if (r) return r; }
@@ -1881,12 +2036,14 @@ body.ia-izq #iaBtn{right:auto;left:14px}
       if (T !== "tienda") { const pend = X.cots.reduce((t, c) => t + (Number(c[7]) || 0), 0); if (pend) L.push("- Pedidos pendientes por facturar (NP Defontana): " + MM(pend) + (X.meta ? " → con ellos el avance sería " + pc((fa + pend) / X.meta) : "") + "."); if (T === "admin" && o.t) L.push("- Tienda Hellywoof: " + MM(o.t) + " en el mes."); }
       const me = yo(); if (me && o.vend) { const k = Object.keys(o.vend).find(v => nor(v) === nor(me.cart) || nor(v) === nor(me.n)), mt = Number(X.metas[k]) || 0; if (k) L.push("- **Tú (" + k + ")**: " + MM(o.vend[k]) + (mt ? " de " + MM(mt) + " (" + pc(o.vend[k] / mt) + ")" : "") + "."); }
       return L.join("\n") + pie; }
+    /* BI con dimensión explícita («por marca», «por vendedor»…) o margen: antes que los resúmenes fijos */
+    if (/\bpor (marca|proveedor|producto|cliente|vendedor|comuna|mes)\b/.test(s) || has("margen", "rentab")) { const r = biQ(s, has); if (r) return r; }
     if (T !== "tienda" && T !== "log" && has("vendedor", "equipo", "ranking", "cada vendedor")) { const o = X.mes[ym] || { vend: {} }; return "**Venta del mes por vendedor (" + mesN + ")**\n\n" + tabla(["Vendedor", "Facturado", "Meta", "Avance"], Object.keys(o.vend).sort((a, b) => o.vend[b] - o.vend[a]).map(k => { const mt = Number(X.metas[k]) || 0; return [k, MM(o.vend[k]), mt ? MM(mt) : "–", mt ? pc(o.vend[k] / mt) : "–"]; })) + pie; }
     if (has("ticket")) { if (T !== "tienda") return "El ticket promedio de la distribuidora está en el Dashboard de HWF; estos datos no traen el número de documento." + pie; if (T === "tienda") { const o = X.mes[ym] || {}; return o.docs && o.docs.size ? "Ticket promedio de " + mesN + ": **" + MM(o.v / o.docs.size) + "** (" + o.docs.size + " tickets, " + MM(o.v) + " vendidos)." + pie : "Los datos de la tienda aún no traen el número de documento: el ticket promedio aparecerá con la próxima actualización." + pie; } }
     if (has("se acaba", "poco stock", "dias de stock", "quedan sin", "por agotarse", "acabando", "cobertura", "menos de")) { const n = lim || 15, l = X.prods.filter(w => w.dias != null && w.dias > 0 && w.dias < n).sort((a, b) => a.dias - b.dias); return l.length ? "**Productos con menos de " + n + " días de stock**:\n\n" + tabla(["Producto", "Stock", "Venta u/mes", "Días"], l.slice(0, 20).map(w => [w.n, n0(w.st), n0(w.fc || w.q3), w.dias])) + pie : "Ningún producto con venta tiene menos de " + n + " días de stock." + pie; }
     if (has("sin stock", "quiebre", "agot")) { const l = X.prods.filter(w => w.st === 0 && w.q3 > 0).sort((a, b) => b.q3 - a.q3); return l.length ? "**" + l.length + " productos sin stock que se venden** (stock al " + (X.stockFecha || "?") + "):\n\n" + tabla(["Producto", "Venta prom. u/mes"], l.slice(0, 15).map(w => [w.n, n0(w.q3)])) + (l.length > 15 ? "\n\ny " + (l.length - 15) + " más." : "") + pie : "No hay productos con venta que estén sin stock. 👍" + pie; }
     if (has("sobrestock", "mas stock que venta", "exceso", "sobra")) { const l = X.prods.filter(w => w.dias != null && w.dias > 120).sort((a, b) => b.dias - a.dias); return l.length ? "**Productos con más de 120 días de stock**:\n\n" + tabla(["Producto", "Stock", "Venta u/mes", "Días"], l.slice(0, 20).map(w => [w.n, n0(w.st), n0(w.fc || w.q3), w.dias])) + pie : "No hay productos con más de 120 días de stock." + pie; }
-    if (has("marca")) { const m = {}; X.prods.forEach(w => { const o = m[w.marca] = m[w.marca] || { a: 0, b: 0 }; o.a += w.a; o.b += w.b; }); const L = Object.entries(m).filter(([, o]) => o.a > 0 || o.b > 0).map(([k, o]) => [k, o.a, o.b, o.b ? o.a / o.b - 1 : null]);
+    if (has("marca") && has("crec", "cae", "caen", "suben", "bajan", "subiendo", "bajando", "crecimiento")) { const m = {}; X.prods.forEach(w => { const o = m[w.marca] = m[w.marca] || { a: 0, b: 0 }; o.a += w.a; o.b += w.b; }); const L = Object.entries(m).filter(([, o]) => o.a > 0 || o.b > 0).map(([k, o]) => [k, o.a, o.b, o.b ? o.a / o.b - 1 : null]);
       const C = L.filter(x => x[3] != null && x[2] >= 1e6), sube = C.slice().sort((a, b) => b[3] - a[3]).filter(x => x[3] > 0).slice(0, 5), baja = C.slice().sort((a, b) => a[3] - b[3]).filter(x => x[3] < 0).slice(0, 5), f = x => [x[0], MM(x[1]), MM(x[2]), (x[3] >= 0 ? "+" : "") + pc(x[3])];
       if (!C.length) return "**Marcas con más venta en " + X.cy + "** (no hay datos suficientes del año anterior para comparar):\n\n" + tabla(["Marca", "Venta " + X.cy], L.sort((a, b) => b[1] - a[1]).slice(0, 10).map(x => [x[0], MM(x[1])])) + pie;
       return "**Marcas, ene–" + MES[X.cm - 1] + " " + X.cy + " vs. mismo período " + (X.cy - 1) + "**\n\nCrecen:\n\n" + (tabla(["Marca", X.cy, X.cy - 1, "Var."], sube.map(f)) || "ninguna") + "\n\nCaen:\n\n" + (tabla(["Marca", X.cy, X.cy - 1, "Var."], baja.map(f)) || "ninguna") + "\n\n_Solo marcas que vendieron más de $1 MM el año anterior._" + pie; }
@@ -1894,7 +2051,7 @@ body.ia-izq #iaBtn{right:auto;left:14px}
     if (T !== "tienda" && T !== "log" && has("cliente") && has("no compra", "dormid", "sin compr", "hace", "recuperar", "perdid")) { const n = lim || 60, me = yo(), hoy = new Date(), dd = f => Math.round((hoy - new Date(Math.floor(f / 10000), Math.floor(f / 100) % 100 - 1, f % 100)) / 864e5);
       const l = X.clis.filter(w => (!me || nor(w.vend) === nor(me.cart) || nor(w.vend) === nor(me.n)) && w.ult && dd(w.ult) > n && w.a + w.b > 0).sort((a, b) => (b.a + b.b) - (a.a + a.b));
       return l.length ? "**" + l.length + " clientes" + (me ? " de tu cartera" : "") + " sin comprar hace más de " + n + " días** (los de mayor compra primero):\n\n" + tabla(["Cliente", "Comuna", "Última compra", "Días", "Compra " + X.cy], l.slice(0, 15).map(w => [w.n, w.comuna, String(w.ult % 100).padStart(2, "0") + "-" + String(Math.floor(w.ult / 100) % 100).padStart(2, "0") + "-" + Math.floor(w.ult / 10000), dd(w.ult), MM(w.a)])) + (l.length > 15 ? "\n\ny " + (l.length - 15) + " más." : "") + pie : "No hay clientes" + (me ? " de tu cartera" : "") + " sin comprar hace más de " + n + " días." + pie; }
-    if (T === "ventas" && has("cobr", "vencid", "deuda", "factura", "debe")) { try { const docs = cxMios(); if (!docs.length) return "No tienes documentos por cobrar cargados."; const rs = cxResumen(docs), cl = cxClientes(docs).filter(c => c.venc > 0).sort((a, b) => b.venc - a.venc);
+    if (T === "ventas" && has("cobr", "vencid", "deuda", "facturas venc", "facturas pend", "debe", "impag", "morosos")) { try { const docs = cxMios(); if (!docs.length) return "No tienes documentos por cobrar cargados."; const rs = cxResumen(docs), cl = cxClientes(docs).filter(c => c.venc > 0).sort((a, b) => b.venc - a.venc);
         return "**Cobranza de tu cartera**: por cobrar " + MM(rs.total) + ", vencido **" + MM(rs.venc) + "** (" + rs.nVenc + " documentos), más de 30 días " + MM(rs.v30) + ", vence esta semana " + MM(rs.sem) + ".\n\n" + tabla(["Cliente", "Vencido", "Días máx."], cl.slice(0, 12).map(c => [c.cli, MM(c.venc), c.maxDias])); } catch (e) {} }
     if (T === "ventas" && has("prospect", "contactar", "potencial")) { try { const pr = prMios().filter(o => o.etapa !== "Descartado"), lim2 = new Date(Date.now() + 7 * 864e5).toISOString().slice(0, 10), l = pr.filter(o => o.proximo_contacto && o.proximo_contacto <= lim2).sort((a, b) => a.proximo_contacto.localeCompare(b.proximo_contacto));
         return "**Prospectos**: " + pr.length + " activos. " + (l.length ? "Para contactar esta semana:\n\n" + tabla(["Prospecto", "Comuna", "Etapa", "Contacto"], l.slice(0, 15).map(o => [o.nombre, o.comuna || "", o.etapa, o.proximo_contacto])) : "No tienes contactos agendados para los próximos 7 días; revisa los que están en «1. Mapeo» para agendarlos."); } catch (e) {} }
@@ -1904,13 +2061,14 @@ body.ia-izq #iaBtn{right:auto;left:14px}
       return Object.keys(pv).length ? "**Compras " + X.cy + " por proveedor**:\n\n" + tabla(["Proveedor", "Unidades"].concat(RC ? [] : ["Valor neto"]), Object.entries(pv).sort((a, b) => b[1].u - a[1].u).map(([k, o]) => [k, n0(o.u)].concat(RC ? [] : [MM(o.v)]))) + pie : "No hay compras de " + X.cy + " en los datos." + pie; }
     if (/\b(por dia|diaria|diario|hoy|ayer|cada dia)\b/.test(s)) { const d = Object.keys(X.dias).map(Number).sort((a, b) => a - b); return d.length ? "**Venta por día de " + mesN + "** (" + (T === "tienda" ? "tienda" : "distribuidora") + "):\n\n" + tabla(["Día", "Venta"], d.map(x => [x, MM(X.dias[x])])) + pie : "Aún no hay ventas por día este mes." + pie; }
     if ((T === "admin" || T === "tienda") && has("ruta", "recorrido", "despach")) return "Las rutas están en las apps **Ventas** (ruta de visitas de cada vendedor) y **Logística** (rutas de despacho). Ahí puedes preguntarme «¿cuál es mi ruta de hoy?» o «¿qué despachos hay por comuna?».";
+    { const r = biQ(s, has); if (r) return r; }
     /* producto o cliente nombrado en la pregunta */
     const pal = s.split(" ").filter(w => w.length >= 4 && !/^(como|vamos|cuanto|cuantos|cuales|que|productos?|clientes?|stock|venta|ventas|tiene|tienen|este|esta|mes|ano|del|los|las|para|con|mas|menos|hay|quien|donde|cual)$/.test(w));
     const pBus = pal.length ? X.prods.filter(w => { const n = nor(w.n + " " + w.marca + " " + w.cod); return pal.every(p => n.includes(p)); }) : [];
     if (T === "ventas" || T === "admin") { const cBus = pal.length ? X.clis.filter(w => { const n = nor(w.n); return pal.every(p => n.includes(p)); }) : [];
       if (cBus.length && cBus.length <= 5 && !has("producto")) return cBus.map(w => "**" + w.n + "** (" + (w.dir ? tc(w.dir) + ", " : "") + w.comuna + " · " + w.vend + "): compró " + MM(w.a) + " en " + X.cy + " (" + MM(w.b) + " en " + (X.cy - 1) + "); última compra el " + String(w.ult % 100).padStart(2, "0") + "-" + String(Math.floor(w.ult / 100) % 100).padStart(2, "0") + "-" + Math.floor(w.ult / 10000) + ".").join("\n") + pie; }
     if (pBus.length && pBus.length <= 12 && !has("se acaba", "sin stock", "quiebre", "agot", "mas se vend", "top", "mejores")) return "Encontré " + pBus.length + (pBus.length === 1 ? " producto" : " productos") + ":\n\n" + tabla(["Producto", X.cy + " $", X.cy + " u", MES[X.cm - 1] + " u", "Prom. 3 meses u", "Stock", "Días de stock"], pBus.sort((a, b) => b.a - a.a).map(w => [w.n, MM(w.a), n0(w.au), n0(w.mu), n0(w.q3), w.st == null ? "–" : n0(w.st), w.dias == null ? "–" : w.dias])) + pie;
-    return "Puedo responderte sin costo sobre: **meta y avance del mes**, " + (T === "tienda" ? "**ticket promedio**, " : T === "log" ? "**compras**, **pedidos pendientes**, " : "**vendedores**, **clientes sin compra** (p. ej. «clientes que no compran hace 90 días»), **pedidos pendientes**, ") + (T === "ventas" ? "**tu ruta de hoy**, **clientes por comuna** (p. ej. «clientes en Rengo»), **dirección de un cliente**, **cobranza vencida**, **prospectos a contactar**, " : T === "log" ? "**despachos por comuna**, **la ruta armada**, **dirección de un cliente**, " : "") + "**productos más vendidos**, **marcas que crecen o caen**, **productos sin stock** o que **se acaban en N días**, **sobrestock**, **venta por día**, y puedes escribir el nombre de un producto" + (T === "ventas" || T === "admin" ? " o de un cliente" : "") + " para ver su detalle.";
+    return "Puedo responderte sin costo sobre: **meta y avance del mes**, " + (T === "tienda" ? "**ticket promedio**, " : T === "log" ? "**compras**, **pedidos pendientes**, " : "**vendedores**, **clientes sin compra** (p. ej. «clientes que no compran hace 90 días»), **pedidos pendientes**, ") + (T === "ventas" ? "**tu ruta de hoy**, **clientes por comuna** (p. ej. «clientes en Rengo»), **dirección de un cliente**, **cobranza vencida**, **prospectos a contactar**, " : T === "log" ? "**despachos por comuna**, **la ruta armada**, **dirección de un cliente**, " : "") + "**ventas, unidades" + (RC ? "" : " y margen") + " por marca, proveedor, producto, cliente, vendedor, comuna o mes** (p. ej. «ventas por marca en octubre», «" + (RC ? "unidades de Poema por cliente" : "margen por vendedor este año") + "»), **productos más vendidos**, **marcas que crecen o caen**, **productos sin stock** o que **se acaban en N días**, **sobrestock**, **venta por día**, y puedes escribir el nombre de un producto" + (T === "ventas" || T === "admin" ? " o de un cliente" : "") + " para ver su detalle.";
   }
 
   /* ===== formato de la respuesta (markdown simple, escapado) ===== */
@@ -1966,89 +2124,6 @@ body.ia-izq #iaBtn{right:auto;left:14px}
   $q.addEventListener("input", () => { $q.style.height = "auto"; $q.style.height = Math.min(140, $q.scrollHeight) + "px"; });
   document.addEventListener("keydown", e => { if (e.key === "Escape" && pan.classList.contains("on")) cerrar(); });
   window.hwfAsistente = { contexto };   /* para pruebas */
-})();
-</script>
-<style>/* patch_botonesfix */
-.pr-et{align-self:start;justify-self:end;height:auto!important;line-height:1.35;padding:3px 10px}
-.pr-it>small{align-self:start}
-@media(max-width:899px){
-  body::after{content:"";display:block;height:calc(140px + env(safe-area-inset-bottom))}
-  #iaBtn{width:52px!important;height:52px!important;border:2px solid #fff!important;box-shadow:0 4px 14px rgba(11,49,70,.32)!important}
-  #iaBtn svg{width:28px;height:28px}
-}
-</style>
-<script>/* patch_soloexcelpdf */
-(function () {
-  if (window.hwfSoloExcelPdf) return; window.hwfSoloExcelPdf = 1;
-  /* ---------- CSV → filas ---------- */
-  function leerCsv(t) { t = String(t || "").replace(/^﻿/, ""); const L5 = t.split(/\r?\n/).slice(0, 5).join("\n"), sep = (L5.match(/;/g) || []).length > (L5.match(/,/g) || []).length ? ";" : ",";
-    const F = []; let f = [], c = "", q = false;
-    for (let i = 0; i < t.length; i++) { const ch = t[i];
-      if (q) { if (ch === '"') { if (t[i + 1] === '"') { c += '"'; i++; } else q = false; } else c += ch; continue; }
-      if (ch === '"') q = true; else if (ch === sep) { f.push(c); c = ""; } else if (ch === "\n" || ch === "\r") { if (ch === "\r" && t[i + 1] === "\n") i++; f.push(c); F.push(f); f = []; c = ""; } else c += ch; }
-    if (c !== "" || f.length) { f.push(c); F.push(f); }
-    const num = v => { const s = String(v).trim(); if (s === "" || /^0\d/.test(s) || s.length > 15) return v;
-      if (/^-?\d+(\.\d+)?$/.test(s)) return Number(s); if (sep === ";" && /^-?\d+,\d+$/.test(s)) return Number(s.replace(",", ".")); return v; };
-    return F.map(r => r.map(num)); }
-  /* ---------- ZIP sin compresión ---------- */
-  const CRC = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
-  const crc32 = b => { let c = 0xFFFFFFFF; for (let i = 0; i < b.length; i++) c = CRC[(c ^ b[i]) & 255] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; };
-  function zip(arch) { const te = new TextEncoder(), partes = [], cen = []; let off = 0;
-    const u16 = v => [v & 255, (v >>> 8) & 255], u32 = v => [v & 255, (v >>> 8) & 255, (v >>> 16) & 255, (v >>> 24) & 255];
-    arch.forEach(([n, s]) => { const nb = te.encode(n), db = typeof s === "string" ? te.encode(s) : s, cr = crc32(db);
-      const loc = new Uint8Array([].concat(u32(0x04034b50), u16(20), u16(0x0800), u16(0), u16(0), u16(0x21), u32(cr), u32(db.length), u32(db.length), u16(nb.length), u16(0)));
-      partes.push(loc, nb, db);
-      cen.push(new Uint8Array([].concat(u32(0x02014b50), u16(20), u16(20), u16(0x0800), u16(0), u16(0), u16(0x21), u32(cr), u32(db.length), u32(db.length), u16(nb.length), u16(0), u16(0), u16(0), u16(0), u32(0), u32(off))), nb);
-      off += loc.length + nb.length + db.length; });
-    const tam = cen.reduce((t, x) => t + x.length, 0);
-    return new Blob(partes.concat(cen, [new Uint8Array([].concat(u32(0x06054b50), u16(0), u16(0), u16(arch.length), u16(arch.length), u32(tam), u32(off), u16(0)))]), { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }); }
-  /* ---------- filas → .xlsx ---------- */
-  function xlsx(filas, hoja) { const x = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])).replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, "");
-    const col = i => { let s = ""; i++; while (i) { const m = (i - 1) % 26; s = String.fromCharCode(65 + m) + s; i = Math.floor((i - 1) / 26); } return s; };
-    const cab = filas.findIndex(r => r.filter(v => v !== "" && v != null).length >= 2), anchos = [];
-    const sd = filas.map((r, ri) => '<row r="' + (ri + 1) + '">' + r.map((v, ci) => { if (v === "" || v == null) return ""; const ref = col(ci) + (ri + 1), st = ri === cab ? ' s="1"' : "";
-      anchos[ci] = Math.max(anchos[ci] || 8, Math.min(60, String(v).length + 2));
-      return typeof v === "number" && isFinite(v) ? '<c r="' + ref + '"' + st + "><v>" + v + "</v></c>" : '<c r="' + ref + '" t="inlineStr"' + st + '><is><t xml:space="preserve">' + x(v) + "</t></is></c>"; }).join("") + "</row>").join("");
-    const cols = anchos.length ? "<cols>" + anchos.map((w, i) => '<col min="' + (i + 1) + '" max="' + (i + 1) + '" width="' + (w || 8) + '" customWidth="1"/>').join("") + "</cols>" : "";
-    const nom = x(String(hoja || "Datos").replace(/[\\\/\?\*\[\]:]/g, " ").slice(0, 31) || "Datos");
-    return zip([
-      ["[Content_Types].xml", '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>'],
-      ["_rels/.rels", '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>'],
-      ["xl/workbook.xml", '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="' + nom + '" sheetId="1" r:id="rId1"/></sheets></workbook>'],
-      ["xl/_rels/workbook.xml.rels", '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>'],
-      ["xl/styles.xml", '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><name val="Calibri"/></font></fonts><fills count="2"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill></fills><borders count="1"><border/></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="2"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>'],
-      ["xl/worksheets/sheet1.xml", '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">' + cols + "<sheetData>" + sd + "</sheetData></worksheet>"]]); }
-  /* ---------- imagen → PDF (una página del tamaño de la imagen) ---------- */
-  function pdfDeCanvas(cv) { const jpg = atob(cv.toDataURL("image/jpeg", 0.92).split(",")[1]), w = cv.width, h = cv.height, pw = Math.round(w * 0.75), ph = Math.round(h * 0.75);
-    const img = new Uint8Array(jpg.length); for (let i = 0; i < jpg.length; i++) img[i] = jpg.charCodeAt(i);
-    const cont = "q " + pw + " 0 0 " + ph + " 0 0 cm /Im0 Do Q", te = new TextEncoder(), P = [], off = []; let n = 0;
-    const add = b => { const u = typeof b === "string" ? te.encode(b) : b; P.push(u); n += u.length; };
-    add("%PDF-1.4\n");
-    const obj = (i, s) => { off[i] = n; add(i + " 0 obj\n" + s + "\nendobj\n"); };
-    obj(1, "<< /Type /Catalog /Pages 2 0 R >>"); obj(2, "<< /Type /Pages /Kids [3 0 R] /Count 1 >>");
-    obj(3, "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 " + pw + " " + ph + "] /Resources << /XObject << /Im0 4 0 R >> >> /Contents 5 0 R >>");
-    off[4] = n; add("4 0 obj\n<< /Type /XObject /Subtype /Image /Width " + w + " /Height " + h + " /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length " + img.length + " >>\nstream\n"); add(img); add("\nendstream\nendobj\n");
-    obj(5, "<< /Length " + cont.length + " >>\nstream\n" + cont + "\nendstream");
-    const xr = n; add("xref\n0 6\n0000000000 65535 f \n" + [1, 2, 3, 4, 5].map(i => String(off[i]).padStart(10, "0") + " 00000 n \n").join("") + "trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n" + xr + "\n%%EOF");
-    return new Blob(P, { type: "application/pdf" }); }
-  function cargarImagen(src) { return new Promise((ok, mal) => { const im = new Image(); im.onload = () => { const cv = document.createElement("canvas"); cv.width = im.naturalWidth; cv.height = im.naturalHeight; const g = cv.getContext("2d"); g.fillStyle = "#fff"; g.fillRect(0, 0, cv.width, cv.height); g.drawImage(im, 0, 0); ok(cv); }; im.onerror = mal; im.src = src; }); }
-  const leerTexto = href => { const r = new XMLHttpRequest(); r.open("GET", href, false); r.overrideMimeType("text/plain; charset=utf-8"); r.send(); return r.responseText; };   /* síncrono: el código original puede revocar el blob justo después del clic */
-  const _click = HTMLAnchorElement.prototype.click;
-  function bajar(blob, nombre) { const u = URL.createObjectURL(blob), a = document.createElement("a"); a.href = u; a.download = nombre; document.body.appendChild(a); _click.call(a); a.remove(); setTimeout(() => URL.revokeObjectURL(u), 60000); }
-  HTMLAnchorElement.prototype.click = function () { const n = this.download || "", h = this.getAttribute("href") || this.href || "";
-    try {
-      if (/\.csv$/i.test(n) && /^(blob:|data:)/.test(h)) { const filas = leerCsv(/^data:/.test(h) ? decodeURIComponent(h.split(",").slice(1).join(",")) : leerTexto(h)); bajar(xlsx(filas, n.replace(/\.csv$/i, "")), n.replace(/\.csv$/i, ".xlsx")); return; }
-      if (/\.(png|jpe?g)$/i.test(n) && /^(data:image\/|blob:)/.test(h)) { cargarImagen(h).then(cv => bajar(pdfDeCanvas(cv), n.replace(/\.(png|jpe?g)$/i, ".pdf"))).catch(() => _click.call(this)); return; }
-    } catch (e) { console.error(e); }
-    return _click.apply(this, arguments); };
-  /* compartir (WhatsApp, correo…): imágenes → PDF, CSV → Excel */
-  if (navigator.share) { const _share = navigator.share.bind(navigator), _can = navigator.canShare ? navigator.canShare.bind(navigator) : null;
-    const conv = async fs => Promise.all(fs.map(async f => {
-      if (/^image\//.test(f.type) || /\.(png|jpe?g)$/i.test(f.name)) { const u = URL.createObjectURL(f); try { const cv = await cargarImagen(u); return new File([pdfDeCanvas(cv)], f.name.replace(/\.(png|jpe?g)$/i, "") + ".pdf", { type: "application/pdf" }); } finally { URL.revokeObjectURL(u); } }
-      if (/csv/.test(f.type) || /\.csv$/i.test(f.name)) { const t = await f.text(); return new File([xlsx(leerCsv(t), f.name.replace(/\.csv$/i, ""))], f.name.replace(/\.csv$/i, ".xlsx"), { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }); }
-      return f; }));
-    navigator.share = async function (d) { if (d && d.files && d.files.length) { const files = await conv([...d.files]); d = Object.assign({}, d, { files }); if (_can && !_can(d)) { const f = d.files[0]; bajar(f, f.name); return; } } return _share(d); }; }
-  window.hwfXlsx = (filas, hoja) => xlsx(filas, hoja); window.hwfLeerCsv = leerCsv;   /* para pruebas */
 })();
 </script>
 </body></html>
