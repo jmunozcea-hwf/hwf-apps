@@ -2440,7 +2440,7 @@ let CAT = null;
 $("btnCatalogo").onclick = () => {
   $("mEnvT").textContent = "Descargar catálogo";
   const listo = () => abrirModal(`<p style="margin:0">Catálogo listo: <b>${CAT.total} productos</b>, ${CAT.conFoto} con foto (${esc(CAT.fuente)}).</p>`,
-    [["Cerrar", "", cerrarModal], ["CSV", "", () => guardarDatos(CAT.csv, HWF_CAT.nombreArchivo("csv"), "text/csv")],
+    [["Cerrar", "", cerrarModal], 
      ["Excel con fotos", "primary", () => guardarDatos(CAT.xlsx, HWF_CAT.nombreArchivo("xlsx"), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")]]);
   if (CAT) return listo();
   abrirModal(`<p style="margin:0">Se descargan todos los productos de la tienda HWF con sus fotos y todos sus datos, en Excel (con fotos) y CSV. Necesita internet y tarda alrededor de un minuto.</p>
@@ -7174,7 +7174,7 @@ function confirmarNota() {
   x.onclick = () => cerrarModal(); card.insertBefore(x, card.firstChild); })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261115220410";
+const HWF_VER = "20261115220750";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -9311,5 +9311,79 @@ body.ia-izq #iaBtn{right:auto;left:14px}
   #iaBtn svg{width:28px;height:28px}
 }
 </style>
+<script>/* patch_soloexcelpdf */
+(function () {
+  if (window.hwfSoloExcelPdf) return; window.hwfSoloExcelPdf = 1;
+  /* ---------- CSV → filas ---------- */
+  function leerCsv(t) { t = String(t || "").replace(/^﻿/, ""); const L5 = t.split(/\r?\n/).slice(0, 5).join("\n"), sep = (L5.match(/;/g) || []).length > (L5.match(/,/g) || []).length ? ";" : ",";
+    const F = []; let f = [], c = "", q = false;
+    for (let i = 0; i < t.length; i++) { const ch = t[i];
+      if (q) { if (ch === '"') { if (t[i + 1] === '"') { c += '"'; i++; } else q = false; } else c += ch; continue; }
+      if (ch === '"') q = true; else if (ch === sep) { f.push(c); c = ""; } else if (ch === "\n" || ch === "\r") { if (ch === "\r" && t[i + 1] === "\n") i++; f.push(c); F.push(f); f = []; c = ""; } else c += ch; }
+    if (c !== "" || f.length) { f.push(c); F.push(f); }
+    const num = v => { const s = String(v).trim(); if (s === "" || /^0\d/.test(s) || s.length > 15) return v;
+      if (/^-?\d+(\.\d+)?$/.test(s)) return Number(s); if (sep === ";" && /^-?\d+,\d+$/.test(s)) return Number(s.replace(",", ".")); return v; };
+    return F.map(r => r.map(num)); }
+  /* ---------- ZIP sin compresión ---------- */
+  const CRC = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+  const crc32 = b => { let c = 0xFFFFFFFF; for (let i = 0; i < b.length; i++) c = CRC[(c ^ b[i]) & 255] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; };
+  function zip(arch) { const te = new TextEncoder(), partes = [], cen = []; let off = 0;
+    const u16 = v => [v & 255, (v >>> 8) & 255], u32 = v => [v & 255, (v >>> 8) & 255, (v >>> 16) & 255, (v >>> 24) & 255];
+    arch.forEach(([n, s]) => { const nb = te.encode(n), db = typeof s === "string" ? te.encode(s) : s, cr = crc32(db);
+      const loc = new Uint8Array([].concat(u32(0x04034b50), u16(20), u16(0x0800), u16(0), u16(0), u16(0x21), u32(cr), u32(db.length), u32(db.length), u16(nb.length), u16(0)));
+      partes.push(loc, nb, db);
+      cen.push(new Uint8Array([].concat(u32(0x02014b50), u16(20), u16(20), u16(0x0800), u16(0), u16(0), u16(0x21), u32(cr), u32(db.length), u32(db.length), u16(nb.length), u16(0), u16(0), u16(0), u16(0), u32(0), u32(off))), nb);
+      off += loc.length + nb.length + db.length; });
+    const tam = cen.reduce((t, x) => t + x.length, 0);
+    return new Blob(partes.concat(cen, [new Uint8Array([].concat(u32(0x06054b50), u16(0), u16(0), u16(arch.length), u16(arch.length), u32(tam), u32(off), u16(0)))]), { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }); }
+  /* ---------- filas → .xlsx ---------- */
+  function xlsx(filas, hoja) { const x = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])).replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, "");
+    const col = i => { let s = ""; i++; while (i) { const m = (i - 1) % 26; s = String.fromCharCode(65 + m) + s; i = Math.floor((i - 1) / 26); } return s; };
+    const cab = filas.findIndex(r => r.filter(v => v !== "" && v != null).length >= 2), anchos = [];
+    const sd = filas.map((r, ri) => '<row r="' + (ri + 1) + '">' + r.map((v, ci) => { if (v === "" || v == null) return ""; const ref = col(ci) + (ri + 1), st = ri === cab ? ' s="1"' : "";
+      anchos[ci] = Math.max(anchos[ci] || 8, Math.min(60, String(v).length + 2));
+      return typeof v === "number" && isFinite(v) ? '<c r="' + ref + '"' + st + "><v>" + v + "</v></c>" : '<c r="' + ref + '" t="inlineStr"' + st + '><is><t xml:space="preserve">' + x(v) + "</t></is></c>"; }).join("") + "</row>").join("");
+    const cols = anchos.length ? "<cols>" + anchos.map((w, i) => '<col min="' + (i + 1) + '" max="' + (i + 1) + '" width="' + (w || 8) + '" customWidth="1"/>').join("") + "</cols>" : "";
+    const nom = x(String(hoja || "Datos").replace(/[\\\/\?\*\[\]:]/g, " ").slice(0, 31) || "Datos");
+    return zip([
+      ["[Content_Types].xml", '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>'],
+      ["_rels/.rels", '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>'],
+      ["xl/workbook.xml", '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="' + nom + '" sheetId="1" r:id="rId1"/></sheets></workbook>'],
+      ["xl/_rels/workbook.xml.rels", '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>'],
+      ["xl/styles.xml", '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><name val="Calibri"/></font></fonts><fills count="2"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill></fills><borders count="1"><border/></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="2"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>'],
+      ["xl/worksheets/sheet1.xml", '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">' + cols + "<sheetData>" + sd + "</sheetData></worksheet>"]]); }
+  /* ---------- imagen → PDF (una página del tamaño de la imagen) ---------- */
+  function pdfDeCanvas(cv) { const jpg = atob(cv.toDataURL("image/jpeg", 0.92).split(",")[1]), w = cv.width, h = cv.height, pw = Math.round(w * 0.75), ph = Math.round(h * 0.75);
+    const img = new Uint8Array(jpg.length); for (let i = 0; i < jpg.length; i++) img[i] = jpg.charCodeAt(i);
+    const cont = "q " + pw + " 0 0 " + ph + " 0 0 cm /Im0 Do Q", te = new TextEncoder(), P = [], off = []; let n = 0;
+    const add = b => { const u = typeof b === "string" ? te.encode(b) : b; P.push(u); n += u.length; };
+    add("%PDF-1.4\n");
+    const obj = (i, s) => { off[i] = n; add(i + " 0 obj\n" + s + "\nendobj\n"); };
+    obj(1, "<< /Type /Catalog /Pages 2 0 R >>"); obj(2, "<< /Type /Pages /Kids [3 0 R] /Count 1 >>");
+    obj(3, "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 " + pw + " " + ph + "] /Resources << /XObject << /Im0 4 0 R >> >> /Contents 5 0 R >>");
+    off[4] = n; add("4 0 obj\n<< /Type /XObject /Subtype /Image /Width " + w + " /Height " + h + " /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length " + img.length + " >>\nstream\n"); add(img); add("\nendstream\nendobj\n");
+    obj(5, "<< /Length " + cont.length + " >>\nstream\n" + cont + "\nendstream");
+    const xr = n; add("xref\n0 6\n0000000000 65535 f \n" + [1, 2, 3, 4, 5].map(i => String(off[i]).padStart(10, "0") + " 00000 n \n").join("") + "trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n" + xr + "\n%%EOF");
+    return new Blob(P, { type: "application/pdf" }); }
+  function cargarImagen(src) { return new Promise((ok, mal) => { const im = new Image(); im.onload = () => { const cv = document.createElement("canvas"); cv.width = im.naturalWidth; cv.height = im.naturalHeight; const g = cv.getContext("2d"); g.fillStyle = "#fff"; g.fillRect(0, 0, cv.width, cv.height); g.drawImage(im, 0, 0); ok(cv); }; im.onerror = mal; im.src = src; }); }
+  const leerTexto = href => { const r = new XMLHttpRequest(); r.open("GET", href, false); r.overrideMimeType("text/plain; charset=utf-8"); r.send(); return r.responseText; };   /* síncrono: el código original puede revocar el blob justo después del clic */
+  const _click = HTMLAnchorElement.prototype.click;
+  function bajar(blob, nombre) { const u = URL.createObjectURL(blob), a = document.createElement("a"); a.href = u; a.download = nombre; document.body.appendChild(a); _click.call(a); a.remove(); setTimeout(() => URL.revokeObjectURL(u), 60000); }
+  HTMLAnchorElement.prototype.click = function () { const n = this.download || "", h = this.getAttribute("href") || this.href || "";
+    try {
+      if (/\.csv$/i.test(n) && /^(blob:|data:)/.test(h)) { const filas = leerCsv(/^data:/.test(h) ? decodeURIComponent(h.split(",").slice(1).join(",")) : leerTexto(h)); bajar(xlsx(filas, n.replace(/\.csv$/i, "")), n.replace(/\.csv$/i, ".xlsx")); return; }
+      if (/\.(png|jpe?g)$/i.test(n) && /^(data:image\/|blob:)/.test(h)) { cargarImagen(h).then(cv => bajar(pdfDeCanvas(cv), n.replace(/\.(png|jpe?g)$/i, ".pdf"))).catch(() => _click.call(this)); return; }
+    } catch (e) { console.error(e); }
+    return _click.apply(this, arguments); };
+  /* compartir (WhatsApp, correo…): imágenes → PDF, CSV → Excel */
+  if (navigator.share) { const _share = navigator.share.bind(navigator), _can = navigator.canShare ? navigator.canShare.bind(navigator) : null;
+    const conv = async fs => Promise.all(fs.map(async f => {
+      if (/^image\//.test(f.type) || /\.(png|jpe?g)$/i.test(f.name)) { const u = URL.createObjectURL(f); try { const cv = await cargarImagen(u); return new File([pdfDeCanvas(cv)], f.name.replace(/\.(png|jpe?g)$/i, "") + ".pdf", { type: "application/pdf" }); } finally { URL.revokeObjectURL(u); } }
+      if (/csv/.test(f.type) || /\.csv$/i.test(f.name)) { const t = await f.text(); return new File([xlsx(leerCsv(t), f.name.replace(/\.csv$/i, ""))], f.name.replace(/\.csv$/i, ".xlsx"), { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }); }
+      return f; }));
+    navigator.share = async function (d) { if (d && d.files && d.files.length) { const files = await conv([...d.files]); d = Object.assign({}, d, { files }); if (_can && !_can(d)) { const f = d.files[0]; bajar(f, f.name); return; } } return _share(d); }; }
+  window.hwfXlsx = (filas, hoja) => xlsx(filas, hoja); window.hwfLeerCsv = leerCsv;   /* para pruebas */
+})();
+</script>
 </body>
 </html>
