@@ -7174,7 +7174,7 @@ function confirmarNota() {
   x.onclick = () => cerrarModal(); card.insertBefore(x, card.firstChild); })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261115143428";
+const HWF_VER = "20261115165800";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -9071,6 +9071,156 @@ function prUnifV(l) {
   function firma() { const s = document.getElementById("selMes"); return (s ? s.value : "") + "|" + vista; }
   poner(); const c = h0.querySelector("#adCard"); if (c) c.dataset.f = firma();
   [800, 2500, 6000].forEach(t => setTimeout(() => { if (!h0.querySelector("#adCard")) poner(); }, t));   /* por si los datos llegan después */
+})();
+</script>
+
+<style>/* patch_rutapropia */
+.rp-card{display:grid;gap:10px;border:1.5px solid var(--line,#DAE1E7);border-radius:16px;padding:12px 14px;background:var(--surface,#fff)}
+.rp-card h3{margin:0;font-size:1rem}.rp-seg{display:flex;gap:4px;background:#EEF2F5;border-radius:10px;padding:4px}
+.rp-seg button{flex:1;border:0;background:none;font:inherit;font-weight:800;font-size:.85rem;padding:9px 8px;border-radius:8px;color:#5B6874;cursor:pointer}
+.rp-seg button[aria-pressed="true"]{background:#fff;color:#0B3146;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.rp-row{display:grid;gap:8px}.rp-row label{font-size:.78rem;font-weight:800;color:#5B6874}
+.rp-row select{width:100%;border:1px solid var(--line,#DAE1E7);border-radius:10px;padding:10px;font:inherit;background:#fff;min-height:44px}
+.rp-coms{display:flex;flex-wrap:wrap;gap:6px}
+.rp-coms button{border:1.5px solid #C9D3DB;background:#fff;border-radius:999px;padding:7px 12px;font:inherit;font-size:.84rem;font-weight:700;cursor:pointer;color:#0F1E29}
+.rp-coms button[aria-pressed="true"]{background:#0B3146;border-color:#0B3146;color:#fff}.rp-coms small{opacity:.7;font-weight:600}
+.rp-lst{max-height:46vh;overflow:auto;display:grid;gap:2px;border:1px solid var(--line,#DAE1E7);border-radius:12px;padding:4px}
+.rp-lst label{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;align-items:start;padding:8px;border-radius:8px;cursor:pointer}
+.rp-lst label:hover{background:#F3F7FA}.rp-lst input{width:20px;height:20px;margin-top:2px}.rp-lst small{color:#5B6874}
+.rp-lst .rp-c{display:inline-block;font-size:.68rem;font-weight:800;padding:1px 7px;border-radius:999px;background:#FFF1DC;color:#9A5B00;margin-left:4px}
+.rp-lst .rp-c.pr{background:#E8F7F6;color:#1C6E6C}
+.rp-ord{display:flex;gap:4px}.rp-ord button{min-width:40px}
+.rp-tag{display:inline-block;font-size:.7rem;font-weight:800;padding:2px 8px;border-radius:999px;background:#0B3146;color:#fff;margin-left:6px;vertical-align:2px}
+</style>
+
+<script>/* patch_rutapropia: el vendedor arma su propia ruta por región y comuna */
+(function () {
+  if (typeof pintarRuta !== "function" || typeof candidatos !== "function" || typeof COM === "undefined") return;
+  /* región de cada comuna conocida (las que tienen coordenadas en COM) */
+  const REG = {}; const R = (r, l) => l.split(",").forEach(c => REG[c.trim()] = r);
+  R("Metropolitana", "santiago,buin,isla de maipo,curacavi"); R("Valparaíso", "casablanca,vina del mar");
+  R("O'Higgins", "rancagua,machali,graneros,codegua,mostazal,san francisco de mostazal,olivar,requinoa,rengo,coinco,coltauco,donihue,malloa,quinta de tilcoco,san vicente,san vicente de tagua tagua,san vicente de tt,las cabras,san fernando,chimbarongo,placilla,nancagua,chepica,santa cruz,lolol,palmilla,peralillo,marchigue,pichilemu,paredones,navidad");
+  R("Maule", "curico,teno,romeral,molina,sagrada familia,hualane,licanten,rauco,rio claro,talca,maule,pelarco,san clemente,san rafael,constitucion,linares,longavi,parral,retiro,san javier,villa alegre,yerbas buenas,colbun,cauquenes,pelluhue");
+  R("Ñuble", "chillan,san carlos,quillon"); R("Biobío", "los angeles"); R("Araucanía", "angol"); R("Los Ríos", "valdivia");
+  const ORDEN_REG = ["Valparaíso", "Metropolitana", "O'Higgins", "Maule", "Ñuble", "Biobío", "Araucanía", "Los Ríos", "Otras"];
+  const regDe = o => { const k = comKey(o.comuna); if (REG[k]) return REG[k]; const r = String(o.region || "").trim(); return r ? (ORDEN_REG.find(x => prN(x) === prN(r)) || r) : "Otras"; };
+  const misClientes = () => clientesLocal().filter(c => c.vendedor === SES.vendedor.cartera && String(c.comuna || "").trim());
+  const misProspectos = () => { try { return typeof prMios === "function" ? prMios().filter(x => x.etapa !== "Descartado" && prIdx(x.etapa) < 6 && String(x.comuna || "").trim()) : []; } catch (e) { return []; } };
+
+  /* en «Mi ruta» también entran clientes sin compra pendiente (los eligió el vendedor) */
+  const _cand = candidatos;
+  candidatos = function () {
+    const l = _cand.apply(this, arguments);
+    if (!RUTA || !RUTA.propia) return l;
+    const ya = new Set(l.map(x => x.c.codigo)), quiero = new Set(RUTA.planes[0] || []);
+    clientesLocal().forEach(c => { if (!quiero.has(c.codigo) || ya.has(c.codigo)) return; const pt = ubicCli(c); if (!pt) return;
+      const hab = Number(c.compra_habitual) || 0; l.push({ c, s: 1, por: [{ t: hab ? "Habitual " + fmt(hab) : "Elegido por ti", k: "" }], falta: 0, cot: 0, pt }); });
+    return l;
+  };
+  const ordenar = (o, l) => { /* vecino más cercano + 2-opt */ const r = [], rest = l.slice(); let a = o;
+    while (rest.length) { let bi = 0, bd = Infinity; rest.forEach((x, i) => { const d = distM(a, x.pt); if (d < bd) { bd = d; bi = i; } }); const x = rest.splice(bi, 1)[0]; r.push(x); a = x.pt; }
+    return r.length > 2 && r.length < 40 ? dosOpt(o, r) : r; };
+  function guardar(lista) { RUTA.planes = [lista]; RUTA.sel = 0; lsSet(RKEY, RUTA); }
+  function armar(codigos, prIds, cfg) {
+    if (!RUTA) RUTA = { fecha: today(), cart: SES.vendedor.cartera, o: null, origenTxt: "", ini: jornada().ini.getTime(), manana: jornada().manana, excl: [], planes: [[]], sel: 0, total: 0 };
+    if (!RUTA.o) { const b = baseVendedor(); RUTA.o = { lat: b.lat, lng: b.lng }; RUTA.origenTxt = `centro de ${b.nombre}`; }
+    RUTA.propia = cfg; RUTA.excl = []; lsSet(RPKEY, { fecha: today(), ids: prIds });
+    RUTA.planes = [codigos.concat(prIds)];
+    const idx = Object.fromEntries(candidatos().map(x => [x.c.codigo, x]));
+    const l = RUTA.planes[0].map(k => idx[k]).filter(Boolean);
+    guardar(ordenar(RUTA.o, l).map(x => x.c.codigo)); lsSet(RVKEY, today());
+    pintarRuta(); window.scrollTo({ top: 0 });
+    toast(l.length ? `Ruta armada con ${l.length} ${l.length === 1 ? "visita" : "visitas"}.` : "Ninguno de los elegidos tiene ubicación conocida.");
+  }
+  let CFG = lsGet("hwf-ruta-propia-cfg", { region: "", comunas: [], pr: true });
+  function tarjeta() {
+    const propia = !!(RUTA && RUTA.propia), cli = misClientes(), prs = misProspectos();
+    const porReg = {}; cli.concat(prs).forEach(o => { const r = regDe(o); (porReg[r] = porReg[r] || {}); const k = comKey(o.comuna); porReg[r][k] = porReg[r][k] || { n: 0, p: 0, nombre: tc(o.comuna) }; if (o.codigo) porReg[r][k].n++; else porReg[r][k].p++; });
+    const regs = Object.keys(porReg).sort((a, b) => (ORDEN_REG.indexOf(a) + 99) % 99 - (ORDEN_REG.indexOf(b) + 99) % 99);
+    const nCli = r => Object.values(porReg[r] || {}).reduce((a, v) => a + v.n * 10 + v.p, 0);
+    if (!CFG.region || !porReg[CFG.region]) CFG.region = regs.slice().sort((a, b) => nCli(b) - nCli(a))[0] || "";
+    const coms = Object.entries(porReg[CFG.region] || {}).sort((a, b) => (b[1].n - a[1].n) || a[1].nombre.localeCompare(b[1].nombre, "es"));
+    CFG.comunas = CFG.comunas.filter(k => coms.some(([c]) => c === k));
+    const d = document.createElement("div"); d.className = "rp-card"; d.id = "rpCard";
+    d.innerHTML = `<h3>Armar mi ruta</h3>
+      <div class="rp-seg"><button type="button" data-m="sug" aria-pressed="${!propia}">Ruta sugerida</button><button type="button" data-m="mia" aria-pressed="${propia}">Mi ruta por comuna</button></div>
+      <div id="rpForm" ${!propia && CFG.abierto ? "" : "hidden"}>
+        <div class="rp-row"><label for="rpReg">Región</label><select id="rpReg">${regs.map(r => `<option ${r === CFG.region ? "selected" : ""}>${esc(r)}</option>`).join("") || "<option>Sin clientes</option>"}</select></div>
+        <div class="rp-row" style="margin-top:8px"><label>Comunas <span style="font-weight:600">(toca para elegir una o varias)</span></label>
+          <div class="rp-coms" id="rpComs">${coms.map(([k, v]) => `<button type="button" data-k="${esc(k)}" aria-pressed="${CFG.comunas.includes(k)}">${esc(v.nombre)} <small>${[v.n ? v.n + " cl." : "", v.p ? v.p + " pr." : ""].filter(Boolean).join(" · ")}</small></button>`).join("") || '<span class="hint">No tienes clientes en esta región.</span>'}</div></div>
+        <label style="display:flex;gap:8px;align-items:center;margin-top:8px;font-size:.88rem"><input type="checkbox" id="rpPr" ${CFG.pr ? "checked" : ""}> Incluir mis prospectos de esas comunas</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button class="btn primary" type="button" id="rpElegir">Elegir clientes y armar ruta</button></div>
+      </div>
+      ${propia ? `<p class="hint" style="margin:0">Mi ruta: ${esc((RUTA.propia.nombres || RUTA.propia.comunas.map(tc)).join(", "))} (${esc(RUTA.propia.region)}). Puedes subir, bajar o quitar paradas y agregar más clientes.</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" type="button" id="rpMas">+ Agregar clientes</button><button class="btn" type="button" id="rpOrd">Ordenar por cercanía</button><button class="btn" type="button" id="rpCamb">Cambiar comunas</button></div>` : ""}`;
+    d.querySelector(".rp-seg").onclick = e => { const b = e.target.closest("[data-m]"); if (!b) return;
+      if (b.dataset.m === "sug") { CFG.abierto = false; lsSet("hwf-ruta-propia-cfg", CFG); if (RUTA && RUTA.propia) { delete RUTA.propia; lsSet(RPKEY, { fecha: today(), ids: [] }); calcularRuta({ o: RUTA.o, origenTxt: RUTA.origenTxt }); } else pintarRuta(); }
+      else { CFG.abierto = true; lsSet("hwf-ruta-propia-cfg", CFG); d.querySelector("#rpForm").hidden = false; d.querySelectorAll(".rp-seg button").forEach(x => x.setAttribute("aria-pressed", String(x === b))); } };
+    const reg = d.querySelector("#rpReg"); if (reg) reg.onchange = () => { CFG.region = reg.value; CFG.comunas = []; lsSet("hwf-ruta-propia-cfg", CFG); pintarRuta(); };
+    d.querySelector("#rpComs").onclick = e => { const b = e.target.closest("[data-k]"); if (!b) return; const k = b.dataset.k, i = CFG.comunas.indexOf(k);
+      if (i >= 0) CFG.comunas.splice(i, 1); else CFG.comunas.push(k); b.setAttribute("aria-pressed", String(i < 0)); lsSet("hwf-ruta-propia-cfg", CFG); };
+    d.querySelector("#rpPr").onchange = e => { CFG.pr = e.target.checked; lsSet("hwf-ruta-propia-cfg", CFG); };
+    d.querySelector("#rpElegir").onclick = () => elegir(false);
+    if (d.querySelector("#rpMas")) d.querySelector("#rpMas").onclick = () => elegir(true);
+    if (d.querySelector("#rpCamb")) d.querySelector("#rpCamb").onclick = () => { d.querySelector("#rpForm").hidden = false; d.querySelector("#rpForm").scrollIntoView({ block: "nearest" }); };
+    if (d.querySelector("#rpOrd")) d.querySelector("#rpOrd").onclick = () => { const r = paradas(); guardar(ordenar(RUTA.o, r).map(x => x.c.codigo)); pintarRuta(); toast("Ruta ordenada por cercanía."); };
+    return d;
+  }
+  function elegir(agregar) {
+    const cfg = agregar && RUTA && RUTA.propia ? RUTA.propia : { region: CFG.region, comunas: CFG.comunas.slice(), pr: CFG.pr, nombres: CFG.comunas.map(k => { const c = misClientes().concat(misProspectos()).find(o => comKey(o.comuna) === k); return c ? tc(c.comuna) : tc(k); }) };
+    if (!cfg.comunas.length) { toast("Elige al menos una comuna."); return; }
+    const set = new Set(cfg.comunas), sc = Object.fromEntries(_cand().map(x => [x.c.codigo, x]));
+    const ya = new Set(agregar ? RUTA.planes[0] : []), o = (RUTA && RUTA.o) || (() => { const b = baseVendedor(); return { lat: b.lat, lng: b.lng }; })();
+    const items = misClientes().filter(c => set.has(comKey(c.comuna))).map(c => { const pt = ubicCli(c), s = sc[c.codigo]; return { id: c.codigo, nom: tc(c.nombre), com: tc(c.comuna), dir: tc(c.direccion), pt, s: s ? s.s : 0, por: s ? s.por.map(p => p.t).join(" · ") : "", pr: false }; })
+      .concat(cfg.pr ? misProspectos().filter(x => set.has(comKey(x.comuna))).map(x => { const pt = prPunto(x); return { id: x.id, nom: x.nombre, com: tc(x.comuna), dir: tc(x.direccion), pt, s: 0, por: "Prospecto", pr: true }; }) : [])
+      .filter(x => x.pt).sort((a, b) => (b.s - a.s) || distM(o, a.pt) - distM(o, b.pt));
+    if (!items.length) { toast("No hay clientes con ubicación conocida en esas comunas."); return; }
+    const marcar = x => agregar ? ya.has(x.id) : x.s > 0;
+    abrirModal(`<div class="pr-form"><p class="hint" style="margin:0">Marca a quién quieres visitar. Arriba están los que tienen compra pendiente, nota de pedido o contacto agendado.</p>
+      <div class="search" style="margin:0"><input id="rpQ" type="search" placeholder="Buscar cliente" autocomplete="off" aria-label="Buscar cliente"></div>
+      <div style="display:flex;gap:8px"><button class="btn" type="button" id="rpTodos">Marcar todos</button><button class="btn" type="button" id="rpNing">Ninguno</button></div>
+      <div class="rp-lst" id="rpL">${items.map(x => `<label data-q="${esc(prN(x.nom + " " + x.com + " " + x.dir))}"><input type="checkbox" value="${esc(x.id)}" data-pr="${x.pr ? 1 : 0}" ${marcar(x) ? "checked" : ""}>
+        <span><b>${esc(x.nom)}</b>${x.pr ? '<span class="rp-c pr">prospecto</span>' : x.s > 0 ? '<span class="rp-c">prioridad</span>' : ""}<br><small>${esc([x.dir, x.com].filter(Boolean).join(", "))}${x.pt.tipo === "comuna" ? " (ubicación aprox.)" : ""}${x.por && !x.pr ? " · " + esc(x.por) : ""}</small></span></label>`).join("")}</div></div>`,
+      [["Cancelar", "", cerrarModal], [agregar ? "Actualizar ruta" : "Armar ruta", "primary", () => {
+        const sel = [...document.querySelectorAll("#rpL input:checked")];
+        if (!sel.length) { toast("Marca al menos un cliente."); return; }
+        cerrarModal(); armar(sel.filter(i => i.dataset.pr !== "1").map(i => i.value), sel.filter(i => i.dataset.pr === "1").map(i => i.value), cfg); }]]);
+    if ($("mEnvT")) $("mEnvT").textContent = agregar ? "Agregar clientes a mi ruta" : "Elegir clientes de " + (cfg.nombres || cfg.comunas.map(tc)).join(", ");
+    $("rpQ").oninput = e => { const q = prN(e.target.value); document.querySelectorAll("#rpL label").forEach(l => l.hidden = !!q && !l.dataset.q.includes(q)); };
+    $("rpTodos").onclick = () => document.querySelectorAll("#rpL label:not([hidden]) input").forEach(i => i.checked = true);
+    $("rpNing").onclick = () => document.querySelectorAll("#rpL input").forEach(i => i.checked = false);
+  }
+  const _pr = pintarRuta;
+  pintarRuta = function () {
+    if (!SES) return _pr.apply(this, arguments);
+    if (!RUTA) { const g = lsGet(RKEY, null); if (g && g.fecha === today() && g.cart === SES.vendedor.cartera) RUTA = g; }
+    if (RUTA && RUTA.propia && !RUTA.planes[0].length) { delete RUTA.propia; }
+    const r = _pr.apply(this, arguments), box = $("crmRuta"); if (!box || !RUTA) return r;
+    try {
+      const old = $("rpCard"); if (old) old.remove(); box.prepend(tarjeta());
+      if (RUTA.propia) {
+        const hh = box.querySelector(".r-head .hint"); if (hh) hh.textContent = `Desde ${RUTA.origenTxt} · ruta armada por ti en ${(RUTA.propia.nombres || RUTA.propia.comunas.map(tc)).join(", ")}, ordenada por cercanía.`;
+        const h = box.querySelector(".r-head h3"); if (h && !h.querySelector(".rp-tag")) h.insertAdjacentHTML("beforeend", '<span class="rp-tag">MI RUTA</span>');
+        const lst = RUTA.planes[0];
+        box.querySelectorAll("[data-rq]").forEach(b => { const code = b.dataset.rq;
+          b.onclick = () => { guardar(lst.filter(k => k !== code)); if (!RUTA.planes[0].length) { delete RUTA.propia; lsSet(RKEY, RUTA); calcularRuta({ o: RUTA.o, origenTxt: RUTA.origenTxt }); } else pintarRuta(); };
+          const i = lst.indexOf(code), cont = document.createElement("span"); cont.className = "rp-ord";
+          cont.innerHTML = `<button class="btn" type="button" aria-label="Subir" ${i <= 0 ? "disabled" : ""}>↑</button><button class="btn" type="button" aria-label="Bajar" ${i >= lst.length - 1 ? "disabled" : ""}>↓</button>`;
+          const [up, dn] = cont.querySelectorAll("button");
+          up.onclick = () => { const n = lst.slice(); [n[i - 1], n[i]] = [n[i], n[i - 1]]; guardar(n); pintarRuta(); };
+          dn.onclick = () => { const n = lst.slice(); [n[i + 1], n[i]] = [n[i], n[i + 1]]; guardar(n); pintarRuta(); };
+          b.before(cont); });
+        const rc = $("rRecalc"); if (rc) { rc.textContent = "Reordenar desde mi ubicación"; rc.onclick = async () => { rc.disabled = true; rc.textContent = "Buscando tu ubicación…";
+          try { const p = await Promise.race([ubicar(), new Promise((_, j) => setTimeout(() => j(new Error("t")), 30000))]); RUTA.o = { lat: p.lat, lng: p.lng }; RUTA.origenTxt = "tu ubicación actual"; } catch (e) { toast("Sin GPS: se ordena desde el punto actual."); }
+          guardar(ordenar(RUTA.o, paradas()).map(x => x.c.codigo)); pintarRuta(); }; }
+        const ot = $("rOtra"); if (ot) ot.remove();
+      }
+    } catch (e) { console.error(e); }
+    return r;
+  };
+  /* «Recalcular» automático no debe borrar «Mi ruta» sin querer: solo la ruta sugerida se recalcula */
+  const _calc = calcularRuta;
+  calcularRuta = function (opc) { if (RUTA && RUTA.propia && opc && opc.excl && !opc.forzar) return pintarRuta(); if (RUTA) delete RUTA.propia; return _calc.apply(this, arguments); };
 })();
 </script>
 </body>
