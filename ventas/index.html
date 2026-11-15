@@ -7174,7 +7174,7 @@ function confirmarNota() {
   x.onclick = () => cerrarModal(); card.insertBefore(x, card.firstChild); })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261115165800";
+const HWF_VER = "20261115170243";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -9074,6 +9074,7 @@ function prUnifV(l) {
 })();
 </script>
 
+
 <style>/* patch_rutapropia */
 .rp-card{display:grid;gap:10px;border:1.5px solid var(--line,#DAE1E7);border-radius:16px;padding:12px 14px;background:var(--surface,#fff)}
 .rp-card h3{margin:0;font-size:1rem}.rp-seg{display:flex;gap:4px;background:#EEF2F5;border-radius:10px;padding:4px}
@@ -9096,6 +9097,8 @@ function prUnifV(l) {
 <script>/* patch_rutapropia: el vendedor arma su propia ruta por región y comuna */
 (function () {
   if (typeof pintarRuta !== "function" || typeof candidatos !== "function" || typeof COM === "undefined") return;
+  /* sin topes horarios (pedido de Jorge 15-11-2026): la ruta parte ahora, sin límite de 9:00–18:30 ni paso al día siguiente */
+  jornada = function () { return { ini: new Date(), manana: false, budget: 1e9 }; };
   /* región de cada comuna conocida (las que tienen coordenadas en COM) */
   const REG = {}; const R = (r, l) => l.split(",").forEach(c => REG[c.trim()] = r);
   R("Metropolitana", "santiago,buin,isla de maipo,curacavi"); R("Valparaíso", "casablanca,vina del mar");
@@ -9197,6 +9200,7 @@ function prUnifV(l) {
     if (RUTA && RUTA.propia && !RUTA.planes[0].length) { delete RUTA.propia; }
     const r = _pr.apply(this, arguments), box = $("crmRuta"); if (!box || !RUTA) return r;
     try {
+      const nt = box.querySelector(".r-nota"); if (nt) nt.textContent = nt.textContent.replace(/\s*Jornada hasta las 18:30\.?/, " Sin límite de horario: la ruta incluye todas las visitas elegidas.");
       const old = $("rpCard"); if (old) old.remove(); box.prepend(tarjeta());
       if (RUTA.propia) {
         const hh = box.querySelector(".r-head .hint"); if (hh) hh.textContent = `Desde ${RUTA.origenTxt} · ruta armada por ti en ${(RUTA.propia.nombres || RUTA.propia.comunas.map(tc)).join(", ")}, ordenada por cercanía.`;
