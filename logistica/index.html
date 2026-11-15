@@ -402,7 +402,7 @@ if (!cfg() || !DATA()) pantallaConexion(); else { arrancar(); bajar(true).then(n
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261115213040";
+const HWF_VER = "20261115215416";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -1965,4 +1965,13 @@ body.ia-izq #iaBtn{right:auto;left:14px}
   window.hwfAsistente = { contexto };   /* para pruebas */
 })();
 </script>
+<style>/* patch_botonesfix */
+.pr-et{align-self:start;justify-self:end;height:auto!important;line-height:1.35;padding:3px 10px}
+.pr-it>small{align-self:start}
+@media(max-width:899px){
+  body::after{content:"";display:block;height:calc(140px + env(safe-area-inset-bottom))}
+  #iaBtn{width:52px!important;height:52px!important;border:2px solid #fff!important;box-shadow:0 4px 14px rgba(11,49,70,.32)!important}
+  #iaBtn svg{width:28px;height:28px}
+}
+</style>
 </body></html>
