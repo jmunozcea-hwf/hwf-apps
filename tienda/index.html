@@ -2269,7 +2269,7 @@ const stAbrev = n => ST_ABR.reduce((s, [r, t]) => s.replace(r, t), String(n || "
 try { if ($("sStock") && !$("sStock").hidden) pintarStock(); } catch (e) {}
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261115091952";
+const HWF_VER = "20261115143148";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -2939,6 +2939,776 @@ body.log-sn main{padding-bottom:0!important}
   function firma() { const s = document.getElementById("selMes"); return (s ? s.value : "") + "|" + vista; }
   poner(); const c = h0.querySelector("#adCard"); if (c) c.dataset.f = firma();
   [800, 2500, 6000].forEach(t => setTimeout(() => { if (!h0.querySelector("#adCard")) poner(); }, t));   /* por si los datos llegan después */
+})();
+</script>
+
+<style>/* patch_tdasug */
+#sSug{display:grid;gap:12px}#sSug[hidden]{display:none!important}
+#sSug .t-card{display:grid;gap:10px;min-width:0}
+#sSug h2 small{color:var(--muted,#5B6874);font-weight:600;font-size:.8rem}
+.sg-seg{display:flex;gap:4px;background:var(--sunk,#EEF2F5);border-radius:10px;padding:4px;flex-wrap:wrap}
+.sg-seg button{border:0;background:none;font:inherit;font-weight:700;font-size:.85rem;padding:8px 10px;border-radius:8px;cursor:pointer;color:var(--muted,#5B6874);flex:1;white-space:nowrap}
+.sg-seg button[aria-pressed="true"]{background:var(--surface,#fff);color:var(--ink,#0F1E29);box-shadow:0 1px 3px rgba(0,0,0,.1)}
+.sg-seg.sm button{font-size:.8rem;padding:6px 8px}
+.sg-sub{display:none}.sg-sub.on{display:grid;gap:12px}
+.sg-f{display:grid;gap:4px;min-width:0}
+.sg-f label,.sg-lbl{font-size:.8rem;font-weight:700;color:var(--muted,#5B6874)}
+.sg-f .opt{font-weight:500}
+.sg-f input,.sg-f select,.sg-f textarea{width:100%;box-sizing:border-box;border:1px solid var(--line,#DAE1E7);background:var(--bg,#F4F6F8);border-radius:10px;padding:10px 11px;min-height:44px;font:inherit;color:inherit}
+.sg-f textarea{min-height:64px;resize:vertical}
+.sg-f input:focus,.sg-f select:focus,.sg-f textarea:focus{border-color:var(--hw);outline:none;box-shadow:0 0 0 3px #F6EEFB}
+.sg-two{display:grid;grid-template-columns:1fr 1fr;gap:10px}@media (max-width:380px){.sg-two{grid-template-columns:1fr}}
+.sg-hint{font-size:.78rem;color:var(--muted,#5B6874);min-height:1em}.sg-hint b{color:#4A1F6F}
+.sg-qty{display:flex;align-items:stretch;border:1px solid var(--line,#DAE1E7);border-radius:10px;overflow:hidden;background:var(--bg,#F4F6F8)}
+.sg-qty button{width:48px;border:0;background:transparent;cursor:pointer;font-size:1.2rem;font-weight:700;color:var(--hw)}
+.sg-f .sg-qty input{flex:1;min-width:0;border:0;border-inline:1px solid var(--line,#DAE1E7);border-radius:0;background:var(--surface,#fff);text-align:center;font-weight:700;box-shadow:none}
+.sg-srch{position:relative}.sg-srch .lupa{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:.85rem;opacity:.55;pointer-events:none}
+.sg-f .sg-srch input{padding-left:36px;padding-right:44px}
+.sg-srch .x{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:32px;height:32px;border:0;border-radius:50%;background:var(--sunk,#EEF2F5);color:var(--muted,#5B6874);font-weight:800;cursor:pointer}
+.sg-pk{border:1px solid var(--line,#DAE1E7);border-radius:10px;background:var(--surface,#fff);overflow:hidden;margin-top:4px;box-shadow:0 6px 18px rgba(15,30,41,.08)}
+.sg-pk-h{padding:6px 12px;font-size:.72rem;font-weight:600;color:var(--muted,#5B6874);border-bottom:1px solid var(--line,#DAE1E7)}
+.sg-pk-l{max-height:232px;overflow-y:auto;overscroll-behavior:contain}
+.sg-pi{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;width:100%;text-align:left;border:0;border-top:1px solid var(--line,#DAE1E7);background:none;padding:8px 12px;cursor:pointer;min-height:44px;font:inherit;color:inherit}
+.sg-pi:first-child{border-top:0}.sg-pi:hover,.sg-pi:focus-visible{background:#F6EEFB}
+.sg-pi b{display:block;font-weight:500;font-size:.88rem;line-height:1.25}.sg-pi b mark{background:none;color:#4A1F6F;font-weight:800}
+.sg-pi small{color:var(--muted,#5B6874);font-size:.72rem}.sg-pi.nuevo b{color:#4A1F6F;font-weight:700}
+.sg-pk-f .sg-pi{background:var(--bg,#F4F6F8);min-height:40px}
+.sg-pk-x{padding:12px;font-size:.84rem;color:var(--muted,#5B6874)}.sg-pk-x button{margin-top:8px}
+.sg-st0{font-size:.7rem;font-weight:800;padding:2px 7px;border-radius:999px;background:#FFF1DC;color:#A35A00;white-space:nowrap}
+.sg-fr{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;padding:9px 0;border-top:1px solid var(--line,#DAE1E7)}.sg-fr:first-child{border-top:0}
+.sg-fr b{display:block;font-weight:600;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sg-fr small{color:var(--muted,#5B6874);font-size:.78rem}
+.sg-ch{font-size:.7rem;font-weight:700;padding:2px 7px;border-radius:999px;background:var(--sunk,#EEF2F5);color:var(--muted,#5B6874);white-space:nowrap}
+.sg-ch.nt{background:#F6EEFB;color:#4A1F6F}.sg-ch.ss{background:#FFF1DC;color:#A35A00}
+.sg-pod{display:grid;gap:8px}@media (min-width:620px){.sg-pod{grid-template-columns:repeat(3,1fr)}}
+.sg-pd{border:1px solid var(--line,#DAE1E7);border-radius:12px;padding:10px 12px;display:grid;grid-template-columns:38px minmax(0,1fr);gap:10px;align-items:center;background:var(--bg,#F4F6F8)}
+.sg-pd .n{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:1.05rem;background:#F6EEFB;color:#4A1F6F}.sg-pd.p1 .n{background:var(--hw);color:#fff}
+.sg-pd b{display:block;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sg-pd small{color:var(--muted,#5B6874);font-size:.78rem}
+.sg-bars{display:grid;gap:7px}
+.sg-bar{display:grid;grid-template-columns:minmax(96px,40%) minmax(0,1fr) 34px;gap:8px;align-items:center;font-size:.84rem}
+.sg-bar .lb{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sg-bar .tr{height:10px;position:relative}
+.sg-bar .tr i{position:absolute;inset:0 auto 0 0;background:var(--hw);border-radius:0 5px 5px 0;min-width:3px}.sg-bar b{text-align:right}
+.sg-split{display:flex;height:12px;border-radius:999px;overflow:hidden;gap:2px}.sg-split i{display:block;height:100%}
+.sg-ley{display:flex;gap:14px;flex-wrap:wrap;font-size:.78rem;color:var(--muted,#5B6874)}
+.sg-ley span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px;background:var(--c)}
+.sg-cols{display:flex;align-items:flex-end;gap:3px;height:120px;border-bottom:1px solid var(--line,#DAE1E7)}
+.sg-cols div{flex:1;height:100%;display:flex;align-items:flex-end}.sg-cols i{display:block;width:100%;background:var(--hw);border-radius:4px 4px 0 0;min-height:2px}
+.sg-colx{display:flex;gap:3px}.sg-colx span{flex:1;width:0;font-size:.68rem;color:var(--muted,#5B6874);text-align:center;white-space:nowrap;overflow:visible}
+#sgTip{position:fixed;z-index:9600;pointer-events:none;background:#0F1E29;color:#fff;font-size:.8rem;padding:7px 10px;border-radius:8px;opacity:0;transition:opacity .1s;max-width:240px;line-height:1.35}#sgTip.on{opacity:1}
+.sg-it{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 10px;padding:11px 0;border-top:1px solid var(--line,#DAE1E7)}.sg-it:first-child{border-top:0}
+.sg-it .q{display:inline-block;background:#F6EEFB;color:#4A1F6F;font-weight:800;font-size:.72rem;padding:1px 7px;border-radius:999px;margin-left:6px}
+.sg-it .m{font-size:.78rem;color:var(--muted,#5B6874)}.sg-it .nt{font-size:.84rem;opacity:.85}
+.sg-it .side{display:grid;justify-items:end;gap:6px;align-content:start}
+.sg-it select{border:1px solid var(--line,#DAE1E7);background:var(--bg,#F4F6F8);border-radius:999px;padding:5px 8px;font:inherit;font-size:.78rem;font-weight:700}
+.sg-est{display:inline-flex;align-items:center;gap:5px;font-size:.74rem;font-weight:700;padding:2px 9px;border-radius:999px;background:var(--sunk,#EEF2F5);color:var(--muted,#5B6874);white-space:nowrap}
+.sg-est::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.sg-est.pendiente{background:#FFF1DC;color:#A35A00}.sg-est.encargado{background:#F6EEFB;color:#4A1F6F}.sg-est.avisado{background:#E5F3EA;color:#1F6B3F}
+.sg-filt{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px}
+.sg-filt input,.sg-filt select{border:1px solid var(--line,#DAE1E7);background:var(--surface,#fff);border-radius:999px;padding:9px 14px;min-height:42px;min-width:0;font:inherit;color:inherit}
+.sg-sync{font-size:.74rem;color:var(--muted,#5B6874)}
+.sg-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+#sSug .t-btn.full{width:100%;min-height:50px;font-size:1rem}
+@media (min-width:900px){#sSug{max-width:880px;margin:0 auto;width:100%}}
+</style>
+
+<script>/* patch_tdasug: «💡 Sugerencias» de la tienda */
+(function () {
+  if (document.getElementById("sSug")) return;
+  const DAY = 864e5, LSK = "sug-loc", ENVQ = "sug-env", SGV = "sug-ver";
+  const nrm = s => norm(s).replace(/\s+/g, " ").trim();
+  const fFecha = ts => new Date(ts).toLocaleDateString("es-CL", { day: "numeric", month: "short" });
+  const fFH = ts => new Date(ts).toLocaleString("es-CL", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
+  const CATS = ["Alimentos Perro Seco", "Alimentos Gato Seco", "Húmedos Perro", "Húmedos Gato", "Arenas Sanitarias", "Snacks y Premios Perro", "Snacks y Premios Gato", "Suplementos Perro y Gato", "Accesorios", "Higiene y farmacia", "Otros"];
+  const MOT = { nt: { t: "No lo trabajamos", c: "var(--hw)" }, ss: { t: "Lo tenemos, sin stock", c: "#E2A33B" } };
+  const EST = { pendiente: "Pendiente", encargado: "Encargado", avisado: "Avisado", descartado: "Descartado" };
+  const espDe = (n, c) => { const t = (c || "") + " " + (n || ""); if (/perro y gato/i.test(t)) return /\bgato\b/i.test(n) && !/perro/i.test(n) ? "Gato" : /\bperro\b/i.test(n) && !/gato/i.test(n) ? "Perro" : "Ambos";
+    return /gato|cats?\b|katze|kitten|felin/i.test(t) || /arena/i.test(t) ? "Gato" : "Perro"; };
+  const catDe = n => { const t = norm(n), g = /gato|cats?\b|katze|kitten|felin/.test(t);
+    if (/arena|lindocat|turkat|clean cat|cool&clean|cool ?& ?clean/.test(t)) return "Arenas Sanitarias";
+    if (/lata|pouch|sobre|humed|mousse|caldo|pate/.test(t)) return /mousse|caldo/.test(t) ? (g ? "Snacks y Premios Gato" : "Snacks y Premios Perro") : (g ? "Húmedos Gato" : "Húmedos Perro");
+    if (/snack|premio|galleta|hueso/.test(t)) return g ? "Snacks y Premios Gato" : "Snacks y Premios Perro";
+    if (/omega|suplemento|caps|calmante/.test(t)) return "Suplementos Perro y Gato";
+    if (/shampoo|antipulga|pipeta|toallita/.test(t)) return "Higiene y farmacia";
+    if (/\bkg\b|\d\s*kg|gr\b|\d\s*g\b/.test(t)) return g ? "Alimentos Gato Seco" : "Alimentos Perro Seco";
+    return "Otros"; };
+  const MARCAS = ["Agility", "Ownat", "Poema", "Proterline", "Dog Evolution", "PuraNatura", "Pura Natura", "Sieger", "Bestpet", "LindoCat", "Cool&Clean", "Clean Cat", "TurKat", "IKAI", "Montaraz", "Planet Pet"];
+  const marcaDe = n => MARCAS.find(m => norm(n).includes(norm(m))) || "";
+  /* productos que NO trabajamos (marcas de la competencia que piden en el mesón), por perro y gato */
+  const NT_SPEC = [
+   ["Perro","Alimentos Perro Seco","Royal Canin",["X-Small Adult","X-Small Puppy","Mini Adult","Mini Puppy","Mini Adult 8+","Mini Light Weight Care","Medium Adult","Medium Puppy","Medium Adult 7+","Maxi Adult","Maxi Puppy","Maxi Adult 5+","Giant Adult","Giant Puppy","Bulldog Francés Adult","Chihuahua Adult","Yorkshire Terrier Adult","Shih Tzu Adult","Poodle Adult","Pug Adult","Dachshund Adult","Labrador Retriever Adult","Golden Retriever Adult","Pastor Alemán Adult","Hypoallergenic","Gastrointestinal","Urinary SO","Renal","Satiety Weight Management","Mobility Support"],["1 kg","3 kg","7,5 kg","15 kg"]],
+   ["Perro","Alimentos Perro Seco","Pro Plan",["Puppy Raza Pequeña","Puppy Raza Mediana","Puppy Raza Grande","Adulto Raza Pequeña","Adulto Raza Mediana","Adulto Raza Grande","Reduced Calorie","Sensitive Skin","Sensitive Stomach","Adulto 7+","Veterinary Diets HA Hipoalergénico","Veterinary Diets OM Control de Peso","Veterinary Diets EN Gastrointestinal","Veterinary Diets NF Renal"],["1 kg","3 kg","7,5 kg","15 kg"]],
+   ["Perro","Alimentos Perro Seco","Hill's Science Diet",["Adult Small Bites","Adult Large Breed","Puppy Small Bites","Puppy Large Breed","Adult Light","Adult 7+","Sensitive Stomach & Skin","Prescription Diet i/d","Prescription Diet k/d","Prescription Diet z/d","Prescription Diet Metabolic"],["2 kg","7 kg","12 kg"]],
+   ["Perro","Alimentos Perro Seco","Acana",["Puppy & Junior","Puppy Small Breed","Adult Dog","Adult Small Breed","Adult Large Breed","Light & Fit","Senior Dog","Wild Atlantic","Grasslands","Pacifica","Sport & Agility"],["2 kg","6 kg","11,4 kg"]],
+   ["Perro","Alimentos Perro Seco","Orijen",["Original","Puppy","Puppy Large","Senior","Six Fish","Regional Red","Small Breed","Fit & Trim"],["2 kg","6 kg","11,4 kg"]],
+   ["Perro","Alimentos Perro Seco","Taste of the Wild",["High Prairie","Pacific Stream","Sierra Mountain","Wetlands","Southwest Canyon","Appalachian Valley Small Breed","High Prairie Puppy","Pacific Stream Puppy"],["2 kg","5,6 kg","12,2 kg"]],
+   ["Perro","Alimentos Perro Seco","Brit Care",["Puppy Lamb & Rice","Junior Large Breed","Adult Small Breed","Adult Medium Breed","Adult Large Breed","Senior & Light","Grain-free Salmon","Hypoallergenic Lamb"],["3 kg","12 kg"]],
+   ["Perro","Alimentos Perro Seco","Bravery",["Chicken Adult Mini","Chicken Adult Medium & Large","Chicken Puppy Mini","Chicken Puppy Medium & Large","Lamb Mini Adult","Lamb Adult Medium & Large","Salmon Adult","Iberian Pork Adult","Senior"],["2 kg","7 kg","12 kg"]],
+   ["Perro","Alimentos Perro Seco","Fit Formula",["Adulto","Adulto Razas Pequeñas","Adulto Razas Medianas y Grandes","Cachorro","Senior","Light"],["3 kg","10 kg","20 kg"]],
+   ["Perro","Alimentos Perro Seco","Master Dog",["Adulto Carne","Adulto Pollo","Cachorro","Senior","Razas Pequeñas"],["3 kg","10 kg","21 kg"]],
+   ["Perro","Alimentos Perro Seco","Dog Chow",["Cachorros Minis y Pequeños","Cachorros Medianos y Grandes","Adultos Minis y Pequeños","Adultos Medianos y Grandes","Adultos Light","Senior"],["1,5 kg","8 kg","15 kg","21 kg"]],
+   ["Perro","Alimentos Perro Seco","Pedigree",["Adulto Carne Pollo y Cereal","Adulto Razas Pequeñas","Cachorro","Senior"],["1,5 kg","8 kg","21 kg"]],
+   ["Perro","Alimentos Perro Seco","Champion Dog",["Adulto Carne y Pollo","Adulto Medianos y Grandes","Cachorro","Senior"],["3 kg","18 kg"]],
+   ["Perro","Alimentos Perro Seco","Bokato",["Tradición Premium Adulto","Gold Super Premium Adulto","Veloz Alto Rendimiento","Cachorro Premium"],["10 kg","20 kg"]],
+   ["Perro","Alimentos Perro Seco","Frost",["Adult Mini & Small","Adult Medium & Large","Puppy Mini & Small","Puppy Medium & Large","Senior"],["3 kg","15 kg"]],
+   ["Perro","Alimentos Perro Seco","Biofresh",["Adulto Raza Pequeña","Adulto Raza Mediana","Adulto Raza Grande","Cachorro","Senior","Light"],["3 kg","10 kg","15 kg"]],
+   ["Perro","Húmedos Perro","Royal Canin",["Mini Adult pouch","Medium Adult pouch","Puppy pouch","Recovery lata","Gastrointestinal lata"],["85 g","195 g","400 g"]],
+   ["Perro","Húmedos Perro","Pro Plan",["Adulto lata Pollo","Puppy lata","Sensitive lata Cordero"],["354 g"]],
+   ["Perro","Húmedos Perro","Pedigree",["Sobre Adulto Carne","Sobre Adulto Pollo","Sobre Cachorro","Lata Adulto Carne"],["100 g","340 g"]],
+   ["Perro","Húmedos Perro","Cesar",["Bandeja Pollo","Bandeja Carne","Bandeja Cordero","Bandeja Cachorro"],["100 g"]],
+   ["Perro","Húmedos Perro","Dog Chow",["Sobre Adulto Carne","Sobre Cachorro Pollo"],["100 g"]],
+   ["Perro","Snacks y Premios Perro","Pedigree",["Dentastix Razas Pequeñas","Dentastix Razas Medianas","Dentastix Razas Grandes","Marrobone","Biscrok"],[""]],
+   ["Perro","Snacks y Premios Perro","Greenies",["Teenie","Petite","Regular","Large"],[""]],
+   ["Perro","Snacks y Premios Perro","Natural",["Oreja de cerdo deshidratada","Pezuña de vacuno","Tráquea de vacuno","Hueso de rodilla","Nervio de toro","Pulmón deshidratado","Patitas de pollo"],[""]],
+   ["Perro","Accesorios","Kong",["Classic","Extreme","Puppy","Wobbler","Flyer frisbee","Squeezz pelota"],["S","M","L"]],
+   ["Perro","Accesorios","Flexi",["Correa retráctil cinta","Correa retráctil cordón"],["S","M","L"]],
+   ["Perro","Accesorios","Genérico",["Arnés pechera acolchado","Collar de nylon","Collar de cuero","Correa de paseo 1,5 m","Bozal de canasta","Cama ortopédica","Cama redonda tipo dona","Colchoneta lavable","Chaleco abrigo","Impermeable con capucha","Transportadora rígida","Bolso transportador","Comedero de acero","Comedero lento antiansiedad","Bebedero portátil de paseo","Cepillo carda","Guante quitapelo","Cortaúñas","Bolsas para excremento (rollos)","Juguete de cuerda","Pelota de goma","Peluche con sonido","Corral plegable","Rampa para auto","Placa de identificación grabada"],["S","M","L"]],
+   ["Perro","Higiene y farmacia","NexGard",["Masticable antipulgas","Spectra"],["2-3,5 kg","3,5-7,5 kg","7,5-15 kg","15-30 kg","30-60 kg"]],
+   ["Perro","Higiene y farmacia","Bravecto",["Masticable"],["2-4,5 kg","4,5-10 kg","10-20 kg","20-40 kg","40-56 kg"]],
+   ["Perro","Higiene y farmacia","Simparica",["Masticable","Trio"],["2,5-5 kg","5-10 kg","10-20 kg","20-40 kg"]],
+   ["Perro","Higiene y farmacia","Seresto",["Collar antipulgas"],["hasta 8 kg","sobre 8 kg"]],
+   ["Perro","Higiene y farmacia","Frontline",["Plus pipeta"],["hasta 10 kg","10-20 kg","20-40 kg"]],
+   ["Perro","Higiene y farmacia","Genérico",["Shampoo antipulgas","Shampoo hipoalergénico","Shampoo cachorro","Shampoo pelo blanco","Toallitas húmedas","Pasta dental + cepillo","Limpiador de oídos","Desparasitante interno comprimido","Pañales para perro","Paños absorbentes de entrenamiento","Spray repelente de orina","Perfume para perro"],[""]],
+   ["Gato","Alimentos Gato Seco","Royal Canin",["Kitten","Kitten Sterilised","Indoor 27","Fit 32","Sterilised 37","Hair & Skin Care","Hairball Care","Digestive Care","Light Weight Care","Urinary Care","Ageing 12+","Persian Adult","Maine Coon Adult","British Shorthair Adult","Siamese Adult","Renal","Urinary SO","Hypoallergenic","Gastrointestinal"],["400 g","1,5 kg","4 kg","7,5 kg"]],
+   ["Gato","Alimentos Gato Seco","Pro Plan",["Kitten","Adulto Pollo","Esterilizado","Urinary","Delicate","Light","Senior 7+","Veterinary Diets UR Urinario","Veterinary Diets NF Renal"],["1 kg","3 kg","7,5 kg"]],
+   ["Gato","Alimentos Gato Seco","Hill's Science Diet",["Kitten","Adult","Adult Indoor","Hairball Control","Light","Prescription Diet c/d","Prescription Diet k/d","Prescription Diet w/d"],["1,8 kg","4 kg"]],
+   ["Gato","Alimentos Gato Seco","Acana",["Wild Prairie Cat","Pacifica Cat","Indoor Entrée","Bountiful Catch"],["1,8 kg","4,5 kg"]],
+   ["Gato","Alimentos Gato Seco","Orijen",["Cat & Kitten","Six Fish Cat","Regional Red Cat","Fit & Trim Cat"],["1,8 kg","5,4 kg"]],
+   ["Gato","Alimentos Gato Seco","Taste of the Wild",["Rocky Mountain","Canyon River","Lowland Creek"],["2 kg","6,6 kg"]],
+   ["Gato","Alimentos Gato Seco","Brit Care Cat",["Kitten","Sterilized Urinary","Indoor Anti-stress","Hair & Skin"],["2 kg","7 kg"]],
+   ["Gato","Alimentos Gato Seco","Bravery",["Salmon Adult Cat","Chicken Adult Cat Sterilized","Chicken Kitten","Herring Adult Cat"],["2 kg","7 kg"]],
+   ["Gato","Alimentos Gato Seco","Cat Chow",["Adultos Pescado","Adultos Carne","Esterilizados","Gatitos","Defense Plus"],["1 kg","3 kg","8 kg","15 kg"]],
+   ["Gato","Alimentos Gato Seco","Whiskas",["Adulto Carne","Adulto Pescado","Adulto Pollo","Gatitos","Esterilizados"],["1 kg","3 kg","10 kg"]],
+   ["Gato","Alimentos Gato Seco","Frost",["Cat Indoor Sterilized","Cat Kitten","Cat Adult Salmon"],["1,5 kg","7,5 kg"]],
+   ["Gato","Alimentos Gato Seco","Fit Formula",["Gato Adulto","Gato Kitten","Gato Esterilizado"],["1 kg","10 kg"]],
+   ["Gato","Alimentos Gato Seco","Master Cat",["Adulto","Gatitos"],["1,5 kg","8 kg"]],
+   ["Gato","Húmedos Gato","Whiskas",["Sobre Carne","Sobre Pollo","Sobre Salmón","Sobre Gatitos","Sobre Atún"],["85 g"]],
+   ["Gato","Húmedos Gato","Felix",["Sobre Carne en gelatina","Sobre Pescado en gelatina","Sobre Pollo","Sobre Gatitos"],["85 g"]],
+   ["Gato","Húmedos Gato","Royal Canin",["Instinctive pouch","Kitten pouch","Sterilised pouch","Urinary Care pouch","Renal pouch","Recovery lata"],["85 g","195 g"]],
+   ["Gato","Húmedos Gato","Pro Plan",["Lata Adulto Pollo","Lata Kitten","Lata Urinary"],["85 g"]],
+   ["Gato","Húmedos Gato","Fancy Feast",["Paté Pollo","Paté Pescado","Paté Pavo","Gourmet Atún"],["85 g"]],
+   ["Gato","Húmedos Gato","Cat Chow",["Sobre Adulto Pescado","Sobre Gatitos"],["85 g"]],
+   ["Gato","Snacks y Premios Gato","Inaba Churu",["Atún","Pollo","Salmón","Atún y Vieiras"],["pack 4 x 14 g","pack 20 x 14 g"]],
+   ["Gato","Snacks y Premios Gato","Whiskas Temptations",["Pollo","Salmón","Carne","Catnip"],["85 g"]],
+   ["Gato","Snacks y Premios Gato","Dreamies",["Pollo","Salmón","Queso"],["60 g"]],
+   ["Gato","Snacks y Premios Gato","Genérico",["Hierba gatera (catnip) seca","Pasto para gato para sembrar","Palitos de matatabi"],[""]],
+   ["Gato","Arenas Sanitarias","Ever Clean",["Arena aglomerante Extra Strong","Arena aglomerante Multi-Crystals"],["6 L","10 L"]],
+   ["Gato","Arenas Sanitarias","Genérico",["Arena de tofu","Arena de sílice","Arena de pellet de madera","Arena biodegradable de maíz"],["3,8 L","6 L","10 L"]],
+   ["Gato","Accesorios","Genérico",["Rascador torre","Rascador de cartón","Rascador poste","Arenero cubierto","Arenero abierto","Pala de arena","Fuente de agua eléctrica","Transportadora rígida","Mochila transportadora con visor","Varita con plumas","Ratón de juguete","Túnel plegable","Cama iglú","Hamaca para ventana","Collar con cascabel","Pelota con catnip","Láser de juego","Comedero doble elevado","Malla protectora para ventana","Puerta gatera"],[""]],
+   ["Gato","Higiene y farmacia","NexGard",["Combo gato"],["0,8-2,5 kg","2,5-7,5 kg"]],
+   ["Gato","Higiene y farmacia","Bravecto",["Pipeta gato"],["1,2-2,8 kg","2,8-6,25 kg","6,25-12,5 kg"]],
+   ["Gato","Higiene y farmacia","Revolution",["Plus gato"],["1,25-2,5 kg","2,5-5 kg","5-10 kg"]],
+   ["Gato","Higiene y farmacia","Seresto",["Collar antipulgas gato"],[""]],
+   ["Gato","Higiene y farmacia","Feliway",["Difusor + repuesto","Repuesto 48 ml","Spray"],[""]],
+   ["Gato","Higiene y farmacia","Genérico",["Pasta de malta","Shampoo en seco para gato","Toallitas húmedas","Limpiador de oídos","Desparasitante interno comprimido","Cortaúñas"],[""]],
+   ["Otro","Otros","Genérico",["Alimento para conejo","Heno para conejo","Alimento para hámster","Viruta para roedores","Jaula para hámster","Alimento para aves","Semillas para canario","Jaula para aves","Alimento para peces","Acuario pequeño","Alimento para tortuga","Arena para chinchilla"],[""]]];
+  const NO_TRAB = []; NT_SPEC.forEach(([e, c, m, L, T]) => L.forEach(l => T.forEach(t => { const g = m === "Genérico" || m === "Natural"; NO_TRAB.push({ n: (g ? "" : m + " ") + l + (t ? " " + t : ""), c, e, m: g ? "" : m }); })));
+  /* sin stock: bodega de la tienda con saldo 0 o menos (datos de Drive) */
+  const sinStock = () => { const D = DATA(), S = D && D.stock; if (!Array.isArray(S)) return null;
+    return S.filter(x => Number(x[2]) <= 0).map(x => { const n = String(x[1] || "").trim(), c = catDe(n); return { n, cod: String(x[0] || ""), c, e: espDe(n, c), m: marcaDe(n) }; }).filter(x => x.n).sort((a, b) => a.n.localeCompare(b.n, "es")); };
+
+  /* ---------- almacenamiento: teléfono + script (registro de cambios, código SUGERENCIA) ---------- */
+  const base = () => { const o = lsGet(LSK, null); return o && o.items ? o : { items: {}, est: {} }; };
+  const guardarBase = o => lsSet(LSK, o);
+  const filas = () => { const o = base(); return Object.values(o.items).map(r => { const e = o.est[r.id]; return Object.assign({}, r, { estado: e ? e.estado : "pendiente", key: nrm(r.producto) }); }).sort((a, b) => b.ts - a.ts); };
+  const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+  function encolar(cc) { const q = lsGet(ENVQ, []); q.push(cc); lsSet(ENVQ, q.slice(-300)); clearTimeout(encolar.t); encolar.t = setTimeout(enviar, 400); }
+  let enviando = false;
+  async function enviar() {
+    const c = syCfg(), q = lsGet(ENVQ, []); if (!c || !q.length || enviando) { pintarSync(); return; } enviando = true;
+    try { const r = await syLlamar(c, { accion: "clienteCambios", cambios: q.slice(0, 100) });
+      if (r && r.ok) { const ok = new Set(r.guardados || []); lsSet(ENVQ, lsGet(ENVQ, []).filter(x => !ok.has(x.id))); } } finally { enviando = false; pintarSync(); }
+  }
+  let bajado = 0;
+  async function bajar(forzar) {
+    const c = syCfg(); if (!c || (!forzar && Date.now() - bajado < 60000)) return; bajado = Date.now();
+    const r = await syLlamar(c, { accion: "clientesCambios", version: lsGet(SGV, "") || "" });
+    if (!r || !r.ok || r.igual || !Array.isArray(r.cambios)) return;
+    const o = base(); let cambio = false;
+    r.cambios.filter(x => x && x.codigo === "SUGERENCIA").forEach(x => { let d; try { d = JSON.parse(x.detalle); } catch (e) { return; }
+      if (d.sg === 1 && d.id && !o.items[d.id]) { delete d.sg; o.items[d.id] = d; cambio = true; }
+      if (d.sg === 2 && d.ref) { const a = o.est[d.ref]; if (!a || (d.ts || 0) > (a.ts || 0)) { o.est[d.ref] = { estado: d.estado, ts: d.ts || 0 }; cambio = true; } } });
+    lsSet(SGV, r.version || ""); if (cambio) { guardarBase(o); if (vista === "sug") pintarTodoSug(); }
+  }
+  function agregar(d) {
+    if (!turno()) { pedirTurno(); toast("Primero indica quién está en el turno."); return false; }
+    const r = Object.assign({ id: uid(), ts: Date.now(), quien: turno() }, d); r.notas = String(r.notas || "").slice(0, 250);
+    const o = base(); o.items[r.id] = r; guardarBase(o);
+    encolar({ id: "CC-SG-" + r.id, fecha: new Date(r.ts).toISOString(), vendedor: r.quien + TAG, cartera: "", codigo: "SUGERENCIA", cliente: "Sugerencia de la tienda (no es un cliente)",
+      tipo: "Datos", motivo: (MOT[r.motivo] || MOT.nt).t + ": " + r.producto.slice(0, 80), detalle: JSON.stringify(Object.assign({ sg: 1 }, r)), cambios: [] });
+    pintarTodoSug(); return true;
+  }
+  function cambiarEstado(id, estado) {
+    const o = base(); if (!o.items[id]) return; const ts = Date.now(); o.est[id] = { estado, ts }; guardarBase(o);
+    encolar({ id: "CC-SG-E-" + id + "-" + ts.toString(36), fecha: new Date(ts).toISOString(), vendedor: (turno() || "Tienda") + TAG, cartera: "", codigo: "SUGERENCIA", cliente: "Sugerencia de la tienda (no es un cliente)",
+      tipo: "Datos", motivo: "Estado: " + EST[estado], detalle: JSON.stringify({ sg: 2, ref: id, estado, ts, quien: turno() || "" }), cambios: [] });
+    pintarTodoSug();
+  }
+
+  /* ---------- sección y navegación ---------- */
+  const ICO = '<svg viewBox="0 0 32 32" aria-hidden="true" class="hic"><defs><linearGradient id="hic-sugt" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F7C04A"/><stop offset="1" stop-color="#D98A0B"/></linearGradient></defs><rect width="32" height="32" rx="9" fill="url(#hic-sugt)"/><path d="M4 4h24v10C20 9 11 9 4 13z" fill="#fff" opacity=".12"/><g transform="translate(5.5 5.5) scale(.875)" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.6.5 1 1.2 1 2V16h5.2v-.2c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z"/></g></svg>';
+  const sec = document.createElement("section"); sec.className = "t-sec"; sec.id = "sSug"; sec.hidden = true; document.querySelector("main").appendChild(sec);
+  SEC.sug = "sSug";
+  const nav = $("tNav"), btn = document.createElement("button"); btn.type = "button"; btn.dataset.s = "sug"; btn.innerHTML = '<span class="hic-w">' + ICO + "</span>Sugerencias";
+  const nut = nav.querySelector('[data-s="nut"]'); if (nut) nut.after(btn); else nav.appendChild(btn);
+  const _p = pintar; pintar = function (x) { if (x === "sug") { try { pintarSug(); } catch (e) { console.error(e); } return; } return _p.apply(this, arguments); };
+  /* el orden de la barra lo fija patch_menuorden; se ubica justo después de Nutrición */
+  const ubicar = () => { const n = nav.querySelector('[data-s="nut"]'); if (n && n.nextElementSibling !== btn) n.after(btn); };
+  setTimeout(ubicar, 600); setTimeout(ubicar, 1500);
+
+  let armado = false, sub = "reg", motivo = "nt", especie = "Perro", elegido = null, pkLista = [], pkN = 0, pkQ = [], dias = 30;
+  const tip = document.createElement("div"); tip.id = "sgTip"; tip.setAttribute("role", "tooltip"); document.body.appendChild(tip);
+  function conTip(el, html) {
+    const mv = e => { const p = e.touches ? e.touches[0] : e; let x = p.clientX + 12, y = p.clientY - 12 - tip.offsetHeight; if (x + tip.offsetWidth > innerWidth - 8) x = innerWidth - tip.offsetWidth - 8; if (y < 8) y = p.clientY + 16; tip.style.left = x + "px"; tip.style.top = y + "px"; };
+    const sh = e => { tip.innerHTML = html; tip.classList.add("on"); mv(e); };
+    el.addEventListener("mouseenter", sh); el.addEventListener("mousemove", mv); el.addEventListener("mouseleave", () => tip.classList.remove("on"));
+    el.addEventListener("touchstart", e => { sh(e); clearTimeout(conTip.t); conTip.t = setTimeout(() => tip.classList.remove("on"), 1800); }, { passive: true });
+  }
+  const seg = (id, attr, cb) => { const box = $(id); box.addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; box.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x === b ? "true" : "false")); cb(b.dataset[attr]); }); };
+  const setSeg = (id, attr, val) => $(id).querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x.dataset[attr] === val ? "true" : "false"));
+
+  function armar() {
+    armado = true;
+    sec.innerHTML = `
+    <div class="t-card" style="gap:8px"><h2>💡 Sugerencias <small>lo que piden los clientes y no pudimos vender</small></h2>
+      <div class="sg-seg" id="sgSub"><button type="button" data-v="reg" aria-pressed="true">Registrar</button><button type="button" data-v="res" aria-pressed="false">Resumen</button><button type="button" data-v="his" aria-pressed="false">Historial</button></div>
+      <div class="sg-sync" id="sgSync"></div></div>
+    <div class="sg-sub on" id="sgV-reg">
+      <form class="t-card" id="sgForm" autocomplete="off"><h2>Nueva solicitud</h2>
+        <div class="sg-f"><span class="sg-lbl">¿Por qué no se pudo vender?</span>
+          <div class="sg-seg sm" id="sgMot"><button type="button" data-m="nt" aria-pressed="true">No lo trabajamos</button><button type="button" data-m="ss" aria-pressed="false">Lo tenemos, sin stock</button></div></div>
+        <div class="sg-f"><span class="sg-lbl">Para</span>
+          <div class="sg-seg sm" id="sgEsp"><button type="button" data-e="Perro" aria-pressed="true">🐶 Perro</button><button type="button" data-e="Gato" aria-pressed="false">🐱 Gato</button><button type="button" data-e="Otro" aria-pressed="false">🐾 Otro</button></div></div>
+        <div class="sg-f"><label for="sgProd" id="sgLProd">Producto que pidió</label>
+          <div class="sg-srch"><span class="lupa" aria-hidden="true">🔍</span><input id="sgProd" placeholder="Escribe para buscar…" required maxlength="120" autocomplete="off" enterkeyhint="search"><button type="button" class="x" id="sgX" aria-label="Borrar lo escrito" hidden>✕</button></div>
+          <div class="sg-pk" id="sgPk" hidden><div class="sg-pk-h" id="sgPkH"></div><div class="sg-pk-l" id="sgPkL"></div><div class="sg-pk-f" id="sgPkF"></div></div>
+          <div class="sg-hint" id="sgHProd"></div></div>
+        <div class="sg-two"><div class="sg-f"><label for="sgMarca">Marca <span class="opt">(opcional)</span></label><input id="sgMarca" placeholder="Ej: Royal Canin" maxlength="40"></div>
+          <div class="sg-f"><label for="sgCat">Categoría</label><select id="sgCat">${CATS.map(c => `<option>${esc(c)}</option>`).join("")}</select></div></div>
+        <div class="sg-f"><label for="sgCant">Cantidad</label><div class="sg-qty"><button type="button" id="sgMenos" aria-label="Menos">−</button><input id="sgCant" type="number" inputmode="numeric" min="1" value="1"><button type="button" id="sgMas" aria-label="Más">+</button></div></div>
+        <div class="sg-two"><div class="sg-f"><label for="sgCli">Cliente <span class="opt">(opcional)</span></label><input id="sgCli" placeholder="Nombre" maxlength="60"></div>
+          <div class="sg-f"><label for="sgTel">Teléfono <span class="opt">(para avisarle)</span></label><input id="sgTel" type="tel" inputmode="tel" placeholder="+56 9 …" maxlength="25"></div></div>
+        <div class="sg-f"><label for="sgNota">Notas <span class="opt">(opcional)</span></label><textarea id="sgNota" placeholder="Tamaño, sabor, para cuándo lo necesita…" maxlength="250"></textarea></div>
+        <button class="t-btn full" type="submit">Registrar solicitud</button></form>
+      <div class="t-card"><h2>Lo más pedido <small>últimos 60 días · si lo vuelven a pedir, toca +1</small></h2><div id="sgFrec"></div></div></div>
+    <div class="sg-sub" id="sgV-res">
+      <div class="t-card"><div class="sg-seg sm" id="sgPer"><button type="button" data-d="7" aria-pressed="false">7 días</button><button type="button" data-d="30" aria-pressed="true">30 días</button><button type="button" data-d="90" aria-pressed="false">3 meses</button><button type="button" data-d="0" aria-pressed="false">Todo</button></div>
+        <div class="sg-filt" style="grid-template-columns:1fr 1fr"><select id="sgFiCat" aria-label="Categoría"><option value="">Todas las categorías</option>${CATS.map(c => `<option>${esc(c)}</option>`).join("")}</select>
+          <select id="sgFiEsp" aria-label="Perro o gato"><option value="">Perro y gato</option><option>Perro</option><option>Gato</option><option>Otro</option></select></div>
+        <div class="t-kpis" id="sgKpis"></div></div>
+      <div class="t-card"><h2>🏆 Top 3 más pedidos</h2><div class="sg-pod" id="sgPod"></div></div>
+      <div class="t-card"><h2>Productos más pedidos <small>veces que los pidieron · top 10</small></h2><div class="sg-bars" id="sgBProd"></div></div>
+      <div class="t-card"><h2>¿Por qué no se vendió?</h2><div class="sg-split" id="sgSplit"></div><div class="sg-ley" id="sgSplitLey"></div></div>
+      <div class="t-card"><h2>Por categoría</h2><div class="sg-bars" id="sgBCat"></div></div>
+      <div class="t-card"><h2>Marcas más pedidas <small>que hoy no vendemos</small></h2><div class="sg-bars" id="sgBMarca"></div></div>
+      <div class="t-card"><h2>Tendencia <small>solicitudes por semana · últimas 12</small></h2><div><div class="sg-cols" id="sgCols"></div><div class="sg-colx" id="sgColx"></div></div></div>
+      <div class="t-card"><h2>Descargar <small>CSV para Excel · respeta los filtros de arriba</small></h2>
+        <div class="sg-row"><button type="button" class="t-btn sec" id="sgCsvDet">⬇ Detalle de solicitudes</button><button type="button" class="t-btn sec" id="sgCsvRes">⬇ Ranking por producto</button></div><p class="sg-hint" id="sgHCsv"></p></div></div>
+    <div class="sg-sub" id="sgV-his"><div class="t-card"><div class="sg-filt"><input id="sgHQ" placeholder="Buscar producto, marca o cliente…" aria-label="Buscar"><select id="sgHEst" aria-label="Estado"><option value="">Todos</option>${Object.entries(EST).map(([k, v]) => `<option value="${k}">${v}</option>`).join("")}</select></div><div id="sgLista"></div></div></div>`;
+
+    seg("sgSub", "v", v => { sub = v; sec.querySelectorAll(".sg-sub").forEach(s => s.classList.toggle("on", s.id === "sgV-" + v)); window.scrollTo({ top: 0 }); pintarTodoSug(); });
+    seg("sgMot", "m", v => { motivo = v; elegido = null; $("sgProd").value = ""; limpiarAuto(); pintarPicker(); });
+    seg("sgEsp", "e", v => { especie = v; if (elegido && elegido.e !== v && elegido.e !== "Ambos") { elegido = null; $("sgProd").value = ""; limpiarAuto(); } pintarPicker(); });
+    $("sgMenos").onclick = () => $("sgCant").value = Math.max(1, (+$("sgCant").value || 1) - 1);
+    $("sgMas").onclick = () => $("sgCant").value = (+$("sgCant").value || 0) + 1;
+    $("sgPkL").addEventListener("scroll", e => { const L = e.target; if (pkN < pkLista.length && L.scrollTop + L.clientHeight > L.scrollHeight - 120) masPicker(); });
+    $("sgPkL").addEventListener("click", pkClick); $("sgPkF").addEventListener("click", pkClick);
+    $("sgX").onclick = () => { $("sgProd").value = ""; elegido = null; limpiarAuto(); pintarPicker(); $("sgProd").focus(); };
+    $("sgProd").addEventListener("input", () => { if (elegido && $("sgProd").value !== elegido.n) { elegido = null; limpiarAuto(); } pintarPicker(); });
+    $("sgForm").addEventListener("submit", e => {
+      e.preventDefault(); const p = $("sgProd").value.replace(/\s+/g, " ").trim(); if (!p) return;
+      if (motivo === "ss" && !(elegido && elegido.cod != null)) { toast("Elige el producto de la lista de sin stock."); $("sgProd").focus(); return; }
+      const ok = agregar({ producto: p, marca: $("sgMarca").value.trim(), categoria: $("sgCat").value, especie, motivo, cantidad: Math.max(1, parseInt($("sgCant").value, 10) || 1),
+        cliente: $("sgCli").value.trim(), telefono: $("sgTel").value.trim(), notas: $("sgNota").value.trim(), codigo: elegido && elegido.cod || "" });
+      if (!ok) return;
+      ["sgProd", "sgMarca", "sgCli", "sgTel", "sgNota"].forEach(i => $(i).value = ""); $("sgCant").value = 1; $("sgHProd").textContent = ""; elegido = null; pintarPicker();
+      toast("Solicitud registrada ✓");
+    });
+    seg("sgPer", "d", v => { dias = +v; pintarResumen(); });
+    $("sgFiCat").onchange = pintarResumen; $("sgFiEsp").onchange = pintarResumen;
+    $("sgCsvDet").onclick = () => { const L = filtrados(); if (!L.length) { $("sgHCsv").textContent = "No hay datos en este período."; return; }
+      csvBajar(`sugerencias-detalle-${hoyISO()}.csv`, [["Fecha", "Producto", "Marca", "Categoría", "Para", "Motivo", "Cantidad", "Cliente", "Teléfono", "Estado", "Atendió", "Notas"]].concat(L.map(r => [fFH(r.ts), r.producto, r.marca, r.categoria, r.especie, MOT[r.motivo].t, r.cantidad, r.cliente, r.telefono, EST[r.estado], r.quien, r.notas]))); };
+    $("sgCsvRes").onclick = () => { const L = filtrados(); if (!L.length) { $("sgHCsv").textContent = "No hay datos en este período."; return; }
+      csvBajar(`sugerencias-ranking-${hoyISO()}.csv`, [["Puesto", "Producto", "Marca", "Categoría", "Motivo", "Veces pedido", "Unidades", "Última vez"]].concat(agrupar(L, r => r.key, r => r.producto).map((g, i) => [i + 1, g.n, g.marca, g.cat, MOT[g.mot].t, g.veces, g.unid, fFH(g.ult)]))); };
+    $("sgHQ").addEventListener("input", pintarHistorial); $("sgHEst").onchange = pintarHistorial;
+    $("sgLista").addEventListener("change", e => { const it = e.target.closest(".sg-it"); if (!it) return; cambiarEstado(it.dataset.id, e.target.value); toast("Marcado como " + EST[e.target.value]); });
+  }
+
+  /* ---------- formulario ---------- */
+  function indice(list) { const m = new Map(); for (const r of list) { let p = m.get(r.key); if (!p) { p = { key: r.key, nombre: r.producto, marca: r.marca, cat: r.categoria, esp: r.especie, mot: r.motivo, cod: r.codigo || "", veces: 0, unid: 0, ult: 0 }; m.set(r.key, p); }
+    p.veces++; p.unid += r.cantidad; if (r.ts > p.ult) { p.ult = r.ts; Object.assign(p, { nombre: r.producto, marca: r.marca, cat: r.categoria, esp: r.especie, mot: r.motivo, cod: r.codigo || "" }); } } return m; }
+  function limpiarAuto() { $("sgMarca").value = ""; $("sgHProd").textContent = ""; }
+  const coincide = (x, q) => { if (!q.length) return true; const t = nrm(x.n + " " + x.m + " " + x.c + " " + (x.cod || "")); return q.every(w => t.includes(w)); };
+  function resaltar(t, q) { if (!q.length) return esc(t); const n = nrm(t); if (n.length !== t.length) return esc(t); const marks = [];
+    q.forEach(w => { let i = n.indexOf(w); while (i >= 0) { marks.push([i, i + w.length]); i = n.indexOf(w, i + w.length); } }); if (!marks.length) return esc(t);
+    marks.sort((a, b) => a[0] - b[0]); let out = "", pos = 0; for (const [a, b] of marks) { if (a < pos) continue; out += esc(t.slice(pos, a)) + "<mark>" + esc(t.slice(a, b)) + "</mark>"; pos = b; } return out + esc(t.slice(pos)); }
+  function pintarPicker() {
+    const pk = $("sgPk"), qtxt = $("sgProd").value, q = nrm(qtxt).split(" ").filter(Boolean); pkQ = q; $("sgX").hidden = !qtxt;
+    $("sgLProd").textContent = motivo === "ss" ? "¿Cuál de nuestros productos buscaba?" : "Producto que pidió";
+    const espOk = x => especie === "Otro" || x.e === especie || x.e === "Ambos";
+    const SS = motivo === "ss" ? sinStock() : null;
+    const base = motivo === "ss" ? (SS || []).filter(espOk) : NO_TRAB.filter(x => x.e === especie), quien = especie === "Otro" ? "" : " de " + especie.toLowerCase();
+    $("sgProd").placeholder = motivo === "ss" ? (SS ? `Escribe para buscar entre ${base.length} sin stock${quien}…` : "Aún no llega el stock de la tienda") : `Escribe para buscar entre ${base.length.toLocaleString("es-CL")} productos${quien}…`;
+    if (motivo === "ss" && !SS) { $("sgHProd").innerHTML = "Todavía no llega el stock de la <b>bodega de la tienda</b> desde Drive; registra como «No lo trabajamos» o espera la próxima actualización."; }
+    if (!q.length || (elegido && elegido.n === qtxt)) { pk.hidden = true; return; }
+    pk.hidden = false; pkLista = base.filter(x => coincide(x, q)); pkN = 0;
+    $("sgPkH").textContent = pkLista.length ? `${pkLista.length.toLocaleString("es-CL")} ${pkLista.length === 1 ? "resultado" : "resultados"}${motivo === "ss" ? " sin stock" : ""}` : "Sin resultados";
+    const L = $("sgPkL"); L.innerHTML = ""; L.scrollTop = 0;
+    $("sgPkF").innerHTML = motivo === "nt" && !pkLista.some(x => nrm(x.n) === nrm(qtxt)) ? `<button type="button" class="sg-pi nuevo" data-nuevo><span><b>+ No está: usar “${esc(qtxt.trim())}”</b></span></button>` : "";
+    if (!pkLista.length) { if (motivo === "ss") L.insertAdjacentHTML("beforeend", `<div class="sg-pk-x">No está entre los productos sin stock.<br><button type="button" class="t-btn sec" data-ant>Registrarlo como “No lo trabajamos”</button></div>`); return; }
+    masPicker();
+  }
+  function masPicker() { const L = $("sgPkL"), hasta = Math.min(pkLista.length, pkN + 40); let html = "";
+    for (let i = pkN; i < hasta; i++) { const x = pkLista[i]; html += `<button type="button" class="sg-pi" data-i="${i}"><span><b>${resaltar(x.n, pkQ)}</b><small>${esc(x.c)}${x.m ? " · " + esc(x.m) : ""}${x.cod ? " · " + esc(x.cod) : ""}</small></span>${motivo === "ss" ? '<span class="sg-st0">stock 0</span>' : ""}</button>`; }
+    L.insertAdjacentHTML("beforeend", html); pkN = hasta; }
+  function pkClick(e) {
+    if (e.target.closest("[data-ant]")) { motivo = "nt"; setSeg("sgMot", "m", "nt"); pintarPicker(); $("sgProd").focus(); return; }
+    if (e.target.closest("[data-nuevo]")) { elegido = { n: $("sgProd").value.trim(), m: "", c: $("sgCat").value, e: especie, libre: true }; $("sgPk").hidden = true; $("sgHProd").textContent = "Producto escrito a mano · elige la categoría"; $("sgCat").focus(); return; }
+    const b = e.target.closest("[data-i]"); if (!b) return; const x = pkLista[+b.dataset.i]; elegido = x;
+    $("sgProd").value = x.n; $("sgMarca").value = x.m; if (CATS.includes(x.c)) $("sgCat").value = x.c; $("sgPk").hidden = true;
+    const p = indice(filas()).get(nrm(x.n)); $("sgHProd").innerHTML = p ? `Ya lo pidieron <b>${p.veces} ${p.veces === 1 ? "vez" : "veces"}</b> · se suma al mismo producto` : "Primera vez que lo piden";
+  }
+  function pintarFrecuentes() {
+    const L = [...indice(filas().filter(r => r.ts > Date.now() - 60 * DAY)).values()].sort((a, b) => b.veces - a.veces || b.ult - a.ult).slice(0, 6), box = $("sgFrec");
+    if (!L.length) { box.innerHTML = `<p class="t-vacio">Aún no hay solicitudes. La primera que registres aparecerá aquí.</p>`; return; }
+    box.innerHTML = L.map((p, i) => `<div class="sg-fr"><div><b>${esc(p.nombre)}</b><small>${p.veces} ${p.veces === 1 ? "vez" : "veces"} · último ${fFecha(p.ult)} </small><span class="sg-ch ${p.mot}">${p.mot === "ss" ? "sin stock" : "no lo trabajamos"}</span></div><button type="button" class="t-btn sec" data-i="${i}">+1</button></div>`).join("");
+    box.querySelectorAll("[data-i]").forEach(b => b.onclick = () => { const p = L[+b.dataset.i]; if (agregar({ producto: p.nombre, marca: p.marca, categoria: p.cat, especie: p.esp, motivo: p.mot, cantidad: 1, cliente: "", telefono: "", notas: "", codigo: p.cod })) toast(`+1 a “${p.nombre}”`); });
+  }
+
+  /* ---------- resumen ---------- */
+  function filtrados() { const d0 = dias ? Date.now() - dias * DAY : 0, c = $("sgFiCat").value, e = $("sgFiEsp").value; return filas().filter(r => r.ts >= d0 && (!c || r.categoria === c) && (!e || r.especie === e)); }
+  function agrupar(L, kf, nf) { const m = new Map(); for (const r of L) { const k = kf(r); if (!k) continue; let g = m.get(k); if (!g) { g = { n: nf(r), veces: 0, unid: 0, ult: 0, cat: r.categoria, mot: r.motivo, marca: r.marca }; m.set(k, g); }
+    g.veces++; g.unid += r.cantidad; if (r.ts > g.ult) { g.ult = r.ts; g.n = nf(r); } } return [...m.values()].sort((a, b) => b.veces - a.veces || b.unid - a.unid); }
+  function barras(id, L, tot, vacio) { const box = $(id); if (!L.length) { box.innerHTML = `<p class="t-vacio">${vacio || "Sin datos en este período."}</p>`; return; } const mx = L[0].veces;
+    box.innerHTML = L.map(g => `<div class="sg-bar"><span class="lb">${esc(g.n)}</span><span class="tr"><i style="width:${(g.veces / mx * 100).toFixed(1)}%"></i></span><b>${g.veces}</b></div>`).join("");
+    box.querySelectorAll(".sg-bar").forEach((el, i) => { const g = L[i]; conTip(el, `<b>${esc(g.n)}</b><br>${g.veces} ${g.veces === 1 ? "solicitud" : "solicitudes"} · ${g.unid} ${g.unid === 1 ? "unidad" : "unidades"}<br>${Math.round(g.veces / tot * 100)}% del período`); }); }
+  function pintarResumen() {
+    const L = filtrados(), prods = agrupar(L, r => r.key, r => r.producto), uni = L.reduce((s, r) => s + r.cantidad, 0), ss = L.filter(r => r.motivo === "ss").length, nt = L.length - ss;
+    const avisar = filas().filter(r => r.telefono && (r.estado === "pendiente" || r.estado === "encargado")).length;
+    $("sgKpis").innerHTML = [["Solicitudes", L.length, `${uni} unidades`], ["Productos distintos", prods.length, ""], ["No lo trabajamos", nt, L.length ? Math.round(nt / L.length * 100) + "%" : ""], ["Clientes por avisar", avisar, "con teléfono"]]
+      .map(([a, b, c]) => `<div class="t-kpi"><span>${a}</span><b>${b}</b>${c ? `<small>${c}</small>` : ""}</div>`).join("");
+    const top = prods.slice(0, 3);
+    $("sgPod").innerHTML = top.length ? top.map((g, i) => `<div class="sg-pd p${i + 1}"><div class="n">${i + 1}</div><div><b>${esc(g.n)}</b><small>${g.veces} ${g.veces === 1 ? "vez" : "veces"} · ${g.unid} u. · ${esc(g.cat)}</small></div></div>`).join("") : `<p class="t-vacio">Sin solicitudes en este período.</p>`;
+    barras("sgBProd", prods.slice(0, 10), L.length); barras("sgBCat", agrupar(L, r => r.categoria, r => r.categoria), L.length);
+    barras("sgBMarca", agrupar(L.filter(r => r.motivo === "nt"), r => nrm(r.marca), r => r.marca).slice(0, 6), L.length, "Sin marcas registradas en este período.");
+    const sp = $("sgSplit"); sp.innerHTML = L.length ? `<i style="width:${nt / L.length * 100}%;background:${MOT.nt.c}"></i><i style="width:${ss / L.length * 100}%;background:${MOT.ss.c}"></i>` : ""; sp.style.background = L.length ? "" : "var(--sunk,#EEF2F5)";
+    $("sgSplitLey").innerHTML = `<span style="--c:${MOT.nt.c}">No lo trabajamos · <b>${nt}</b> → oportunidad de traer</span><span style="--c:${MOT.ss.c}">Sin stock · <b>${ss}</b> → reponer</span>`;
+    const h = new Date(); h.setHours(0, 0, 0, 0); const lun = h.getTime() - ((h.getDay() + 6) % 7) * DAY, W = []; for (let i = 11; i >= 0; i--) W.push({ d: lun - i * 7 * DAY, n: 0 });
+    const c = $("sgFiCat").value, e = $("sgFiEsp").value;
+    filas().forEach(r => { if ((c && r.categoria !== c) || (e && r.especie !== e)) return; const j = Math.floor((r.ts - W[0].d) / (7 * DAY)); if (j >= 0 && j < 12) W[j].n++; });
+    const mx = Math.max(1, ...W.map(w => w.n));
+    $("sgCols").innerHTML = W.map(w => `<div><i style="height:${(w.n / mx * 100).toFixed(1)}%"></i></div>`).join("");
+    $("sgColx").innerHTML = W.map((w, i) => `<span>${i % 3 === 2 ? fFecha(w.d) : ""}</span>`).join("");
+    $("sgCols").querySelectorAll("div").forEach((el, i) => conTip(el, `Semana del ${new Date(W[i].d).toLocaleDateString("es-CL", { day: "numeric", month: "long" })}<br><b>${W[i].n}</b> ${W[i].n === 1 ? "solicitud" : "solicitudes"}`));
+  }
+  const cel = v => { v = String(v == null ? "" : v); return /[;"\n\r]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v; };
+  function csvBajar(nombre, A) { const txt = "﻿" + A.map(r => r.map(cel).join(";")).join("\r\n");
+    try { const u = URL.createObjectURL(new Blob([txt], { type: "text/csv;charset=utf-8" })), a = document.createElement("a"); a.href = u; a.download = nombre; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(u), 2000); $("sgHCsv").textContent = ""; }
+    catch (e) { $("sgHCsv").textContent = "No se pudo descargar en este equipo."; } }
+
+  /* ---------- historial ---------- */
+  function pintarHistorial() {
+    const q = nrm($("sgHQ").value), es = $("sgHEst").value, todas = filas();
+    const L = todas.filter(r => (!es || r.estado === es) && (!q || r.key.includes(q) || nrm(r.marca).includes(q) || nrm(r.cliente).includes(q))), box = $("sgLista");
+    if (!L.length) { box.innerHTML = `<p class="t-vacio" style="padding:12px 0">${todas.length ? "Nada con ese filtro." : "Todavía no hay solicitudes."}</p>`; return; }
+    box.innerHTML = L.slice(0, 200).map(r => `<div class="sg-it" data-id="${esc(r.id)}"><div>
+        <b>${esc(r.producto)}</b><span class="q">×${r.cantidad}</span>
+        <div class="m">${esc(r.categoria)}${r.marca ? " · " + esc(r.marca) : ""} · ${r.especie === "Perro" ? "🐶" : r.especie === "Gato" ? "🐱" : "🐾"} · <span class="sg-ch ${r.motivo}">${r.motivo === "ss" ? "sin stock" : "no lo trabajamos"}</span></div>
+        <div class="m">${fFH(r.ts)} · atendió ${esc(r.quien)}</div>
+        ${r.cliente || r.telefono ? `<div class="m">👤 ${esc([r.cliente, r.telefono].filter(Boolean).join(" · "))}</div>` : ""}
+        ${r.notas ? `<div class="nt">${esc(r.notas)}</div>` : ""}</div>
+      <div class="side"><span class="sg-est ${r.estado}">${EST[r.estado] || r.estado}</span>
+        <select aria-label="Cambiar estado">${Object.entries(EST).map(([k, v]) => `<option value="${k}" ${k === r.estado ? "selected" : ""}>${v}</option>`).join("")}</select></div></div>`).join("");
+  }
+  function pintarSync() { const s = $("sgSync"); if (!s) return; const n = lsGet(ENVQ, []).length, c = syCfg();
+    s.textContent = !c ? "Sin conexión al script: lo registrado queda en este equipo." : n ? `${n} ${n === 1 ? "registro pendiente" : "registros pendientes"} de enviar (se envían solos).` : "Todo enviado · lo ven ambos turnos y llega en el resumen de los lunes."; }
+  function pintarTodoSug() { if (!armado) return; pintarFrecuentes(); pintarResumen(); pintarHistorial(); pintarSync(); }
+  function pintarSug() { if (!armado) armar(); pintarTodoSug(); pintarPicker(); bajar(); enviar(); }
+  window.addEventListener("online", () => enviar());
+  setTimeout(() => { enviar(); bajar(true); }, 4000);
+})();
+</script>
+
+<style>/* patch_tdasug */
+#sSug{display:grid;gap:12px}#sSug[hidden]{display:none!important}
+#sSug .t-card{display:grid;gap:10px;min-width:0}
+#sSug h2 small{color:var(--muted,#5B6874);font-weight:600;font-size:.8rem}
+.sg-seg{display:flex;gap:4px;background:var(--sunk,#EEF2F5);border-radius:10px;padding:4px;flex-wrap:wrap}
+.sg-seg button{border:0;background:none;font:inherit;font-weight:700;font-size:.85rem;padding:8px 10px;border-radius:8px;cursor:pointer;color:var(--muted,#5B6874);flex:1;white-space:nowrap}
+.sg-seg button[aria-pressed="true"]{background:var(--surface,#fff);color:var(--ink,#0F1E29);box-shadow:0 1px 3px rgba(0,0,0,.1)}
+.sg-seg.sm button{font-size:.8rem;padding:6px 8px}
+.sg-sub{display:none}.sg-sub.on{display:grid;gap:12px}
+.sg-f{display:grid;gap:4px;min-width:0}
+.sg-f label,.sg-lbl{font-size:.8rem;font-weight:700;color:var(--muted,#5B6874)}
+.sg-f .opt{font-weight:500}
+.sg-f input,.sg-f select,.sg-f textarea{width:100%;box-sizing:border-box;border:1px solid var(--line,#DAE1E7);background:var(--bg,#F4F6F8);border-radius:10px;padding:10px 11px;min-height:44px;font:inherit;color:inherit}
+.sg-f textarea{min-height:64px;resize:vertical}
+.sg-f input:focus,.sg-f select:focus,.sg-f textarea:focus{border-color:var(--hw);outline:none;box-shadow:0 0 0 3px #F6EEFB}
+.sg-two{display:grid;grid-template-columns:1fr 1fr;gap:10px}@media (max-width:380px){.sg-two{grid-template-columns:1fr}}
+.sg-hint{font-size:.78rem;color:var(--muted,#5B6874);min-height:1em}.sg-hint b{color:#4A1F6F}
+.sg-qty{display:flex;align-items:stretch;border:1px solid var(--line,#DAE1E7);border-radius:10px;overflow:hidden;background:var(--bg,#F4F6F8)}
+.sg-qty button{width:48px;border:0;background:transparent;cursor:pointer;font-size:1.2rem;font-weight:700;color:var(--hw)}
+.sg-f .sg-qty input{flex:1;min-width:0;border:0;border-inline:1px solid var(--line,#DAE1E7);border-radius:0;background:var(--surface,#fff);text-align:center;font-weight:700;box-shadow:none}
+.sg-srch{position:relative}.sg-srch .lupa{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:.85rem;opacity:.55;pointer-events:none}
+.sg-f .sg-srch input{padding-left:36px;padding-right:44px}
+.sg-srch .x{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:32px;height:32px;border:0;border-radius:50%;background:var(--sunk,#EEF2F5);color:var(--muted,#5B6874);font-weight:800;cursor:pointer}
+.sg-pk{border:1px solid var(--line,#DAE1E7);border-radius:10px;background:var(--surface,#fff);overflow:hidden;margin-top:4px;box-shadow:0 6px 18px rgba(15,30,41,.08)}
+.sg-pk-h{padding:6px 12px;font-size:.72rem;font-weight:600;color:var(--muted,#5B6874);border-bottom:1px solid var(--line,#DAE1E7)}
+.sg-pk-l{max-height:232px;overflow-y:auto;overscroll-behavior:contain}
+.sg-pi{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;width:100%;text-align:left;border:0;border-top:1px solid var(--line,#DAE1E7);background:none;padding:8px 12px;cursor:pointer;min-height:44px;font:inherit;color:inherit}
+.sg-pi:first-child{border-top:0}.sg-pi:hover,.sg-pi:focus-visible{background:#F6EEFB}
+.sg-pi b{display:block;font-weight:500;font-size:.88rem;line-height:1.25}.sg-pi b mark{background:none;color:#4A1F6F;font-weight:800}
+.sg-pi small{color:var(--muted,#5B6874);font-size:.72rem}.sg-pi.nuevo b{color:#4A1F6F;font-weight:700}
+.sg-pk-f .sg-pi{background:var(--bg,#F4F6F8);min-height:40px}
+.sg-pk-x{padding:12px;font-size:.84rem;color:var(--muted,#5B6874)}.sg-pk-x button{margin-top:8px}
+.sg-st0{font-size:.7rem;font-weight:800;padding:2px 7px;border-radius:999px;background:#FFF1DC;color:#A35A00;white-space:nowrap}
+.sg-fr{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;padding:9px 0;border-top:1px solid var(--line,#DAE1E7)}.sg-fr:first-child{border-top:0}
+.sg-fr b{display:block;font-weight:600;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sg-fr small{color:var(--muted,#5B6874);font-size:.78rem}
+.sg-ch{font-size:.7rem;font-weight:700;padding:2px 7px;border-radius:999px;background:var(--sunk,#EEF2F5);color:var(--muted,#5B6874);white-space:nowrap}
+.sg-ch.nt{background:#F6EEFB;color:#4A1F6F}.sg-ch.ss{background:#FFF1DC;color:#A35A00}
+.sg-pod{display:grid;gap:8px}@media (min-width:620px){.sg-pod{grid-template-columns:repeat(3,1fr)}}
+.sg-pd{border:1px solid var(--line,#DAE1E7);border-radius:12px;padding:10px 12px;display:grid;grid-template-columns:38px minmax(0,1fr);gap:10px;align-items:center;background:var(--bg,#F4F6F8)}
+.sg-pd .n{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:1.05rem;background:#F6EEFB;color:#4A1F6F}.sg-pd.p1 .n{background:var(--hw);color:#fff}
+.sg-pd b{display:block;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sg-pd small{color:var(--muted,#5B6874);font-size:.78rem}
+.sg-bars{display:grid;gap:7px}
+.sg-bar{display:grid;grid-template-columns:minmax(96px,40%) minmax(0,1fr) 34px;gap:8px;align-items:center;font-size:.84rem}
+.sg-bar .lb{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sg-bar .tr{height:10px;position:relative}
+.sg-bar .tr i{position:absolute;inset:0 auto 0 0;background:var(--hw);border-radius:0 5px 5px 0;min-width:3px}.sg-bar b{text-align:right}
+.sg-split{display:flex;height:12px;border-radius:999px;overflow:hidden;gap:2px}.sg-split i{display:block;height:100%}
+.sg-ley{display:flex;gap:14px;flex-wrap:wrap;font-size:.78rem;color:var(--muted,#5B6874)}
+.sg-ley span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px;background:var(--c)}
+.sg-cols{display:flex;align-items:flex-end;gap:3px;height:120px;border-bottom:1px solid var(--line,#DAE1E7)}
+.sg-cols div{flex:1;height:100%;display:flex;align-items:flex-end}.sg-cols i{display:block;width:100%;background:var(--hw);border-radius:4px 4px 0 0;min-height:2px}
+.sg-colx{display:flex;gap:3px}.sg-colx span{flex:1;width:0;font-size:.68rem;color:var(--muted,#5B6874);text-align:center;white-space:nowrap;overflow:visible}
+#sgTip{position:fixed;z-index:9600;pointer-events:none;background:#0F1E29;color:#fff;font-size:.8rem;padding:7px 10px;border-radius:8px;opacity:0;transition:opacity .1s;max-width:240px;line-height:1.35}#sgTip.on{opacity:1}
+.sg-it{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 10px;padding:11px 0;border-top:1px solid var(--line,#DAE1E7)}.sg-it:first-child{border-top:0}
+.sg-it .q{display:inline-block;background:#F6EEFB;color:#4A1F6F;font-weight:800;font-size:.72rem;padding:1px 7px;border-radius:999px;margin-left:6px}
+.sg-it .m{font-size:.78rem;color:var(--muted,#5B6874)}.sg-it .nt{font-size:.84rem;opacity:.85}
+.sg-it .side{display:grid;justify-items:end;gap:6px;align-content:start}
+.sg-it select{border:1px solid var(--line,#DAE1E7);background:var(--bg,#F4F6F8);border-radius:999px;padding:5px 8px;font:inherit;font-size:.78rem;font-weight:700}
+.sg-est{display:inline-flex;align-items:center;gap:5px;font-size:.74rem;font-weight:700;padding:2px 9px;border-radius:999px;background:var(--sunk,#EEF2F5);color:var(--muted,#5B6874);white-space:nowrap}
+.sg-est::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.sg-est.pendiente{background:#FFF1DC;color:#A35A00}.sg-est.encargado{background:#F6EEFB;color:#4A1F6F}.sg-est.avisado{background:#E5F3EA;color:#1F6B3F}
+.sg-filt{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px}
+.sg-filt input,.sg-filt select{border:1px solid var(--line,#DAE1E7);background:var(--surface,#fff);border-radius:999px;padding:9px 14px;min-height:42px;min-width:0;font:inherit;color:inherit}
+.sg-sync{font-size:.74rem;color:var(--muted,#5B6874)}
+.sg-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+#sSug .t-btn.full{width:100%;min-height:50px;font-size:1rem}
+@media (min-width:900px){#sSug{max-width:880px;margin:0 auto;width:100%}}
+</style>
+
+<script>/* patch_tdasug: «💡 Sugerencias» de la tienda */
+(function () {
+  if (document.getElementById("sSug")) return;
+  const DAY = 864e5, LSK = "sug-loc", ENVQ = "sug-env", SGV = "sug-ver";
+  const nrm = s => norm(s).replace(/\s+/g, " ").trim();
+  const fFecha = ts => new Date(ts).toLocaleDateString("es-CL", { day: "numeric", month: "short" });
+  const fFH = ts => new Date(ts).toLocaleString("es-CL", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
+  const CATS = ["Alimentos Perro Seco", "Alimentos Gato Seco", "Húmedos Perro", "Húmedos Gato", "Arenas Sanitarias", "Snacks y Premios Perro", "Snacks y Premios Gato", "Suplementos Perro y Gato", "Accesorios", "Higiene y farmacia", "Otros"];
+  const MOT = { nt: { t: "No lo trabajamos", c: "var(--hw)" }, ss: { t: "Lo tenemos, sin stock", c: "#E2A33B" } };
+  const EST = { pendiente: "Pendiente", encargado: "Encargado", avisado: "Avisado", descartado: "Descartado" };
+  const espDe = (n, c) => { const t = (c || "") + " " + (n || ""); if (/perro y gato/i.test(t)) return /\bgato\b/i.test(n) && !/perro/i.test(n) ? "Gato" : /\bperro\b/i.test(n) && !/gato/i.test(n) ? "Perro" : "Ambos";
+    return /gato|cats?\b|katze|kitten|felin/i.test(t) || /arena/i.test(t) ? "Gato" : "Perro"; };
+  const catDe = n => { const t = norm(n), g = /gato|cats?\b|katze|kitten|felin/.test(t);
+    if (/arena|lindocat|turkat|clean cat|cool&clean|cool ?& ?clean/.test(t)) return "Arenas Sanitarias";
+    if (/lata|pouch|sobre|humed|mousse|caldo|pate/.test(t)) return /mousse|caldo/.test(t) ? (g ? "Snacks y Premios Gato" : "Snacks y Premios Perro") : (g ? "Húmedos Gato" : "Húmedos Perro");
+    if (/snack|premio|galleta|hueso/.test(t)) return g ? "Snacks y Premios Gato" : "Snacks y Premios Perro";
+    if (/omega|suplemento|caps|calmante/.test(t)) return "Suplementos Perro y Gato";
+    if (/shampoo|antipulga|pipeta|toallita/.test(t)) return "Higiene y farmacia";
+    if (/\bkg\b|\d\s*kg|gr\b|\d\s*g\b/.test(t)) return g ? "Alimentos Gato Seco" : "Alimentos Perro Seco";
+    return "Otros"; };
+  const MARCAS = ["Agility", "Ownat", "Poema", "Proterline", "Dog Evolution", "PuraNatura", "Pura Natura", "Sieger", "Bestpet", "LindoCat", "Cool&Clean", "Clean Cat", "TurKat", "IKAI", "Montaraz", "Planet Pet"];
+  const marcaDe = n => MARCAS.find(m => norm(n).includes(norm(m))) || "";
+  /* productos que NO trabajamos (marcas de la competencia que piden en el mesón), por perro y gato */
+  const NT_SPEC = [
+   ["Perro","Alimentos Perro Seco","Royal Canin",["X-Small Adult","X-Small Puppy","Mini Adult","Mini Puppy","Mini Adult 8+","Mini Light Weight Care","Medium Adult","Medium Puppy","Medium Adult 7+","Maxi Adult","Maxi Puppy","Maxi Adult 5+","Giant Adult","Giant Puppy","Bulldog Francés Adult","Chihuahua Adult","Yorkshire Terrier Adult","Shih Tzu Adult","Poodle Adult","Pug Adult","Dachshund Adult","Labrador Retriever Adult","Golden Retriever Adult","Pastor Alemán Adult","Hypoallergenic","Gastrointestinal","Urinary SO","Renal","Satiety Weight Management","Mobility Support"],["1 kg","3 kg","7,5 kg","15 kg"]],
+   ["Perro","Alimentos Perro Seco","Pro Plan",["Puppy Raza Pequeña","Puppy Raza Mediana","Puppy Raza Grande","Adulto Raza Pequeña","Adulto Raza Mediana","Adulto Raza Grande","Reduced Calorie","Sensitive Skin","Sensitive Stomach","Adulto 7+","Veterinary Diets HA Hipoalergénico","Veterinary Diets OM Control de Peso","Veterinary Diets EN Gastrointestinal","Veterinary Diets NF Renal"],["1 kg","3 kg","7,5 kg","15 kg"]],
+   ["Perro","Alimentos Perro Seco","Hill's Science Diet",["Adult Small Bites","Adult Large Breed","Puppy Small Bites","Puppy Large Breed","Adult Light","Adult 7+","Sensitive Stomach & Skin","Prescription Diet i/d","Prescription Diet k/d","Prescription Diet z/d","Prescription Diet Metabolic"],["2 kg","7 kg","12 kg"]],
+   ["Perro","Alimentos Perro Seco","Acana",["Puppy & Junior","Puppy Small Breed","Adult Dog","Adult Small Breed","Adult Large Breed","Light & Fit","Senior Dog","Wild Atlantic","Grasslands","Pacifica","Sport & Agility"],["2 kg","6 kg","11,4 kg"]],
+   ["Perro","Alimentos Perro Seco","Orijen",["Original","Puppy","Puppy Large","Senior","Six Fish","Regional Red","Small Breed","Fit & Trim"],["2 kg","6 kg","11,4 kg"]],
+   ["Perro","Alimentos Perro Seco","Taste of the Wild",["High Prairie","Pacific Stream","Sierra Mountain","Wetlands","Southwest Canyon","Appalachian Valley Small Breed","High Prairie Puppy","Pacific Stream Puppy"],["2 kg","5,6 kg","12,2 kg"]],
+   ["Perro","Alimentos Perro Seco","Brit Care",["Puppy Lamb & Rice","Junior Large Breed","Adult Small Breed","Adult Medium Breed","Adult Large Breed","Senior & Light","Grain-free Salmon","Hypoallergenic Lamb"],["3 kg","12 kg"]],
+   ["Perro","Alimentos Perro Seco","Bravery",["Chicken Adult Mini","Chicken Adult Medium & Large","Chicken Puppy Mini","Chicken Puppy Medium & Large","Lamb Mini Adult","Lamb Adult Medium & Large","Salmon Adult","Iberian Pork Adult","Senior"],["2 kg","7 kg","12 kg"]],
+   ["Perro","Alimentos Perro Seco","Fit Formula",["Adulto","Adulto Razas Pequeñas","Adulto Razas Medianas y Grandes","Cachorro","Senior","Light"],["3 kg","10 kg","20 kg"]],
+   ["Perro","Alimentos Perro Seco","Master Dog",["Adulto Carne","Adulto Pollo","Cachorro","Senior","Razas Pequeñas"],["3 kg","10 kg","21 kg"]],
+   ["Perro","Alimentos Perro Seco","Dog Chow",["Cachorros Minis y Pequeños","Cachorros Medianos y Grandes","Adultos Minis y Pequeños","Adultos Medianos y Grandes","Adultos Light","Senior"],["1,5 kg","8 kg","15 kg","21 kg"]],
+   ["Perro","Alimentos Perro Seco","Pedigree",["Adulto Carne Pollo y Cereal","Adulto Razas Pequeñas","Cachorro","Senior"],["1,5 kg","8 kg","21 kg"]],
+   ["Perro","Alimentos Perro Seco","Champion Dog",["Adulto Carne y Pollo","Adulto Medianos y Grandes","Cachorro","Senior"],["3 kg","18 kg"]],
+   ["Perro","Alimentos Perro Seco","Bokato",["Tradición Premium Adulto","Gold Super Premium Adulto","Veloz Alto Rendimiento","Cachorro Premium"],["10 kg","20 kg"]],
+   ["Perro","Alimentos Perro Seco","Frost",["Adult Mini & Small","Adult Medium & Large","Puppy Mini & Small","Puppy Medium & Large","Senior"],["3 kg","15 kg"]],
+   ["Perro","Alimentos Perro Seco","Biofresh",["Adulto Raza Pequeña","Adulto Raza Mediana","Adulto Raza Grande","Cachorro","Senior","Light"],["3 kg","10 kg","15 kg"]],
+   ["Perro","Húmedos Perro","Royal Canin",["Mini Adult pouch","Medium Adult pouch","Puppy pouch","Recovery lata","Gastrointestinal lata"],["85 g","195 g","400 g"]],
+   ["Perro","Húmedos Perro","Pro Plan",["Adulto lata Pollo","Puppy lata","Sensitive lata Cordero"],["354 g"]],
+   ["Perro","Húmedos Perro","Pedigree",["Sobre Adulto Carne","Sobre Adulto Pollo","Sobre Cachorro","Lata Adulto Carne"],["100 g","340 g"]],
+   ["Perro","Húmedos Perro","Cesar",["Bandeja Pollo","Bandeja Carne","Bandeja Cordero","Bandeja Cachorro"],["100 g"]],
+   ["Perro","Húmedos Perro","Dog Chow",["Sobre Adulto Carne","Sobre Cachorro Pollo"],["100 g"]],
+   ["Perro","Snacks y Premios Perro","Pedigree",["Dentastix Razas Pequeñas","Dentastix Razas Medianas","Dentastix Razas Grandes","Marrobone","Biscrok"],[""]],
+   ["Perro","Snacks y Premios Perro","Greenies",["Teenie","Petite","Regular","Large"],[""]],
+   ["Perro","Snacks y Premios Perro","Natural",["Oreja de cerdo deshidratada","Pezuña de vacuno","Tráquea de vacuno","Hueso de rodilla","Nervio de toro","Pulmón deshidratado","Patitas de pollo"],[""]],
+   ["Perro","Accesorios","Kong",["Classic","Extreme","Puppy","Wobbler","Flyer frisbee","Squeezz pelota"],["S","M","L"]],
+   ["Perro","Accesorios","Flexi",["Correa retráctil cinta","Correa retráctil cordón"],["S","M","L"]],
+   ["Perro","Accesorios","Genérico",["Arnés pechera acolchado","Collar de nylon","Collar de cuero","Correa de paseo 1,5 m","Bozal de canasta","Cama ortopédica","Cama redonda tipo dona","Colchoneta lavable","Chaleco abrigo","Impermeable con capucha","Transportadora rígida","Bolso transportador","Comedero de acero","Comedero lento antiansiedad","Bebedero portátil de paseo","Cepillo carda","Guante quitapelo","Cortaúñas","Bolsas para excremento (rollos)","Juguete de cuerda","Pelota de goma","Peluche con sonido","Corral plegable","Rampa para auto","Placa de identificación grabada"],["S","M","L"]],
+   ["Perro","Higiene y farmacia","NexGard",["Masticable antipulgas","Spectra"],["2-3,5 kg","3,5-7,5 kg","7,5-15 kg","15-30 kg","30-60 kg"]],
+   ["Perro","Higiene y farmacia","Bravecto",["Masticable"],["2-4,5 kg","4,5-10 kg","10-20 kg","20-40 kg","40-56 kg"]],
+   ["Perro","Higiene y farmacia","Simparica",["Masticable","Trio"],["2,5-5 kg","5-10 kg","10-20 kg","20-40 kg"]],
+   ["Perro","Higiene y farmacia","Seresto",["Collar antipulgas"],["hasta 8 kg","sobre 8 kg"]],
+   ["Perro","Higiene y farmacia","Frontline",["Plus pipeta"],["hasta 10 kg","10-20 kg","20-40 kg"]],
+   ["Perro","Higiene y farmacia","Genérico",["Shampoo antipulgas","Shampoo hipoalergénico","Shampoo cachorro","Shampoo pelo blanco","Toallitas húmedas","Pasta dental + cepillo","Limpiador de oídos","Desparasitante interno comprimido","Pañales para perro","Paños absorbentes de entrenamiento","Spray repelente de orina","Perfume para perro"],[""]],
+   ["Gato","Alimentos Gato Seco","Royal Canin",["Kitten","Kitten Sterilised","Indoor 27","Fit 32","Sterilised 37","Hair & Skin Care","Hairball Care","Digestive Care","Light Weight Care","Urinary Care","Ageing 12+","Persian Adult","Maine Coon Adult","British Shorthair Adult","Siamese Adult","Renal","Urinary SO","Hypoallergenic","Gastrointestinal"],["400 g","1,5 kg","4 kg","7,5 kg"]],
+   ["Gato","Alimentos Gato Seco","Pro Plan",["Kitten","Adulto Pollo","Esterilizado","Urinary","Delicate","Light","Senior 7+","Veterinary Diets UR Urinario","Veterinary Diets NF Renal"],["1 kg","3 kg","7,5 kg"]],
+   ["Gato","Alimentos Gato Seco","Hill's Science Diet",["Kitten","Adult","Adult Indoor","Hairball Control","Light","Prescription Diet c/d","Prescription Diet k/d","Prescription Diet w/d"],["1,8 kg","4 kg"]],
+   ["Gato","Alimentos Gato Seco","Acana",["Wild Prairie Cat","Pacifica Cat","Indoor Entrée","Bountiful Catch"],["1,8 kg","4,5 kg"]],
+   ["Gato","Alimentos Gato Seco","Orijen",["Cat & Kitten","Six Fish Cat","Regional Red Cat","Fit & Trim Cat"],["1,8 kg","5,4 kg"]],
+   ["Gato","Alimentos Gato Seco","Taste of the Wild",["Rocky Mountain","Canyon River","Lowland Creek"],["2 kg","6,6 kg"]],
+   ["Gato","Alimentos Gato Seco","Brit Care Cat",["Kitten","Sterilized Urinary","Indoor Anti-stress","Hair & Skin"],["2 kg","7 kg"]],
+   ["Gato","Alimentos Gato Seco","Bravery",["Salmon Adult Cat","Chicken Adult Cat Sterilized","Chicken Kitten","Herring Adult Cat"],["2 kg","7 kg"]],
+   ["Gato","Alimentos Gato Seco","Cat Chow",["Adultos Pescado","Adultos Carne","Esterilizados","Gatitos","Defense Plus"],["1 kg","3 kg","8 kg","15 kg"]],
+   ["Gato","Alimentos Gato Seco","Whiskas",["Adulto Carne","Adulto Pescado","Adulto Pollo","Gatitos","Esterilizados"],["1 kg","3 kg","10 kg"]],
+   ["Gato","Alimentos Gato Seco","Frost",["Cat Indoor Sterilized","Cat Kitten","Cat Adult Salmon"],["1,5 kg","7,5 kg"]],
+   ["Gato","Alimentos Gato Seco","Fit Formula",["Gato Adulto","Gato Kitten","Gato Esterilizado"],["1 kg","10 kg"]],
+   ["Gato","Alimentos Gato Seco","Master Cat",["Adulto","Gatitos"],["1,5 kg","8 kg"]],
+   ["Gato","Húmedos Gato","Whiskas",["Sobre Carne","Sobre Pollo","Sobre Salmón","Sobre Gatitos","Sobre Atún"],["85 g"]],
+   ["Gato","Húmedos Gato","Felix",["Sobre Carne en gelatina","Sobre Pescado en gelatina","Sobre Pollo","Sobre Gatitos"],["85 g"]],
+   ["Gato","Húmedos Gato","Royal Canin",["Instinctive pouch","Kitten pouch","Sterilised pouch","Urinary Care pouch","Renal pouch","Recovery lata"],["85 g","195 g"]],
+   ["Gato","Húmedos Gato","Pro Plan",["Lata Adulto Pollo","Lata Kitten","Lata Urinary"],["85 g"]],
+   ["Gato","Húmedos Gato","Fancy Feast",["Paté Pollo","Paté Pescado","Paté Pavo","Gourmet Atún"],["85 g"]],
+   ["Gato","Húmedos Gato","Cat Chow",["Sobre Adulto Pescado","Sobre Gatitos"],["85 g"]],
+   ["Gato","Snacks y Premios Gato","Inaba Churu",["Atún","Pollo","Salmón","Atún y Vieiras"],["pack 4 x 14 g","pack 20 x 14 g"]],
+   ["Gato","Snacks y Premios Gato","Whiskas Temptations",["Pollo","Salmón","Carne","Catnip"],["85 g"]],
+   ["Gato","Snacks y Premios Gato","Dreamies",["Pollo","Salmón","Queso"],["60 g"]],
+   ["Gato","Snacks y Premios Gato","Genérico",["Hierba gatera (catnip) seca","Pasto para gato para sembrar","Palitos de matatabi"],[""]],
+   ["Gato","Arenas Sanitarias","Ever Clean",["Arena aglomerante Extra Strong","Arena aglomerante Multi-Crystals"],["6 L","10 L"]],
+   ["Gato","Arenas Sanitarias","Genérico",["Arena de tofu","Arena de sílice","Arena de pellet de madera","Arena biodegradable de maíz"],["3,8 L","6 L","10 L"]],
+   ["Gato","Accesorios","Genérico",["Rascador torre","Rascador de cartón","Rascador poste","Arenero cubierto","Arenero abierto","Pala de arena","Fuente de agua eléctrica","Transportadora rígida","Mochila transportadora con visor","Varita con plumas","Ratón de juguete","Túnel plegable","Cama iglú","Hamaca para ventana","Collar con cascabel","Pelota con catnip","Láser de juego","Comedero doble elevado","Malla protectora para ventana","Puerta gatera"],[""]],
+   ["Gato","Higiene y farmacia","NexGard",["Combo gato"],["0,8-2,5 kg","2,5-7,5 kg"]],
+   ["Gato","Higiene y farmacia","Bravecto",["Pipeta gato"],["1,2-2,8 kg","2,8-6,25 kg","6,25-12,5 kg"]],
+   ["Gato","Higiene y farmacia","Revolution",["Plus gato"],["1,25-2,5 kg","2,5-5 kg","5-10 kg"]],
+   ["Gato","Higiene y farmacia","Seresto",["Collar antipulgas gato"],[""]],
+   ["Gato","Higiene y farmacia","Feliway",["Difusor + repuesto","Repuesto 48 ml","Spray"],[""]],
+   ["Gato","Higiene y farmacia","Genérico",["Pasta de malta","Shampoo en seco para gato","Toallitas húmedas","Limpiador de oídos","Desparasitante interno comprimido","Cortaúñas"],[""]],
+   ["Otro","Otros","Genérico",["Alimento para conejo","Heno para conejo","Alimento para hámster","Viruta para roedores","Jaula para hámster","Alimento para aves","Semillas para canario","Jaula para aves","Alimento para peces","Acuario pequeño","Alimento para tortuga","Arena para chinchilla"],[""]]];
+  const NO_TRAB = []; NT_SPEC.forEach(([e, c, m, L, T]) => L.forEach(l => T.forEach(t => { const g = m === "Genérico" || m === "Natural"; NO_TRAB.push({ n: (g ? "" : m + " ") + l + (t ? " " + t : ""), c, e, m: g ? "" : m }); })));
+  /* sin stock: bodega de la tienda con saldo 0 o menos (datos de Drive) */
+  const sinStock = () => { const D = DATA(), S = D && D.stock; if (!Array.isArray(S)) return null;
+    return S.filter(x => Number(x[2]) <= 0).map(x => { const n = String(x[1] || "").trim(), c = catDe(n); return { n, cod: String(x[0] || ""), c, e: espDe(n, c), m: marcaDe(n) }; }).filter(x => x.n).sort((a, b) => a.n.localeCompare(b.n, "es")); };
+
+  /* ---------- almacenamiento: teléfono + script (registro de cambios, código SUGERENCIA) ---------- */
+  const base = () => { const o = lsGet(LSK, null); return o && o.items ? o : { items: {}, est: {} }; };
+  const guardarBase = o => lsSet(LSK, o);
+  const filas = () => { const o = base(); return Object.values(o.items).map(r => { const e = o.est[r.id]; return Object.assign({}, r, { estado: e ? e.estado : "pendiente", key: nrm(r.producto) }); }).sort((a, b) => b.ts - a.ts); };
+  const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+  function encolar(cc) { const q = lsGet(ENVQ, []); q.push(cc); lsSet(ENVQ, q.slice(-300)); clearTimeout(encolar.t); encolar.t = setTimeout(enviar, 400); }
+  let enviando = false;
+  async function enviar() {
+    const c = syCfg(), q = lsGet(ENVQ, []); if (!c || !q.length || enviando) { pintarSync(); return; } enviando = true;
+    try { const r = await syLlamar(c, { accion: "clienteCambios", cambios: q.slice(0, 100) });
+      if (r && r.ok) { const ok = new Set(r.guardados || []); lsSet(ENVQ, lsGet(ENVQ, []).filter(x => !ok.has(x.id))); } } finally { enviando = false; pintarSync(); }
+  }
+  let bajado = 0;
+  async function bajar(forzar) {
+    const c = syCfg(); if (!c || (!forzar && Date.now() - bajado < 60000)) return; bajado = Date.now();
+    const r = await syLlamar(c, { accion: "clientesCambios", version: lsGet(SGV, "") || "" });
+    if (!r || !r.ok || r.igual || !Array.isArray(r.cambios)) return;
+    const o = base(); let cambio = false;
+    r.cambios.filter(x => x && x.codigo === "SUGERENCIA").forEach(x => { let d; try { d = JSON.parse(x.detalle); } catch (e) { return; }
+      if (d.sg === 1 && d.id && !o.items[d.id]) { delete d.sg; o.items[d.id] = d; cambio = true; }
+      if (d.sg === 2 && d.ref) { const a = o.est[d.ref]; if (!a || (d.ts || 0) > (a.ts || 0)) { o.est[d.ref] = { estado: d.estado, ts: d.ts || 0 }; cambio = true; } } });
+    lsSet(SGV, r.version || ""); if (cambio) { guardarBase(o); if (vista === "sug") pintarTodoSug(); }
+  }
+  function agregar(d) {
+    if (!turno()) { pedirTurno(); toast("Primero indica quién está en el turno."); return false; }
+    const r = Object.assign({ id: uid(), ts: Date.now(), quien: turno() }, d); r.notas = String(r.notas || "").slice(0, 250);
+    const o = base(); o.items[r.id] = r; guardarBase(o);
+    encolar({ id: "CC-SG-" + r.id, fecha: new Date(r.ts).toISOString(), vendedor: r.quien + TAG, cartera: "", codigo: "SUGERENCIA", cliente: "Sugerencia de la tienda (no es un cliente)",
+      tipo: "Datos", motivo: (MOT[r.motivo] || MOT.nt).t + ": " + r.producto.slice(0, 80), detalle: JSON.stringify(Object.assign({ sg: 1 }, r)), cambios: [] });
+    pintarTodoSug(); return true;
+  }
+  function cambiarEstado(id, estado) {
+    const o = base(); if (!o.items[id]) return; const ts = Date.now(); o.est[id] = { estado, ts }; guardarBase(o);
+    encolar({ id: "CC-SG-E-" + id + "-" + ts.toString(36), fecha: new Date(ts).toISOString(), vendedor: (turno() || "Tienda") + TAG, cartera: "", codigo: "SUGERENCIA", cliente: "Sugerencia de la tienda (no es un cliente)",
+      tipo: "Datos", motivo: "Estado: " + EST[estado], detalle: JSON.stringify({ sg: 2, ref: id, estado, ts, quien: turno() || "" }), cambios: [] });
+    pintarTodoSug();
+  }
+
+  /* ---------- sección y navegación ---------- */
+  const ICO = '<svg viewBox="0 0 32 32" aria-hidden="true" class="hic"><defs><linearGradient id="hic-sugt" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F7C04A"/><stop offset="1" stop-color="#D98A0B"/></linearGradient></defs><rect width="32" height="32" rx="9" fill="url(#hic-sugt)"/><path d="M4 4h24v10C20 9 11 9 4 13z" fill="#fff" opacity=".12"/><g transform="translate(5.5 5.5) scale(.875)" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.6.5 1 1.2 1 2V16h5.2v-.2c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z"/></g></svg>';
+  const sec = document.createElement("section"); sec.className = "t-sec"; sec.id = "sSug"; sec.hidden = true; document.querySelector("main").appendChild(sec);
+  SEC.sug = "sSug";
+  const nav = $("tNav"), btn = document.createElement("button"); btn.type = "button"; btn.dataset.s = "sug"; btn.innerHTML = '<span class="hic-w">' + ICO + "</span>Sugerencias";
+  const nut = nav.querySelector('[data-s="nut"]'); if (nut) nut.after(btn); else nav.appendChild(btn);
+  const _p = pintar; pintar = function (x) { if (x === "sug") { try { pintarSug(); } catch (e) { console.error(e); } return; } return _p.apply(this, arguments); };
+  /* el orden de la barra lo fija patch_menuorden; se ubica justo después de Nutrición */
+  const ubicar = () => { const n = nav.querySelector('[data-s="nut"]'); if (n && n.nextElementSibling !== btn) n.after(btn); };
+  setTimeout(ubicar, 600); setTimeout(ubicar, 1500);
+
+  let armado = false, sub = "reg", motivo = "nt", especie = "Perro", elegido = null, pkLista = [], pkN = 0, pkQ = [], dias = 30;
+  const tip = document.createElement("div"); tip.id = "sgTip"; tip.setAttribute("role", "tooltip"); document.body.appendChild(tip);
+  function conTip(el, html) {
+    const mv = e => { const p = e.touches ? e.touches[0] : e; let x = p.clientX + 12, y = p.clientY - 12 - tip.offsetHeight; if (x + tip.offsetWidth > innerWidth - 8) x = innerWidth - tip.offsetWidth - 8; if (y < 8) y = p.clientY + 16; tip.style.left = x + "px"; tip.style.top = y + "px"; };
+    const sh = e => { tip.innerHTML = html; tip.classList.add("on"); mv(e); };
+    el.addEventListener("mouseenter", sh); el.addEventListener("mousemove", mv); el.addEventListener("mouseleave", () => tip.classList.remove("on"));
+    el.addEventListener("touchstart", e => { sh(e); clearTimeout(conTip.t); conTip.t = setTimeout(() => tip.classList.remove("on"), 1800); }, { passive: true });
+  }
+  const seg = (id, attr, cb) => { const box = $(id); box.addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; box.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x === b ? "true" : "false")); cb(b.dataset[attr]); }); };
+  const setSeg = (id, attr, val) => $(id).querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x.dataset[attr] === val ? "true" : "false"));
+
+  function armar() {
+    armado = true;
+    sec.innerHTML = `
+    <div class="t-card" style="gap:8px"><h2>💡 Sugerencias <small>lo que piden los clientes y no pudimos vender</small></h2>
+      <div class="sg-seg" id="sgSub"><button type="button" data-v="reg" aria-pressed="true">Registrar</button><button type="button" data-v="res" aria-pressed="false">Resumen</button><button type="button" data-v="his" aria-pressed="false">Historial</button></div>
+      <div class="sg-sync" id="sgSync"></div></div>
+    <div class="sg-sub on" id="sgV-reg">
+      <form class="t-card" id="sgForm" autocomplete="off"><h2>Nueva solicitud</h2>
+        <div class="sg-f"><span class="sg-lbl">¿Por qué no se pudo vender?</span>
+          <div class="sg-seg sm" id="sgMot"><button type="button" data-m="nt" aria-pressed="true">No lo trabajamos</button><button type="button" data-m="ss" aria-pressed="false">Lo tenemos, sin stock</button></div></div>
+        <div class="sg-f"><span class="sg-lbl">Para</span>
+          <div class="sg-seg sm" id="sgEsp"><button type="button" data-e="Perro" aria-pressed="true">🐶 Perro</button><button type="button" data-e="Gato" aria-pressed="false">🐱 Gato</button><button type="button" data-e="Otro" aria-pressed="false">🐾 Otro</button></div></div>
+        <div class="sg-f"><label for="sgProd" id="sgLProd">Producto que pidió</label>
+          <div class="sg-srch"><span class="lupa" aria-hidden="true">🔍</span><input id="sgProd" placeholder="Escribe para buscar…" required maxlength="120" autocomplete="off" enterkeyhint="search"><button type="button" class="x" id="sgX" aria-label="Borrar lo escrito" hidden>✕</button></div>
+          <div class="sg-pk" id="sgPk" hidden><div class="sg-pk-h" id="sgPkH"></div><div class="sg-pk-l" id="sgPkL"></div><div class="sg-pk-f" id="sgPkF"></div></div>
+          <div class="sg-hint" id="sgHProd"></div></div>
+        <div class="sg-two"><div class="sg-f"><label for="sgMarca">Marca <span class="opt">(opcional)</span></label><input id="sgMarca" placeholder="Ej: Royal Canin" maxlength="40"></div>
+          <div class="sg-f"><label for="sgCat">Categoría</label><select id="sgCat">${CATS.map(c => `<option>${esc(c)}</option>`).join("")}</select></div></div>
+        <div class="sg-f"><label for="sgCant">Cantidad</label><div class="sg-qty"><button type="button" id="sgMenos" aria-label="Menos">−</button><input id="sgCant" type="number" inputmode="numeric" min="1" value="1"><button type="button" id="sgMas" aria-label="Más">+</button></div></div>
+        <div class="sg-two"><div class="sg-f"><label for="sgCli">Cliente <span class="opt">(opcional)</span></label><input id="sgCli" placeholder="Nombre" maxlength="60"></div>
+          <div class="sg-f"><label for="sgTel">Teléfono <span class="opt">(para avisarle)</span></label><input id="sgTel" type="tel" inputmode="tel" placeholder="+56 9 …" maxlength="25"></div></div>
+        <div class="sg-f"><label for="sgNota">Notas <span class="opt">(opcional)</span></label><textarea id="sgNota" placeholder="Tamaño, sabor, para cuándo lo necesita…" maxlength="250"></textarea></div>
+        <button class="t-btn full" type="submit">Registrar solicitud</button></form>
+      <div class="t-card"><h2>Lo más pedido <small>últimos 60 días · si lo vuelven a pedir, toca +1</small></h2><div id="sgFrec"></div></div></div>
+    <div class="sg-sub" id="sgV-res">
+      <div class="t-card"><div class="sg-seg sm" id="sgPer"><button type="button" data-d="7" aria-pressed="false">7 días</button><button type="button" data-d="30" aria-pressed="true">30 días</button><button type="button" data-d="90" aria-pressed="false">3 meses</button><button type="button" data-d="0" aria-pressed="false">Todo</button></div>
+        <div class="sg-filt" style="grid-template-columns:1fr 1fr"><select id="sgFiCat" aria-label="Categoría"><option value="">Todas las categorías</option>${CATS.map(c => `<option>${esc(c)}</option>`).join("")}</select>
+          <select id="sgFiEsp" aria-label="Perro o gato"><option value="">Perro y gato</option><option>Perro</option><option>Gato</option><option>Otro</option></select></div>
+        <div class="t-kpis" id="sgKpis"></div></div>
+      <div class="t-card"><h2>🏆 Top 3 más pedidos</h2><div class="sg-pod" id="sgPod"></div></div>
+      <div class="t-card"><h2>Productos más pedidos <small>veces que los pidieron · top 10</small></h2><div class="sg-bars" id="sgBProd"></div></div>
+      <div class="t-card"><h2>¿Por qué no se vendió?</h2><div class="sg-split" id="sgSplit"></div><div class="sg-ley" id="sgSplitLey"></div></div>
+      <div class="t-card"><h2>Por categoría</h2><div class="sg-bars" id="sgBCat"></div></div>
+      <div class="t-card"><h2>Marcas más pedidas <small>que hoy no vendemos</small></h2><div class="sg-bars" id="sgBMarca"></div></div>
+      <div class="t-card"><h2>Tendencia <small>solicitudes por semana · últimas 12</small></h2><div><div class="sg-cols" id="sgCols"></div><div class="sg-colx" id="sgColx"></div></div></div>
+      <div class="t-card"><h2>Descargar <small>CSV para Excel · respeta los filtros de arriba</small></h2>
+        <div class="sg-row"><button type="button" class="t-btn sec" id="sgCsvDet">⬇ Detalle de solicitudes</button><button type="button" class="t-btn sec" id="sgCsvRes">⬇ Ranking por producto</button></div><p class="sg-hint" id="sgHCsv"></p></div></div>
+    <div class="sg-sub" id="sgV-his"><div class="t-card"><div class="sg-filt"><input id="sgHQ" placeholder="Buscar producto, marca o cliente…" aria-label="Buscar"><select id="sgHEst" aria-label="Estado"><option value="">Todos</option>${Object.entries(EST).map(([k, v]) => `<option value="${k}">${v}</option>`).join("")}</select></div><div id="sgLista"></div></div></div>`;
+
+    seg("sgSub", "v", v => { sub = v; sec.querySelectorAll(".sg-sub").forEach(s => s.classList.toggle("on", s.id === "sgV-" + v)); window.scrollTo({ top: 0 }); pintarTodoSug(); });
+    seg("sgMot", "m", v => { motivo = v; elegido = null; $("sgProd").value = ""; limpiarAuto(); pintarPicker(); });
+    seg("sgEsp", "e", v => { especie = v; if (elegido && elegido.e !== v && elegido.e !== "Ambos") { elegido = null; $("sgProd").value = ""; limpiarAuto(); } pintarPicker(); });
+    $("sgMenos").onclick = () => $("sgCant").value = Math.max(1, (+$("sgCant").value || 1) - 1);
+    $("sgMas").onclick = () => $("sgCant").value = (+$("sgCant").value || 0) + 1;
+    $("sgPkL").addEventListener("scroll", e => { const L = e.target; if (pkN < pkLista.length && L.scrollTop + L.clientHeight > L.scrollHeight - 120) masPicker(); });
+    $("sgPkL").addEventListener("click", pkClick); $("sgPkF").addEventListener("click", pkClick);
+    $("sgX").onclick = () => { $("sgProd").value = ""; elegido = null; limpiarAuto(); pintarPicker(); $("sgProd").focus(); };
+    $("sgProd").addEventListener("input", () => { if (elegido && $("sgProd").value !== elegido.n) { elegido = null; limpiarAuto(); } pintarPicker(); });
+    $("sgForm").addEventListener("submit", e => {
+      e.preventDefault(); const p = $("sgProd").value.replace(/\s+/g, " ").trim(); if (!p) return;
+      if (motivo === "ss" && !(elegido && elegido.cod != null)) { toast("Elige el producto de la lista de sin stock."); $("sgProd").focus(); return; }
+      const ok = agregar({ producto: p, marca: $("sgMarca").value.trim(), categoria: $("sgCat").value, especie, motivo, cantidad: Math.max(1, parseInt($("sgCant").value, 10) || 1),
+        cliente: $("sgCli").value.trim(), telefono: $("sgTel").value.trim(), notas: $("sgNota").value.trim(), codigo: elegido && elegido.cod || "" });
+      if (!ok) return;
+      ["sgProd", "sgMarca", "sgCli", "sgTel", "sgNota"].forEach(i => $(i).value = ""); $("sgCant").value = 1; $("sgHProd").textContent = ""; elegido = null; pintarPicker();
+      toast("Solicitud registrada ✓");
+    });
+    seg("sgPer", "d", v => { dias = +v; pintarResumen(); });
+    $("sgFiCat").onchange = pintarResumen; $("sgFiEsp").onchange = pintarResumen;
+    $("sgCsvDet").onclick = () => { const L = filtrados(); if (!L.length) { $("sgHCsv").textContent = "No hay datos en este período."; return; }
+      csvBajar(`sugerencias-detalle-${hoyISO()}.csv`, [["Fecha", "Producto", "Marca", "Categoría", "Para", "Motivo", "Cantidad", "Cliente", "Teléfono", "Estado", "Atendió", "Notas"]].concat(L.map(r => [fFH(r.ts), r.producto, r.marca, r.categoria, r.especie, MOT[r.motivo].t, r.cantidad, r.cliente, r.telefono, EST[r.estado], r.quien, r.notas]))); };
+    $("sgCsvRes").onclick = () => { const L = filtrados(); if (!L.length) { $("sgHCsv").textContent = "No hay datos en este período."; return; }
+      csvBajar(`sugerencias-ranking-${hoyISO()}.csv`, [["Puesto", "Producto", "Marca", "Categoría", "Motivo", "Veces pedido", "Unidades", "Última vez"]].concat(agrupar(L, r => r.key, r => r.producto).map((g, i) => [i + 1, g.n, g.marca, g.cat, MOT[g.mot].t, g.veces, g.unid, fFH(g.ult)]))); };
+    $("sgHQ").addEventListener("input", pintarHistorial); $("sgHEst").onchange = pintarHistorial;
+    $("sgLista").addEventListener("change", e => { const it = e.target.closest(".sg-it"); if (!it) return; cambiarEstado(it.dataset.id, e.target.value); toast("Marcado como " + EST[e.target.value]); });
+  }
+
+  /* ---------- formulario ---------- */
+  function indice(list) { const m = new Map(); for (const r of list) { let p = m.get(r.key); if (!p) { p = { key: r.key, nombre: r.producto, marca: r.marca, cat: r.categoria, esp: r.especie, mot: r.motivo, cod: r.codigo || "", veces: 0, unid: 0, ult: 0 }; m.set(r.key, p); }
+    p.veces++; p.unid += r.cantidad; if (r.ts > p.ult) { p.ult = r.ts; Object.assign(p, { nombre: r.producto, marca: r.marca, cat: r.categoria, esp: r.especie, mot: r.motivo, cod: r.codigo || "" }); } } return m; }
+  function limpiarAuto() { $("sgMarca").value = ""; $("sgHProd").textContent = ""; }
+  const coincide = (x, q) => { if (!q.length) return true; const t = nrm(x.n + " " + x.m + " " + x.c + " " + (x.cod || "")); return q.every(w => t.includes(w)); };
+  function resaltar(t, q) { if (!q.length) return esc(t); const n = nrm(t); if (n.length !== t.length) return esc(t); const marks = [];
+    q.forEach(w => { let i = n.indexOf(w); while (i >= 0) { marks.push([i, i + w.length]); i = n.indexOf(w, i + w.length); } }); if (!marks.length) return esc(t);
+    marks.sort((a, b) => a[0] - b[0]); let out = "", pos = 0; for (const [a, b] of marks) { if (a < pos) continue; out += esc(t.slice(pos, a)) + "<mark>" + esc(t.slice(a, b)) + "</mark>"; pos = b; } return out + esc(t.slice(pos)); }
+  function pintarPicker() {
+    const pk = $("sgPk"), qtxt = $("sgProd").value, q = nrm(qtxt).split(" ").filter(Boolean); pkQ = q; $("sgX").hidden = !qtxt;
+    $("sgLProd").textContent = motivo === "ss" ? "¿Cuál de nuestros productos buscaba?" : "Producto que pidió";
+    const espOk = x => especie === "Otro" || x.e === especie || x.e === "Ambos";
+    const SS = motivo === "ss" ? sinStock() : null;
+    const base = motivo === "ss" ? (SS || []).filter(espOk) : NO_TRAB.filter(x => x.e === especie), quien = especie === "Otro" ? "" : " de " + especie.toLowerCase();
+    $("sgProd").placeholder = motivo === "ss" ? (SS ? `Escribe para buscar entre ${base.length} sin stock${quien}…` : "Aún no llega el stock de la tienda") : `Escribe para buscar entre ${base.length.toLocaleString("es-CL")} productos${quien}…`;
+    if (motivo === "ss" && !SS) { $("sgHProd").innerHTML = "Todavía no llega el stock de la <b>bodega de la tienda</b> desde Drive; registra como «No lo trabajamos» o espera la próxima actualización."; }
+    if (!q.length || (elegido && elegido.n === qtxt)) { pk.hidden = true; return; }
+    pk.hidden = false; pkLista = base.filter(x => coincide(x, q)); pkN = 0;
+    $("sgPkH").textContent = pkLista.length ? `${pkLista.length.toLocaleString("es-CL")} ${pkLista.length === 1 ? "resultado" : "resultados"}${motivo === "ss" ? " sin stock" : ""}` : "Sin resultados";
+    const L = $("sgPkL"); L.innerHTML = ""; L.scrollTop = 0;
+    $("sgPkF").innerHTML = motivo === "nt" && !pkLista.some(x => nrm(x.n) === nrm(qtxt)) ? `<button type="button" class="sg-pi nuevo" data-nuevo><span><b>+ No está: usar “${esc(qtxt.trim())}”</b></span></button>` : "";
+    if (!pkLista.length) { if (motivo === "ss") L.insertAdjacentHTML("beforeend", `<div class="sg-pk-x">No está entre los productos sin stock.<br><button type="button" class="t-btn sec" data-ant>Registrarlo como “No lo trabajamos”</button></div>`); return; }
+    masPicker();
+  }
+  function masPicker() { const L = $("sgPkL"), hasta = Math.min(pkLista.length, pkN + 40); let html = "";
+    for (let i = pkN; i < hasta; i++) { const x = pkLista[i]; html += `<button type="button" class="sg-pi" data-i="${i}"><span><b>${resaltar(x.n, pkQ)}</b><small>${esc(x.c)}${x.m ? " · " + esc(x.m) : ""}${x.cod ? " · " + esc(x.cod) : ""}</small></span>${motivo === "ss" ? '<span class="sg-st0">stock 0</span>' : ""}</button>`; }
+    L.insertAdjacentHTML("beforeend", html); pkN = hasta; }
+  function pkClick(e) {
+    if (e.target.closest("[data-ant]")) { motivo = "nt"; setSeg("sgMot", "m", "nt"); pintarPicker(); $("sgProd").focus(); return; }
+    if (e.target.closest("[data-nuevo]")) { elegido = { n: $("sgProd").value.trim(), m: "", c: $("sgCat").value, e: especie, libre: true }; $("sgPk").hidden = true; $("sgHProd").textContent = "Producto escrito a mano · elige la categoría"; $("sgCat").focus(); return; }
+    const b = e.target.closest("[data-i]"); if (!b) return; const x = pkLista[+b.dataset.i]; elegido = x;
+    $("sgProd").value = x.n; $("sgMarca").value = x.m; if (CATS.includes(x.c)) $("sgCat").value = x.c; $("sgPk").hidden = true;
+    const p = indice(filas()).get(nrm(x.n)); $("sgHProd").innerHTML = p ? `Ya lo pidieron <b>${p.veces} ${p.veces === 1 ? "vez" : "veces"}</b> · se suma al mismo producto` : "Primera vez que lo piden";
+  }
+  function pintarFrecuentes() {
+    const L = [...indice(filas().filter(r => r.ts > Date.now() - 60 * DAY)).values()].sort((a, b) => b.veces - a.veces || b.ult - a.ult).slice(0, 6), box = $("sgFrec");
+    if (!L.length) { box.innerHTML = `<p class="t-vacio">Aún no hay solicitudes. La primera que registres aparecerá aquí.</p>`; return; }
+    box.innerHTML = L.map((p, i) => `<div class="sg-fr"><div><b>${esc(p.nombre)}</b><small>${p.veces} ${p.veces === 1 ? "vez" : "veces"} · último ${fFecha(p.ult)} </small><span class="sg-ch ${p.mot}">${p.mot === "ss" ? "sin stock" : "no lo trabajamos"}</span></div><button type="button" class="t-btn sec" data-i="${i}">+1</button></div>`).join("");
+    box.querySelectorAll("[data-i]").forEach(b => b.onclick = () => { const p = L[+b.dataset.i]; if (agregar({ producto: p.nombre, marca: p.marca, categoria: p.cat, especie: p.esp, motivo: p.mot, cantidad: 1, cliente: "", telefono: "", notas: "", codigo: p.cod })) toast(`+1 a “${p.nombre}”`); });
+  }
+
+  /* ---------- resumen ---------- */
+  function filtrados() { const d0 = dias ? Date.now() - dias * DAY : 0, c = $("sgFiCat").value, e = $("sgFiEsp").value; return filas().filter(r => r.ts >= d0 && (!c || r.categoria === c) && (!e || r.especie === e)); }
+  function agrupar(L, kf, nf) { const m = new Map(); for (const r of L) { const k = kf(r); if (!k) continue; let g = m.get(k); if (!g) { g = { n: nf(r), veces: 0, unid: 0, ult: 0, cat: r.categoria, mot: r.motivo, marca: r.marca }; m.set(k, g); }
+    g.veces++; g.unid += r.cantidad; if (r.ts > g.ult) { g.ult = r.ts; g.n = nf(r); } } return [...m.values()].sort((a, b) => b.veces - a.veces || b.unid - a.unid); }
+  function barras(id, L, tot, vacio) { const box = $(id); if (!L.length) { box.innerHTML = `<p class="t-vacio">${vacio || "Sin datos en este período."}</p>`; return; } const mx = L[0].veces;
+    box.innerHTML = L.map(g => `<div class="sg-bar"><span class="lb">${esc(g.n)}</span><span class="tr"><i style="width:${(g.veces / mx * 100).toFixed(1)}%"></i></span><b>${g.veces}</b></div>`).join("");
+    box.querySelectorAll(".sg-bar").forEach((el, i) => { const g = L[i]; conTip(el, `<b>${esc(g.n)}</b><br>${g.veces} ${g.veces === 1 ? "solicitud" : "solicitudes"} · ${g.unid} ${g.unid === 1 ? "unidad" : "unidades"}<br>${Math.round(g.veces / tot * 100)}% del período`); }); }
+  function pintarResumen() {
+    const L = filtrados(), prods = agrupar(L, r => r.key, r => r.producto), uni = L.reduce((s, r) => s + r.cantidad, 0), ss = L.filter(r => r.motivo === "ss").length, nt = L.length - ss;
+    const avisar = filas().filter(r => r.telefono && (r.estado === "pendiente" || r.estado === "encargado")).length;
+    $("sgKpis").innerHTML = [["Solicitudes", L.length, `${uni} unidades`], ["Productos distintos", prods.length, ""], ["No lo trabajamos", nt, L.length ? Math.round(nt / L.length * 100) + "%" : ""], ["Clientes por avisar", avisar, "con teléfono"]]
+      .map(([a, b, c]) => `<div class="t-kpi"><span>${a}</span><b>${b}</b>${c ? `<small>${c}</small>` : ""}</div>`).join("");
+    const top = prods.slice(0, 3);
+    $("sgPod").innerHTML = top.length ? top.map((g, i) => `<div class="sg-pd p${i + 1}"><div class="n">${i + 1}</div><div><b>${esc(g.n)}</b><small>${g.veces} ${g.veces === 1 ? "vez" : "veces"} · ${g.unid} u. · ${esc(g.cat)}</small></div></div>`).join("") : `<p class="t-vacio">Sin solicitudes en este período.</p>`;
+    barras("sgBProd", prods.slice(0, 10), L.length); barras("sgBCat", agrupar(L, r => r.categoria, r => r.categoria), L.length);
+    barras("sgBMarca", agrupar(L.filter(r => r.motivo === "nt"), r => nrm(r.marca), r => r.marca).slice(0, 6), L.length, "Sin marcas registradas en este período.");
+    const sp = $("sgSplit"); sp.innerHTML = L.length ? `<i style="width:${nt / L.length * 100}%;background:${MOT.nt.c}"></i><i style="width:${ss / L.length * 100}%;background:${MOT.ss.c}"></i>` : ""; sp.style.background = L.length ? "" : "var(--sunk,#EEF2F5)";
+    $("sgSplitLey").innerHTML = `<span style="--c:${MOT.nt.c}">No lo trabajamos · <b>${nt}</b> → oportunidad de traer</span><span style="--c:${MOT.ss.c}">Sin stock · <b>${ss}</b> → reponer</span>`;
+    const h = new Date(); h.setHours(0, 0, 0, 0); const lun = h.getTime() - ((h.getDay() + 6) % 7) * DAY, W = []; for (let i = 11; i >= 0; i--) W.push({ d: lun - i * 7 * DAY, n: 0 });
+    const c = $("sgFiCat").value, e = $("sgFiEsp").value;
+    filas().forEach(r => { if ((c && r.categoria !== c) || (e && r.especie !== e)) return; const j = Math.floor((r.ts - W[0].d) / (7 * DAY)); if (j >= 0 && j < 12) W[j].n++; });
+    const mx = Math.max(1, ...W.map(w => w.n));
+    $("sgCols").innerHTML = W.map(w => `<div><i style="height:${(w.n / mx * 100).toFixed(1)}%"></i></div>`).join("");
+    $("sgColx").innerHTML = W.map((w, i) => `<span>${i % 3 === 2 ? fFecha(w.d) : ""}</span>`).join("");
+    $("sgCols").querySelectorAll("div").forEach((el, i) => conTip(el, `Semana del ${new Date(W[i].d).toLocaleDateString("es-CL", { day: "numeric", month: "long" })}<br><b>${W[i].n}</b> ${W[i].n === 1 ? "solicitud" : "solicitudes"}`));
+  }
+  const cel = v => { v = String(v == null ? "" : v); return /[;"\n\r]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v; };
+  function csvBajar(nombre, A) { const txt = "﻿" + A.map(r => r.map(cel).join(";")).join("\r\n");
+    try { const u = URL.createObjectURL(new Blob([txt], { type: "text/csv;charset=utf-8" })), a = document.createElement("a"); a.href = u; a.download = nombre; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(u), 2000); $("sgHCsv").textContent = ""; }
+    catch (e) { $("sgHCsv").textContent = "No se pudo descargar en este equipo."; } }
+
+  /* ---------- historial ---------- */
+  function pintarHistorial() {
+    const q = nrm($("sgHQ").value), es = $("sgHEst").value, todas = filas();
+    const L = todas.filter(r => (!es || r.estado === es) && (!q || r.key.includes(q) || nrm(r.marca).includes(q) || nrm(r.cliente).includes(q))), box = $("sgLista");
+    if (!L.length) { box.innerHTML = `<p class="t-vacio" style="padding:12px 0">${todas.length ? "Nada con ese filtro." : "Todavía no hay solicitudes."}</p>`; return; }
+    box.innerHTML = L.slice(0, 200).map(r => `<div class="sg-it" data-id="${esc(r.id)}"><div>
+        <b>${esc(r.producto)}</b><span class="q">×${r.cantidad}</span>
+        <div class="m">${esc(r.categoria)}${r.marca ? " · " + esc(r.marca) : ""} · ${r.especie === "Perro" ? "🐶" : r.especie === "Gato" ? "🐱" : "🐾"} · <span class="sg-ch ${r.motivo}">${r.motivo === "ss" ? "sin stock" : "no lo trabajamos"}</span></div>
+        <div class="m">${fFH(r.ts)} · atendió ${esc(r.quien)}</div>
+        ${r.cliente || r.telefono ? `<div class="m">👤 ${esc([r.cliente, r.telefono].filter(Boolean).join(" · "))}</div>` : ""}
+        ${r.notas ? `<div class="nt">${esc(r.notas)}</div>` : ""}</div>
+      <div class="side"><span class="sg-est ${r.estado}">${EST[r.estado] || r.estado}</span>
+        <select aria-label="Cambiar estado">${Object.entries(EST).map(([k, v]) => `<option value="${k}" ${k === r.estado ? "selected" : ""}>${v}</option>`).join("")}</select></div></div>`).join("");
+  }
+  function pintarSync() { const s = $("sgSync"); if (!s) return; const n = lsGet(ENVQ, []).length, c = syCfg();
+    s.textContent = !c ? "Sin conexión al script: lo registrado queda en este equipo." : n ? `${n} ${n === 1 ? "registro pendiente" : "registros pendientes"} de enviar (se envían solos).` : "Todo enviado · lo ven ambos turnos y llega en el resumen de los lunes."; }
+  function pintarTodoSug() { if (!armado) return; pintarFrecuentes(); pintarResumen(); pintarHistorial(); pintarSync(); }
+  function pintarSug() { if (!armado) armar(); pintarTodoSug(); pintarPicker(); bajar(); enviar(); }
+  window.addEventListener("online", () => enviar());
+  setTimeout(() => { enviar(); bajar(true); }, 4000);
 })();
 </script>
 </body></html>

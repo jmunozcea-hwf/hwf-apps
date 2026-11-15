@@ -5194,7 +5194,7 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261115091952";
+const HWF_VER = "20261115143148";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -7616,6 +7616,48 @@ function npVer(n) {
   const MG_ICO = '<svg viewBox="0 0 32 32" aria-hidden="true" class="hic"><defs><linearGradient id="hic-mar" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#B58BE6"/><stop offset="1" stop-color="#6B3FA0"/></linearGradient></defs><rect width="32" height="32" rx="9" fill="url(#hic-mar)"/><path d="M4 4h24v10C20 9 11 9 4 13z" fill="#fff" opacity=".12"/><g transform="translate(5.5 5.5) scale(.875)" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18.5 5.5 5.5 18.5"/><circle cx="7.5" cy="7.5" r="2.7"/><circle cx="16.5" cy="16.5" r="2.7"/></g></svg>';
   const pan = document.getElementById("snPanel");
   if (pan) new MutationObserver(() => { const e = pan.querySelector('.sn-i[data-t="mar"] .sn-e'); if (e && !e.querySelector("svg")) e.innerHTML = MG_ICO; }).observe(pan, { childList: true });
+})();
+</script>
+
+<style>/* patch_prosppausa */
+.pp-card{display:flex;gap:12px;align-items:center;flex-wrap:wrap;border:1.5px solid var(--line,#DAE1E7);border-radius:14px;padding:12px 14px;margin:0 0 12px;background:var(--surface,#fff)}
+.pp-card .pp-t{flex:1 1 220px;min-width:0}.pp-card .pp-t b{display:block;font-size:.95rem}.pp-card .pp-t small{display:block;color:var(--muted,#5B6874);font-size:.78rem;line-height:1.35}
+.pp-est{display:inline-flex;align-items:center;gap:6px;font-weight:800;font-size:.8rem;padding:3px 10px;border-radius:999px}
+.pp-est::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor}
+.pp-est.on{background:#E3F4EA;color:#1C7A4E}.pp-est.off{background:#FFF1DC;color:#9A5B00}.pp-est.na{background:#EEF2F5;color:#5B6874}
+.pp-card button{border:0;border-radius:12px;font:inherit;font-weight:800;padding:10px 14px;min-height:44px;cursor:pointer;background:#0B3146;color:#fff}
+.pp-card button.sec{background:#fff;color:#0B3146;border:1px solid var(--line,#DAE1E7)}.pp-card button:disabled{opacity:.55;cursor:default}
+</style>
+
+<script>/* patch_prosppausa: pausa de la búsqueda automática de prospectos */
+(function () {
+  if (typeof store === "undefined" || typeof syCall !== "function") return;
+  /* registro de cambios de clientes: sin los registros internos de la tienda y del ranking */
+  const INT = { SUGERENCIA: 1, PUNTAJE: 1 }, _g = store.get.bind(store);
+  store.get = function (k, d) { const v = _g(k, d); if (k === "adm-cc" && v && Array.isArray(v.lista)) return Object.assign({}, v, { lista: v.lista.filter(c => !(c && INT[c.codigo])) }); return v; };
+  if (typeof pintarEmbudo !== "function") return;
+  const K = "adm-prosp-auto"; let est = store.get(K, null), cargando = false;
+  async function leer() { const c = SYC(); if (!c || !c.url || cargando) return; cargando = true;
+    try { const r = await syCall(c, { accion: "prospectosEstado" }); if (r && r.ok && typeof r.activo === "boolean") { est = { activo: r.activo, fecha: r.fecha || "", por: r.por || "" }; store.set(K, est); pintar(); }
+      else if (r && !r.ok && /desconocida/i.test(r.error || "")) { est = { na: 1 }; pintar(); } } finally { cargando = false; } }
+  async function cambiar(activo) {
+    const c = SYC(); if (!c || !c.url) { toast("Conecta HWF con el script de Google primero."); return; }
+    const b = document.getElementById("ppBtn"); if (b) { b.disabled = true; b.textContent = "Guardando…"; }
+    const r = await syCall(c, { accion: "prospectosEstado", activo, por: "HWF Admin" });
+    if (r && r.ok) { est = { activo: r.activo, fecha: r.fecha || "", por: r.por || "" }; store.set(K, est); toast(activo ? "Prospectos automáticos ACTIVADOS." : "Prospectos automáticos en PAUSA."); }
+    else toast((r && r.error) || "No se pudo guardar.");
+    pintar();
+  }
+  function pintar() {
+    const box = document.getElementById("masBody"); if (!box || typeof vistaMas === "undefined" || vistaMas !== "embudo") return;
+    let c = document.getElementById("ppCard"); if (!c) { c = document.createElement("div"); c.id = "ppCard"; c.className = "pp-card"; box.prepend(c); }
+    const on = est && est.activo === true, na = !est || est.na;
+    c.innerHTML = `<div class="pp-t"><b>Prospectos automáticos <span class="pp-est ${na ? "na" : on ? "on" : "off"}">${na ? (est && est.na ? "Script sin actualizar" : "Consultando…") : on ? "Activo" : "Pausado"}</span></b>
+      <small>${on ? "Claude busca y verifica prospectos nuevos en internet según la programación." : "En pausa: no se buscan prospectos nuevos y no se consumen recursos de Claude. Los prospectos actuales siguen igual en las apps."}${est && est.fecha ? " · Cambiado " + esc(est.fecha) + (est.por ? " por " + esc(est.por) : "") : ""}</small></div>
+      <button type="button" id="ppBtn" class="${on ? "sec" : ""}" ${na ? "disabled" : ""}>${on ? "⏸ Pausar" : "▶ Activar"}</button>`;
+    c.querySelector("#ppBtn").onclick = () => { if (!on || confirm("¿Pausar la búsqueda automática de prospectos?")) cambiar(!on); };
+  }
+  const _pe = pintarEmbudo; pintarEmbudo = function () { const r = _pe.apply(this, arguments); try { pintar(); leer(); } catch (e) { console.error(e); } return r; };
 })();
 </script>
 </body>
