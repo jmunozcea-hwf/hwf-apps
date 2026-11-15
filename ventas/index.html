@@ -7174,7 +7174,7 @@ function confirmarNota() {
   x.onclick = () => cerrarModal(); card.insertBefore(x, card.firstChild); })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261115202743";
+const HWF_VER = "20261115203504";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -8956,6 +8956,25 @@ function prUnifV(l) {
   calcularRuta = function (opc) { if (RUTA && RUTA.propia && opc && opc.excl && !opc.forzar) return pintarRuta(); if (RUTA) delete RUTA.propia; return _calc.apply(this, arguments); };
 })();
 </script>
+<script>/* patch_graficospc: alto máximo de los gráficos en PC */
+(function () {
+  const MAXH = 340;
+  function ajustar() {
+    if (window.innerWidth < 900) return;
+    document.querySelectorAll("svg[viewBox]").forEach(s => {
+      if (s.closest("#iaBtn,#snPanel,#snPanLog,nav,header,.hic-w,.sn-e") || s.classList.contains("hic") || s.classList.contains("lucide")) return;
+      const vb = (s.getAttribute("viewBox") || "").split(/[\s,]+/).map(Number); if (vb.length !== 4 || !(vb[2] > 0 && vb[3] > 0)) return;
+      const w = s.getBoundingClientRect().width; if (w < 400) return;
+      if (w * vb[3] / vb[2] <= MAXH + 2) return;
+      s.style.maxHeight = MAXH + "px"; s.style.height = MAXH + "px"; s.style.width = "100%"; s.style.display = "block"; s.style.marginInline = "auto";
+      if (!s.getAttribute("preserveAspectRatio")) s.setAttribute("preserveAspectRatio", "xMidYMid meet");
+    });
+  }
+  let t = null; const pronto = () => { clearTimeout(t); t = setTimeout(ajustar, 120); };
+  new MutationObserver(pronto).observe(document.documentElement, { childList: true, subtree: true });
+  window.addEventListener("resize", pronto); document.addEventListener("DOMContentLoaded", pronto); pronto();
+})();
+</script>
 <style>/* patch_asistente */
 #iaBtn{position:fixed;right:14px;bottom:calc(84px + env(safe-area-inset-bottom));z-index:900;border:0;border-radius:50%;width:58px;height:58px;padding:0;justify-content:center;font:600 .95rem system-ui,sans-serif;
   background:linear-gradient(135deg,#0B3146,#1C7A4E);color:#fff;box-shadow:0 6px 18px rgba(11,49,70,.35);cursor:pointer;display:flex;gap:6px;align-items:center}
@@ -8993,10 +9012,10 @@ body.ia-izq #iaBtn{right:auto;left:14px}
     log: "App de logística HWF. Secciones: Panel (buenas noticias, avance), BI (unidades Ventas y Logística: ventas, compras y stock por proveedor/marca/formato/producto y canal; exportar PDF/Excel/correo/imprimir), Abastecimiento (compra sugerida según pronóstico y stock de seguridad), Rutas de despacho (armar rutas del día, enviarlas a la app Chofer, seguimiento GPS y entregas con foto/firma; PDF), stock de todas las bodegas, pedidos pendientes y clientes para despacho."
   }[T] || "";
   const SUG = {
-    ventas: ["¿Cómo vamos con la meta del mes? ESTE ASISTENTE no tiene costos, márgenes, compras en pesos ni stock valorizado: si preguntan por eso, dilo.", "¿Qué clientes tienen facturas vencidas?", "¿Qué prospectos debo contactar esta semana?", "¿Qué productos están sin stock?"],
+    ventas: ["¿Cómo vamos con la meta del mes? ESTE ASISTENTE no tiene costos, márgenes, compras en pesos ni stock valorizado: si preguntan por eso, dilo.", "¿Qué clientes tienen facturas vencidas?", "¿Cuál es mi ruta de hoy?", "¿Qué prospectos debo contactar esta semana?", "¿Qué productos están sin stock?"],
     tienda: ["¿Cómo vamos con la meta del mes?", "¿Qué productos se venden más este mes?", "¿Qué productos se están acabando en la tienda?", "¿Cuál es el ticket promedio del mes?"],
     admin: ["Resume cómo va el mes contra la meta", "¿Qué marcas crecen y cuáles caen este año?", "¿Qué productos clase A tienen poco stock?", "¿Cómo va cada vendedor este mes?"],
-    log: ["¿Qué productos se quedan sin stock en menos de 15 días?", "¿Cuánto compramos por proveedor este año?", "¿Qué pedidos están pendientes?", "¿Qué productos tienen más stock que venta?"]
+    log: ["¿Qué productos se quedan sin stock en menos de 15 días?", "¿Cuánto compramos por proveedor este año?", "¿Qué despachos hay por comuna?", "¿Qué pedidos están pendientes?", "¿Qué productos tienen más stock que venta?"]
   }[T] || [];
   const MES = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
   const n0 = v => Math.round(Number(v) || 0).toLocaleString("es-CL"), pz = v => "$" + n0(v), pc = v => isFinite(v) ? (Math.round(v * 1000) / 10).toLocaleString("es-CL") + " %" : "–";
@@ -9125,7 +9144,7 @@ body.ia-izq #iaBtn{right:auto;left:14px}
         const i = info[r[1]]; if (i) { const w = pk[i.cod] = pk[i.cod] || Object.assign({ a: 0, au: 0, b: 0, ma: 0, mu: 0, m: {} }, i); if (y === X.cy) { w.a += v; w.au += q; } else if (y === X.cy - 1 && (r[2] < X.cm || (r[2] === X.cm && (!X.cd || r[3] <= X.cd)))) w.b += v; if (k === X.cy * 100 + X.cm) { w.ma += v; w.mu += q; } if (!t) w.m[k] = (w.m[k] || 0) + q; }
         if (!t && CL.length && r[0] > 0 && v > 0) { const w = ck[r[0]] = ck[r[0]] || { i: r[0], a: 0, b: 0, ult: 0 }, f = y * 10000 + r[2] * 100 + (r[3] || 1); if (y === X.cy) w.a += v; else if (y === X.cy - 1) w.b += v; if (f > w.ult) w.ult = f; } });
       const FC = (B.fc && B.fc.p) || {}; X.prods = Object.values(pk); X.prods.forEach(w => { let s = null; try { s = HB.stock(w.cod); } catch (e) {} w.st = s; w.fc = FC[w.cod] ? FC[w.cod][0] : 0; w.cls = FC[w.cod] ? FC[w.cod][3] : ""; });
-      X.clis = Object.values(ck).map(w => { const c = CL[w.i] || []; return Object.assign(w, { n: c[0] || "?", comuna: c[1] || "", vend: c[2] || "" }); });
+      X.clis = Object.values(ck).map(w => { const c = CL[w.i] || []; return Object.assign(w, { n: c[0] || "?", comuna: c[1] || "", vend: c[2] || "", dir: c[3] || "" }); });
       X.meta = 0; try { X.meta = HB.meta(X.cy, X.cm) || 0; } catch (e) {} X.cots = B.cots || []; X.metas = B.metas || {}; X.compras = B.compras && B.compras.rows || [];
       const hab = (y, m, h) => { let n = 0; const f = new Date(y, m, 0).getDate(); for (let d = 1; d <= Math.min(f, h || f); d++) { const w = new Date(y, m - 1, d).getDay(); if (w && w < 6) n++; } return n; }; X.prog = X.cd ? hab(X.cy, X.cm, X.cd) / Math.max(1, hab(X.cy, X.cm)) : 1; }
     const u3 = [1, 2, 3].map(i => { const d = new Date(X.cy, X.cm - 1 - i, 1); return d.getFullYear() * 100 + d.getMonth() + 1; }); X.prods.forEach(w => { w.q3 = u3.reduce((t, k) => t + (w.m[k] || 0), 0) / 3; const base = w.fc > 0 ? w.fc : w.q3; w.dias = w.st != null && base > 0 ? Math.round(w.st / base * 30) : null; });
@@ -9133,8 +9152,59 @@ body.ia-izq #iaBtn{right:auto;left:14px}
   const yo = () => { try { if (T === "ventas" && typeof SES !== "undefined" && SES && SES.vendedor) return { n: SES.vendedor.nombre || "", cart: SES.vendedor.cartera || SES.vendedor.nombre || "" }; } catch (e) {} return null; };
   const tabla = (cab, filas) => filas.length ? "| " + cab.join(" | ") + " |\n|" + cab.map(() => "---").join("|") + "|\n" + filas.map(f => "| " + f.join(" | ") + " |").join("\n") : "";
   const MM = v => "$" + (Math.abs(v) >= 1e6 ? (v / 1e6).toLocaleString("es-CL", { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + " MM" : n0(v));
+
+  /* ===== RUTAS (pedido de Jorge 15-11-2026): ruta del día, clientes por comuna, dirección de un cliente, despachos =====
+     Direcciones: las de las facturas de cada cliente (script 2026-11-15.3) o las corregidas en la app. */
+  const mq = u => u.replace(/\(/g, "%28").replace(/\)/g, "%29");
+  const mapsDe = (dir, com) => mq("https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent([dir, tc(com), "Chile"].filter(Boolean).join(", ")));
+  const PIDE_DIR = ["direcci", "donde queda", "donde esta", "ubicaci", "como llego", "llegar a"];
+  const palabras = s => s.split(" ").filter(w => w.length >= 3 && !/^(cual|cuales|como|donde|queda|esta|esta|direccion|direcciones|ubicacion|llego|llegar|cliente|clientes|del|las|los|que|para|con|tiene|tengo|hay|ruta|mapa|calle|hoy|mi|el|la|de|en)$/.test(w));
+  const comunaEn = (s, lista) => { const t = " " + s + " "; return lista.map(c => nor(c)).filter(Boolean).sort((a, b) => b.length - a.length).find(k => t.includes(" " + k + " ")) || ""; };
+  function rutaVentas(s, has) {
+    if (typeof SES === "undefined" || !SES || !SES.vendedor || typeof clientesLocal !== "function") return null;
+    const cart = SES.vendedor.cartera, CL = clientesLocal().filter(c => c.vendedor === cart), dirT = c => [tc(c.direccion), tc(c.comuna)].filter(Boolean).join(", ") || "sin dirección registrada";
+    const ult = c => c.ultima_compra ? String(c.ultima_compra).slice(0, 10).split("-").reverse().join("-") : "–";
+    if (has(...PIDE_DIR)) { const pal = palabras(s), l = pal.length ? CL.filter(c => { const n = nor(c.nombre); return pal.every(p => n.includes(p)); }) : [];
+      if (l.length) return l.slice(0, 6).map(c => "**" + tc(c.nombre) + "**: " + dirT(c) + (c.direccion || c.comuna ? " · [Abrir en Google Maps](" + mapsDe(c.direccion, c.comuna) + ")" : "")).join("\n\n") + (l.length > 6 ? "\n\ny " + (l.length - 6) + " más: escribe más del nombre." : "") + "\n\n_Dirección de las facturas del cliente._";
+      if (pal.length) return "No encontré a «" + pal.join(" ") + "» en tu cartera. Escribe parte del nombre como aparece en la factura."; }
+    const com = comunaEn(s, [...new Set(CL.map(c => c.comuna))]);
+    if (com && has("cliente", "visit", "ruta", "recorr", "quien", "tengo", "hay", "pasar", "ir a") && !has("mi ruta", "ruta de hoy", "ruta del dia")) { const l = CL.filter(c => nor(c.comuna) === com).map(c => ({ c, hab: Number(c.compra_habitual) || 0, falta: Math.max(0, (Number(c.compra_habitual) || 0) - (Number(c.octubre) || 0)) })).sort((a, b) => b.falta - a.falta || b.hab - a.hab);
+      return l.length ? "**" + l.length + (l.length === 1 ? " cliente" : " clientes") + " de tu cartera en " + tc(com) + "** (primero los que más les falta comprar este mes):\n\n" + tabla(["Cliente", "Dirección", "Habitual/mes", "Falta este mes", "Última compra"], l.slice(0, 25).map(x => [tc(x.c.nombre), tc(x.c.direccion) || "–", MM(x.hab), x.falta ? MM(x.falta) : "✓", ult(x.c)])) + (l.length > 25 ? "\n\ny " + (l.length - 25) + " más." : "") + "\n\nPara visitarlos en orden: **Clientes → Ruta → Mi ruta por comuna** y elige " + tc(com) + "." : null; }
+    if (!has("ruta", "recorrido", "parada", "visit", "a quien", "primero", "itinerario")) return null;
+    if (typeof paradas !== "function") return null;
+    try { if (!RUTA && typeof lsGet === "function") { const g = lsGet(RKEY, null); if (g && g.fecha === today() && g.cart === cart) RUTA = g; } } catch (e) {}
+    let P = []; try { P = RUTA ? paradas() : []; } catch (e) {}
+    if (!P.length) return "Todavía no tienes ruta para hoy. Ábrela en **Clientes → Ruta**: la app te propone la ruta del día según lo que le falta comprar a cada cliente, cotizaciones y visitas agendadas, o puedes armar **Mi ruta por comuna**." + "\n\nTambién puedes preguntarme «¿qué clientes tengo en Rancagua?».";
+    let t = RUTA.ini || Date.now(), a = RUTA.o, km = 0; const filas = P.map((x, i) => { if (a && x.pt && typeof minutos === "function") { t += minutos(a, x.pt) * 6e4; if (typeof distM === "function") km += distM(a, x.pt) * 1.3 / 1000; } const hora = new Date(t).toLocaleTimeString("es-CL", { hour: "2-digit", minute: "2-digit" }); t += (typeof VISITA === "number" ? VISITA : 25) * 6e4; a = x.pt;
+      return [i + 1, tc(x.c.nombre), dirT(x.c), (x.por || []).map(p => p.t).join(" · ") || "–", hora]; });
+    let links = []; try { links = typeof linkMaps === "function" ? linkMaps(RUTA.o, P) : []; } catch (e) {}
+    const fin = new Date(t).toLocaleTimeString("es-CL", { hour: "2-digit", minute: "2-digit" });
+    return "**" + (RUTA.propia ? "Mi ruta por comuna" : "Ruta sugerida") + " de hoy: " + P.length + (P.length === 1 ? " visita" : " visitas") + "**, desde " + (RUTA.origenTxt || "tu ubicación") + " · unos " + n0(km) + " km · terminas cerca de las " + fin + ".\n\n" +
+      tabla(["#", "Cliente", "Dirección", "Por qué", "Llegada aprox."], filas) + "\n\n" + links.map((u, i) => "[Abrir la ruta en Google Maps" + (links.length > 1 ? " (tramo " + (i + 1) + ")" : "") + "](" + mq(u) + ")").join("\n\n") +
+      "\n\n_Horas estimadas con 25 min por visita. Puedes cambiar el orden o quitar paradas en Clientes → Ruta._"; }
+  function rutaLog(s, has) {
+    if (typeof paradasBase !== "function") return null; let L = []; try { L = paradasBase(); } catch (e) { return null; }
+    const dirT = p => [p.dir, tc(p.comuna)].filter(Boolean).join(", ") || "sin dirección";
+    if (has(...PIDE_DIR)) { const pal = palabras(s); let C = []; try { C = (DATA().clientes || []).map(c => ({ cli: c[0], comuna: c[1], dir: c[2] })); } catch (e) {} const l = pal.length ? C.filter(c => { const n = nor(c.cli); return pal.every(p => n.includes(p)); }) : [];
+      if (l.length) return l.slice(0, 6).map(c => "**" + tc(c.cli) + "**: " + dirT(c) + " · [Abrir en Google Maps](" + mapsDe(c.dir, c.comuna) + ")").join("\n\n") + "\n\n_Dirección de las facturas del cliente._"; }
+    let R = null; try { R = RT; } catch (e) {} const U = typeof lsGet === "function" ? lsGet("ultimaRuta", null) : null;
+    if (has("ruta", "vehicul", "camion", "chofer", "reparto") && (R && R.res || U)) {
+      if (R && R.res) return "**Plan de rutas" + (U && U.fecha ? " del " + U.fecha : "") + "**: " + R.res.usos.length + (R.res.usos.length === 1 ? " vehículo" : " vehículos") + ", costo total " + MM(R.res.total) + ".\n\n" + R.res.usos.map(u => u.viajes.map((r, vi) => "**" + u.v.nombre + (u.viajes.length > 1 ? " · vuelta " + (vi + 1) : "") + "** (" + n0(R.len(r)) + " km):\n\n" + tabla(["#", "Cliente", "Dirección", "Kg"], r.map((x, i) => [i + 1, tc(R.S[x].cli), dirT(R.S[x]), n0(R.S[x].kg)]))).join("\n\n")).join("\n\n") + (R.res.sinAsig.length ? "\n\n⚠️ " + R.res.sinAsig.length + " paradas no caben hoy (ver Rutas)." : "");
+      return "**Última ruta armada" + (U.fecha ? " (" + U.fecha + ")" : "") + "**: " + U.veh + (U.veh === 1 ? " vehículo" : " vehículos") + ", " + U.paradas + " paradas, " + n0(U.km) + " km, " + n0(U.kg) + " kg, costo " + MM(U.total) + ". Para ver el detalle por vehículo, abre **Rutas → Armar rutas óptimas**."; }
+    if (!has("despach", "ruta", "parada", "entrega", "reparto", "por comuna", "comuna")) return null;
+    if (!L.length) return "No hay pedidos pendientes para despachar.";
+    const sinRuta = has("ruta", "vehicul", "camion", "chofer", "reparto") ? "Todavía no se arma la ruta de hoy en este equipo (**Rutas → Armar rutas óptimas**). Esto es lo que hay por despachar:\n\n" : "";
+    const com = comunaEn(s, [...new Set(L.map(p => p.comuna))]);
+    if (com) { const l = L.filter(p => nor(p.comuna) === com); return "**" + l.length + " despachos pendientes en " + tc(com) + "**:\n\n" + tabla(["Pedido", "Cliente", "Dirección", "Kg", "Monto"], l.map(p => [p.manual ? "manual" : p.num, tc(p.cli), dirT(p), n0(p.kg), MM(p.monto || 0)])); }
+    const g = {}; L.forEach(p => { const k = tc(p.comuna) || "Sin comuna", o = g[k] = g[k] || { n: 0, kg: 0, m: 0, sd: 0 }; o.n++; o.kg += p.kg || 0; o.m += p.monto || 0; if (!p.dir) o.sd++; });
+    const sd = L.filter(p => !p.dir).length;
+    return sinRuta + "**" + L.length + " despachos pendientes por comuna**:\n\n" + tabla(["Comuna", "Pedidos", "Kg", "Monto"], Object.entries(g).sort((a, b) => b[1].n - a[1].n).map(([k, o]) => [k, o.n, n0(o.kg), MM(o.m)])) + (sd ? "\n\n" + sd + " sin dirección registrada (se ubican por el centro de la comuna)." : "") + "\n\nPregúntame «despachos en Rengo» para ver el detalle, o arma las rutas en **Rutas → Armar rutas óptimas**."; }
+
   function local(q) { const X = prep(), s = nor(q), has = (...w) => w.some(x => s.includes(x)), mesN = MES[X.cm - 1] + " " + X.cy, ym = X.cy * 100 + X.cm, pie = "\n\n_Datos al " + String(X.corte || "").split("-").reverse().join("-") + "._";
     const nDias = (s.match(/(\d+)\s*dias?/) || [])[1]; const lim = nDias ? Number(nDias) : null;
+    /* rutas, direcciones y despachos */
+    if (T === "ventas") { const r = rutaVentas(s, has); if (r) return r; }
+    if (T === "log") { const r = rutaLog(s, has); if (r) return r; }
     /* meta y avance */
     if (has("meta", "avance", "vamos", "proyecc", "cierre", "como va el mes", "resume")) { const o = X.mes[ym] || {}, fa = T === "tienda" ? (o.v || 0) : (o.d || 0), proy = X.prog > 0 ? fa / X.prog : 0, L = [];
       L.push("**" + (T === "tienda" ? "Tienda" : "Distribuidora") + " · " + mesN + "**: llevamos " + MM(fa) + (X.meta ? " de una meta de " + MM(X.meta) + " (" + pc(fa / X.meta) + "), con el " + pc(X.prog) + " del mes transcurrido." : "."));
@@ -9164,17 +9234,18 @@ body.ia-izq #iaBtn{right:auto;left:14px}
     if ((T === "admin" || T === "log") && has("compr")) { const pv = {}; X.compras.forEach(r => { if (Math.floor(r[1] / 100) !== X.cy) return; const w = X.prods.find(p => p.cod === String(r[0])), k = w ? w.pv : "Sin proveedor", o = pv[k] = pv[k] || { u: 0, v: 0 }; o.u += Number(r[2]) || 0; o.v += Number(r[3]) || 0; });
       return Object.keys(pv).length ? "**Compras " + X.cy + " por proveedor**:\n\n" + tabla(["Proveedor", "Unidades"].concat(RC ? [] : ["Valor neto"]), Object.entries(pv).sort((a, b) => b[1].u - a[1].u).map(([k, o]) => [k, n0(o.u)].concat(RC ? [] : [MM(o.v)]))) + pie : "No hay compras de " + X.cy + " en los datos." + pie; }
     if (/\b(por dia|diaria|diario|hoy|ayer|cada dia)\b/.test(s)) { const d = Object.keys(X.dias).map(Number).sort((a, b) => a - b); return d.length ? "**Venta por día de " + mesN + "** (" + (T === "tienda" ? "tienda" : "distribuidora") + "):\n\n" + tabla(["Día", "Venta"], d.map(x => [x, MM(X.dias[x])])) + pie : "Aún no hay ventas por día este mes." + pie; }
+    if ((T === "admin" || T === "tienda") && has("ruta", "recorrido", "despach")) return "Las rutas están en las apps **Ventas** (ruta de visitas de cada vendedor) y **Logística** (rutas de despacho). Ahí puedes preguntarme «¿cuál es mi ruta de hoy?» o «¿qué despachos hay por comuna?».";
     /* producto o cliente nombrado en la pregunta */
     const pal = s.split(" ").filter(w => w.length >= 4 && !/^(como|vamos|cuanto|cuantos|cuales|que|productos?|clientes?|stock|venta|ventas|tiene|tienen|este|esta|mes|ano|del|los|las|para|con|mas|menos|hay|quien|donde|cual)$/.test(w));
     const pBus = pal.length ? X.prods.filter(w => { const n = nor(w.n + " " + w.marca + " " + w.cod); return pal.every(p => n.includes(p)); }) : [];
     if (T === "ventas" || T === "admin") { const cBus = pal.length ? X.clis.filter(w => { const n = nor(w.n); return pal.every(p => n.includes(p)); }) : [];
-      if (cBus.length && cBus.length <= 5 && !has("producto")) return cBus.map(w => "**" + w.n + "** (" + w.comuna + " · " + w.vend + "): compró " + MM(w.a) + " en " + X.cy + " (" + MM(w.b) + " en " + (X.cy - 1) + "); última compra el " + String(w.ult % 100).padStart(2, "0") + "-" + String(Math.floor(w.ult / 100) % 100).padStart(2, "0") + "-" + Math.floor(w.ult / 10000) + ".").join("\n") + pie; }
+      if (cBus.length && cBus.length <= 5 && !has("producto")) return cBus.map(w => "**" + w.n + "** (" + (w.dir ? tc(w.dir) + ", " : "") + w.comuna + " · " + w.vend + "): compró " + MM(w.a) + " en " + X.cy + " (" + MM(w.b) + " en " + (X.cy - 1) + "); última compra el " + String(w.ult % 100).padStart(2, "0") + "-" + String(Math.floor(w.ult / 100) % 100).padStart(2, "0") + "-" + Math.floor(w.ult / 10000) + ".").join("\n") + pie; }
     if (pBus.length && pBus.length <= 12 && !has("se acaba", "sin stock", "quiebre", "agot", "mas se vend", "top", "mejores")) return "Encontré " + pBus.length + (pBus.length === 1 ? " producto" : " productos") + ":\n\n" + tabla(["Producto", X.cy + " $", X.cy + " u", MES[X.cm - 1] + " u", "Prom. 3 meses u", "Stock", "Días de stock"], pBus.sort((a, b) => b.a - a.a).map(w => [w.n, MM(w.a), n0(w.au), n0(w.mu), n0(w.q3), w.st == null ? "–" : n0(w.st), w.dias == null ? "–" : w.dias])) + pie;
-    return "Puedo responderte sin costo sobre: **meta y avance del mes**, " + (T === "tienda" ? "**ticket promedio**, " : T === "log" ? "**compras**, **pedidos pendientes**, " : "**vendedores**, **clientes sin compra** (p. ej. «clientes que no compran hace 90 días»), **pedidos pendientes**, ") + (T === "ventas" ? "**cobranza vencida**, **prospectos a contactar**, " : "") + "**productos más vendidos**, **marcas que crecen o caen**, **productos sin stock** o que **se acaban en N días**, **sobrestock**, **venta por día**, y puedes escribir el nombre de un producto" + (T === "ventas" || T === "admin" ? " o de un cliente" : "") + " para ver su detalle.";
+    return "Puedo responderte sin costo sobre: **meta y avance del mes**, " + (T === "tienda" ? "**ticket promedio**, " : T === "log" ? "**compras**, **pedidos pendientes**, " : "**vendedores**, **clientes sin compra** (p. ej. «clientes que no compran hace 90 días»), **pedidos pendientes**, ") + (T === "ventas" ? "**tu ruta de hoy**, **clientes por comuna** (p. ej. «clientes en Rengo»), **dirección de un cliente**, **cobranza vencida**, **prospectos a contactar**, " : T === "log" ? "**despachos por comuna**, **la ruta armada**, **dirección de un cliente**, " : "") + "**productos más vendidos**, **marcas que crecen o caen**, **productos sin stock** o que **se acaban en N días**, **sobrestock**, **venta por día**, y puedes escribir el nombre de un producto" + (T === "ventas" || T === "admin" ? " o de un cliente" : "") + " para ver su detalle.";
   }
 
   /* ===== formato de la respuesta (markdown simple, escapado) ===== */
-  const inl = s => esc(s).replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>").replace(/(^|\s)_([^_]+)_(?=\s|$)/g, "$1<em>$2</em>");
+  const inl = s => esc(s).replace(/\[([^\]]+)\]\((https:\/\/www\.google\.com\/maps\/[^)\s]+)\)/g, '<a href="$2" target="_blank" rel="noopener">📍 $1</a>').replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>").replace(/(^|\s)_([^_]+)_(?=\s|$)/g, "$1<em>$2</em>");
   function md(t) { const out = [], L = String(t || "").split("\n"); let i = 0;
     while (i < L.length) { const l = L[i];
       if (/^\s*\|.*\|\s*$/.test(l)) { const F = []; while (i < L.length && /^\s*\|.*\|\s*$/.test(L[i])) { F.push(L[i]); i++; }
@@ -9197,7 +9268,7 @@ body.ia-izq #iaBtn{right:auto;left:14px}
   if (T === "ventas" || T === "tienda") document.body.classList.add("ia-izq");
   const $m = pan.querySelector("#iaMsgs"), $q = pan.querySelector("#iaQ"), $go = pan.querySelector("#iaGo");
   const burbuja = (cls, html) => { const d = document.createElement("div"); d.className = "ia-b " + cls; d.innerHTML = html; $m.appendChild(d); $m.scrollTop = $m.scrollHeight; return d; };
-  function inicio() { $m.innerHTML = ""; burbuja("ia-a", "<p>Hola" + (usuario() && usuario() !== T ? ", " + esc(String(usuario()).split(" ")[0]) : "") + ". Pregúntame sobre los datos de esta app: " + ({ log: "ventas, metas, stock, compras, pedidos y rutas", ventas: "ventas, metas, stock de la distribuidora, prospectos y cobranza", tienda: "ventas de la tienda, metas y stock de la tienda" }[T] || "ventas, metas, clientes, productos y stock") + ".</p>");
+  function inicio() { $m.innerHTML = ""; burbuja("ia-a", "<p>Hola" + (usuario() && usuario() !== T ? ", " + esc(String(usuario()).split(" ")[0]) : "") + ". Pregúntame sobre los datos de esta app: " + ({ log: "ventas, metas, stock, compras, pedidos, despachos y rutas", ventas: "ventas, metas, tu ruta y direcciones de clientes, stock de la distribuidora, prospectos y cobranza", tienda: "ventas de la tienda, metas y stock de la tienda" }[T] || "ventas, metas, clientes, productos y stock") + ".</p>");
     const s = document.createElement("div"); s.className = "ia-s"; s.innerHTML = SUG.map(x => '<button type="button">' + esc(x) + "</button>").join(""); s.onclick = e => { const b = e.target.closest("button"); if (b) preguntar(b.textContent); }; $m.appendChild(s); }
   async function preguntar(q) { q = String(q || "").trim(); if (!q || OCUP) return; OCUP = true; $go.disabled = true; $q.value = ""; burbuja("ia-u", esc(q)); const esp = burbuja("ia-a", '<span class="ia-p">Pensando…</span>');
     let res; const loc = () => { let t; try { t = local(q); } catch (e) { t = "No pude calcular eso (" + (e && e.message) + ")."; } return { ok: true, respuesta: t, local: true }; };
@@ -9226,25 +9297,6 @@ body.ia-izq #iaBtn{right:auto;left:14px}
   $q.addEventListener("input", () => { $q.style.height = "auto"; $q.style.height = Math.min(140, $q.scrollHeight) + "px"; });
   document.addEventListener("keydown", e => { if (e.key === "Escape" && pan.classList.contains("on")) cerrar(); });
   window.hwfAsistente = { contexto };   /* para pruebas */
-})();
-</script>
-<script>/* patch_graficospc: alto máximo de los gráficos en PC */
-(function () {
-  const MAXH = 340;
-  function ajustar() {
-    if (window.innerWidth < 900) return;
-    document.querySelectorAll("svg[viewBox]").forEach(s => {
-      if (s.closest("#iaBtn,#snPanel,#snPanLog,nav,header,.hic-w,.sn-e") || s.classList.contains("hic") || s.classList.contains("lucide")) return;
-      const vb = (s.getAttribute("viewBox") || "").split(/[\s,]+/).map(Number); if (vb.length !== 4 || !(vb[2] > 0 && vb[3] > 0)) return;
-      const w = s.getBoundingClientRect().width; if (w < 400) return;
-      if (w * vb[3] / vb[2] <= MAXH + 2) return;
-      s.style.maxHeight = MAXH + "px"; s.style.height = MAXH + "px"; s.style.width = "100%"; s.style.display = "block"; s.style.marginInline = "auto";
-      if (!s.getAttribute("preserveAspectRatio")) s.setAttribute("preserveAspectRatio", "xMidYMid meet");
-    });
-  }
-  let t = null; const pronto = () => { clearTimeout(t); t = setTimeout(ajustar, 120); };
-  new MutationObserver(pronto).observe(document.documentElement, { childList: true, subtree: true });
-  window.addEventListener("resize", pronto); document.addEventListener("DOMContentLoaded", pronto); pronto();
 })();
 </script>
 </body>
