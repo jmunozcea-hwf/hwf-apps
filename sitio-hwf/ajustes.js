@@ -15,7 +15,7 @@ window.AJUSTES = {
 
   whatsapp: "+56 9 6606 3522",   // número de ventas con código de país, ej: "+56 9 1234 5678" (vacío = WhatsApp pide elegir contacto)
   email: "ventas@hwf.cl",   // ej: "ventas@hwf.cl"
-  direccion: "",           // ej: "Av. Ejemplo 123, Ciudad"
+  direccion: "Punta de Cortés, Rancagua, Región de O'Higgins",   // ej: "Av. Ejemplo 123, Ciudad"
   horario: "Lunes a viernes",
   instagram: "",           // usuario de Instagram sin @, ej: "hwf.cl"
 
