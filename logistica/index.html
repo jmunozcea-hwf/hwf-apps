@@ -402,7 +402,7 @@ if (!cfg() || !DATA()) pantallaConexion(); else { arrancar(); bajar(true).then(n
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261115215416";
+const HWF_VER = "20261115220410";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -819,6 +819,7 @@ function vmPoner(cont, VM, antes) { try { if (!cont) return; const v = cont.quer
 .bi-seg button{flex:1;border:0;background:transparent;padding:9px 8px;border-radius:9px;font:inherit;font-weight:700;color:var(--muted,#5B6874);cursor:pointer}
 .bi-seg button[aria-pressed="true"]{background:var(--card,#fff);color:var(--ink,#0F1E29);box-shadow:0 1px 3px rgba(15,30,41,.15)}
 .bi-oculto{display:none!important}
+#crmBi{min-width:0;max-width:100%}#crmBi .bi-u{display:flex;max-width:100%;flex-wrap:wrap}#crmBi .bi-u button{flex:1 1 0;min-width:0;padding-left:6px;padding-right:6px}#crmBi .bi-seg button{min-width:0}
 .bi-svg{max-height:440px}
 .bi-fil{display:grid!important;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));align-items:end}.bi-fil label{min-width:0}.bi-fil select{width:100%;min-width:0;max-width:100%;text-overflow:ellipsis}.bi-fil .bi-full{grid-column:1/-1}.bi-u{flex-wrap:wrap;max-width:100%}.bi-fil>.btn{justify-content:center}
 @media(min-width:900px){.bi-fil{grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}.bi-fil .bi-full{grid-column:span 2}}.bi-al td:last-child,.bi-al th:last-child{white-space:normal;min-width:96px}
@@ -876,13 +877,13 @@ function vmPoner(cont, VM, antes) { try { if (!cont) return; const v = cont.quer
       stock: c => { const st = DB && DB.d && DB.d.stock; return tiene(st, c) ? st[c] : null; }, meta: (y, m) => metaPlan14(y, m), demo: () => /DEMO/.test(document.title), engancha: f => montarVentas(f) };
   } catch (e) {} return null; })();
   if (!HOST) return;
-  /* VENTAS: sin costos (pedido de Jorge 13-11-2026). No se muestran compras en pesos, costo vendido, márgenes, stock valorizado ni alzas de costo;
-     las compras y el inventario se ven en unidades y en días */
-  const RC = HOST.t !== "admin", sinC = h => RC ? h.replace(/<t[dh] class="bi-c[^"]*"[^>]*>[\s\S]*?<\/t[dh]>/g, "") : h;
+  /* LOGÍSTICA: sin costos (13-11-2026): compras e inventario en unidades y días. VENTAS ve el BI completo de HWF, con costos
+     y márgenes (pedido de Jorge 15-11-2026: «el mismo BI de admin en la app de ventas») */
+  const RC = !(HOST.t === "admin" || HOST.t === "ventas"), sinC = h => RC ? h.replace(/<t[dh] class="bi-c[^"]*"[^>]*>[\s\S]*?<\/t[dh]>/g, "") : h;
   const LS = HOST.t === "admin" ? "hwf-bi" : "hwf-bi-" + HOST.t; let E = { on: false, un: "", u: "$", prov: "", marca: "", prod: "", fmt: "", canal: "", anio: 0 }; try { E = Object.assign(E, JSON.parse(localStorage.getItem(LS) || "{}")); } catch (e) {}
   /* unidades (13-11-2026): "v" Ventas · "l" Logística · "" = la pantalla propia de la app (solo VENTAS: Panel). En HWF y LOGÍSTICA ya no hay
      pestaña «Stock»: el detalle de stock queda debajo de la unidad Logística */
-  if (E.un !== "v" && E.un !== "l") E.un = "l"; if (HOST.t === "ventas") { E.un = "v"; E.canal = "d"; }   /* VENTAS: solo unidad Ventas y solo distribuidora (12-11-2026) */
+  if (E.un !== "v" && E.un !== "l") E.un = HOST.t === "ventas" ? "v" : "l";   /* VENTAS: unidades Ventas y Logística y los tres negocios, igual que HWF (15-11-2026) */
   E.m1 = Math.min(12, Math.max(1, Number(E.m1) || 1)); E.m2 = Math.min(12, Math.max(E.m1, Number(E.m2) || 12));   /* 12-11-2026: filtro de fechas (meses desde/hasta) */
   const M1 = () => E.m1 || 1, M2 = () => E.m2 || 12, perModo = () => E.perP ? "p" : M1() === 1 && M2() === 12 ? "a" : M1() === M2() ? "m" : M2() - M1() === 2 ? "t" : "p";
   E.prov = "";   /* sin filtro de proveedor (12-11-2026): marca, formato y producto */
@@ -957,7 +958,7 @@ function vmPoner(cont, VM, antes) { try { if (!cont) return; const v = cont.quer
       return `<tr${clic ? ` data-bp="${esc(o.cod != null ? o.cod : o.n)}"` : ""}><td>${esc(o.n)}${o.cod != null ? `<small>${esc(o.cod)}${o.x ? " · " + esc(o.x) : ""}${st != null ? " · stock " + fu(st) : ""}</small>` : ""}</td><td>${F(vv)}</td><td class="bi-l">${hay ? Fc(cc) : "—"}</td><td class="bi-l ${dcl(cc - rr)}">${hay ? Fc(cc - rr) : "—"}</td><td class="bi-v">${v ? Math.round(vv / v * 100) + "%" : "—"}</td></tr>`; };
     const G = ord(R.prov).filter(o => o.vq || o.cq || o.vv || o.cv), NV = R.nv, hayF = !!(E.prov || E.marca || E.fmt || E.prod), filt = [E.prov, E.marca, E.fmt, E.prod ? (R.prods.find(x => x[0] === E.prod) || [])[1] : ""].filter(Boolean).join(" · ");
     return `<div class="card"><h2>BI ${E.un === "v" ? "Ventas" : "Logística"} <span class="muted">${({ "": "Total", d: "Distribuidora", t: "Tienda" })[E.canal]} · ${perTxt()}</span></h2>
-      <div class="bi-fil">${HOST.t === "ventas" ? "" : `<label class="bi-full">Negocio<span class="bi-u" id="biCanal">${[["", "Total"], ["d", "Distribuidora"], ["t", "Tienda"]].map(([k, t]) => `<button type="button" data-c="${k}" aria-pressed="${E.canal === k}">${t}</button>`).join("")}</span></label>`}
+      <div class="bi-fil">${false ? "" : `<label class="bi-full">Negocio<span class="bi-u" id="biCanal">${[["", "Total"], ["d", "Distribuidora"], ["t", "Tienda"]].map(([k, t]) => `<button type="button" data-c="${k}" aria-pressed="${E.canal === k}">${t}</button>`).join("")}</span></label>`}
         <label>Ver en<span class="bi-u" id="biU"><button type="button" data-u="$" aria-pressed="${P}">Pesos $</button><button type="button" data-u="u" aria-pressed="${!P}">Unidades</button></span></label>
         <label>Marca<select id="biMarca"><option value="">Todas las marcas</option>${R.marcas.map(p => `<option${p === E.marca ? " selected" : ""}>${esc(p)}</option>`).join("")}</select></label>
         <label>Formato<select id="biFmt"><option value="">Todos los formatos</option>${R.fmts.map(p => `<option${p === E.fmt ? " selected" : ""}>${esc(p)}</option>`).join("")}</select></label>
@@ -1121,9 +1122,11 @@ function vmPoner(cont, VM, antes) { try { if (!cont) return; const v = cont.quer
   /* auditoría 12-11-2026: el cálculo se reutiliza si no cambiaron los filtros ni los datos (volver a la pantalla es instantáneo) */
   let RCACHE = null; function calcM() { const B = HOST.base() || {}, k = JSON.stringify(E) + "|" + (B.corte || "") + "|" + ((B.rows || []).length) + "|" + ((B.compras && B.compras.rows || []).length); if (RCACHE && RCACHE.k === k) return RCACHE.R; const R = calc(); RCACHE = { k: JSON.stringify(E) + "|" + (B.corte || "") + "|" + ((B.rows || []).length) + "|" + ((B.compras && B.compras.rows || []).length), R }; return R; }
   function poner() { const s = HOST.cont(); if (!s) return; ["#biSeg", "#biBox"].forEach(k => { const x = s.querySelector(k); if (x) x.remove(); });
-    const soloV = HOST.t === "ventas"; if (soloV) { E.un = "v"; E.canal = "d"; }
-    if (!soloV) [...s.children].forEach(c => c.classList.toggle("bi-oculto", E.un === "v"));   /* HWF y LOGÍSTICA: el stock se ve bajo la unidad Logística */
-    marcarMenu(); s.insertAdjacentHTML("afterbegin", '<div id="biSeg" hidden></div>');
+    const enV = HOST.t === "ventas";
+    if (!enV) [...s.children].forEach(c => c.classList.toggle("bi-oculto", E.un === "v"));   /* HWF y LOGÍSTICA: el stock se ve bajo la unidad Logística */
+    /* VENTAS no tiene entradas de menú por unidad: selector «BI Ventas | BI Logística» arriba (15-11-2026) */
+    marcarMenu(); s.insertAdjacentHTML("afterbegin", enV ? '<div id="biSeg" class="bi-seg" role="group" aria-label="Unidad del BI"><button type="button" data-un="v" aria-pressed="' + (E.un === "v") + '">BI Ventas</button><button type="button" data-un="l" aria-pressed="' + (E.un === "l") + '">BI Logística</button></div>' : '<div id="biSeg" hidden></div>');
+    if (enV) s.querySelector("#biSeg").onclick = e => { const b = e.target.closest("[data-un]"); if (b && b.dataset.un !== E.un) { E.un = b.dataset.un; guarda(); poner(); } };
     let R; try { R = calcM(); } catch (e) { s.querySelector("#biSeg").insertAdjacentHTML("afterend", '<div id="biBox"><div class="card"><p class="muted">No se pudo calcular: ' + esc(String(e && e.message || e)) + "</p></div></div>"); return; }
     s.querySelector("#biSeg").insertAdjacentHTML("afterend", '<div id="biBox">' + sinC(html(R) + avzHtml(R)) + "</div>"); const q = id => s.querySelector("#" + id);
     { const bx = q("biBox"), otra = E.un === "v" ? "l" : "v"; bx.querySelectorAll('[data-u="' + otra + '"], .bi-' + otra).forEach(x => x.remove());   /* deja solo lo de la unidad elegida */
