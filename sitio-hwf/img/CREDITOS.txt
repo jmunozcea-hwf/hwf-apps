@@ -4,6 +4,8 @@ c_gatos.webp     Pexels 16395147 · Helena Jankovičová Kováčová (recorte)
 c_alimentos.webp Pexels 12928244 · Barking Royalty (recorte)
 c_higiene.webp   Pexels 9952105  · Foden Nguyen (recorte)
 nosotros.jpg     Pexels 6821106  · Nadia Vasil'eva
-premios.jpg      Unsplash photo-1568640347023-a616a30bc3bd
 Para cambiar una foto: reemplazar el archivo con el mismo nombre.
 img/marcas/*.webp  Logos oficiales de las marcas distribuidas (sitios de Alican, Ownat, Poema y Pura Natura); marcas registradas de sus dueños.
+portada_hwf.webp  perros y gatos generados con Figma IA + fotos reales de productos del catálogo (sin fondo)
+c_*.webp          fotos reales de productos del catálogo (Ventas → Pedido), fondo blanco
+marca/            logos oficiales HWF (avatar e isotipo); favicon y apple-touch-icon generados del avatar azul
