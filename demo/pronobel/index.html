@@ -7133,7 +7133,7 @@ function confirmarNota() {
   x.onclick = () => cerrarModal(); card.insertBefore(x, card.firstChild); })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261115192655";
+const HWF_VER = "20261115202743";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -8512,9 +8512,9 @@ body.ia-izq #iaBtn{right:auto;left:14px}
 
   /* ===== interfaz ===== */
   let H = [], CTX = null, OCUP = false;
-  const btn = document.createElement("button"); btn.id = "iaBtn"; btn.type = "button"; btn.innerHTML = "✨ Asistente"; btn.setAttribute("aria-label", "Abrir el asistente IA");
+  const btn = document.createElement("button"); btn.id = "iaBtn"; btn.type = "button"; btn.innerHTML = '<svg viewBox="0 0 64 64" width="32" height="32" aria-hidden="true" fill="#fff"><ellipse cx="18" cy="24" rx="6.5" ry="8.5" transform="rotate(-18 18 24)"/><ellipse cx="29" cy="15" rx="6.5" ry="8.8"/><ellipse cx="41" cy="15" rx="6.5" ry="8.8"/><ellipse cx="52" cy="24" rx="6.5" ry="8.5" transform="rotate(18 52 24)"/><path d="M35 31c-7 0-17 11-17 19 0 6 5 8 10 7 3-1 5-2 7-2s4 1 7 2c5 1 10-1 10-7 0-8-10-19-17-19z"/></svg>'; btn.title = "Asistente"; btn.setAttribute("aria-label", "Abrir el asistente");
   const pan = document.createElement("section"); pan.id = "iaPan"; pan.setAttribute("aria-label", "Asistente IA"); pan.setAttribute("role", "dialog");
-  pan.innerHTML = '<div class="ia-h"><b>✨ Asistente ' + esc(NOM.split(" ")[0]) + '</b><button type="button" id="iaNew" title="Nueva conversación">Nueva</button><button type="button" id="iaX" aria-label="Cerrar">✕</button></div>' +
+  pan.innerHTML = '<div class="ia-h"><b>🐾 Asistente ' + esc(NOM.split(" ")[0]) + '</b><button type="button" id="iaNew" title="Nueva conversación">Nueva</button><button type="button" id="iaX" aria-label="Cerrar">✕</button></div>' +
     '<div class="ia-m" id="iaMsgs" aria-live="polite"></div><form class="ia-f" id="iaF"><textarea id="iaQ" rows="1" maxlength="2000" placeholder="Pregunta sobre ventas, metas, clientes, stock…"></textarea><button type="submit" id="iaGo">Enviar</button></form>' +
     '<div class="ia-n">Sin costo: responde con los datos de esta app' + (RC ? " (sin costos ni márgenes)" : "") + '; lo que no sabe calcular se lo pregunta a la IA gratis de Google (Gemini), sin RUT ni teléfonos. Revisa las cifras importantes.</div>';
   document.body.appendChild(btn); document.body.appendChild(pan);
@@ -8914,5 +8914,6 @@ function prUnifV(l) {
   try { mostrarAcceso(); } catch (e) {}
 })();
 </script>
+<style>/* patch_patitas_pronobel */ #iaBtn{border-radius:50%!important;width:58px;height:58px;padding:0!important;justify-content:center;align-items:center} #iaBtn svg{width:32px;height:32px}</style>
 </body>
 </html>
