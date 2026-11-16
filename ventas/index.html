@@ -7199,7 +7199,7 @@ function confirmarNota() {
   x.onclick = () => cerrarModal(); card.insertBefore(x, card.firstChild); })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261116220436";
+const HWF_VER = "20261116222154";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -8532,7 +8532,7 @@ function prUnifV(l) {
   const VENDS = () => (CRM_BASE.metas || []).map(m => m.vendedor).filter(v => v && !/tienda|gen[eé]rico/i.test(v));
   const esAdmin = () => !!(SES && SES.vendedor && SES.vendedor.admin);
   const ULT = "hwf-pv-ultimo";
-  const MENU = ["Claudia", "Diego", "Matias", "Invitado"];
+  const MENU = ["Claudia", "Diego", "Matias"];   /* sin «Invitado» (16-11-2026): Admin entra eligiendo el vendedor */
   let pvVisor = null; /* null = todos; nombre = filtrar por ese vendedor */
 
   mostrarAcceso = function () {
