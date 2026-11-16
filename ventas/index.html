@@ -7199,7 +7199,7 @@ function confirmarNota() {
   x.onclick = () => cerrarModal(); card.insertBefore(x, card.firstChild); })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261116222647";
+const HWF_VER = "20261116223136";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -10363,6 +10363,17 @@ try { if (document.getElementById("crmInicio") && SES) pintarInicio(); } catch (
   [800, 2500, 6000].forEach(t => setTimeout(() => { if (!h0.querySelector("#adCard")) poner(); }, t));   /* por si los datos llegan después */
 })();
 </script>
+<script>/* patch_singenerico: «Genérico» se muestra como «Sin vendedor» */
+(function () {
+  const RX = /^\s*gen[eé]rico\s*$/i, NO = /^(OPTION|SELECT|TEXTAREA|INPUT|SCRIPT|STYLE)$/;
+  const fija = raiz => { if (!raiz) return; const w = document.createTreeWalker(raiz, NodeFilter.SHOW_TEXT); let n;
+    while ((n = w.nextNode())) { const p = n.parentElement; if (p && !NO.test(p.tagName) && !p.isContentEditable && RX.test(n.nodeValue)) n.nodeValue = n.nodeValue.replace(/gen[eé]rico/i, "Sin vendedor"); } };
+  let pend = null; const cola = new Set();
+  new MutationObserver(ms => { ms.forEach(m => m.addedNodes.forEach(x => { if (x.nodeType === 1) cola.add(x); else if (x.nodeType === 3 && x.parentElement) cola.add(x.parentElement); }));
+    if (!pend && cola.size) pend = requestAnimationFrame(() => { pend = null; cola.forEach(fija); cola.clear(); }); }).observe(document.documentElement, { childList: true, subtree: true });
+  if (document.body) fija(document.body); else document.addEventListener("DOMContentLoaded", () => fija(document.body));
+})();
+</script>
 <style>/* patch_resumendia */
 #rdOv{position:fixed;inset:0;z-index:1100;background:var(--bg,#F4F7F9);overflow:auto;-webkit-overflow-scrolling:touch;color:var(--ink,#13222D)}
 :is(#rdOv,#rdIn) .rd-w{max-width:880px;margin:0 auto;padding:16px 14px calc(18px + env(safe-area-inset-bottom));display:grid;gap:12px}
@@ -10436,25 +10447,9 @@ body:has(#rdOv) #snBtn,body:has(#rdOv) #iaBtn,body:has(#rdOv) #navBotones{displa
   /* ya no se abre solo al entrar (16-11-2026, pedido de Jorge): solo desde el menú lateral */
   /* acceso desde el menú lateral ☰ (grupo «Mi día», después de Inicio); ya no hay botón en Inicio */
   document.querySelectorAll("#rdAbrir").forEach(x => x.remove());
-  const ponerEnMenu = () => { const pan = document.getElementById("snPanel"); if (!pan || !pan.classList.contains("on") || pan.querySelector("#snRd")) return;
-    if (!pan.querySelector(".sn-g")) return setTimeout(ponerEnMenu, 60);   /* espera a que se armen los grupos del menú */
-    const ini = pan.querySelector('.sn-i[data-sm="inicio"]'); const b = document.createElement("button"); b.type = "button"; b.className = "sn-i"; b.id = "snRd";
-    b.innerHTML = '<span class="sn-e hic-w"><svg viewBox="0 0 32 32" aria-hidden="true" class="hic"><defs><linearGradient id="hic-resumen" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFC94A"/><stop offset="1" stop-color="#F28C28"/></linearGradient></defs><rect width="32" height="32" rx="9" fill="url(#hic-resumen)"/><path d="M4 4h24v10C20 9 11 9 4 13z" fill="#fff" opacity=".12"/><g transform="translate(5.5 5.5) scale(.875)" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 6h10M10 12h10M10 18h10"/><path d="M3.5 6l1.5 1.5L7.5 5M3.5 12l1.5 1.5L7.5 11M3.5 18l1.5 1.5L7.5 17"/></g></svg></span>Resumen del día';
-    b.addEventListener("click", ev => { ev.stopPropagation(); pan.classList.remove("on"); const v = document.getElementById("snVelo"); if (v) v.classList.remove("on"); mostrar(); });
-    if (ini) ini.after(b); else pan.querySelector(".sn-g").after(b); };
-  const vigila = setInterval(() => { const pan = document.getElementById("snPanel"); if (!pan) return; clearInterval(vigila);
-    new MutationObserver(() => setTimeout(ponerEnMenu, 30)).observe(pan, { childList: true, attributes: true, attributeFilter: ["class"] }); }, 400);
-})();
-</script>
-<script>/* patch_singenerico: «Genérico» se muestra como «Sin vendedor» */
-(function () {
-  const RX = /^\s*gen[eé]rico\s*$/i, NO = /^(OPTION|SELECT|TEXTAREA|INPUT|SCRIPT|STYLE)$/;
-  const fija = raiz => { if (!raiz) return; const w = document.createTreeWalker(raiz, NodeFilter.SHOW_TEXT); let n;
-    while ((n = w.nextNode())) { const p = n.parentElement; if (p && !NO.test(p.tagName) && !p.isContentEditable && RX.test(n.nodeValue)) n.nodeValue = n.nodeValue.replace(/gen[eé]rico/i, "Sin vendedor"); } };
-  let pend = null; const cola = new Set();
-  new MutationObserver(ms => { ms.forEach(m => m.addedNodes.forEach(x => { if (x.nodeType === 1) cola.add(x); else if (x.nodeType === 3 && x.parentElement) cola.add(x.parentElement); }));
-    if (!pend && cola.size) pend = requestAnimationFrame(() => { pend = null; cola.forEach(fija); cola.clear(); }); }).observe(document.documentElement, { childList: true, subtree: true });
-  if (document.body) fija(document.body); else document.addEventListener("DOMContentLoaded", () => fija(document.body));
+  /* sin entrada en el menú lateral (16-11-2026, «redunda»): lo mismo está en Inicio → «Mi día» */
+  const quitar = () => document.querySelectorAll("#snRd, #rdOv").forEach(x => x.remove()); quitar();
+  const vigila = setInterval(() => { const pan = document.getElementById("snPanel"); if (!pan) return; clearInterval(vigila); new MutationObserver(quitar).observe(pan, { childList: true }); }, 400);
 })();
 </script>
 </body>
