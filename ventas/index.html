@@ -7198,7 +7198,7 @@ function confirmarNota() {
   x.onclick = () => cerrarModal(); card.insertBefore(x, card.firstChild); })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261116175145";
+const HWF_VER = "20261116175222";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -10327,11 +10327,11 @@ body:has(#rdOv) #snBtn,body:has(#rdOv) #iaBtn,body:has(#rdOv) #navBotones{displa
     L.push(`<div class="rd-c"><h2>🏢 La distribuidora <small>resumen del equipo</small></h2>${barra(X.fD, X.mD)}<div class="rd-k"><div>Facturado del equipo<b>${MM(X.fD)}</b>${X.mD ? pc(X.fD / X.mD) + " de " + MM(X.mD) : ""}</div><div>Proyección de cierre<b>${MM(proyD)}</b>${X.mD ? pc(proyD / X.mD) + " de la meta" : ""}</div>
       <div>Por facturar (todos)<b>${MM(X.pendD)}</b>pedidos pendientes</div><div>Tu lugar en el equipo<b>${X.pos ? X.pos + "° de " + X.nEq : "—"}</b>por facturado del mes</div></div>
       ${X.top.length ? `<p style="margin:0;font-size:.86rem;color:var(--muted,#5B6874)">Lo más vendido del mes: ${X.top.map(e).join(" · ")}</p>` : ""}</div>`);
-    return `<button type="button" id="rdX" aria-label="Cerrar resumen">✕</button><div class="rd-w">${L.join("")}<div class="rd-pie"><button type="button" id="rdIr">Entrar a la app →</button></div></div>`; }
+    return `<button type="button" id="rdX" aria-label="Cerrar resumen">✕</button><div class="rd-w">${L.join("")}</div>`; }
   const clave = () => "hwf-rd-" + (SES && SES.vendedor ? SES.vendedor.usuario || SES.vendedor.nombre : "") + "-" + hoyS();
   function mostrar() { if (document.getElementById("rdOv")) return; let h; try { h = html(); } catch (x) { console.error(x); return; }
     const o = document.createElement("div"); o.id = "rdOv"; o.setAttribute("role", "dialog"); o.setAttribute("aria-label", "Resumen del día"); o.innerHTML = h; document.body.appendChild(o);
-    const cerrar = () => { try { localStorage.setItem(clave(), "1"); } catch (x) {} o.remove(); }; o.querySelector("#rdIr").onclick = cerrar; o.querySelector("#rdX").onclick = cerrar; }
+    const cerrar = () => { try { localStorage.setItem(clave(), "1"); } catch (x) {} o.remove(); }; o.querySelector("#rdX").onclick = cerrar; }
   window.hwfResumenDia = mostrar;
   setInterval(() => { try { if (typeof SES === "undefined" || !SES || document.getElementById("rdOv")) return; if (localStorage.getItem(clave())) return; const B = HB.base() || {}; if (!(B.rows && B.rows.length)) return; mostrar(); } catch (x) {} }, 1200);
   /* acceso desde Inicio */
