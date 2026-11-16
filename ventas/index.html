@@ -7198,7 +7198,7 @@ function confirmarNota() {
   x.onclick = () => cerrarModal(); card.insertBefore(x, card.firstChild); })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261116171610";
+const HWF_VER = "20261116175145";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -9607,77 +9607,6 @@ body.ini-u #crmInicio>*,body.ini-u #crmDash>*{margin-top:0!important;margin-bott
   def("rkdCalc", (B, y, m) => { const f = firma(B); return f ? f + "|" + y + "|" + m : null; });
 })();
 </script>
-<style>/* patch_resumendia */
-#rdOv{position:fixed;inset:0;z-index:1100;background:var(--bg,#F4F7F9);overflow:auto;-webkit-overflow-scrolling:touch;color:var(--ink,#13222D)}
-#rdOv .rd-w{max-width:880px;margin:0 auto;padding:16px 14px calc(96px + env(safe-area-inset-bottom));display:grid;gap:12px}
-#rdOv .rd-h{background:linear-gradient(135deg,#0B3146,#1C7A4E);color:#fff;border-radius:18px;padding:16px}#rdOv .rd-h h1{margin:0;font-size:1.25rem}#rdOv .rd-h p{margin:4px 0 0;opacity:.9;font-size:.88rem}
-#rdOv .rd-c{background:var(--card,#fff);border:1px solid var(--line,#DAE1E7);border-radius:16px;padding:14px;display:grid;gap:8px}#rdOv .rd-c h2{margin:0;font-size:1rem}#rdOv .rd-c h2 small{font-weight:600;color:var(--muted,#5B6874);font-size:.76rem}
-#rdOv .rd-k{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}#rdOv .rd-k div{background:var(--sunk,#EEF2F5);border-radius:12px;padding:9px 10px;font-size:.74rem;color:var(--muted,#5B6874)}#rdOv .rd-k b{display:block;font-size:1.15rem;color:var(--ink,#13222D);font-variant-numeric:tabular-nums}
-@media(min-width:700px){#rdOv .rd-k{grid-template-columns:repeat(4,minmax(0,1fr))}#rdOv .rd-g{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}}
-#rdOv ul{margin:0;padding-left:1.1em;font-size:.9rem;display:grid;gap:4px}#rdOv li small{color:var(--muted,#5B6874)}#rdOv .rd-v{color:#1C7A4E}#rdOv .rd-r{color:#B42318}
-#rdOv .rd-bar{height:10px;border-radius:6px;background:var(--sunk,#E3E9EE);overflow:hidden;position:relative}#rdOv .rd-bar i{position:absolute;inset:0 auto 0 0;background:#1C7A4E;border-radius:6px}#rdOv .rd-bar s{position:absolute;top:-3px;bottom:-3px;width:2px;background:#E07B24}
-#rdOv .rd-pie{position:fixed;left:0;right:0;bottom:0;padding:10px 14px calc(10px + env(safe-area-inset-bottom));background:var(--card,#fff);border-top:1px solid var(--line,#DAE1E7);display:flex;justify-content:center}
-#rdOv .rd-pie button{width:min(520px,100%);border:0;border-radius:14px;background:#0B3146;color:#fff;font:700 1.02rem system-ui,sans-serif;padding:14px;cursor:pointer}
-body:has(#rdOv) #snBtn,body:has(#rdOv) #iaBtn,body:has(#rdOv) #navBotones{display:none!important}
-#rdAbrir{border:1px solid var(--line,#C9D3DB);background:var(--card,#fff);color:inherit;border-radius:12px;padding:9px 12px;font:inherit;font-weight:700;cursor:pointer;margin:0 0 12px;width:100%}
-</style>
-<script>/* patch_resumendia: resumen del día del vendedor antes de entrar */
-(function () {
-  if (typeof NAV_ORDEN === "undefined" || !document.getElementById("crmInicio") || !window.hwfBi) return;
-  const HB = window.hwfBi, MESL = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"], DIA = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
-  const e = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])), nr = s => String(s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").trim();
-  const MM = v => "$" + (Math.abs(v) >= 1e6 ? (v / 1e6).toLocaleString("es-CL", { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + " MM" : Math.round(v).toLocaleString("es-CL")), pc = x => isFinite(x) ? Math.round(x * 100) + "%" : "–";
-  const hoyS = () => { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
-  const FER = new Set(["2026-11-01", "2026-12-08", "2026-12-25", "2027-01-01", "2027-04-02", "2027-04-03", "2027-05-01", "2027-05-21", "2027-06-21", "2027-06-28", "2027-07-16", "2027-08-15", "2027-09-17", "2027-09-18", "2027-09-19", "2027-10-11", "2027-10-31", "2027-11-01", "2027-12-08", "2027-12-25"]);
-  const hab = (y, m, d1, d2) => { let n = 0; for (let d = d1; d <= d2; d++) { const w = new Date(y, m - 1, d).getDay(), k = y + "-" + String(m).padStart(2, "0") + "-" + String(d).padStart(2, "0"); if (w && w < 6 && !FER.has(k)) n++; } return n; };
-  function calc() { const B = HB.base() || {}, R = B.rows || [], P = B.productos || [], V = B.vend || [], CL = B.clientes || [], tv = V.indexOf("Tienda Hellywoof"), S = SES && SES.vendedor ? SES.vendedor : {}, yo = S.cartera || S.nombre || "", iy = V.findIndex(v => nr(v) === nr(yo));
-    const cy = Number(String(B.corte || "").slice(0, 4)) || B.anio, cm = Number(String(B.corte || "").slice(5, 7)), cd = Number(String(B.corte || "").slice(8, 10)) || 1, dim = new Date(cy, cm, 0).getDate();
-    const hT = hab(cy, cm, 1, dim), hP = hab(cy, cm, 1, cd), hR = Math.max(0, hT - hP);
-    let fD = 0, fY = 0; const vend = {}, prodM = {}, ult = {}, cliY = {}; R.forEach(r => { const y = r[8] || B.anio, v = Number(r[5]) || 0, f = y * 10000 + r[2] * 100 + (r[3] || 1);
-      if (y === cy && r[2] === cm && r[7] !== tv) { fD += v; vend[V[r[7]]] = (vend[V[r[7]]] || 0) + v; if (r[7] === iy) fY += v; const p = P[r[1]]; if (p) prodM[p[0]] = (prodM[p[0]] || 0) + (Number(r[4]) || 0); }
-      if (r[7] === iy && v > 0 && r[0] > 0) { if (!ult[r[0]] || f > ult[r[0]]) ult[r[0]] = f; if (y === cy || y === cy - 1) cliY[r[0]] = (cliY[r[0]] || 0) + v; } });
-    let mD = 0; try { mD = HB.meta(cy, cm) || 0; } catch (x) {} const mY = Number(B.metaMes) === cm ? Number((B.metas || {})[V[iy]]) || 0 : 0;
-    const pend = (B.cots || []).filter(c => nr(c[3]) === nr(yo) || nr(c[4]) === nr(yo)), pendD = (B.cots || []).reduce((t, c) => t + (Number(c[7]) || 0), 0), pendY = pend.reduce((t, c) => t + (Number(c[7]) || 0), 0), nPend = new Set(pend.map(c => c[0])).size;
-    const hoyD = new Date(), dd = f => Math.round((hoyD - new Date(Math.floor(f / 10000), Math.floor(f / 100) % 100 - 1, f % 100)) / 864e5);
-    const recup = Object.keys(ult).map(Number).filter(c => dd(ult[c]) >= 45 && dd(ult[c]) <= 365 && !/ANGELICA CAROLINA CARVAJAL/i.test(String((CL[c] || [])[0] || "").normalize("NFD").replace(/[\u0300-\u036f]/g, ""))).sort((a, b) => (cliY[b] || 0) - (cliY[a] || 0)).slice(0, 5).map(c => ({ n: (CL[c] || [])[0] || "?", com: (CL[c] || [])[1] || "", d: dd(ult[c]), v: cliY[c] || 0 }));
-    /* productos sin stock que compran mis clientes */
-    const mis = new Set(Object.keys(ult).map(Number)), q = {}; R.forEach(r => { if (!mis.has(r[0])) return; const y = r[8] || B.anio; if ((cy * 12 + cm) - (y * 12 + r[2]) > 3) return; q[r[1]] = (q[r[1]] || 0) + (Number(r[4]) || 0); });
-    const sinSt = Object.keys(q).map(Number).filter(i => { const p = P[i]; if (!p) return false; let s = null; try { s = HB.stock(String(p[2])); } catch (x) {} return s === 0 && q[i] > 0; }).sort((a, b) => q[b] - q[a]).slice(0, 5).map(i => P[i][0]);
-    let cob = null; try { const docs = cxMios(); if (docs.length) { const rs = cxResumen(docs); cob = { rs, top: cxClientes(docs).filter(c => c.venc > 0).sort((a, b) => b.venc - a.venc).slice(0, 3) }; } } catch (x) {}
-    let pros = null; try { const pr = prMios().filter(o => o.etapa !== "Descartado"), lim = new Date(Date.now() + 2 * 864e5).toISOString().slice(0, 10); pros = { n: pr.length, hoy: pr.filter(o => o.proximo_contacto && o.proximo_contacto <= lim).sort((a, b) => a.proximo_contacto.localeCompare(b.proximo_contacto)).slice(0, 5) }; } catch (x) {}
-    let ag = []; try { const t = hoyS(); ag = actividades().filter(a => String(a.fecha || "").slice(0, 10) === t || String(a.proximo || a.prox || "").slice(0, 10) === t).slice(0, 5); } catch (x) {}
-    let ruta = 0; try { if (typeof paradas === "function" && typeof RUTA !== "undefined" && RUTA) ruta = paradas().length; } catch (x) {}
-    const rk = Object.keys(vend).filter(v => v !== "Tienda Hellywoof" && v !== "Genérico").sort((a, b) => vend[b] - vend[a]), pos = rk.indexOf(V[iy]) + 1;
-    const top = Object.keys(prodM).sort((a, b) => prodM[b] - prodM[a]).slice(0, 3);
-    return { S, yo: V[iy] || yo, cy, cm, cd, hT, hP, hR, fD, fY, mD, mY, pendD, pendY, nPend, recup, sinSt, cob, pros, ag, ruta, pos, nEq: rk.length, top, corte: B.corte }; }
-  function html() { const X = calc(), nom = String(X.S.nombre || "").split(" ")[0], mesN = MESL[X.cm - 1], d = new Date(), esp = X.hT ? X.hP / X.hT : 0;
-    const proyD = X.hP ? X.fD / X.hP * X.hT : 0, faltY = Math.max(0, X.mY - X.fY), porDia = X.hR ? faltY / X.hR : faltY;
-    const barra = (v, m) => m ? `<div class="rd-bar"><i style="width:${Math.min(100, v / m * 100)}%"></i><s style="left:${Math.min(100, esp * 100)}%"></s></div>` : "";
-    const L = []; L.push(`<div class="rd-h"><h1>${d.getHours() < 12 ? "Buenos días" : d.getHours() < 20 ? "Buenas tardes" : "Buenas noches"}, ${e(nom)} 👋</h1><p>${DIA[d.getDay()]} ${d.getDate()} de ${MESL[d.getMonth()]} · tu resumen para partir el día · datos de venta al ${String(X.corte || "").split("-").reverse().join("-")}</p></div>`);
-    L.push(`<div class="rd-c"><h2>🎯 Tu mes <small>${e(X.yo)} · ${mesN}</small></h2>${X.mY ? barra(X.fY, X.mY) : ""}
-      <div class="rd-k"><div>Facturado<b>${MM(X.fY)}</b>${X.mY ? pc(X.fY / X.mY) + " de tu meta" : "sin meta cargada"}</div><div>Tu meta<b>${X.mY ? MM(X.mY) : "—"}</b>${X.hR} días hábiles quedan</div>
-        <div>Te falta por día<b class="${faltY ? "" : "rd-v"}">${X.mY ? (faltY ? MM(porDia) : "¡Cumplida!") : "—"}</b>${X.mY && faltY ? "para llegar a la meta" : ""}</div><div>Tus pedidos por facturar<b>${MM(X.pendY)}</b>${X.nPend} ${X.nPend === 1 ? "nota" : "notas"} en Defontana</div></div></div>`);
-    const li = [];
-    if (X.cob && X.cob.rs.venc > 0) li.push(`<div class="rd-c"><h2>💵 Cobranza <small>vencido ${MM(X.cob.rs.venc)} de ${MM(X.cob.rs.total)}</small></h2><ul>${X.cob.top.map(c => `<li><b>${e(c.cli)}</b> <small>${MM(c.venc)} vencido · ${c.maxDias} días</small></li>`).join("")}</ul></div>`);
-    if (X.pros && X.pros.hoy.length) li.push(`<div class="rd-c"><h2>🎯 Prospectos para contactar <small>${X.pros.n} activos</small></h2><ul>${X.pros.hoy.map(o => `<li><b>${e(o.nombre)}</b> <small>${e(o.comuna || "")} · ${e(o.etapa)} · ${e(o.proximo_contacto)}</small></li>`).join("")}</ul></div>`);
-    if (X.recup.length) li.push(`<div class="rd-c"><h2>🔄 Clientes para recuperar <small>45 días o más sin comprar</small></h2><ul>${X.recup.map(c => `<li><b>${e(c.n)}</b> <small>${e(c.com)} · ${c.d} días sin comprar</small></li>`).join("")}</ul></div>`);
-    if (X.ag.length || X.ruta) li.push(`<div class="rd-c"><h2>📅 Hoy <small>agenda y ruta</small></h2><ul>${X.ruta ? `<li>Ruta del día: <b>${X.ruta}</b> ${X.ruta === 1 ? "parada" : "paradas"} (menú → Ruta)</li>` : ""}${X.ag.map(a => `<li>${e(a.tipo || "Actividad")}: <b>${e(a.cliente || a.nombre || "")}</b>${a.nota ? " <small>" + e(String(a.nota).slice(0, 60)) + "</small>" : ""}</li>`).join("")}</ul></div>`);
-    if (X.sinSt.length) li.push(`<div class="rd-c"><h2>📦 Sin stock que tus clientes compran <small>avisa o sugiere otro</small></h2><ul>${X.sinSt.map(n => `<li>${e(n)}</li>`).join("")}</ul></div>`);
-    if (li.length) L.push(`<div class="rd-g">${li.join("")}</div>`); else L.push(`<div class="rd-c"><h2>✅ Todo al día</h2><p style="margin:0">Sin cobranza vencida, prospectos atrasados ni clientes por recuperar en tu cartera.</p></div>`);
-    L.push(`<div class="rd-c"><h2>🏢 La distribuidora <small>resumen del equipo</small></h2>${barra(X.fD, X.mD)}<div class="rd-k"><div>Facturado del equipo<b>${MM(X.fD)}</b>${X.mD ? pc(X.fD / X.mD) + " de " + MM(X.mD) : ""}</div><div>Proyección de cierre<b>${MM(proyD)}</b>${X.mD ? pc(proyD / X.mD) + " de la meta" : ""}</div>
-      <div>Por facturar (todos)<b>${MM(X.pendD)}</b>pedidos pendientes</div><div>Tu lugar en el equipo<b>${X.pos ? X.pos + "° de " + X.nEq : "—"}</b>por facturado del mes</div></div>
-      ${X.top.length ? `<p style="margin:0;font-size:.86rem;color:var(--muted,#5B6874)">Lo más vendido del mes: ${X.top.map(e).join(" · ")}</p>` : ""}</div>`);
-    return `<div class="rd-w">${L.join("")}</div><div class="rd-pie"><button type="button" id="rdIr">Entrar a la app →</button></div>`; }
-  const clave = () => "hwf-rd-" + (SES && SES.vendedor ? SES.vendedor.usuario || SES.vendedor.nombre : "") + "-" + hoyS();
-  function mostrar() { if (document.getElementById("rdOv")) return; let h; try { h = html(); } catch (x) { console.error(x); return; }
-    const o = document.createElement("div"); o.id = "rdOv"; o.setAttribute("role", "dialog"); o.setAttribute("aria-label", "Resumen del día"); o.innerHTML = h; document.body.appendChild(o);
-    o.querySelector("#rdIr").onclick = () => { try { localStorage.setItem(clave(), "1"); } catch (x) {} o.remove(); }; }
-  window.hwfResumenDia = mostrar;
-  setInterval(() => { try { if (typeof SES === "undefined" || !SES || document.getElementById("rdOv")) return; if (localStorage.getItem(clave())) return; const B = HB.base() || {}; if (!(B.rows && B.rows.length)) return; mostrar(); } catch (x) {} }, 1200);
-  /* acceso desde Inicio */
-  const ini = document.getElementById("crmInicio"); new MutationObserver(() => { if (ini.querySelector("#rdAbrir")) return; const ad = ini.querySelector("#adCard"), b = document.createElement("button"); b.type = "button"; b.id = "rdAbrir"; b.textContent = "📋 Ver mi resumen del día"; b.onclick = mostrar; if (ad) ad.after(b); else ini.prepend(b); }).observe(ini, { childList: true });
-})();
-</script>
 <style>/* patch_iaflotante */
 #iaBtn{background:#0B3146!important;border:2px solid #80C6C9!important;box-shadow:0 4px 14px rgba(11,49,70,.35)!important;width:50px!important;height:50px!important;
   touch-action:none;user-select:none;-webkit-user-select:none;transition:transform .2s ease,opacity .2s ease,box-shadow .2s ease;opacity:.92}
@@ -10335,6 +10264,78 @@ try { if (document.getElementById("crmInicio") && SES) pintarInicio(); } catch (
   try { if (!NAV_ORDEN.some(x => x[0] === "mail")) NAV_ORDEN.push(["mail", "mMail"]); } catch (e) { }
   const iv = setInterval(() => { const p = document.getElementById("snPanel"); if (!p) return; clearInterval(iv);
     new MutationObserver(() => setTimeout(() => { const it = p.querySelector('[data-sm="mail"]'); if (it) { const e = it.querySelector(".sn-e"); /* ícono: patch_iconos_extra */ } }, 0)).observe(p, { childList: true }); }, 400);
+})();
+</script>
+<style>/* patch_resumendia */
+#rdOv{position:fixed;inset:0;z-index:1100;background:var(--bg,#F4F7F9);overflow:auto;-webkit-overflow-scrolling:touch;color:var(--ink,#13222D)}
+#rdOv .rd-w{max-width:880px;margin:0 auto;padding:16px 14px calc(18px + env(safe-area-inset-bottom));display:grid;gap:12px}
+#rdOv .rd-h{background:linear-gradient(135deg,#0B3146,#1C7A4E);color:#fff;border-radius:18px;padding:16px 58px 16px 16px}#rdOv .rd-h h1{margin:0;font-size:1.25rem}#rdOv .rd-h p{margin:4px 0 0;opacity:.9;font-size:.88rem}
+#rdOv .rd-c{background:var(--card,#fff);border:1px solid var(--line,#DAE1E7);border-radius:16px;padding:14px;display:grid;gap:8px}#rdOv .rd-c h2{margin:0;font-size:1rem}#rdOv .rd-c h2 small{font-weight:600;color:var(--muted,#5B6874);font-size:.76rem}
+#rdOv .rd-k{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}#rdOv .rd-k div{background:var(--sunk,#EEF2F5);border-radius:12px;padding:9px 10px;font-size:.74rem;color:var(--muted,#5B6874)}#rdOv .rd-k b{display:block;font-size:1.15rem;color:var(--ink,#13222D);font-variant-numeric:tabular-nums}
+@media(min-width:700px){#rdOv .rd-k{grid-template-columns:repeat(4,minmax(0,1fr))}#rdOv .rd-g{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}}
+#rdOv ul{margin:0;padding-left:1.1em;font-size:.9rem;display:grid;gap:4px}#rdOv li small{color:var(--muted,#5B6874)}#rdOv .rd-v{color:#1C7A4E}#rdOv .rd-r{color:#B42318}
+#rdOv .rd-bar{height:10px;border-radius:6px;background:var(--sunk,#E3E9EE);overflow:hidden;position:relative}#rdOv .rd-bar i{position:absolute;inset:0 auto 0 0;background:#1C7A4E;border-radius:6px}#rdOv .rd-bar s{position:absolute;top:-3px;bottom:-3px;width:2px;background:#E07B24}
+#rdOv .rd-pie{display:flex;justify-content:center;padding:6px 0 4px}
+#rdX{position:fixed;top:calc(10px + env(safe-area-inset-top));right:max(10px,calc(50% - 430px));z-index:1101;width:40px;height:40px;border-radius:50%;border:0;background:rgba(255,255,255,.92);color:#0B3146;font:700 20px/1 system-ui,sans-serif;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.18)}
+#rdOv .rd-pie button{width:min(520px,100%);border:0;border-radius:14px;background:#0B3146;color:#fff;font:700 1.02rem system-ui,sans-serif;padding:14px;cursor:pointer}
+body:has(#rdOv) #snBtn,body:has(#rdOv) #iaBtn,body:has(#rdOv) #navBotones{display:none!important}
+#rdAbrir{border:1px solid var(--line,#C9D3DB);background:var(--card,#fff);color:inherit;border-radius:12px;padding:9px 12px;font:inherit;font-weight:700;cursor:pointer;margin:0 0 12px;width:100%}
+</style>
+<script>/* patch_resumendia: resumen del día del vendedor antes de entrar */
+(function () {
+  if (typeof NAV_ORDEN === "undefined" || !document.getElementById("crmInicio") || !window.hwfBi) return;
+  const HB = window.hwfBi, MESL = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"], DIA = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
+  const e = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])), nr = s => String(s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").trim();
+  const MM = v => "$" + (Math.abs(v) >= 1e6 ? (v / 1e6).toLocaleString("es-CL", { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + " MM" : Math.round(v).toLocaleString("es-CL")), pc = x => isFinite(x) ? Math.round(x * 100) + "%" : "–";
+  const hoyS = () => { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
+  const FER = new Set(["2026-11-01", "2026-12-08", "2026-12-25", "2027-01-01", "2027-04-02", "2027-04-03", "2027-05-01", "2027-05-21", "2027-06-21", "2027-06-28", "2027-07-16", "2027-08-15", "2027-09-17", "2027-09-18", "2027-09-19", "2027-10-11", "2027-10-31", "2027-11-01", "2027-12-08", "2027-12-25"]);
+  const hab = (y, m, d1, d2) => { let n = 0; for (let d = d1; d <= d2; d++) { const w = new Date(y, m - 1, d).getDay(), k = y + "-" + String(m).padStart(2, "0") + "-" + String(d).padStart(2, "0"); if (w && w < 6 && !FER.has(k)) n++; } return n; };
+  function calc() { const B = HB.base() || {}, R = B.rows || [], P = B.productos || [], V = B.vend || [], CL = B.clientes || [], tv = V.indexOf("Tienda Hellywoof"), S = SES && SES.vendedor ? SES.vendedor : {}, yo = S.cartera || S.nombre || "", iy = V.findIndex(v => nr(v) === nr(yo));
+    const cy = Number(String(B.corte || "").slice(0, 4)) || B.anio, cm = Number(String(B.corte || "").slice(5, 7)), cd = Number(String(B.corte || "").slice(8, 10)) || 1, dim = new Date(cy, cm, 0).getDate();
+    const hT = hab(cy, cm, 1, dim), hP = hab(cy, cm, 1, cd), hR = Math.max(0, hT - hP);
+    let fD = 0, fY = 0; const vend = {}, prodM = {}, ult = {}, cliY = {}; R.forEach(r => { const y = r[8] || B.anio, v = Number(r[5]) || 0, f = y * 10000 + r[2] * 100 + (r[3] || 1);
+      if (y === cy && r[2] === cm && r[7] !== tv) { fD += v; vend[V[r[7]]] = (vend[V[r[7]]] || 0) + v; if (r[7] === iy) fY += v; const p = P[r[1]]; if (p) prodM[p[0]] = (prodM[p[0]] || 0) + (Number(r[4]) || 0); }
+      if (r[7] === iy && v > 0 && r[0] > 0) { if (!ult[r[0]] || f > ult[r[0]]) ult[r[0]] = f; if (y === cy || y === cy - 1) cliY[r[0]] = (cliY[r[0]] || 0) + v; } });
+    let mD = 0; try { mD = HB.meta(cy, cm) || 0; } catch (x) {} const mY = Number(B.metaMes) === cm ? Number((B.metas || {})[V[iy]]) || 0 : 0;
+    const pend = (B.cots || []).filter(c => nr(c[3]) === nr(yo) || nr(c[4]) === nr(yo)), pendD = (B.cots || []).reduce((t, c) => t + (Number(c[7]) || 0), 0), pendY = pend.reduce((t, c) => t + (Number(c[7]) || 0), 0), nPend = new Set(pend.map(c => c[0])).size;
+    const hoyD = new Date(), dd = f => Math.round((hoyD - new Date(Math.floor(f / 10000), Math.floor(f / 100) % 100 - 1, f % 100)) / 864e5);
+    const recup = Object.keys(ult).map(Number).filter(c => dd(ult[c]) >= 45 && dd(ult[c]) <= 365 && !/ANGELICA CAROLINA CARVAJAL/i.test(String((CL[c] || [])[0] || "").normalize("NFD").replace(/[\u0300-\u036f]/g, ""))).sort((a, b) => (cliY[b] || 0) - (cliY[a] || 0)).slice(0, 5).map(c => ({ n: (CL[c] || [])[0] || "?", com: (CL[c] || [])[1] || "", d: dd(ult[c]), v: cliY[c] || 0 }));
+    /* productos sin stock que compran mis clientes */
+    const mis = new Set(Object.keys(ult).map(Number)), q = {}; R.forEach(r => { if (!mis.has(r[0])) return; const y = r[8] || B.anio; if ((cy * 12 + cm) - (y * 12 + r[2]) > 3) return; q[r[1]] = (q[r[1]] || 0) + (Number(r[4]) || 0); });
+    const sinSt = Object.keys(q).map(Number).filter(i => { const p = P[i]; if (!p) return false; let s = null; try { s = HB.stock(String(p[2])); } catch (x) {} return s === 0 && q[i] > 0; }).sort((a, b) => q[b] - q[a]).slice(0, 5).map(i => P[i][0]);
+    let cob = null; try { const docs = cxMios(); if (docs.length) { const rs = cxResumen(docs); cob = { rs, top: cxClientes(docs).filter(c => c.venc > 0).sort((a, b) => b.venc - a.venc).slice(0, 3) }; } } catch (x) {}
+    let pros = null; try { const pr = prMios().filter(o => o.etapa !== "Descartado"), lim = new Date(Date.now() + 2 * 864e5).toISOString().slice(0, 10); pros = { n: pr.length, hoy: pr.filter(o => o.proximo_contacto && o.proximo_contacto <= lim).sort((a, b) => a.proximo_contacto.localeCompare(b.proximo_contacto)).slice(0, 5) }; } catch (x) {}
+    let ag = []; try { const t = hoyS(); ag = actividades().filter(a => String(a.fecha || "").slice(0, 10) === t || String(a.proximo || a.prox || "").slice(0, 10) === t).slice(0, 5); } catch (x) {}
+    let ruta = 0; try { if (typeof paradas === "function" && typeof RUTA !== "undefined" && RUTA) ruta = paradas().length; } catch (x) {}
+    const rk = Object.keys(vend).filter(v => v !== "Tienda Hellywoof" && v !== "Genérico").sort((a, b) => vend[b] - vend[a]), pos = rk.indexOf(V[iy]) + 1;
+    const top = Object.keys(prodM).sort((a, b) => prodM[b] - prodM[a]).slice(0, 3);
+    return { S, yo: V[iy] || yo, cy, cm, cd, hT, hP, hR, fD, fY, mD, mY, pendD, pendY, nPend, recup, sinSt, cob, pros, ag, ruta, pos, nEq: rk.length, top, corte: B.corte }; }
+  function html() { const X = calc(), nom = String(X.S.nombre || "").split(" ")[0], mesN = MESL[X.cm - 1], d = new Date(), esp = X.hT ? X.hP / X.hT : 0;
+    const proyD = X.hP ? X.fD / X.hP * X.hT : 0, faltY = Math.max(0, X.mY - X.fY), porDia = X.hR ? faltY / X.hR : faltY;
+    const barra = (v, m) => m ? `<div class="rd-bar"><i style="width:${Math.min(100, v / m * 100)}%"></i><s style="left:${Math.min(100, esp * 100)}%"></s></div>` : "";
+    const L = []; L.push(`<div class="rd-h"><h1>${d.getHours() < 12 ? "Buenos días" : d.getHours() < 20 ? "Buenas tardes" : "Buenas noches"}, ${e(nom)} 👋</h1><p>${DIA[d.getDay()]} ${d.getDate()} de ${MESL[d.getMonth()]} · tu resumen para partir el día · datos de venta al ${String(X.corte || "").split("-").reverse().join("-")}</p></div>`);
+    L.push(`<div class="rd-c"><h2>🎯 Tu mes <small>${e(X.yo)} · ${mesN}</small></h2>${X.mY ? barra(X.fY, X.mY) : ""}
+      <div class="rd-k"><div>Facturado<b>${MM(X.fY)}</b>${X.mY ? pc(X.fY / X.mY) + " de tu meta" : "sin meta cargada"}</div><div>Tu meta<b>${X.mY ? MM(X.mY) : "—"}</b>${X.hR} días hábiles quedan</div>
+        <div>Te falta por día<b class="${faltY ? "" : "rd-v"}">${X.mY ? (faltY ? MM(porDia) : "¡Cumplida!") : "—"}</b>${X.mY && faltY ? "para llegar a la meta" : ""}</div><div>Tus pedidos por facturar<b>${MM(X.pendY)}</b>${X.nPend} ${X.nPend === 1 ? "nota" : "notas"} en Defontana</div></div></div>`);
+    const li = [];
+    if (X.cob && X.cob.rs.venc > 0) li.push(`<div class="rd-c"><h2>💵 Cobranza <small>vencido ${MM(X.cob.rs.venc)} de ${MM(X.cob.rs.total)}</small></h2><ul>${X.cob.top.map(c => `<li><b>${e(c.cli)}</b> <small>${MM(c.venc)} vencido · ${c.maxDias} días</small></li>`).join("")}</ul></div>`);
+    if (X.pros && X.pros.hoy.length) li.push(`<div class="rd-c"><h2>🎯 Prospectos para contactar <small>${X.pros.n} activos</small></h2><ul>${X.pros.hoy.map(o => `<li><b>${e(o.nombre)}</b> <small>${e(o.comuna || "")} · ${e(o.etapa)} · ${e(o.proximo_contacto)}</small></li>`).join("")}</ul></div>`);
+    if (X.recup.length) li.push(`<div class="rd-c"><h2>🔄 Clientes para recuperar <small>45 días o más sin comprar</small></h2><ul>${X.recup.map(c => `<li><b>${e(c.n)}</b> <small>${e(c.com)} · ${c.d} días sin comprar</small></li>`).join("")}</ul></div>`);
+    if (X.ag.length || X.ruta) li.push(`<div class="rd-c"><h2>📅 Hoy <small>agenda y ruta</small></h2><ul>${X.ruta ? `<li>Ruta del día: <b>${X.ruta}</b> ${X.ruta === 1 ? "parada" : "paradas"} (menú → Ruta)</li>` : ""}${X.ag.map(a => `<li>${e(a.tipo || "Actividad")}: <b>${e(a.cliente || a.nombre || "")}</b>${a.nota ? " <small>" + e(String(a.nota).slice(0, 60)) + "</small>" : ""}</li>`).join("")}</ul></div>`);
+    if (X.sinSt.length) li.push(`<div class="rd-c"><h2>📦 Sin stock que tus clientes compran <small>avisa o sugiere otro</small></h2><ul>${X.sinSt.map(n => `<li>${e(n)}</li>`).join("")}</ul></div>`);
+    if (li.length) L.push(`<div class="rd-g">${li.join("")}</div>`); else L.push(`<div class="rd-c"><h2>✅ Todo al día</h2><p style="margin:0">Sin cobranza vencida, prospectos atrasados ni clientes por recuperar en tu cartera.</p></div>`);
+    L.push(`<div class="rd-c"><h2>🏢 La distribuidora <small>resumen del equipo</small></h2>${barra(X.fD, X.mD)}<div class="rd-k"><div>Facturado del equipo<b>${MM(X.fD)}</b>${X.mD ? pc(X.fD / X.mD) + " de " + MM(X.mD) : ""}</div><div>Proyección de cierre<b>${MM(proyD)}</b>${X.mD ? pc(proyD / X.mD) + " de la meta" : ""}</div>
+      <div>Por facturar (todos)<b>${MM(X.pendD)}</b>pedidos pendientes</div><div>Tu lugar en el equipo<b>${X.pos ? X.pos + "° de " + X.nEq : "—"}</b>por facturado del mes</div></div>
+      ${X.top.length ? `<p style="margin:0;font-size:.86rem;color:var(--muted,#5B6874)">Lo más vendido del mes: ${X.top.map(e).join(" · ")}</p>` : ""}</div>`);
+    return `<button type="button" id="rdX" aria-label="Cerrar resumen">✕</button><div class="rd-w">${L.join("")}<div class="rd-pie"><button type="button" id="rdIr">Entrar a la app →</button></div></div>`; }
+  const clave = () => "hwf-rd-" + (SES && SES.vendedor ? SES.vendedor.usuario || SES.vendedor.nombre : "") + "-" + hoyS();
+  function mostrar() { if (document.getElementById("rdOv")) return; let h; try { h = html(); } catch (x) { console.error(x); return; }
+    const o = document.createElement("div"); o.id = "rdOv"; o.setAttribute("role", "dialog"); o.setAttribute("aria-label", "Resumen del día"); o.innerHTML = h; document.body.appendChild(o);
+    const cerrar = () => { try { localStorage.setItem(clave(), "1"); } catch (x) {} o.remove(); }; o.querySelector("#rdIr").onclick = cerrar; o.querySelector("#rdX").onclick = cerrar; }
+  window.hwfResumenDia = mostrar;
+  setInterval(() => { try { if (typeof SES === "undefined" || !SES || document.getElementById("rdOv")) return; if (localStorage.getItem(clave())) return; const B = HB.base() || {}; if (!(B.rows && B.rows.length)) return; mostrar(); } catch (x) {} }, 1200);
+  /* acceso desde Inicio */
+  const ini = document.getElementById("crmInicio"); new MutationObserver(() => { if (ini.querySelector("#rdAbrir")) return; const ad = ini.querySelector("#adCard"), b = document.createElement("button"); b.type = "button"; b.id = "rdAbrir"; b.textContent = "📋 Ver mi resumen del día"; b.onclick = mostrar; if (ad) ad.after(b); else ini.prepend(b); }).observe(ini, { childList: true });
 })();
 </script>
 </body>
