@@ -477,7 +477,7 @@ if (!cfg() || !DATA()) pantallaConexion(); else { arrancar(); bajar(true).then(n
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261116100331";
+const HWF_VER = "20261116104502";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -748,7 +748,7 @@ function vmPoner(cont, VM, antes) { try { if (!cont) return; const v = cont.quer
 .bi-rg input[type=range]::-moz-range-thumb{pointer-events:auto;width:20px;height:20px;border-radius:50%;background:#fff;border:3px solid #0B3146;cursor:pointer}
 .bi-rg input[type=range]::-webkit-slider-runnable-track{background:none}
 #biBox #biR1,#biBox #biR2{min-height:0!important;height:24px!important;background:transparent!important;border:0!important;box-shadow:none!important;padding:0!important;border-radius:0!important}.bi-rgx{font-size:.78rem;color:var(--muted,#5B6874);font-weight:700}
-@media(max-width:699px){#biBox .bi-t thead{display:none}#biBox .bi-t,#biBox .bi-t tbody{display:block;width:100%}
+@media(max-width:699px){#biBox .bi-t thead{display:none}#biBox .bi-t,#biBox .bi-t tbody{display:block;width:100%;min-width:0!important;max-width:100%;box-sizing:border-box}#biBox .bi-t tr{width:100%;box-sizing:border-box}
   #biBox .bi-t tr{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px 12px;padding:9px 4px;border-bottom:1px solid var(--line,#E3E9EE)}
   #biBox .bi-t td{display:block;border:0;padding:1px 0;text-align:left!important;white-space:normal;min-width:0!important}
   #biBox .bi-t td:first-child{grid-column:1/-1;font-weight:800;font-size:.92rem}#biBox .bi-t td[colspan]{grid-column:1/-1}
