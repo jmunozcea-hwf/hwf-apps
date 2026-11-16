@@ -4782,7 +4782,7 @@ setTimeout(() => cartBajar().then(c => { if (c) toast("Hay cambios de cartera: r
 </script>
 
 <script>/* sinangelica: fuera del ranking los vendedores eliminados */
-const RK_FUERA = /^(ang[eé]lica|v[ií]ctor|jorge)\b|\(tienda\)\s*$/i;   /* fuera: vendedores eliminados y los de la Tienda Hellywoof (tienen su propio ranking) */
+const RK_FUERA = /^(ang[eé]lica|v[ií]ctor|jorge)\b|^gen[eé]rico$|\(tienda\)\s*$/i;   /* fuera: vendedores eliminados y los de la Tienda Hellywoof (tienen su propio ranking) */
 { const _rkFilasSA = rkFilas; rkFilas = function () { return _rkFilasSA.apply(this, arguments).filter(r => !RK_FUERA.test(String((r && (r.v || r[1])) || ""))); }; }
 </script>
 
@@ -5274,7 +5274,7 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261116220108";
+const HWF_VER = "20261116220436";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -8965,6 +8965,17 @@ window.hwfContCambio = function () { try { if (typeof praPintar === "function" &
   function firma() { const s = document.getElementById("selMes"); return (s ? s.value : "") + "|" + vista; }
   poner(); const c = h0.querySelector("#adCard"); if (c) c.dataset.f = firma();
   [800, 2500, 6000].forEach(t => setTimeout(() => { if (!h0.querySelector("#adCard")) poner(); }, t));   /* por si los datos llegan después */
+})();
+</script>
+<script>/* patch_singenerico: «Genérico» se muestra como «Sin vendedor» */
+(function () {
+  const RX = /^\s*gen[eé]rico\s*$/i, NO = /^(OPTION|SELECT|TEXTAREA|INPUT|SCRIPT|STYLE)$/;
+  const fija = raiz => { if (!raiz) return; const w = document.createTreeWalker(raiz, NodeFilter.SHOW_TEXT); let n;
+    while ((n = w.nextNode())) { const p = n.parentElement; if (p && !NO.test(p.tagName) && !p.isContentEditable && RX.test(n.nodeValue)) n.nodeValue = n.nodeValue.replace(/gen[eé]rico/i, "Sin vendedor"); } };
+  let pend = null; const cola = new Set();
+  new MutationObserver(ms => { ms.forEach(m => m.addedNodes.forEach(x => { if (x.nodeType === 1) cola.add(x); else if (x.nodeType === 3 && x.parentElement) cola.add(x.parentElement); }));
+    if (!pend && cola.size) pend = requestAnimationFrame(() => { pend = null; cola.forEach(fija); cola.clear(); }); }).observe(document.documentElement, { childList: true, subtree: true });
+  if (document.body) fija(document.body); else document.addEventListener("DOMContentLoaded", () => fija(document.body));
 })();
 </script>
 </body>

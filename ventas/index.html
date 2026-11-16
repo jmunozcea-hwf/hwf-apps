@@ -6832,7 +6832,7 @@ try { if (SES && SES.vendedor && SES.vendedor.nombre === "Jorge") { SES.vendedor
 </script>
 
 <script>/* sinangelica: fuera del ranking los vendedores eliminados */
-const RK_FUERA = /^(ang[eé]lica|v[ií]ctor|jorge)\b|\(tienda\)\s*$/i;   /* fuera: vendedores eliminados y los de la Tienda Hellywoof (tienen su propio ranking) */
+const RK_FUERA = /^(ang[eé]lica|v[ií]ctor|jorge)\b|^gen[eé]rico$|\(tienda\)\s*$/i;   /* fuera: vendedores eliminados y los de la Tienda Hellywoof (tienen su propio ranking) */
 { const _ptFilasSA = ptFilas; ptFilas = function () { return _ptFilasSA.apply(this, arguments).filter(r => !RK_FUERA.test(String(r.v || ""))); }; }
 </script>
 
@@ -7199,7 +7199,7 @@ function confirmarNota() {
   x.onclick = () => cerrarModal(); card.insertBefore(x, card.firstChild); })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261116220108";
+const HWF_VER = "20261116220436";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -10440,6 +10440,17 @@ body:has(#rdOv) #snBtn,body:has(#rdOv) #iaBtn,body:has(#rdOv) #navBotones{displa
     if (ini) ini.after(b); else pan.querySelector(".sn-g").after(b); };
   const vigila = setInterval(() => { const pan = document.getElementById("snPanel"); if (!pan) return; clearInterval(vigila);
     new MutationObserver(() => setTimeout(ponerEnMenu, 30)).observe(pan, { childList: true, attributes: true, attributeFilter: ["class"] }); }, 400);
+})();
+</script>
+<script>/* patch_singenerico: «Genérico» se muestra como «Sin vendedor» */
+(function () {
+  const RX = /^\s*gen[eé]rico\s*$/i, NO = /^(OPTION|SELECT|TEXTAREA|INPUT|SCRIPT|STYLE)$/;
+  const fija = raiz => { if (!raiz) return; const w = document.createTreeWalker(raiz, NodeFilter.SHOW_TEXT); let n;
+    while ((n = w.nextNode())) { const p = n.parentElement; if (p && !NO.test(p.tagName) && !p.isContentEditable && RX.test(n.nodeValue)) n.nodeValue = n.nodeValue.replace(/gen[eé]rico/i, "Sin vendedor"); } };
+  let pend = null; const cola = new Set();
+  new MutationObserver(ms => { ms.forEach(m => m.addedNodes.forEach(x => { if (x.nodeType === 1) cola.add(x); else if (x.nodeType === 3 && x.parentElement) cola.add(x.parentElement); }));
+    if (!pend && cola.size) pend = requestAnimationFrame(() => { pend = null; cola.forEach(fija); cola.clear(); }); }).observe(document.documentElement, { childList: true, subtree: true });
+  if (document.body) fija(document.body); else document.addEventListener("DOMContentLoaded", () => fija(document.body));
 })();
 </script>
 </body>
