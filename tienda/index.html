@@ -1545,7 +1545,8 @@ main{max-width:1100px;margin:0 auto;padding:12px 16px;display:grid;gap:12px}
 main,.t-card{min-width:0;max-width:100%}#sDash .t-t td:first-child{white-space:normal;min-width:120px;max-width:200px}html,body{overflow-x:hidden}.d-ley{display:flex;gap:12px;flex-wrap:wrap;font-size:.76rem;color:var(--muted,#5B6874)}.d-ley span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;vertical-align:-1px;background:var(--hw)}
 .d-ley .ly::before{background:#C9B3DD}.d-ley .mt::before{background:#F28C28;height:3px;vertical-align:3px}
 .modal[hidden],.toast[hidden],[hidden]{display:none!important}
-</style></head><body>
+</style><style>/* patch_cardvar */:root{--card:var(--surface)}</style>
+</head><body>
 <div class="t-top"><div><h1>🐾 TIENDA HWF</h1><small id="tAct">Datos de Drive: —</small></div><button type="button" class="t-turno" id="tTurno">Turno: —</button></div>
 <nav class="t-nav" id="tNav">
   <button type="button" data-s="inicio"><span>🏠</span>Inicio</button><button type="button" data-s="ventas"><span>💰</span>Ventas</button><button type="button" data-s="dash"><span>📊</span>Panel</button>
@@ -2349,7 +2350,7 @@ const stAbrev = n => ST_ABR.reduce((s, [r, t]) => s.replace(r, t), String(n || "
 try { if ($("sStock") && !$("sStock").hidden) pintarStock(); } catch (e) {}
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261116203926";
+const HWF_VER = "20261116205742";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
