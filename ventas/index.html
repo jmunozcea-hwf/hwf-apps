@@ -7199,7 +7199,7 @@ function confirmarNota() {
   x.onclick = () => cerrarModal(); card.insertBefore(x, card.firstChild); })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261116222154";
+const HWF_VER = "20261116222647";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -8562,6 +8562,10 @@ function prUnifV(l) {
     $("pvB").onclick = go; $("pvNom").onkeydown = e => { if (e.key === "Enter") go(); };
   };
 
+  /* sin «Invitado» (16-11-2026): una sesión de Invitado guardada (versión anterior) se cierra y se pide elegir vendedor */
+  const sinInvitado = () => { try { if (SES && SES.vendedor && nrm(SES.vendedor.usuario || SES.vendedor.nombre) === "invitado") {
+      try { localStorage.removeItem(ULT); } catch (e) {} SES = null; try { localStorage.removeItem(typeof SKEY !== "undefined" ? SKEY : "hwf-sesion"); } catch (e) {} mostrarAcceso(); } } catch (e) {} };
+  setTimeout(sinInvitado, 0); document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") sinInvitado(); });
   /* dbAlcance: vendedor → solo sus datos; Invitado sin visor → todo; Invitado con visor → cartera del visor */
   if (typeof dbAlcance === "function" && typeof dbMiCart === "function") {
     const _a = dbAlcance;
