@@ -1,4 +1,22 @@
-<!doctype html><html lang="es-CL"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!doctype html><html lang="es-CL"><head>
+<script>/* patch_fotos: base de fotos por código HWF (datos/fotos.json) */
+(function(){var W=window,K="hwf-fotos";
+function lee(){try{var p=JSON.parse(localStorage.getItem(K)||"null");return p&&p.fotos?p:null}catch(e){return null}}
+W.__FOT=lee();
+W.SINFOTO="data:image/svg+xml,"+encodeURIComponent("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='#EEF2F5'/><g fill='none' stroke='#9AA7B2' stroke-width='3' stroke-linejoin='round'><rect x='28' y='30' width='44' height='32' rx='5'/><circle cx='50' cy='46' r='8'/></g><text x='50' y='84' font-family='sans-serif' font-size='13' font-weight='700' fill='#7A8794' text-anchor='middle'>Sin foto</text></svg>");
+W.hwfFoto=function(c,chica){c=String(c==null?"":c).trim();if(!c)return"";var B=W.__FOT,e=B&&B.fotos&&B.fotos[c];
+ if(e){if(e.calidad==="mala")return"";var r=(chica&&e.m)||e.f;if(r){var u=/^https?:/.test(r)?r:String(B.base||"")+r;return u+(B.version?(u.indexOf("?")<0?"?":"&")+"v="+encodeURIComponent(B.version):"")}}
+ return""};
+W.hwfFotoErr=function(i){i.onerror=null;i.src=W.SINFOTO};
+W.hwfFotoHtml=function(c,chica,alt,cls){var u=W.hwfFoto(c,chica);return'<img'+(cls?' class="'+cls+'"':'')+' src="'+String(u||W.SINFOTO).replace(/"/g,"&quot;")+'" alt="'+String(alt||"").replace(/"/g,"&quot;")+'" data-hf="'+String(c==null?"":c).replace(/"/g,"&quot;")+'" data-hc="'+(chica?1:0)+'" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="hwfFotoErr(this)">'};
+function refresca(){try{[].forEach.call(document.querySelectorAll("img[data-hf]"),function(i){var n=W.hwfFoto(i.getAttribute("data-hf"),i.getAttribute("data-hc")==="1")||W.SINFOTO;if(i.getAttribute("src")!==n){i.removeAttribute("data-hx");i.onerror=function(){W.hwfFotoErr(i)};i.src=n}})}catch(e){}}
+function aplica(p){if(!p||!p.version||!p.fotos)return;var a=W.__FOT;if(a&&a.version&&a.version>=p.version)return;try{localStorage.setItem(K,JSON.stringify(p))}catch(e){}W.__FOT=p;refresca()}
+function baja(l){if(!l.length)return;fetch(l[0],{cache:"no-store"}).then(function(r){return r.ok?r.json():Promise.reject()}).then(aplica).catch(function(){baja(l.slice(1))})}
+setTimeout(function(){baja(["../datos/fotos.json","https://jmunozcea-hwf.github.io/hwf-apps/datos/fotos.json"])},1500);
+})();</script>
+<style>/* patch_fotos */.st-f{display:flex;align-items:center;gap:10px;min-width:0}.st-th{width:40px;height:40px;flex:none;object-fit:contain;background:#fff;border:1px solid #E1E8EE;border-radius:8px}</style>
+
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>LOGÍSTICA HWF</title>
 <meta name="apple-mobile-web-app-title" content="LOGÍSTICA"><meta name="theme-color" content="#1C7A4E"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon-192.png">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
@@ -193,7 +211,7 @@ function pintarInv() { const D = DATA(), bods = Object.keys(D.bodegas || {}); if
     <input id="invQ" type="search" placeholder="Buscar producto, código o proveedor" value="${esc(invQ)}" style="width:100%">
     <p class="nota">Días de stock = stock ÷ venta diaria de esa bodega (promedio de ${D.meses ? D.meses.slice(0, 3).map(m => MC[m % 100 - 1]).join(", ") : "3 meses"}; distribuidora y tienda por separado). Valor a costo unitario de la venta.</p></div>
   <div class="card"><div class="tw"><table class="t"><thead><tr><th>Producto</th>${invB === "__todas" ? "<th>Bodega</th>" : ""}<th>Stock</th><th>Venta/mes</th><th>Días</th><th>Valor</th></tr></thead><tbody>
-    ${L.slice(0, 400).map(x => `<tr><td>${esc(x.nombre)}<small>${esc(x.cod)} · ${esc(x.prov)}</small></td>${invB === "__todas" ? `<td>${esc(x.bo)}</td>` : ""}<td class="${x.stock <= 0 ? "bad" : ""}"><b>${nf(x.stock)}</b></td><td>${x.q ? nf(x.q, x.q < 10 ? 1 : 0) : "—"}</td><td>${pill(x)}</td><td>${mm(x.valor)}</td></tr>`).join("") || '<tr><td colspan="6" class="muted">Sin productos con ese filtro.</td></tr>'}</tbody></table></div></div>`;
+    ${L.slice(0, 400).map(x => `<tr><td><div class="st-f">${hwfFotoHtml(x.cod, true, "", "st-th")}<div style="min-width:0">${esc(x.nombre)}<small>${esc(x.cod)} · ${esc(x.prov)}</small></div></div></td>${invB === "__todas" ? `<td>${esc(x.bo)}</td>` : ""}<td class="${x.stock <= 0 ? "bad" : ""}"><b>${nf(x.stock)}</b></td><td>${x.q ? nf(x.q, x.q < 10 ? 1 : 0) : "—"}</td><td>${pill(x)}</td><td>${mm(x.valor)}</td></tr>`).join("") || '<tr><td colspan="6" class="muted">Sin productos con ese filtro.</td></tr>'}</tbody></table></div></div>`;
   $("invB").onclick = e => { const b = e.target.closest("[data-b]"); if (b) { invB = b.dataset.b; pintarInv(); } };
   $("invF").onclick = e => { const b = e.target.closest("[data-f]"); if (b) { invF = b.dataset.f; pintarInv(); } };
   $("invQ").oninput = () => { invQ = $("invQ").value; clearTimeout(pintarInv.t); pintarInv.t = setTimeout(() => { pintarInv(); const i = $("invQ"); i.focus(); i.setSelectionRange(i.value.length, i.value.length); }, 250); }; }
@@ -231,7 +249,7 @@ function pintarAbast() { const D = DATA(), bods = Object.keys(D.bodegas || {}).f
       <label>Plazo del proveedor (días)<input id="aLead" type="number" min="0" max="60" value="${X.A.lead}" style="width:90px"></label><button type="button" class="btn ver" id="aCsv">⬇ Orden sugerida (Excel)</button></div>
     <p class="nota">Compra = lo que falta vender este mes + venta durante el plazo del proveedor (con la meta del mes siguiente) + stock de seguridad − stock. ${X.conFc ? "Venta de cada producto = pronóstico (distribuidora: promedio de 6 meses cerrados; tienda: suavizamiento exponencial), elegido por prueba sobre 2026," : "Venta de cada producto = promedio de los 3 meses cerrados de esa bodega,"} escalado a la meta del plan (distribuidora, con estacionalidad, 53,0 → 64,1 → 69,4 MM; tienda 10,0 → 12,5 → 16,1 MM; total $1.000 MM en 14 meses). ${X.N ? "Stock de seguridad según el error real del pronóstico de cada producto y su clase (A = 80 % de la venta, B = 15 %, C = 5 %), servicio " + X.N.t + ", revisión semanal." : "Stock de seguridad: " + X.A.seg + " días de venta."} ${X.nDesc ? " Sin compra: " + X.nDesc + " productos descontinuados (hoja «Descontinuados» de la planilla)." : ""} Mismo método que Admin → Abastecimiento.</p></div>
   ${GP.map(g => `<div class="card"><h2>${esc(g.k)} <small>${g.l.length} productos · ${mm(g.t)}</small></h2><div class="tw"><table class="t"><thead><tr><th>Producto</th><th>Stock</th><th>Venta/mes</th><th>Seguridad</th><th>Días</th><th>Comprar</th><th>Monto</th></tr></thead><tbody>
-    ${g.l.map(x => `<tr><td>${esc(x.nombre)}<small>${esc(x.cod)}${x.cls ? " · clase " + x.cls : ""}</small></td><td class="${x.s <= 0 ? "bad" : ""}">${nf(x.s)}</td><td>${nf(x.q, x.q < 10 ? 1 : 0)}</td><td>${nf(x.ss, x.ss < 10 ? 1 : 0)}</td><td><span class="pill ${x.urg ? "p-bad" : "p-wa"}">${isFinite(x.dias) ? nf(x.dias) : "—"}</span></td><td><b>${nf(x.compra)} u</b></td><td>${mm(x.monto)}</td></tr>`).join("")}</tbody></table></div></div>`).join("") || '<div class="card"><p class="muted">No hay compras sugeridas con estos parámetros.</p></div>'}`;
+    ${g.l.map(x => `<tr><td><div class="st-f">${hwfFotoHtml(x.cod, true, "", "st-th")}<div style="min-width:0">${esc(x.nombre)}<small>${esc(x.cod)}${x.cls ? " · clase " + x.cls : ""}</small></div></div></td><td class="${x.s <= 0 ? "bad" : ""}">${nf(x.s)}</td><td>${nf(x.q, x.q < 10 ? 1 : 0)}</td><td>${nf(x.ss, x.ss < 10 ? 1 : 0)}</td><td><span class="pill ${x.urg ? "p-bad" : "p-wa"}">${isFinite(x.dias) ? nf(x.dias) : "—"}</span></td><td><b>${nf(x.compra)} u</b></td><td>${mm(x.monto)}</td></tr>`).join("")}</tbody></table></div></div>`).join("") || '<div class="card"><p class="muted">No hay compras sugeridas con estos parámetros.</p></div>'}`;
   $("abB").onclick = e => { const b = e.target.closest("[data-b]"); if (b) { abB = b.dataset.b; pintarAbast(); } };
   const g = () => { lsSet("abast", Object.assign(parA(), { seg: +$("aSeg").value || 0, lead: +$("aLead").value || 0, modo: $("aModo").value })); pintarAbast(); }; ["aSeg", "aLead", "aModo"].forEach(i => $(i).onchange = g);
   $("aCsv").onclick = () => { const f = [["Bodega", "Proveedor", "Código", "Producto", "Clase", "Stock", "Venta/mes", "Stock de seguridad", "Días", "Comprar (u)", "Costo unitario", "Monto"]];
@@ -459,7 +477,7 @@ if (!cfg() || !DATA()) pantallaConexion(); else { arrancar(); bajar(true).then(n
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261116003351";
+const HWF_VER = "20261116005600";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;

@@ -1,0 +1,1226 @@
+{
+ "version": "2026-11-16.1",
+ "base": "https://jmunozcea-hwf.github.io/hwf-apps/",
+ "fotos": {
+  "RR0133": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_35e79a94-f7e6-469b-b50d-8a81d1a3fcce.jpg",
+   "calidad": "buena",
+   "nota": "",
+   "f": "fotos/RR0133.webp",
+   "m": "fotos/m/RR0133.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0009": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_847ec099-04df-43a9-98fb-ea7957357330.jpg",
+   "calidad": "regular",
+   "nota": "misma foto que RR0008 (otra presentación de la línea); contenido 381 px (300-599)",
+   "f": "fotos/RR0009.webp",
+   "m": "fotos/m/RR0009.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0008": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_2fc75c38-3951-40eb-b18b-f0bab48e4a19.jpg",
+   "calidad": "regular",
+   "nota": "misma foto que RR0009 (otra presentación de la línea); contenido 381 px (300-599)",
+   "f": "fotos/RR0008.webp",
+   "m": "fotos/m/RR0008.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0004": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_af79724a-ac5e-4108-a6db-f4f0ec2791d2.jpg",
+   "calidad": "regular",
+   "nota": "contenido 450 px (300-599); poco nítida (lap 95)",
+   "f": "fotos/RR0004.webp",
+   "m": "fotos/m/RR0004.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0005": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_beb2e1c2-1e09-4813-abd6-c72f5e9ec200.jpg",
+   "calidad": "mala",
+   "nota": "contenido 254 px (<300); poco nítida (lap 59)"
+  },
+  "RR0007": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_036e45de-9225-4eac-8551-9d57eec38256.jpg",
+   "calidad": "regular",
+   "nota": "misma foto que RR0006 (otra presentación de la línea); contenido 347 px (300-599)",
+   "f": "fotos/RR0007.webp",
+   "m": "fotos/m/RR0007.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0006": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_a3092e3f-9a24-4099-b3b5-75d73fa09ab7.jpg",
+   "calidad": "regular",
+   "nota": "misma foto que RR0007 (otra presentación de la línea); contenido 347 px (300-599)",
+   "f": "fotos/RR0006.webp",
+   "m": "fotos/m/RR0006.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0010": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_cb768e1f-cbcd-44ea-be83-fd87a604da39.jpg",
+   "calidad": "mala",
+   "nota": "misma foto que RR0011 (otra presentación de la línea); contenido 138 px (<300)"
+  },
+  "RR0011": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_3186d9d5-9591-415a-a2c7-777ab6635131.jpg",
+   "calidad": "mala",
+   "nota": "misma foto que RR0010 (otra presentación de la línea); contenido 138 px (<300)"
+  },
+  "RR0021": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_9e7b0d25-7159-4a2d-b7e9-aa0c4f44cf4d.jpg",
+   "calidad": "mala",
+   "nota": "misma foto que RR0022 (otra presentación de la línea); contenido 117 px (<300)"
+  },
+  "RR0022": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_75bc4e25-76dd-4e26-9a94-a377856b67ed.jpg",
+   "calidad": "mala",
+   "nota": "misma foto que RR0021 (otra presentación de la línea); contenido 117 px (<300)"
+  },
+  "RR0014": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_d8adbdcc-829d-415e-ab60-ba7112a4a50e.jpg",
+   "calidad": "mala",
+   "nota": "misma foto que RR0025 (otra presentación de la línea); contenido 137 px (<300)"
+  },
+  "RR0025": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_c383a437-019a-4ffc-ab73-e86528db3033.jpg",
+   "calidad": "mala",
+   "nota": "misma foto que RR0014 (otra presentación de la línea); contenido 137 px (<300)"
+  },
+  "RR0002": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_b28cecee-daeb-46f4-a740-d5dce8ca30e1.jpg",
+   "calidad": "regular",
+   "nota": "misma foto que RR0001, RR0003 (otra presentación de la línea); contenido 560 px (300-599)",
+   "f": "fotos/RR0002.webp",
+   "m": "fotos/m/RR0002.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0001": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_374a0b58-19b5-406d-b643-78bb49d14764.jpg",
+   "calidad": "regular",
+   "nota": "misma foto que RR0002, RR0003 (otra presentación de la línea); contenido 560 px (300-599)",
+   "f": "fotos/RR0001.webp",
+   "m": "fotos/m/RR0001.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0003": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_0c6a246d-755f-459c-8c84-7b5d9de24cf2.jpg",
+   "calidad": "regular",
+   "nota": "misma foto que RR0002, RR0001 (otra presentación de la línea); contenido 560 px (300-599)",
+   "f": "fotos/RR0003.webp",
+   "m": "fotos/m/RR0003.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0170": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_ea794858-01dc-4b20-83dd-df7393588610.jpg",
+   "calidad": "regular",
+   "nota": "misma foto que RR0169 (otra presentación de la línea)",
+   "f": "fotos/RR0170.webp",
+   "m": "fotos/m/RR0170.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0169": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_67325668-563a-4571-b225-7c879b88b3d0.jpg",
+   "calidad": "regular",
+   "nota": "misma foto que RR0170 (otra presentación de la línea)",
+   "f": "fotos/RR0169.webp",
+   "m": "fotos/m/RR0169.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0026": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_b92b4350-e7b2-47e1-8d90-e576346a5049.jpg",
+   "calidad": "regular",
+   "nota": "misma foto que RR0027 (otra presentación de la línea); contenido 350 px (300-599)",
+   "f": "fotos/RR0026.webp",
+   "m": "fotos/m/RR0026.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0027": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_eeab7873-5d47-4de2-a660-4503908a7e87.jpg",
+   "calidad": "regular",
+   "nota": "misma foto que RR0026 (otra presentación de la línea); contenido 350 px (300-599)",
+   "f": "fotos/RR0027.webp",
+   "m": "fotos/m/RR0027.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0023": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_93e84d35-abf3-4d6f-b956-0bb66837f2ab.jpg",
+   "calidad": "regular",
+   "nota": "misma foto que RR0024 (otra presentación de la línea); contenido 504 px (300-599)",
+   "f": "fotos/RR0023.webp",
+   "m": "fotos/m/RR0023.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0024": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_9c686899-756e-45f6-b309-97dc151d3097.jpg",
+   "calidad": "regular",
+   "nota": "misma foto que RR0023 (otra presentación de la línea); contenido 504 px (300-599)",
+   "f": "fotos/RR0024.webp",
+   "m": "fotos/m/RR0024.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0028": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_a12c9e6e-f40d-4774-a301-87190b2d4478.jpg",
+   "calidad": "regular",
+   "nota": "misma foto que RR0029 (otra presentación de la línea); contenido 380 px (300-599)",
+   "f": "fotos/RR0028.webp",
+   "m": "fotos/m/RR0028.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0029": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_5a0e2fb2-cdbd-4469-ac05-2ee00fc28c63.jpg",
+   "calidad": "regular",
+   "nota": "misma foto que RR0028 (otra presentación de la línea); contenido 380 px (300-599)",
+   "f": "fotos/RR0029.webp",
+   "m": "fotos/m/RR0029.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0144": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_a7254a64-9e1f-4932-92f1-822514f82542.jpg",
+   "calidad": "regular",
+   "nota": "contenido 394 px (300-599)",
+   "f": "fotos/RR0144.webp",
+   "m": "fotos/m/RR0144.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0143": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_ed7d2a64-a6fd-4432-ac10-c2ff37ce5832.jpg",
+   "calidad": "regular",
+   "nota": "contenido 407 px (300-599)",
+   "f": "fotos/RR0143.webp",
+   "m": "fotos/m/RR0143.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0049": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_1df9601d-f5c0-407d-9b25-76dfde057da2.jpg",
+   "calidad": "buena",
+   "nota": "",
+   "f": "fotos/RR0049.webp",
+   "m": "fotos/m/RR0049.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0141": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_059308af-705f-499b-80a8-091576e64a8c.jpg",
+   "calidad": "mala",
+   "nota": "contenido 235 px (<300)"
+  },
+  "RR0150": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_0da11540-29a5-4129-a51e-84f04ea3fb78.jpg",
+   "calidad": "buena",
+   "nota": "",
+   "f": "fotos/RR0150.webp",
+   "m": "fotos/m/RR0150.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0047": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_1c446e95-21f1-41fc-a85d-a3da4bfe6a42.jpg",
+   "calidad": "regular",
+   "nota": "misma foto que RR0046 (otra presentación de la línea)",
+   "f": "fotos/RR0047.webp",
+   "m": "fotos/m/RR0047.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0046": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_43cf4e30-c6fd-42f9-ae02-a356c199807e.jpg",
+   "calidad": "regular",
+   "nota": "misma foto que RR0047 (otra presentación de la línea)",
+   "f": "fotos/RR0046.webp",
+   "m": "fotos/m/RR0046.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0064": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_23d0221a-7c0e-41c4-b376-4e24c39f41cc.jpg",
+   "calidad": "mala",
+   "nota": "contenido 199 px (<300)"
+  },
+  "RR0118": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_574c1cbb-40b0-4587-8a2f-6b4097ab67be.jpg",
+   "calidad": "buena",
+   "nota": "",
+   "f": "fotos/RR0118.webp",
+   "m": "fotos/m/RR0118.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0064-2": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_26a15290-e6fd-4fc8-9ece-7b1e01b564f1.jpg",
+   "calidad": "regular",
+   "nota": "contenido 309 px (300-599)",
+   "f": "fotos/RR0064-2.webp",
+   "m": "fotos/m/RR0064-2.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0134": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_96cc9b7c-63e6-4a7b-86ed-2e19d96ea77a.jpg",
+   "calidad": "mala",
+   "nota": "contenido 202 px (<300)"
+  },
+  "RR0135": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_03eca245-508d-4df3-bf72-6a236a5bf65b.jpg",
+   "calidad": "mala",
+   "nota": "contenido 164 px (<300)"
+  },
+  "RR0085": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_99280176-87e9-46d4-b644-69b2e31457d1.jpg",
+   "calidad": "mala",
+   "nota": "contenido 295 px (<300)"
+  },
+  "RR0073": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_b443dbbe-8685-4cb0-a00f-2d5dbfaf0ada.jpg",
+   "calidad": "regular",
+   "nota": "contenido 599 px (300-599)",
+   "f": "fotos/RR0073.webp",
+   "m": "fotos/m/RR0073.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0076": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_12075dfb-227e-415e-b54c-87c0bfc7d159.jpg",
+   "calidad": "regular",
+   "nota": "contenido 599 px (300-599)",
+   "f": "fotos/RR0076.webp",
+   "m": "fotos/m/RR0076.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0163": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_77f533f2-4dac-4ad3-b54a-80db11eeaff9.jpg",
+   "calidad": "buena",
+   "nota": "",
+   "f": "fotos/RR0163.webp",
+   "m": "fotos/m/RR0163.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0084": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_ca310fe9-b59f-4e5a-80e9-26d2e23fac8b.jpg",
+   "calidad": "mala",
+   "nota": "contenido 295 px (<300)"
+  },
+  "RR0081": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_66919075-5f6f-4621-becd-997753738e43.jpg",
+   "calidad": "mala",
+   "nota": "contenido 295 px (<300)"
+  },
+  "RR0080": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_ad9b965c-0ec0-4228-bae4-9ff0e9ac4b66.jpg",
+   "calidad": "mala",
+   "nota": "contenido 295 px (<300)"
+  },
+  "RR0077": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_c210e7f7-5efb-452d-9000-ff5ddf145000.jpg",
+   "calidad": "buena",
+   "nota": "",
+   "f": "fotos/RR0077.webp",
+   "m": "fotos/m/RR0077.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0078": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_1d0898f1-1ed7-4e22-b377-d9850d2b584a.jpg",
+   "calidad": "buena",
+   "nota": "",
+   "f": "fotos/RR0078.webp",
+   "m": "fotos/m/RR0078.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0082": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_89dd17d4-dd3d-4bb2-83ae-f5fab6d30738.jpg",
+   "calidad": "buena",
+   "nota": "",
+   "f": "fotos/RR0082.webp",
+   "m": "fotos/m/RR0082.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0083": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_1ce26176-b480-4b4d-8a3e-efb76c97638d.jpg",
+   "calidad": "buena",
+   "nota": "",
+   "f": "fotos/RR0083.webp",
+   "m": "fotos/m/RR0083.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0088": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_e56f1f25-0570-4188-be8c-b54b5e79dad8.jpg",
+   "calidad": "mala",
+   "nota": "contenido 298 px (<300)"
+  },
+  "RR0086": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_e9a61ab2-5a1c-4526-885a-f4bf4ca22ab8.jpg",
+   "calidad": "mala",
+   "nota": "contenido 299 px (<300)"
+  },
+  "RR0091": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_ed68b773-cc93-43d6-8aa0-93b18c41a79e.jpg",
+   "calidad": "regular",
+   "nota": "contenido 390 px (300-599)",
+   "f": "fotos/RR0091.webp",
+   "m": "fotos/m/RR0091.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0050": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_e83709f5-ec5f-4d34-9701-f817e041ed1c.jpg",
+   "calidad": "buena",
+   "nota": "",
+   "f": "fotos/RR0050.webp",
+   "m": "fotos/m/RR0050.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0079": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_76cc9a17-628a-4127-9739-f0aa371dc386.jpg",
+   "calidad": "buena",
+   "nota": "",
+   "f": "fotos/RR0079.webp",
+   "m": "fotos/m/RR0079.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0096": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_f6c97957-7ef0-4c29-a8f2-14921cbb8fa6.jpg",
+   "calidad": "mala",
+   "nota": "misma foto que RR0095 (otra línea de producto); contenido 374 px (300-599)"
+  },
+  "RR0095": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_d4b02fd2-aa36-422b-8bb8-44c7833ccd88.jpg",
+   "calidad": "mala",
+   "nota": "misma foto que RR0096 (otra línea de producto); contenido 374 px (300-599)"
+  },
+  "RR0016": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_1341b70d-6c18-4a94-8177-410700395776.jpg",
+   "calidad": "regular",
+   "nota": "contenido 384 px (300-599)",
+   "f": "fotos/RR0016.webp",
+   "m": "fotos/m/RR0016.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0017": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_e01615c7-d44e-49f7-974c-2d4e4862e0ac.jpg",
+   "calidad": "buena",
+   "nota": "",
+   "f": "fotos/RR0017.webp",
+   "m": "fotos/m/RR0017.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0015": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_aebdc6fc-20c2-456c-96cb-df25480be26d.jpg",
+   "calidad": "regular",
+   "nota": "contenido 384 px (300-599)",
+   "f": "fotos/RR0015.webp",
+   "m": "fotos/m/RR0015.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0048": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_14656bac-8216-4974-b684-b045ce2fbdec.jpg",
+   "calidad": "buena",
+   "nota": "",
+   "f": "fotos/RR0048.webp",
+   "m": "fotos/m/RR0048.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0018": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_5050bc50-c0ef-4bfd-a139-ebbaab3946c1.jpg",
+   "calidad": "buena",
+   "nota": "",
+   "f": "fotos/RR0018.webp",
+   "m": "fotos/m/RR0018.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0019": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_62929c7b-2d90-4b5f-b03f-34e454a8f73e.jpg",
+   "calidad": "regular",
+   "nota": "contenido 385 px (300-599)",
+   "f": "fotos/RR0019.webp",
+   "m": "fotos/m/RR0019.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0092": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_b063d3a5-ed9b-47f8-970d-83020bafa2f1.jpg",
+   "calidad": "regular",
+   "nota": "contenido 391 px (300-599)",
+   "f": "fotos/RR0092.webp",
+   "m": "fotos/m/RR0092.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0145": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_0c2543dc-ec3f-46d6-8888-7aee10045485.jpg",
+   "calidad": "regular",
+   "nota": "contenido 557 px (300-599)",
+   "f": "fotos/RR0145.webp",
+   "m": "fotos/m/RR0145.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0094": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_1081d4e9-72f9-4c93-9438-7b96fa87f253.jpg",
+   "calidad": "regular",
+   "nota": "contenido 379 px (300-599)",
+   "f": "fotos/RR0094.webp",
+   "m": "fotos/m/RR0094.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0131": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_a203d7ca-2f45-4e7c-b069-dee49fafbfd0.jpg",
+   "calidad": "regular",
+   "nota": "misma foto que RR0093 (otra presentación de la línea); contenido 430 px (300-599)",
+   "f": "fotos/RR0131.webp",
+   "m": "fotos/m/RR0131.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0093": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_a203d7ca-2f45-4e7c-b069-dee49fafbfd0.jpg",
+   "calidad": "regular",
+   "nota": "misma foto que RR0131 (otra presentación de la línea); contenido 430 px (300-599)",
+   "f": "fotos/RR0093.webp",
+   "m": "fotos/m/RR0093.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0140": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_db1b62c3-40a5-49f2-8a5a-adbc297f4b5e.jpg",
+   "calidad": "mala",
+   "nota": "contenido 243 px (<300)"
+  },
+  "RR0139": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_cd1677bf-4ea0-4721-b383-5c370e086641.jpg",
+   "calidad": "mala",
+   "nota": "contenido 228 px (<300)"
+  },
+  "RR0138": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_0064c784-dc3c-4521-bf21-9d3a0e4f280f.jpg",
+   "calidad": "mala",
+   "nota": "contenido 267 px (<300)"
+  },
+  "RR0137": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_27de4e1e-9266-4084-ad18-7f356e4055ee.jpg",
+   "calidad": "mala",
+   "nota": "contenido 291 px (<300)"
+  },
+  "RR0136": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_c0686f65-c3bb-48c9-bcf5-c0f89603da4f.jpg",
+   "calidad": "mala",
+   "nota": "contenido 228 px (<300)"
+  },
+  "RR0152": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_3736ed89-e2e0-4c94-939d-fd8edbd1a859.jpg",
+   "calidad": "mala",
+   "nota": "contenido 278 px (<300)"
+  },
+  "RR0151": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_30433e84-c60c-4c5f-9254-5ef01505597b.jpg",
+   "calidad": "mala",
+   "nota": "contenido 278 px (<300)"
+  },
+  "RR0125": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_55028a8e-c53d-485e-968c-40941bae896e.jpg",
+   "calidad": "regular",
+   "nota": "contenido 364 px (300-599)",
+   "f": "fotos/RR0125.webp",
+   "m": "fotos/m/RR0125.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0127": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_4476f0b0-6055-4f16-a028-b41d28de65db.jpg",
+   "calidad": "regular",
+   "nota": "misma foto que RR0128 (otra presentación de la línea); contenido 423 px (300-599)",
+   "f": "fotos/RR0127.webp",
+   "m": "fotos/m/RR0127.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0128": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_4476f0b0-6055-4f16-a028-b41d28de65db.jpg",
+   "calidad": "regular",
+   "nota": "misma foto que RR0127 (otra presentación de la línea); contenido 423 px (300-599)",
+   "f": "fotos/RR0128.webp",
+   "m": "fotos/m/RR0128.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0129": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_0ec10c59-9dd1-46ed-8e1c-5052341fbac1.jpg",
+   "calidad": "regular",
+   "nota": "contenido 355 px (300-599)",
+   "f": "fotos/RR0129.webp",
+   "m": "fotos/m/RR0129.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0123": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_a38ac5da-129b-4101-a057-4673400a6b98.jpg",
+   "calidad": "regular",
+   "nota": "contenido 362 px (300-599)",
+   "f": "fotos/RR0123.webp",
+   "m": "fotos/m/RR0123.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0121": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_85ad99e5-3cba-4b4c-ae2e-3a06ad00c10d.jpg",
+   "calidad": "regular",
+   "nota": "contenido 365 px (300-599)",
+   "f": "fotos/RR0121.webp",
+   "m": "fotos/m/RR0121.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0119": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_acbc1655-97d8-4c93-9c11-0d0d505c6445.jpg",
+   "calidad": "regular",
+   "nota": "contenido 362 px (300-599)",
+   "f": "fotos/RR0119.webp",
+   "m": "fotos/m/RR0119.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0070": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_374252d3-9d8c-4872-9afb-41fd8b12553a.jpg",
+   "calidad": "mala",
+   "nota": "misma foto que RR0069 (otra presentación de la línea); contenido 170 px (<300)"
+  },
+  "RR0069": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_450caff5-cdbb-4385-aafc-db3f470b6cf7.jpg",
+   "calidad": "mala",
+   "nota": "misma foto que RR0070 (otra presentación de la línea); contenido 170 px (<300)"
+  },
+  "RR0113": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_e488fe93-e4f6-4578-9571-807b141a6c61.jpg",
+   "calidad": "mala",
+   "nota": "misma foto que RR0112 (otra presentación de la línea); contenido 169 px (<300)"
+  },
+  "RR0112": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_c365cd64-98f6-4312-a9be-05606e904b28.jpg",
+   "calidad": "mala",
+   "nota": "misma foto que RR0113 (otra presentación de la línea); contenido 169 px (<300)"
+  },
+  "RR0109": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_6f30f22b-ca1b-4192-ae75-2df2d2f91262.jpg",
+   "calidad": "mala",
+   "nota": "misma foto que RR0108 (otra presentación de la línea); contenido 170 px (<300)"
+  },
+  "RR0108": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_3a93f7d5-9ffc-4209-96e7-2eea3d15eec6.jpg",
+   "calidad": "mala",
+   "nota": "misma foto que RR0109 (otra presentación de la línea); contenido 170 px (<300)"
+  },
+  "RR0072": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_b6e48455-40da-4adb-b18e-eaf0ed04bd78.jpg",
+   "calidad": "mala",
+   "nota": "misma foto que RR0071 (otra presentación de la línea); contenido 169 px (<300)"
+  },
+  "RR0071": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_bd733261-c0f8-4ad7-b01e-0a7eb6fc7a60.jpg",
+   "calidad": "mala",
+   "nota": "misma foto que RR0072 (otra presentación de la línea); contenido 169 px (<300)"
+  },
+  "RR0111": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_b2ff2c94-23e7-4797-888b-709b10fdc642.jpg",
+   "calidad": "mala",
+   "nota": "misma foto que RR0110 (otra presentación de la línea); contenido 170 px (<300)"
+  },
+  "RR0110": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_28ff6201-5f3f-458e-8931-ce4fd4b96a44.jpg",
+   "calidad": "mala",
+   "nota": "misma foto que RR0111 (otra presentación de la línea); contenido 170 px (<300)"
+  },
+  "RR0105": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_c12f6173-d04e-449c-a662-f1784fc97e88.jpg",
+   "calidad": "mala",
+   "nota": "misma foto que RR0106 (otra presentación de la línea); contenido 171 px (<300)"
+  },
+  "RR0106": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_1db85e28-c167-475f-86c0-efc47573ae29.jpg",
+   "calidad": "mala",
+   "nota": "misma foto que RR0105 (otra presentación de la línea); contenido 171 px (<300)"
+  },
+  "RR0164": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_db9ffde7-dc21-40af-bcdf-6b96f77da6c8.jpg",
+   "calidad": "regular",
+   "nota": "contenido 343 px (300-599)",
+   "f": "fotos/RR0164.webp",
+   "m": "fotos/m/RR0164.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0165": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_cf37c577-9e6c-40bd-94c2-242e0fe2f945.jpg",
+   "calidad": "mala",
+   "nota": "contenido 283 px (<300)"
+  },
+  "RR0062": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_4e1ef15b-46c2-481b-a5be-9c6805e08d5e.jpg",
+   "calidad": "mala",
+   "nota": "misma foto que RR0061 (otra presentación de la línea); contenido 170 px (<300)"
+  },
+  "RR0061": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_7c4db547-a186-449b-8fc8-39a198eb8879.jpg",
+   "calidad": "mala",
+   "nota": "misma foto que RR0062 (otra presentación de la línea); contenido 170 px (<300)"
+  },
+  "RR0114": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_30f5c258-6dbd-4dc4-956d-1a6dd1ad262e.jpg",
+   "calidad": "regular",
+   "nota": "misma foto que RR0115 (otra presentación de la línea); contenido 388 px (300-599)",
+   "f": "fotos/RR0114.webp",
+   "m": "fotos/m/RR0114.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0115": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_1bc51817-b976-4f28-973e-80dc5e186a25.jpg",
+   "calidad": "regular",
+   "nota": "misma foto que RR0114 (otra presentación de la línea); contenido 388 px (300-599)",
+   "f": "fotos/RR0115.webp",
+   "m": "fotos/m/RR0115.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0055": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_85a7efee-307e-4136-b1cf-f03123d3c2dd.jpg",
+   "calidad": "mala",
+   "nota": "misma foto que RR0055-2 (otra presentación de la línea); contenido 170 px (<300)"
+  },
+  "RR0055-2": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_85a7efee-307e-4136-b1cf-f03123d3c2dd.jpg",
+   "calidad": "mala",
+   "nota": "misma foto que RR0055 (otra presentación de la línea); contenido 170 px (<300)"
+  },
+  "RR0056": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_4649193d-7996-47a1-8efb-4b380fab18ec.jpg",
+   "calidad": "mala",
+   "nota": "misma foto que RR0056-2 (otra presentación de la línea); contenido 170 px (<300)"
+  },
+  "RR0056-2": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_4649193d-7996-47a1-8efb-4b380fab18ec.jpg",
+   "calidad": "mala",
+   "nota": "misma foto que RR0056 (otra presentación de la línea); contenido 170 px (<300)"
+  },
+  "RR0116": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_ee9cc5ff-f10f-4cc5-8da5-a1595337c8e0.jpg",
+   "calidad": "mala",
+   "nota": "misma foto que RR0117 (otra presentación de la línea); contenido 155 px (<300)"
+  },
+  "RR0117": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_e84f27cf-f4cb-4167-8bf3-a562e8a33368.jpg",
+   "calidad": "mala",
+   "nota": "misma foto que RR0116 (otra presentación de la línea); contenido 155 px (<300)"
+  },
+  "RR0102": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_cc773bac-8067-4cd6-8e93-143c7cbb6875.jpg",
+   "calidad": "mala",
+   "nota": "misma foto que RR0101 (otra presentación de la línea); contenido 155 px (<300)"
+  },
+  "RR0101": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_89838f38-3eae-4faa-9515-3a4d09f548d3.jpg",
+   "calidad": "mala",
+   "nota": "misma foto que RR0102 (otra presentación de la línea); contenido 155 px (<300)"
+  },
+  "RR0098": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_966c59e0-bd50-4e27-ae15-aedddabe2484.jpg",
+   "calidad": "regular",
+   "nota": "misma foto que RR0097 (otra presentación de la línea); contenido 388 px (300-599)",
+   "f": "fotos/RR0098.webp",
+   "m": "fotos/m/RR0098.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0097": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_4adfa2dd-705e-49ce-8197-7c3bef67f6da.jpg",
+   "calidad": "regular",
+   "nota": "misma foto que RR0098 (otra presentación de la línea); contenido 388 px (300-599)",
+   "f": "fotos/RR0097.webp",
+   "m": "fotos/m/RR0097.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0052": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_1fb94941-0e53-481c-8b2a-5bf115848e36.jpg",
+   "calidad": "mala",
+   "nota": "misma foto que RR0051 (otra presentación de la línea); contenido 169 px (<300)"
+  },
+  "RR0051": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_78d5dd6f-1371-4592-a56b-c682291b04d7.jpg",
+   "calidad": "mala",
+   "nota": "misma foto que RR0052 (otra presentación de la línea); contenido 169 px (<300)"
+  },
+  "RR0053": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_91103835-07e9-4c7e-b728-db85899f9a17.jpg",
+   "calidad": "mala",
+   "nota": "misma foto que RR0054 (otra presentación de la línea); contenido 170 px (<300)"
+  },
+  "RR0054": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_a6ba3797-76af-4763-9b9c-55278a014fc4.jpg",
+   "calidad": "mala",
+   "nota": "misma foto que RR0053 (otra presentación de la línea); contenido 170 px (<300)"
+  },
+  "RR0104": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_5a165ae1-2ae7-43f3-befa-11e331fa2447.jpg",
+   "calidad": "mala",
+   "nota": "misma foto que RR0103 (otra presentación de la línea); contenido 167 px (<300)"
+  },
+  "RR0103": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_6403189b-0286-41e1-9b67-30fdf00ad83c.jpg",
+   "calidad": "mala",
+   "nota": "misma foto que RR0104 (otra presentación de la línea); contenido 167 px (<300)"
+  },
+  "RR0100": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_7d9616c1-db87-4e9c-ade6-b6abb442e33e.jpg",
+   "calidad": "mala",
+   "nota": "misma foto que RR0099 (otra presentación de la línea); contenido 155 px (<300)"
+  },
+  "RR0099": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_cdaca656-4e61-484b-bd2e-1dcba3870752.jpg",
+   "calidad": "mala",
+   "nota": "misma foto que RR0100 (otra presentación de la línea); contenido 155 px (<300)"
+  },
+  "RR0057": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_6c325f59-977f-4a26-9a20-50fc4d4cd003.jpg",
+   "calidad": "regular",
+   "nota": "misma foto que RR0058 (otra presentación de la línea); contenido 399 px (300-599)",
+   "f": "fotos/RR0057.webp",
+   "m": "fotos/m/RR0057.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0058": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_22f5e097-9376-4945-99c9-36488f4f73da.jpg",
+   "calidad": "regular",
+   "nota": "misma foto que RR0057 (otra presentación de la línea); contenido 399 px (300-599)",
+   "f": "fotos/RR0058.webp",
+   "m": "fotos/m/RR0058.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0063": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_3aa926d8-d6c0-4c52-912f-92d6abfac5c2.jpg",
+   "calidad": "regular",
+   "nota": "contenido 399 px (300-599)",
+   "f": "fotos/RR0063.webp",
+   "m": "fotos/m/RR0063.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0060": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_e71dcacf-5fff-4fd8-abbc-812782eb57d7.jpg",
+   "calidad": "regular",
+   "nota": "misma foto que RR0060-2, RR0059 (otra presentación de la línea); contenido 398 px (300-599)",
+   "f": "fotos/RR0060.webp",
+   "m": "fotos/m/RR0060.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0060-2": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_e71dcacf-5fff-4fd8-abbc-812782eb57d7.jpg",
+   "calidad": "regular",
+   "nota": "misma foto que RR0060, RR0059 (otra presentación de la línea); contenido 398 px (300-599)",
+   "f": "fotos/RR0060-2.webp",
+   "m": "fotos/m/RR0060-2.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0059": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_97a66ad3-4aa0-4248-8bbf-be7d6de74423.jpg",
+   "calidad": "regular",
+   "nota": "misma foto que RR0060, RR0060-2 (otra presentación de la línea); contenido 398 px (300-599)",
+   "f": "fotos/RR0059.webp",
+   "m": "fotos/m/RR0059.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0036": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_4111e764-80df-4e94-bff1-9ed4e42c97a0.jpg",
+   "calidad": "regular",
+   "nota": "misma foto que RR0037 (otra presentación de la línea); contenido 332 px (300-599)",
+   "f": "fotos/RR0036.webp",
+   "m": "fotos/m/RR0036.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0037": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_6b4a5c58-69bc-4377-8076-9ca673ad4f1c.jpg",
+   "calidad": "regular",
+   "nota": "misma foto que RR0036 (otra presentación de la línea); contenido 332 px (300-599)",
+   "f": "fotos/RR0037.webp",
+   "m": "fotos/m/RR0037.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0035": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_1309936d-679e-485c-8fe4-8db8c48c64d8.jpg",
+   "calidad": "regular",
+   "nota": "contenido 577 px (300-599)",
+   "f": "fotos/RR0035.webp",
+   "m": "fotos/m/RR0035.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0013": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_4fbdeaac-5723-4762-aa73-2a70d2b89588.jpg",
+   "calidad": "regular",
+   "nota": "contenido 324 px (300-599)",
+   "f": "fotos/RR0013.webp",
+   "m": "fotos/m/RR0013.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0041": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_afef2eb0-be6f-4718-a6e3-9ab494986e6f.jpg",
+   "calidad": "regular",
+   "nota": "misma foto que RR0040 (otra presentación de la línea); contenido 562 px (300-599)",
+   "f": "fotos/RR0041.webp",
+   "m": "fotos/m/RR0041.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0040": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_357a550b-b9d3-426e-a626-a47e39ba03d2.jpg",
+   "calidad": "regular",
+   "nota": "misma foto que RR0041 (otra presentación de la línea); contenido 562 px (300-599)",
+   "f": "fotos/RR0040.webp",
+   "m": "fotos/m/RR0040.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0039": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_1c4d7626-5607-45b6-ba60-115afdc24f6a.jpg",
+   "calidad": "regular",
+   "nota": "misma foto que RR0038 (otra presentación de la línea); contenido 393 px (300-599)",
+   "f": "fotos/RR0039.webp",
+   "m": "fotos/m/RR0039.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0038": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_fa48275d-333e-4b18-b6d8-f16431774ed8.jpg",
+   "calidad": "regular",
+   "nota": "misma foto que RR0039 (otra presentación de la línea); contenido 393 px (300-599)",
+   "f": "fotos/RR0038.webp",
+   "m": "fotos/m/RR0038.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0020": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_729c7655-eb6a-4c76-9cf1-042110aa4ddf.jpg",
+   "calidad": "mala",
+   "nota": "misma foto que RR0030 (otra presentación de la línea); contenido 279 px (<300)"
+  },
+  "RR0030": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_4a06ea60-4c15-4d17-a7d4-76cfbd38f021.jpg",
+   "calidad": "mala",
+   "nota": "misma foto que RR0020 (otra presentación de la línea); contenido 279 px (<300)"
+  },
+  "RR0031": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_bfadb726-fc18-4949-a3ed-22396518de55.jpg",
+   "calidad": "mala",
+   "nota": "misma foto que RR0032 (otra presentación de la línea); contenido 112 px (<300)"
+  },
+  "RR0032": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_1632dba6-fb4e-4942-9df4-396a09d781a7.jpg",
+   "calidad": "mala",
+   "nota": "misma foto que RR0031 (otra presentación de la línea); contenido 112 px (<300)"
+  },
+  "RR0034": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_2ae8ba87-ab0c-4a53-ac46-651be47d0ac2.jpg",
+   "calidad": "mala",
+   "nota": "misma foto que RR0033 (otra presentación de la línea); contenido 182 px (<300)"
+  },
+  "RR0012": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_f95c9c55-5c66-419d-aef5-2508590e6332.jpg",
+   "calidad": "buena",
+   "nota": "",
+   "f": "fotos/RR0012.webp",
+   "m": "fotos/m/RR0012.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0033": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_98ac7b18-30d4-4232-82ca-242fffff182a.jpg",
+   "calidad": "mala",
+   "nota": "misma foto que RR0034 (otra presentación de la línea); contenido 182 px (<300)"
+  },
+  "RR0043": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_e7af9a84-0646-4613-8736-e2087802b5d6.jpg",
+   "calidad": "regular",
+   "nota": "misma foto que RR0042 (otra presentación de la línea); contenido 325 px (300-599)",
+   "f": "fotos/RR0043.webp",
+   "m": "fotos/m/RR0043.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0042": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_7d3af32c-3bbb-4921-9a34-b33af76637e5.jpg",
+   "calidad": "regular",
+   "nota": "misma foto que RR0043 (otra presentación de la línea); contenido 325 px (300-599)",
+   "f": "fotos/RR0042.webp",
+   "m": "fotos/m/RR0042.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0045": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_0c8cc099-da9f-41f6-b82e-9a9b853d97fd.jpg",
+   "calidad": "mala",
+   "nota": "contenido 99 px (<300)"
+  },
+  "RR0044": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_ddaa442b-0a86-4a4d-9420-925cdca753f5.jpg",
+   "calidad": "regular",
+   "nota": "contenido 332 px (300-599)",
+   "f": "fotos/RR0044.webp",
+   "m": "fotos/m/RR0044.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0166": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_64cba787-fd48-42d2-9eaf-5db81349acc4.jpg",
+   "calidad": "regular",
+   "nota": "contenido 542 px (300-599)",
+   "f": "fotos/RR0166.webp",
+   "m": "fotos/m/RR0166.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0167": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_4c9c0c96-a5c7-4f25-8de8-22a93b3efd36.jpg",
+   "calidad": "regular",
+   "nota": "contenido 541 px (300-599)",
+   "f": "fotos/RR0167.webp",
+   "m": "fotos/m/RR0167.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0168": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_0c84abb7-2686-45eb-b790-a321c5871188.jpg",
+   "calidad": "regular",
+   "nota": "contenido 340 px (300-599)",
+   "f": "fotos/RR0168.webp",
+   "m": "fotos/m/RR0168.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0147": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_1f171f38-2c9b-4e38-bce2-19013f161f14.jpg",
+   "calidad": "buena",
+   "nota": "",
+   "f": "fotos/RR0147.webp",
+   "m": "fotos/m/RR0147.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0146": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_ea8f9cab-2eef-4d0c-9092-960e6806a00d.jpg",
+   "calidad": "regular",
+   "nota": "contenido 593 px (300-599)",
+   "f": "fotos/RR0146.webp",
+   "m": "fotos/m/RR0146.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0149": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_5ac0546a-1655-436c-aa58-58ac54043a2c.jpg",
+   "calidad": "buena",
+   "nota": "",
+   "f": "fotos/RR0149.webp",
+   "m": "fotos/m/RR0149.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0148": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_735461d6-e1bc-49d6-a1f9-537f70ab1b01.jpg",
+   "calidad": "buena",
+   "nota": "",
+   "f": "fotos/RR0148.webp",
+   "m": "fotos/m/RR0148.webp",
+   "w": 800,
+   "h": 800
+  },
+  "RR0158": {
+   "fuente": "rediredi",
+   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_287d6bcc-cac2-46f3-ba78-74166a5979f5.jpg",
+   "calidad": "mala",
+   "nota": "contenido 224 px (<300)"
+  }
+ }
+}

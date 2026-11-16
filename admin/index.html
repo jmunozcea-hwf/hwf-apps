@@ -1,6 +1,23 @@
 <!doctype html>
 <html lang="es">
-<head><!-- patch_claves -->
+<head>
+<script>/* patch_fotos: base de fotos por código HWF (datos/fotos.json) */
+(function(){var W=window,K="hwf-fotos";
+function lee(){try{var p=JSON.parse(localStorage.getItem(K)||"null");return p&&p.fotos?p:null}catch(e){return null}}
+W.__FOT=lee();
+W.SINFOTO="data:image/svg+xml,"+encodeURIComponent("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='#EEF2F5'/><g fill='none' stroke='#9AA7B2' stroke-width='3' stroke-linejoin='round'><rect x='28' y='30' width='44' height='32' rx='5'/><circle cx='50' cy='46' r='8'/></g><text x='50' y='84' font-family='sans-serif' font-size='13' font-weight='700' fill='#7A8794' text-anchor='middle'>Sin foto</text></svg>");
+W.hwfFoto=function(c,chica){c=String(c==null?"":c).trim();if(!c)return"";var B=W.__FOT,e=B&&B.fotos&&B.fotos[c];
+ if(e){if(e.calidad==="mala")return"";var r=(chica&&e.m)||e.f;if(r){var u=/^https?:/.test(r)?r:String(B.base||"")+r;return u+(B.version?(u.indexOf("?")<0?"?":"&")+"v="+encodeURIComponent(B.version):"")}}
+ return""};
+W.hwfFotoErr=function(i){i.onerror=null;i.src=W.SINFOTO};
+W.hwfFotoHtml=function(c,chica,alt,cls){var u=W.hwfFoto(c,chica);return'<img'+(cls?' class="'+cls+'"':'')+' src="'+String(u||W.SINFOTO).replace(/"/g,"&quot;")+'" alt="'+String(alt||"").replace(/"/g,"&quot;")+'" data-hf="'+String(c==null?"":c).replace(/"/g,"&quot;")+'" data-hc="'+(chica?1:0)+'" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="hwfFotoErr(this)">'};
+function refresca(){try{[].forEach.call(document.querySelectorAll("img[data-hf]"),function(i){var n=W.hwfFoto(i.getAttribute("data-hf"),i.getAttribute("data-hc")==="1")||W.SINFOTO;if(i.getAttribute("src")!==n){i.removeAttribute("data-hx");i.onerror=function(){W.hwfFotoErr(i)};i.src=n}})}catch(e){}}
+function aplica(p){if(!p||!p.version||!p.fotos)return;var a=W.__FOT;if(a&&a.version&&a.version>=p.version)return;try{localStorage.setItem(K,JSON.stringify(p))}catch(e){}W.__FOT=p;refresca()}
+function baja(l){if(!l.length)return;fetch(l[0],{cache:"no-store"}).then(function(r){return r.ok?r.json():Promise.reject()}).then(aplica).catch(function(){baja(l.slice(1))})}
+setTimeout(function(){baja(["../datos/fotos.json","https://jmunozcea-hwf.github.io/hwf-apps/datos/fotos.json"])},1500);
+})();</script>
+
+<!-- patch_claves -->
 <link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0B3146"><link rel="apple-touch-icon" href="icon-192.png"><link rel="icon" href="icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="HWF"><script>/* patch_congruencia: días de apertura de la tienda (todos, salvo feriados irrenunciables) */
 function tdaDiasAp(y, m, hasta) { const IRR = ["01-01", "05-01", "09-18", "09-19", "12-25"]; let n = 0;
   for (let d = 1; d <= hasta; d++) if (!IRR.includes(String(m).padStart(2, "0") + "-" + String(d).padStart(2, "0"))) n++; return n; }
@@ -4392,11 +4409,11 @@ syCall = async function (cfg, d) {
 </style>
 <script>
 /* ================= Productos visibles en la app de ventas ================= */
-const PRA_KEY = "adm-prod-estado", PRA_VER = "adm-prod-ver", PRA_IMG = "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_";
+const PRA_KEY = "adm-prod-estado", PRA_VER = "adm-prod-ver";
 let praFiltro = "todos", praAbierto = false, praOcup = false;
 const praEstado = () => store.get(PRA_KEY, {});
 const praOn = i => { const e = praEstado()[i]; return !(e && e.on === false); };
-const praImg = i => { const p = ((window.__PUB && window.__PUB.prods) || []).find(x => x.i === i); return p && p.img ? (String(p.img).startsWith("http") ? p.img : PRA_IMG + p.img + ".jpg?s=small&f=webp") : ""; };
+const praImg = i => hwfFoto(i, true);
 function praLeer(cambios) {
   const E = {};
   (cambios || []).forEach(c => { if (!c || c.codigo !== "PRODUCTO") return; let o; try { o = JSON.parse(c.detalle); } catch (e) { return; }
@@ -4436,7 +4453,7 @@ function praPintar() {
   const l = CAT_APP.filter(p => (praFiltro === "todos" || (praFiltro === "off" ? !praOn(p[0]) : praOn(p[0]))) && (!q || norm(p[0] + " " + p[1] + " " + p[2]).includes(q)));
   $("praRes").textContent = `${CAT_APP.length - off} ${CAT_APP.length - off === 1 ? "visible" : "visibles"} · ${off} ${off === 1 ? "oculto" : "ocultos"}`;
   $("praL").innerHTML = l.map(p => { const on = praOn(p[0]), im = praImg(p[0]);
-    return `<div class="pra-it${on ? "" : " off"}">${im ? `<img src="${esc(im)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.visibility='hidden'">` : "<span></span>"}
+    return `<div class="pra-it${on ? "" : " off"}">${hwfFotoHtml(p[0], true, "")}
       <div><b>${esc(p[1])}</b><small>${esc(p[0])} · ${esc(p[2])}${p[6] ? " · " + fmt(p[6]) : ""}</small></div>
       <button type="button" class="pra-tg${on ? "" : " off"}" data-pra="${esc(p[0])}" aria-pressed="${on}" title="${on ? "Ocultar en la app de ventas" : "Mostrar en la app de ventas"}">${on ? "✓ Visible" : "Oculto"}</button></div>`; }).join("") || '<p class="muted">Ningún producto coincide.</p>';
 }
@@ -5194,7 +5211,7 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261116003351";
+const HWF_VER = "20261116005600";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -8010,6 +8027,265 @@ body.ns-on [data-na].ns-sel{outline:2px solid #80C6C9;outline-offset:-2px}
   b.addEventListener("click", e => { if (movido) { e.stopImmediatePropagation(); e.preventDefault(); movido = false; } }, true);
   addEventListener("resize", () => { if (b.classList.contains("ia-fl")) pegar(); });
   let t = 0; addEventListener("scroll", () => { b.classList.add("ia-sc"); clearTimeout(t); t = setTimeout(() => b.classList.remove("ia-sc"), 450); }, { passive: true });
+})();
+</script>
+<style>/* patch_b2b_apps */
+.b2{display:grid;gap:12px;min-width:0;max-width:100%}.b2 *{box-sizing:border-box}
+.b2-top{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.b2-top h2{margin:0;font-size:1.15rem;color:#0B3146}
+.b2-card{background:var(--surface,#fff);border:1px solid var(--line,#DAE1E7);border-radius:14px;padding:12px;min-width:0;overflow-wrap:anywhere}
+.b2-card h3{margin:0 0 8px;font-size:1rem;color:#0B3146;display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.b2-card h3 small{font-weight:600;color:var(--muted,#5B6874);font-size:.78rem}
+.b2-c{border:1px solid var(--line,#DAE1E7);border-radius:12px;padding:10px;display:grid;gap:4px;background:var(--surface,#fff);min-width:0}
+.b2-c+.b2-c{margin-top:8px}.b2-c.pend{border-color:#80C6C9;box-shadow:inset 4px 0 0 #80C6C9}
+.b2-t{display:flex;gap:8px;justify-content:space-between;align-items:flex-start}.b2-t b{color:#0B3146;min-width:0}
+.b2-c small,.b2-p{color:var(--muted,#5B6874);font-size:.82rem;line-height:1.35}
+.b2-c a{color:#0B3146;font-weight:700}
+.b2-pill{display:inline-block;border-radius:999px;padding:2px 9px;font-size:.72rem;font-weight:800;white-space:nowrap;background:#E6EEF3;color:#0B3146}
+.b2-pill.pendiente{background:#FFF1CC;color:#7A5300}.b2-pill.activo{background:#DDF3E6;color:#0F6B3B}.b2-pill.rechazado{background:#EDEDED;color:#555}.b2-pill.bloqueado{background:#FBE0DD;color:#B42318}
+.b2-bt{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.b2 button.b2-b,.b2-md button.b2-b{border:0;border-radius:10px;padding:9px 12px;font:inherit;font-weight:800;font-size:.86rem;cursor:pointer;background:#E6EEF3;color:#0B3146;min-height:38px}
+.b2 button.b2-b.ok,.b2-md button.b2-b.ok{background:#0B3146;color:#fff}.b2 button.b2-b.tq{background:#80C6C9;color:#0B3146}
+.b2 button.b2-b.mal{background:#FBE0DD;color:#B42318}.b2 button.b2-b:disabled{opacity:.5;cursor:default}
+.b2-chips{display:flex;gap:6px;flex-wrap:wrap}.b2 button.b2-ch{border:1px solid var(--line,#DAE1E7);background:var(--surface,#fff);border-radius:999px;padding:6px 12px;font:inherit;font-weight:700;font-size:.82rem;color:var(--ink,#0F1E29);cursor:pointer}
+.b2 button.b2-ch[aria-pressed="true"]{background:#0B3146;color:#fff;border-color:#0B3146}
+.b2-in,.b2 select.b2-in,.b2 textarea.b2-in,.b2-md .b2-in{width:100%;min-width:0;max-width:100%;border:1px solid var(--line,#DAE1E7);border-radius:10px;padding:9px 10px;font:inherit;font-size:.92rem;background:var(--surface,#fff);color:var(--ink,#0F1E29)}
+.b2 textarea.b2-in{min-height:64px;resize:vertical;font-weight:500}
+.b2-md .b2-in,.b2 .b2-in{font-weight:500}
+.b2-lbl{display:grid;gap:3px;font-size:.74rem;font-weight:800;color:var(--muted,#5B6874);min-width:0}.b2-lbl .b2-in{font-weight:500}
+.b2-g2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.b2-it{border:1px solid var(--line,#DAE1E7);border-radius:12px;padding:10px;display:grid;gap:8px;margin-bottom:8px;background:var(--sunk,#F6F8FA)}
+.b2-vac{padding:14px;text-align:center;color:var(--muted,#5B6874);font-size:.9rem}
+.b2-err{background:#FBE0DD;color:#7A1A12;border-radius:12px;padding:10px;font-size:.88rem}
+.b2-seg{display:flex;gap:6px;flex-wrap:wrap}
+.b2-bdg{display:inline-block;min-width:18px;height:18px;line-height:18px;border-radius:9px;background:#B42318;color:#fff;font-size:.68rem;font-weight:800;text-align:center;padding:0 5px;margin-left:6px;font-style:normal;vertical-align:middle}
+.b2-bdg[hidden]{display:none}
+#masSeg [data-m="b2b"][data-n]::after{content:attr(data-n);display:inline-block;min-width:18px;height:18px;line-height:18px;border-radius:9px;background:#B42318;color:#fff;font-size:.68rem;font-weight:800;text-align:center;padding:0 5px;margin-left:6px}
+#snBtn.b2-punto::after{content:"";position:absolute;top:6px;right:6px;width:11px;height:11px;border-radius:50%;background:#B42318;border:2px solid #fff}
+.b2-ov{position:fixed;inset:0;z-index:9900;background:rgba(11,49,70,.55);display:flex;align-items:flex-end;justify-content:center}
+.b2-md{background:var(--surface,#fff);width:min(560px,100%);max-height:88vh;border-radius:18px 18px 0 0;padding:14px 14px calc(14px + env(safe-area-inset-bottom));display:grid;gap:8px;grid-template-rows:auto auto auto auto minmax(0,1fr);overflow:hidden}
+.b2-mh{display:flex;align-items:center;justify-content:space-between;color:#0B3146}.b2-mh .b2-x{border:0;background:none;font-size:1.6rem;cursor:pointer;color:var(--muted,#5B6874)}
+.b2-sub{margin:0;font-size:.84rem;color:var(--muted,#5B6874)}.b2-chk{display:flex;gap:8px;align-items:center;font-size:.84rem;color:var(--ink,#0F1E29)}
+.b2-ls{overflow-y:auto;display:grid;gap:6px;align-content:start;min-height:120px}
+.b2-ls button{display:block;width:100%;text-align:left;border:1px solid var(--line,#DAE1E7);background:var(--surface,#fff);border-radius:10px;padding:9px 10px;font:inherit;cursor:pointer;color:var(--ink,#0F1E29)}
+.b2-ls button b{display:block;color:#0B3146;font-size:.9rem}.b2-ls button small{color:var(--muted,#5B6874);font-size:.76rem}.b2-ls button.rut{border-color:#80C6C9;background:#EAF7F7}
+body.m-b2b #crmMeta{display:none!important}
+</style>
+<script>/* patch_b2b_apps (Admin): Portal B2B */
+(function () {
+  if (typeof pintarMas !== "function" || typeof syCall !== "function" || typeof SYC !== "function" || !document.getElementById("masSeg") || document.querySelector('#masSeg [data-m="b2b"]')) return;
+
+  const E = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const M = n => "$" + Math.round(Number(n) || 0).toLocaleString("es-CL");
+  const F = s => { s = String(s || ""); const m = /^(\d{4})-(\d\d)-(\d\d)/.exec(s); return m ? m[3] + "-" + m[2] + "-" + m[1] : s.slice(0, 16); };
+  const N = s => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+  const RK = s => String(s || "").replace(/[^0-9kK]/g, "").toUpperCase();
+  const aviso = m => { try { (typeof toast === "function" ? toast : alert)(m); } catch (e) { } };
+  const EST = { pendiente: "Pendiente", activo: "Activa", rechazado: "Rechazada", bloqueado: "Bloqueada" };
+  const pill = e => `<span class="b2-pill ${E(e)}">${E(EST[e] || e || "—")}</span>`;
+  /* ventana con buscador para elegir el cliente exacto */
+  function elegir(o) {
+    const ov = document.createElement("div"); ov.className = "b2-ov";
+    ov.innerHTML = `<div class="b2-md" role="dialog" aria-label="${E(o.titulo)}"><div class="b2-mh"><b>${E(o.titulo)}</b><button type="button" class="b2-x" aria-label="Cerrar">×</button></div>
+      <p class="b2-sub">${o.sub || ""}</p><input class="b2-in" type="search" placeholder="Buscar por nombre, RUT o comuna" autocomplete="off">
+      <label class="b2-chk" ${o.mas ? "" : "hidden"}><input type="checkbox"> Incluir clientes de otras carteras</label><div class="b2-ls"></div></div>`;
+    document.body.appendChild(ov);
+    const inp = ov.querySelector("input[type=search]"), chk = ov.querySelector(".b2-chk input"), ls = ov.querySelector(".b2-ls"); let lista = o.lista;
+    const cerrar = () => { ov.remove(); document.removeEventListener("keydown", esc); }, esc = e => { if (e.key === "Escape") cerrar(); };
+    document.addEventListener("keydown", esc);
+    function pintar() {
+      const q = N(inp.value).split(/\s+/).filter(Boolean);
+      let l = lista.filter(c => { const t = N([c.nombre, c.rut, c.comuna, c.cart].join(" ")); return q.every(w => t.includes(w)); });
+      if (o.rut) l.sort((a, b) => (RK(b.rut) === o.rut) - (RK(a.rut) === o.rut));
+      const tot = l.length; l = l.slice(0, 40);
+      ls.innerHTML = l.length ? l.map((c, i) => `<button type="button" data-i="${i}" class="${o.rut && RK(c.rut) === o.rut ? "rut" : ""}"><b>${E(c.nombre)}</b><small>${E([c.rut, c.comuna, c.cart].filter(Boolean).join(" · "))}${o.rut && RK(c.rut) === o.rut ? " · coincide el RUT" : ""}</small></button>`).join("") + (tot > 40 ? `<p class="b2-sub">Hay ${tot} resultados; escribe más para afinar.</p>` : "")
+        : `<p class="b2-vac">No hay clientes que coincidan.</p>`;
+      ls._l = l; }
+    inp.oninput = pintar; if (chk) chk.onchange = () => { lista = chk.checked ? o.mas() : o.lista; pintar(); };
+    ls.onclick = e => { const b = e.target.closest("button[data-i]"); if (!b) return; const c = ls._l[+b.dataset.i]; cerrar(); o.ok(c); };
+    ov.onclick = e => { if (e.target === ov || e.target.closest(".b2-x")) cerrar(); };
+    pintar(); setTimeout(() => inp.focus(), 50);
+  }
+  function tarjetaCuenta(c, extra, botones) {
+    return `<div class="b2-c ${c.estado === "pendiente" ? "pend" : ""}" data-id="${E(c.id)}"><div class="b2-t"><b>${E(c.razon || "(sin razón social)")}</b>${pill(c.estado)}</div>
+      <small>RUT ${E(c.rut || "—")}${c.contacto ? " · " + E(c.contacto) : ""}</small>
+      <small>${c.correo ? `<a href="mailto:${E(c.correo)}">${E(c.correo)}</a>` : ""}${c.telefono ? ` · <a href="tel:${E(String(c.telefono).replace(/[^0-9+]/g, ""))}">${E(c.telefono)}</a>` : ""}${c.comuna ? " · " + E(c.comuna) : ""}</small>
+      <small>Solicitó el ${E(F(c.fecha))}${c.cliente ? ` · Cliente HWF: <b>${E(c.cliente)}</b>` : ""}${c.vendedor ? ` · Vendedor: ${E(c.vendedor)}` : ""}</small>${extra || ""}
+      <div class="b2-bt">${botones}</div></div>`;
+  }
+  const items = p => { let a = p.items; if (typeof a === "string") { try { a = JSON.parse(a); } catch (e) { a = null; } } return Array.isArray(a) ? a : null; };
+  function tarjetaPedido(p) {
+    const it = items(p), n = it ? it.length : 0;
+    return `<div class="b2-c"><div class="b2-t"><b>${E(p.cliente || p.rut || "—")}</b><b>${M(p.neto)}</b></div>
+      <small>${E(F(p.fecha))}${n ? ` · ${n} producto${n === 1 ? "" : "s"}` : ""}${p.vendedor ? " · " + E(p.vendedor) : ""}</small>
+      <small>${p.estado ? "Estado: " + E(p.estado) : ""}${p.nota ? ` · Nota de pedido ${E(p.nota)}` : ""}</small></div>`;
+  }
+
+  const cfg = () => { try { const c = SYC(); return c && c.url ? c : null; } catch (e) { return null; } };
+  const llamar = async d => { const c = cfg(); if (!c) return { ok: false, error: "Esta app no está conectada al script de Google." }; return await syCall(c, d); };
+  const POR = "Admin";
+  const ST = { tab: "cuentas", fEst: "pendiente", fVend: "", q: "", cuentas: [], pedidos: [], canjes: [], aj: null, ajErr: "", cargando: false, cargandoAj: false, err: "", t: 0, ocup: false, dr: {}, avisado: false };
+  const pend = () => ST.cuentas.filter(c => c.estado === "pendiente").length;
+  const vendedores = () => { const s = new Set(); try { CARTERAS().forEach(v => s.add(v)); } catch (e) { } try { A.clientes.forEach(c => c.cart && s.add(c.cart)); } catch (e) { } ST.cuentas.forEach(c => c.vendedor && s.add(c.vendedor)); s.delete("Tienda Hellywoof"); return [...s].filter(Boolean).sort((a, b) => a.localeCompare(b, "es")); };
+  const clientes = () => { try { return (A.clientes || []).map(c => ({ nombre: c.nombre, comuna: c.comuna, cart: c.cart, rut: "" })); } catch (e) { return []; } };
+  const vivo = () => typeof vistaMas !== "undefined" && vistaMas === "b2b" && typeof TAB !== "undefined" && TAB === "mas";
+  function insignias() {
+    const b = document.querySelector('#masSeg [data-m="b2b"]'), n = pend(); if (b) { if (n) b.dataset.n = n; else delete b.dataset.n; }
+    const it = document.querySelector('#snPanel [data-m="b2b"]'); if (it) { it.querySelectorAll(".b2-bdg").forEach(x => x.remove()); if (n) it.insertAdjacentHTML("beforeend", `<i class="b2-bdg" style="margin-left:auto">${n}</i>`); }
+    const sb = document.getElementById("snBtn"); if (sb) sb.classList.toggle("b2-punto", n > 0);   /* el menú lateral toma el contador del texto del botón */
+  }
+  async function cargar(silencio) {
+    if (ST.cargando || !cfg()) return; ST.cargando = true; ST.err = ""; if (!silencio && vivo()) pintar();
+    const r = await llamar({ accion: "b2bSolicitudes" }); ST.cargando = false; ST.t = Date.now();
+    if (r && r.ok) { ST.cuentas = r.cuentas || []; ST.pedidos = r.pedidos || []; ST.canjes = r.canjes || []; ST.err = ""; }
+    else if (!silencio || !ST.cuentas.length) ST.err = (r && r.error) || "No se pudo consultar el portal B2B.";
+    insignias(); if (vivo()) pintar();
+    if (!ST.avisado && pend() && r && r.ok) { ST.avisado = true; aviso("Hay " + pend() + (pend() === 1 ? " solicitud B2B pendiente" : " solicitudes B2B pendientes")); }
+  }
+  async function cargarAj(forzar) {
+    if (ST.cargandoAj || (ST.aj && !forzar)) return; ST.cargandoAj = true; ST.ajErr = ""; if (vivo()) pintar();
+    const r = await llamar({ accion: "b2bAjustes", leer: true }); ST.cargandoAj = false;
+    if (r && r.ok) { const a = k => Array.isArray(r[k]) ? JSON.parse(JSON.stringify(r[k])) : [];
+      const rg = r.reglas && typeof r.reglas === "object" ? JSON.parse(JSON.stringify(r.reglas)) : {};
+      ST.aj = { promos: a("promos"), ofertas: a("ofertas"), novedades: a("novedades"), reglas: { puntosPorMil: rg.puntosPorMil != null ? rg.puntosPorMil : 1, niveles: Array.isArray(rg.niveles) ? rg.niveles : [{ n: "Bronce", min: 0 }, { n: "Plata", min: 1000000 }, { n: "Oro", min: 3000000 }], beneficios: Array.isArray(rg.beneficios) ? rg.beneficios : [] } }; }
+    else ST.ajErr = (r && r.error) || "No se pudieron leer los ajustes.";
+    if (vivo()) pintar();
+  }
+  /* ---------- cuentas ---------- */
+  function vCuentas() {
+    const q = N(ST.q), vs = vendedores();
+    let l = ST.cuentas.filter(c => (!ST.fEst || c.estado === ST.fEst) && (!ST.fVend || (ST.fVend === "-" ? !c.vendedor : c.vendedor === ST.fVend)) && (!q || N([c.razon, c.rut, c.contacto, c.correo, c.comuna, c.cliente].join(" ")).includes(q)));
+    l.sort((a, b) => String(b.fecha).localeCompare(String(a.fecha)));
+    const cnt = e => ST.cuentas.filter(c => c.estado === e).length;
+    return `<div class="b2-card"><div class="b2-chips">${[["pendiente", "Pendientes"], ["activo", "Activas"], ["bloqueado", "Bloqueadas"], ["rechazado", "Rechazadas"], ["", "Todas"]].map(([k, t]) => `<button type="button" class="b2-ch" data-fe="${k}" aria-pressed="${ST.fEst === k}">${t}${k ? " " + cnt(k) : " " + ST.cuentas.length}</button>`).join("")}</div>
+      <div class="b2-g2" style="margin-top:8px"><label class="b2-lbl">Vendedor<select class="b2-in" id="b2Fv"><option value="">Todos</option><option value="-" ${ST.fVend === "-" ? "selected" : ""}>Sin vendedor</option>${vs.map(v => `<option ${ST.fVend === v ? "selected" : ""}>${E(v)}</option>`).join("")}</select></label>
+        <label class="b2-lbl">Buscar<input class="b2-in" id="b2Fq" type="search" value="${E(ST.q)}" placeholder="Nombre, RUT, correo…"></label></div></div>
+      ${l.length ? l.map(c => { const d = ST.dr[c.id] || {}, v = d.vendedor != null ? d.vendedor : (c.vendedor || ""), cl = d.cliente != null ? d.cliente : (c.cliente || "");
+        const asig = `<div class="b2-g2" style="margin-top:6px"><label class="b2-lbl">Vendedor<select class="b2-in" data-v="${E(c.id)}"><option value="">Sin vendedor</option>${vs.concat(v && !vs.includes(v) ? [v] : []).map(x => `<option ${x === v ? "selected" : ""}>${E(x)}</option>`).join("")}</select></label>
+          <div class="b2-lbl">Cliente HWF<button type="button" class="b2-b" data-cl="${E(c.id)}" style="text-align:left;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${cl ? E(cl) : "Elegir cliente…"}</button></div></div>`;
+        const bt = (c.estado === "pendiente" ? `<button type="button" class="b2-b ok" data-a="aprobar" data-id="${E(c.id)}">Aprobar</button><button type="button" class="b2-b mal" data-a="rechazado" data-id="${E(c.id)}">Rechazar</button>`
+          : c.estado === "activo" ? `<button type="button" class="b2-b tq" data-a="guardar" data-id="${E(c.id)}">Guardar asignación</button><button type="button" class="b2-b mal" data-a="bloqueado" data-id="${E(c.id)}">Bloquear</button>`
+            : c.estado === "bloqueado" ? `<button type="button" class="b2-b ok" data-a="aprobar" data-id="${E(c.id)}">Reactivar</button>` : `<button type="button" class="b2-b ok" data-a="aprobar" data-id="${E(c.id)}">Aprobar</button>`);
+        return tarjetaCuenta(c, asig, bt).replace(/<small>Solicitó el [^<]*(?:<b>.*?<\/b>)?[^<]*<\/small>/, `<small>Solicitó el ${E(F(c.fecha))}</small>`); }).join("") : `<div class="b2-card b2-vac">${ST.t ? "No hay cuentas con ese filtro." : "Sin datos todavía."}</div>`}`;
+  }
+  function vPedidos() {
+    return `<div class="b2-card"><h3>Pedidos del portal <small>${ST.pedidos.length}</small></h3>${ST.pedidos.length ? ST.pedidos.map(tarjetaPedido).join("") : `<div class="b2-vac">Aún no hay pedidos.</div>`}</div>
+      <div class="b2-card"><h3>Canjes de puntos <small>${ST.canjes.length}</small></h3>${ST.canjes.length ? ST.canjes.map(c => `<div class="b2-c"><div class="b2-t"><b>${E(c.cliente || c.rut)}</b><span class="b2-pill ${c.estado === "pendiente" ? "pendiente" : "activo"}">${E(c.estado || "")}</span></div><small>${E(F(c.fecha))} · ${E(c.beneficio || "")} · ${E(c.puntos || 0)} puntos</small></div>`).join("") : `<div class="b2-vac">Aún no hay canjes.</div>`}</div>`;
+  }
+  /* ---------- contenido y reglas ---------- */
+  const SEC = { promos: ["Promociones", "Descuentos sobre productos concretos; se aplican al precio del catálogo mientras están vigentes."], ofertas: ["Ofertas especiales", "Ofertas destacadas en el portal (liquidaciones, packs, oportunidades)."], novedades: ["Novedades", "Anuncios y productos nuevos para los clientes."] };
+  const lbl = (t, h) => `<label class="b2-lbl">${t}${h}</label>`;
+  function vSec(k) {
+    const l = ST.aj[k];
+    return `<div class="b2-card"><h3>${SEC[k][0]} <small>${l.length}</small></h3><p class="b2-p" style="margin:0 0 8px">${SEC[k][1]} Se muestran solo entre «Desde» y «Hasta».</p>
+      ${l.map((it, i) => { const p = k + "." + i + "."; return `<div class="b2-it">
+        ${lbl("Título", `<input class="b2-in" data-p="${p}titulo" value="${E(it.titulo)}" maxlength="80">`)}
+        ${lbl("Texto", `<textarea class="b2-in" data-p="${p}texto" maxlength="400">${E(it.texto)}</textarea>`)}
+        ${lbl("Imagen (URL, opcional)", `<input class="b2-in" data-p="${p}img" value="${E(it.img)}" placeholder="https://…" inputmode="url">`)}
+        <div class="b2-g2">${lbl("Desde", `<input class="b2-in" type="date" data-p="${p}desde" value="${E(String(it.desde || "").slice(0, 10))}">`)}${lbl("Hasta", `<input class="b2-in" type="date" data-p="${p}hasta" value="${E(String(it.hasta || "").slice(0, 10))}">`)}</div>
+        <div class="b2-g2">${lbl("Códigos de producto", `<input class="b2-in" data-p="${p}productos" value="${E((it.productos || []).join(", "))}" placeholder="RR0036, RR0094">`)}${lbl("Descuento %", `<input class="b2-in" type="number" min="0" max="100" step="0.5" inputmode="decimal" data-p="${p}dcto" value="${it.dcto == null ? "" : E(it.dcto)}">`)}</div>
+        <div class="b2-bt"><button type="button" class="b2-b mal" data-del="${k}.${i}">Quitar</button></div></div>`; }).join("") || `<div class="b2-vac">No hay elementos.</div>`}
+      <div class="b2-bt"><button type="button" class="b2-b tq" data-add="${k}">+ Agregar</button></div></div>`;
+  }
+  function vContenido() { return ["promos", "ofertas", "novedades"].map(vSec).join("") + `<div class="b2-bt"><button type="button" class="b2-b ok" id="b2GC" ${ST.ocup ? "disabled" : ""}>Guardar contenido</button></div>`; }
+  function vReglas() {
+    const r = ST.aj.reglas;
+    return `<div class="b2-card"><h3>Fidelización</h3>
+      ${lbl("Puntos por cada $1.000 facturados (neto)", `<input class="b2-in" type="number" min="0" step="0.1" inputmode="decimal" data-p="reglas.puntosPorMil" value="${E(r.puntosPorMil)}">`)}
+      <h3 style="margin-top:12px">Niveles <small>según lo facturado en 3 meses</small></h3>
+      ${r.niveles.map((n, i) => `<div class="b2-it"><div class="b2-g2">${lbl("Nivel", `<input class="b2-in" data-p="reglas.niveles.${i}.n" value="${E(n.n)}" maxlength="30">`)}${lbl("Mínimo facturado ($)", `<input class="b2-in" type="number" min="0" step="1000" inputmode="numeric" data-p="reglas.niveles.${i}.min" value="${E(n.min)}">`)}</div><div class="b2-bt"><button type="button" class="b2-b mal" data-del="reglas.niveles.${i}">Quitar</button></div></div>`).join("")}
+      <div class="b2-bt"><button type="button" class="b2-b tq" data-add="niveles">+ Agregar nivel</button></div>
+      <h3 style="margin-top:12px">Beneficios canjeables</h3>
+      ${r.beneficios.map((n, i) => `<div class="b2-it">${lbl("Beneficio", `<input class="b2-in" data-p="reglas.beneficios.${i}.titulo" value="${E(n.titulo)}" maxlength="80">`)}<div class="b2-g2">${lbl("Puntos", `<input class="b2-in" type="number" min="1" step="1" inputmode="numeric" data-p="reglas.beneficios.${i}.puntos" value="${E(n.puntos)}">`)}${lbl("Código", `<input class="b2-in" data-p="reglas.beneficios.${i}.id" value="${E(n.id)}" maxlength="20" placeholder="auto">`)}</div><div class="b2-bt"><button type="button" class="b2-b mal" data-del="reglas.beneficios.${i}">Quitar</button></div></div>`).join("")}
+      <div class="b2-bt"><button type="button" class="b2-b tq" data-add="beneficios">+ Agregar beneficio</button></div></div>
+      <div class="b2-bt"><button type="button" class="b2-b ok" id="b2GR" ${ST.ocup ? "disabled" : ""}>Guardar reglas</button></div>`;
+  }
+  let pintando = false;
+  function pintar() {
+    const cont = document.getElementById("masBody"); if (!cont || !vivo() || pintando) return; pintando = true; try { pintarX(cont); } finally { pintando = false; } }
+  function pintarX(cont) {
+    const sc = window.scrollY, fo = document.activeElement && document.activeElement.id;
+    const T = [["cuentas", "Solicitudes y cuentas"], ["pedidos", "Pedidos y canjes"], ["contenido", "Promociones y novedades"], ["reglas", "Fidelización"]];
+    let cuerpo;
+    if (ST.tab === "cuentas") cuerpo = vCuentas(); else if (ST.tab === "pedidos") cuerpo = vPedidos();
+    else if (ST.cargandoAj) cuerpo = `<div class="b2-card b2-vac">Cargando…</div>`; else if (!ST.aj) cuerpo = `<div class="b2-err">${E(ST.ajErr || "Sin datos.")}</div><div class="b2-bt"><button type="button" class="b2-b ok" id="b2Aj">Reintentar</button></div>`;
+    else cuerpo = ST.tab === "contenido" ? vContenido() : vReglas();
+    cont.innerHTML = `<div class="b2"><div class="b2-top"><h2>Portal B2B</h2><button type="button" class="b2-b" id="b2Ref" ${ST.cargando ? "disabled" : ""}>${ST.cargando ? "Cargando…" : "↻ Actualizar"}</button></div>
+      ${!cfg() ? `<div class="b2-err">Esta app no está conectada al script de Google.</div>` : ""}${ST.err ? `<div class="b2-err">${E(ST.err)}</div>` : ""}
+      <div class="b2-seg">${T.map(([k, t]) => `<button type="button" class="b2-ch" data-tb="${k}" aria-pressed="${ST.tab === k}">${t}${k === "cuentas" && pend() ? `<i class="b2-bdg">${pend()}</i>` : ""}</button>`).join("")}</div>${cuerpo}</div>`;
+    window.scrollTo({ top: sc }); if (fo && document.getElementById(fo)) { const x = document.getElementById(fo); x.focus(); try { x.setSelectionRange(x.value.length, x.value.length); } catch (e) { } }
+  }
+  /* ---------- acciones ---------- */
+  async function actuar(c, estado) {
+    if (ST.ocup) return; const d = ST.dr[c.id] || {}, vend = d.vendedor != null ? d.vendedor : (c.vendedor || ""), cli = d.cliente != null ? d.cliente : (c.cliente || "");
+    if (estado === "activo" && !cli) { aviso("Elige el cliente HWF antes de aprobar."); return elegirCli(c, () => actuar(c, estado)); }
+    ST.ocup = true; const r = await llamar({ accion: "b2bAprobar", id: c.id, estado, vendedor: vend, cliente: cli, por: POR }); ST.ocup = false;
+    if (r && r.ok) { delete ST.dr[c.id]; aviso(estado === "activo" ? "Guardado. Si es una cuenta nueva, el cliente recibirá su correo de bienvenida." : estado === "bloqueado" ? "Cuenta bloqueada." : "Solicitud rechazada."); await cargar(true); pintar(); }
+    else aviso((r && r.error) || "No se pudo guardar.");
+  }
+  function elegirCli(c, luego) {
+    const lista = clientes(), v = (ST.dr[c.id] || {}).vendedor != null ? ST.dr[c.id].vendedor : c.vendedor;
+    elegir({ titulo: "Elegir el cliente HWF", sub: `Solicitud de <b>${E(c.razon)}</b> · RUT ${E(c.rut)}.`, lista: v ? lista.filter(x => x.cart === v) : lista, mas: () => lista, ok: x => {
+      const d = ST.dr[c.id] = ST.dr[c.id] || {}; d.cliente = x.nombre; if ((d.vendedor == null ? c.vendedor : d.vendedor) == null || (d.vendedor == null && !c.vendedor)) d.vendedor = x.cart || ""; pintar(); if (luego) luego(); } });
+  }
+  const dame = (o, path) => path.split(".").reduce((a, k) => a && a[k], o);
+  function poner(path, v) { const ks = path.split("."), u = ks.pop(), o = dame(ST.aj, ks.join(".")); if (!o) return; if (u === "productos") o[u] = String(v).split(/[\s,;]+/).filter(Boolean); else if (u === "dcto") { if (v === "") delete o[u]; else o[u] = Number(v); } else if (u === "puntosPorMil" || u === "min" || u === "puntos") o[u] = v === "" ? "" : Number(v); else o[u] = v; }
+  const hoy = () => new Date().toISOString().slice(0, 10), nid = p => p + "-" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+  async function guardar(parte) {
+    if (ST.ocup || !ST.aj) return; let g = {};
+    if (parte === "contenido") {
+      for (const k of ["promos", "ofertas", "novedades"]) { const sal = [];
+        for (const [i, it] of ST.aj[k].entries()) { const t = String(it.titulo || "").trim(); if (!t) { aviso(`${SEC[k][0]} n.º ${i + 1}: falta el título.`); return; }
+          if (!it.desde || !it.hasta) { aviso(`«${t}»: indica desde y hasta.`); return; } if (it.hasta < it.desde) { aviso(`«${t}»: «Hasta» es anterior a «Desde».`); return; }
+          const d = it.dcto == null || it.dcto === "" ? null : Number(it.dcto); if (d != null && (!(d >= 0) || d > 100)) { aviso(`«${t}»: el descuento debe estar entre 0 y 100.`); return; }
+          const o = { id: it.id || nid(k), titulo: t, texto: String(it.texto || "").trim(), desde: String(it.desde).slice(0, 10), hasta: String(it.hasta).slice(0, 10), productos: (it.productos || []).map(x => String(x).trim().toUpperCase()).filter(Boolean) };
+          const im = String(it.img || "").trim(); if (im) { if (!/^https:\/\//i.test(im)) { aviso(`«${t}»: la imagen debe ser una dirección https://`); return; } o.img = im; } if (d != null) o.dcto = d; sal.push(o); }
+        g[k] = sal; }
+    } else {
+      const r = ST.aj.reglas, pm = Number(r.puntosPorMil); if (!(pm > 0)) { aviso("Los puntos por $1.000 deben ser mayores que 0."); return; }
+      const niv = r.niveles.map(n => ({ n: String(n.n || "").trim(), min: Number(n.min) || 0 })); if (!niv.length || niv.some(n => !n.n)) { aviso("Cada nivel necesita un nombre."); return; }
+      niv.sort((a, b) => a.min - b.min); if (niv[0].min !== 0) { aviso("El primer nivel debe partir en $0."); return; } if (new Set(niv.map(n => n.min)).size !== niv.length) { aviso("Dos niveles tienen el mismo mínimo."); return; }
+      const ben = []; for (const b of r.beneficios) { const t = String(b.titulo || "").trim(), p = Number(b.puntos); if (!t || !(p > 0)) { aviso("Cada beneficio necesita título y puntos."); return; }
+        ben.push({ id: String(b.id || "").trim() || N(t).replace(/[^a-z0-9]+/g, "").slice(0, 12) || nid("b"), titulo: t, puntos: Math.round(p) }); }
+      g.reglas = { puntosPorMil: pm, niveles: niv, beneficios: ben };
+    }
+    ST.ocup = true; pintar(); const r = await llamar({ accion: "b2bAjustes", guardar: g, por: POR }); ST.ocup = false;
+    if (r && r.ok) { aviso("Guardado. El portal lo muestra de inmediato."); await cargarAj(true); } else { aviso((r && r.error) || "No se pudo guardar."); pintar(); }
+  }
+  function clic(e) {
+    const t = e.target; let b;
+    if (t.closest("#b2Ref")) return cargar(false); if (t.closest("#b2Aj")) return cargarAj(true);
+    if ((b = t.closest("[data-tb]"))) { ST.tab = b.dataset.tb; if (ST.tab === "contenido" || ST.tab === "reglas") cargarAj(false); window.scrollTo({ top: 0 }); return pintar(); }
+    if ((b = t.closest("[data-fe]"))) { ST.fEst = b.dataset.fe; return pintar(); }
+    if ((b = t.closest("[data-cl]"))) { const c = ST.cuentas.find(x => String(x.id) === b.dataset.cl); return c && elegirCli(c); }
+    if ((b = t.closest("[data-a]"))) { const c = ST.cuentas.find(x => String(x.id) === b.dataset.id); if (!c) return; const a = b.dataset.a;
+      if (a === "guardar") return actuar(c, c.estado);
+      if (a === "aprobar") return actuar(c, "activo");
+      if (confirm(a === "bloqueado" ? `¿Bloquear el acceso de ${c.razon}?` : `¿Rechazar la solicitud de ${c.razon}?`)) actuar(c, a); return; }
+    if ((b = t.closest("[data-add]"))) { const k = b.dataset.add;
+      if (k === "niveles") ST.aj.reglas.niveles.push({ n: "", min: 0 }); else if (k === "beneficios") ST.aj.reglas.beneficios.push({ id: "", titulo: "", puntos: 100 });
+      else ST.aj[k].push({ id: nid(k), titulo: "", texto: "", img: "", desde: hoy(), hasta: new Date(Date.now() + 30 * 864e5).toISOString().slice(0, 10), productos: [] }); return pintar(); }
+    if ((b = t.closest("[data-del]"))) { const ks = b.dataset.del.split("."), i = +ks.pop(), l = dame(ST.aj, ks.join(".")); if (l && confirm("¿Quitar este elemento? (queda guardado al tocar Guardar)")) { l.splice(i, 1); pintar(); } return; }
+    if (t.closest("#b2GC")) return guardar("contenido"); if (t.closest("#b2GR")) return guardar("reglas");
+  }
+  function cambio(e) {
+    const t = e.target; if (t.id === "b2Fv") { if (ST.fVend !== t.value) { ST.fVend = t.value; pintar(); } return; } if (t.id === "b2Fq") { if (ST.q !== t.value) { ST.q = t.value; pintar(); } return; }
+    if (t.dataset.v) { (ST.dr[t.dataset.v] = ST.dr[t.dataset.v] || {}).vendedor = t.value; return; }
+    if (t.dataset.p && ST.aj) poner(t.dataset.p, t.value);
+  }
+  function montar() {
+    const seg = document.getElementById("masSeg"), b = document.createElement("button"); b.type = "button"; b.dataset.m = "b2b"; b.setAttribute("aria-pressed", "false");
+    b.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l5-5 4 3 4-3 5 5-5 6h-8z"/><path d="M8 17l2 2M11 17l2 2"/></svg><span>Portal B2B</span>`;
+    const ref = seg.querySelector('[data-m="embudo"]') || seg.lastElementChild; ref.after(b);
+    try { if (typeof NAV_MAS !== "undefined" && !NAV_MAS.includes("b2b")) { const i = NAV_MAS.indexOf("embudo"); NAV_MAS.splice(i >= 0 ? i + 1 : NAV_MAS.length, 0, "b2b"); } if (typeof NAV_MNOM !== "undefined") NAV_MNOM.b2b = "Portal B2B"; } catch (e) { }
+    const _pm = pintarMas; pintarMas = function () { if (vistaMas === "b2b") { if (!ST.t) cargar(false); pintar(); return; } return _pm.apply(this, arguments); };
+    const mb = document.getElementById("masBody"); mb.addEventListener("click", e => { if (vistaMas === "b2b") clic(e); }); mb.addEventListener("change", e => { if (vistaMas === "b2b") cambio(e); }); mb.addEventListener("input", e => { if (vistaMas === "b2b") cambio(e); });
+    const ajustar = () => { const p = document.getElementById("snPanel"); if (!p) return; const it = p.querySelector('[data-m="b2b"]'); if (!it) return; const e = it.querySelector(".sn-e"); if (e && e.textContent.trim() === "•") e.textContent = "🤝"; if (!it.querySelector(".b2-bdg") && pend()) it.insertAdjacentHTML("beforeend", `<i class="b2-bdg" style="margin-left:auto">${pend()}</i>`); };
+    const iv = setInterval(() => { const p = document.getElementById("snPanel"); if (p) { clearInterval(iv); new MutationObserver(() => setTimeout(ajustar, 0)).observe(p, { childList: true }); } }, 400);
+    const sonda = () => { if (document.hidden || !cfg() || (document.getElementById("lock") && !document.getElementById("lock").hidden)) return; cargar(true); };
+    setTimeout(sonda, 5000); setInterval(sonda, 300000); document.addEventListener("visibilitychange", () => { if (!document.hidden && Date.now() - ST.t > 120000) sonda(); });
+  }
+  montar();
 })();
 </script>
 </body>

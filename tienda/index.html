@@ -1,5 +1,23 @@
 <!doctype html>
-<html lang="es-CL"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<html lang="es-CL"><head>
+<script>/* patch_fotos: base de fotos por código HWF (datos/fotos.json) */
+(function(){var W=window,K="hwf-fotos";
+function lee(){try{var p=JSON.parse(localStorage.getItem(K)||"null");return p&&p.fotos?p:null}catch(e){return null}}
+W.__FOT=lee();
+W.SINFOTO="data:image/svg+xml,"+encodeURIComponent("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='#EEF2F5'/><g fill='none' stroke='#9AA7B2' stroke-width='3' stroke-linejoin='round'><rect x='28' y='30' width='44' height='32' rx='5'/><circle cx='50' cy='46' r='8'/></g><text x='50' y='84' font-family='sans-serif' font-size='13' font-weight='700' fill='#7A8794' text-anchor='middle'>Sin foto</text></svg>");
+W.hwfFoto=function(c,chica){c=String(c==null?"":c).trim();if(!c)return"";var B=W.__FOT,e=B&&B.fotos&&B.fotos[c];
+ if(e){if(e.calidad==="mala")return"";var r=(chica&&e.m)||e.f;if(r){var u=/^https?:/.test(r)?r:String(B.base||"")+r;return u+(B.version?(u.indexOf("?")<0?"?":"&")+"v="+encodeURIComponent(B.version):"")}}
+ return""};
+W.hwfFotoErr=function(i){i.onerror=null;i.src=W.SINFOTO};
+W.hwfFotoHtml=function(c,chica,alt,cls){var u=W.hwfFoto(c,chica);return'<img'+(cls?' class="'+cls+'"':'')+' src="'+String(u||W.SINFOTO).replace(/"/g,"&quot;")+'" alt="'+String(alt||"").replace(/"/g,"&quot;")+'" data-hf="'+String(c==null?"":c).replace(/"/g,"&quot;")+'" data-hc="'+(chica?1:0)+'" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="hwfFotoErr(this)">'};
+function refresca(){try{[].forEach.call(document.querySelectorAll("img[data-hf]"),function(i){var n=W.hwfFoto(i.getAttribute("data-hf"),i.getAttribute("data-hc")==="1")||W.SINFOTO;if(i.getAttribute("src")!==n){i.removeAttribute("data-hx");i.onerror=function(){W.hwfFotoErr(i)};i.src=n}})}catch(e){}}
+function aplica(p){if(!p||!p.version||!p.fotos)return;var a=W.__FOT;if(a&&a.version&&a.version>=p.version)return;try{localStorage.setItem(K,JSON.stringify(p))}catch(e){}W.__FOT=p;refresca()}
+function baja(l){if(!l.length)return;fetch(l[0],{cache:"no-store"}).then(function(r){return r.ok?r.json():Promise.reject()}).then(aplica).catch(function(){baja(l.slice(1))})}
+setTimeout(function(){baja(["../datos/fotos.json","https://jmunozcea-hwf.github.io/hwf-apps/datos/fotos.json"])},1500);
+})();</script>
+<style>/* patch_fotos */.st-f{display:flex;align-items:center;gap:10px;min-width:0}.st-f>div{min-width:0}.st-th{width:44px;height:44px;flex:none;object-fit:contain;background:#fff;border:1px solid #EDF1F5;border-radius:8px}</style>
+
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>TIENDA HWF</title>
 <meta name="apple-mobile-web-app-title" content="TIENDA"><meta name="theme-color" content="#5B2A86"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon-192.png">
 <script>/* espacio propio en el almacenamiento del sitio (no choca con app Ventas ni HWF en el mismo equipo) */
@@ -1700,7 +1718,7 @@ function pintarStock() {
     <div class="t-kpis"><div class="t-kpi"><span>Productos</span><b>${S.length}</b></div><div class="t-kpi bad"><span>Sin stock</span><b>${cero}</b></div><div class="t-kpi"><span>Stock bajo (1–3)</span><b>${bajo}</b></div></div>
     <div class="t-row"><input id="stQ" type="search" placeholder="Buscar producto o código" value="${esc(stQ)}" style="flex:1;min-width:180px;border:1px solid var(--line);border-radius:10px;padding:10px"><button type="button" class="t-btn sec" id="stRev">Marcar stock revisado</button></div>
     <p class="t-vacio" style="font-size:.78rem">Ordenado de lo que más se vende a lo que menos (unidades de los últimos 90 días).</p>
-    <table class="t-t t-stock"><thead><tr><th>Producto</th><th>Vendidas 90 d</th><th>Saldo</th></tr></thead><tbody>${L.slice(0, 400).map(x => `<tr><td><span class="st-n">${esc(x[1])}</span><small class="st-c">${esc(x[0])}</small></td><td>${Math.round(vend[String(x[0])] || 0)}</td><td class="${x[2] <= 3 ? "neg" : ""}"><b>${x[2]}</b></td></tr>`).join("")}</tbody></table></div>`;
+    <table class="t-t t-stock"><thead><tr><th>Producto</th><th>Vendidas 90 d</th><th>Saldo</th></tr></thead><tbody>${L.slice(0, 400).map(x => `<tr><td><div class="st-f">${hwfFotoHtml(x[0], true, "", "st-th")}<div><span class="st-n">${esc(x[1])}</span><small class="st-c">${esc(x[0])}</small></div></div></td><td>${Math.round(vend[String(x[0])] || 0)}</td><td class="${x[2] <= 3 ? "neg" : ""}"><b>${x[2]}</b></td></tr>`).join("")}</tbody></table></div>`;
   $("stQ").oninput = e => { stQ = e.target.value; const p = e.target.selectionStart; pintarStock(); $("stQ").focus(); try { $("stQ").setSelectionRange(p, p); } catch (x) {} };
   $("stRev").onclick = () => { misSumar("stock", 1); toast("Stock revisado."); pintarInicio(); };
 }
@@ -2269,7 +2287,7 @@ const stAbrev = n => ST_ABR.reduce((s, [r, t]) => s.replace(r, t), String(n || "
 try { if ($("sStock") && !$("sStock").hidden) pintarStock(); } catch (e) {}
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261116003351";
+const HWF_VER = "20261116005600";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
