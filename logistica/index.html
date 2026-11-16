@@ -58,6 +58,9 @@ function rtFiltrosHtml(L0, F, n) { const regs = [...new Set(L0.map(rtReg))].sort
     <label>Comuna<select id="rtCom">${op("", "Todas", F.com)}${Object.keys(coms).sort().map(k => op(k, coms[k], F.com)).join("")}</select></label>
     <label>Vendedor<select id="rtVend">${op("", "Todos", F.vend)}${vends.map(v => op(v, v, F.vend)).join("")}</select></label>
     <div class="rt-fb"><small>${n} de ${L0.length} paradas${F.reg || F.com || F.vend ? " con estos filtros" : ""}</small><button type="button" class="btn" id="rtMar">Marcar visibles</button><button type="button" class="btn" id="rtDes">Desmarcar visibles</button></div></div>`; }
+const rtHor = () => lsGet("rtHorario", true) !== false;
+const rtP = P => rtHor() ? P : Object.assign({}, P, { jornada: 1e6 });
+const rtHorHtml = P => `<div class="rt-hor" role="radiogroup" aria-label="Restricción horaria del chofer"><span>Horario del chofer</span><button type="button" class="chip" data-hor="1" aria-pressed="${rtHor()}">⏱ Con restricción (jornada máx. ${P.jornada} h)</button><button type="button" class="chip" data-hor="0" aria-pressed="${!rtHor()}">Sin restricción horaria</button></div>`;
 const rtProg = () => lsGet("rtProg", {});
 const rtProgPor = () => { const o = {}; Object.entries(rtProg()).forEach(([f, x]) => (x.ids || []).forEach(id => { if (!o[id] || f > o[id]) o[id] = f; })); return o; };
 function rtProgGuardar(fecha, rutas) { if (!fecha) return; const P = rtProg(); P[fecha] = { rutas: rutas.length, paradas: rutas.reduce((t, r) => t + r.paradas.length, 0), ids: [].concat(...rutas.map(r => r.paradas.map(s => s.id))), choferes: rutas.map(r => r.chofer).filter(Boolean) };
@@ -69,6 +72,7 @@ function rtEnganchar(L) { const g = id => document.getElementById(id), set = (k,
   if (g("rtReg")) g("rtReg").onchange = e => set("reg", e.target.value); if (g("rtCom")) g("rtCom").onchange = e => set("com", e.target.value); if (g("rtVend")) g("rtVend").onchange = e => set("vend", e.target.value);
   const marca = on => { const s = new Set(lsGet("excl", [])); L.forEach(p => on ? s.delete(p.id) : s.add(p.id)); lsSet("excl", [...s]); pintarRutas(); };
   if (g("rtMar")) g("rtMar").onclick = () => marca(true); if (g("rtDes")) g("rtDes").onclick = () => marca(false);
+  document.querySelectorAll("[data-hor]").forEach(b => b.onclick = () => { lsSet("rtHorario", b.dataset.hor === "1"); RT = null; pintarRutas(); toast(b.dataset.hor === "1" ? "Rutas con jornada máxima del chofer." : "Rutas sin restricción horaria: un vehículo puede hacer todas las vueltas que necesite."); });
   document.querySelectorAll("[data-dia]").forEach(b => b.onclick = () => { lsSet("fecha", b.dataset.dia); RT = null; pintarRutas(); }); }
 const rtFecha = () => lsGet("fecha", "") || (document.getElementById("rFecha") || {}).value || fLocal(new Date(Date.now() + 864e5));
 const rtAsigK = () => "rtAsig:" + rtFecha(), rtAsig = k => (lsGet(rtAsigK(), {})[k] || {});
@@ -84,6 +88,8 @@ document.addEventListener("change", e => { const s = e.target.closest(".rt-asig 
 .rt-fil select,.rt-asig select{font:inherit;padding:8px;border-radius:10px;border:1px solid var(--line);background:var(--card,#fff);min-width:0;width:100%}
 .rt-fb{grid-column:1/-1;display:flex;gap:8px;align-items:center;flex-wrap:wrap}.rt-fb small{flex:1 1 140px;color:var(--muted)}
 @media(max-width:600px){.rt-fil{grid-template-columns:1fr 1fr}.rt-fil label:last-of-type{grid-column:1/-1}}
+.rt-hor{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:10px 0 2px}.rt-hor span{font-size:.74rem;font-weight:800;text-transform:uppercase;color:var(--muted);margin-right:4px;width:100%}
+.rt-hor .chip,.rt-dias .chip{border:1px solid var(--line);background:var(--card,#fff);border-radius:999px;padding:6px 10px;font:inherit;font-size:.8rem;cursor:pointer}.rt-hor .chip[aria-pressed="true"]{background:#0B3146;color:#fff;border-color:#0B3146}
 .rt-dias{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:8px 0}.rt-dias span{font-size:.74rem;font-weight:800;text-transform:uppercase;color:var(--muted);margin-right:4px}
 .rt-dias .chip{border:1px solid var(--line);background:var(--card,#fff);border-radius:999px;padding:6px 10px;font:inherit;font-size:.8rem;cursor:pointer}.rt-dias .chip[aria-pressed="true"]{background:#0B3146;color:#fff;border-color:#0B3146}
 .rt-asig{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:6px 0 8px}.rt-asig label{display:grid;gap:3px;font-size:.74rem;font-weight:700;color:var(--muted)}
@@ -327,7 +333,7 @@ function pintarRutas() { const D = DATA(), P = par(), F = flota(), L0 = paradasB
     <div class="k" style="margin-bottom:10px"><span>Vehículos disponibles hoy</span><div class="chips" id="rVeh">${F.map(v => `<button type="button" data-veh="${v.id}" aria-pressed="${!!v.on}" title="${esc(v.nota)}"><span class="sw" style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${COL[v.id]};margin-right:5px"></span>${esc(v.nombre)} · ${nf(v.kg)} kg</button>`).join("")}</div><small>Toca para quitar o agregar. Origen: ${esc(P.origen.nombre)} (cámbialo en Flota).</small></div>
     <div class="row"><label>Fecha de despacho<input type="date" id="rFecha" value="${fecha}"></label><button type="button" class="btn" id="rGeo">📍 Ubicar direcciones exactas</button><button type="button" class="btn" id="rAdd">+ Agregar parada</button>
       <button type="button" class="btn pri" id="rOpt">⚙ Armar rutas óptimas</button></div>
-    ${rtFiltrosHtml(L0, FR, L.length)}${rtDiasHtml()}
+    ${rtHorHtml(P)}${rtFiltrosHtml(L0, FR, L.length)}${rtDiasHtml()}
     <div id="rLista" style="margin-top:8px">${L.map(p => { const u = ubic(p.cli, p.comuna), dd = diasDesde(p.fecha);
       return `<div class="st"><input type="checkbox" data-id="${esc(p.id)}" ${excl.has(p.id) ? "" : "checked"} aria-label="Incluir ${esc(p.cli)}"><div><span class="n">${esc(p.cli)}</span>
         <small>${esc(p.comuna || "sin comuna")}${p.dir ? " · " + esc(p.dir) : ""} · ${p.manual ? "parada agregada" : "NP " + esc(p.num) + (dd != null ? (dd < 0 ? " · para el " + esc(String(p.fecha).slice(0, 5)) : dd === 0 ? " · hoy" : dd === 1 ? " · ayer" : ` · hace ${dd} días`) : "") + " · " + esc(p.vend || "")}${PROG[p.id] && PROG[p.id] !== fecha ? ` <span class="pill p-wa">programada ${esc(PROG[p.id].slice(8, 10) + "-" + PROG[p.id].slice(5, 7))}</span>` : PROG[p.id] ? ' <span class="pill p-ok">en este día</span>' : ""}</small>
@@ -348,7 +354,7 @@ function pintarRutas() { const D = DATA(), P = par(), F = flota(), L0 = paradasB
   $("rAdd").onclick = agregarParada;
   $("rOpt").onclick = () => { const inc = L.filter(p => !excl.has(p.id)).map(p => Object.assign({}, p, ubic(p.cli, p.comuna) || {})); const sinU = inc.filter(p => p.lat == null);
     if (sinU.length) toast(`${sinU.length} sin ubicación (sin comuna conocida): quedan fuera.`); const ok = inc.filter(p => p.lat != null);
-    RT = optimizar(ok, F, P); lsSet("ultimaRuta", RT ? { fecha: $("rFecha").value, total: RT.res.total, km: RT.res.usos.reduce((t, u) => t + u.viajes.reduce((s, r) => s + RT.len(r), 0), 0), veh: RT.res.usos.length, paradas: ok.length - RT.res.sinAsig.length, kg: ok.reduce((t, p) => t + p.kg, 0), monto: ok.reduce((t, p) => t + (p.monto || 0), 0) } : null);
+    RT = optimizar(ok, F, rtP(P)); lsSet("ultimaRuta", RT ? { fecha: $("rFecha").value, total: RT.res.total, km: RT.res.usos.reduce((t, u) => t + u.viajes.reduce((s, r) => s + RT.len(r), 0), 0), veh: RT.res.usos.length, paradas: ok.length - RT.res.sinAsig.length, kg: ok.reduce((t, p) => t + p.kg, 0), monto: ok.reduce((t, p) => t + (p.monto || 0), 0) } : null);
     pintarResultado(); };
   if (RT) pintarResultado(); }
 function agregarParada() { const D = DATA(), box = document.createElement("div"); box.className = "ov";
@@ -359,10 +365,10 @@ function agregarParada() { const D = DATA(), box = document.createElement("div")
   $("aSi").onclick = () => { const n = $("aCli").value.trim(); if (!n) return; const c = (D.clientes || []).find(x => norm(x[0]) === norm(n)) || [n, "", "", "", ""]; const kg = Number($("aKg").value) || 0;
     const L = lsGet("manuales", []); L.push({ id: "m" + Date.now(), cli: c[0], comuna: c[1], dir: c[2], tel: c[3], kg, m3: kg * 0.0028, monto: Number($("aMon").value) || 0, nota: $("aNota").value, fecha: "" }); lsSet("manuales", L); box.remove(); pintarRutas(); }; }
 function pintarResultado() { const box = $("rRes"); if (!RT || !RT.res) { box.innerHTML = '<div class="card"><p class="muted">Selecciona paradas con ubicación y vehículos disponibles.</p></div>'; return; }
-  const R = RT.res, P = par(), km = R.usos.reduce((t, u) => t + u.viajes.reduce((s, r) => s + RT.len(r), 0), 0), kg = R.usos.reduce((t, u) => t + u.viajes.reduce((s, r) => s + RT.carga(r).kg, 0), 0);
+  const R = RT.res, P = rtP(par()), km = R.usos.reduce((t, u) => t + u.viajes.reduce((s, r) => s + RT.len(r), 0), 0), kg = R.usos.reduce((t, u) => t + u.viajes.reduce((s, r) => s + RT.carga(r).kg, 0), 0);
   const monto = R.usos.reduce((t, u) => t + u.viajes.reduce((s, r) => s + r.reduce((a, x) => a + (RT.S[x].monto || 0), 0), 0), 0), aho = RT.solo - R.total;
   const link = (r) => { const pts = r.map(x => `${RT.S[x].lat},${RT.S[x].lng}`), o = `${RT.O.lat},${RT.O.lng}`, L = []; for (let i = 0; i < pts.length; i += 9) L.push(`https://www.google.com/maps/dir/?api=1&origin=${i ? pts[i - 1] : o}&destination=${i + 9 >= pts.length ? o : pts[i + 8]}&waypoints=${encodeURIComponent(pts.slice(i, i + (i + 9 >= pts.length ? 9 : 8)).join("|"))}&travelmode=driving`); return L; };
-  box.innerHTML = `<div class="card"><h2>Plan de rutas <small>${esc(lsGet("fecha", ""))}</small></h2>
+  box.innerHTML = `<div class="card"><h2>Plan de rutas <small>${esc(lsGet("fecha", ""))} · ${rtHor() ? "jornada máx. " + par().jornada + " h" : "sin restricción horaria"}</small></h2>
     <div class="kp"><div class="k"><span>Costo total del día</span><b>${mm(R.total)}</b><small>${R.usos.length} ${R.usos.length === 1 ? "vehículo" : "vehículos"} · ${nf(km)} km</small></div>
       <div class="k"><span>Costo por kg</span><b>${kg ? fmt(R.total / kg) : "—"}</b><small>${nf(kg)} kg despachados</small></div><div class="k"><span>% sobre lo despachado</span><b>${monto ? nf(R.total / monto * 100, 1) + "%" : "—"}</b><small>${monto ? mm(monto) + " en pedidos" : "sin montos"}</small></div>
       <div class="k"><span>Ahorro vs. viajes separados</span><b class="ok">${mm(Math.max(0, aho))}</b><small>${RT.solo ? nf(Math.max(0, aho) / RT.solo * 100) + "% menos" : ""}</small></div></div>
@@ -381,7 +387,7 @@ function pintarResultado() { const box = $("rRes"); if (!RT || !RT.res) { box.in
       <div class="row np" style="margin-top:8px">${link(r).map((l, i) => `<a class="btn ver" target="_blank" rel="noopener" href="${esc(l)}">🧭 Navegar${link(r).length > 1 ? " " + (i + 1) : ""}</a>`).join("")}
         <a class="btn" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(txt)}">WhatsApp al chofer</a></div></div>`; }).join(""); }).join("")}`;
   $("rEnv").onclick = async () => { const b = $("rEnv"), P2 = par(), rutas = [];
-    R.usos.forEach(u => u.viajes.forEach((r, vi) => rutas.push({ veh: u.v.id, vehNombre: rtAsig(u.v.id + "|" + (vi + 1)).trans || u.v.nombre, chofer: rtAsig(u.v.id + "|" + (vi + 1)).chofer || "", transporte: rtAsig(u.v.id + "|" + (vi + 1)).trans || u.v.nombre, vuelta: vi + 1, km: Math.round(RT.len(r)), horas: +RT.horas(r, u.v).toFixed(1), costo: Math.round(RT.costo(r, u.v) + (vi ? 0 : u.v.fijo)), origen: P2.origen,
+    R.usos.forEach(u => u.viajes.forEach((r, vi) => rutas.push({ veh: u.v.id, vehNombre: rtAsig(u.v.id + "|" + (vi + 1)).trans || u.v.nombre, chofer: rtAsig(u.v.id + "|" + (vi + 1)).chofer || "", transporte: rtAsig(u.v.id + "|" + (vi + 1)).trans || u.v.nombre, horario: rtHor() ? "con" : "sin", jornada: rtHor() ? par().jornada : null, vuelta: vi + 1, km: Math.round(RT.len(r)), horas: +RT.horas(r, u.v).toFixed(1), costo: Math.round(RT.costo(r, u.v) + (vi ? 0 : u.v.fijo)), origen: P2.origen,
       paradas: r.map(x => { const s = RT.S[x]; return { id: s.id, cli: s.cli, dir: s.dir || "", comuna: s.comuna || "", tel: s.tel || "", lat: s.lat, lng: s.lng, kg: Math.round(s.kg), monto: s.monto || 0, num: s.num || "", vend: s.vend || "", items: s.items || [] }; }) })));
     b.disabled = true; b.textContent = "Enviando…"; const res = await syLlamar(cfg(), { accion: "rutaGuardar", fecha: lsGet("fecha", ""), rutas, por: "Logística" });
     b.disabled = false; b.textContent = "📤 Enviar rutas a choferes"; if (res.ok) rtProgGuardar(rtFecha(), rutas); toast(res.ok ? `Rutas enviadas: ${res.rutas} ${res.rutas === 1 ? "ruta" : "rutas"}, ${res.paradas} paradas para el ${res.fecha}.` : "No se pudo enviar: " + (res.error || "error")); };
@@ -453,7 +459,7 @@ if (!cfg() || !DATA()) pantallaConexion(); else { arrancar(); bajar(true).then(n
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261116003337";
+const HWF_VER = "20261116003351";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
