@@ -230,7 +230,7 @@ function npRitmo(cots, Y, M, n, real, lim, ant) {
   return { np, tot };
 }
 </script>
-<script>/* hwfAutoAct (liviano): revisa version.json y recarga sola al volver a la app si hay versión nueva */(function(){var t0=0;function raiz(){return location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer)\/[^/]*$/,"/")}function ocupado(){var a=document.activeElement;return !!(a&&/INPUT|TEXTAREA|SELECT/.test(a.tagName))}function chk(){if(Date.now()-t0<60000||!navigator.onLine)return;t0=Date.now();fetch(raiz()+"version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.json():null}).then(function(j){var v=typeof HWF_VER!=="undefined"?String(HWF_VER):"";if(!j||!j.v||!v||String(j.v)<=v||ocupado())return;var k="hwf-autoact-"+j.v;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,"1")}catch(e){return}location.reload()}).catch(function(){})}document.addEventListener("visibilitychange",function(){if(document.visibilityState==="visible")chk()});window.addEventListener("load",function(){setTimeout(chk,5000)})})();</script>
+<script>/* hwfAutoAct (liviano): revisa version.json y recarga sola al volver a la app si hay versión nueva */(function(){var t0=0,oc=0;function raiz(){return location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/,"/")}function ocupado(){var a=document.activeElement;return !!(a&&/INPUT|TEXTAREA|SELECT/.test(a.tagName))}function chk(){if(Date.now()-t0<60000||!navigator.onLine)return;t0=Date.now();fetch(raiz()+"version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.json():null}).then(function(j){var v=typeof HWF_VER!=="undefined"?String(HWF_VER):"";if(!j||!j.v||!v||String(j.v)<=v||ocupado())return;var k="hwf-autoact-"+j.v;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,"1")}catch(e){return}location.reload()}).catch(function(){})}document.addEventListener("visibilitychange",function(){if(document.visibilityState==="hidden"){oc=Date.now();return}if(oc&&Date.now()-oc>=600000)chk();oc=0})})();</script>
 <style>.cli-fant{display:block;font-weight:600;color:var(--muted,#5B6874);font-size:.86em;margin-top:2px}.cli-top .cli-fant{display:inline;font-size:.82em}</style><style>.p14t td,.p14t th{white-space:nowrap;padding:6px 8px}.p14t td:first-child{white-space:normal;min-width:110px}</style></head>
 <body>
 <title>VENTAS HWF</title>
@@ -7198,7 +7198,7 @@ function confirmarNota() {
   x.onclick = () => cerrarModal(); card.insertBefore(x, card.firstChild); })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261116180050";
+const HWF_VER = "20261116202810";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -9571,6 +9571,18 @@ body.ini-u #crmInicio>.in-sec{order:9}body.ini-u #ptCard{order:10}body.ini-u #ca
 body.ini-u #crmDash>#crmAvance,body.ini-u #crmDash>.db-hd,body.ini-u .iu-fuera{display:none!important}
 body.ini-u #crmInicio>*,body.ini-u #crmDash>*{margin-top:0!important;margin-bottom:0!important}
 #mDash,#mAvance,#snPanel [data-sm="dash"],#snPanel [data-sm="avance"]{display:none!important}
+/* Inicio en 2 pestañas (16-11-2026): «Mi día» (liviano) y «Avance» (gráficos y panel; se dibuja solo al abrirla) */
+#iuTabs{display:none}body.ini-u #iuTabs{display:flex;order:2;gap:6px;background:var(--card,#fff);border:1px solid var(--line,#DAE1E7);border-radius:14px;padding:4px}
+#iuTabs button{flex:1;border:0;border-radius:10px;padding:11px 8px;font:inherit;font-weight:800;font-size:.95rem;background:transparent;color:var(--muted,#5B6874);cursor:pointer}
+#iuTabs button[aria-selected="true"]{background:#0B3146;color:#fff}
+body.ini-u.it-dia #kpCard,body.ini-u.it-dia #adCard,body.ini-u.it-dia #crmDash,body.ini-u.it-dia #vmCard,body.ini-u.it-dia #actLin{display:none!important}
+body.ini-u.it-dia #ptCard,body.ini-u.it-dia #calCard{display:none!important}
+body.ini-u.it-av #crmInicio>.in-sec,body.ini-u.it-av #ntCard,body.ini-u.it-av #rdIn{display:none!important}
+body.ini-u.it-dia .iu-pl{max-height:190px;overflow:hidden;position:relative}
+.iu-pl::after{content:"";position:absolute;left:0;right:0;bottom:0;height:70px;background:linear-gradient(transparent,var(--bg,#F4F7F9))}
+.iu-mas{display:none}body.ini-u.it-dia .iu-pl .iu-mas{display:block;position:absolute;z-index:1;left:50%;bottom:8px;transform:translateX(-50%);border:1px solid var(--line,#C9D3DB);background:var(--card,#fff);color:inherit;border-radius:999px;padding:8px 16px;font:inherit;font-weight:700;cursor:pointer;white-space:nowrap}
+#rdIn{display:none}body.ini-u.it-dia #rdIn{display:grid;order:3;gap:12px}
+@media(min-width:700px){#rdIn .rd-g{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}}#rdIn .rd-g{display:grid;gap:12px}
 </style>
 <script>/* patch_inicio_unico: Panel dentro de Inicio, sin duplicados */
 (function () {
@@ -9580,14 +9592,28 @@ body.ini-u #crmInicio>*,body.ini-u #crmDash>*{margin-top:0!important;margin-bott
     d.querySelectorAll(".db-g > *").forEach(c => { const h = c.querySelector("h2,h3,.db-t,b"); const t = (h ? h.textContent : c.textContent).trim(); c.classList.toggle("iu-fuera", FUERA.test(t)); });
     d.querySelectorAll(".db-k > *").forEach(c => c.classList.toggle("iu-fuera", /^Facturado del mes/i.test(c.textContent.trim())));
     document.querySelectorAll("#crmInicio .in-hero button, #crmInicio .in-hero a").forEach(b => { if (/dashboard|panel/i.test(b.textContent)) b.classList.add("iu-fuera"); }); }
-  let pintando = false;
-  function conPanel() { if (pintando) return; pintando = true;
+  let pintando = false, TAB = "dia"; try { TAB = localStorage.getItem("hwf-ini-tab") === "av" ? "av" : "dia"; } catch (e) {}
+  function tabs() { const ini = document.getElementById("crmInicio"); if (!ini) return; let t = document.getElementById("iuTabs");
+    if (!t) { t = document.createElement("div"); t.id = "iuTabs"; t.setAttribute("role", "tablist");
+      t.innerHTML = '<button type="button" role="tab" data-it="dia">Mi día</button><button type="button" role="tab" data-it="av">Avance</button>';
+      t.addEventListener("click", e => { const b = e.target.closest("[data-it]"); if (b) ponerTab(b.dataset.it); }); ini.appendChild(t); }
+    t.querySelectorAll("[data-it]").forEach(b => b.setAttribute("aria-selected", String(b.dataset.it === TAB)));
+    document.body.classList.toggle("it-dia", TAB === "dia"); document.body.classList.toggle("it-av", TAB === "av"); }
+  function miDia() { if (TAB !== "dia" || typeof window.hwfResumenHtml !== "function") return; const ini = document.getElementById("crmInicio"); if (!ini) return;
+    let c = document.getElementById("rdIn"); if (!c) { c = document.createElement("div"); c.id = "rdIn"; ini.appendChild(c); }
+    try { c.innerHTML = window.hwfResumenHtml(); } catch (e) { console.error(e); c.innerHTML = ""; }
+    /* novedades plegadas en «Mi día»: se abren con «Ver todas» */
+    ini.querySelectorAll(":scope>.in-sec").forEach(x => { if (!/^\s*Novedades/.test(x.textContent) || x.dataset.iu) return; x.dataset.iu = "1"; x.classList.add("iu-pl");
+      const b = document.createElement("button"); b.type = "button"; b.className = "iu-mas"; b.textContent = "Ver todas las novedades"; b.onclick = () => { x.classList.remove("iu-pl"); b.remove(); }; x.appendChild(b); }); }
+  function ponerTab(k) { TAB = k === "av" ? "av" : "dia"; try { localStorage.setItem("hwf-ini-tab", TAB); } catch (e) {} tabs(); if (TAB === "av") conPanel(); else miDia(); window.scrollTo(0, 0); }
+  { const ini = document.getElementById("crmInicio"); new MutationObserver(() => { if (!document.getElementById("iuTabs")) tabs(); if (!document.getElementById("rdIn")) miDia(); }).observe(ini, { childList: true }); }
+  function conPanel() { if (TAB !== "av") return; if (pintando) return; pintando = true;
     try { const d = document.getElementById("crmDash"); d.hidden = false; if (typeof pintarDash === "function") pintarDash(); d.hidden = false; const av = document.getElementById("crmAvance"); if (av) av.hidden = true; limpiar(); }
     catch (e) { console.error(e); } finally { pintando = false; } }
   const _sm = setModo;
   setModo = function (m) { if (m === "dash" || m === "avance") m = "inicio";
     const r = _sm.call(this, m), on = m === "inicio"; document.body.classList.toggle("ini-u", on);
-    if (on) conPanel(); else { const d = document.getElementById("crmDash"); if (d && MODO !== "dash") d.hidden = true; }
+    if (on) { tabs(); conPanel(); setTimeout(miDia, 0); } else { const d = document.getElementById("crmDash"); if (d && MODO !== "dash") d.hidden = true; }
     return r; };
   if (typeof pintarDash === "function") { const _pd = pintarDash; pintarDash = function () { const r = _pd.apply(this, arguments); try { if (document.body.classList.contains("ini-u")) { document.getElementById("crmDash").hidden = false; limpiar(); } } catch (e) {} return r; }; }
   try { if (typeof NAV_ORDEN !== "undefined") for (let i = NAV_ORDEN.length - 1; i >= 0; i--) if (NAV_ORDEN[i][0] === "dash" || NAV_ORDEN[i][0] === "avance") NAV_ORDEN.splice(i, 1); } catch (e) {}
@@ -10266,18 +10292,19 @@ try { if (document.getElementById("crmInicio") && SES) pintarInicio(); } catch (
     new MutationObserver(() => setTimeout(() => { const it = p.querySelector('[data-sm="mail"]'); if (it) { const e = it.querySelector(".sn-e"); /* ícono: patch_iconos_extra */ } }, 0)).observe(p, { childList: true }); }, 400);
 })();
 </script>
+<style>/* patch_sinverdash */#inAv{display:none!important}</style>
 <style>/* patch_resumendia */
 #rdOv{position:fixed;inset:0;z-index:1100;background:var(--bg,#F4F7F9);overflow:auto;-webkit-overflow-scrolling:touch;color:var(--ink,#13222D)}
-#rdOv .rd-w{max-width:880px;margin:0 auto;padding:16px 14px calc(18px + env(safe-area-inset-bottom));display:grid;gap:12px}
-#rdOv .rd-h{background:linear-gradient(135deg,#0B3146,#1C7A4E);color:#fff;border-radius:18px;padding:16px 58px 16px 16px}#rdOv .rd-h h1{margin:0;font-size:1.25rem}#rdOv .rd-h p{margin:4px 0 0;opacity:.9;font-size:.88rem}
-#rdOv .rd-c{background:var(--card,#fff);border:1px solid var(--line,#DAE1E7);border-radius:16px;padding:14px;display:grid;gap:8px}#rdOv .rd-c h2{margin:0;font-size:1rem}#rdOv .rd-c h2 small{font-weight:600;color:var(--muted,#5B6874);font-size:.76rem}
-#rdOv .rd-k{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}#rdOv .rd-k div{background:var(--sunk,#EEF2F5);border-radius:12px;padding:9px 10px;font-size:.74rem;color:var(--muted,#5B6874)}#rdOv .rd-k b{display:block;font-size:1.15rem;color:var(--ink,#13222D);font-variant-numeric:tabular-nums}
-@media(min-width:700px){#rdOv .rd-k{grid-template-columns:repeat(4,minmax(0,1fr))}#rdOv .rd-g{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}}
-#rdOv ul{margin:0;padding-left:1.1em;font-size:.9rem;display:grid;gap:4px}#rdOv li small{color:var(--muted,#5B6874)}#rdOv .rd-v{color:#1C7A4E}#rdOv .rd-r{color:#B42318}
-#rdOv .rd-bar{height:10px;border-radius:6px;background:var(--sunk,#E3E9EE);overflow:hidden;position:relative}#rdOv .rd-bar i{position:absolute;inset:0 auto 0 0;background:#1C7A4E;border-radius:6px}#rdOv .rd-bar s{position:absolute;top:-3px;bottom:-3px;width:2px;background:#E07B24}
-#rdOv .rd-pie{display:flex;justify-content:center;padding:6px 0 4px}
+:is(#rdOv,#rdIn) .rd-w{max-width:880px;margin:0 auto;padding:16px 14px calc(18px + env(safe-area-inset-bottom));display:grid;gap:12px}
+:is(#rdOv,#rdIn) .rd-h{background:linear-gradient(135deg,#0B3146,#1C7A4E);color:#fff;border-radius:18px;padding:16px 58px 16px 16px}:is(#rdOv,#rdIn) .rd-h h1{margin:0;font-size:1.25rem}:is(#rdOv,#rdIn) .rd-h p{margin:4px 0 0;opacity:.9;font-size:.88rem}
+:is(#rdOv,#rdIn) .rd-c{background:var(--card,#fff);border:1px solid var(--line,#DAE1E7);border-radius:16px;padding:14px;display:grid;gap:8px}:is(#rdOv,#rdIn) .rd-c h2{margin:0;font-size:1rem}:is(#rdOv,#rdIn) .rd-c h2 small{font-weight:600;color:var(--muted,#5B6874);font-size:.76rem}
+:is(#rdOv,#rdIn) .rd-k{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}:is(#rdOv,#rdIn) .rd-k div{background:var(--sunk,#EEF2F5);border-radius:12px;padding:9px 10px;font-size:.74rem;color:var(--muted,#5B6874)}:is(#rdOv,#rdIn) .rd-k b{display:block;font-size:1.15rem;color:var(--ink,#13222D);font-variant-numeric:tabular-nums}
+@media(min-width:700px){:is(#rdOv,#rdIn) .rd-k{grid-template-columns:repeat(4,minmax(0,1fr))}:is(#rdOv,#rdIn) .rd-g{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}}
+:is(#rdOv,#rdIn) ul{margin:0;padding-left:1.1em;font-size:.9rem;display:grid;gap:4px}:is(#rdOv,#rdIn) li small{color:var(--muted,#5B6874)}:is(#rdOv,#rdIn) .rd-v{color:#1C7A4E}:is(#rdOv,#rdIn) .rd-r{color:#B42318}
+:is(#rdOv,#rdIn) .rd-bar{height:10px;border-radius:6px;background:var(--sunk,#E3E9EE);overflow:hidden;position:relative}:is(#rdOv,#rdIn) .rd-bar i{position:absolute;inset:0 auto 0 0;background:#1C7A4E;border-radius:6px}:is(#rdOv,#rdIn) .rd-bar s{position:absolute;top:-3px;bottom:-3px;width:2px;background:#E07B24}
+:is(#rdOv,#rdIn) .rd-pie{display:flex;justify-content:center;padding:6px 0 4px}
 #rdX{position:fixed;top:calc(10px + env(safe-area-inset-top));right:max(10px,calc(50% - 430px));z-index:1101;width:40px;height:40px;border-radius:50%;border:0;background:rgba(255,255,255,.92);color:#0B3146;font:700 20px/1 system-ui,sans-serif;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.18)}
-#rdOv .rd-pie button{width:min(520px,100%);border:0;border-radius:14px;background:#0B3146;color:#fff;font:700 1.02rem system-ui,sans-serif;padding:14px;cursor:pointer}
+:is(#rdOv,#rdIn) .rd-pie button{width:min(520px,100%);border:0;border-radius:14px;background:#0B3146;color:#fff;font:700 1.02rem system-ui,sans-serif;padding:14px;cursor:pointer}
 body:has(#rdOv) #snBtn,body:has(#rdOv) #iaBtn,body:has(#rdOv) #navBotones{display:none!important}
 #rdAbrir{border:1px solid var(--line,#C9D3DB);background:var(--card,#fff);color:inherit;border-radius:12px;padding:9px 12px;font:inherit;font-weight:700;cursor:pointer;margin:0 0 12px;width:100%}
 </style>
@@ -10310,10 +10337,10 @@ body:has(#rdOv) #snBtn,body:has(#rdOv) #iaBtn,body:has(#rdOv) #navBotones{displa
     const rk = Object.keys(vend).filter(v => v !== "Tienda Hellywoof" && v !== "Genérico").sort((a, b) => vend[b] - vend[a]), pos = rk.indexOf(V[iy]) + 1;
     const top = Object.keys(prodM).sort((a, b) => prodM[b] - prodM[a]).slice(0, 3);
     return { S, yo: V[iy] || yo, cy, cm, cd, hT, hP, hR, fD, fY, mD, mY, pendD, pendY, nPend, recup, sinSt, cob, pros, ag, ruta, pos, nEq: rk.length, top, corte: B.corte }; }
-  function html() { const X = calc(), nom = String(X.S.nombre || "").split(" ")[0], mesN = MESL[X.cm - 1], d = new Date(), esp = X.hT ? X.hP / X.hT : 0;
+  function html(inl) { const X = calc(), nom = String(X.S.nombre || "").split(" ")[0], mesN = MESL[X.cm - 1], d = new Date(), esp = X.hT ? X.hP / X.hT : 0;
     const proyD = X.hP ? X.fD / X.hP * X.hT : 0, faltY = Math.max(0, X.mY - X.fY), porDia = X.hR ? faltY / X.hR : faltY;
     const barra = (v, m) => m ? `<div class="rd-bar"><i style="width:${Math.min(100, v / m * 100)}%"></i><s style="left:${Math.min(100, esp * 100)}%"></s></div>` : "";
-    const L = []; L.push(`<div class="rd-h"><h1>${d.getHours() < 12 ? "Buenos días" : d.getHours() < 20 ? "Buenas tardes" : "Buenas noches"}, ${e(nom)} 👋</h1><p>${DIA[d.getDay()]} ${d.getDate()} de ${MESL[d.getMonth()]} · tu resumen para partir el día · datos de venta al ${String(X.corte || "").split("-").reverse().join("-")}</p></div>`);
+    const L = []; if (!inl) L.push(`<div class="rd-h"><h1>${d.getHours() < 12 ? "Buenos días" : d.getHours() < 20 ? "Buenas tardes" : "Buenas noches"}, ${e(nom)} 👋</h1><p>${DIA[d.getDay()]} ${d.getDate()} de ${MESL[d.getMonth()]} · tu resumen para partir el día · datos de venta al ${String(X.corte || "").split("-").reverse().join("-")}</p></div>`);
     L.push(`<div class="rd-c"><h2>🎯 Tu mes <small>${e(X.yo)} · ${mesN}</small></h2>${X.mY ? barra(X.fY, X.mY) : ""}
       <div class="rd-k"><div>Facturado<b>${MM(X.fY)}</b>${X.mY ? pc(X.fY / X.mY) + " de tu meta" : "sin meta cargada"}</div><div>Tu meta<b>${X.mY ? MM(X.mY) : "—"}</b>${X.hR} días hábiles quedan</div>
         <div>Te falta por día<b class="${faltY ? "" : "rd-v"}">${X.mY ? (faltY ? MM(porDia) : "¡Cumplida!") : "—"}</b>${X.mY && faltY ? "para llegar a la meta" : ""}</div><div>Tus pedidos por facturar<b>${MM(X.pendY)}</b>${X.nPend} ${X.nPend === 1 ? "nota" : "notas"} en Defontana</div></div></div>`);
@@ -10324,6 +10351,7 @@ body:has(#rdOv) #snBtn,body:has(#rdOv) #iaBtn,body:has(#rdOv) #navBotones{displa
     if (X.ag.length || X.ruta) li.push(`<div class="rd-c"><h2>📅 Hoy <small>agenda y ruta</small></h2><ul>${X.ruta ? `<li>Ruta del día: <b>${X.ruta}</b> ${X.ruta === 1 ? "parada" : "paradas"} (menú → Ruta)</li>` : ""}${X.ag.map(a => `<li>${e(a.tipo || "Actividad")}: <b>${e(a.cliente || a.nombre || "")}</b>${a.nota ? " <small>" + e(String(a.nota).slice(0, 60)) + "</small>" : ""}</li>`).join("")}</ul></div>`);
     if (X.sinSt.length) li.push(`<div class="rd-c"><h2>📦 Sin stock que tus clientes compran <small>avisa o sugiere otro</small></h2><ul>${X.sinSt.map(n => `<li>${e(n)}</li>`).join("")}</ul></div>`);
     if (li.length) L.push(`<div class="rd-g">${li.join("")}</div>`); else L.push(`<div class="rd-c"><h2>✅ Todo al día</h2><p style="margin:0">Sin cobranza vencida, prospectos atrasados ni clientes por recuperar en tu cartera.</p></div>`);
+    if (inl) return L.join("");
     L.push(`<div class="rd-c"><h2>🏢 La distribuidora <small>resumen del equipo</small></h2>${barra(X.fD, X.mD)}<div class="rd-k"><div>Facturado del equipo<b>${MM(X.fD)}</b>${X.mD ? pc(X.fD / X.mD) + " de " + MM(X.mD) : ""}</div><div>Proyección de cierre<b>${MM(proyD)}</b>${X.mD ? pc(proyD / X.mD) + " de la meta" : ""}</div>
       <div>Por facturar (todos)<b>${MM(X.pendD)}</b>pedidos pendientes</div><div>Tu lugar en el equipo<b>${X.pos ? X.pos + "° de " + X.nEq : "—"}</b>por facturado del mes</div></div>
       ${X.top.length ? `<p style="margin:0;font-size:.86rem;color:var(--muted,#5B6874)">Lo más vendido del mes: ${X.top.map(e).join(" · ")}</p>` : ""}</div>`);
@@ -10333,6 +10361,7 @@ body:has(#rdOv) #snBtn,body:has(#rdOv) #iaBtn,body:has(#rdOv) #navBotones{displa
     const o = document.createElement("div"); o.id = "rdOv"; o.setAttribute("role", "dialog"); o.setAttribute("aria-label", "Resumen del día"); o.innerHTML = h; document.body.appendChild(o);
     const cerrar = () => { try { localStorage.setItem(clave(), "1"); } catch (x) {} o.remove(); }; o.querySelector("#rdX").onclick = cerrar; }
   window.hwfResumenDia = mostrar;
+  window.hwfResumenHtml = () => html(true);   /* Inicio → «Mi día» (patch_inicio_unico) lo muestra dentro de la pestaña */
   /* ya no se abre solo al entrar (16-11-2026, pedido de Jorge): solo desde el menú lateral */
   /* acceso desde el menú lateral ☰ (grupo «Mi día», después de Inicio); ya no hay botón en Inicio */
   document.querySelectorAll("#rdAbrir").forEach(x => x.remove());
@@ -10346,6 +10375,5 @@ body:has(#rdOv) #snBtn,body:has(#rdOv) #iaBtn,body:has(#rdOv) #navBotones{displa
     new MutationObserver(() => setTimeout(ponerEnMenu, 30)).observe(pan, { childList: true, attributes: true, attributeFilter: ["class"] }); }, 400);
 })();
 </script>
-<style>/* patch_sinverdash */#inAv{display:none!important}</style>
 </body>
 </html>
