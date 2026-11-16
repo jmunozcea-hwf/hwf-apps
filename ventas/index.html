@@ -7198,7 +7198,7 @@ function confirmarNota() {
   x.onclick = () => cerrarModal(); card.insertBefore(x, card.firstChild); })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261116175742";
+const HWF_VER = "20261116180050";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -10346,5 +10346,6 @@ body:has(#rdOv) #snBtn,body:has(#rdOv) #iaBtn,body:has(#rdOv) #navBotones{displa
     new MutationObserver(() => setTimeout(ponerEnMenu, 30)).observe(pan, { childList: true, attributes: true, attributeFilter: ["class"] }); }, 400);
 })();
 </script>
+<style>/* patch_sinverdash */#inAv{display:none!important}</style>
 </body>
 </html>
