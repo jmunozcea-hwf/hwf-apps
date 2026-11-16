@@ -5273,7 +5273,7 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261116202810";
+const HWF_VER = "20261116203926";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -8778,6 +8778,113 @@ window.hwfContCambio = function () { try { if (typeof praPintar === "function" &
   enganchar(CONT());
   const iv = setInterval(() => { const p = document.getElementById("snPanel"); if (!p) return; clearInterval(iv);
     new MutationObserver(() => setTimeout(() => { const it = p.querySelector('[data-m="mail"]'); if (it) { const e = it.querySelector(".sn-e"); /* ícono: patch_iconos_extra */ } }, 0)).observe(p, { childList: true }); }, 400);
+})();
+</script>
+<style>/* patch_prodprecios */
+.pra .pp-f{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px;margin:12px 0 4px}
+.pra .pp-f select,.pra .pp-f input{min-height:40px;border:1px solid var(--line);border-radius:10px;padding:0 10px;font:inherit;background:var(--surface);color:var(--ink);width:100%}
+.pra .pp-m{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0 10px;font-size:.84rem}
+.pra .pp-m button,.pp-gu{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:7px 12px;font:inherit;font-size:.8rem;font-weight:700;cursor:pointer}
+.pra .pp-m input{width:76px;min-height:34px;border:1px solid var(--line);border-radius:8px;padding:0 8px;font:inherit;background:var(--surface);color:var(--ink)}
+.pra .pra-it{grid-template-columns:48px minmax(0,1fr) auto auto}
+.pp-pr{display:grid;gap:2px;justify-items:end}.pp-pr input{width:112px;min-height:36px;border:1px solid var(--line);border-radius:8px;padding:0 8px;font:inherit;font-variant-numeric:tabular-nums;text-align:right;background:var(--surface);color:var(--ink)}
+.pp-pr input.pp-own{border-color:#E07B24;background:#FFF6EC;color:#13222D}.pp-pr small{font-size:.7rem;color:var(--muted)}
+.pp-gu{background:#0B3146;color:#fff;border-color:#0B3146;padding:5px 10px}.pp-gu[hidden]{display:none}
+@media(max-width:620px){.pra .pra-it{grid-template-columns:44px minmax(0,1fr);row-gap:6px}.pra .pra-it .pp-pr{grid-column:2;justify-items:start;grid-auto-flow:column;align-items:center;gap:8px}.pra .pra-it .pra-tg{grid-column:2;justify-self:start}}
+</style>
+<script>/* patch_prodprecios: proveedor/marca, precio de venta y cambios masivos en «Productos visibles» */
+(function () {
+  if (typeof praPintar !== "function" || typeof CAT_APP === "undefined" || typeof pintarProductos !== "function") return;
+  const BASEP = {}; ((window.__PUB && window.__PUB.prods) || []).forEach(p => BASEP[String(p.i)] = Number(p.p) || 0);
+  CAT_APP.forEach(p => { if (!(p[0] in BASEP)) BASEP[p[0]] = Number(p[6]) || 0; });
+  const SUF = ["PLANET PET", "MONTARAZ", "COMERCIAL PET-FOOD", "NADAL", "COMECAN", "MY PET CHILE", "HALLMARK SA", "SABORES ALTO PERFIL SPA"];
+  const tc = s => String(s || "").toLowerCase().replace(/(^|[\s\-])([a-záéíóúñ])/g, (m, a, b) => a + b.toUpperCase());
+  const provDe = cat => { const c = String(cat || "").trim().toUpperCase(); if (!c || /^SIN CATEGOR/.test(c)) return ["Sin proveedor", ""];
+    for (const s of SUF) if (c === s || c.endsWith(" " + s)) return [tc(s), tc(c.slice(0, c.length - s.length).trim()) || tc(s)]; return [tc(c), tc(c)]; };
+  const nz = s => String(s || "").replace(/&/g, "and").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "");
+  let PM = null, PMsrc = null;   /* se recalcula cuando llegan los datos de Drive */
+  function pm() { const B = (typeof D !== "undefined" && D && D.productos && D.productos.length) ? D : (typeof BASE !== "undefined" && BASE) || {}, P = B.productos || [], cats = B.cats || [];
+    if (PM && PMsrc === P && Object.keys(PM).length === CAT_APP.length) return PM; PM = {}; PMsrc = P;
+    const porCod = {}, porNom = {}, marcas = {};
+    P.forEach(p => { const r = provDe(cats[p[1]]); porCod[String(p[2])] = r; porNom[nz(p[0])] = r; if (r[1]) marcas[nz(r[1])] = r; });
+    const ms = Object.keys(marcas).filter(Boolean).sort((a, b) => b.length - a.length);
+    CAT_APP.forEach(p => { let r = porCod[p[0]] || porNom[nz(p[1])];
+      if (!r) { const n = nz(p[1]), m = ms.find(k => k.length > 2 && n.includes(k)); r = m ? marcas[m] : ["Sin proveedor", ""]; }
+      PM[p[0]] = { pv: r[0] || "Sin proveedor", ma: r[1] || "Sin marca" }; });
+    return PM; }
+  const st = i => praEstado()[i] || {};
+  const precio = i => { const e = st(i); return e.p > 0 ? e.p : BASEP[i] || 0; };
+  const aplicar = () => CAT_APP.forEach(p => { p[6] = precio(p[0]); });
+  const $m = n => "$" + Math.round(n || 0).toLocaleString("es-CL");
+  const F = { pv: "", ma: "", q: "" }; let fPrecio = false;
+  /* el registro guarda el estado completo del producto: visible y precio */
+  praLeer = function (cambios) { const E = {};
+    (cambios || []).forEach(c => { if (!c || c.codigo !== "PRODUCTO") return; let o; try { o = JSON.parse(c.detalle); } catch (e) { return; }
+      if (!o || !o.pr || !o.i) return; const a = E[o.i]; if (!a || String(o.t || "") >= String(a.t || "")) E[o.i] = { on: o.on !== false, p: Number(o.p) > 0 ? Math.round(Number(o.p)) : 0, t: o.t || "" }; });
+    setTimeout(aplicar, 0); return E; };
+  async function guardar(lista, txt) {   /* lista: [{i, on, p}] */
+    const cfg = SYC(); if (!cfg || !cfg.url) { toast("Sin conexión con el script de Google: no se puede guardar."); return false; }
+    const t = new Date().toISOString(), cambios = lista.map((x, k) => { const p = CAT_APP.find(y => y[0] === x.i), a = st(x.i), pa = precio(x.i), pn = x.p > 0 ? x.p : BASEP[x.i] || 0, ch = [];
+      if ((a.on !== false) !== x.on) ch.push({ campo: "Visible en apps y B2B", antes: a.on !== false ? "Sí" : "No", despues: x.on ? "Sí" : "No" });
+      if (pa !== pn) ch.push({ campo: "Precio neto de venta", antes: $m(pa), despues: $m(pn) + (x.p > 0 ? "" : " (maestro)") });
+      return { id: "CC-PR-" + String(x.i).replace(/[^A-Za-z0-9]/g, "") + "-" + (Date.now() + k), fecha: t, vendedor: "HWF Admin", cartera: "", codigo: "PRODUCTO",
+        cliente: x.i + " · " + (p ? p[1] : ""), tipo: "Datos", motivo: ch.map(c => c.campo + ": " + c.despues).join(" · ") || "Producto",
+        detalle: JSON.stringify({ pr: 1, i: x.i, on: x.on, p: x.p > 0 ? Math.round(x.p) : 0, t }), cambios: ch }; });
+    for (let k = 0; k < cambios.length; k += 40) {
+      const r = await syCall(cfg, { accion: "clienteCambios", cambios: cambios.slice(k, k + 40) });
+      if (!r || !r.ok) { toast("No se pudo guardar: " + ((r && r.error) || "sin respuesta del script")); praPintar(); return false; }
+      const E = praEstado(); cambios.slice(k, k + 40).forEach(c => { const o = JSON.parse(c.detalle); E[o.i] = { on: o.on, p: o.p, t }; }); store.set(PRA_KEY, E); }
+    store.set(PRA_VER, ""); aplicar(); toast(txt); praPintar(); return true; }
+  praCambiar = function (i, on, btn) { if (btn) btn.disabled = true; const p = CAT_APP.find(x => x[0] === i);
+    return guardar([{ i, on, p: st(i).p || 0 }], (p ? p[1] : i) + (on ? ": visible en las apps y el B2B." : ": oculto en las apps y el B2B.")); };
+  const lista = () => { const M = pm(), q = norm(F.q);
+    return CAT_APP.filter(p => (praFiltro === "todos" || (praFiltro === "off" ? !praOn(p[0]) : praOn(p[0]))) && (!F.pv || M[p[0]].pv === F.pv) && (!F.ma || M[p[0]].ma === F.ma)
+      && (!fPrecio || st(p[0]).p > 0) && (!q || norm(p[0] + " " + p[1] + " " + p[2] + " " + M[p[0]].ma + " " + M[p[0]].pv).includes(q))); };
+  praPintar = function () { const box = $("praBox"); if (!box) return; if (!box.dataset.pp) decorar(box); aplicar(); const M = pm();
+    const sel = (id, k, todos, ops) => { const s = $(id); if (!s) return; const v = F[k]; s.innerHTML = `<option value="">${todos}</option>` + ops.map(o => `<option${o === v ? " selected" : ""}>${esc(o)}</option>`).join(""); };
+    const enPv = CAT_APP.filter(p => !F.pv || M[p[0]].pv === F.pv);
+    sel("ppPv", "pv", "Todos los proveedores", [...new Set(CAT_APP.map(p => M[p[0]].pv))].sort());
+    sel("ppMa", "ma", "Todas las marcas", [...new Set(enPv.map(p => M[p[0]].ma))].sort());
+    const l = lista(), off = CAT_APP.filter(p => !praOn(p[0])).length, own = CAT_APP.filter(p => st(p[0]).p > 0).length;
+    $("praRes").textContent = `${CAT_APP.length - off} visibles · ${off} ocultos · ${own} con precio propio`;
+    $("ppN").textContent = `${l.length} ${l.length === 1 ? "producto" : "productos"} filtrados:`;
+    $("praL").innerHTML = l.map(p => { const on = praOn(p[0]), im = praImg(p[0]), e = st(p[0]), m = M[p[0]];
+      return `<div class="pra-it${on ? "" : " off"}" data-i="${esc(p[0])}">${im ? `<img src="${esc(im)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.visibility='hidden'">` : "<span></span>"}
+        <div><b>${esc(p[1])}</b><small>${esc(p[0])} · ${esc(m.pv)} · ${esc(m.ma)} · ${esc(p[2])}</small></div>
+        <div class="pp-pr"><input type="text" inputmode="numeric" aria-label="Precio neto de venta" class="${e.p > 0 ? "pp-own" : ""}" value="${Math.round(precio(p[0])).toLocaleString("es-CL")}" data-pp="${esc(p[0])}">
+          <small>${e.p > 0 ? `maestro ${$m(BASEP[p[0]])} · <a href="#" data-ppx="${esc(p[0])}">volver</a>` : "neto (maestro)"}</small><button type="button" class="pp-gu" hidden data-ppg="${esc(p[0])}">Guardar precio</button></div>
+        <button type="button" class="pra-tg${on ? "" : " off"}" data-pra="${esc(p[0])}" aria-pressed="${on}">${on ? "✓ Visible" : "Oculto"}</button></div>`; }).join("") || '<p class="muted">Ningún producto coincide.</p>'; };
+  const num = s => { const v = Number(String(s || "").replace(/[^\d]/g, "")); return v > 0 ? v : 0; };
+  function decorar(box) { box.dataset.pp = "1";
+    box.querySelector("summary h2").textContent = "Productos y precios de venta (apps y portal B2B)";
+    const nota = box.querySelector("p.muted"); if (nota) nota.textContent = "Activa u oculta productos y cambia su precio neto de venta. Se aplica en la app de Ventas (al abrirla o volver a ella), en el portal B2B, la lista de precios y el mailing (en 2 minutos). El precio vacío o «volver» usa el de la planilla «HWF Maestro de productos». Fotos y descripciones se editan en esa planilla.";
+    box.querySelector(".pra-tools").insertAdjacentHTML("beforebegin", `<div class="pp-f"><select id="ppPv" aria-label="Proveedor"></select><select id="ppMa" aria-label="Marca"></select>
+      <label style="display:flex;align-items:center;gap:6px;font-size:.84rem"><input type="checkbox" id="ppOwn" style="width:auto;min-height:0"> Solo con precio propio</label></div>`);
+    box.querySelector(".pra-tools").insertAdjacentHTML("afterend", `<div class="pp-m"><b id="ppN"></b><button type="button" data-ppm="on">Mostrar todos</button><button type="button" data-ppm="off">Ocultar todos</button>
+      <span>Ajustar precio</span><input id="ppPct" type="text" inputmode="decimal" placeholder="+5 %" aria-label="Porcentaje de ajuste"><button type="button" data-ppm="pct">Aplicar %</button><button type="button" data-ppm="base">Volver al maestro</button></div>`);
+    $("praQ").oninput = e => { F.q = e.target.value; praPintar(); };
+    $("ppPv").onchange = e => { F.pv = e.target.value; F.ma = ""; praPintar(); }; $("ppMa").onchange = e => { F.ma = e.target.value; praPintar(); };
+    $("ppOwn").onchange = e => { fPrecio = e.target.checked; praPintar(); };
+    box.addEventListener("input", e => { const x = e.target.closest("[data-pp]"); if (!x) return; const g = box.querySelector(`[data-ppg="${CSS.escape(x.dataset.pp)}"]`); if (g) g.hidden = num(x.value) === Math.round(precio(x.dataset.pp)); });
+    box.addEventListener("keydown", e => { const x = e.target.closest("[data-pp]"); if (x && e.key === "Enter") { e.preventDefault(); const g = box.querySelector(`[data-ppg="${CSS.escape(x.dataset.pp)}"]`); if (g && !g.hidden) g.click(); } });
+    box.addEventListener("click", async e => {
+      const g = e.target.closest("[data-ppg]"), x = e.target.closest("[data-ppx]"), m = e.target.closest("[data-ppm]");
+      if (g) { const i = g.dataset.ppg, v = num(box.querySelector(`[data-pp="${CSS.escape(i)}"]`).value); if (!v) { toast("Escribe un precio mayor a cero."); return; }
+        const b = BASEP[i] || 0; if (b && (v < b * .5 || v > b * 2) && !confirm(`El precio nuevo (${$m(v)}) es muy distinto al del maestro (${$m(b)}). ¿Guardar igual?`)) return;
+        g.disabled = true; await guardar([{ i, on: praOn(i), p: v === b ? 0 : v }], "Precio guardado: " + $m(v) + " neto."); return; }
+      if (x) { e.preventDefault(); const i = x.dataset.ppx; await guardar([{ i, on: praOn(i), p: 0 }], "Vuelve al precio del maestro: " + $m(BASEP[i])); return; }
+      if (!m) return; const l = lista(); if (!l.length) return; const k = m.dataset.ppm;
+      if (k === "on" || k === "off") { if (!confirm(`¿${k === "on" ? "Mostrar" : "Ocultar"} ${l.length} productos en las apps y el B2B?`)) return;
+        await guardar(l.map(p => ({ i: p[0], on: k === "on", p: st(p[0]).p || 0 })), `${l.length} productos ${k === "on" ? "visibles" : "ocultos"}.`); return; }
+      if (k === "base") { const c = l.filter(p => st(p[0]).p > 0); if (!c.length) { toast("Ninguno de los filtrados tiene precio propio."); return; }
+        if (!confirm(`¿Volver al precio del maestro en ${c.length} productos?`)) return; await guardar(c.map(p => ({ i: p[0], on: praOn(p[0]), p: 0 })), `${c.length} productos con el precio del maestro.`); return; }
+      if (k === "pct") { const v = Number(String($("ppPct").value).replace("%", "").replace(",", ".").replace(/\s/g, "")); if (!v || Math.abs(v) > 50) { toast("Escribe un porcentaje entre −50 y +50 (ej. 5 o −3)."); return; }
+        const fil = [F.pv, F.ma].filter(Boolean).join(" · ") || "todos los filtrados";
+        if (!confirm(`¿${v > 0 ? "Subir" : "Bajar"} ${Math.abs(v)} % el precio neto de ${l.length} productos (${fil})? Se calcula sobre el precio actual y se redondea a $10.`)) return;
+        await guardar(l.map(p => { const n = Math.round(precio(p[0]) * (1 + v / 100) / 10) * 10; return { i: p[0], on: praOn(p[0]), p: n === BASEP[p[0]] ? 0 : n }; }), `Precio ${v > 0 ? "+" : ""}${v} % en ${l.length} productos.`); $("ppPct").value = ""; }
+    });
+  }
+  aplicar();
 })();
 </script>
 </body>
