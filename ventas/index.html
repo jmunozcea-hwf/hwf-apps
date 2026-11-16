@@ -7199,7 +7199,7 @@ function confirmarNota() {
   x.onclick = () => cerrarModal(); card.insertBefore(x, card.firstChild); })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261116205742";
+const HWF_VER = "20261116210839";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -10392,6 +10392,54 @@ body:has(#rdOv) #snBtn,body:has(#rdOv) #iaBtn,body:has(#rdOv) #navBotones{displa
     if (ini) ini.after(b); else pan.querySelector(".sn-g").after(b); };
   const vigila = setInterval(() => { const pan = document.getElementById("snPanel"); if (!pan) return; clearInterval(vigila);
     new MutationObserver(() => setTimeout(ponerEnMenu, 30)).observe(pan, { childList: true, attributes: true, attributeFilter: ["class"] }); }, 400);
+})();
+</script>
+<script>/* patch_oscuro: corrige contrastes en modo oscuro */
+(function () {
+  const oscuro = () => { const t = document.documentElement.dataset.theme; return t === "dark" || (t !== "light" && matchMedia("(prefers-color-scheme: dark)").matches); };
+  const cv = document.createElement("canvas").getContext("2d");
+  const rgb = c => { if (!c || /var\(|inherit|initial|transparent|currentcolor|unset/i.test(c)) return null; try { cv.fillStyle = "#010203"; cv.fillStyle = c; const v = cv.fillStyle; if (v === "#010203" && !/010203/.test(c)) return null;
+      if (v[0] === "#") return [parseInt(v.slice(1, 3), 16), parseInt(v.slice(3, 5), 16), parseInt(v.slice(5, 7), 16), 1];
+      const m = v.match(/[\d.]+/g); return m ? [+m[0], +m[1], +m[2], m[3] == null ? 1 : +m[3]] : null; } catch (e) { return null; } };
+  const lum = c => [c[0], c[1], c[2]].map(v => { v /= 255; return v <= .03928 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4); }).reduce((s, v, i) => s + v * [.2126, .7152, .0722][i], 0);
+  const claro = c => { let k = .45, o; do { o = [0, 1, 2].map(i => Math.round(c[i] + (255 - c[i]) * k)); k += .08; } while (lum(o) < .32 && k < .95); return `rgb(${o.join(",")})`; };
+  const bgDe = st => st.backgroundColor || ((st.background || "").match(/#[0-9a-f]{3,8}\b|rgba?\([^)]*\)|\b(white|black)\b/i) || [])[0] || "";
+  const oscuroLetra = c => { const r = rgb(c); return r && r[3] > .5 && lum(r) < .2 ? r : null; };
+  const claroFondo = c => { const r = rgb(c); return r && r[3] > .5 && lum(r) > .72 ? r : null; };
+  const fondoOsc = c => { const r = rgb(c); return r && lum(r) > .9 ? "var(--surface,#152029)" : "var(--sunk,#1C2A35)"; };   /* blanco → tarjeta; gris claro → hundido (se ve la opción elegida) */
+  const esMediaOscura = r => r.media && /prefers-color-scheme:\s*dark/i.test(r.media.mediaText);
+  let hoja = null;
+  function arreglarHojas() {
+    const conOscuro = new Set(), R = [];
+    const rec = (rules, enOsc) => { for (const r of rules) { if (r.cssRules && r.type !== 1) { rec(r.cssRules, enOsc || esMediaOscura(r)); continue; } if (r.type !== 1) continue;
+      if (enOsc || /data-theme="?dark/.test(r.selectorText)) { r.selectorText.split(",").forEach(s => conOscuro.add(s.replace(/:root(:not\(\[data-theme="?light"?\]\))?\s*/g, "").trim())); continue; } R.push(r); } };
+    for (const sh of document.styleSheets) { if (sh.ownerNode && sh.ownerNode.id === "osFix") continue; try { rec(sh.cssRules, false); } catch (e) {} }
+    const out = [];
+    R.forEach(r => { const st = r.style, sel = r.selectorText; if (!sel || /^(html|body|:root)$/i.test(sel.trim()) || sel.split(",").every(s => conOscuro.has(s.trim()))) return;
+      if (/::?-webkit-|::placeholder|::selection/.test(sel)) return;
+      const c = st.color, bg = bgDe(st), rb = rgb(bg), conFondo = rb && rb[3] > .5, imgF = /url\(|gradient/.test(st.backgroundImage || st.background || ""), r0 = c && oscuroLetra(c);
+      const iC = st.getPropertyPriority("color") ? "!important" : "", iB = (st.getPropertyPriority("background-color") || st.getPropertyPriority("background")) ? "!important" : "";
+      const gr = (st.backgroundImage || st.background || ""), grC = /gradient/.test(gr) && !/url\(/.test(gr) ? (gr.match(/#[0-9a-f]{3,8}\b|rgba?\([^)]*\)/gi) || []) : [];
+      if (grC.length && grC.every(x => claroFondo(x))) { out.push(`${sel}{background:${fondoOsc(grC[0])}${iB}${r0 ? ";color:" + claro(r0) + iC : ""}}`); return; }   /* degradado claro → fondo oscuro */
+      if (conFondo && !imgF && claroFondo(bg)) out.push(`${sel}{background-color:${fondoOsc(bg)}${iB}${r0 ? ";color:" + claro(r0) + iC : ""}}`);   /* fondo claro → fondo oscuro de la app */
+      else if (r0 && !conFondo) out.push(`${sel}{color:${claro(r0)}${iC}}`); });   /* letra oscura sin fondo propio → se aclara */
+    if (!hoja) { hoja = document.createElement("style"); hoja.id = "osFix"; }
+    hoja.textContent = out.join("\n"); document.body.appendChild(hoja);   /* al final: gana a las reglas originales de igual especificidad */
+  }
+  function arreglarEl(el) { const s = el.style; if (!s || el.dataset.osf) return; const c = s.color, bg = bgDe(s), rb = rgb(bg), r0 = c && oscuroLetra(c), fc = rb && rb[3] > .5 && claroFondo(bg) && !/url\(|gradient/.test(s.backgroundImage || "");
+    if (!fc && !(r0 && !(rb && rb[3] > .5))) return;
+    el.dataset.osf = "1"; el.dataset.osc = c || ""; el.dataset.osb = fc ? s.backgroundColor : "";
+    if (fc) s.backgroundColor = fondoOsc(bg); if (r0) s.color = claro(r0); }
+  function deshacerEl(el) { if (!el.dataset.osf) return; el.style.color = el.dataset.osc; if (el.dataset.osb) el.style.backgroundColor = el.dataset.osb; delete el.dataset.osf; delete el.dataset.osc; delete el.dataset.osb; }
+  let pend = null, obs = null;
+  const lote = () => { pend = null; document.querySelectorAll("[style]").forEach(arreglarEl); };
+  function aplicar() {
+    if (oscuro()) { arreglarHojas(); lote(); if (!obs) { obs = new MutationObserver(ms => { if (ms.some(m => [...m.addedNodes].some(n => n.nodeName === "STYLE" && n.id !== "osFix"))) setTimeout(arreglarHojas, 0); if (!pend) pend = requestAnimationFrame(lote); }); obs.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["style"] }); } }
+    else { if (obs) { obs.disconnect(); obs = null; } if (hoja) hoja.textContent = ""; document.querySelectorAll("[data-osf]").forEach(deshacerEl); } }
+  try { matchMedia("(prefers-color-scheme: dark)").addEventListener("change", aplicar); } catch (e) {}
+  new MutationObserver(aplicar).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+  if (document.readyState === "complete") aplicar(); else window.addEventListener("load", aplicar);
+  setTimeout(aplicar, 4000);   /* estilos que agregan otros parches al cargar */
 })();
 </script>
 </body>
