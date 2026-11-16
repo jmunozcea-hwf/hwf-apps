@@ -5273,7 +5273,7 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261116104502";
+const HWF_VER = "20261116105812";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -8359,23 +8359,6 @@ window.hwfContCambio = function () { try { if (typeof praPintar === "function" &
 { const _sc = syCall; syCall = async function (cfg, d) { const r = await _sc.apply(this, arguments);
     try { if (d && d.accion === "b2bAjustes" && d.guardar && r && r.ok) setTimeout(() => hwfContBajar(true), 800); } catch (e) {} return r; }; }
 </script>
-<script>/* patch_iconos_extra: íconos de color de B2B y Mailing */
-(function () {
-  const ICO = {"b2b": "<svg viewBox=\"0 0 32 32\" aria-hidden=\"true\" class=\"hic\"><defs><linearGradient id=\"hic-b2b\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"1\"><stop offset=\"0\" stop-color=\"#3FBF7F\"/><stop offset=\"1\" stop-color=\"#1C7A4E\"/></linearGradient></defs><rect width=\"32\" height=\"32\" rx=\"9\" fill=\"url(#hic-b2b)\"/><path d=\"M4 4h24v10C20 9 11 9 4 13z\" fill=\"#fff\" opacity=\".12\"/><g transform=\"translate(5.5 5.5) scale(.875)\" fill=\"none\" stroke=\"#fff\" stroke-width=\"2.2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"3\" y=\"7.5\" width=\"18\" height=\"12.5\" rx=\"2\"/><path d=\"M8.5 7.5V5.5a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v2\"/><path d=\"M3 13h18\"/><path d=\"M12 12v2.5\"/></g></svg>", "mail": "<svg viewBox=\"0 0 32 32\" aria-hidden=\"true\" class=\"hic\"><defs><linearGradient id=\"hic-mail\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"1\"><stop offset=\"0\" stop-color=\"#FF8A6B\"/><stop offset=\"1\" stop-color=\"#D9483B\"/></linearGradient></defs><rect width=\"32\" height=\"32\" rx=\"9\" fill=\"url(#hic-mail)\"/><path d=\"M4 4h24v10C20 9 11 9 4 13z\" fill=\"#fff\" opacity=\".12\"/><g transform=\"translate(5.5 5.5) scale(.875)\" fill=\"none\" stroke=\"#fff\" stroke-width=\"2.2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"3\" y=\"5.5\" width=\"18\" height=\"13\" rx=\"2\"/><path d=\"M3.5 7l8.5 6 8.5-6\"/></g></svg>"}; let n = 0;
-  const poner = (e, k) => { if (!e || !ICO[k] || e.dataset.hic === k) return;
-    if (e.tagName.toLowerCase() === "svg") { const s = document.createElement("span"); s.className = "emo"; e.replaceWith(s); e = s; }
-    n++; e.innerHTML = ICO[k].replace(/hic-([a-z0-9]+)/g, "hic-$1-x" + n); e.dataset.hic = k; e.classList.add("hic-w"); e.setAttribute("aria-hidden", "true"); };
-  const tab = (id, k) => { const b = document.getElementById(id); if (!b) return; let e = b.querySelector(".emo");
-    if (!e) { e = document.createElement("span"); e.className = "emo"; b.insertBefore(e, b.firstChild); } poner(e, k); };
-  const aplicar = () => { try {
-    tab("mB2b", "b2b"); tab("mMail", "mail");
-    document.querySelectorAll('#masSeg [data-m="b2b"], #masSeg [data-m="mail"]').forEach(b => poner(b.querySelector(".emo") || b.querySelector("svg:not(.hic)"), b.dataset.m));
-    document.querySelectorAll('#snPanel [data-sm="b2b"] .sn-e, #snPanel [data-sm="mail"] .sn-e, #snPanel [data-m="b2b"] .sn-e, #snPanel [data-m="mail"] .sn-e').forEach(e => poner(e, e.parentNode.dataset.sm || e.parentNode.dataset.m));
-  } catch (x) {} };
-  aplicar(); setTimeout(aplicar, 400); setTimeout(aplicar, 1600);
-  let pend = false; new MutationObserver(() => { if (pend) return; pend = true; requestAnimationFrame(() => { pend = false; aplicar(); }); }).observe(document.body, { childList: true, subtree: true });
-})();
-</script>
 <style>/* patch_mailing */
 .ml{display:grid;gap:12px}.ml-c{background:var(--card,#fff);border:1px solid var(--line,#DDE3E8);border-radius:14px;padding:14px}
 .ml h3{margin:0 0 8px;font-size:1rem;color:#0B3146}.ml small,.ml .ml-m{color:var(--muted,#5B6874)}
@@ -8521,6 +8504,275 @@ window.hwfContCambio = function () { try { if (typeof praPintar === "function" &
   enganchar(CONT());
   const iv = setInterval(() => { const p = document.getElementById("snPanel"); if (!p) return; clearInterval(iv);
     new MutationObserver(() => setTimeout(() => { const it = p.querySelector('[data-m="mail"]'); if (it) { const e = it.querySelector(".sn-e"); /* ícono: patch_iconos_extra */ } }, 0)).observe(p, { childList: true }); }, 400);
+})();
+</script>
+<script>/* patch_iconos_extra: íconos de color de B2B y Mailing */
+(function () {
+  const ICO = {"b2b": "<svg viewBox=\"0 0 32 32\" aria-hidden=\"true\" class=\"hic\"><defs><linearGradient id=\"hic-b2b\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"1\"><stop offset=\"0\" stop-color=\"#3FBF7F\"/><stop offset=\"1\" stop-color=\"#1C7A4E\"/></linearGradient></defs><rect width=\"32\" height=\"32\" rx=\"9\" fill=\"url(#hic-b2b)\"/><path d=\"M4 4h24v10C20 9 11 9 4 13z\" fill=\"#fff\" opacity=\".12\"/><g transform=\"translate(5.5 5.5) scale(.875)\" fill=\"none\" stroke=\"#fff\" stroke-width=\"2.2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"3\" y=\"7.5\" width=\"18\" height=\"12.5\" rx=\"2\"/><path d=\"M8.5 7.5V5.5a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v2\"/><path d=\"M3 13h18\"/><path d=\"M12 12v2.5\"/></g></svg>", "mail": "<svg viewBox=\"0 0 32 32\" aria-hidden=\"true\" class=\"hic\"><defs><linearGradient id=\"hic-mail\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"1\"><stop offset=\"0\" stop-color=\"#FF8A6B\"/><stop offset=\"1\" stop-color=\"#D9483B\"/></linearGradient></defs><rect width=\"32\" height=\"32\" rx=\"9\" fill=\"url(#hic-mail)\"/><path d=\"M4 4h24v10C20 9 11 9 4 13z\" fill=\"#fff\" opacity=\".12\"/><g transform=\"translate(5.5 5.5) scale(.875)\" fill=\"none\" stroke=\"#fff\" stroke-width=\"2.2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"3\" y=\"5.5\" width=\"18\" height=\"13\" rx=\"2\"/><path d=\"M3.5 7l8.5 6 8.5-6\"/></g></svg>", "roi": "<svg viewBox=\"0 0 32 32\" aria-hidden=\"true\" class=\"hic\"><defs><linearGradient id=\"hic-roi\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"1\"><stop offset=\"0\" stop-color=\"#FFC94A\"/><stop offset=\"1\" stop-color=\"#F28C28\"/></linearGradient></defs><rect width=\"32\" height=\"32\" rx=\"9\" fill=\"url(#hic-roi)\"/><path d=\"M4 4h24v10C20 9 11 9 4 13z\" fill=\"#fff\" opacity=\".12\"/><g transform=\"translate(5.5 5.5) scale(.875)\" fill=\"none\" stroke=\"#fff\" stroke-width=\"2.2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M3 12V4h8l10 10-8 8z\"/><circle cx=\"7.5\" cy=\"8.5\" r=\"1.3\"/><path d=\"M10.5 15.5l4-4\"/></g></svg>"}; let n = 0;
+  const poner = (e, k) => { if (!e || !ICO[k] || e.dataset.hic === k) return;
+    if (e.tagName.toLowerCase() === "svg") { const s = document.createElement("span"); s.className = "emo"; e.replaceWith(s); e = s; }
+    n++; e.innerHTML = ICO[k].replace(/hic-([a-z0-9]+)/g, "hic-$1-x" + n); e.dataset.hic = k; e.classList.add("hic-w"); e.setAttribute("aria-hidden", "true"); };
+  const tab = (id, k) => { const b = document.getElementById(id); if (!b) return; let e = b.querySelector(".emo");
+    if (!e) { e = document.createElement("span"); e.className = "emo"; b.insertBefore(e, b.firstChild); } poner(e, k); };
+  const aplicar = () => { try {
+    tab("mB2b", "b2b"); tab("mMail", "mail"); tab("mRoi", "roi");
+    document.querySelectorAll('#masSeg [data-m="b2b"], #masSeg [data-m="mail"], #masSeg [data-m="roi"]').forEach(b => poner(b.querySelector(".emo") || b.querySelector("svg:not(.hic)"), b.dataset.m));
+    document.querySelectorAll('#snPanel [data-sm="b2b"] .sn-e, #snPanel [data-sm="mail"] .sn-e, #snPanel [data-sm="roi"] .sn-e, #snPanel [data-m="b2b"] .sn-e, #snPanel [data-m="mail"] .sn-e, #snPanel [data-m="roi"] .sn-e').forEach(e => poner(e, e.parentNode.dataset.sm || e.parentNode.dataset.m));
+  } catch (x) {} };
+  aplicar(); setTimeout(aplicar, 400); setTimeout(aplicar, 1600);
+  let pend = false; new MutationObserver(() => { if (pend) return; pend = true; requestAnimationFrame(() => { pend = false; aplicar(); }); }).observe(document.body, { childList: true, subtree: true });
+})();
+</script>
+<style>/* patch_promoroi */
+.roi{display:grid;gap:12px;min-width:0}.roi *{box-sizing:border-box}
+.roi-c{background:var(--card,#fff);border:1px solid var(--line,#DDE3E8);border-radius:14px;padding:14px;min-width:0}
+.roi h3{margin:0 0 6px;font-size:1rem;color:#0B3146}.roi small,.roi .roi-m{color:var(--muted,#5B6874)}
+.roi table{min-width:0!important;width:100%;table-layout:fixed;border-collapse:collapse;margin:0}
+.roi-seg{display:flex;gap:4px;background:var(--sunk,#EEF2F5);padding:3px;border-radius:12px;min-width:0}
+.roi-seg button{flex:1;min-width:0;border:0;background:transparent;padding:8px 4px;border-radius:9px;font:inherit;font-size:.82rem;font-weight:700;color:var(--muted,#5B6874);cursor:pointer}
+.roi-seg button[aria-pressed="true"]{background:var(--card,#fff);color:var(--ink,#0F1E29);box-shadow:0 1px 3px rgba(15,30,41,.15)}
+.roi-fl{display:grid;gap:8px}.roi-fl label{display:grid;gap:3px;font-size:.74rem;font-weight:700;color:var(--muted,#5B6874)}
+.roi-fl select{font:inherit;font-weight:400;color:var(--ink,#0F1E29);padding:8px;border:1px solid var(--line,#DDE3E8);border-radius:10px;background:var(--card,#fff);width:100%;min-width:0}
+.roi-bt{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.roi-b{border:1px solid #0B3146;background:#fff;color:#0B3146;border-radius:10px;padding:9px 12px;font:inherit;font-weight:800;cursor:pointer}
+.roi-b.pri{background:#0B3146;color:#fff}.roi-b:disabled{opacity:.5;cursor:default}
+.roi-k{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.roi-k div{background:#F2F7F8;border-radius:10px;padding:8px 10px;font-size:.74rem;color:#5B6874;min-width:0}
+.roi-k b{display:block;font-size:1.05rem;color:#0B3146;overflow-wrap:anywhere}.roi-k b.pos,.roi .pos{color:#1C7A4E}.roi-k b.neg,.roi .neg{color:#B42318}
+.roi-s{display:inline-block;border-radius:999px;padding:3px 10px;font-size:.74rem;font-weight:800;white-space:nowrap}
+.roi-s.ok{background:#E3F4EA;color:#1C7A4E}.roi-s.mid{background:#FFF3D6;color:#8A5A00}.roi-s.no{background:#FDE8E8;color:#B42318}.roi-s.nd{background:#E9EEF2;color:#42505C}
+.roi-tp{display:inline-block;border-radius:6px;padding:1px 7px;font-size:.68rem;font-weight:800;background:#FFF4DB;color:#8A5A00;margin-right:6px}.roi-tp.o{background:#FDECEA;color:#B3261E}
+.roi-h{display:flex;gap:8px;align-items:flex-start;justify-content:space-between;min-width:0}.roi-h>div{min-width:0}.roi-h b{overflow-wrap:anywhere}
+.roi-t th,.roi-t td{padding:5px 4px;border-bottom:1px solid #EEF2F5;font-size:.8rem;text-align:right;overflow-wrap:anywhere;vertical-align:top}
+.roi-t th{font-size:.7rem;color:#5B6874;font-weight:700}.roi-t th:first-child,.roi-t td:first-child{text-align:left;width:34%}
+.roi-t tr.tot td{font-weight:800;border-top:2px solid #DDE3E8}
+.roi-v{margin-top:8px;border-radius:10px;padding:9px 11px;font-size:.86rem;line-height:1.35}.roi-v.ok{background:#E3F4EA;color:#14553A}.roi-v.mid{background:#FFF3D6;color:#6B4600}.roi-v.no{background:#FDE8E8;color:#8E1B12}.roi-v.nd{background:#EEF2F5;color:#42505C}
+.roi-av{background:#FFF3D6;color:#6B4600;border-radius:10px;padding:8px 10px;font-size:.78rem;margin-top:6px}.roi-err{background:#FDE8E8;color:#B42318;border-radius:10px;padding:10px}
+.roi-svg{width:100%;height:auto;display:block}.roi-lg{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.76rem;color:#5B6874;margin-top:2px}.roi-lg i{display:inline-block;width:18px;height:0;border-top:3px solid #0B3146;vertical-align:middle;margin-right:5px}.roi-lg i.b{border-top:3px dashed #5B6874}
+.roi-n{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+@media(min-width:700px){.roi-k{grid-template-columns:repeat(4,minmax(0,1fr))}.roi-fl{grid-template-columns:repeat(3,minmax(0,1fr))}}
+</style>
+<script>/* patch_promoroi (Admin): ROI de promociones */
+(function () {
+  if (!window.hwfBi || typeof pintarMas !== "function" || typeof syCall !== "function" || typeof SYC !== "function" || !document.getElementById("masSeg") || document.querySelector('#masSeg [data-m="roi"]')) return;
+  const ES_ADMIN = true;
+  const cfg = () => { try { const c = SYC(); return c && c.url ? c : null; } catch (e) { return null; } };
+  async function cargar(forzar) { const c = cfg(); ST.t = Date.now();
+    if (!c) { ST.err = "Esta app no está conectada al script de Google: se muestran las promociones guardadas en este equipo."; return pintar(); }
+    ST.ocup = true; ST.err = ""; pintar(); let r = null; try { r = await syCall(c, { accion: "b2bAjustes", leer: true }); } catch (e) { }
+    ST.ocup = false; if (r && r.ok) { ST.srv = (r.promos || []).map(x => normPromo(x, "promo")).concat((r.ofertas || []).map(x => normPromo(x, "oferta"))); acumular(r); }
+    else ST.err = "No se pudo leer las promociones del script" + (r && r.error ? " (" + r.error + ")" : "") + ": se muestran las guardadas en este equipo.";
+    pintar(); }
+
+  const HB = window.hwfBi;
+  const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const aviso = m => { try { (typeof toast === "function" ? toast : alert)(m); } catch (e) { } };
+  const nf = n => Math.round(Number(n) || 0).toLocaleString("es-CL");
+  const fm = n => { const a = Math.abs(n); return (n < 0 ? "−" : "") + "$" + (a >= 1e6 ? (a / 1e6).toLocaleString("es-CL", { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + " MM" : a >= 1e4 ? Math.round(a / 1e3).toLocaleString("es-CL") + " mil" : Math.round(a).toLocaleString("es-CL")); };
+  const sg = (n, f) => (n > 0.5 ? "+" : n < -0.5 ? "−" : "") + f(Math.abs(n)), cl = n => n > 0.5 ? "pos" : n < -0.5 ? "neg" : "";
+  const fp = x => x == null ? "—" : Math.abs(x) > 9.99 ? (x > 0 ? ">+999 %" : "<−999 %") : (x > 0.0005 ? "+" : x < -0.0005 ? "−" : "") + (Math.abs(x) * 100).toLocaleString("es-CL", { maximumFractionDigits: 0 }) + " %";
+  const lee = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k) || "null"); return v == null ? d : v; } catch (e) { return d; } };
+  const guarda = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { } };
+  const LSH = "hwf-roi-hist", LSE = "hwf-roi";
+  const hoyCL = () => new Intl.DateTimeFormat("en-CA", { timeZone: "America/Santiago" }).format(new Date());
+  const DAY = 864e5, ord = (y, m, d) => Date.UTC(y, m - 1, d) / DAY, iso = o => new Date(o * DAY).toISOString().slice(0, 10);
+  const ordIso = s => { const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(s || "")); return m ? ord(+m[1], +m[2], +m[3]) : null; };
+  const shiftY = (o, k) => { const d = new Date(o * DAY); return Date.UTC(d.getUTCFullYear() + k, d.getUTCMonth(), d.getUTCDate()) / DAY; };
+  const dmy = o => { const s = iso(o); return s.slice(8, 10) + "-" + s.slice(5, 7) + "-" + s.slice(0, 4); }, dm = o => { const s = iso(o); return s.slice(8, 10) + "-" + s.slice(5, 7); };
+  const ST = Object.assign({ est: "vig", base: "ant", canal: "d", vend: "", g: "v" }, lee(LSE, {}), { abiertas: {}, srv: null, err: "", ocup: false, ayuda: false, t: 0 });
+  if (!ES_ADMIN) ST.canal = "d";
+  const persiste = () => guarda(LSE, { est: ST.est, base: ST.base, canal: ST.canal, vend: ST.vend, g: ST.g });
+  const TIENDA = "Tienda Hellywoof";
+
+  /* ---------- historial local de promos (Ventas solo conoce las vigentes: b2bContenido) ---------- */
+  const normPromo = (x, tipo) => ({ k: tipo + ":" + (x.id || x.titulo || ""), id: x.id || "", tipo, titulo: x.titulo || "", desde: String(x.desde || "").slice(0, 10), hasta: String(x.hasta || "").slice(0, 10), productos: (x.productos || []).map(String), dcto: Number(x.dcto) || 0 });
+  function acumular(C) { if (!C) return; try { const H = lee(LSH, {}); let ch = false;
+      [["promos", "promo"], ["ofertas", "oferta"]].forEach(([t, tp]) => (C[t] || []).forEach(x => { const n = normPromo(x, tp); if (JSON.stringify(H[n.k]) !== JSON.stringify(n)) { H[n.k] = n; ch = true; } }));
+      const ks = Object.keys(H); if (ks.length > 200) { ks.sort((a, b) => String(H[a].hasta).localeCompare(String(H[b].hasta))).slice(0, ks.length - 200).forEach(k => delete H[k]); ch = true; }
+      if (ch) guarda(LSH, H); } catch (e) { } }
+  const listaPromos = () => { if (ST.srv) return ST.srv; acumular(window.__CONT); return Object.values(lee(LSH, {})); };
+
+  /* ---------- índice de ventas (por producto) con el filtro de negocio y vendedor ---------- */
+  let CI = null;
+  function indice(B) { const key = [(B.rows || []).length, B.corte, ST.canal, ST.vend].join("|"); if (CI && CI.key === key) return CI;
+    const V = B.vend || [], tv = V.indexOf(TIENDA), vi = ST.vend ? V.indexOf(ST.vend) : -1, pp = new Map(), cod = new Map(); let min = 1e12, max = -1e12;
+    (B.productos || []).forEach((p, i) => cod.set(String(p[2]), i));
+    (B.rows || []).forEach(r => { const o = ord(r[8] || B.anio, r[2], r[3] || 1); if (o < min) min = o; if (o > max) max = o;
+      const esT = r[7] === tv; if (ST.canal === "t" ? !esT : esT) return; if (ST.canal !== "t" && vi >= 0 && r[7] !== vi) return;
+      let a = pp.get(r[1]); if (!a) pp.set(r[1], a = []); a.push([o, r[4] || 0, r[5] || 0, (r[4] || 0) * (r[6] || 0), r[0]]); });
+    const co = ordIso(B.corte); CI = { key, pp, cod, min, max: co != null ? Math.max(co, max) : max, tv }; return CI; }
+  function metr(I, idxs, a, b) { const o = { u: 0, v: 0, c: 0, cli: new Map(), prod: {} };
+    idxs.forEach(i => { const L = I.pp.get(i); if (!L) return; let pu = 0, pv = 0, pc = 0;
+      for (const x of L) { if (x[0] < a || x[0] > b) continue; pu += x[1]; pv += x[2]; pc += x[3]; o.cli.set(x[4], (o.cli.get(x[4]) || 0) + x[2]); }
+      if (pu || pv || pc) o.prod[i] = { u: pu, v: pv, c: pc }; o.u += pu; o.v += pv; o.c += pc; });
+    o.m = o.v - o.c; o.cn = 0; o.cli.forEach(v => { if (v > 0) o.cn++; }); return o; }
+  function serie(I, idxs, a, n) { const S = { u: new Array(n).fill(0), v: new Array(n).fill(0), m: new Array(n).fill(0) };
+    idxs.forEach(i => { const L = I.pp.get(i); if (!L) return; for (const x of L) { const k = x[0] - a; if (k < 0 || k >= n) continue; S.u[k] += x[1]; S.v[k] += x[2]; S.m[k] += x[2] - x[3]; } }); return S; }
+  /* precio final: hwfPrecio de publicos/precio.js (lo define patch_congruencia_cat); respaldo con la misma fórmula */
+  const PX = (p, c, h) => { if (typeof hwfPrecio === "function") return hwfPrecio(p, c, h);
+    let d = Number(p.dc) || 0; ["promos", "ofertas"].forEach(k => ((c && c[k]) || []).forEach(x => { if ((!x.desde || x.desde <= h) && (!x.hasta || h <= x.hasta) && (x.productos || []).indexOf(p.i) >= 0 && (Number(x.dcto) || 0) > d) d = Number(x.dcto) || 0; }));
+    return { neto: Math.round((Number(p.p) || 0) * (1 - d / 100)) }; };
+  /* catálogo con precio de lista y dcto. permanente: hwfProd (PRODS / datos públicos); si la app aún no los tiene (Admin antes de su primera
+     actualización de datos públicos) baja ../datos/publicos.json (archivo público, sin datos de clientes) y, mientras llega, usa su CAT_APP */
+  let CAPM = null, CAPD = null, PUBX = null, pubPedido = false;
+  function bajarPub() { if (pubPedido) return; pubPedido = true; try { fetch("../datos/publicos.json", { cache: "no-cache" }).then(r => r.ok ? r.json() : null).then(j => { if (j && j.prods && j.prods.length) { PUBX = {}; j.prods.forEach(p => PUBX[p.i] = p); try { pintar(); } catch (e) { } } }).catch(() => { }); } catch (e) { } }
+  const PRD = c => { try { const x = typeof hwfProd === "function" ? hwfProd(c) : null; if (x) return x; if (PUBX && PUBX[c]) return PUBX[c];
+      if (typeof CAT_APP !== "undefined" && CAT_APP && CAT_APP.length) { if (CAPD !== CAT_APP) { CAPD = CAT_APP; CAPM = {}; CAT_APP.forEach(q => CAPM[q[0]] = { i: q[0], p: Number(q[6]) || 0, dc: 0 }); } return CAPM[c] || null; } } catch (e) { } return null; };
+
+  /* ---------- evaluación de una promo ---------- */
+  function evaluar(p, B, I, hoy) {
+    const R = { p, ok: false, estado: "", nota: [] }, hoyO = ordIso(hoy), d0 = ordIso(p.desde), h0 = p.hasta ? ordIso(p.hasta) : null;
+    R.vigente = d0 != null && d0 <= hoyO && (h0 == null || hoyO <= h0); R.futura = d0 != null && d0 > hoyO; R.terminada = h0 != null && h0 < hoyO;
+    R.nProd = (p.productos || []).length; R.sev = 9;
+    if (d0 == null) { R.estado = "Sin fecha de inicio: no se puede medir."; return R; }
+    if (R.futura) { R.estado = "Programada: aún no parte."; return R; }
+    if (!R.nProd) { R.estado = "Sin productos asignados."; return R; }
+    const idxs = []; (p.productos || []).forEach(c => { const i = I.cod.get(String(c)); if (i != null) idxs.push(i); });
+    const fin = Math.min(h0 == null ? hoyO : Math.min(h0, hoyO), I.max), n = fin - d0 + 1; R.d0 = d0; R.fin = fin; R.n = n; R.idxs = idxs;
+    R.nom = h0 != null ? h0 - d0 + 1 : null;
+    if (n < 1) { R.estado = "Aún no hay ventas cargadas del período."; return R; }
+    R.per = metr(I, idxs, d0, fin);
+    let a, b; if (ST.base === "anio") { a = shiftY(d0, -1); b = a + n - 1; } else { a = d0 - n; b = d0 - 1; }
+    R.ba0 = a; R.bn = n; R.cov = Math.max(0, Math.min(b, I.max) - Math.max(a, I.min) + 1); R.baseOk = R.cov >= Math.max(1, Math.ceil(n * 0.5)); R.f = R.cov ? n / R.cov : 0;
+    R.ba = metr(I, idxs, a, b);
+    R.bu = R.ba.u * R.f; R.bv = R.ba.v * R.f; R.bc = R.ba.c * R.f; R.bm = R.bv - R.bc; R.bcl = R.ba.cn * R.f;
+    /* costo de la promo (estimado): (precio final sin promo − con promo) × unidades netas del período */
+    const fi = iso(fin), contP = { promos: [{ desde: p.desde, hasta: p.hasta, productos: (p.productos || []).map(String), dcto: p.dcto, titulo: p.titulo }] }; let cost = 0, sinLista = 0; R.prods = [];
+    Object.keys(R.per.prod).forEach(k => { const x = R.per.prod[k], u = Math.max(0, x.u), pr = B.productos[k], pc = PRD(String(pr[2])); let unit;
+      if (pc && Number(pc.p) > 0) unit = Math.max(0, PX(pc, null, fi).neto - PX(pc, contP, fi).neto);
+      else { const pu = x.u > 0 ? x.v / x.u : 0; unit = p.dcto > 0 && p.dcto < 100 ? pu * p.dcto / (100 - p.dcto) : 0; sinLista++; }
+      cost += u * unit; R.prods.push({ n: pr[0], cod: String(pr[2]), u: x.u, v: x.v, m: x.v - x.c, cp: u * unit }); });
+    R.prods.sort((x, y) => y.v - x.v); R.costo = cost; R.sinLista = sinLista;
+    R.iu = R.per.u - R.bu; R.iv = R.per.v - R.bv; R.im = R.per.m - R.bm; R.icl = R.per.cn - R.bcl;
+    R.imPre = R.im + R.costo; R.neto = R.imPre - R.costo; R.roi = R.costo > 0.5 ? R.neto / R.costo : null;
+    R.ok = true; R.sinBase = !R.baseOk;
+    if (!R.baseOk) { R.sev = 8; R.tag = "nd"; R.etq = "Sin base"; R.frase = "Sin base: antes del inicio no hay ventas cargadas suficientes para comparar (" + R.cov + " de " + n + " días)."; return R; }
+    if (R.f > 1.001) R.nota.push("La base cubre " + R.cov + " de " + n + " días; se escaló × " + (Math.round(R.f * 100) / 100).toLocaleString("es-CL") + ".");
+    if (n < 7) R.nota.push("Período de " + n + (n === 1 ? " día" : " días") + ": cifras solo indicativas.");
+    if (!idxs.length) R.nota.push("Ninguno de los productos tiene ventas en la base.");
+    if (sinLista) R.nota.push(sinLista + (sinLista === 1 ? " producto sin precio de lista" : " productos sin precio de lista") + " en el catálogo: su descuento se estimó desde el precio vendido.");
+    const T = 0.10;
+    if (R.roi == null) { const ref = Math.abs(R.bm) > 1 ? Math.abs(R.bm) : 1, rel = R.im / ref; R.tag = rel > T ? "ok" : rel < -T ? "no" : "mid";
+      R.frase = (R.tag === "ok" ? "Rentable" : R.tag === "no" ? "No rentable" : "Neutra") + ": sin descuento que costear" + (R.p.dcto ? "" : " (la promo no baja el precio)") + "; el margen cambió " + sg(R.im, fm) + " frente a la base."; }
+    else { R.tag = R.roi >= T ? "ok" : R.roi <= -T ? "no" : "mid";
+      if (R.tag === "ok") R.frase = "Rentable: por cada $1 descontado quedaron $" + (R.roi).toLocaleString("es-CL", { maximumFractionDigits: 2 }) + " de margen extra; neto " + sg(R.neto, fm) + " y " + sg(R.iu, nf) + " u frente a la base.";
+      else if (R.tag === "mid") R.frase = "Neutra: el margen adicional apenas cubrió el descuento de " + fm(R.costo) + " (neto " + sg(R.neto, fm) + ").";
+      else R.frase = R.iu <= 0 ? "No rentable: no aumentó el volumen (" + sg(R.iu, nf) + " u vs base) y el descuento costó " + fm(R.costo) + " (neto " + sg(R.neto, fm) + ")."
+        : "No rentable: vendió " + sg(R.iu, nf) + " u más, pero el margen adicional no alcanzó para pagar el descuento de " + fm(R.costo) + " (neto " + sg(R.neto, fm) + ")."; }
+    R.etq = R.tag === "ok" ? "Rentable" : R.tag === "no" ? "No rentable" : "Neutra";
+    R.sev = R.roi == null ? 5 : 0; return R; }
+  const ETQ = { ok: "Rentable", mid: "Neutra", no: "No rentable", nd: "Sin base" };
+
+  function calcular() { const B = HB.base() || {}, hoy = hoyCL();
+    if (!(B.rows && B.rows.length)) return { sinDatos: true, B };
+    const I = indice(B), todas = listaPromos().map(p => evaluar(p, B, I, hoy));
+    const sel = todas.filter(r => !r.futura && (ST.est === "todas" || (ST.est === "vig" ? r.vigente : r.terminada)));
+    const ev = sel.filter(r => r.ok), con = ev.filter(r => r.baseOk);
+    const ord_ = (x, y) => (x.roi == null ? 1 : 0) - (y.roi == null ? 1 : 0) || (y.roi != null && x.roi != null ? y.roi - x.roi : (y.neto || 0) - (x.neto || 0));
+    con.sort(ord_); const resto = sel.filter(r => !r.ok || !r.baseOk);
+    /* promos que comparten productos y fechas: el incremental se traslapa */
+    con.forEach(r => con.forEach(s => { if (s !== r && r.d0 <= s.fin && s.d0 <= r.fin && r.idxs.some(i => s.idxs.indexOf(i) >= 0)) r.nota.push("Comparte productos y fechas con «" + (s.p.titulo || "otra promo") + "»: el incremental puede estar repetido."); }));
+    const t = { n: con.length, costo: 0, neto: 0, iv: 0, iu: 0, im: 0, imPre: 0, ok: 0, mid: 0, no: 0 };
+    con.forEach(r => { t.costo += r.costo; t.neto += r.neto; t.iv += r.iv; t.iu += r.iu; t.im += r.im; t.imPre += r.imPre; t[r.tag]++; }); t.roi = t.costo > 0.5 ? t.neto / t.costo : null;
+    const nFut = todas.filter(r => r.futura).length;
+    return { B, I, hoy, lista: con.concat(resto.filter(r => r.ok).concat(resto.filter(r => !r.ok))), con, t, nFut, total: todas.length }; }
+
+  /* ---------- gráfico día a día (período vs base), mismo estilo del BI ---------- */
+  function grafico(R) { const idxs = R.idxs, n = R.n, CIx = CI, S1 = serie(CIx, idxs, R.d0, n), S0 = serie(CIx, idxs, R.ba0, n), g = ST.g, f = x => g === "u" ? x : x;
+    const sem = n > 62, K = sem ? 7 : 1, m = Math.ceil(n / K), agr = (A) => { const o = new Array(m).fill(0); A.forEach((v, i) => o[Math.floor(i / K)] += v); return o; };
+    const P = agr(S1[g]), Bs = agr(S0[g]), W = 640, H = 220, L = 46, Rr = 8, T = 12, Bm = 26;
+    const mx = Math.max(1, ...P, ...Bs), p10 = Math.pow(10, Math.floor(Math.log10(mx))), q = mx / p10, paso = (q > 5 ? 2 : q > 2 ? 1 : 0.5) * p10, top = Math.ceil(mx / paso) * paso;
+    const y = v => T + (H - T - Bm) * (1 - Math.max(0, v) / top), xx = i => L + (W - L - Rr) * (m === 1 ? 0.5 : i / (m - 1)), fe = v => g === "u" ? Math.round(v).toLocaleString("es-CL") : v >= 1e6 ? (v / 1e6).toLocaleString("es-CL") + " MM" : v >= 1e3 ? Math.round(v / 1e3).toLocaleString("es-CL") + " mil" : String(Math.round(v));
+    let s = ""; for (let k = 0; k <= top + 1e-9; k += paso) s += `<line x1="${L}" x2="${W - Rr}" y1="${y(k)}" y2="${y(k)}" stroke="#DDE3E8" stroke-width="1"/><text x="${L - 6}" y="${y(k) + 4}" text-anchor="end" font-size="11" fill="#5B6874">${fe(k)}</text>`;
+    const step = Math.max(1, Math.ceil(m / 8)); for (let i = 0; i < m; i += step) s += `<text x="${xx(i)}" y="${H - 8}" text-anchor="middle" font-size="11" fill="#5B6874">${sem ? "sem " + (i + 1) : dm(R.d0 + i)}</text>`;
+    const pl = (A, st) => `<polyline points="${A.map((v, i) => xx(i) + "," + y(v)).join(" ")}" fill="none" ${st} stroke-linejoin="round"/>`;
+    s += pl(Bs, 'stroke="#5B6874" stroke-width="2" stroke-dasharray="5 4"') + pl(P, 'stroke="#0B3146" stroke-width="2.5"');
+    if (m <= 40) s += P.map((v, i) => `<circle cx="${xx(i)}" cy="${y(v)}" r="3.5" fill="#0B3146"><title>${sem ? "Semana " + (i + 1) : dmy(R.d0 + i)}: ${fe(v)}</title></circle>`).join("");
+    return `<svg class="roi-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(R.p.titulo)}: período contra línea base">${s}</svg>
+      <div class="roi-lg"><span><i></i>Período ${dm(R.d0)} a ${dm(R.fin)}</span><span><i class="b"></i>Base ${dm(R.ba0)} a ${dm(R.ba0 + n - 1)}${ST.base === "anio" ? " (año anterior)" : ""}</span></div>`; }
+
+  /* ---------- pantalla ---------- */
+  const periodoTxt = r => dmy(r.d0) + " a " + (r.vigente && r.p.hasta ? dmy(ordIso(r.p.hasta)) : dmy(r.fin)) + (r.vigente ? " · vigente" : "") + " · " + r.n + (r.n === 1 ? " día" : " días");
+  function tarjeta(r) { const p = r.p, ab = !!ST.abiertas[p.k], tp = p.tipo === "oferta" ? '<span class="roi-tp o">OFERTA</span>' : '<span class="roi-tp">PROMO</span>';
+    let h = `<div class="roi-c"><div class="roi-h"><div>${tp}<b>${esc(p.titulo || "(sin título)")}</b><br><small>${r.ok ? periodoTxt(r) : esc(dmy(ordIso(p.desde) || 0)) + (p.hasta ? " a " + dmy(ordIso(p.hasta)) : "")} · ${p.dcto ? "-" + p.dcto + " %" : "sin dcto."} · ${r.nProd} ${r.nProd === 1 ? "producto" : "productos"}</small></div>${r.ok ? `<span class="roi-s ${r.tag}">${r.etq}</span>` : '<span class="roi-s nd">Sin medir</span>'}</div>`;
+    if (!r.ok) return h + `<div class="roi-v nd">${esc(r.estado)}</div></div>`;
+    h += `<table class="roi-t" style="margin-top:8px"><colgroup><col style="width:28%"><col style="width:24%"><col style="width:24%"><col style="width:24%"></colgroup><thead><tr><th></th><th>Período</th><th>Base${R_f(r)}</th><th>Incr.</th></tr></thead><tbody>
+      <tr><td>Unidades</td><td>${nf(r.per.u)}</td><td>${nf(r.bu)}</td><td class="${cl(r.iu)}">${sg(r.iu, nf)}</td></tr>
+      <tr><td>Venta neta</td><td>${fm(r.per.v)}</td><td>${fm(r.bv)}</td><td class="${cl(r.iv)}">${sg(r.iv, fm)}</td></tr>
+      <tr><td>Margen bruto</td><td>${fm(r.per.m)}</td><td>${fm(r.bm)}</td><td class="${cl(r.im)}">${sg(r.im, fm)}</td></tr>
+      <tr><td>Clientes</td><td>${nf(r.per.cn)}</td><td>${nf(r.bcl)}</td><td class="${cl(r.icl)}">${sg(r.icl, nf)}</td></tr></tbody></table>`;
+    if (r.baseOk) h += `<div class="roi-k" style="margin-top:8px"><div>Costo de la promo (estimado)<b>${fm(r.costo)}</b></div><div>Margen incr. antes del dcto.<b class="${cl(r.imPre)}">${sg(r.imPre, fm)}</b></div><div>Beneficio neto<b class="${cl(r.neto)}">${sg(r.neto, fm)}</b></div><div>ROI<b class="${r.roi == null ? "" : cl(r.roi)}">${fp(r.roi)}</b></div></div>`;
+    h += `<div class="roi-v ${r.tag}">${esc(r.frase)}</div>`;
+    r.nota.forEach(x => h += `<div class="roi-av">${esc(x)}</div>`);
+    h += `<div class="roi-bt" style="margin-top:8px"><button type="button" class="roi-b" data-a="det" data-k="${esc(p.k)}">${ab ? "Ocultar detalle" : "Ver gráfico y productos"}</button></div>`;
+    if (ab) { h += `<div style="margin-top:8px">${grafico(r)}</div>`;
+      h += `<table class="roi-t" style="margin-top:8px"><colgroup><col style="width:34%"><col style="width:12%"><col style="width:18%"><col style="width:18%"><col style="width:18%"></colgroup><thead><tr><th>Producto</th><th>Uds</th><th>Venta</th><th>Margen</th><th>Costo promo</th></tr></thead><tbody>${r.prods.slice(0, 8).map(x => `<tr><td>${esc(x.n)}</td><td>${nf(x.u)}</td><td>${fm(x.v)}</td><td>${fm(x.m)}</td><td>${fm(x.cp)}</td></tr>`).join("")}</tbody></table>${r.prods.length > 8 ? `<small>… y ${r.prods.length - 8} productos más (completos en el Excel).</small>` : ""}`; }
+    return h + "</div>"; }
+  const R_f = r => r.f > 1.001 ? " <small>(esc.)</small>" : "";
+  function html() { if (!(window.__PUB && window.__PUB.prods)) bajarPub(); const C = calcular(), V = HB.base() && HB.base().vend || [];
+    const vends = V.filter(v => v !== TIENDA);
+    let h = `<div class="roi"><div class="roi-c"><h3>ROI de promociones</h3><small>Qué ganó o perdió HWF con cada promoción u oferta del portal B2B: ventas, margen y clientes del período contra una línea base, menos el descuento entregado. ${ES_ADMIN ? "" : "Solo distribuidora. "}Las cifras de descuento son estimadas.</small>
+      <div class="roi-fl" style="margin-top:10px"><div class="roi-seg" role="group" aria-label="Estado">${[["vig", "Vigentes"], ["ter", "Terminadas"], ["todas", "Todas"]].map(([k, t]) => `<button type="button" data-a="est" data-v="${k}" aria-pressed="${ST.est === k}">${t}</button>`).join("")}</div>
+      <div class="roi-seg" role="group" aria-label="Línea base">${[["ant", "Base: período anterior"], ["anio", "Base: año anterior"]].map(([k, t]) => `<button type="button" data-a="base" data-v="${k}" aria-pressed="${ST.base === k}">${t}</button>`).join("")}</div>
+      ${ES_ADMIN ? `<div class="roi-seg" role="group" aria-label="Negocio">${[["d", "Distribuidora"], ["t", "Tienda"]].map(([k, t]) => `<button type="button" data-a="canal" data-v="${k}" aria-pressed="${ST.canal === k}">${t}</button>`).join("")}</div>` : ""}
+      ${ST.canal === "d" && vends.length ? `<label>Vendedor<select data-s="vend"><option value="">Todos los vendedores</option>${vends.map(v => `<option value="${esc(v)}"${v === ST.vend ? " selected" : ""}>${esc(v)}</option>`).join("")}</select></label>` : ""}
+      <div class="roi-seg" role="group" aria-label="Gráfico">${[["v", "Gráfico: venta"], ["u", "unidades"], ["m", "margen"]].map(([k, t]) => `<button type="button" data-a="graf" data-v="${k}" aria-pressed="${ST.g === k}">${t}</button>`).join("")}</div></div>
+      <div class="roi-bt" style="margin-top:10px"><button type="button" class="roi-b" data-a="ref" ${ST.ocup ? "disabled" : ""}>↻ Actualizar</button><button type="button" class="roi-b pri" data-a="xls" ${C.sinDatos || !C.lista || !C.lista.length ? "disabled" : ""}>Excel</button><button type="button" class="roi-b" data-a="ayuda">${ST.ayuda ? "Ocultar cómo se calcula" : "Cómo se calcula"}</button></div>
+      ${ST.err ? `<div class="roi-av">${esc(ST.err)}</div>` : ""}</div>`;
+    if (ST.ayuda) h += `<div class="roi-c"><h3>Cómo se calcula</h3><small>
+      <b>Período</b>: desde el inicio de la promo hasta su término (o hasta hoy / el último día con ventas cargadas). <b>Línea base</b>: los mismos días inmediatamente antes del inicio (o las mismas fechas del año anterior); si el dato no cubre todos los días, se escala a igual duración.<br>
+      <b>Incremental</b> = período − base, solo con los productos de la promo (venta neta sin IVA; margen = venta − unidades × costo unitario; clientes con venta neta).<br>
+      <b>Costo de la promo (estimado)</b> = (precio final sin promo − precio final con la promo) × unidades vendidas en el período; supone que se facturó con el descuento.<br>
+      <b>ROI</b> = (margen incremental antes del descuento − costo de la promo) ÷ costo de la promo. El margen de las facturas ya viene descontado, así que el margen incremental antes del descuento es el observado más el costo de la promo, y el beneficio neto es el margen incremental observado.<br>
+      <b>Semáforo</b>: Rentable desde +10 %, Neutra entre −10 % y +10 %, No rentable desde −10 % hacia abajo. Es una comparación, no una prueba: estacionalidad, otras promos y quiebres de stock también mueven las ventas.</small></div>`;
+    if (C.sinDatos) return h + `<div class="roi-c roi-m">Todavía no hay ventas cargadas en la app para evaluar.</div></div>`;
+    if (!C.total) return h + `<div class="roi-c roi-m">${ST.ocup ? "Cargando promociones…" : "No hay promociones ni ofertas registradas" + (ES_ADMIN ? " (créalas en Más → Portal B2B)." : " todavía: aquí se acumulan las vigentes que la app va viendo.")}</div></div>`;
+    const t = C.t;
+    if (C.con.length) h += `<div class="roi-c"><h3>Total de ${t.n} ${t.n === 1 ? "promoción medida" : "promociones medidas"}</h3><div class="roi-k"><div>Costo de las promos (est.)<b>${fm(t.costo)}</b></div><div>Beneficio neto<b class="${cl(t.neto)}">${sg(t.neto, fm)}</b></div><div>Venta incremental<b class="${cl(t.iv)}">${sg(t.iv, fm)}</b></div><div>ROI total<b class="${t.roi == null ? "" : cl(t.roi)}">${fp(t.roi)}</b></div></div>
+      <div class="roi-n"><span class="roi-s ok">${t.ok} rentables</span><span class="roi-s mid">${t.mid} neutras</span><span class="roi-s no">${t.no} no rentables</span></div><small style="display:block;margin-top:6px">Ordenadas de mayor a menor ROI.${C.nFut ? " " + C.nFut + " programadas aún no cuentan." : ""}</small></div>`;
+    h += C.lista.length ? C.lista.map(tarjeta).join("") : `<div class="roi-c roi-m">No hay promociones ${ST.est === "vig" ? "vigentes" : ST.est === "ter" ? "terminadas" : ""} para medir${C.nFut ? " (" + C.nFut + " programadas)" : ""}.</div>`;
+    return h + "</div>"; }
+
+  /* ---------- Excel ---------- */
+  function hojas(C) { const r0 = x => Math.round(x || 0), r1 = x => x == null ? "" : Math.round(x * 1000) / 10;
+    const H1 = [["Tipo", "Promoción", "Desde", "Hasta", "Días medidos", "Dcto. %", "Productos", "Unidades período", "Unidades base", "Unidades incremental", "Venta neta período", "Venta neta base", "Venta incremental", "Margen bruto período", "Margen bruto base", "Margen incremental", "Clientes período", "Clientes base", "Costo promo (estimado)", "Margen incr. antes del dcto.", "Beneficio neto", "ROI %", "Veredicto", "Explicación", "Notas"]];
+    C.lista.forEach(r => { const p = r.p; if (!r.ok) H1.push([p.tipo, p.titulo, p.desde, p.hasta, "", p.dcto, r.nProd, "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "Sin medir", r.estado, ""]);
+      else H1.push([p.tipo, p.titulo, p.desde, p.hasta || "", r.n, p.dcto, r.nProd, r0(r.per.u), r0(r.bu), r0(r.iu), r0(r.per.v), r0(r.bv), r0(r.iv), r0(r.per.m), r0(r.bm), r0(r.im), r0(r.per.cn), r0(r.bcl), r0(r.costo), r0(r.imPre), r0(r.neto), r1(r.roi), r.etq, r.frase, r.nota.join(" ")]); });
+    const H2 = [["Promoción", "Producto", "Código", "Unidades período", "Venta neta período", "Margen bruto período", "Costo promo (estimado)"]];
+    C.lista.forEach(r => { if (r.ok) r.prods.forEach(x => H2.push([r.p.titulo, x.n, x.cod, r0(x.u), r0(x.v), r0(x.m), r0(x.cp)])); });
+    const H3 = [["Promoción", "Día n°", "Fecha período", "Fecha base", "Unidades período", "Unidades base", "Venta neta período", "Venta neta base", "Margen período", "Margen base"]];
+    C.lista.forEach(r => { if (!r.ok || !r.baseOk) return; const A = serie(C.I, r.idxs, r.d0, r.n), Z = serie(C.I, r.idxs, r.ba0, r.n); for (let i = 0; i < r.n; i++) H3.push([r.p.titulo, i + 1, iso(r.d0 + i), iso(r.ba0 + i), r0(A.u[i]), r0(Z.u[i]), r0(A.v[i]), r0(Z.v[i]), r0(A.m[i]), r0(Z.m[i])]); });
+    const H0 = [["ROI de promociones HWF", "Generado " + hoyCL()], ["Negocio", ST.canal === "t" ? "Tienda" : "Distribuidora" + (ST.vend ? " · " + ST.vend : "")], ["Línea base", ST.base === "anio" ? "Mismas fechas del año anterior" : "Mismos días inmediatamente anteriores al inicio"], ["Datos de ventas hasta", C.B.corte || ""], [],
+      ["Costo promo", "(precio final sin promo − precio final con la promo) × unidades vendidas; ESTIMADO (supone que se facturó con el descuento)."], ["Margen bruto", "Venta neta sin IVA − unidades × costo unitario."], ["ROI", "(margen incremental antes del descuento − costo de la promo) / costo de la promo = beneficio neto / costo."], ["Semáforo", "Rentable ≥ +10 % · Neutra entre −10 % y +10 % · No rentable ≤ −10 %"]];
+    return [["Resumen", H1], ["Productos", H2], ["Día a día", H3], ["Cómo se calcula", H0]]; }
+  function excel() { const C = calcular(); if (C.sinDatos || !C.lista.length) return aviso("No hay promociones para exportar."); const H = hojas(C), nombre = "ROI promociones " + hoyCL();
+    try { if (window.XLSX && XLSX.utils && XLSX.writeFile) { const wb = XLSX.utils.book_new(); H.forEach(([n, f]) => XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(f), n)); XLSX.writeFile(wb, nombre + ".xlsx"); return; } } catch (e) { }
+    const f = []; H.forEach(([n, l], i) => { if (i) f.push([]); f.push([n.toUpperCase()]); l.forEach(r => f.push(r)); });
+    const t = "﻿" + f.map(r => r.map(x => { const s = String(x == null ? "" : x); return /[;"\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; }).join(";")).join("\r\n");
+    const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([t], { type: "text/csv;charset=utf-8" })); a.download = nombre + ".csv"; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); }
+  async function act(a, v, k) {
+    if (a === "est") { ST.est = v; persiste(); return pintar(); }
+    if (a === "base") { ST.base = v; persiste(); return pintar(); }
+    if (a === "canal") { ST.canal = v; ST.vend = ""; persiste(); return pintar(); }
+    if (a === "graf") { ST.g = v; persiste(); return pintar(); }
+    if (a === "ayuda") { ST.ayuda = !ST.ayuda; return pintar(); }
+    if (a === "det") { ST.abiertas[k] = !ST.abiertas[k]; return pintar(); }
+    if (a === "xls") return excel();
+    if (a === "ref") return cargar(true); }
+  function enganchar(c) { c.addEventListener("click", ev => { const b = ev.target.closest(".roi [data-a]"); if (!b || b.disabled) return; ev.preventDefault(); act(b.dataset.a, b.dataset.v, b.dataset.k); });
+    c.addEventListener("change", ev => { const s = ev.target.closest(".roi [data-s]"); if (!s) return; if (s.dataset.s === "vend") { ST.vend = s.value; persiste(); pintar(); } }); }
+  window.hwfRoi = { calc: calcular, est: ST, hojas: () => hojas(calcular()) };
+  const alCargar = f => { if (document.readyState === "complete") f(); else window.addEventListener("load", f); };
+  alCargar(() => { try { acumular(window.__CONT); const _cc = window.hwfContCambio; window.hwfContCambio = function () { try { acumular(window.__CONT); } catch (e) { } return _cc && _cc.apply(this, arguments); }; } catch (e) { }
+    setInterval(() => { try { acumular(window.__CONT); } catch (e) { } }, 60000); });
+
+  function pintar() { if (typeof vistaMas !== "undefined" && vistaMas === "roi") { const mb = document.getElementById("masBody"); if (mb) mb.innerHTML = html(); } }
+  const seg = document.getElementById("masSeg"), b = document.createElement("button"); b.type = "button"; b.dataset.m = "roi"; b.setAttribute("aria-pressed", "false");
+  b.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1.3"/></svg><span>ROI promos</span>`;
+  const ref = seg.querySelector('[data-m="mail"]') || seg.querySelector('[data-m="b2b"]') || seg.lastElementChild; ref.after(b);
+  try { if (typeof NAV_MAS !== "undefined" && !NAV_MAS.includes("roi")) { const i = NAV_MAS.indexOf("mail"); NAV_MAS.splice(i >= 0 ? i + 1 : NAV_MAS.length, 0, "roi"); } if (typeof NAV_MNOM !== "undefined") NAV_MNOM.roi = "ROI promos"; } catch (e) { }
+  const _pm = pintarMas; pintarMas = function () { if (vistaMas === "roi") { pintar(); if (!ST.t || Date.now() - ST.t > 300000) cargar(); return; } return _pm.apply(this, arguments); };
+  enganchar(document.getElementById("masBody"));
 })();
 </script>
 </body>
