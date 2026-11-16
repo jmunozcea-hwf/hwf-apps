@@ -7198,7 +7198,7 @@ function confirmarNota() {
   x.onclick = () => cerrarModal(); card.insertBefore(x, card.firstChild); })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261116175222";
+const HWF_VER = "20261116175657";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -10334,8 +10334,16 @@ body:has(#rdOv) #snBtn,body:has(#rdOv) #iaBtn,body:has(#rdOv) #navBotones{displa
     const cerrar = () => { try { localStorage.setItem(clave(), "1"); } catch (x) {} o.remove(); }; o.querySelector("#rdX").onclick = cerrar; }
   window.hwfResumenDia = mostrar;
   setInterval(() => { try { if (typeof SES === "undefined" || !SES || document.getElementById("rdOv")) return; if (localStorage.getItem(clave())) return; const B = HB.base() || {}; if (!(B.rows && B.rows.length)) return; mostrar(); } catch (x) {} }, 1200);
-  /* acceso desde Inicio */
-  const ini = document.getElementById("crmInicio"); new MutationObserver(() => { if (ini.querySelector("#rdAbrir")) return; const ad = ini.querySelector("#adCard"), b = document.createElement("button"); b.type = "button"; b.id = "rdAbrir"; b.textContent = "📋 Ver mi resumen del día"; b.onclick = mostrar; if (ad) ad.after(b); else ini.prepend(b); }).observe(ini, { childList: true });
+  /* acceso desde el menú lateral ☰ (grupo «Mi día», después de Inicio); ya no hay botón en Inicio */
+  document.querySelectorAll("#rdAbrir").forEach(x => x.remove());
+  const ponerEnMenu = () => { const pan = document.getElementById("snPanel"); if (!pan || !pan.classList.contains("on") || pan.querySelector("#snRd")) return;
+    if (!pan.querySelector(".sn-g")) return setTimeout(ponerEnMenu, 60);   /* espera a que se armen los grupos del menú */
+    const ini = pan.querySelector('.sn-i[data-sm="inicio"]'); const b = document.createElement("button"); b.type = "button"; b.className = "sn-i"; b.id = "snRd";
+    b.innerHTML = '<span class="sn-e hic-w"><svg viewBox="0 0 32 32" aria-hidden="true" class="hic"><defs><linearGradient id="hic-resumen" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFC94A"/><stop offset="1" stop-color="#F28C28"/></linearGradient></defs><rect width="32" height="32" rx="9" fill="url(#hic-resumen)"/><path d="M4 4h24v10C20 9 11 9 4 13z" fill="#fff" opacity=".12"/><g transform="translate(5.5 5.5) scale(.875)" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 6h10M10 12h10M10 18h10"/><path d="M3.5 6l1.5 1.5L7.5 5M3.5 12l1.5 1.5L7.5 11M3.5 18l1.5 1.5L7.5 17"/></g></svg></span>Resumen del día';
+    b.addEventListener("click", ev => { ev.stopPropagation(); pan.classList.remove("on"); const v = document.getElementById("snVelo"); if (v) v.classList.remove("on"); mostrar(); });
+    if (ini) ini.after(b); else pan.querySelector(".sn-g").after(b); };
+  const vigila = setInterval(() => { const pan = document.getElementById("snPanel"); if (!pan) return; clearInterval(vigila);
+    new MutationObserver(() => setTimeout(ponerEnMenu, 30)).observe(pan, { childList: true, attributes: true, attributeFilter: ["class"] }); }, 400);
 })();
 </script>
 </body>
