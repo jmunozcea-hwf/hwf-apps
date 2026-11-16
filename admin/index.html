@@ -4523,7 +4523,7 @@ const _pintarProductosPra = pintarProductos;
 pintarProductos = function () {
   const r = _pintarProductosPra.apply(this, arguments);
   const s = $("s-pro"); if (!s) return r;
-  s.insertAdjacentHTML("afterbegin", `<details class="card pra" id="praBox"${praAbierto ? " open" : ""}><summary><h2>Productos visibles en la app de ventas</h2><span class="pra-res" id="praRes"></span></summary>
+  s.insertAdjacentHTML("afterbegin", `<details class="card pra" id="praBox"${praAbierto ? " open" : ""}><summary><h2>Productos visibles en la app de ventas y el portal B2B</h2><span class="pra-res" id="praRes"></span></summary>
     <p class="muted" style="margin:8px 0 0;font-size:.85rem">Los productos ocultos no aparecen en la sección Pedido de app Ventas (se actualiza en los teléfonos al abrir la app). Las fotos, precios y descripciones se editan en la planilla «HWF Maestro de productos» de Drive.</p>
     <div class="pra-tools"><input id="praQ" type="search" placeholder="Buscar producto, código o categoría" aria-label="Buscar producto">
       <div class="pra-seg" role="group" aria-label="Filtro">${[["todos", "Todos"], ["on", "Visibles"], ["off", "Ocultos"]].map(([k, t]) => `<button type="button" data-praf="${k}" aria-pressed="${praFiltro === k}">${t}</button>`).join("")}</div></div>
@@ -5273,7 +5273,7 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261116115351";
+const HWF_VER = "20261116115615";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
