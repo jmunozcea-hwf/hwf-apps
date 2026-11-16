@@ -5274,7 +5274,7 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261116210839";
+const HWF_VER = "20261116211401";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -6100,7 +6100,7 @@ function vmPoner(cont, VM, antes) { try { if (!cont) return; const v = cont.quer
   const VEN = typeof NAV_ORDEN !== "undefined" && typeof setModo === "function" && !!document.getElementById("mInicio"), ADM = !VEN && !!document.querySelector("nav.bottom") && !!document.getElementById("s-res");
   const LOG = !VEN && !ADM && !!document.querySelector('#nav [data-s="rutas"]'), TND = !VEN && !ADM && !!document.getElementById("tNav");
   const GV = [["Mi día", ["inicio", "pedido", "clientes", "agenda", "ruta", "cobranza", "embudo", "cat"]], ["Análisis", ["dash", "avance", "bi"]], ["Aprender", ["nut", "tec"]]];
-  const GA = [["Ventas", ["t:res", "t:ven", "t:cli", "t:pro", "m:ranking", "m:plan", "m:zonas", "m:terreno", "m:bonif"]], ["Pedidos y cobranza", ["m:cots", "m:napp", "m:cobranza", "m:embudo"]],
+  const GA = [["Dirección", ["t:hal"]], ["Ventas", ["t:res", "t:ven", "t:cli", "t:pro", "m:ranking", "m:plan", "m:zonas", "m:terreno", "m:bonif"]], ["Pedidos y cobranza", ["m:cots", "m:napp", "m:cobranza", "m:embudo"]],
     ["BI y compras", ["b:v", "b:l", "t:mar", "m:abast", "m:provee"]], ["Archivos y datos", ["m:catalogo", "m:cambios", "m:datos"]]];
   const pos = (G, k) => { let n = 0; for (const [, l] of G) { const i = l.indexOf(k); if (i >= 0) return n + i; n += l.length; } return 999; };
   if (VEN) { const ord = () => { const a = NAV_ORDEN.slice(); a.sort((x, y) => pos(GV, x[0]) - pos(GV, y[0])); NAV_ORDEN.splice(0, NAV_ORDEN.length, ...a); };
@@ -8886,6 +8886,85 @@ window.hwfContCambio = function () { try { if (typeof praPintar === "function" &
     });
   }
   aplicar();
+})();
+</script>
+<style>/* patch_hallazgos */
+#s-hal{display:grid;gap:12px;align-content:start}
+.hl-top{display:grid;gap:10px}.hl-top h2{margin:0}
+.hl-k{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px}
+.hl-k div{background:var(--sunk);border-radius:12px;padding:10px 12px;font-size:.78rem;color:var(--muted)}.hl-k b{display:block;font-size:1.25rem;color:var(--ink)}
+.hl-f{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.hl-f select,.hl-f input{font:inherit;font-size:.9rem;color:var(--ink);border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:9px 12px;min-height:42px;width:100%}
+.hl-acc{display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:.82rem;color:var(--muted)}
+.hl-acc button{font:inherit;font-size:.85rem;font-weight:800;border:0;background:#0B3146;color:#fff;border-radius:999px;padding:9px 16px;cursor:pointer}.hl-acc button:disabled{opacity:.6;cursor:wait}
+.hl-c{border:1px solid var(--line);border-left:6px solid #0B3146;border-radius:14px;padding:12px 14px;background:var(--surface);display:grid;gap:6px}
+.hl-c.neg{border-left-color:#B42318}.hl-c.pos{border-left-color:#1C7A4E}
+.hl-m{font-size:.76rem;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center}
+.hl-t{font-weight:800;font-size:1.02rem;line-height:1.3}
+.hl-b{font-size:.9rem;line-height:1.45}.hl-r{font-size:.9rem;line-height:1.45;background:var(--sunk);border-radius:10px;padding:8px 10px}
+.hl-tag{font-weight:800;border-radius:999px;padding:2px 9px;font-size:.72rem}.hl-tag.neg{background:#FDECEA;color:#B42318}.hl-tag.pos{background:#E3F4EA;color:#1C7A4E}.hl-tag.cam{background:#E6EEF4;color:#0B3146}
+.hl-tag.dec{background:#B42318;color:#fff}.hl-tag.nuevo{background:#FFF1D6;color:#8A5A00}
+.hl-pie{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;font-size:.76rem;color:var(--muted)}
+.hl-pie select{font:inherit;font-size:.82rem;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:5px 10px}
+.hl-vacio{padding:24px;text-align:center;color:var(--muted)}
+</style>
+<script>/* patch_hallazgos: agente de hallazgos en HWF Admin */
+(function () {
+  const $h = id => document.getElementById(id), navPro = document.querySelector('nav.bottom [data-t="pro"]');
+  if (!navPro || !$h("s-pro") || typeof syCall !== "function" || typeof SYC !== "function") return;
+  if (/\/administracion\//.test(location.pathname)) return;   /* HWF Administración (Leslie): sin hallazgos */
+  const K = "adm-hallazgos", ESTADOS = ["Nuevo", "Visto", "En gestión", "Resuelto", "Descartado"], PEND = ["Nuevo", "Visto", "En gestión"];
+  const F = Object.assign({ tipo: "", area: "", est: "pend", q: "" }, (() => { try { return JSON.parse(localStorage.getItem(K + "-f") || "{}"); } catch (e) { return {}; } })());
+  let D = (() => { try { return JSON.parse(localStorage.getItem(K) || "null"); } catch (e) { return null; } })(), cargando = false, err = "";
+  const e_ = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+  const $m = n => { n = Number(n) || 0; const a = Math.abs(n); return (n < 0 ? "−" : "") + "$" + (a >= 1e6 ? (a / 1e6).toLocaleString("es-CL", { maximumFractionDigits: 1 }) + " MM" : Math.round(a).toLocaleString("es-CL")); };
+  const aviso = m => { try { if (typeof toast === "function") toast(m); } catch (e) {} };
+  const filas = () => (D && D.filas || []).map(r => ({ id: r[0], fecha: r[1], area: r[2], tipo: r[3], sev: r[4], dec: r[5] === "Sí", tit: r[6], cuant: r[7], cual: r[8], imp: Number(r[9]) || 0, reco: r[10], est: r[11] || "Nuevo", alerta: r[12] }));
+  async function cargar(ahora) { const cfg = SYC(); if (!cfg || !cfg.url) { err = "Sin conexión con el script de Google."; pintar(); return; } if (cargando) return; cargando = true; err = ""; pintar();
+    try { const r = await syCall(cfg, { accion: ahora ? "hallazgosAhora" : "hallazgos", n: 400 });
+      if (r && r.ok) { D = { filas: r.filas || [], t: new Date().toISOString(), total: r.total || 0 }; try { localStorage.setItem(K, JSON.stringify(D)); } catch (e) {} if (ahora) aviso(r.nuevos ? r.nuevos + " hallazgos nuevos." : "Revisado: sin hallazgos nuevos."); }
+      else err = (r && r.error) || "El script no respondió. Si es la primera vez, puede que aún no tenga la versión con hallazgos."; }
+    catch (x) { err = "No se pudo leer: " + (x && x.message || x); } finally { cargando = false; pintar(); } }
+  async function estado(id, est) { const cfg = SYC(); const r = await syCall(cfg, { accion: "hallazgoEstado", id, estado: est });
+    if (r && r.ok) { (D.filas.find(x => x[0] === id) || [])[11] = est; try { localStorage.setItem(K, JSON.stringify(D)); } catch (e) {} pintar(); } else aviso("No se pudo cambiar: " + ((r && r.error) || "sin respuesta")); }
+  function pintar() { const s = $h("s-hal"); if (!s || s.hidden) return; const L = filas();
+    const areas = [...new Set(L.map(x => x.area))].sort(), q = (F.q || "").toLowerCase();
+    const V = L.filter(x => (!F.tipo || x.tipo === F.tipo) && (!F.area || x.area === F.area) && (F.est === "todos" || (F.est === "pend" ? PEND.includes(x.est) : x.est === F.est)) && (!q || (x.tit + " " + x.cuant + " " + x.reco).toLowerCase().includes(q)));
+    const pend = L.filter(x => PEND.includes(x.est)), cnt = t => pend.filter(x => x.tipo === t).length, sum = t => pend.filter(x => x.tipo === t).reduce((a, x) => a + x.imp, 0);
+    const ord = { alta: 0, media: 1, baja: 2 }; V.sort((a, b) => (b.est === "Nuevo") - (a.est === "Nuevo") || (b.dec - a.dec) || (ord[a.sev] - ord[b.sev]) || String(b.fecha).localeCompare(String(a.fecha)));
+    const cls = t => t === "Negativo" ? "neg" : t === "Positivo" ? "pos" : "cam";
+    s.innerHTML = `<div class="card hl-top"><h2>Hallazgos</h2>
+      <p class="muted" style="margin:0;font-size:.86rem">Cambios en los números de la empresa detectados por el agente (proveedores, ventas, finanzas, logística y externos), cada uno con su recomendación. Se revisa todos los días; los lunes llega el resumen por correo y las decisiones urgentes, al momento.</p>
+      <div class="hl-k"><div>Requieren decisión<b style="color:#B42318">${pend.filter(x => x.dec).length}</b>pendientes</div><div>Negativos<b>${cnt("Negativo")}</b>${$m(sum("Negativo"))}/mes</div><div>Positivos<b>${cnt("Positivo")}</b>${$m(sum("Positivo"))}/mes</div><div>Nuevos<b>${L.filter(x => x.est === "Nuevo").length}</b>sin revisar</div></div>
+      <div class="hl-f"><select id="hlTipo" aria-label="Tipo"><option value="">Positivos y negativos</option>${["Negativo", "Positivo", "Cambio"].map(t => `<option value="${t}"${F.tipo === t ? " selected" : ""}>${t}s</option>`).join("")}</select>
+        <select id="hlArea" aria-label="Área"><option value="">Todas las áreas</option>${areas.map(a => `<option${F.area === a ? " selected" : ""}>${e_(a)}</option>`).join("")}</select>
+        <select id="hlEst" aria-label="Estado"><option value="pend"${F.est === "pend" ? " selected" : ""}>Pendientes</option><option value="todos"${F.est === "todos" ? " selected" : ""}>Todos</option>${["Resuelto", "Descartado"].map(t => `<option value="${t}"${F.est === t ? " selected" : ""}>${t}s</option>`).join("")}</select>
+        <input id="hlQ" type="search" placeholder="Buscar proveedor, cliente…" value="${e_(F.q)}" aria-label="Buscar"></div>
+      <div class="hl-acc"><button type="button" id="hlAhora"${cargando ? " disabled" : ""}>${cargando ? "Revisando…" : "Revisar ahora"}</button><span>${err ? '<b style="color:#B42318">' + e_(err) + "</b>" : D ? `${V.length} de ${L.length} · actualizado ${new Date(D.t).toLocaleString("es-CL", { dateStyle: "short", timeStyle: "short" })}` : "Cargando…"}</span></div></div>
+      ${V.map(x => `<article class="hl-c ${cls(x.tipo)}"><div class="hl-m"><span class="hl-tag ${cls(x.tipo)}">${e_(x.tipo)}</span>${x.dec ? '<span class="hl-tag dec">Requiere decisión</span>' : ""}${x.est === "Nuevo" ? '<span class="hl-tag nuevo">Nuevo</span>' : ""}<span>${e_(x.area)}</span><span>severidad ${e_(x.sev)}</span>${x.imp ? `<span>impacto ${$m(x.imp)}/mes</span>` : ""}</div>
+        <div class="hl-t">${e_(x.tit)}</div><div class="hl-b"><b>Cifras:</b> ${e_(x.cuant)}</div><div class="hl-b"><b>Lectura:</b> ${e_(x.cual)}</div><div class="hl-r"><b>Recomendación:</b> ${e_(x.reco)}</div>
+        <div class="hl-pie"><span>Detectado ${e_(String(x.fecha).slice(0, 16))}${x.alerta ? " · alerta enviada " + e_(String(x.alerta).slice(0, 16)) : ""}</span><select data-hl="${e_(x.id)}" aria-label="Estado del hallazgo">${ESTADOS.map(t => `<option${t === x.est ? " selected" : ""}>${t}</option>`).join("")}</select></div></article>`).join("")
+      || `<div class="card hl-vacio">${D ? (L.length ? "Ningún hallazgo con estos filtros." : "Aún no hay hallazgos registrados: el agente revisa los números una vez al día (o toca «Revisar ahora»).") : "Cargando hallazgos…"}</div>`}`;
+    const g = () => { try { localStorage.setItem(K + "-f", JSON.stringify(F)); } catch (e) {} };
+    $h("hlTipo").onchange = e => { F.tipo = e.target.value; g(); pintar(); }; $h("hlArea").onchange = e => { F.area = e.target.value; g(); pintar(); }; $h("hlEst").onchange = e => { F.est = e.target.value; g(); pintar(); };
+    let t; $h("hlQ").oninput = e => { clearTimeout(t); t = setTimeout(() => { F.q = e.target.value; g(); pintar(); const i = $h("hlQ"); i.focus(); i.setSelectionRange(i.value.length, i.value.length); }, 300); };
+    $h("hlAhora").onclick = () => cargar(true);
+    s.querySelectorAll("[data-hl]").forEach(x => x.onchange = () => estado(x.dataset.hl, x.value)); }
+  window.pintarHallazgos = pintar;
+  /* integración con la navegación de Admin (igual que «Márgenes») */
+  const sec = document.createElement("section"); sec.className = "sec"; sec.id = "s-hal"; sec.hidden = true; $h("s-pro").after(sec);
+  const btn = document.createElement("button"); btn.type = "button"; btn.dataset.t = "hal"; btn.setAttribute("aria-selected", "false");
+  btn.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/><path d="M11 8v3.5"/><path d="M11 14h.01"/></svg>Hallazgos';
+  navPro.after(btn);
+  if (typeof NAV_TABS !== "undefined" && !NAV_TABS.includes("hal")) NAV_TABS.splice(NAV_TABS.indexOf("pro") + 1, 0, "hal");
+  if (typeof NAV_TNOM !== "undefined") NAV_TNOM.hal = "Hallazgos";
+  const _ref = refrescar;
+  refrescar = function () { if (TAB !== "hal") return _ref.apply(this, arguments); try { $h("subT").textContent = "Agente de hallazgos"; } catch (e) {} pintar(); if (!cargando) cargar(false); };
+  document.querySelector("nav.bottom").addEventListener("click", e => { if (!e.target.closest("[data-t]")) return; sec.hidden = TAB !== "hal"; if (!sec.hidden) pintar(); });
+  const ICO = '<svg viewBox="0 0 32 32" aria-hidden="true" class="hic"><defs><linearGradient id="hic-hal" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F2A65A"/><stop offset="1" stop-color="#C2410C"/></linearGradient></defs><rect width="32" height="32" rx="9" fill="url(#hic-hal)"/><circle cx="14.5" cy="14.5" r="6.5" fill="none" stroke="#fff" stroke-width="2.4"/><path d="M19.5 19.5l5 5" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/><path d="M14.5 11.5v3.6M14.5 17.6v.1" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg>';
+  const pan = document.getElementById("snPanel");
+  if (pan) new MutationObserver(() => { const x = pan.querySelector('.sn-i[data-t="hal"] .sn-e'); if (x && !x.querySelector("svg")) x.innerHTML = ICO; }).observe(pan, { childList: true });
+  setTimeout(() => { if (!D) cargar(false); }, 6000);   /* precarga para que la pestaña abra al instante */
 })();
 </script>
 </body>
