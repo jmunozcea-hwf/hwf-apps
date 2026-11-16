@@ -7199,7 +7199,7 @@ function confirmarNota() {
   x.onclick = () => cerrarModal(); card.insertBefore(x, card.firstChild); })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261116223136";
+const HWF_VER = "20261116232217";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -10217,23 +10217,6 @@ try { if (document.getElementById("crmInicio") && SES) pintarInicio(); } catch (
 })();
 </script>
 <style>/* patch_sinverdash */#inAv{display:none!important}</style>
-<script>/* patch_prodprecios: precio de venta definido en HWF Admin → Productos */
-(function () {
-  if (typeof praLeer !== "function" || typeof PRODS === "undefined") return;
-  const K = "hwf-prod-precio", B = {}; PRODS.forEach(p => B[p.i] = p.p);
-  const aplicar = () => { let M = {}; try { M = JSON.parse(localStorage.getItem(K) || "{}") || {}; } catch (e) {}
-    PRODS.forEach(p => { p.p = M[p.i] > 0 ? M[p.i] : B[p.i]; }); };
-  const _pl = praLeer;
-  praLeer = function (cambios) { const U = {};
-    (cambios || []).forEach(c => { if (!c || c.codigo !== "PRODUCTO") return; let o; try { o = JSON.parse(c.detalle); } catch (e) { return; }
-      if (!o || !o.pr || !o.i) return; const a = U[o.i]; if (!a || String(o.t || "") >= String(a.t || "")) U[o.i] = { p: Number(o.p) > 0 ? Math.round(Number(o.p)) : 0, t: String(o.t || "") }; });
-    const M = {}; Object.keys(U).forEach(i => { if (U[i].p) M[i] = U[i].p; });
-    let antes = ""; try { antes = localStorage.getItem(K) || ""; localStorage.setItem(K, JSON.stringify(M)); } catch (e) {}
-    aplicar(); if (JSON.stringify(M) !== (antes || "{}")) setTimeout(() => { try { applyFilter(); } catch (e) {} try { if (typeof renderCart === "function") renderCart(); } catch (e) {} }, 0);
-    return _pl.apply(this, arguments); };
-  aplicar(); try { applyFilter(); } catch (e) {}
-})();
-</script>
 <script>/* patch_oscuro: corrige contrastes en modo oscuro */
 (function () {
   const oscuro = () => { const t = document.documentElement.dataset.theme; return t === "dark" || (t !== "light" && matchMedia("(prefers-color-scheme: dark)").matches); };
@@ -10450,6 +10433,23 @@ body:has(#rdOv) #snBtn,body:has(#rdOv) #iaBtn,body:has(#rdOv) #navBotones{displa
   /* sin entrada en el menú lateral (16-11-2026, «redunda»): lo mismo está en Inicio → «Mi día» */
   const quitar = () => document.querySelectorAll("#snRd, #rdOv").forEach(x => x.remove()); quitar();
   const vigila = setInterval(() => { const pan = document.getElementById("snPanel"); if (!pan) return; clearInterval(vigila); new MutationObserver(quitar).observe(pan, { childList: true }); }, 400);
+})();
+</script>
+<script>/* patch_prodprecios: precio de venta definido en HWF Admin → Productos */
+(function () {
+  if (typeof praLeer !== "function" || typeof PRODS === "undefined") return;
+  const K = "hwf-prod-precio", B = {}; PRODS.forEach(p => B[p.i] = p.p);
+  const aplicar = () => { let M = {}; try { M = JSON.parse(localStorage.getItem(K) || "{}") || {}; } catch (e) {}
+    PRODS.forEach(p => { p.p = M[p.i] > 0 ? M[p.i] : B[p.i]; }); };
+  const _pl = praLeer;
+  praLeer = function (cambios) { const U = {};
+    (cambios || []).forEach(c => { if (!c || c.codigo !== "PRODUCTO") return; let o; try { o = JSON.parse(c.detalle); } catch (e) { return; }
+      if (!o || !o.pr || !o.i) return; const a = U[o.i]; if (!a || String(o.t || "") >= String(a.t || "")) U[o.i] = { p: Number(o.p) > 0 ? Math.round(Number(o.p)) : 0, t: String(o.t || "") }; });
+    const M = {}; Object.keys(U).forEach(i => { if (U[i].p) M[i] = U[i].p; });
+    let antes = ""; try { antes = localStorage.getItem(K) || ""; localStorage.setItem(K, JSON.stringify(M)); } catch (e) {}
+    aplicar(); if (JSON.stringify(M) !== (antes || "{}")) setTimeout(() => { try { applyFilter(); } catch (e) {} try { if (typeof renderCart === "function") renderCart(); } catch (e) {} }, 0);
+    return _pl.apply(this, arguments); };
+  aplicar(); try { applyFilter(); } catch (e) {}
 })();
 </script>
 </body>
