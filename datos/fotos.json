@@ -1,5 +1,5 @@
 {
- "version": "2026-11-16.4-agility-nuevo",
+ "version": "2026-11-16.5-ikai-dogevolution",
  "base": "https://jmunozcea-hwf.github.io/hwf-apps/",
  "fotos": {
   "764": {
@@ -273,10 +273,14 @@
    "h": 800
   },
   "765": {
-   "fuente": "rediredi",
-   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_059308af-705f-499b-80a8-091576e64a8c.jpg",
-   "calidad": "mala",
-   "nota": "contenido 235 px (<300)"
+   "fuente": "ikaichile.cl (oficial)",
+   "origen": "https://www.ikaichile.cl/cdn/shop/files/Premium_Salmon_Broth_Pouch_with_Bowl.png",
+   "calidad": "buena",
+   "nota": "reemplaza foto rediredi chica (16-11-2026); fondo blanco",
+   "f": "fotos/765.webp",
+   "m": "fotos/m/765.webp",
+   "w": 800,
+   "h": 800
   },
   "498167": {
    "fuente": "rediredi",
@@ -309,10 +313,14 @@
    "h": 800
   },
   "18": {
-   "fuente": "rediredi",
-   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_23d0221a-7c0e-41c4-b376-4e24c39f41cc.jpg",
-   "calidad": "mala",
-   "nota": "contenido 199 px (<300)"
+   "fuente": "amigales.cl",
+   "origen": "https://amigales.cl/cdn/shop/files/dog_evolution_adulto_1_a59c23bc-f9d5-46bf-88c5-df0575eaea60.jpg",
+   "calidad": "buena",
+   "nota": "reemplaza foto rediredi chica (16-11-2026); fondo blanco",
+   "f": "fotos/18.webp",
+   "m": "fotos/m/18.webp",
+   "w": 800,
+   "h": 800
   },
   "750": {
    "fuente": "rediredi",
@@ -335,16 +343,24 @@
    "h": 800
   },
   "771": {
-   "fuente": "rediredi",
-   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_96cc9b7c-63e6-4a7b-86ed-2e19d96ea77a.jpg",
-   "calidad": "mala",
-   "nota": "contenido 202 px (<300)"
+   "fuente": "ikaichile.cl (oficial)",
+   "origen": "https://www.ikaichile.cl/cdn/shop/files/Salmon_Broth_Pouch_with_Orange_Bowl.png",
+   "calidad": "buena",
+   "nota": "reemplaza foto rediredi chica (16-11-2026); fondo blanco",
+   "f": "fotos/771.webp",
+   "m": "fotos/m/771.webp",
+   "w": 800,
+   "h": 800
   },
   "772": {
-   "fuente": "rediredi",
-   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_03eca245-508d-4df3-bf72-6a236a5bf65b.jpg",
-   "calidad": "mala",
-   "nota": "contenido 164 px (<300)"
+   "fuente": "ikaichile.cl (oficial)",
+   "origen": "https://www.ikaichile.cl/cdn/shop/files/IKAI_-_AMAZON_65.png",
+   "calidad": "buena",
+   "nota": "reemplaza foto rediredi chica (16-11-2026); fondo blanco",
+   "f": "fotos/772.webp",
+   "m": "fotos/m/772.webp",
+   "w": 800,
+   "h": 800
   },
   "31": {
    "fuente": "alican (agilitypets.com)",
@@ -599,10 +615,14 @@
    "h": 800
   },
   "769": {
-   "fuente": "rediredi",
-   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_db1b62c3-40a5-49f2-8a5a-adbc297f4b5e.jpg",
-   "calidad": "mala",
-   "nota": "contenido 243 px (<300)"
+   "fuente": "ikaichile.cl (oficial)",
+   "origen": "https://www.ikaichile.cl/cdn/shop/files/Premium_Salmon_Mousse_Cat_Treat_Pouch_1.png",
+   "calidad": "buena",
+   "nota": "reemplaza foto rediredi chica (16-11-2026); fondo blanco",
+   "f": "fotos/769.webp",
+   "m": "fotos/m/769.webp",
+   "w": 800,
+   "h": 800
   },
   "770": {
    "fuente": "rediredi",
@@ -611,22 +631,34 @@
    "nota": "contenido 228 px (<300)"
   },
   "767": {
-   "fuente": "rediredi",
-   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_0064c784-dc3c-4521-bf21-9d3a0e4f280f.jpg",
-   "calidad": "mala",
-   "nota": "contenido 267 px (<300)"
+   "fuente": "ikaichile.cl (oficial)",
+   "origen": "https://www.ikaichile.cl/cdn/shop/files/IKAI_-_AMAZON_64.png",
+   "calidad": "buena",
+   "nota": "reemplaza foto rediredi chica (16-11-2026); fondo blanco",
+   "f": "fotos/767.webp",
+   "m": "fotos/m/767.webp",
+   "w": 800,
+   "h": 800
   },
   "768": {
-   "fuente": "rediredi",
-   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_27de4e1e-9266-4084-ad18-7f356e4055ee.jpg",
-   "calidad": "mala",
-   "nota": "contenido 291 px (<300)"
+   "fuente": "ikaichile.cl (oficial)",
+   "origen": "https://www.ikaichile.cl/cdn/shop/files/Premium_Salmon_Mousse_Treat.png",
+   "calidad": "buena",
+   "nota": "reemplaza foto rediredi chica (16-11-2026); fondo blanco",
+   "f": "fotos/768.webp",
+   "m": "fotos/m/768.webp",
+   "w": 800,
+   "h": 800
   },
   "766": {
-   "fuente": "rediredi",
-   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_c0686f65-c3bb-48c9-bcf5-c0f89603da4f.jpg",
-   "calidad": "mala",
-   "nota": "contenido 228 px (<300)"
+   "fuente": "ikaichile.cl (oficial)",
+   "origen": "https://www.ikaichile.cl/cdn/shop/files/Salmon_Shrimp_Mousse_Treat_Studio_Shot.png",
+   "calidad": "buena",
+   "nota": "reemplaza foto rediredi chica (16-11-2026); fondo blanco",
+   "f": "fotos/766.webp",
+   "m": "fotos/m/766.webp",
+   "w": 800,
+   "h": 800
   },
   "498169": {
    "fuente": "rediredi",
