@@ -18,6 +18,68 @@
 })();
 </script>
 <head>
+<script>/* patch_congruencia_cat: contenido público (promos, ofertas, novedades, sin stock) y precio final único (publicos/FUENTES.md) */
+(function(){var W=window,K="hwf-b2bcont",KP="hwf-prods-min",NEEDPUB=false;
+function hwfPrecio(prod, contenido, hoy) {
+  hoy = hoy || new Intl.DateTimeFormat("en-CA", { timeZone: "America/Santiago" }).format(new Date());
+  const vig = x => x && (!x.desde || x.desde <= hoy) && (!x.hasta || hoy <= x.hasta);
+  let dcto = Number(prod.dc) || 0, promo = null;
+  ["promos", "ofertas"].forEach(k => ((contenido && contenido[k]) || []).forEach(x => {
+    if (vig(x) && (x.productos || []).indexOf(prod.i) >= 0 && (Number(x.dcto) || 0) > dcto) { dcto = Number(x.dcto) || 0; promo = { titulo: x.titulo, dcto: dcto, tipo: k }; } }));
+  const neto = Math.round((Number(prod.p) || 0) * (1 - dcto / 100));
+  return { lista: Number(prod.p) || 0, dcto: dcto, neto: neto, conIva: Math.round(neto * 1.19), promo: promo };
+}
+W.hwfPrecio=hwfPrecio;
+function lee(k){try{return JSON.parse(localStorage.getItem(k)||"null")}catch(e){return null}}
+function guarda(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+var C0=lee(K);W.__CONT=C0&&C0.d?C0.d:null;
+var hesc=function(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})};
+var clp=function(n){n=Math.round(Number(n)||0);return(n<0?"-":"")+"$"+Math.abs(n).toLocaleString("es-CL")};
+W.hwfClp=clp;
+var PM=NEEDPUB?(lee(KP)||[]):[];
+W.hwfProds=function(){try{if(typeof PRODS!=="undefined"&&PRODS&&PRODS.length)return PRODS}catch(e){}var P=W.__PUB&&W.__PUB.prods;if(P&&P.length)return P;return PM};
+var mapa=null,mapaDe=null;
+W.hwfProd=function(c){var L=W.hwfProds();if(mapaDe!==L){mapa={};L.forEach(function(p){mapa[p.i]=p});mapaDe=L}return mapa[String(c)]||null};
+W.hwfSinStock=function(c){var l=W.__CONT&&W.__CONT.sinStock;return!!l&&l.indexOf(String(c))>=0};
+W.hwfPx=function(p){return hwfPrecio(p,W.__CONT)};
+W.hwfPxChips=function(p){var r=W.hwfPx(p),h="";
+ if(W.hwfSinStock(p.i))h+='<span class="hpx-sin">SIN STOCK</span>';
+ if(r.dcto)h+='<span class="hpx-b">-'+r.dcto+' %</span>';
+ if(r.promo&&r.promo.titulo)h+='<span class="hpx-pm">'+hesc(r.promo.titulo)+'</span>';
+ return h?'<span class="hpx-ch">'+h+'</span>':""};
+W.hwfPxLinea=function(p){if(!(Number(p.p)>0))return"";var r=W.hwfPx(p);
+ return'<div class="hpx-l" data-hpx="'+hesc(p.i)+'">'+(r.dcto?'<s>'+clp(r.lista)+'</s>':'')+'<b>'+clp(r.neto)+'</b><span>+ IVA</span><span>· '+clp(r.conIva)+' con IVA</span></div>'};
+function conn(){try{if(typeof syCfg==="function"){var c=syCfg();if(c&&c.url)return c}}catch(e){}try{if(typeof SYC==="function"){var c2=SYC();if(c2&&c2.url)return c2}}catch(e){}return null}
+function llamar(c,d){try{if(typeof syLlamar==="function")return syLlamar(c,d)}catch(e){}try{if(typeof syCall==="function")return syCall(c,d)}catch(e){}return Promise.resolve(null)}
+function cambio(){try{W.hwfContCambio&&W.hwfContCambio()}catch(e){console.error(e)}}
+var ocup=false,ult=C0&&C0.t||0;
+W.hwfContBajar=function(forzar){var c=conn();if(!c||ocup||(!forzar&&Date.now()-ult<9*60000))return;ocup=true;
+ Promise.resolve(llamar(c,{accion:"b2bContenido"})).then(function(r){ult=Date.now();
+  if(!r||!r.ok)return;var d={promos:r.promos||[],ofertas:r.ofertas||[],novedades:r.novedades||[],sinStock:r.sinStock||[]};
+  var igual=JSON.stringify(d)===JSON.stringify(W.__CONT);guarda(K,{t:ult,d:d});if(!igual){W.__CONT=d;cambio()}
+ }).catch(function(){}).then(function(){ocup=false})};
+if(NEEDPUB){fetch("../datos/publicos.json",{cache:"no-cache"}).then(function(r){return r.ok?r.json():Promise.reject()}).then(function(j){
+  if(!j||!j.prods||!j.prods.length)return;var m=j.prods.map(function(p){return{i:p.i,s:p.s,d:p.d,g:p.g,o:p.o,p:p.p,dc:p.dc,u:p.u}});
+  if(JSON.stringify(m)!==JSON.stringify(PM)){PM=m;guarda(KP,m);cambio()}}).catch(function(){})}
+setTimeout(function(){W.hwfContBajar(true)},3000);
+setInterval(function(){if(!document.hidden)W.hwfContBajar(false)},10*60000);
+document.addEventListener("visibilitychange",function(){if(!document.hidden)W.hwfContBajar(false)});
+})();</script>
+<style>/* patch_congruencia_cat */
+.hpx-ch{display:inline-flex;flex-wrap:wrap;gap:4px;align-items:center;max-width:100%}
+.hpx-b{background:#80C6C9;color:#0B3147;border-radius:99px;font-weight:800;font-size:.72rem;padding:2px 8px;white-space:nowrap;line-height:1.4}
+.hpx-pm{background:#FFF4DB;color:#8A5A00;border-radius:8px;font-weight:700;font-size:.74rem;padding:2px 8px;line-height:1.4;overflow-wrap:anywhere}
+.hpx-sin{background:#B3261E;color:#fff;border-radius:99px;font-weight:800;font-size:.72rem;padding:2px 8px;letter-spacing:.03em;white-space:nowrap;line-height:1.4}
+.hpx-l{font-size:.8rem;color:#4A6577;margin-top:3px;display:flex;flex-wrap:wrap;gap:0 6px;align-items:baseline;min-width:0}
+.hpx-l b{color:#0B3147;font-size:.95rem}.hpx-l s{color:#7A8F9C}
+.hpx-x{display:block;margin-top:3px;min-width:0}.hpx-x .hpx-ch{margin-top:2px}
+.hc-card .hc-it{display:flex;gap:8px;align-items:flex-start;padding:6px 0;border-top:1px solid #EDF1F5;min-width:0}.hc-card .hc-it:first-of-type{border-top:0}
+.hc-card .hc-it>div{min-width:0}.hc-card .hc-it b{display:block;overflow-wrap:anywhere;font-size:.92rem;color:#0B3147}.hc-card .hc-it small{display:block;color:#4A6577;font-size:.78rem;overflow-wrap:anywhere}
+.hc-t{flex:none;border-radius:99px;font-weight:800;font-size:.68rem;padding:2px 8px;letter-spacing:.03em;margin-top:2px}
+.hc-t.p{background:#FFF4DB;color:#8A5A00}.hc-t.o{background:#FDECEA;color:#B3261E}.hc-t.n{background:#EAF6F6;color:#2F7F83}.hc-t.s{background:#B3261E;color:#fff}
+.hc-card .hc-mas{font-size:.78rem;color:#4A6577;margin:4px 0 0}
+</style>
+
 <script>/* patch_fotos: base de fotos por código HWF (datos/fotos.json) */
 (function(){var W=window,K="hwf-fotos";
 function lee(){try{var p=JSON.parse(localStorage.getItem(K)||"null");return p&&p.fotos?p:null}catch(e){return null}}
@@ -2291,81 +2353,30 @@ $("btnMis").onclick = async () => {
 /* ---------- Descargar catálogo completo ---------- */
 /* Catálogo HWF: descarga todos los productos de la tienda con sus fotos y arma Excel (con fotos) y CSV.
    Requiere ExcelJS cargado antes. Funciona en Chrome, en la app Android (WebView) y en la app de Windows. */
-const HWF_CAT = (() => {
-  const T = window.HWF_TEST || {};
-  const STORE_ID = "95a62d91-1171-4739-90b9-db1224ce7b80";
-  const API = T.api || "https://api.rediredi.com";
-  const TIENDA = "https://distribuidora-hwf.rdi.store";
-  const IMG_PRE = "https://assets.rediredi.com/items/images/" + STORE_ID + "_";
+const HWF_CAT = (() => {   /* patch_congruencia_cat: solo datos HWF (prods de publicos.json + fotos.json + hwfPrecio + contenido B2B); sin tienda externa */
   const FORMATO = { UNIT: "Unidad", BOX: "Caja", PACKAGE: "Pack", U: "Unidad", C: "Caja", P: "Pack" };
-  const CONDICION = { NEW: "Nuevo", USED: "Usado", REFURBISHED: "Reacondicionado" };
-
   const COLS = [
-    ["foto", "Foto", 15], ["sku", "Código", 10], ["nombre", "Nombre", 46], ["descripcion", "Descripción", 30],
-    ["categoria", "Categoría", 24], ["precio", "Precio neto", 12], ["precio_iva", "Precio con IVA", 13],
-    ["formato", "Formato", 10], ["condicion", "Condición", 10], ["stock", "Stock disponible", 11],
-    ["reservado", "Stock reservado", 11], ["stock_total", "Stock total", 10], ["promocion", "Promoción", 18],
-    ["promo_pct", "% promoción", 11], ["promo_estado", "Estado promoción", 13], ["destacado", "Destacado", 10],
-    ["largo", "Largo (cm)", 9], ["ancho", "Ancho (cm)", 9], ["alto", "Alto (cm)", 9], ["peso", "Peso (kg)", 9],
-    ["url", "Enlace producto", 40], ["whatsapp", "Enlace WhatsApp", 40], ["archivo", "Archivo foto", 22], ["foto_url", "Enlace foto", 40],
-    ["fotos_extra", "Otras fotos", 30], ["id", "ID producto", 38], ["creado", "Creado", 17], ["actualizado", "Actualizado", 17]
+    ["foto", "Foto", 15], ["sku", "Código", 10], ["nombre", "Producto", 46], ["categoria", "Categoría", 26], ["formato", "Formato", 10],
+    ["lista", "Precio lista neto", 14], ["dcto", "Dcto. %", 9], ["neto", "Precio final neto", 15], ["iva", "Precio final con IVA", 16],
+    ["promo", "Promoción / oferta", 30], ["sin", "SIN STOCK", 11], ["stock", "Stock bodega", 11], ["foto_url", "Enlace foto", 40]
   ];
+  const hoyTxt = () => { const d = new Date(), p = n => String(n).padStart(2, "0"); return `${p(d.getDate())}-${p(d.getMonth() + 1)}-${d.getFullYear()} ${p(d.getHours())}:${p(d.getMinutes())}`; };
 
-  const sinHtml = s => String(s || "").replace(/<br\s*\/?>/gi, "\n").replace(/<\/p>\s*<p>/gi, "\n").replace(/<[^>]+>/g, "")
-    .replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').trim();
-  const fechaTxt = iso => { if (!iso) return ""; const d = new Date(iso); if (isNaN(d)) return ""; const p = n => String(n).padStart(2, "0");
-    return `${p(d.getDate())}-${p(d.getMonth() + 1)}-${d.getFullYear()} ${p(d.getHours())}:${p(d.getMinutes())}`; };
-  const dim = (o, k) => { const v = o && o[k] && Number(o[k].value); return v ? v : ""; };
-
-  /** Lee el catálogo completo desde la tienda en línea (todos los campos, precios del momento). */
-  async function leerTienda(prog) {
-    const todos = [];
-    for (let pag = 1; pag <= 40; pag++) {
-      const q = new URLSearchParams({ page: pag, perPage: 50, sortBy: "title", order: "asc" });
-      const r = await fetch(`${API}/inventory/storefront/v2/items?${q}`, { headers: { "X-RR-Store-ID": STORE_ID } });
-      if (!r.ok) throw new Error("La tienda respondió " + r.status);
-      const j = await r.json();
-      const datos = j.data || [];
-      todos.push(...datos);
-      prog(`Leyendo productos de la tienda… ${todos.length}${j.meta && j.meta.total ? " de " + j.meta.total : ""}`);
-      if (datos.length < 50) break;
-    }
-    if (!todos.length) throw new Error("La tienda no devolvió productos");
-    return todos.map(x => {
-      const v = x.baseVariant || {}, pr = x.promotion, d = x.dimensions || {};
-      const precio = Number(v.price && v.price.amount) || 0;
-      const fotos = (x.pictures && x.pictures.length ? x.pictures : v.pictures) || [];
-      return {
-        id: x.id, sku: v.sku || "", nombre: String(v.title || "").trim().replace(/\s+/g, " "), descripcion: sinHtml(v.description),
-        categoria: (x.category && x.category.name) || "", precio, precio_iva: Math.round(precio * 1.19),
-        formato: FORMATO[x.unity] || x.unity || "", condicion: CONDICION[x.condition] || x.condition || "",
-        stock: v.quantityAvailable ?? x.quantityAvailable ?? "", reservado: v.quantityReserved ?? "", stock_total: v.quantityTotal ?? "",
-        promocion: pr ? String(pr.promotionLabel || "").trim() : "", promo_pct: pr && pr.promotionPercent ? pr.promotionPercent / 100 : "",
-        promo_estado: pr ? (pr.status === "ACTIVE" ? "Activa" : pr.status || "") : "",
-        destacado: x.spotlightPreferences && x.spotlightPreferences.enabled ? "Sí" : "No",
-        largo: dim(d, "length"), ancho: dim(d, "width"), alto: dim(d, "height"), peso: dim(d, "weight"),
-        url: `${TIENDA}/produtos/${x.id}`, whatsapp: v.buyUrl || "", foto_url: fotos[0] || "", fotos_extra: fotos.slice(1).join(" "),
-        creado: fechaTxt(x.createdAt), actualizado: fechaTxt(x.updatedAt)
-      };
-    }).sort((a, b) => a.nombre.localeCompare(b.nombre, "es"));
-  }
-
-  /** Respaldo: el catálogo que viene dentro de la app (menos campos). */
+  /** Filas desde el catálogo de la app (los mismos prods de publicos.json) con el precio final único (hwfPrecio) y el contenido B2B vigente. */
   function desdeApp(prods) {
-    return prods.map(p => ({
-      id: "", sku: p.s || p.i, nombre: p.d, descripcion: "", categoria: p.g, precio: p.p, precio_iva: Math.round(p.p * 1.19),
-      formato: FORMATO[p.o] || p.o || "", condicion: "", stock: "", reservado: "", stock_total: "", promocion: p.pr || "",
-      promo_pct: "", promo_estado: p.pr ? "Activa" : "", destacado: "", largo: "", ancho: "", alto: "", peso: "",
-      url: "", whatsapp: "", foto_url: p.img ? (p.img.startsWith("http") ? p.img : IMG_PRE + p.img + ".jpg") : "",
-      fotos_extra: "", creado: "", actualizado: ""
-    }));
+    return prods.map(p => {
+      const r = hwfPrecio(p, window.__CONT), f = typeof hwfFoto === "function" ? hwfFoto(p.i, true) : "";
+      let st = ""; try { const s = typeof stockDe === "function" ? stockDe(p.i) : null; if (s != null) st = s; } catch (e) {}
+      return { sku: p.s || p.i, i: p.i, nombre: String(p.d || "").trim().replace(/\s+/g, " "), categoria: p.g || "", formato: FORMATO[p.o] || p.o || "",
+        lista: r.lista, dcto: r.dcto, neto: r.neto, iva: r.conIva, promo: r.promo ? r.promo.titulo + " (-" + r.promo.dcto + " %)" : "",
+        sin: hwfSinStock(p.i) ? "SIN STOCK" : "", stock: st, foto_url: f };
+    }).sort((a, b) => a.nombre.localeCompare(b.nombre, "es"));
   }
 
   /** Descarga una foto y la deja como JPEG cuadrado de 200 px (Excel no acepta WebP). */
   async function foto(url) {
     if (!url) return null;
-    const pedir = T.img ? T.img(url) : url;
-    const r = await fetch(pedir, { mode: "cors" });
+    const r = await fetch(url, { mode: "cors" });
     if (!r.ok) throw new Error("foto " + r.status);
     const bmp = await createImageBitmap(await r.blob());
     const S = 200, c = document.createElement("canvas"); c.width = c.height = S;
@@ -2374,57 +2385,37 @@ const HWF_CAT = (() => {
     g.drawImage(bmp, (S - w) / 2, (S - h) / 2, w, h);
     return c.toDataURL("image/jpeg", 0.82);
   }
-
   async function conLimite(items, n, fn) {
     let i = 0;
     await Promise.all(Array.from({ length: n }, async () => { while (i < items.length) { const k = i++; await fn(items[k], k); } }));
   }
 
-  function csv(filas) {
-    const q = v => { const s = v === null || v === undefined ? "" : String(v); return /[";\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
-    const cols = colsDe(filas).filter(c => c[0] !== "foto");
-    const lineas = [cols.map(c => c[1]).join(";")];
-    filas.forEach(f => lineas.push(cols.map(([k]) => {
-      const v = f[k];
-      if (k === "promo_pct" && v !== "") return q(String(Math.round(v * 1000) / 10).replace(".", ","));
-      return q(v);
-    }).join(";")));
-    return "﻿" + lineas.join("\r\n");
-  }
-
-  /** La columna "Archivo foto" solo aparece cuando se arma el banco de fotos. */
-  const colsDe = filas => COLS.filter(c => c[0] !== "archivo" || filas.some(f => f.archivo));
-
   async function excel(filas, fotos, fuente) {
-    const COLS = colsDe(filas);
     const wb = new ExcelJS.Workbook();
     wb.creator = "HWF Mascotas"; wb.created = new Date();
     const ws = wb.addWorksheet("Catálogo", { views: [{ state: "frozen", ySplit: 3, xSplit: 3 }] });
     ws.columns = COLS.map(([key, , width]) => ({ key, width }));
-    const hoy = fechaTxt(new Date().toISOString());
     ws.getCell("A1").value = "Catálogo HWF Mascotas";
     ws.getCell("A1").font = { bold: true, size: 16, color: { argb: "FF0B3146" } };
-    ws.getCell("A2").value = `${filas.length} productos · descargado el ${hoy} · ${fuente} · precios netos en pesos chilenos`;
+    ws.getCell("A2").value = `${filas.length} productos · descargado el ${hoyTxt()} · ${fuente} · precios netos en pesos chilenos (el precio final incluye las promociones y ofertas vigentes)`;
     ws.getCell("A2").font = { italic: true, size: 10, color: { argb: "FF5B6874" } };
     const cab = ws.getRow(3);
-    COLS.forEach(([, titulo], i) => { const c = cab.getCell(i + 1); c.value = titulo; });
+    COLS.forEach(([, titulo], i) => { cab.getCell(i + 1).value = titulo; });
     cab.font = { bold: true, color: { argb: "FFFFFFFF" } };
     cab.alignment = { vertical: "middle", horizontal: "center", wrapText: true };
     cab.height = 32;
     cab.eachCell(c => { c.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FF0B3146" } }; });
-
     filas.forEach((f, i) => {
       const fila = ws.getRow(4 + i);
       COLS.forEach(([k], j) => {
         if (k === "foto") return;
         const c = fila.getCell(j + 1), v = f[k];
-        if ((k === "url" || k === "whatsapp" || k === "foto_url") && v) c.value = { text: v, hyperlink: v };
-        else c.value = v === "" ? null : v;
+        if (k === "foto_url" && v) c.value = { text: v, hyperlink: v }; else c.value = v === "" ? null : v;
       });
       fila.height = 80;
       fila.alignment = { vertical: "middle", wrapText: true };
-      ["precio", "precio_iva"].forEach(k => { fila.getCell(COLS.findIndex(c => c[0] === k) + 1).numFmt = "$#,##0"; });
-      fila.getCell(COLS.findIndex(c => c[0] === "promo_pct") + 1).numFmt = "0%";
+      ["lista", "neto", "iva"].forEach(k => { fila.getCell(COLS.findIndex(c => c[0] === k) + 1).numFmt = "$#,##0"; });
+      if (f.sin) fila.getCell(COLS.findIndex(c => c[0] === "sin") + 1).font = { bold: true, color: { argb: "FFB3261E" } };
       if (i % 2) fila.eachCell({ includeEmpty: true }, c => { if (!c.fill || !c.fill.fgColor) c.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF2F6F8" } }; });
       if (fotos[i]) {
         const id = wb.addImage({ base64: fotos[i], extension: "jpeg" });
@@ -2435,19 +2426,13 @@ const HWF_CAT = (() => {
     return wb.xlsx.writeBuffer();
   }
 
-  /**
-   * Arma los dos archivos. opciones: { prodsApp, prog(texto, fraccion) }
-   * Devuelve { xlsx: ArrayBuffer, csv: string, total, conFoto, fuente }
-   */
+  /** Arma el Excel. opciones: { prodsApp, prog(texto, fraccion) } → { xlsx, total, conFoto, fuente } */
   async function generar(op) {
     const prog = op.prog || (() => {});
-    let filas, fuente;
-    prog("Conectando con la tienda HWF…", 0.02);
-    try { filas = await leerTienda(t => prog(t, 0.08)); fuente = "datos en línea de la tienda"; }
-    catch (e) {
-      if (!op.prodsApp) throw new Error("No se pudo leer la tienda. Revisa tu conexión a internet.");
-      filas = desdeApp(op.prodsApp); fuente = "catálogo guardado en la app";
-    }
+    const prods = (op.prodsApp && op.prodsApp.length ? op.prodsApp : hwfProds());
+    if (!prods.length) throw new Error("No hay catálogo en la app. Abre la app con internet una vez.");
+    prog("Armando el catálogo con precios y promociones vigentes…", 0.05);
+    const filas = desdeApp(prods), fuente = "catálogo, fotos y promociones únicos de HWF";
     const fotos = new Array(filas.length).fill(null);
     let listas = 0, conFoto = 0;
     await conLimite(filas, 6, async (f, i) => {
@@ -2457,13 +2442,13 @@ const HWF_CAT = (() => {
     prog("Armando el Excel…", 0.9);
     const xlsx = await excel(filas, fotos, fuente);
     prog("Listo", 1);
-    return { xlsx, csv: csv(filas), total: filas.length, conFoto, fuente };
+    return { xlsx, total: filas.length, conFoto, fuente };
   }
 
   const nombreArchivo = ext => { const d = new Date(), p = n => String(n).padStart(2, "0");
     return `Catalogo HWF ${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}.${ext}`; };
 
-  return { generar, nombreArchivo, leerTienda, desdeApp, excel, csv, conLimite, STORE_ID };
+  return { generar, nombreArchivo, desdeApp, excel, conLimite };
 })();
 
 function guardarDatos(datos, nombre, mime) {
@@ -2482,7 +2467,7 @@ $("btnCatalogo").onclick = () => {
     [["Cerrar", "", cerrarModal], 
      ["Excel con fotos", "primary", () => guardarDatos(CAT.xlsx, HWF_CAT.nombreArchivo("xlsx"), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")]]);
   if (CAT) return listo();
-  abrirModal(`<p style="margin:0">Se descargan todos los productos de la tienda HWF con sus fotos y todos sus datos, en Excel (con fotos) y CSV. Necesita internet y tarda alrededor de un minuto.</p>
+  abrirModal(`<p style="margin:0">Se arma un Excel con todo el catálogo HWF: código, producto, categoría, precio lista, descuento, precio final con las promociones y ofertas vigentes, SIN STOCK y fotos. Son los mismos datos que ve el cliente en hwf.cl y en el portal B2B. Necesita internet y tarda unos segundos.</p>
     <div id="catProg" hidden style="margin-top:12px"><div style="height:10px;background:var(--sunk);border-radius:99px;overflow:hidden"><i id="catBar" style="display:block;height:100%;width:0;background:#80C8CD"></i></div><p class="hint" id="catTxt" style="margin-top:6px"></p></div>`,
     [["Cancelar", "", cerrarModal], ["Preparar catálogo", "primary", async ev => {
       const b = ev.currentTarget; b.disabled = true; $("catProg").hidden = false;
@@ -7213,7 +7198,7 @@ function confirmarNota() {
   x.onclick = () => cerrarModal(); card.insertBefore(x, card.firstChild); })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261116014052";
+const HWF_VER = "20261116100331";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -9889,7 +9874,7 @@ body.m-b2b #crmMeta{display:none!important}
     });
     /* menú lateral: ícono, grupo y contador */
     const pan = document.getElementById("snPanel");
-    const ajustar = () => { const p = document.getElementById("snPanel"); if (!p) return; const it = p.querySelector('[data-sm="b2b"]'); if (it) { const e = it.querySelector(".sn-e"); if (e && (e.textContent.trim() === "•" || !e.dataset.b2)) { e.dataset.b2 = "1"; e.textContent = "🤝"; }
+    const ajustar = () => { const p = document.getElementById("snPanel"); if (!p) return; const it = p.querySelector('[data-sm="b2b"]'); if (it) { const e = it.querySelector(".sn-e"); if (e && (e.textContent.trim() === "•" || !e.dataset.b2)) { e.dataset.b2 = "1"; /* ícono: patch_iconos_extra */ }
         if (!it.querySelector(".b2-bdg") && pend()) it.insertAdjacentHTML("beforeend", `<i class="b2-bdg">${pend()}</i>`);
         const g = [...p.querySelectorAll(".sn-g")].find(x => /^Otros$/.test(x.textContent.trim())); if (g) g.textContent = "Portal B2B"; } };
     const iv = setInterval(() => { const p = document.getElementById("snPanel"); if (p) { clearInterval(iv); new MutationObserver(() => setTimeout(ajustar, 0)).observe(p, { childList: true }); } }, 400);
@@ -10040,7 +10025,48 @@ body.m-b2b #crmMeta{display:none!important}
   try { const _af = abrirFicha; abrirFicha = function () { box.hidden = true; tab.setAttribute("aria-selected", "false"); document.body.classList.remove("m-mail"); return _af.apply(this, arguments); }; } catch (e) { }
   try { if (!NAV_ORDEN.some(x => x[0] === "mail")) NAV_ORDEN.push(["mail", "mMail"]); } catch (e) { }
   const iv = setInterval(() => { const p = document.getElementById("snPanel"); if (!p) return; clearInterval(iv);
-    new MutationObserver(() => setTimeout(() => { const it = p.querySelector('[data-sm="mail"]'); if (it) { const e = it.querySelector(".sn-e"); if (e && e.textContent.trim() === "•") e.textContent = "✉"; } }, 0)).observe(p, { childList: true }); }, 400);
+    new MutationObserver(() => setTimeout(() => { const it = p.querySelector('[data-sm="mail"]'); if (it) { const e = it.querySelector(".sn-e"); /* ícono: patch_iconos_extra */ } }, 0)).observe(p, { childList: true }); }, 400);
+})();
+</script>
+<script>/* patch_congruencia_cat: VENTAS (catálogo y pedido, Inicio) */
+{ const _rh = rowHTML; rowHTML = function (p) { let h = _rh.apply(this, arguments);
+    try { const ch = hwfPxChips(p), li = hwfPxLinea(p);
+      if (ch) h = h.replace('<div class="tags">', () => '<div class="tags">' + ch);
+      h = h.replace(/<\/div><\/div>(\s*<div class="price)/, (m, a) => "</div>" + li + "</div>" + a);
+    } catch (e) { console.error(e); } return h; }; }
+function hcHtml() {
+  const C = window.__CONT; if (!C) return "";
+  const hoy = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Santiago" }).format(new Date()), vig = x => x && (!x.desde || x.desde <= hoy) && (!x.hasta || hoy <= x.hasta);
+  const fd = s => { const m = String(s || "").match(/^(\d{4})-(\d{2})-(\d{2})/); return m ? m[3] + "-" + m[2] + "-" + m[1] : ""; };
+  const P = (C.promos || []).filter(vig).map(x => [x, "PROMO", "p"]).concat((C.ofertas || []).filter(vig).map(x => [x, "OFERTA", "o"])), N = (C.novedades || []).filter(vig), sin = (C.sinStock || []).length;
+  if (!P.length && !N.length) return "";
+  const nP = (x) => (x.productos || []).length, MP = 3, MN = 2;
+  const filas = P.slice(0, MP).map(([x, t, c]) => `<div class="hc-it"><span class="hc-t ${c}">${t}</span><div><b>${esc(x.titulo || "")}</b><small>${[x.dcto ? "-" + x.dcto + " %" : "", x.hasta ? "hasta " + fd(x.hasta) : "", nP(x) ? nP(x) + (nP(x) === 1 ? " producto" : " productos") : ""].filter(Boolean).join(" · ")}</small></div></div>`)
+    .concat(N.slice(0, MN).map(x => `<div class="hc-it"><span class="hc-t n">NOVEDAD</span><div><b>${esc(x.titulo || "")}</b>${x.texto ? `<small>${esc(String(x.texto).slice(0, 110))}</small>` : ""}</div></div>`));
+  const mas = Math.max(0, P.length - MP) + Math.max(0, N.length - MN);
+  return `<div class="in-sec hc-card" id="hcCard"><h3>Promociones y novedades vigentes <small>${P.length + N.length}</small></h3>${filas.join("")}${mas ? `<p class="hc-mas">y ${mas} más en el portal B2B</p>` : ""}${sin ? `<div class="hc-it"><span class="hc-t s">SIN STOCK</span><div><b>${sin} ${sin === 1 ? "producto" : "productos"}</b><small>marcados igual que en hwf.cl y el portal B2B</small></div></div>` : ""}</div>`;
+}
+function hcInicio() { const box = document.getElementById("crmInicio"); if (!box) return; const v = box.querySelector("#hcCard"); if (v) v.remove(); const h = hcHtml(); if (!h) return;
+  const hero = box.querySelector(".in-hero"); if (hero) hero.insertAdjacentHTML("afterend", h); else box.insertAdjacentHTML("afterbegin", h); }
+{ const _pi = pintarInicio; pintarInicio = function () { const r = _pi.apply(this, arguments); try { hcInicio(); } catch (e) { console.error(e); } return r; }; }
+window.hwfContCambio = function () { try { if (document.getElementById("rows") && typeof applyFilter === "function") applyFilter(); } catch (e) {} try { const b = document.getElementById("crmInicio"); if (b && !b.hidden && SES) pintarInicio(); } catch (e) {} };
+try { if (document.getElementById("crmInicio") && SES) pintarInicio(); } catch (e) {}
+</script>
+<script>/* patch_iconos_extra: íconos de color de B2B y Mailing */
+(function () {
+  const ICO = {"b2b": "<svg viewBox=\"0 0 32 32\" aria-hidden=\"true\" class=\"hic\"><defs><linearGradient id=\"hic-b2b\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"1\"><stop offset=\"0\" stop-color=\"#3FBF7F\"/><stop offset=\"1\" stop-color=\"#1C7A4E\"/></linearGradient></defs><rect width=\"32\" height=\"32\" rx=\"9\" fill=\"url(#hic-b2b)\"/><path d=\"M4 4h24v10C20 9 11 9 4 13z\" fill=\"#fff\" opacity=\".12\"/><g transform=\"translate(5.5 5.5) scale(.875)\" fill=\"none\" stroke=\"#fff\" stroke-width=\"2.2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"3\" y=\"7.5\" width=\"18\" height=\"12.5\" rx=\"2\"/><path d=\"M8.5 7.5V5.5a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v2\"/><path d=\"M3 13h18\"/><path d=\"M12 12v2.5\"/></g></svg>", "mail": "<svg viewBox=\"0 0 32 32\" aria-hidden=\"true\" class=\"hic\"><defs><linearGradient id=\"hic-mail\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"1\"><stop offset=\"0\" stop-color=\"#FF8A6B\"/><stop offset=\"1\" stop-color=\"#D9483B\"/></linearGradient></defs><rect width=\"32\" height=\"32\" rx=\"9\" fill=\"url(#hic-mail)\"/><path d=\"M4 4h24v10C20 9 11 9 4 13z\" fill=\"#fff\" opacity=\".12\"/><g transform=\"translate(5.5 5.5) scale(.875)\" fill=\"none\" stroke=\"#fff\" stroke-width=\"2.2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"3\" y=\"5.5\" width=\"18\" height=\"13\" rx=\"2\"/><path d=\"M3.5 7l8.5 6 8.5-6\"/></g></svg>"}; let n = 0;
+  const poner = (e, k) => { if (!e || !ICO[k] || e.dataset.hic === k) return;
+    if (e.tagName.toLowerCase() === "svg") { const s = document.createElement("span"); s.className = "emo"; e.replaceWith(s); e = s; }
+    n++; e.innerHTML = ICO[k].replace(/hic-([a-z0-9]+)/g, "hic-$1-x" + n); e.dataset.hic = k; e.classList.add("hic-w"); e.setAttribute("aria-hidden", "true"); };
+  const tab = (id, k) => { const b = document.getElementById(id); if (!b) return; let e = b.querySelector(".emo");
+    if (!e) { e = document.createElement("span"); e.className = "emo"; b.insertBefore(e, b.firstChild); } poner(e, k); };
+  const aplicar = () => { try {
+    tab("mB2b", "b2b"); tab("mMail", "mail");
+    document.querySelectorAll('#masSeg [data-m="b2b"], #masSeg [data-m="mail"]').forEach(b => poner(b.querySelector(".emo") || b.querySelector("svg:not(.hic)"), b.dataset.m));
+    document.querySelectorAll('#snPanel [data-sm="b2b"] .sn-e, #snPanel [data-sm="mail"] .sn-e, #snPanel [data-m="b2b"] .sn-e, #snPanel [data-m="mail"] .sn-e').forEach(e => poner(e, e.parentNode.dataset.sm || e.parentNode.dataset.m));
+  } catch (x) {} };
+  aplicar(); setTimeout(aplicar, 400); setTimeout(aplicar, 1600);
+  let pend = false; new MutationObserver(() => { if (pend) return; pend = true; requestAnimationFrame(() => { pend = false; aplicar(); }); }).observe(document.body, { childList: true, subtree: true });
 })();
 </script>
 </body>

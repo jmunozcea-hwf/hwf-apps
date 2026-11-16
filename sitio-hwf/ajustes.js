@@ -25,5 +25,7 @@ window.AJUSTES = {
   ],
 
   /* catálogo de productos (se actualiza solo desde las apps HWF; no cambiar) */
-  catalogo: "https://jmunozcea-hwf.github.io/hwf-apps/datos/publicos.json"
+  catalogo: "https://jmunozcea-hwf.github.io/hwf-apps/datos/publicos.json",
+  /* base de fotos de productos (por código HWF); sin ella se usa la foto anterior o «Sin foto» */
+  fotos: "https://jmunozcea-hwf.github.io/hwf-apps/datos/fotos.json"
 };

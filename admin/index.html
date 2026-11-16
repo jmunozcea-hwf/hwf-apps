@@ -1,6 +1,68 @@
 <!doctype html>
 <html lang="es">
 <head>
+<script>/* patch_congruencia_cat: contenido público (promos, ofertas, novedades, sin stock) y precio final único (publicos/FUENTES.md) */
+(function(){var W=window,K="hwf-b2bcont",KP="hwf-prods-min",NEEDPUB=false;
+function hwfPrecio(prod, contenido, hoy) {
+  hoy = hoy || new Intl.DateTimeFormat("en-CA", { timeZone: "America/Santiago" }).format(new Date());
+  const vig = x => x && (!x.desde || x.desde <= hoy) && (!x.hasta || hoy <= x.hasta);
+  let dcto = Number(prod.dc) || 0, promo = null;
+  ["promos", "ofertas"].forEach(k => ((contenido && contenido[k]) || []).forEach(x => {
+    if (vig(x) && (x.productos || []).indexOf(prod.i) >= 0 && (Number(x.dcto) || 0) > dcto) { dcto = Number(x.dcto) || 0; promo = { titulo: x.titulo, dcto: dcto, tipo: k }; } }));
+  const neto = Math.round((Number(prod.p) || 0) * (1 - dcto / 100));
+  return { lista: Number(prod.p) || 0, dcto: dcto, neto: neto, conIva: Math.round(neto * 1.19), promo: promo };
+}
+W.hwfPrecio=hwfPrecio;
+function lee(k){try{return JSON.parse(localStorage.getItem(k)||"null")}catch(e){return null}}
+function guarda(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+var C0=lee(K);W.__CONT=C0&&C0.d?C0.d:null;
+var hesc=function(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})};
+var clp=function(n){n=Math.round(Number(n)||0);return(n<0?"-":"")+"$"+Math.abs(n).toLocaleString("es-CL")};
+W.hwfClp=clp;
+var PM=NEEDPUB?(lee(KP)||[]):[];
+W.hwfProds=function(){try{if(typeof PRODS!=="undefined"&&PRODS&&PRODS.length)return PRODS}catch(e){}var P=W.__PUB&&W.__PUB.prods;if(P&&P.length)return P;return PM};
+var mapa=null,mapaDe=null;
+W.hwfProd=function(c){var L=W.hwfProds();if(mapaDe!==L){mapa={};L.forEach(function(p){mapa[p.i]=p});mapaDe=L}return mapa[String(c)]||null};
+W.hwfSinStock=function(c){var l=W.__CONT&&W.__CONT.sinStock;return!!l&&l.indexOf(String(c))>=0};
+W.hwfPx=function(p){return hwfPrecio(p,W.__CONT)};
+W.hwfPxChips=function(p){var r=W.hwfPx(p),h="";
+ if(W.hwfSinStock(p.i))h+='<span class="hpx-sin">SIN STOCK</span>';
+ if(r.dcto)h+='<span class="hpx-b">-'+r.dcto+' %</span>';
+ if(r.promo&&r.promo.titulo)h+='<span class="hpx-pm">'+hesc(r.promo.titulo)+'</span>';
+ return h?'<span class="hpx-ch">'+h+'</span>':""};
+W.hwfPxLinea=function(p){if(!(Number(p.p)>0))return"";var r=W.hwfPx(p);
+ return'<div class="hpx-l" data-hpx="'+hesc(p.i)+'">'+(r.dcto?'<s>'+clp(r.lista)+'</s>':'')+'<b>'+clp(r.neto)+'</b><span>+ IVA</span><span>· '+clp(r.conIva)+' con IVA</span></div>'};
+function conn(){try{if(typeof syCfg==="function"){var c=syCfg();if(c&&c.url)return c}}catch(e){}try{if(typeof SYC==="function"){var c2=SYC();if(c2&&c2.url)return c2}}catch(e){}return null}
+function llamar(c,d){try{if(typeof syLlamar==="function")return syLlamar(c,d)}catch(e){}try{if(typeof syCall==="function")return syCall(c,d)}catch(e){}return Promise.resolve(null)}
+function cambio(){try{W.hwfContCambio&&W.hwfContCambio()}catch(e){console.error(e)}}
+var ocup=false,ult=C0&&C0.t||0;
+W.hwfContBajar=function(forzar){var c=conn();if(!c||ocup||(!forzar&&Date.now()-ult<9*60000))return;ocup=true;
+ Promise.resolve(llamar(c,{accion:"b2bContenido"})).then(function(r){ult=Date.now();
+  if(!r||!r.ok)return;var d={promos:r.promos||[],ofertas:r.ofertas||[],novedades:r.novedades||[],sinStock:r.sinStock||[]};
+  var igual=JSON.stringify(d)===JSON.stringify(W.__CONT);guarda(K,{t:ult,d:d});if(!igual){W.__CONT=d;cambio()}
+ }).catch(function(){}).then(function(){ocup=false})};
+if(NEEDPUB){fetch("../datos/publicos.json",{cache:"no-cache"}).then(function(r){return r.ok?r.json():Promise.reject()}).then(function(j){
+  if(!j||!j.prods||!j.prods.length)return;var m=j.prods.map(function(p){return{i:p.i,s:p.s,d:p.d,g:p.g,o:p.o,p:p.p,dc:p.dc,u:p.u}});
+  if(JSON.stringify(m)!==JSON.stringify(PM)){PM=m;guarda(KP,m);cambio()}}).catch(function(){})}
+setTimeout(function(){W.hwfContBajar(true)},3000);
+setInterval(function(){if(!document.hidden)W.hwfContBajar(false)},10*60000);
+document.addEventListener("visibilitychange",function(){if(!document.hidden)W.hwfContBajar(false)});
+})();</script>
+<style>/* patch_congruencia_cat */
+.hpx-ch{display:inline-flex;flex-wrap:wrap;gap:4px;align-items:center;max-width:100%}
+.hpx-b{background:#80C6C9;color:#0B3147;border-radius:99px;font-weight:800;font-size:.72rem;padding:2px 8px;white-space:nowrap;line-height:1.4}
+.hpx-pm{background:#FFF4DB;color:#8A5A00;border-radius:8px;font-weight:700;font-size:.74rem;padding:2px 8px;line-height:1.4;overflow-wrap:anywhere}
+.hpx-sin{background:#B3261E;color:#fff;border-radius:99px;font-weight:800;font-size:.72rem;padding:2px 8px;letter-spacing:.03em;white-space:nowrap;line-height:1.4}
+.hpx-l{font-size:.8rem;color:#4A6577;margin-top:3px;display:flex;flex-wrap:wrap;gap:0 6px;align-items:baseline;min-width:0}
+.hpx-l b{color:#0B3147;font-size:.95rem}.hpx-l s{color:#7A8F9C}
+.hpx-x{display:block;margin-top:3px;min-width:0}.hpx-x .hpx-ch{margin-top:2px}
+.hc-card .hc-it{display:flex;gap:8px;align-items:flex-start;padding:6px 0;border-top:1px solid #EDF1F5;min-width:0}.hc-card .hc-it:first-of-type{border-top:0}
+.hc-card .hc-it>div{min-width:0}.hc-card .hc-it b{display:block;overflow-wrap:anywhere;font-size:.92rem;color:#0B3147}.hc-card .hc-it small{display:block;color:#4A6577;font-size:.78rem;overflow-wrap:anywhere}
+.hc-t{flex:none;border-radius:99px;font-weight:800;font-size:.68rem;padding:2px 8px;letter-spacing:.03em;margin-top:2px}
+.hc-t.p{background:#FFF4DB;color:#8A5A00}.hc-t.o{background:#FDECEA;color:#B3261E}.hc-t.n{background:#EAF6F6;color:#2F7F83}.hc-t.s{background:#B3261E;color:#fff}
+.hc-card .hc-mas{font-size:.78rem;color:#4A6577;margin:4px 0 0}
+</style>
+
 <script>/* patch_fotos: base de fotos por código HWF (datos/fotos.json) */
 (function(){var W=window,K="hwf-fotos";
 function lee(){try{var p=JSON.parse(localStorage.getItem(K)||"null");return p&&p.fotos?p:null}catch(e){return null}}
@@ -5211,7 +5273,7 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261116014052";
+const HWF_VER = "20261116100331";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -8280,7 +8342,7 @@ body.m-b2b #crmMeta{display:none!important}
     try { if (typeof NAV_MAS !== "undefined" && !NAV_MAS.includes("b2b")) { const i = NAV_MAS.indexOf("embudo"); NAV_MAS.splice(i >= 0 ? i + 1 : NAV_MAS.length, 0, "b2b"); } if (typeof NAV_MNOM !== "undefined") NAV_MNOM.b2b = "Portal B2B"; } catch (e) { }
     const _pm = pintarMas; pintarMas = function () { if (vistaMas === "b2b") { if (!ST.t) cargar(false); pintar(); return; } return _pm.apply(this, arguments); };
     const mb = document.getElementById("masBody"); mb.addEventListener("click", e => { if (vistaMas === "b2b") clic(e); }); mb.addEventListener("change", e => { if (vistaMas === "b2b") cambio(e); }); mb.addEventListener("input", e => { if (vistaMas === "b2b") cambio(e); });
-    const ajustar = () => { const p = document.getElementById("snPanel"); if (!p) return; const it = p.querySelector('[data-m="b2b"]'); if (!it) return; const e = it.querySelector(".sn-e"); if (e && e.textContent.trim() === "•") e.textContent = "🤝"; if (!it.querySelector(".b2-bdg") && pend()) it.insertAdjacentHTML("beforeend", `<i class="b2-bdg" style="margin-left:auto">${pend()}</i>`); };
+    const ajustar = () => { const p = document.getElementById("snPanel"); if (!p) return; const it = p.querySelector('[data-m="b2b"]'); if (!it) return; const e = it.querySelector(".sn-e"); if (e && e.textContent.trim() === "•") /* ícono: patch_iconos_extra */ if (!it.querySelector(".b2-bdg") && pend()) it.insertAdjacentHTML("beforeend", `<i class="b2-bdg" style="margin-left:auto">${pend()}</i>`); };
     const iv = setInterval(() => { const p = document.getElementById("snPanel"); if (p) { clearInterval(iv); new MutationObserver(() => setTimeout(ajustar, 0)).observe(p, { childList: true }); } }, 400);
     const sonda = () => { if (document.hidden || !cfg() || (document.getElementById("lock") && !document.getElementById("lock").hidden)) return; cargar(true); };
     setTimeout(sonda, 5000); setInterval(sonda, 300000); document.addEventListener("visibilitychange", () => { if (!document.hidden && Date.now() - ST.t > 120000) sonda(); });
@@ -8423,7 +8485,33 @@ body.m-b2b #crmMeta{display:none!important}
   const _pm = pintarMas; pintarMas = function () { if (vistaMas === "mail") { pintar(); if (!ST.t) cargar(); return; } return _pm.apply(this, arguments); };
   enganchar(CONT());
   const iv = setInterval(() => { const p = document.getElementById("snPanel"); if (!p) return; clearInterval(iv);
-    new MutationObserver(() => setTimeout(() => { const it = p.querySelector('[data-m="mail"]'); if (it) { const e = it.querySelector(".sn-e"); if (e && e.textContent.trim() === "•") e.textContent = "✉"; } }, 0)).observe(p, { childList: true }); }, 400);
+    new MutationObserver(() => setTimeout(() => { const it = p.querySelector('[data-m="mail"]'); if (it) { const e = it.querySelector(".sn-e"); /* ícono: patch_iconos_extra */ } }, 0)).observe(p, { childList: true }); }, 400);
+})();
+</script>
+<script>/* patch_congruencia_cat: ADMIN («Productos visibles» y refresco al guardar promos) */
+{ const _pp = praPintar; praPintar = function () { const r = _pp.apply(this, arguments);
+    try { document.querySelectorAll("#praL .pra-it").forEach(it => { if (it.querySelector(".hpx-x")) return; const sm = it.querySelector("small"); if (!sm) return;
+        const cod = sm.textContent.split(" · ")[0].trim(), p = hwfProd(cod) || { i: cod, p: 0 }, h = hwfPxChips(p) + hwfPxLinea(p); if (h) sm.insertAdjacentHTML("afterend", '<span class="hpx-x">' + h + "</span>"); }); } catch (e) { console.error(e); }
+    return r; }; }
+window.hwfContCambio = function () { try { if (typeof praPintar === "function" && document.getElementById("praL")) praPintar(); } catch (e) {} };
+{ const _sc = syCall; syCall = async function (cfg, d) { const r = await _sc.apply(this, arguments);
+    try { if (d && d.accion === "b2bAjustes" && d.guardar && r && r.ok) setTimeout(() => hwfContBajar(true), 800); } catch (e) {} return r; }; }
+</script>
+<script>/* patch_iconos_extra: íconos de color de B2B y Mailing */
+(function () {
+  const ICO = {"b2b": "<svg viewBox=\"0 0 32 32\" aria-hidden=\"true\" class=\"hic\"><defs><linearGradient id=\"hic-b2b\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"1\"><stop offset=\"0\" stop-color=\"#3FBF7F\"/><stop offset=\"1\" stop-color=\"#1C7A4E\"/></linearGradient></defs><rect width=\"32\" height=\"32\" rx=\"9\" fill=\"url(#hic-b2b)\"/><path d=\"M4 4h24v10C20 9 11 9 4 13z\" fill=\"#fff\" opacity=\".12\"/><g transform=\"translate(5.5 5.5) scale(.875)\" fill=\"none\" stroke=\"#fff\" stroke-width=\"2.2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"3\" y=\"7.5\" width=\"18\" height=\"12.5\" rx=\"2\"/><path d=\"M8.5 7.5V5.5a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v2\"/><path d=\"M3 13h18\"/><path d=\"M12 12v2.5\"/></g></svg>", "mail": "<svg viewBox=\"0 0 32 32\" aria-hidden=\"true\" class=\"hic\"><defs><linearGradient id=\"hic-mail\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"1\"><stop offset=\"0\" stop-color=\"#FF8A6B\"/><stop offset=\"1\" stop-color=\"#D9483B\"/></linearGradient></defs><rect width=\"32\" height=\"32\" rx=\"9\" fill=\"url(#hic-mail)\"/><path d=\"M4 4h24v10C20 9 11 9 4 13z\" fill=\"#fff\" opacity=\".12\"/><g transform=\"translate(5.5 5.5) scale(.875)\" fill=\"none\" stroke=\"#fff\" stroke-width=\"2.2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"3\" y=\"5.5\" width=\"18\" height=\"13\" rx=\"2\"/><path d=\"M3.5 7l8.5 6 8.5-6\"/></g></svg>"}; let n = 0;
+  const poner = (e, k) => { if (!e || !ICO[k] || e.dataset.hic === k) return;
+    if (e.tagName.toLowerCase() === "svg") { const s = document.createElement("span"); s.className = "emo"; e.replaceWith(s); e = s; }
+    n++; e.innerHTML = ICO[k].replace(/hic-([a-z0-9]+)/g, "hic-$1-x" + n); e.dataset.hic = k; e.classList.add("hic-w"); e.setAttribute("aria-hidden", "true"); };
+  const tab = (id, k) => { const b = document.getElementById(id); if (!b) return; let e = b.querySelector(".emo");
+    if (!e) { e = document.createElement("span"); e.className = "emo"; b.insertBefore(e, b.firstChild); } poner(e, k); };
+  const aplicar = () => { try {
+    tab("mB2b", "b2b"); tab("mMail", "mail");
+    document.querySelectorAll('#masSeg [data-m="b2b"], #masSeg [data-m="mail"]').forEach(b => poner(b.querySelector(".emo") || b.querySelector("svg:not(.hic)"), b.dataset.m));
+    document.querySelectorAll('#snPanel [data-sm="b2b"] .sn-e, #snPanel [data-sm="mail"] .sn-e, #snPanel [data-m="b2b"] .sn-e, #snPanel [data-m="mail"] .sn-e').forEach(e => poner(e, e.parentNode.dataset.sm || e.parentNode.dataset.m));
+  } catch (x) {} };
+  aplicar(); setTimeout(aplicar, 400); setTimeout(aplicar, 1600);
+  let pend = false; new MutationObserver(() => { if (pend) return; pend = true; requestAnimationFrame(() => { pend = false; aplicar(); }); }).observe(document.body, { childList: true, subtree: true });
 })();
 </script>
 </body>
