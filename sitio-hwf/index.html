@@ -275,7 +275,7 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
   const waUrl = t => (WA_NUM ? "https://wa.me/" + WA_NUM : "https://wa.me/") + "?text=" + encodeURIComponent(String(t).split("{NOMBRE}").join(A.nombre));
   function enlazarWa(root) { (root || document).querySelectorAll("[data-wa]").forEach(a => { a.href = waUrl(a.dataset.wa); a.target = "_blank"; a.rel = "noopener"; }); }
   document.querySelectorAll("[data-a]").forEach(el => { const v = A[el.dataset.a]; if (v) el.textContent = v; });
-  if (A.titulo_pestana) document.title = A.titulo_pestana;
+  /* el título de la pestaña es fijo en el HTML (posicionamiento en Google); ajustes.titulo_pestana ya no lo cambia */
   const fila = (id, v) => { const li = $(id).closest("li"); if (v) $(id).textContent = v; else li.style.display = "none"; };
   fila("dir", A.direccion); fila("hor", A.horario); $("anio").textContent = new Date().getFullYear();
   if (A.email) $("hor").closest("ul").insertAdjacentHTML("beforeend", `<li class="flex gap-2"><span class="text-turq">✉</span><a href="mailto:${esc(A.email)}" class="hover:text-white">${esc(A.email)}</a></li>`);
@@ -385,7 +385,7 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
   }).catch(() => { $("vacio").classList.remove("hidden"); $("vacio").innerHTML = `No se pudo cargar el catálogo. <a class="font-bold text-turq-600 underline" target="_blank" rel="noopener" href="${waUrl("Hola {NOMBRE}, me gustaría recibir el catálogo mayorista.")}">Pídelo por WhatsApp</a>.`; });
   fetch("/b2b/api.php", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ accion: "b2bContenido" }) }).then(r => r.ok ? r.json() : Promise.reject()).then(j => {
     if (!j || !j.ok) return; CONT = { promos: j.promos || [], ofertas: j.ofertas || [], novedades: j.novedades || [], sinStock: j.sinStock || [], ocultos: new Set((j.ocultos || []).map(String)) };
-    if (CONT.ocultos.size && P.length) P = P.filter(p => !CONT.ocultos.has(p.i));   /* productos desactivados en Admin: no se muestran (igual que Ventas y B2B) */
+    if (CONT.ocultos.size && P.length) { P = P.filter(p => !CONT.ocultos.has(p.i)); chips(); }   /* productos desactivados en Admin: no se muestran (igual que Ventas y B2B) */
     pintarPromos(); if (P.length) pintar(); }).catch(() => { CONT = null; });
   iconos();
 })();
