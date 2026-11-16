@@ -402,7 +402,7 @@ if (!cfg() || !DATA()) pantallaConexion(); else { arrancar(); bajar(true).then(n
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261116001709";
+const HWF_VER = "20261116002527";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -666,6 +666,19 @@ function vmPoner(cont, VM, antes) { try { if (!cont) return; const v = cont.quer
 .bi-seg button{flex:1;border:0;background:transparent;padding:9px 8px;border-radius:9px;font:inherit;font-weight:700;color:var(--muted,#5B6874);cursor:pointer}
 .bi-seg button[aria-pressed="true"]{background:var(--card,#fff);color:var(--ink,#0F1E29);box-shadow:0 1px 3px rgba(15,30,41,.15)}
 .bi-oculto{display:none!important}
+.bi-dias{display:grid;gap:8px}.bi-dd{display:grid;grid-template-columns:1fr 1fr;gap:8px}.bi-dd input{font:inherit;padding:8px 10px;border-radius:10px;border:1px solid var(--line,#C9D3DB);background:var(--card,#fff);color:inherit;width:100%;min-width:0}
+.bi-rg{position:relative;height:34px}.bi-rgt{position:absolute;left:10px;right:10px;top:15px;height:6px;border-radius:3px;background:#DDE3E8}.bi-rgt i{position:absolute;top:0;height:6px;border-radius:3px;background:#0B3146}
+.bi-rg input[type=range]{position:absolute!important;left:0;right:0;top:6px;width:100%!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;box-shadow:none!important;background:transparent!important;pointer-events:none;-webkit-appearance:none;appearance:none;height:24px!important;min-height:0!important;outline:none}
+.bi-rg input[type=range]::-webkit-slider-thumb{pointer-events:auto;-webkit-appearance:none;width:24px;height:24px;border-radius:50%;background:#fff;border:3px solid #0B3146;box-shadow:0 1px 4px rgba(0,0,0,.25);cursor:pointer}
+.bi-rg input[type=range]::-moz-range-thumb{pointer-events:auto;width:20px;height:20px;border-radius:50%;background:#fff;border:3px solid #0B3146;cursor:pointer}
+.bi-rg input[type=range]::-webkit-slider-runnable-track{background:none}
+#biBox #biR1,#biBox #biR2{min-height:0!important;height:24px!important;background:transparent!important;border:0!important;box-shadow:none!important;padding:0!important;border-radius:0!important}.bi-rgx{font-size:.78rem;color:var(--muted,#5B6874);font-weight:700}
+@media(max-width:699px){#biBox .bi-t thead{display:none}#biBox .bi-t,#biBox .bi-t tbody{display:block;width:100%}
+  #biBox .bi-t tr{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px 12px;padding:9px 4px;border-bottom:1px solid var(--line,#E3E9EE)}
+  #biBox .bi-t td{display:block;border:0;padding:1px 0;text-align:left!important;white-space:normal;min-width:0!important}
+  #biBox .bi-t td:first-child{grid-column:1/-1;font-weight:800;font-size:.92rem}#biBox .bi-t td[colspan]{grid-column:1/-1}
+  #biBox .bi-t td[data-l]::before{content:attr(data-l);display:block;font-size:.64rem;font-weight:800;text-transform:uppercase;letter-spacing:.03em;color:var(--muted,#5B6874)}
+  #biBox .tbl{overflow:visible!important;margin:0}}
 #crmBi{min-width:0;max-width:100%}#crmBi .bi-u{display:flex;max-width:100%;flex-wrap:wrap}#crmBi .bi-u button{flex:1 1 0;min-width:0;padding-left:6px;padding-right:6px}#crmBi .bi-seg button{min-width:0}
 .bi-svg{max-height:440px}
 .bi-fil{display:grid!important;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));align-items:end}.bi-fil label{min-width:0}.bi-fil select{width:100%;min-width:0;max-width:100%;text-overflow:ellipsis}.bi-fil .bi-full{grid-column:1/-1}.bi-u{flex-wrap:wrap;max-width:100%}.bi-fil>.btn{justify-content:center}
@@ -732,7 +745,8 @@ function vmPoner(cont, VM, antes) { try { if (!cont) return; const v = cont.quer
      pestaña «Stock»: el detalle de stock queda debajo de la unidad Logística */
   if (E.un !== "v" && E.un !== "l") E.un = HOST.t === "ventas" ? "v" : "l";   /* VENTAS: unidades Ventas y Logística y los tres negocios, igual que HWF (15-11-2026) */
   E.m1 = Math.min(12, Math.max(1, Number(E.m1) || 1)); E.m2 = Math.min(12, Math.max(E.m1, Number(E.m2) || 12));   /* 12-11-2026: filtro de fechas (meses desde/hasta) */
-  const M1 = () => E.m1 || 1, M2 = () => E.m2 || 12, perModo = () => E.perP ? "p" : M1() === 1 && M2() === 12 ? "a" : M1() === M2() ? "m" : M2() - M1() === 2 ? "t" : "p";
+  const DK = s => Number(String(s).slice(5, 7)) * 100 + Number(String(s).slice(8, 10)), enDias = () => !!(E.perD && E.d1 && E.d2);   /* período por días (16-11-2026) */
+  const M1 = () => enDias() ? Number(String(E.d1).slice(5, 7)) : (E.m1 || 1), M2 = () => enDias() ? Number(String(E.d2).slice(5, 7)) : (E.m2 || 12), perModo = () => enDias() ? "d" : E.perP ? "p" : M1() === 1 && M2() === 12 ? "a" : M1() === M2() ? "m" : M2() - M1() === 2 ? "t" : "p";
   E.prov = "";   /* sin filtro de proveedor (12-11-2026): marca, formato y producto */
   E.on = !!E.un;
   const guarda = () => { try { localStorage.setItem(LS, JSON.stringify(E)); } catch (e) {} };
@@ -750,6 +764,9 @@ function vmPoner(cont, VM, antes) { try { if (!cont) return; const v = cont.quer
      y en distribuidora/tienda se suman los traspasos netos entre bodegas (así las dos partes suman el total comprado) */
   const CAN = { "": "total (distribuidora + tienda)", d: "distribuidora", t: "tienda" };
   const vCanal = (r, tv) => !E.canal || (E.canal === "t" ? r[7] === tv : r[7] !== tv);
+  const doy = s => { const d = new Date(String(s) + "T12:00:00"); return Math.round((d - new Date(d.getFullYear(), 0, 1, 12)) / 864e5); }, isoDoy = (y, n) => { const d = new Date(y, 0, 1 + Number(n), 12); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
+  const dmy = s => String(s).slice(8, 10) + "-" + String(s).slice(5, 7), rgTxt = () => { const n = doy(E.d2) - doy(E.d1) + 1; return dmy(E.d1) + " a " + dmy(E.d2) + " · " + n + (n === 1 ? " día" : " días") + (n > 62 ? " (gráfico por mes)" : " (gráfico por día)"); };
+  const vVend = (r, B) => !(E.canal === "d" && E.vend) || (B.vend || [])[r[7]] === E.vend;   /* BI por vendedor en distribuidora (16-11-2026) */
   const compra = r => !E.canal ? [r[2] || 0, r[3] || 0] : r.length < 5 ? null : (E.canal === "t") === !!r[4] ? [(r[2] || 0) + (r[5] || 0), (r[3] || 0) + (r[6] || 0)] : [0, 0];
   const pasa = i => (!E.prov || i.pv === E.prov) && (!E.marca || i.ma === E.marca) && (!E.fmt || i.ft === E.fmt) && (!E.prod || i.cod === E.prod);
   const fmtOrd = (a, b) => { const k = x => { const m = /^([\d,]+) (\S+)/.exec(x); return m ? [["Kg", "g", "L", "ml", "caps", "un"].indexOf(m[2]), parseFloat(m[1].replace(",", "."))] : [9, 0]; }, A = k(a), B_ = k(b); return A[0] - B_[0] || A[1] - B_[1]; };
@@ -767,23 +784,31 @@ function vmPoner(cont, VM, antes) { try { if (!cont) return; const v = cont.quer
   function calc() { const X = datos(), B = X.B, anios = new Set();
     (B.rows || []).forEach(r => anios.add(r[8] || B.anio)); if (X.C) X.C.rows.forEach(r => anios.add(Math.floor(r[1] / 100)));
     const AN = [...anios].sort((a, b) => b - a); if (!AN.includes(E.anio)) E.anio = AN.includes(B.anio) ? B.anio : AN[0];
-    const z = () => ({ vq: 0, vv: 0, vc: 0, cq: 0, cv: 0 }), mes = MES.map(z), prov = {}, prod = {}, provs = new Set(), marcas = new Set(), fmts = new Set(), prods = {}, nv = nivel();
+    const DD = enDias(), DIA = [], DIX = {}; if (DD) { const a = new Date(E.anio, Number(String(E.d1).slice(5, 7)) - 1, Number(String(E.d1).slice(8, 10))), b = new Date(E.anio, Number(String(E.d2).slice(5, 7)) - 1, Number(String(E.d2).slice(8, 10)));
+      for (let d = new Date(a); d <= b && DIA.length < 400; d.setDate(d.getDate() + 1)) { DIX[(d.getMonth() + 1) * 100 + d.getDate()] = DIA.length; DIA.push([d.getMonth() + 1, d.getDate()]); } }
+    const diario = DD && DIA.length <= 62, ix = (m, d) => diario ? (DIX[m * 100 + (d || 1)] != null ? DIX[m * 100 + (d || 1)] : 0) : m - 1, vend = {};
+    const z = () => ({ vq: 0, vv: 0, vc: 0, cq: 0, cv: 0 }), mes = (diario ? DIA : MES).map(z), prov = {}, prod = {}, provs = new Set(), marcas = new Set(), fmts = new Set(), prods = {}, nv = nivel();
     const suma = (i, m, f) => { provs.add(i.pv); if (!E.prov || i.pv === E.prov) { marcas.add(i.ma); if (!E.marca || i.ma === E.marca) { fmts.add(i.ft); if (!E.fmt || i.ft === E.fmt) prods[i.cod] = i.n; } }
       if (!pasa(i)) return; f(mes[m]); const gk = nv === "proveedor" ? i.pv : nv === "marca" ? i.ma : i.cod;
       f(prov[gk] = prov[gk] || Object.assign(z(), nv === "producto" ? { n: i.n, cod: i.cod, x: i.ma + " · " + i.ft } : { n: gk })); f(prod[i.cod] = prod[i.cod] || Object.assign(z(), { n: i.n, cod: i.cod, x: i.ma, ft: i.ft, pv: i.pv })); };
     const tv = (B.vend || []).indexOf("Tienda Hellywoof"); let sinBod = false;
-    (B.rows || []).forEach(r => { if ((r[8] || B.anio) !== E.anio || r[2] < M1() || r[2] > M2() || !vCanal(r, tv)) return; const i = X.info[r[1]]; if (!i) return;
-      suma(i, r[2] - 1, o => { o.vq += r[4] || 0; o.vv += r[5] || 0; o.vc += (r[4] || 0) * (r[6] || 0); }); });
+    (B.rows || []).forEach(r => { if ((r[8] || B.anio) !== E.anio || r[2] < M1() || r[2] > M2() || !vCanal(r, tv)) return; if (DD && (r[2] * 100 + (r[3] || 1) < DK(E.d1) || r[2] * 100 + (r[3] || 1) > DK(E.d2))) return; const i = X.info[r[1]]; if (!i) return;
+      if (E.canal === "d" && pasa(i)) { const vn = (B.vend || [])[r[7]] || "?", o = vend[vn] = vend[vn] || z(); o.vq += r[4] || 0; o.vv += r[5] || 0; o.vc += (r[4] || 0) * (r[6] || 0); }
+      if (!vVend(r, B)) return;
+      suma(i, ix(r[2], r[3]), o => { o.vq += r[4] || 0; o.vv += r[5] || 0; o.vc += (r[4] || 0) * (r[6] || 0); }); });
     let hayC = false;
     if (X.C) X.C.rows.forEach(r => { if (Math.floor(r[1] / 100) !== E.anio || r[1] % 100 < M1() || r[1] % 100 > M2()) return; const cc = compra(r); if (!cc) { sinBod = true; return; } hayC = true; const k = X.porCod[String(r[0])], i = k != null ? X.info[k] : (X.extra[r[0]] = X.extra[r[0]] || { n: (X.C.nom || {})[r[0]] || "Código " + r[0], cod: String(r[0]), pv: "Sin proveedor", ma: "Sin marca", ft: fmtDe((X.C.nom || {})[r[0]]) });
-      suma(i, r[1] % 100 - 1, o => { o.cq += cc[0]; o.cv += cc[1]; }); });
+      if (!DD) suma(i, r[1] % 100 - 1, o => { o.cq += cc[0]; o.cv += cc[1]; });
+      else { const m = r[1] % 100, dim = new Date(E.anio, m, 0).getDate(), ds = DIA.filter(x => x[0] === m); if (!ds.length) return;   /* compras por día = compra del mes ÷ días del mes */
+        if (diario) ds.forEach(x => suma(i, ix(m, x[1]), o => { o.cq += cc[0] / dim; o.cv += cc[1] / dim; })); else { const f = ds.length / dim; suma(i, m - 1, o => { o.cq += cc[0] * f; o.cv += cc[1] * f; }); } } });
     if (E.prov && !provs.has(E.prov)) { E.prov = E.marca = E.prod = ""; return calc(); }
     if (E.marca && !marcas.has(E.marca)) { E.marca = E.prod = ""; return calc(); }
     if (E.fmt && !fmts.has(E.fmt)) { E.fmt = ""; return calc(); }
     if (E.prod && !(E.prod in prods)) { E.prod = ""; return calc(); }
     const tot = mes.reduce((t, o) => { Object.keys(t).forEach(k => t[k] += o[k]); return t; }, z());
-    let ult = M2() - 1; while (ult > M1() - 1 && !(mes[ult].vv || mes[ult].cv || mes[ult].vq || mes[ult].cq)) ult--; const ini = M1() - 1;
-    return { X, B, AN, hayC, sinBod, mes: mes.slice(ini, ult + 1), lab: MES.slice(ini), tot, ult: ult - ini, prov: Object.values(prov), prod: Object.values(prod), provs: [...provs].sort((a, b) => a.localeCompare(b, "es")), marcas: [...marcas].sort((a, b) => a.localeCompare(b, "es")), fmts: [...fmts].sort(fmtOrd), prods: Object.keys(prods).map(c => [c, prods[c]]).sort((a, b) => a[1].localeCompare(b[1], "es")), nv }; }
+    let ult = diario ? mes.length - 1 : M2() - 1; if (!diario) while (ult > M1() - 1 && !(mes[ult].vv || mes[ult].cv || mes[ult].vq || mes[ult].cq)) ult--; const ini = diario ? 0 : M1() - 1;
+    const lab = diario ? DIA.map(x => x[1] + " " + MES[x[0] - 1]) : MES.slice(ini);
+    return { X, B, AN, hayC, sinBod, diario, vend: Object.entries(vend).map(([n, o]) => Object.assign({ n }, o)), mes: mes.slice(ini, ult + 1), lab, tot, ult: ult - ini, prov: Object.values(prov), prod: Object.values(prod), provs: [...provs].sort((a, b) => a.localeCompare(b, "es")), marcas: [...marcas].sort((a, b) => a.localeCompare(b, "es")), fmts: [...fmts].sort(fmtOrd), prods: Object.keys(prods).map(c => [c, prods[c]]).sort((a, b) => a[1].localeCompare(b[1], "es")), nv }; }
   function grafico(R) { const W = 640, H = 250, L = 44, Rr = 8, T = 12, Bm = 26, n = R.ult + 1, v = o => E.u === "$" ? o.vv : o.vq, c = o => E.u === "$" ? (RC ? 0 : o.cv) : o.cq, verC = R.hayC && !(RC && E.u === "$") && E.un !== "v", verK = E.u === "$" && !RC && E.un !== "l";
     const mx = Math.max(1, ...R.mes.slice(0, n).map(o => Math.max(v(o), c(o), verK ? o.vc : 0))), esc_ = E.u === "$" ? 1e6 : 1, paso = (() => { const p = Math.pow(10, Math.floor(Math.log10(mx / esc_ || 1))), q = mx / esc_ / p; return (q > 5 ? 2 : q > 2 ? 1 : 0.5) * p * esc_; })();
     const top = Math.ceil(mx / paso) * paso, y = x => T + (H - T - Bm) * (1 - x / top), g = (W - L - Rr) / n; let s = "";
@@ -792,7 +817,7 @@ function vmPoner(cont, VM, antes) { try { if (!cont) return; const v = cont.quer
     R.mes.slice(0, n).forEach((o, i) => { const cx = L + g * (i + 0.5), yv = y(Math.max(0, v(o))), yc = y(Math.max(0, c(o)));
       pts.v += `${cx},${yv} `; pts.c += `${cx},${yc} `; if (verK) pts.k += `${cx},${y(Math.max(0, o.vc))} `;
       dots += `<circle cx="${cx}" cy="${yv}" r="4" fill="#0B3146"><title>${R.lab[i]}: ventas ${F(v(o))}</title></circle>` + (verC ? `<circle cx="${cx}" cy="${yc}" r="4" fill="#E07B24"><title>${R.lab[i]}: compras ${F(c(o))}</title></circle>` : "");
-      s += `<text x="${cx}" y="${H - 8}" text-anchor="middle" font-size="11" fill="#5B6874">${R.lab[i]}</text>`; });
+      if (n <= 14 || i % Math.ceil(n / 12) === 0) s += `<text x="${cx}" y="${H - 8}" text-anchor="middle" font-size="11" fill="#5B6874">${R.lab[i]}</text>`; });
     if (verK) s += `<polyline points="${pts.k}" fill="none" stroke="#5B6874" stroke-width="2" stroke-dasharray="5 4"/>`;
     if (verC) s += `<polyline points="${pts.c}" fill="none" stroke="#E07B24" stroke-width="2.5" stroke-linejoin="round"/>`;
     s += `<polyline points="${pts.v}" fill="none" stroke="#0B3146" stroke-width="2.5" stroke-linejoin="round"/>` + dots;
@@ -811,21 +836,27 @@ function vmPoner(cont, VM, antes) { try { if (!cont) return; const v = cont.quer
         <label>Formato<select id="biFmt"><option value="">Todos los formatos</option>${R.fmts.map(p => `<option${p === E.fmt ? " selected" : ""}>${esc(p)}</option>`).join("")}</select></label>
         <label class="bi-full">Producto<select id="biProd"><option value="">Todos los productos (${R.prods.length})</option>${R.prods.map(([c, n]) => `<option value="${esc(c)}"${c === E.prod ? " selected" : ""}>${esc(n)}</option>`).join("")}</select></label>
         ${hayF ? '<button type="button" class="btn" id="biLimpia">Quitar filtros</button>' : ""}
-        <label class="bi-full">Período<span class="bi-u" id="biPer">${[["a", "Año"], ["t", "Trimestre"], ["m", "Mes"], ["p", "Elegir meses"]].map(([k, t]) => `<button type="button" data-p="${k}" aria-pressed="${perModo() === k}">${t}</button>`).join("")}</span></label>
+        ${E.canal === "d" && E.un === "v" ? `<label class="bi-full">Vendedor<select id="biVend"><option value="">Todos los vendedores</option>${[...new Set((R.B.vend || []).filter(v => v && !/tienda|hellywoof/i.test(v)))].sort((a, b) => a.localeCompare(b, "es")).map(v => `<option${v === E.vend ? " selected" : ""}>${esc(v)}</option>`).join("")}</select></label>` : ""}
+        <label class="bi-full">Período<span class="bi-u" id="biPer">${[["a", "Año"], ["t", "Trimestre"], ["m", "Mes"], ["p", "Elegir meses"], ["d", "Días"]].map(([k, t]) => `<button type="button" data-p="${k}" aria-pressed="${perModo() === k}">${t}</button>`).join("")}</span></label>
         <label>Año<select id="biAnio">${R.AN.map(a => `<option${a === E.anio ? " selected" : ""}>${a}</option>`).join("")}</select></label>
-        <label>Desde<select id="biM1">${MES.map((m, i) => `<option value="${i + 1}"${i + 1 === M1() ? " selected" : ""}>${m}</option>`).join("")}</select></label>
-        <label>Hasta<select id="biM2">${MES.map((m, i) => `<option value="${i + 1}"${i + 1 === M2() ? " selected" : ""}${i + 1 < M1() ? " disabled" : ""}>${m}</option>`).join("")}</select></label>
+        ${perModo() === "d" ? (() => { const nd = (E.anio % 4 === 0 ? 366 : 365) - 1; return `<div class="bi-full bi-dias"><div class="bi-dd"><label>Desde<input type="date" id="biD1" value="${E.d1}" min="${E.anio}-01-01" max="${E.anio}-12-31"></label><label>Hasta<input type="date" id="biD2" value="${E.d2}" min="${E.anio}-01-01" max="${E.anio}-12-31"></label></div>
+          <div class="bi-rg" aria-label="Rango de días"><div class="bi-rgt"><i id="biRB"></i></div><input type="range" id="biR1" min="0" max="${nd}" value="${doy(E.d1)}" aria-label="Desde"><input type="range" id="biR2" min="0" max="${nd}" value="${doy(E.d2)}" aria-label="Hasta"></div>
+          <small class="bi-rgx" id="biRT">${rgTxt()}</small></div>`; })() : `<label>Desde<select id="biM1">${MES.map((m, i) => `<option value="${i + 1}"${i + 1 === M1() ? " selected" : ""}>${m}</option>`).join("")}</select></label>
+        <label>Hasta<select id="biM2">${MES.map((m, i) => `<option value="${i + 1}"${i + 1 === M2() ? " selected" : ""}${i + 1 < M1() ? " disabled" : ""}>${m}</option>`).join("")}</select></label>`}
         </div>
       <div class="bi-exp" role="group" aria-label="Exportar"><button type="button" class="btn" id="biPdf">📄 PDF</button><button type="button" class="btn" id="biCsv">📊 Excel</button><button type="button" class="btn" id="biMail">✉️ Enviar por correo</button><button type="button" class="btn" id="biPrint">🖨 Imprimir</button></div>
       <div class="bi-k"><div>Ventas ${P ? "netas" : ""}<b>${F(v)}</b><small>${R.lab[0]}–${R.lab[R.ult]} · ${CAN[E.canal]}</small></div>
         <div data-u="l">Compras${PC ? " a costo" : RC && P ? " (unidades)" : ""}<b>${hay ? Fc(c) : "—"}</b><small>${hay ? (E.canal ? "compras directas ± traspasos entre bodegas" : "ingresos de mercadería") : R.sinBod ? "por bodega: con la próxima actualización de datos" : R.X.C ? "sin datos de compras para " + E.anio : "aún sin datos de compras"}</small></div>
         <div data-u="${PC ? "v" : "l"}">${PC ? "Costo de lo vendido" : "Compras ÷ ventas" + (RC && P ? " (unidades)" : "")}<b>${PC ? fm(t.vc) : (hay && t.vq ? Math.round(c / t.vq * 100) + "%" : "—")}</b><small>${PC ? (t.vv ? "margen " + Math.round((1 - t.vc / t.vv) * 100) + "%" : "") : "100% = se compra lo que se vende"}</small></div>
         <div data-u="l">Compras − ${PC ? "costo vendido" : "ventas" + (RC && P ? " (unidades)" : "")}<b class="${hay ? dcl(dif) : ""}">${hay ? Fc(dif) : "—"}</b><small>${hay ? (dif > 0 ? "se compró más de lo vendido: sube el inventario" : dif < 0 ? "se compró menos: baja el inventario" : "") : ""}</small></div></div></div>
-    <div class="card"><h2>Por mes <span class="muted">${hayF ? esc(filt) : "todas las marcas"} · ${P ? "millones de $" : "unidades"}</span></h2>
+    <div class="card"><h2>Por ${R.diario ? "día" : "mes"} <span class="muted">${hayF ? esc(filt) : "todas las marcas"} · ${P ? "millones de $" : "unidades"}</span></h2>
       <div class="bi-ley"><span><i style="background:#0B3146;height:3px;width:16px;vertical-align:4px"></i>Ventas${P ? " netas" : ""}</span>${(RC && P) || E.un === "v" ? "" : '<span><i style="background:#E07B24;height:3px;width:16px;vertical-align:4px"></i>Compras</span>'}${PC && E.un !== "l" ? '<span><i style="background:none;border-top:2px dashed #5B6874;height:0;border-radius:0;vertical-align:4px"></i>Costo de lo vendido</span>' : ""}</div>
       ${grafico(R)}
-      <div class="tbl" style="overflow-x:auto;margin-top:8px"><table class="bi-t"><thead><tr><th>Mes</th><th>Ventas</th>${PC ? '<th class="bi-v">Costo vendido</th>' : ""}<th class="bi-l">Compras${RC && P ? " (u)" : ""}</th><th class="bi-l">Compras − ${PC ? "costo" : "ventas"}${RC && P ? " (u)" : ""}</th>${PC ? '<th class="bi-v">Margen</th>' : ""}</tr></thead><tbody>
+      <div class="tbl" style="overflow-x:auto;margin-top:8px"><table class="bi-t"><thead><tr><th>${R.diario ? "Día" : "Mes"}</th><th>Ventas</th>${PC ? '<th class="bi-v">Costo vendido</th>' : ""}<th class="bi-l">Compras${RC && P ? " (u)" : ""}</th><th class="bi-l">Compras − ${PC ? "costo" : "ventas"}${RC && P ? " (u)" : ""}</th>${PC ? '<th class="bi-v">Margen</th>' : ""}</tr></thead><tbody>
         ${R.mes.slice(0, R.ult + 1).map(filaM).join("")}<tr class="tot"><td>Total</td><td>${F(v)}</td>${PC ? `<td class="bi-v">${fm(t.vc)}</td>` : ""}<td class="bi-l">${hay ? Fc(c) : "—"}</td><td class="bi-l ${hay ? dcl(dif) : ""}">${hay ? Fc(dif) : "—"}</td>${PC ? `<td class="bi-v">${t.vv ? Math.round((1 - t.vc / t.vv) * 100) + "%" : "—"}</td>` : ""}</tr></tbody></table></div></div>
+    ${E.un === "v" && E.canal === "d" && !E.vend && R.vend.length > 1 ? (() => { const L = R.vend.filter(o => o.vv || o.vq).sort((a, b) => P ? b.vv - a.vv : b.vq - a.vq), tv = L.reduce((s, o) => s + (P ? o.vv : o.vq), 0);
+      return `<div class="card"><h2>Por vendedor <span class="muted">distribuidora · toca un vendedor para filtrar</span></h2><div class="tbl" style="overflow-x:auto"><table class="bi-t"><thead><tr><th>Vendedor</th><th>Ventas</th><th>% venta</th><th>Unidades</th>${PC ? "<th>Margen</th>" : ""}</tr></thead><tbody>
+        ${L.map(o => `<tr data-bv="${esc(o.n)}" style="cursor:pointer"><td>${esc(o.n)}</td><td>${F(P ? o.vv : o.vq)}</td><td>${tv ? Math.round((P ? o.vv : o.vq) / tv * 100) + "%" : "—"}</td><td>${fu(o.vq)}</td>${PC ? `<td>${o.vv ? Math.round((1 - o.vc / o.vv) * 100) + "%" : "—"}</td>` : ""}</tr>`).join("")}</tbody></table></div></div>`; })() : ""}
     <div class="card"><h2>Por ${NV} <span class="muted">${hayF ? esc(filt) + " · " : ""}${NV === "producto" ? G.length + " productos" : "toca una fila para entrar"}</span></h2>
       <div class="tbl" style="overflow-x:auto"><table class="bi-t"><thead><tr><th>${NV[0].toUpperCase() + NV.slice(1)}</th><th>Ventas</th><th class="bi-l">Compras${RC && P ? " (u)" : ""}</th><th class="bi-l">Compras − ${PC ? "costo" : "ventas"}${RC && P ? " (u)" : ""}</th><th class="bi-v">% venta</th></tr></thead><tbody>
         ${G.slice(0, 200).map(o => filaG(o, !E.prod)).join("") || '<tr><td colspan="5" class="muted">Sin movimientos.</td></tr>'}</tbody></table></div>
@@ -922,7 +953,7 @@ function vmPoner(cont, VM, antes) { try { if (!cont) return; const v = cont.quer
           <tr class="tot"><td>Total</td><td>${fm(T.fv)}</td><td class="bi-c bi-l">${fm(T.v > 0 ? T.fv * T.c / T.v : 0)}</td><td class="bi-c bi-l">${fm(T.sv)}</td><td class="bi-l">${IT.cob == null ? "—" : IT.cob.toLocaleString("es-CL", { maximumFractionDigits: 1 }) + " meses"}</td></tr></tbody></table></div>
         <p class="bi-nota">Venta esperada = pronóstico por producto (el mismo de Abastecimiento) llevado a la meta del plan de la distribuidora de los próximos 3 meses, más la venta base de la tienda. Cobertura = meses de la venta esperada que cubre el stock (${A.invTxt}; en rojo, menos de medio mes). La compra producto a producto está en Más → Abastecimiento.</p></div>` : ""}`; }
   /* ===== exportar la unidad en pantalla: Excel, PDF, correo e imprimir ===== */
-  const unidadTxt = () => E.un === "v" ? "Ventas" : "Logística", perTxt = () => (M1() > 1 || M2() < 12 ? MES[M1() - 1] + (M2() > M1() ? "–" + MES[M2() - 1] : "") + " " : "") + E.anio, filtroTxt = () => [CAN[E.canal], E.marca, E.fmt, E.prod ? "producto " + E.prod : "", perTxt(), E.u === "$" ? "pesos" : "unidades"].filter(Boolean).join(" · ");
+  const unidadTxt = () => E.un === "v" ? "Ventas" : "Logística", perTxt = () => enDias() ? dmy(E.d1) + " a " + dmy(E.d2) + " " + E.anio : (M1() > 1 || M2() < 12 ? MES[M1() - 1] + (M2() > M1() ? "–" + MES[M2() - 1] : "") + " " : "") + E.anio, filtroTxt = () => [CAN[E.canal], E.canal === "d" && E.vend ? "vendedor " + E.vend : "", E.marca, E.fmt, E.prod ? "producto " + E.prod : "", perTxt(), E.u === "$" ? "pesos" : "unidades"].filter(Boolean).join(" · ");
   function hojas(R) { const V = E.un === "v", r0 = x => Math.round(x || 0), r1 = x => x == null ? "" : Math.round(x * 1000) / 10, H = [];
     const cm = ["Mes", "Ventas unidades", "Ventas $ neto"].concat(V ? (RC ? [] : ["Costo vendido $", "Margen %"]) : ["Compras unidades"].concat(RC ? [] : ["Compras $ costo"]));
     H.push(["Por mes", [["BI " + unidadTxt(), filtroTxt()], [], cm].concat(R.mes.slice(0, R.ult + 1).map((o, i) => [R.lab[i] + " " + E.anio, r0(o.vq), r0(o.vv)].concat(V ? (RC ? [] : [r0(o.vc), o.vv ? r1(1 - o.vc / o.vv) : ""]) : [r0(o.cq)].concat(RC ? [] : [r0(o.cv)]))))]);
@@ -976,6 +1007,7 @@ function vmPoner(cont, VM, antes) { try { if (!cont) return; const v = cont.quer
     if (enV) s.querySelector("#biSeg").onclick = e => { const b = e.target.closest("[data-un]"); if (b && b.dataset.un !== E.un) { E.un = b.dataset.un; guarda(); poner(); } };
     let R; try { R = calcM(); } catch (e) { s.querySelector("#biSeg").insertAdjacentHTML("afterend", '<div id="biBox"><div class="card"><p class="muted">No se pudo calcular: ' + esc(String(e && e.message || e)) + "</p></div></div>"); return; }
     s.querySelector("#biSeg").insertAdjacentHTML("afterend", '<div id="biBox">' + sinC(html(R) + avzHtml(R)) + "</div>"); const q = id => s.querySelector("#" + id);
+    s.querySelectorAll("#biBox table.bi-t").forEach(t => { const H = [...t.querySelectorAll("thead th")].map(th => th.textContent.trim()); t.querySelectorAll("tbody tr").forEach(tr => [...tr.children].forEach((td, i) => { if (i && H[i] && !td.hasAttribute("colspan")) td.setAttribute("data-l", H[i]); })); });   /* tablas legibles en el teléfono (16-11-2026) */
     { const bx = q("biBox"), otra = E.un === "v" ? "l" : "v"; bx.querySelectorAll('[data-u="' + otra + '"], .bi-' + otra).forEach(x => x.remove());   /* deja solo lo de la unidad elegida */
       bx.querySelectorAll(".card").forEach(c => { const ps = c.querySelectorAll("p[data-u]"); if (c.querySelector("h2") && /^Hallazgos/.test(c.querySelector("h2").textContent) && !ps.length && !c.querySelector(".muted + p")) c.insertAdjacentHTML("beforeend", '<p class="muted">Sin hallazgos para esta unidad con los filtros elegidos.</p>'); }); }
     q("biU").onclick = e => { const b = e.target.closest("[data-u]"); if (b) { E.u = b.dataset.u; guarda(); poner(); } };
@@ -984,10 +1016,19 @@ function vmPoner(cont, VM, antes) { try { if (!cont) return; const v = cont.quer
     q("biFmt").onchange = () => { E.fmt = q("biFmt").value; E.prod = ""; guarda(); poner(); };
     q("biProd").onchange = () => { E.prod = q("biProd").value; guarda(); poner(); };
     if (q("biLimpia")) q("biLimpia").onclick = () => { E.prov = E.marca = E.fmt = E.prod = ""; guarda(); poner(); };
-    if (q("biAnio")) q("biAnio").onchange = () => { E.anio = Number(q("biAnio").value); guarda(); poner(); };
-    q("biM1").onchange = () => { E.perP = 1; E.m1 = Number(q("biM1").value); if (E.m2 < E.m1) E.m2 = E.m1; guarda(); poner(); };
-    q("biM2").onchange = () => { E.perP = 1; E.m2 = Math.max(E.m1, Number(q("biM2").value)); guarda(); poner(); };
+    if (q("biAnio")) q("biAnio").onchange = () => { E.anio = Number(q("biAnio").value); if (E.perD) { E.d1 = E.anio + String(E.d1).slice(4); E.d2 = E.anio + String(E.d2).slice(4); } guarda(); poner(); };
+    if (q("biVend")) q("biVend").onchange = () => { E.vend = q("biVend").value; guarda(); poner(); };
+    s.querySelectorAll("tr[data-bv]").forEach(tr => tr.onclick = () => { E.vend = tr.dataset.bv; guarda(); poner(); window.scrollTo({ top: 0 }); });
+    if (q("biD1")) { const rb = () => { const a = Math.min(+q("biR1").value, +q("biR2").value), b = Math.max(+q("biR1").value, +q("biR2").value), mx = +q("biR1").max; q("biRB").style.left = a / mx * 100 + "%"; q("biRB").style.width = (b - a) / mx * 100 + "%"; return [a, b]; };
+      const vivo = () => { const [a, b] = rb(); q("biD1").value = isoDoy(E.anio, a); q("biD2").value = isoDoy(E.anio, b); q("biRT").textContent = dmy(q("biD1").value) + " a " + dmy(q("biD2").value) + " · " + (b - a + 1) + " días"; };
+      const fija = (d1, d2) => { if (!d1 || !d2) return; if (d2 < d1) [d1, d2] = [d2, d1]; E.d1 = d1; E.d2 = d2; E.perD = 1; guarda(); poner(); };
+      rb(); ["biR1", "biR2"].forEach(k => { q(k).oninput = vivo; q(k).onchange = () => { vivo(); fija(q("biD1").value, q("biD2").value); }; });
+      q("biD1").onchange = () => fija(q("biD1").value, q("biD2").value); q("biD2").onchange = () => fija(q("biD1").value, q("biD2").value); }
+    if (q("biM1")) q("biM1").onchange = () => { E.perP = 1; E.m1 = Number(q("biM1").value); if (E.m2 < E.m1) E.m2 = E.m1; guarda(); poner(); };
+    if (q("biM2")) q("biM2").onchange = () => { E.perP = 1; E.m2 = Math.max(E.m1, Number(q("biM2").value)); guarda(); poner(); };
     q("biPer").onclick = e => { const b = e.target.closest("[data-p]"); if (!b) return; const B = R.B || {}, cy = Number(String(B.corte || "").slice(0, 4)), cm = Number(String(B.corte || "").slice(5, 7)) || 12, ul = E.anio === cy ? cm : 12;
+      if (b.dataset.p === "d") { const c = String(B.corte || "").slice(0, 10), d2 = E.anio === cy && c.length === 10 ? c : E.anio + "-12-31", d1 = isoDoy(E.anio, Math.max(0, doy(d2) - 29)); E.perD = 1; E.d1 = d1; E.d2 = d2; guarda(); poner(); return; }
+      E.perD = 0;
       if (b.dataset.p === "a") { E.m1 = 1; E.m2 = 12; } else if (b.dataset.p === "m") { E.m1 = E.m2 = ul; } else if (b.dataset.p === "t") { E.m2 = ul; E.m1 = Math.max(1, ul - 2); } else { E.perP = 1; guarda(); poner(); return; } E.perP = 0; guarda(); poner(); };
     if (q("biTodos")) q("biTodos").onclick = () => { if (E.prod) E.prod = ""; else if (E.marca) E.marca = ""; else if (E.fmt && !E.prov) E.fmt = ""; else if (E.prov) E.prov = ""; else E.fmt = ""; guarda(); poner(); };
     q("biCsv").onclick = () => excel(R); q("biPdf").onclick = () => conPdf(R, "pdf"); q("biMail").onclick = () => conPdf(R, "correo"); q("biPrint").onclick = () => conPdf(R, "imprimir");
