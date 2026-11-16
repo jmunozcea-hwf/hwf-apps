@@ -7198,7 +7198,7 @@ function confirmarNota() {
   x.onclick = () => cerrarModal(); card.insertBefore(x, card.firstChild); })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261116175657";
+const HWF_VER = "20261116175742";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -10333,7 +10333,7 @@ body:has(#rdOv) #snBtn,body:has(#rdOv) #iaBtn,body:has(#rdOv) #navBotones{displa
     const o = document.createElement("div"); o.id = "rdOv"; o.setAttribute("role", "dialog"); o.setAttribute("aria-label", "Resumen del día"); o.innerHTML = h; document.body.appendChild(o);
     const cerrar = () => { try { localStorage.setItem(clave(), "1"); } catch (x) {} o.remove(); }; o.querySelector("#rdX").onclick = cerrar; }
   window.hwfResumenDia = mostrar;
-  setInterval(() => { try { if (typeof SES === "undefined" || !SES || document.getElementById("rdOv")) return; if (localStorage.getItem(clave())) return; const B = HB.base() || {}; if (!(B.rows && B.rows.length)) return; mostrar(); } catch (x) {} }, 1200);
+  /* ya no se abre solo al entrar (16-11-2026, pedido de Jorge): solo desde el menú lateral */
   /* acceso desde el menú lateral ☰ (grupo «Mi día», después de Inicio); ya no hay botón en Inicio */
   document.querySelectorAll("#rdAbrir").forEach(x => x.remove());
   const ponerEnMenu = () => { const pan = document.getElementById("snPanel"); if (!pan || !pan.classList.contains("on") || pan.querySelector("#snRd")) return;
