@@ -7197,7 +7197,7 @@ function confirmarNota() {
   x.onclick = () => cerrarModal(); card.insertBefore(x, card.firstChild); })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261115222157";
+const HWF_VER = "20261116001709";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -9483,6 +9483,147 @@ body.ia-izq #iaBtn{right:auto;left:14px}
   window.hwfAsistente = { contexto };   /* para pruebas */
 })();
 </script>
+<style>/* patch_clientes2 */
+body.cl2-on #crmMeta,body.cl2-on #crmLista>.crm-tools,body.cl2-on #crmEstado,body.cl2-on #crmRows{display:none!important}
+#cl2{display:grid;gap:12px}
+.c2-res{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.c2-res div{background:var(--surface,#fff);border:1px solid var(--line,#DAE1E7);border-radius:14px;padding:10px 12px}
+.c2-res span{display:block;font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--muted,#5B6874)}
+.c2-res b{font-size:1.08rem;font-variant-numeric:tabular-nums}.c2-res b.mal{color:#B42318}.c2-res b.ojo{color:#9A5B00}
+@media(min-width:700px){.c2-res{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.c2-bar{display:grid;gap:8px}
+.c2-q{display:flex;gap:8px}.c2-q input{flex:1;min-width:0;font:inherit;font-size:16px;padding:11px 12px;border:1.5px solid var(--line,#DAE1E7);border-radius:12px;background:var(--surface,#fff);color:inherit}
+.c2-q button{border:0;border-radius:12px;padding:0 14px;font:inherit;font-weight:800;background:#0B3146;color:#fff;cursor:pointer;white-space:nowrap}
+.c2-chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}.c2-chips::-webkit-scrollbar{display:none}
+.c2-chips button{flex:0 0 auto;border:1.5px solid var(--line,#DAE1E7);background:var(--surface,#fff);color:inherit;border-radius:999px;padding:7px 12px;font:inherit;font-size:.84rem;font-weight:700;cursor:pointer}
+.c2-chips button[aria-pressed="true"]{background:#0B3146;border-color:#0B3146;color:#fff}.c2-chips small{opacity:.75;margin-left:3px}
+.c2-sel{display:grid;grid-template-columns:1fr 1fr;gap:8px}.c2-sel select{font:inherit;font-size:.9rem;padding:9px 10px;border:1.5px solid var(--line,#DAE1E7);border-radius:12px;background:var(--surface,#fff);color:inherit;min-width:0}
+.c2-n{font-size:.8rem;color:var(--muted,#5B6874);margin:0}
+.c2-lst{display:grid;gap:10px}@media(min-width:900px){.c2-lst{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.c2-it{background:var(--surface,#fff);border:1px solid var(--line,#DAE1E7);border-left:4px solid var(--c2c,#C9D3DB);border-radius:14px;padding:12px;display:grid;gap:8px}
+.c2-top{display:flex;align-items:flex-start;gap:6px;flex-wrap:wrap}.c2-top b{font-size:1rem;flex:1 1 60%;min-width:0;line-height:1.25}
+.c2-est{font-size:.7rem;font-weight:800;padding:3px 9px;border-radius:999px;white-space:nowrap}
+.c2-sub{font-size:.82rem;color:var(--muted,#5B6874);margin-top:-4px}
+.c2-m{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.c2-m div{background:var(--sunk,#EEF2F5);border-radius:10px;padding:6px 8px;min-width:0}
+.c2-m span{display:block;font-size:.66rem;font-weight:800;text-transform:uppercase;letter-spacing:.03em;color:var(--muted,#5B6874);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.c2-m b{font-size:.9rem;font-variant-numeric:tabular-nums;white-space:nowrap}
+.c2-fl{display:flex;gap:6px;flex-wrap:wrap}.c2-fl span{font-size:.74rem;font-weight:700;padding:3px 9px;border-radius:999px;background:var(--sunk,#EEF2F5);color:var(--muted,#5B6874)}
+.c2-fl .f{background:#FFF1DC;color:#9A5B00}.c2-fl .v{background:#FDECEA;color:#B42318}.c2-fl .n{background:#E6F0FA;color:#1F5C99}
+.c2-ac{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.c2-ac button,.c2-ac a{display:flex;align-items:center;justify-content:center;min-height:40px;border-radius:10px;border:1px solid var(--line,#DAE1E7);background:var(--surface,#fff);color:inherit;font:inherit;font-size:.78rem;font-weight:800;text-decoration:none;cursor:pointer;padding:0 4px}
+.c2-ac .pri{background:#1C7A4E;border-color:#1C7A4E;color:#fff}.c2-ac [aria-disabled="true"]{opacity:.4;pointer-events:none}
+.c2-mas{border:1.5px dashed var(--line,#C9D3DB);background:transparent;border-radius:12px;padding:12px;font:inherit;font-weight:800;color:inherit;cursor:pointer}
+.c2-vacio{text-align:center;color:var(--muted,#5B6874);padding:24px 8px;background:var(--surface,#fff);border-radius:14px;border:1px dashed var(--line,#DAE1E7)}
+</style>
+<script>/* patch_clientes2: Clientes rediseñado */
+(function () {
+  if (typeof clientesLocal !== "function" || typeof setModo !== "function" || !document.getElementById("crmLista")) return;
+  const ST = { f: "todos", ord: "prio", com: "", q: "", n: 30 };
+  try { Object.assign(ST, JSON.parse(localStorage.getItem("hwf-cl2") || "{}")); } catch (e) {} ST.q = ""; ST.n = 30;
+  const guarda = () => { try { localStorage.setItem("hwf-cl2", JSON.stringify({ f: ST.f, ord: ST.ord, com: ST.com })); } catch (e) {} };
+  const e_ = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const T_ = s => typeof tc === "function" ? tc(s || "") : String(s || "");
+  const nz = s => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+  const MM = v => { const a = Math.abs(v || 0); return a >= 1e6 ? "$" + (v / 1e6).toLocaleString("es-CL", { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + " MM" : a >= 1e3 ? "$" + Math.round(v / 1e3).toLocaleString("es-CL") + " mil" : "$" + Math.round(v || 0).toLocaleString("es-CL"); };
+  const dias = f => { if (!f) return null; const t = new Date(String(f).slice(0, 10) + "T12:00:00").getTime(); return isFinite(t) ? Math.max(0, Math.floor((Date.now() - t) / 864e5)) : null; };
+  const MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
+  const mesTxt = () => { try { return typeof nombreMes === "function" ? nombreMes() : MESES[new Date().getMonth()]; } catch (e) { return "el mes"; } };
+  const EST = { falta: ["Le falta comprar", "#9A5B00", "#FFF1DC", "#E0A43A"], riesgo: ["En riesgo", "#B42318", "#FDECEA", "#E5484D"], perdido: ["Perdido", "#5B6874", "#EEF2F5", "#8A97A3"],
+    aldia: ["Al día", "#1C7A4E", "#E3F4EA", "#2E9E63"], sin: ["Sin compras este año", "#5B6874", "#EEF2F5", "#C9D3DB"] };
+  function datos() {
+    const cart = typeof SES !== "undefined" && SES && SES.vendedor ? SES.vendedor.cartera : "", todos = typeof sinCartera === "function" && sinCartera(cart);
+    const L = clientesLocal().filter(c => !cart || todos || c.vendedor === cart);
+    const cx = {}; try { cxClientes(cxMios()).forEach(c => { cx["n:" + cxNorm(c.cli)] = c; if (c.rut) cx["r:" + String(c.rut).replace(/\./g, "").toUpperCase()] = c; }); } catch (e) {}
+    return L.map(c => { const hab = Number(c.compra_habitual) || 0, app = typeof ventaApp === "function" ? (ventaApp(cart, c.codigo) || 0) : 0, mes = (Number(c.octubre) || 0) + app, falta = Math.max(0, hab - mes), d = dias(c.ultima_compra);
+      let abc = ""; try { abc = typeof plAbcDe === "function" ? plAbcDe(c) : ""; } catch (e) {}
+      let dx = null; try { dx = cx["r:" + String(c.rut || "").replace(/\./g, "").toUpperCase()] || cx["n:" + cxNorm(c.nombre)]; } catch (e) {}
+      const venc = dx ? dx.venc || 0 : 0, np = Number(c.cotizacion_pendiente) || 0, y = Number(c.compra_2026) || 0;
+      const est = !(y > 0) && !(mes > 0) ? "sin" : d != null && d >= 90 && !(mes > 0) ? "perdido" : d != null && d >= 45 && !(mes > 0) ? "riesgo" : falta > 0 ? "falta" : "aldia";
+      const prio = falta + venc * 0.5 + np * 0.5 + (est === "riesgo" ? hab * 0.8 : est === "perdido" ? hab * 0.5 : 0) + ({ A: 3e5, B: 1e5 }[abc] || 0);
+      return { c, hab, mes, falta, d, abc, venc, np, est, prio, y, sinUb: !(c.lat && c.lng) }; });
+  }
+  const FIL = [["todos", "Todos", () => true], ["falta", "Les falta comprar", x => x.est === "falta"], ["riesgo", "En riesgo", x => x.est === "riesgo"], ["perdido", "Perdidos", x => x.est === "perdido"],
+    ["aldia", "Al día", x => x.est === "aldia"], ["deuda", "Con deuda vencida", x => x.venc > 0], ["np", "Con nota de pedido", x => x.np > 0], ["sin", "Sin compras este año", x => x.est === "sin"]];
+  const ORD = [["prio", "Prioridad"], ["compra", "Mayor compra"], ["reciente", "Última compra"], ["dias", "Más días sin compra"], ["nombre", "Nombre"]];
+  const ordenar = l => { const by = { prio: (a, b) => b.prio - a.prio, compra: (a, b) => b.hab - a.hab || b.y - a.y, reciente: (a, b) => (a.d == null ? 1e9 : a.d) - (b.d == null ? 1e9 : b.d),
+      dias: (a, b) => (b.d == null ? -1 : b.d) - (a.d == null ? -1 : a.d), nombre: (a, b) => String(a.c.nombre).localeCompare(String(b.c.nombre), "es") }[ST.ord] || ((a, b) => b.prio - a.prio); return l.sort(by); };
+  const tel = c => String(c.telefono || "").replace(/\D/g, "").replace(/^0+/, ""), telI = c => { const t = tel(c); return !t ? "" : t.length === 9 ? "56" + t : t; };
+  function tarjeta(x) { const c = x.c, E = EST[x.est], t = telI(c), mapa = c.lat && c.lng ? `https://www.google.com/maps/dir/?api=1&destination=${c.lat},${c.lng}` : (c.direccion || c.comuna) ? "https://www.google.com/maps/dir/?api=1&destination=" + encodeURIComponent([c.direccion, T_(c.comuna), "Chile"].filter(Boolean).join(", ")) : "";
+    const ult = x.d == null ? "—" : x.d === 0 ? "hoy" : x.d === 1 ? "ayer" : "hace " + x.d + " d";
+    return `<article class="c2-it" style="--c2c:${E[3]}" data-cod="${e_(c.codigo)}">
+      <div class="c2-top"><b>${e_(T_(c.nombre))}</b>${x.abc ? `<span class="abc ${x.abc}" title="Clasificación ${x.abc}">${x.abc}</span>` : ""}<span class="c2-est" style="color:${E[1]};background:${E[2]}">${E[0]}</span></div>
+      <div class="c2-sub">${e_([T_(c.direccion), T_(c.comuna)].filter(Boolean).join(", ") || "Sin dirección")}</div>
+      <div class="c2-m"><div><span>Habitual/mes</span><b>${x.hab ? MM(x.hab) : "—"}</b></div><div><span>${e_(mesTxt())}</span><b>${MM(x.mes)}</b></div><div><span>Última compra</span><b>${ult}</b></div></div>
+      ${x.falta > 0 || x.venc > 0 || x.np > 0 || x.sinUb ? `<div class="c2-fl">${x.falta > 0 ? `<span class="f">Falta ${MM(x.falta)}</span>` : ""}${x.venc > 0 ? `<span class="v">Vencido ${MM(x.venc)}</span>` : ""}${x.np > 0 ? `<span class="n">NP Defontana ${MM(x.np)}</span>` : ""}${x.sinUb ? "<span>Sin ubicación</span>" : ""}</div>` : ""}
+      <div class="c2-ac"><button type="button" data-a="ficha">Ficha</button><button type="button" class="pri" data-a="pedido">Pedido</button>
+        <a href="${t ? "https://wa.me/" + t : "#"}" target="_blank" rel="noopener" ${t ? "" : 'aria-disabled="true"'}>WhatsApp</a><a href="${t ? "tel:+" + t : "#"}" ${t ? "" : 'aria-disabled="true"'}>Llamar</a>
+        <a href="${mapa || "#"}" target="_blank" rel="noopener" data-a="mapa" ${mapa ? "" : 'aria-disabled="true"'}>Ir</a></div></article>`; }
+  function pintar() { const lista = document.getElementById("crmLista"); if (!lista || !document.body.classList.contains("cl2-on")) return;
+    let box = document.getElementById("cl2"); if (!box) { box = document.createElement("div"); box.id = "cl2"; const ag = document.getElementById("cliAg"); if (ag && ag.parentNode === lista) ag.after(box); else lista.prepend(box); }
+    const D = datos(), base = D.filter(x => !ST.com || nz(x.c.comuna) === ST.com), q = nz(ST.q).trim();
+    const coms = [...new Set(D.map(x => nz(x.c.comuna)).filter(Boolean))].sort(), nomCom = k => { const x = D.find(z => nz(z.c.comuna) === k); return x ? T_(x.c.comuna) : k; };
+    const cnt = Object.fromEntries(FIL.map(([k, , f]) => [k, base.filter(f).length])); if (!FIL.some(([k]) => k === ST.f)) ST.f = "todos";
+    let L = base.filter(FIL.find(([k]) => k === ST.f)[2]); if (q) L = L.filter(x => nz([x.c.nombre, x.c.fantasia, x.c.rut, x.c.direccion, x.c.comuna, x.c.contacto].join(" ")).includes(q));
+    ordenar(L); const R = { n: base.length, hab: base.reduce((t, x) => t + x.hab, 0), falta: base.reduce((t, x) => t + x.falta, 0), venc: base.reduce((t, x) => t + x.venc, 0) };
+    const masBtn = [...document.querySelectorAll("#crmLista .crm-tools button")].find(b => /\+\s*Cliente/i.test(b.textContent));
+    box.innerHTML = `<div class="c2-res"><div><span>Clientes</span><b>${R.n}</b></div><div><span>Habitual al mes</span><b>${MM(R.hab)}</b></div><div><span>Falta en ${e_(mesTxt())}</span><b class="${R.falta ? "ojo" : ""}">${MM(R.falta)}</b></div><div><span>Vencido</span><b class="${R.venc ? "mal" : ""}">${MM(R.venc)}</b></div></div>
+      <div class="c2-bar"><div class="c2-q"><input type="search" id="c2Q" placeholder="Buscar cliente, RUT, dirección o comuna" value="${e_(ST.q)}" aria-label="Buscar cliente">${masBtn ? '<button type="button" id="c2Nuevo">+ Cliente</button>' : ""}</div>
+        <div class="c2-chips" role="group" aria-label="Filtrar por estado">${FIL.filter(([k]) => k === "todos" || cnt[k]).map(([k, t]) => `<button type="button" data-f="${k}" aria-pressed="${ST.f === k}">${t}<small>${cnt[k]}</small></button>`).join("")}</div>
+        <div class="c2-sel"><select id="c2Ord" aria-label="Ordenar">${ORD.map(([k, t]) => `<option value="${k}" ${ST.ord === k ? "selected" : ""}>Ordenar: ${t}</option>`).join("")}</select>
+          <select id="c2Com" aria-label="Comuna"><option value="">Todas las comunas</option>${coms.map(k => `<option value="${e_(k)}" ${ST.com === k ? "selected" : ""}>${e_(nomCom(k))}</option>`).join("")}</select></div></div>
+      <p class="c2-n">${L.length} ${L.length === 1 ? "cliente" : "clientes"}${ST.f !== "todos" ? " · " + FIL.find(([k]) => k === ST.f)[1].toLowerCase() : ""}${ST.com ? " · " + e_(nomCom(ST.com)) : ""}${q ? " · «" + e_(ST.q) + "»" : ""}</p>
+      <div class="c2-lst">${L.length ? L.slice(0, ST.n).map(tarjeta).join("") : '<div class="c2-vacio">No hay clientes con estos filtros.</div>'}</div>
+      ${L.length > ST.n ? `<button type="button" class="c2-mas" id="c2Mas">Ver ${Math.min(30, L.length - ST.n)} más (quedan ${L.length - ST.n})</button>` : ""}`;
+    const qi = box.querySelector("#c2Q"); let tq = 0; qi.oninput = () => { clearTimeout(tq); tq = setTimeout(() => { ST.q = qi.value; ST.n = 30; const pos = qi.selectionStart; pintar(); const n = document.getElementById("c2Q"); if (n) { n.focus(); try { n.setSelectionRange(pos, pos); } catch (e) {} } }, 180); };
+    box.querySelector(".c2-chips").onclick = ev => { const b = ev.target.closest("[data-f]"); if (!b) return; ST.f = b.dataset.f; ST.n = 30; guarda(); pintar(); };
+    box.querySelector("#c2Ord").onchange = ev => { ST.ord = ev.target.value; guarda(); pintar(); };
+    box.querySelector("#c2Com").onchange = ev => { ST.com = ev.target.value; ST.n = 30; guarda(); pintar(); };
+    if (box.querySelector("#c2Mas")) box.querySelector("#c2Mas").onclick = () => { ST.n += 30; pintar(); };
+    if (box.querySelector("#c2Nuevo")) box.querySelector("#c2Nuevo").onclick = () => masBtn.click();
+    box.querySelector(".c2-lst").onclick = ev => { const b = ev.target.closest("[data-a]"), it = ev.target.closest("[data-cod]"); if (!b || !it) return; const cod = it.dataset.cod, c = clientesLocal().find(z => z.codigo === cod); if (!c) return;
+      if (b.dataset.a === "ficha") { ev.preventDefault(); abrirFicha(cod); }
+      else if (b.dataset.a === "pedido") { ev.preventDefault(); try { if (typeof seleccionarCliente === "function") seleccionarCliente(c); } catch (e) { console.error(e); } setModo("pedido"); window.scrollTo({ top: 0 }); }
+      else if (b.dataset.a === "mapa" && typeof abrirExterno === "function" && b.href && b.href !== "#") { ev.preventDefault(); abrirExterno(b.href); } };
+  }
+  const _sm = setModo; setModo = function (m) { const r = _sm.apply(this, arguments); const on = m === "clientes"; document.body.classList.toggle("cl2-on", on); if (on) try { pintar(); } catch (e) { console.error(e); } return r; };
+  if (typeof pintarLista === "function") { const _pl = pintarLista; pintarLista = async function () { const r = await _pl.apply(this, arguments); try { if (document.body.classList.contains("cl2-on")) pintar(); } catch (e) { console.error(e); } return r; }; }
+  window.hwfClientes2 = { pintar, datos };
+  try { if (typeof MODO !== "undefined" && MODO === "clientes") setModo("clientes"); } catch (e) {}
+})();
+</script>
+<style>/* patch_inicio_unico */
+body.ini-u #vCRM{display:flex;flex-direction:column;gap:14px}
+body.ini-u #crmInicio,body.ini-u #crmDash{display:contents!important}
+body.ini-u #crmInicio>.in-hero{order:1}body.ini-u #rdAbrir{order:2}body.ini-u #kpCard{order:3}body.ini-u #adCard{order:4}body.ini-u #actLin{order:5}
+body.ini-u #crmDash>.db-k{order:6}body.ini-u #crmDash>.db-g{order:7}body.ini-u #vmCard{order:8}
+body.ini-u #crmInicio>.in-sec{order:9}body.ini-u #ptCard{order:10}body.ini-u #calCard{order:11}body.ini-u #crmDash>.db-act{order:12}
+body.ini-u #crmDash>#crmAvance,body.ini-u #crmDash>.db-hd,body.ini-u .iu-fuera{display:none!important}
+body.ini-u #crmInicio>*,body.ini-u #crmDash>*{margin-top:0!important;margin-bottom:0!important}
+#mDash,#mAvance,#snPanel [data-sm="dash"],#snPanel [data-sm="avance"]{display:none!important}
+</style>
+<script>/* patch_inicio_unico: Panel dentro de Inicio, sin duplicados */
+(function () {
+  if (typeof setModo !== "function" || !document.getElementById("crmDash") || !document.getElementById("crmInicio")) return;
+  const FUERA = /^(Ritmo del mes|Venta mensual|Habituales sin compra|Avance de la empresa)/i;
+  function limpiar() { const d = document.getElementById("crmDash"); if (!d) return;
+    d.querySelectorAll(".db-g > *").forEach(c => { const h = c.querySelector("h2,h3,.db-t,b"); const t = (h ? h.textContent : c.textContent).trim(); c.classList.toggle("iu-fuera", FUERA.test(t)); });
+    d.querySelectorAll(".db-k > *").forEach(c => c.classList.toggle("iu-fuera", /^Facturado del mes/i.test(c.textContent.trim())));
+    document.querySelectorAll("#crmInicio .in-hero button, #crmInicio .in-hero a").forEach(b => { if (/dashboard|panel/i.test(b.textContent)) b.classList.add("iu-fuera"); }); }
+  let pintando = false;
+  function conPanel() { if (pintando) return; pintando = true;
+    try { const d = document.getElementById("crmDash"); d.hidden = false; if (typeof pintarDash === "function") pintarDash(); d.hidden = false; const av = document.getElementById("crmAvance"); if (av) av.hidden = true; limpiar(); }
+    catch (e) { console.error(e); } finally { pintando = false; } }
+  const _sm = setModo;
+  setModo = function (m) { if (m === "dash" || m === "avance") m = "inicio";
+    const r = _sm.call(this, m), on = m === "inicio"; document.body.classList.toggle("ini-u", on);
+    if (on) conPanel(); else { const d = document.getElementById("crmDash"); if (d && MODO !== "dash") d.hidden = true; }
+    return r; };
+  if (typeof pintarDash === "function") { const _pd = pintarDash; pintarDash = function () { const r = _pd.apply(this, arguments); try { if (document.body.classList.contains("ini-u")) { document.getElementById("crmDash").hidden = false; limpiar(); } } catch (e) {} return r; }; }
+  try { if (typeof NAV_ORDEN !== "undefined") for (let i = NAV_ORDEN.length - 1; i >= 0; i--) if (NAV_ORDEN[i][0] === "dash" || NAV_ORDEN[i][0] === "avance") NAV_ORDEN.splice(i, 1); } catch (e) {}
+  document.addEventListener("click", e => { const b = e.target.closest('#mDash, #mAvance, [data-sm="dash"], [data-sm="avance"], [data-ir="dash"]'); if (!b) return; e.preventDefault(); e.stopPropagation(); setModo("inicio"); }, true);
+  try { if (typeof MODO !== "undefined" && (MODO === "inicio" || MODO === "dash" || MODO === "avance")) setModo("inicio"); } catch (e) {}
+})();
+</script>
 <script>/* patch_rendimiento:tarde */
 (function () {
   const id = new WeakMap(); let n = 0; const ref = o => { if (!o || typeof o !== "object") return String(o); if (!id.has(o)) id.set(o, ++n); return "#" + id.get(o); };
@@ -9493,6 +9634,38 @@ body.ia-izq #iaBtn{right:auto;left:14px}
       g.__memo = 1; window["__hwfMemo_" + nom] = g; (0, eval)(nom + " = window.__hwfMemo_" + nom); } catch (e) {} };
   def("vmDeBase", B => firma(B));
   def("rkdCalc", (B, y, m) => { const f = firma(B); return f ? f + "|" + y + "|" + m : null; });
+})();
+</script>
+<style>/* patch_iaflotante */
+#iaBtn{background:#0B3146!important;border:2px solid #80C6C9!important;box-shadow:0 4px 14px rgba(11,49,70,.35)!important;width:50px!important;height:50px!important;
+  touch-action:none;user-select:none;-webkit-user-select:none;transition:transform .2s ease,opacity .2s ease,box-shadow .2s ease;opacity:.92}
+#iaBtn svg{width:27px!important;height:27px!important}#iaBtn svg *{fill:#fff}
+#iaBtn.ia-fl{right:auto!important;bottom:auto!important}
+#iaBtn.ia-mov{transition:none;transform:scale(1.08);opacity:1;box-shadow:0 10px 26px rgba(11,49,70,.45)!important}
+#iaBtn.ia-sc{transform:scale(.78);opacity:.38}
+#iaBtn:hover{opacity:1}
+.ia-h{background:#0B3146!important;border-bottom:3px solid #80C6C9}
+.ia-u{background:#0B3146!important}.ia-f button{background:#0B3146!important}.ia-f button:hover{background:#164560!important}
+.ia-s button{border-color:#80C6C9!important}
+</style>
+<script>/* patch_iaflotante: arrastrar y ocultar al desplazar */
+(function ini(n) {
+  const b = document.getElementById("iaBtn"); if (!b) { if ((n || 0) < 40) setTimeout(() => ini((n || 0) + 1), 250); return; } if (b.dataset.fl) return; b.dataset.fl = "1";
+  const K = "hwf-ia-pos:" + location.pathname.split("/").filter(Boolean).slice(-1)[0];
+  const M = 10, tam = () => b.offsetWidth || 50, alto = () => window.innerHeight, ancho = () => document.documentElement.clientWidth;
+  const poner = (x, y) => { const s = tam(); x = Math.min(Math.max(M, x), ancho() - s - M); y = Math.min(Math.max(70, y), alto() - s - 80);
+    b.classList.add("ia-fl"); b.style.left = x + "px"; b.style.top = y + "px"; };
+  const pegar = () => { const s = tam(), x = parseFloat(b.style.left) || 0, der = x + s / 2 > ancho() / 2; poner(der ? ancho() - s - M : M, parseFloat(b.style.top) || 0); return der; };
+  try { const p = JSON.parse(localStorage.getItem(K) || "null"); if (p) { poner(p.der ? ancho() : 0, p.y * alto()); pegar(); } } catch (e) {}
+  let ini = null, movido = false;
+  b.addEventListener("pointerdown", e => { const r = b.getBoundingClientRect(); ini = { x: e.clientX, y: e.clientY, dx: e.clientX - r.left, dy: e.clientY - r.top }; movido = false; try { b.setPointerCapture(e.pointerId); } catch (x) {} });
+  b.addEventListener("pointermove", e => { if (!ini) return; if (!movido && Math.hypot(e.clientX - ini.x, e.clientY - ini.y) < 7) return; movido = true; b.classList.add("ia-mov"); poner(e.clientX - ini.dx, e.clientY - ini.dy); });
+  const soltar = () => { if (!ini) return; ini = null; b.classList.remove("ia-mov"); if (!movido) return;
+    const der = pegar(); try { localStorage.setItem(K, JSON.stringify({ der, y: (parseFloat(b.style.top) || 0) / alto() })); } catch (e) {} };
+  b.addEventListener("pointerup", soltar); b.addEventListener("pointercancel", soltar);
+  b.addEventListener("click", e => { if (movido) { e.stopImmediatePropagation(); e.preventDefault(); movido = false; } }, true);
+  addEventListener("resize", () => { if (b.classList.contains("ia-fl")) pegar(); });
+  let t = 0; addEventListener("scroll", () => { b.classList.add("ia-sc"); clearTimeout(t); t = setTimeout(() => b.classList.remove("ia-sc"), 450); }, { passive: true });
 })();
 </script>
 </body>

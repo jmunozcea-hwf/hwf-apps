@@ -5194,7 +5194,7 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261115222157";
+const HWF_VER = "20261116001709";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -5952,159 +5952,6 @@ function vmPoner(cont, VM, antes) { try { if (!cont) return; const v = cont.quer
 </script>
 <script>/* patch_grafventas: HWF */ { const _pd = pintarDashboard; pintarDashboard = function () { const r = _pd.apply(this, arguments); try { vmPoner(document.getElementById("s-res"), vmDeBase(BASE)); } catch (e) {} return r; };
   try { if (document.getElementById("s-res") && document.getElementById("s-res").children.length) vmPoner(document.getElementById("s-res"), vmDeBase(BASE)); } catch (e) {} }</script>
-<style>/* patch_pdf_log */
-.pdfm{position:fixed;inset:0;z-index:9000;background:rgba(11,49,70,.55);display:grid;place-items:end center;padding:12px}
-.pdfm .c{background:#fff;color:#0F1E29;border-radius:18px;padding:16px;width:100%;max-width:460px;display:grid;gap:10px;box-shadow:0 10px 40px rgba(0,0,0,.3)}
-.pdfm h3{margin:0;font-size:1.05rem}.pdfm p{margin:0;font-size:.84rem;color:#5B6874}.pdfm .n{font-weight:800;word-break:break-word}
-.pdfm .b{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.pdfm .b button{border:1px solid #C9D3DB;background:#fff;color:#0F1E29;border-radius:12px;padding:12px 8px;font:inherit;font-weight:800;cursor:pointer}
-.pdfm .b button.pri{background:#0B3146;border-color:#0B3146;color:#fff}
-@media print{.pdfm{display:none!important}}
-</style>
-<script>/* patch_pdf_log: PDF de rutas en LOGÍSTICA y CHOFER (enviar, imprimir, descargar) */
-(function () {
-  /* ---------- generador PDF mínimo: A4, Helvetica / Helvetica-Bold, texto, líneas y rectángulos ---------- */
-  const HW = [278,278,355,556,556,889,667,191,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,278,278,584,584,584,556,1015,667,667,722,722,667,611,778,722,278,500,667,556,833,722,778,667,778,722,667,611,722,667,944,667,667,611,278,278,278,469,556,333,556,556,500,556,556,278,556,556,222,222,500,222,833,556,556,556,556,333,500,278,556,500,722,500,500,500,334,260,334,584];
-  const MAPA = { 8211: 150, 8212: 151, 8216: 145, 8217: 146, 8220: 147, 8221: 148, 8226: 149, 8364: 128, 8230: 133, 8594: 45, 8250: 62, 8722: 45, 215: 120, 8804: 60, 8805: 62 };   /* − → - (para no perder el signo de los negativos) */
-  const cod = s => { const o = []; for (const ch of String(s == null ? "" : s)) { let c = ch.codePointAt(0); if (c > 255) c = MAPA[c] || 0; if (c >= 32) o.push(c); } return o; };
-  const ancho = (s, sz, b) => cod(s).reduce((t, c) => t + (c <= 126 ? HW[c - 32] : c === 237 || c === 205 || c === 236 ? 278 : c >= 192 && c <= 221 ? 690 : 556), 0) / 1000 * sz * (b ? 1.06 : 1);
-  function Pdf() { const W = 595.28, H = 841.89, pags = []; let ops = [];
-    const n = x => (Math.round(x * 100) / 100).toString(), col = c => c.map(v => n(v / 255)).join(" ");
-    const api = { W, H, y: 0,
-      pagina() { ops = []; pags.push(ops); api.y = 0; return api; },
-      rect(x, y, w, h, c) { ops.push(`${col(c)} rg ${n(x)} ${n(H - y - h)} ${n(w)} ${n(h)} re f`); return api; },
-      linea(x1, y1, x2, y2, c, g) { ops.push(`${col(c || [201, 211, 219])} RG ${n(g || 0.7)} w ${n(x1)} ${n(H - y1)} m ${n(x2)} ${n(H - y2)} l S`); return api; },
-      texto(x, y, s, o) { o = o || {}; const sz = o.sz || 10, b = !!o.b, w = ancho(s, sz, b), xx = o.al === "r" ? x - w : o.al === "c" ? x - w / 2 : x;
-        const t = cod(s).map(c => (c === 40 || c === 41 || c === 92 ? "\\" : "") + String.fromCharCode(c)).join("");
-        ops.push(`BT /F${b ? 2 : 1} ${n(sz)} Tf ${col(o.c || [15, 30, 41])} rg 1 0 0 1 ${n(xx)} ${n(H - y)} Tm (${t}) Tj ET`); return api; },
-      partir(s, max, sz, b) { const out = []; String(s == null ? "" : s).split(/\n/).forEach(par => { let l = ""; par.split(/\s+/).filter(Boolean).forEach(p => { const t = l ? l + " " + p : p;
-          if (ancho(t, sz, b) <= max || !l) l = t; else { out.push(l); l = p; } }); out.push(l); }); return out.filter((x, i) => x || i === 0); },
-      corta(s, max, sz, b) { s = String(s == null ? "" : s); if (ancho(s, sz, b) <= max) return s; while (s.length > 1 && ancho(s + "...", sz, b) > max) s = s.slice(0, -1); return s.trim() + "..."; },
-      paginas: () => pags.length,
-      bytes() { const objs = [], add = s => (objs.push(s), objs.length); add(""); add("");
-        const f1 = add("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>"), f2 = add("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>"), kids = [];
-        pags.forEach(p => { const st = p.join("\n"), c = add(`<< /Length ${st.length} >>\nstream\n${st}\nendstream`);
-          kids.push(add(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${n(W)} ${n(H)}] /Resources << /Font << /F1 ${f1} 0 R /F2 ${f2} 0 R >> >> /Contents ${c} 0 R >>`)); });
-        objs[0] = "<< /Type /Catalog /Pages 2 0 R >>"; objs[1] = `<< /Type /Pages /Kids [${kids.map(k => k + " 0 R").join(" ")}] /Count ${kids.length} >>`;
-        let out = "%PDF-1.4\n%\xE2\xE3\xCF\xD3\n"; const off = []; objs.forEach((o, i) => { off.push(out.length); out += `${i + 1} 0 obj\n${o}\nendobj\n`; });
-        const xr = out.length; out += `xref\n0 ${objs.length + 1}\n0000000000 65535 f \n` + off.map(o => String(o).padStart(10, "0") + " 00000 n \n").join("") + `trailer\n<< /Size ${objs.length + 1} /Root 1 0 R >>\nstartxref\n${xr}\n%%EOF`;
-        const u = new Uint8Array(out.length); for (let i = 0; i < out.length; i++) u[i] = out.charCodeAt(i) & 255; return u; } };
-    return api.pagina(); }
-  const AZ = [11, 49, 70], GR = [91, 104, 116], SU = [238, 242, 245], M = 40;
-  const cabecera = (d, titulo, der1, der2) => { d.rect(0, 0, d.W, 74, AZ); d.texto(M, 36, "HWF", { sz: 24, b: 1, c: [255, 255, 255] }); d.texto(M, 54, "Distribuidora HWF Mascotas", { sz: 9, c: [207, 220, 229] });
-    d.texto(d.W - M, 32, titulo, { sz: 15, b: 1, c: [255, 255, 255], al: "r" }); if (der1) d.texto(d.W - M, 48, der1, { sz: 10, c: [255, 255, 255], al: "r" }); if (der2) d.texto(d.W - M, 61, der2, { sz: 9, c: [207, 220, 229], al: "r" }); d.y = 96; };
-  const pie = (d, txt) => { const t = d.paginas(); d._pies = d._pies || []; d._pies.push(() => 0); d.linea(M, d.H - 44, d.W - M, d.H - 44); d.texto(M, d.H - 30, txt, { sz: 8, c: GR }); d.texto(d.W - M, d.H - 30, "Página " + t, { sz: 8, c: GR, al: "r" }); };
-  const dd = s => { if (!s) return ""; const p = String(s).split("-"); return p.length === 3 ? `${p[2]}-${p[1]}-${p[0]}` : String(s); };
-  const pesos = v => "$" + Math.round(v).toLocaleString("es-CL"), limpio = s => String(s || "").replace(/[\\/:*?"<>|]/g, "").trim();
-  const avisa = m => { try { toast(m); } catch (e) {} };
-  function bajar(P) { const bl = new Blob([P.bytes], { type: "application/pdf" });
-    try { if (typeof NATIVO !== "undefined" && NATIVO && NATIVO.guardar) { NATIVO.guardar(toB64(P.bytes.buffer), P.nombre); return; } } catch (e) {}
-    const a = document.createElement("a"); a.href = URL.createObjectURL(bl); a.download = P.nombre; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 8000); avisa("PDF descargado. Revisa la carpeta Descargas."); }
-  async function enviar(P) { const f = new File([P.bytes], P.nombre, { type: "application/pdf" });
-    try { if (navigator.canShare && navigator.canShare({ files: [f] })) { await navigator.share({ files: [f], title: P.nombre.replace(/\.pdf$/, ""), text: P.msg }); return; } } catch (e) { if (e && e.name === "AbortError") return; }
-    bajar(P); avisa("Este equipo no permite compartir el archivo: quedó descargado para adjuntarlo."); }
-  function imprimir(P) { const url = URL.createObjectURL(new Blob([P.bytes], { type: "application/pdf" })), tactil = matchMedia("(pointer:coarse)").matches;
-    if (!tactil) { try { const fr = document.createElement("iframe"); fr.style.cssText = "position:fixed;right:0;bottom:0;width:1px;height:1px;border:0;opacity:0"; fr.src = url; document.body.appendChild(fr);
-        fr.onload = () => { try { fr.contentWindow.focus(); fr.contentWindow.print(); } catch (e) { window.open(url, "_blank"); } setTimeout(() => { fr.remove(); URL.revokeObjectURL(url); }, 120000); }; return; } catch (e) {} }
-    const w = window.open(url, "_blank"); if (!w) { bajar(P); avisa("Abre el PDF descargado y elige Imprimir."); } else avisa("Se abrió el PDF: usa el menú ⋮ → Imprimir."); setTimeout(() => URL.revokeObjectURL(url), 120000); }
-  function cuadro(titulo, P) { const v = document.querySelector(".pdfm"); if (v) v.remove(); const m = document.createElement("div"); m.className = "pdfm";
-    m.innerHTML = `<div class="c" role="dialog" aria-label="${esc(titulo)}"><h3>${esc(titulo)}</h3><div class="n">${esc(P.nombre)}</div><p>${P.paginas} ${P.paginas === 1 ? "página" : "páginas"} · ${Math.max(1, Math.round(P.bytes.length / 1024))} KB. «Enviar» abre las apps del teléfono (WhatsApp, correo…) con el PDF adjunto.</p>
-      <div class="b"><button type="button" data-a="x">Cerrar</button><button type="button" data-a="d">Descargar</button><button type="button" data-a="i">Imprimir</button><button type="button" class="pri" data-a="e">Enviar</button></div></div>`;
-    m.onclick = e => { const b = e.target.closest("[data-a]"); if (!b) { if (e.target === m) m.remove(); return; } const a = b.dataset.a; if (a === "x") m.remove(); else if (a === "d") bajar(P); else if (a === "i") imprimir(P); else enviar(P); };
-    document.body.appendChild(m); }
-  const num = (n, d) => (Number(n) || 0).toLocaleString("es-CL", { maximumFractionDigits: d || 0 }), item = i => Array.isArray(i) ? num(i[0], 1) + " × " + i[1] : String(i || "");
-  /* hoja de una ruta: paradas = [{cli, dir, comuna, tel, kg, monto, num, vend, items, estado}] */
-  function hoja(d, T, primera) { T = Object.assign({}, T, { fecha: dd(T.fecha) }); const PIE = "Hoja de ruta · " + T.veh + " · " + T.fecha; if (!primera) d.pagina(); cabecera(d, "Hoja de ruta", T.fecha, T.veh + (T.sub ? " · " + T.sub : "")); let y = d.y;
-    if (T.origen) { d.texto(M, y, "Salida: " + d.corta(T.origen, d.W - 2 * M - 40, 9), { sz: 9, c: GR }); y += 16; }
-    const kw = (d.W - 2 * M - (T.k.length - 1) * 8) / T.k.length; T.k.forEach(([a, b], i) => { const x = M + i * (kw + 8); d.rect(x, y, kw, 38, SU); d.texto(x + 8, y + 13, a, { sz: 6.5, b: 1, c: GR }); d.texto(x + 8, y + 29, d.corta(b, kw - 14, 12, 1), { sz: 12, b: 1 }); }); y += 52;
-    const X = { n: M + 6, cli: M + 30, kg: M + 344, mon: M + 410, tel: d.W - M - 4 }, wCli = 268;
-    const enc = () => { d.rect(M, y, d.W - 2 * M, 20, AZ); const o = { sz: 8, b: 1, c: [255, 255, 255] }; d.texto(X.n, y + 13, "N°", o); d.texto(X.cli, y + 13, "CLIENTE, DIRECCIÓN Y PRODUCTOS", o); d.texto(X.kg, y + 13, "KG", Object.assign({ al: "r" }, o)); d.texto(X.mon, y + 13, "MONTO NETO", Object.assign({ al: "r" }, o)); d.texto(X.tel, y + 13, "TELÉFONO", Object.assign({ al: "r" }, o)); y += 20; };
-    enc();
-    T.paradas.forEach((s, i) => { const dir = [s.dir, s.comuna].filter(Boolean).join(", "), ld = d.partir(dir || "Sin dirección", wCli, 8, 0).slice(0, 2), sub = [s.num ? "NP " + s.num : "", s.vend || ""].filter(Boolean).join(" · ");
-      const its = (s.items || []).map(item).filter(Boolean), li = []; its.forEach(t => d.partir(t, wCli - 8, 7.5, 0).slice(0, 2).forEach((l, j) => li.push((j ? "   " : "· ") + l))); const lit = li.slice(0, 14); if (li.length > 14) lit.push("· y " + (its.length - 13) + " productos más");
-      const h = 20 + ld.length * 10 + (sub ? 10 : 0) + lit.length * 9 + (s.estado ? 11 : 0) + 20;
-      if (y + h > d.H - 60) { pie(d, PIE); d.pagina(); cabecera(d, "Hoja de ruta", T.fecha, T.veh + (T.sub ? " · " + T.sub : "")); y = d.y; enc(); }
-      if (i % 2) d.rect(M, y, d.W - 2 * M, h, SU);
-      let yy = y + 14; d.texto(X.n, yy, String(s.ord || i + 1), { sz: 11, b: 1, c: AZ }); d.texto(X.cli, yy, d.corta(s.cli || "", wCli, 10, 1), { sz: 10, b: 1 });
-      d.texto(X.kg, yy, s.kg ? num(s.kg) : "—", { sz: 9, al: "r" }); d.texto(X.mon, yy, s.monto ? pesos(s.monto) : "—", { sz: 9, al: "r" }); d.texto(X.tel, yy, String(s.tel || ""), { sz: 9, al: "r" });
-      ld.forEach(l => { yy += 10; d.texto(X.cli, yy, l, { sz: 8, c: GR }); }); if (sub) { yy += 10; d.texto(X.cli, yy, d.corta(sub, wCli, 8), { sz: 8, c: GR }); }
-      lit.forEach(l => { yy += 9; d.texto(X.cli + 4, yy, l, { sz: 7.5 }); });
-      if (s.estado) { yy += 11; d.texto(X.cli, yy, d.corta(s.estado, d.W - 2 * M - 40, 8, 1), { sz: 8, b: 1, c: s.ok ? [28, 122, 78] : [180, 35, 24] }); }
-      d.linea(X.kg - 30, y + h - 9, d.W - M - 4, y + h - 9, [154, 168, 180], 0.5); d.texto(X.kg - 30, y + h - 2, "recibe (nombre, RUT y firma)", { sz: 6, c: GR }); y += h; });
-    d.linea(M, y, d.W - M, y, AZ, 1); const tk = T.paradas.reduce((t, s) => t + (Number(s.kg) || 0), 0), tm = T.paradas.reduce((t, s) => t + (Number(s.monto) || 0), 0);
-    if (y + 26 > d.H - 60) { pie(d, PIE); d.pagina(); cabecera(d, "Hoja de ruta", T.fecha, T.veh); y = d.y; }
-    d.texto(X.cli, y + 15, "Total " + T.paradas.length + " paradas", { sz: 9, b: 1 }); d.texto(X.kg, y + 15, num(tk), { sz: 9, b: 1, al: "r" }); d.texto(X.mon, y + 15, tm ? pesos(tm) : "—", { sz: 9, b: 1, al: "r" });
-    pie(d, PIE); }
-  const boton = (txt, id) => { const b = document.createElement("button"); b.type = "button"; b.className = "btn np"; if (id) b.id = id; b.textContent = txt; return b; };
-  const generar = (titulo, f) => { let P; try { P = f(); } catch (e) { avisa("No se pudo generar el PDF: " + (e && e.message || e)); return; } if (!P) { avisa("No hay paradas para el PDF."); return; } cuadro(titulo, P); };
-
-  if (!window.hwfPdfKit) window.hwfPdfKit = { Pdf, cabecera, pie, bajar, enviar, imprimir, AZ, GR, SU, M, pesos, limpio };   /* lo usa la Inteligencia de negocio (patch_bi) */
-  /* ---------- LOGÍSTICA ---------- */
-  if (typeof pintarResultado === "function" && typeof flota === "function") {
-    const rutasLog = () => { if (typeof RT === "undefined" || !RT || !RT.res) return []; const P = par(), hoyTxt = (() => { const x = new Date(); return x.getFullYear() + "-" + String(x.getMonth() + 1).padStart(2, "0") + "-" + String(x.getDate()).padStart(2, "0"); })(), fecha = lsGet("fecha", "") || ((document.getElementById("rFecha") || {}).value) || hoyTxt, L = [];
-      RT.res.usos.forEach(u => u.viajes.forEach((r, vi) => { const c = RT.carga(r), k = RT.len(r), h = RT.horas(r, u.v);
-        L.push({ veh: u.v.nombre, sub: u.viajes.length > 1 ? "vuelta " + (vi + 1) : "", fecha, origen: (P.origen && (P.origen.nombre || "")) || "", k: [["PARADAS", String(r.length)], ["RECORRIDO", num(k) + " km"], ["TIEMPO", num(h, 1) + " h"], ["CARGA", num(c.kg) + " kg"], ["OCUPACIÓN", num(c.kg / u.v.kg * 100) + " %"]],
-          paradas: r.map(x => { const s = RT.S[x]; return { cli: s.cli, dir: s.dir || "", comuna: (s.comuna || "") + (s.fuente === "comuna" ? " (ubicación aprox.)" : ""), tel: s.tel || "", kg: s.kg, monto: s.monto || 0, num: s.num || "", vend: s.vend || "", items: s.items || [] }; }) }); })); return L; };
-    const pdfLog = idx => { const L = rutasLog(), S = idx == null ? L : [L[idx]].filter(Boolean); if (!S.length) return null; const d = Pdf(); S.forEach((T, i) => hoja(d, T, i === 0));
-      return { bytes: d.bytes(), paginas: d.paginas(), nombre: `Rutas ${limpio(S[0].fecha)}${idx == null ? "" : " " + limpio(S[0].veh) + (S[0].sub ? " " + S[0].sub : "")}.pdf`.replace(/\s+/g, " "),
-        msg: idx == null ? `Hojas de ruta ${S[0].fecha}: ${S.length} ${S.length === 1 ? "ruta" : "rutas"}, ${S.reduce((t, x) => t + x.paradas.length, 0)} paradas.` : `Hoja de ruta ${S[0].veh} ${S[0].fecha}: ${S[0].paradas.length} paradas.` }; };
-    const poner = () => { try { const box = document.getElementById("rRes"); if (!box || typeof RT === "undefined" || !RT || !RT.res) return; const env = box.querySelector("#rEnv");
-        if (env && !box.querySelector("#rPdfTodas")) { const b = boton("📄 PDF de todas las rutas", "rPdfTodas"); env.parentNode.appendChild(b); b.onclick = () => generar("PDF de las rutas", () => pdfLog(null)); }
-        box.querySelectorAll(".card.rt").forEach((c, i) => { if (c.querySelector(".rPdf1")) return; const fila = [...c.querySelectorAll(".row")].pop(); if (!fila) return; const b = boton("📄 PDF"); b.classList.add("rPdf1"); fila.appendChild(b); b.onclick = () => generar("PDF de la ruta", () => pdfLog(i)); }); } catch (e) {} };
-    let tp = null; try { new MutationObserver(() => { clearTimeout(tp); tp = setTimeout(poner, 60); }).observe(document.body, { childList: true, subtree: true }); poner(); } catch (e) {}
-    window.hwfPdfLog = pdfLog;
-  }
-
-  /* ---------- HWF (Admin): PDF de la nota de pedido de la app que se está revisando ---------- */
-  if (typeof naPintar === "function" && document.getElementById("sheetIn")) {
-    const EST_N = { pen: "Por revisar", mod: "Modificada", apr: "Aprobada", rec: "Rechazada" };
-    const pdfNota = () => { if (typeof NAACT === "undefined" || !NAACT || !NAACT.p) return null; const p = NAACT.p, its = (NAACT.items || []).filter(x => x.q > 0), d = Pdf(), PIE = "Distribuidora HWF · nota de pedido de la app · " + (p.vend || "");
-      const fecha = typeof naFecha === "function" ? naFecha(p) : "", est = EST_N[typeof naEst === "function" ? naEst(p.num) : "pen"] || "", tcx = typeof tc === "function" ? tc : x => x;
-      cabecera(d, "Nota de pedido", "N° " + (p.num || ""), "Emisión " + fecha + (est ? " · " + est : ""));
-      const campos = [["Cliente", tcx(p.cliente)], ["RUT", p.rut], ["Giro", p.giro], ["Contacto", p.contacto], ["Teléfono", p.fono], ["Correo", p.mail], ["Dirección facturación", p.dir], ["Comuna / Ciudad", p.comuna],
-        ["Fecha de entrega", typeof naFISO === "function" ? naFISO(p.entrega) : p.entrega], ["Despacho", p.despacho], ["Dirección de entrega", p.dirEnt], ["Vendedor", p.vend + (p.cart && p.cart !== p.vend ? " (cartera " + p.cart + ")" : "")]];
-      const cw = (d.W - 2 * M - 16) / 2; let y = d.y;
-      for (let i = 0; i < campos.length; i += 2) { let alto = 0; [0, 1].forEach(k => { const f = campos[i + k]; if (!f) return; const x = M + k * (cw + 16); d.texto(x, y, f[0].toUpperCase(), { sz: 7, b: 1, c: GR });
-          const ls = d.partir(f[1] || "—", cw, 10, 0).slice(0, 2); ls.forEach((l, j) => d.texto(x, y + 12 + j * 12, d.corta(l, cw, 10), { sz: 10 })); alto = Math.max(alto, ls.length); }); y += 16 + alto * 12; }
-      y += 6; const X = { cod: M + 4, des: M + 62, can: M + 322, pre: M + 392, dsc: M + 436, val: d.W - M - 4 }, wDes = 222;
-      const enc = () => { d.rect(M, y, d.W - 2 * M, 20, AZ); const o = { sz: 8, b: 1, c: [255, 255, 255] }; d.texto(X.cod, y + 13, "CÓDIGO", o); d.texto(X.des, y + 13, "DESCRIPCIÓN", o); d.texto(X.can, y + 13, "CANT.", Object.assign({ al: "r" }, o));
-        d.texto(X.pre, y + 13, "PRECIO NETO", Object.assign({ al: "r" }, o)); d.texto(X.dsc, y + 13, "DESC.", Object.assign({ al: "r" }, o)); d.texto(X.val, y + 13, "VALOR NETO", Object.assign({ al: "r" }, o)); y += 20; };
-      enc(); let neto = 0, uni = 0;
-      its.forEach((x, i) => { const ls = d.partir(String(x.desc || "") + (x.promo ? " · " + x.promo : ""), wDes, 9, 0).slice(0, 3), h = 8 + ls.length * 11; neto += Number(x.v) || 0; uni += Number(x.q) || 0;
-        if (y + h > d.H - 60) { pie(d, PIE); d.pagina(); cabecera(d, "Nota de pedido", "N° " + (p.num || ""), tcx(p.cliente) || ""); y = d.y; enc(); }
-        if (i % 2) d.rect(M, y, d.W - 2 * M, h, SU);
-        d.texto(X.cod, y + 12, d.corta(x.cod, 54, 9), { sz: 9, c: GR }); ls.forEach((l, j) => d.texto(X.des, y + 12 + j * 11, l, { sz: 9 })); d.texto(X.can, y + 12, num(x.q), { sz: 9, al: "r" });
-        d.texto(X.pre, y + 12, x.pl ? pesos(x.pl) : x.pu ? pesos(x.pu) : "—", { sz: 9, al: "r" }); const ds = Number(x.dsc) || 0; d.texto(X.dsc, y + 12, ds ? num(ds <= 1 ? ds * 100 : ds, 1) + "%" : "—", { sz: 9, al: "r" });
-        d.texto(X.val, y + 12, x.v ? pesos(x.v) : "sin cargo", { sz: 9, b: 1, al: "r" }); y += h; });
-      if (!its.length) { d.texto(M + 4, y + 14, "Esta nota no trae el detalle de productos.", { sz: 9, c: GR }); y += 24; neto = Number(p.neto) || 0; }
-      d.linea(M, y, d.W - M, y, AZ, 1); y += 8; neto = Math.round(neto); const iva = Math.round(neto * 0.19), obs = d.partir(p.obs || "", d.W - 2 * M, 9, 0);
-      if (y + 86 + (p.obs ? 26 + obs.length * 11 : 0) > d.H - 60) { pie(d, PIE); d.pagina(); cabecera(d, "Nota de pedido", "N° " + (p.num || ""), tcx(p.cliente) || ""); y = d.y; }
-      const xt = d.W - M - 4, xl = d.W - M - 150; d.texto(M + 4, y + 12, its.length + " líneas · " + num(uni) + " unidades", { sz: 9, c: GR });
-      [["Neto", pesos(neto)], ["IVA 19%", pesos(iva)]].forEach(([a, b], i) => { d.texto(xl, y + 12 + i * 15, a, { sz: 10, c: GR }); d.texto(xt, y + 12 + i * 15, b, { sz: 10, al: "r" }); });
-      d.rect(xl - 8, y + 36, d.W - M - xl + 8, 24, AZ); d.texto(xl, y + 52, "TOTAL", { sz: 11, b: 1, c: [255, 255, 255] }); d.texto(xt, y + 52, pesos(neto + iva), { sz: 12, b: 1, c: [255, 255, 255], al: "r" }); y += 76;
-      if (p.obs) { d.texto(M, y, "OBSERVACIONES", { sz: 7, b: 1, c: GR }); obs.forEach((l, j) => d.texto(M, y + 13 + j * 11, l, { sz: 9 })); }
-      pie(d, PIE); return { bytes: d.bytes(), paginas: d.paginas(), nombre: `Nota de pedido ${limpio(p.num)} ${limpio(tcx(p.cliente) || "cliente")}.pdf`.replace(/\s+/g, " "), msg: `Nota de pedido ${p.num || ""} · ${tcx(p.cliente) || ""} · total ${pesos(neto + iva)} (neto ${pesos(neto)})` }; };
-    const poner = () => { try { const sh = document.getElementById("sheetIn"), acc = sh && sh.querySelector(".np-acc"); if (!acc || !sh.querySelector("#naApr") || sh.querySelector("#naPdf")) return;
-        const b = boton("📄 PDF de la nota (enviar o imprimir)", "naPdf"); b.style.cssText = "width:100%;margin:8px 0"; acc.parentNode.insertBefore(b, acc); b.onclick = () => generar("PDF de la nota de pedido", pdfNota); } catch (e) {} };
-    let ta = null; try { new MutationObserver(() => { clearTimeout(ta); ta = setTimeout(poner, 60); }).observe(document.getElementById("sheetIn"), { childList: true, subtree: true }); poner(); } catch (e) {}
-    window.hwfPdfNota = pdfNota;
-  }
-
-  /* ---------- CHOFER ---------- */
-  if (typeof misParadas === "function" && typeof estados === "function") {
-    const EST = { ok: "Entregado", parcial: "Entrega parcial", rech: "Rechazado", no: "No estaba" };
-    const pdfCho = () => { const X = misParadas(), E = typeof estados === "function" ? estados() : {}, P = (typeof perfil === "function" && perfil()) || {}; if (!X.paradas || !X.paradas.length) return null;
-      const hechas = X.paradas.filter(p => E[p.id]).length, f = (typeof hoy === "function" ? hoy() : ""), veh = typeof vehNom === "function" ? vehNom(P.veh) : String(P.veh || ""), d = Pdf();
-      hoja(d, { veh, sub: P.chofer || P.nombre || "", fecha: f, origen: (X.origen && X.origen.nombre) || "", k: [["PARADAS", String(X.paradas.length)], ["REGISTRADAS", hechas + " de " + X.paradas.length], ["RECORRIDO", num(X.km || 0) + " km"], ["CARGA", num(X.paradas.reduce((t, p) => t + (Number(p.kg) || 0), 0)) + " kg"]],
-        paradas: X.paradas.map(p => { const e = E[p.id]; return { ord: p.ord, cli: p.cli, dir: p.dir || "", comuna: p.comuna || "", tel: p.tel || "", kg: p.kg, monto: p.monto || 0, num: p.num || "", vend: p.vend || "", items: p.items || [],
-          estado: e ? [(EST[e.est] || e.est || ""), e.hora || "", e.pago || "", e.recibe ? "recibe " + e.recibe : "", e.obs || ""].filter(Boolean).join(" · ") : "", ok: e && e.est === "ok" }; }) }, true);
-      return { bytes: d.bytes(), paginas: d.paginas(), nombre: `Ruta ${limpio(f)} ${limpio(veh)}.pdf`.replace(/\s+/g, " "), msg: `Ruta ${veh} ${f}: ${hechas} de ${X.paradas.length} paradas registradas.` }; };
-    const poner = () => { try { ["s-ruta", "s-resumen"].forEach(id => { const s = document.getElementById(id); if (!s || s.querySelector(".cPdf")) return; let n = 0; try { n = misParadas().paradas.length; } catch (e) {} if (!n) return;
-        const cs = s.querySelectorAll(".card"), c = cs[cs.length - 1]; if (!c) return; const b = boton("📄 PDF de mi ruta (enviar o imprimir)"); b.classList.add("cPdf"); b.style.cssText = "width:100%;margin-top:10px"; c.appendChild(b); b.onclick = () => generar("PDF de mi ruta", pdfCho); }); } catch (e) {} };
-    let tc2 = null; try { new MutationObserver(() => { clearTimeout(tc2); tc2 = setTimeout(poner, 60); }).observe(document.body, { childList: true, subtree: true }); poner(); } catch (e) {}
-    window.hwfPdfCho = pdfCho;
-  }
-})();
-</script>
 <script>/* patch_kpipares: cuadros del Dashboard en pares */
 (function () {
   const res = document.getElementById("s-res"); if (!res || !window.hwfBi) return;
@@ -7891,6 +7738,237 @@ body.ia-izq #iaBtn{right:auto;left:14px}
   $q.addEventListener("input", () => { $q.style.height = "auto"; $q.style.height = Math.min(140, $q.scrollHeight) + "px"; });
   document.addEventListener("keydown", e => { if (e.key === "Escape" && pan.classList.contains("on")) cerrar(); });
   window.hwfAsistente = { contexto };   /* para pruebas */
+})();
+</script>
+<style>/* patch_pdf_log */
+.pdfm{position:fixed;inset:0;z-index:9000;background:rgba(11,49,70,.55);display:grid;place-items:end center;padding:12px}
+.pdfm .c{background:#fff;color:#0F1E29;border-radius:18px;padding:16px;width:100%;max-width:460px;display:grid;gap:10px;box-shadow:0 10px 40px rgba(0,0,0,.3)}
+.pdfm h3{margin:0;font-size:1.05rem}.pdfm p{margin:0;font-size:.84rem;color:#5B6874}.pdfm .n{font-weight:800;word-break:break-word}
+.pdfm .b{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.pdfm .b button{border:1px solid #C9D3DB;background:#fff;color:#0F1E29;border-radius:12px;padding:12px 8px;font:inherit;font-weight:800;cursor:pointer}
+.pdfm .b button.pri{background:#0B3146;border-color:#0B3146;color:#fff}
+@media print{.pdfm{display:none!important}}
+</style>
+<script>/* patch_pdf_log: PDF de rutas en LOGÍSTICA y CHOFER (enviar, imprimir, descargar) */
+(function () {
+  /* ---------- generador PDF mínimo: A4, Helvetica / Helvetica-Bold, texto, líneas y rectángulos ---------- */
+  const HW = [278,278,355,556,556,889,667,191,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,278,278,584,584,584,556,1015,667,667,722,722,667,611,778,722,278,500,667,556,833,722,778,667,778,722,667,611,722,667,944,667,667,611,278,278,278,469,556,333,556,556,500,556,556,278,556,556,222,222,500,222,833,556,556,556,556,333,500,278,556,500,722,500,500,500,334,260,334,584];
+  const MAPA = { 8211: 150, 8212: 151, 8216: 145, 8217: 146, 8220: 147, 8221: 148, 8226: 149, 8364: 128, 8230: 133, 8594: 45, 8250: 62, 8722: 45, 215: 120, 8804: 60, 8805: 62 };   /* − → - (para no perder el signo de los negativos) */
+  const cod = s => { const o = []; for (const ch of String(s == null ? "" : s)) { let c = ch.codePointAt(0); if (c > 255) c = MAPA[c] || 0; if (c >= 32) o.push(c); } return o; };
+  const ancho = (s, sz, b) => cod(s).reduce((t, c) => t + (c <= 126 ? HW[c - 32] : c === 237 || c === 205 || c === 236 ? 278 : c >= 192 && c <= 221 ? 690 : 556), 0) / 1000 * sz * (b ? 1.06 : 1);
+  function Pdf() { const W = 595.28, H = 841.89, pags = []; let ops = [];
+    const n = x => (Math.round(x * 100) / 100).toString(), col = c => c.map(v => n(v / 255)).join(" ");
+    const api = { W, H, y: 0,
+      pagina() { ops = []; pags.push(ops); api.y = 0; return api; },
+      rect(x, y, w, h, c) { ops.push(`${col(c)} rg ${n(x)} ${n(H - y - h)} ${n(w)} ${n(h)} re f`); return api; },
+      linea(x1, y1, x2, y2, c, g) { ops.push(`${col(c || [201, 211, 219])} RG ${n(g || 0.7)} w ${n(x1)} ${n(H - y1)} m ${n(x2)} ${n(H - y2)} l S`); return api; },
+      texto(x, y, s, o) { o = o || {}; const sz = o.sz || 10, b = !!o.b, w = ancho(s, sz, b), xx = o.al === "r" ? x - w : o.al === "c" ? x - w / 2 : x;
+        const t = cod(s).map(c => (c === 40 || c === 41 || c === 92 ? "\\" : "") + String.fromCharCode(c)).join("");
+        ops.push(`BT /F${b ? 2 : 1} ${n(sz)} Tf ${col(o.c || [15, 30, 41])} rg 1 0 0 1 ${n(xx)} ${n(H - y)} Tm (${t}) Tj ET`); return api; },
+      partir(s, max, sz, b) { const out = []; String(s == null ? "" : s).split(/\n/).forEach(par => { let l = ""; par.split(/\s+/).filter(Boolean).forEach(p => { const t = l ? l + " " + p : p;
+          if (ancho(t, sz, b) <= max || !l) l = t; else { out.push(l); l = p; } }); out.push(l); }); return out.filter((x, i) => x || i === 0); },
+      corta(s, max, sz, b) { s = String(s == null ? "" : s); if (ancho(s, sz, b) <= max) return s; while (s.length > 1 && ancho(s + "...", sz, b) > max) s = s.slice(0, -1); return s.trim() + "..."; },
+      paginas: () => pags.length,
+      bytes() { const objs = [], add = s => (objs.push(s), objs.length); add(""); add("");
+        const f1 = add("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>"), f2 = add("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>"), kids = [];
+        pags.forEach(p => { const st = p.join("\n"), c = add(`<< /Length ${st.length} >>\nstream\n${st}\nendstream`);
+          kids.push(add(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${n(W)} ${n(H)}] /Resources << /Font << /F1 ${f1} 0 R /F2 ${f2} 0 R >> >> /Contents ${c} 0 R >>`)); });
+        objs[0] = "<< /Type /Catalog /Pages 2 0 R >>"; objs[1] = `<< /Type /Pages /Kids [${kids.map(k => k + " 0 R").join(" ")}] /Count ${kids.length} >>`;
+        let out = "%PDF-1.4\n%\xE2\xE3\xCF\xD3\n"; const off = []; objs.forEach((o, i) => { off.push(out.length); out += `${i + 1} 0 obj\n${o}\nendobj\n`; });
+        const xr = out.length; out += `xref\n0 ${objs.length + 1}\n0000000000 65535 f \n` + off.map(o => String(o).padStart(10, "0") + " 00000 n \n").join("") + `trailer\n<< /Size ${objs.length + 1} /Root 1 0 R >>\nstartxref\n${xr}\n%%EOF`;
+        const u = new Uint8Array(out.length); for (let i = 0; i < out.length; i++) u[i] = out.charCodeAt(i) & 255; return u; } };
+    return api.pagina(); }
+  const AZ = [11, 49, 70], GR = [91, 104, 116], SU = [238, 242, 245], M = 40;
+  const cabecera = (d, titulo, der1, der2) => { d.rect(0, 0, d.W, 74, AZ); d.texto(M, 36, "HWF", { sz: 24, b: 1, c: [255, 255, 255] }); d.texto(M, 54, "Distribuidora HWF Mascotas", { sz: 9, c: [207, 220, 229] });
+    d.texto(d.W - M, 32, titulo, { sz: 15, b: 1, c: [255, 255, 255], al: "r" }); if (der1) d.texto(d.W - M, 48, der1, { sz: 10, c: [255, 255, 255], al: "r" }); if (der2) d.texto(d.W - M, 61, der2, { sz: 9, c: [207, 220, 229], al: "r" }); d.y = 96; };
+  const pie = (d, txt) => { const t = d.paginas(); d._pies = d._pies || []; d._pies.push(() => 0); d.linea(M, d.H - 44, d.W - M, d.H - 44); d.texto(M, d.H - 30, txt, { sz: 8, c: GR }); d.texto(d.W - M, d.H - 30, "Página " + t, { sz: 8, c: GR, al: "r" }); };
+  const dd = s => { if (!s) return ""; const p = String(s).split("-"); return p.length === 3 ? `${p[2]}-${p[1]}-${p[0]}` : String(s); };
+  const pesos = v => "$" + Math.round(v).toLocaleString("es-CL"), limpio = s => String(s || "").replace(/[\\/:*?"<>|]/g, "").trim();
+  const avisa = m => { try { toast(m); } catch (e) {} };
+  function bajar(P) { const bl = new Blob([P.bytes], { type: "application/pdf" });
+    try { if (typeof NATIVO !== "undefined" && NATIVO && NATIVO.guardar) { NATIVO.guardar(toB64(P.bytes.buffer), P.nombre); return; } } catch (e) {}
+    const a = document.createElement("a"); a.href = URL.createObjectURL(bl); a.download = P.nombre; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 8000); avisa("PDF descargado. Revisa la carpeta Descargas."); }
+  async function enviar(P) { const f = new File([P.bytes], P.nombre, { type: "application/pdf" });
+    try { if (navigator.canShare && navigator.canShare({ files: [f] })) { await navigator.share({ files: [f], title: P.nombre.replace(/\.pdf$/, ""), text: P.msg }); return; } } catch (e) { if (e && e.name === "AbortError") return; }
+    bajar(P); avisa("Este equipo no permite compartir el archivo: quedó descargado para adjuntarlo."); }
+  function imprimir(P) { const url = URL.createObjectURL(new Blob([P.bytes], { type: "application/pdf" })), tactil = matchMedia("(pointer:coarse)").matches;
+    if (!tactil) { try { const fr = document.createElement("iframe"); fr.style.cssText = "position:fixed;right:0;bottom:0;width:1px;height:1px;border:0;opacity:0"; fr.src = url; document.body.appendChild(fr);
+        fr.onload = () => { try { fr.contentWindow.focus(); fr.contentWindow.print(); } catch (e) { window.open(url, "_blank"); } setTimeout(() => { fr.remove(); URL.revokeObjectURL(url); }, 120000); }; return; } catch (e) {} }
+    const w = window.open(url, "_blank"); if (!w) { bajar(P); avisa("Abre el PDF descargado y elige Imprimir."); } else avisa("Se abrió el PDF: usa el menú ⋮ → Imprimir."); setTimeout(() => URL.revokeObjectURL(url), 120000); }
+  function cuadro(titulo, P) { const v = document.querySelector(".pdfm"); if (v) v.remove(); const m = document.createElement("div"); m.className = "pdfm";
+    m.innerHTML = `<div class="c" role="dialog" aria-label="${esc(titulo)}"><h3>${esc(titulo)}</h3><div class="n">${esc(P.nombre)}</div><p>${P.paginas} ${P.paginas === 1 ? "página" : "páginas"} · ${Math.max(1, Math.round(P.bytes.length / 1024))} KB. «Enviar» abre las apps del teléfono (WhatsApp, correo…) con el PDF adjunto.</p>
+      <div class="b"><button type="button" data-a="x">Cerrar</button><button type="button" data-a="d">Descargar</button><button type="button" data-a="i">Imprimir</button><button type="button" class="pri" data-a="e">Enviar</button></div></div>`;
+    m.onclick = e => { const b = e.target.closest("[data-a]"); if (!b) { if (e.target === m) m.remove(); return; } const a = b.dataset.a; if (a === "x") m.remove(); else if (a === "d") bajar(P); else if (a === "i") imprimir(P); else enviar(P); };
+    document.body.appendChild(m); }
+  const num = (n, d) => (Number(n) || 0).toLocaleString("es-CL", { maximumFractionDigits: d || 0 }), item = i => Array.isArray(i) ? num(i[0], 1) + " × " + i[1] : String(i || "");
+  /* hoja de una ruta: paradas = [{cli, dir, comuna, tel, kg, monto, num, vend, items, estado}] */
+  function hoja(d, T, primera) { T = Object.assign({}, T, { fecha: dd(T.fecha) }); const PIE = "Hoja de ruta · " + T.veh + " · " + T.fecha; if (!primera) d.pagina(); cabecera(d, "Hoja de ruta", T.fecha, T.veh + (T.sub ? " · " + T.sub : "")); let y = d.y;
+    if (T.origen) { d.texto(M, y, "Salida: " + d.corta(T.origen, d.W - 2 * M - 40, 9), { sz: 9, c: GR }); y += 16; }
+    const kw = (d.W - 2 * M - (T.k.length - 1) * 8) / T.k.length; T.k.forEach(([a, b], i) => { const x = M + i * (kw + 8); d.rect(x, y, kw, 38, SU); d.texto(x + 8, y + 13, a, { sz: 6.5, b: 1, c: GR }); d.texto(x + 8, y + 29, d.corta(b, kw - 14, 12, 1), { sz: 12, b: 1 }); }); y += 52;
+    const X = { n: M + 6, cli: M + 30, kg: M + 344, mon: M + 410, tel: d.W - M - 4 }, wCli = 268;
+    const enc = () => { d.rect(M, y, d.W - 2 * M, 20, AZ); const o = { sz: 8, b: 1, c: [255, 255, 255] }; d.texto(X.n, y + 13, "N°", o); d.texto(X.cli, y + 13, "CLIENTE, DIRECCIÓN Y PRODUCTOS", o); d.texto(X.kg, y + 13, "KG", Object.assign({ al: "r" }, o)); d.texto(X.mon, y + 13, "MONTO NETO", Object.assign({ al: "r" }, o)); d.texto(X.tel, y + 13, "TELÉFONO", Object.assign({ al: "r" }, o)); y += 20; };
+    enc();
+    T.paradas.forEach((s, i) => { const dir = [s.dir, s.comuna].filter(Boolean).join(", "), ld = d.partir(dir || "Sin dirección", wCli, 8, 0).slice(0, 2), sub = [s.num ? "NP " + s.num : "", s.vend || ""].filter(Boolean).join(" · ");
+      const its = (s.items || []).map(item).filter(Boolean), li = []; its.forEach(t => d.partir(t, wCli - 8, 7.5, 0).slice(0, 2).forEach((l, j) => li.push((j ? "   " : "· ") + l))); const lit = li.slice(0, 14); if (li.length > 14) lit.push("· y " + (its.length - 13) + " productos más");
+      const h = 20 + ld.length * 10 + (sub ? 10 : 0) + lit.length * 9 + (s.estado ? 11 : 0) + 20;
+      if (y + h > d.H - 60) { pie(d, PIE); d.pagina(); cabecera(d, "Hoja de ruta", T.fecha, T.veh + (T.sub ? " · " + T.sub : "")); y = d.y; enc(); }
+      if (i % 2) d.rect(M, y, d.W - 2 * M, h, SU);
+      let yy = y + 14; d.texto(X.n, yy, String(s.ord || i + 1), { sz: 11, b: 1, c: AZ }); d.texto(X.cli, yy, d.corta(s.cli || "", wCli, 10, 1), { sz: 10, b: 1 });
+      d.texto(X.kg, yy, s.kg ? num(s.kg) : "—", { sz: 9, al: "r" }); d.texto(X.mon, yy, s.monto ? pesos(s.monto) : "—", { sz: 9, al: "r" }); d.texto(X.tel, yy, String(s.tel || ""), { sz: 9, al: "r" });
+      ld.forEach(l => { yy += 10; d.texto(X.cli, yy, l, { sz: 8, c: GR }); }); if (sub) { yy += 10; d.texto(X.cli, yy, d.corta(sub, wCli, 8), { sz: 8, c: GR }); }
+      lit.forEach(l => { yy += 9; d.texto(X.cli + 4, yy, l, { sz: 7.5 }); });
+      if (s.estado) { yy += 11; d.texto(X.cli, yy, d.corta(s.estado, d.W - 2 * M - 40, 8, 1), { sz: 8, b: 1, c: s.ok ? [28, 122, 78] : [180, 35, 24] }); }
+      d.linea(X.kg - 30, y + h - 9, d.W - M - 4, y + h - 9, [154, 168, 180], 0.5); d.texto(X.kg - 30, y + h - 2, "recibe (nombre, RUT y firma)", { sz: 6, c: GR }); y += h; });
+    d.linea(M, y, d.W - M, y, AZ, 1); const tk = T.paradas.reduce((t, s) => t + (Number(s.kg) || 0), 0), tm = T.paradas.reduce((t, s) => t + (Number(s.monto) || 0), 0);
+    if (y + 26 > d.H - 60) { pie(d, PIE); d.pagina(); cabecera(d, "Hoja de ruta", T.fecha, T.veh); y = d.y; }
+    d.texto(X.cli, y + 15, "Total " + T.paradas.length + " paradas", { sz: 9, b: 1 }); d.texto(X.kg, y + 15, num(tk), { sz: 9, b: 1, al: "r" }); d.texto(X.mon, y + 15, tm ? pesos(tm) : "—", { sz: 9, b: 1, al: "r" });
+    pie(d, PIE); }
+  const boton = (txt, id) => { const b = document.createElement("button"); b.type = "button"; b.className = "btn np"; if (id) b.id = id; b.textContent = txt; return b; };
+  const generar = (titulo, f) => { let P; try { P = f(); } catch (e) { avisa("No se pudo generar el PDF: " + (e && e.message || e)); return; } if (!P) { avisa("No hay paradas para el PDF."); return; } cuadro(titulo, P); };
+
+  if (!window.hwfPdfKit) window.hwfPdfKit = { Pdf, cabecera, pie, bajar, enviar, imprimir, AZ, GR, SU, M, pesos, limpio };   /* lo usa la Inteligencia de negocio (patch_bi) */
+  /* ---------- LOGÍSTICA ---------- */
+  if (typeof pintarResultado === "function" && typeof flota === "function") {
+    const rutasLog = () => { if (typeof RT === "undefined" || !RT || !RT.res) return []; const P = par(), hoyTxt = (() => { const x = new Date(); return x.getFullYear() + "-" + String(x.getMonth() + 1).padStart(2, "0") + "-" + String(x.getDate()).padStart(2, "0"); })(), fecha = lsGet("fecha", "") || ((document.getElementById("rFecha") || {}).value) || hoyTxt, L = [];
+      RT.res.usos.forEach(u => u.viajes.forEach((r, vi) => { const c = RT.carga(r), k = RT.len(r), h = RT.horas(r, u.v);
+        L.push({ veh: u.v.nombre, sub: u.viajes.length > 1 ? "vuelta " + (vi + 1) : "", fecha, origen: (P.origen && (P.origen.nombre || "")) || "", k: [["PARADAS", String(r.length)], ["RECORRIDO", num(k) + " km"], ["TIEMPO", num(h, 1) + " h"], ["CARGA", num(c.kg) + " kg"], ["OCUPACIÓN", num(c.kg / u.v.kg * 100) + " %"]],
+          paradas: r.map(x => { const s = RT.S[x]; return { cli: s.cli, dir: s.dir || "", comuna: (s.comuna || "") + (s.fuente === "comuna" ? " (ubicación aprox.)" : ""), tel: s.tel || "", kg: s.kg, monto: s.monto || 0, num: s.num || "", vend: s.vend || "", items: s.items || [] }; }) }); })); return L; };
+    const pdfLog = idx => { const L = rutasLog(), S = idx == null ? L : [L[idx]].filter(Boolean); if (!S.length) return null; const d = Pdf(); S.forEach((T, i) => hoja(d, T, i === 0));
+      return { bytes: d.bytes(), paginas: d.paginas(), nombre: `Rutas ${limpio(S[0].fecha)}${idx == null ? "" : " " + limpio(S[0].veh) + (S[0].sub ? " " + S[0].sub : "")}.pdf`.replace(/\s+/g, " "),
+        msg: idx == null ? `Hojas de ruta ${S[0].fecha}: ${S.length} ${S.length === 1 ? "ruta" : "rutas"}, ${S.reduce((t, x) => t + x.paradas.length, 0)} paradas.` : `Hoja de ruta ${S[0].veh} ${S[0].fecha}: ${S[0].paradas.length} paradas.` }; };
+    const poner = () => { try { const box = document.getElementById("rRes"); if (!box || typeof RT === "undefined" || !RT || !RT.res) return; const env = box.querySelector("#rEnv");
+        if (env && !box.querySelector("#rPdfTodas")) { const b = boton("📄 PDF de todas las rutas", "rPdfTodas"); env.parentNode.appendChild(b); b.onclick = () => generar("PDF de las rutas", () => pdfLog(null)); }
+        box.querySelectorAll(".card.rt").forEach((c, i) => { if (c.querySelector(".rPdf1")) return; const fila = [...c.querySelectorAll(".row")].pop(); if (!fila) return; const b = boton("📄 PDF"); b.classList.add("rPdf1"); fila.appendChild(b); b.onclick = () => generar("PDF de la ruta", () => pdfLog(i)); }); } catch (e) {} };
+    let tp = null; try { new MutationObserver(() => { clearTimeout(tp); tp = setTimeout(poner, 60); }).observe(document.body, { childList: true, subtree: true }); poner(); } catch (e) {}
+    window.hwfPdfLog = pdfLog;
+  }
+
+  /* ---------- HWF (Admin): PDF de la nota de pedido de la app que se está revisando ---------- */
+  if (typeof naPintar === "function" && document.getElementById("sheetIn")) {
+    const EST_N = { pen: "Por revisar", mod: "Modificada", apr: "Aprobada", rec: "Rechazada" };
+    const notaEn = (d, p, its) => { const PIE = "Distribuidora HWF · nota de pedido de la app · " + (p.vend || "");
+      const fecha = typeof naFecha === "function" ? naFecha(p) : "", est = EST_N[typeof naEst === "function" ? naEst(p.num) : "pen"] || "", tcx = typeof tc === "function" ? tc : x => x;
+      cabecera(d, "Nota de pedido", "N° " + (p.num || ""), "Emisión " + fecha + (est ? " · " + est : ""));
+      const campos = [["Cliente", tcx(p.cliente)], ["RUT", p.rut], ["Giro", p.giro], ["Contacto", p.contacto], ["Teléfono", p.fono], ["Correo", p.mail], ["Dirección facturación", p.dir], ["Comuna / Ciudad", p.comuna],
+        ["Fecha de entrega", typeof naFISO === "function" ? naFISO(p.entrega) : p.entrega], ["Despacho", p.despacho], ["Dirección de entrega", p.dirEnt], ["Vendedor", p.vend + (p.cart && p.cart !== p.vend ? " (cartera " + p.cart + ")" : "")]];
+      const cw = (d.W - 2 * M - 16) / 2; let y = d.y;
+      for (let i = 0; i < campos.length; i += 2) { let alto = 0; [0, 1].forEach(k => { const f = campos[i + k]; if (!f) return; const x = M + k * (cw + 16); d.texto(x, y, f[0].toUpperCase(), { sz: 7, b: 1, c: GR });
+          const ls = d.partir(f[1] || "—", cw, 10, 0).slice(0, 2); ls.forEach((l, j) => d.texto(x, y + 12 + j * 12, d.corta(l, cw, 10), { sz: 10 })); alto = Math.max(alto, ls.length); }); y += 16 + alto * 12; }
+      y += 6; const X = { cod: M + 4, des: M + 62, can: M + 322, pre: M + 392, dsc: M + 436, val: d.W - M - 4 }, wDes = 222;
+      const enc = () => { d.rect(M, y, d.W - 2 * M, 20, AZ); const o = { sz: 8, b: 1, c: [255, 255, 255] }; d.texto(X.cod, y + 13, "CÓDIGO", o); d.texto(X.des, y + 13, "DESCRIPCIÓN", o); d.texto(X.can, y + 13, "CANT.", Object.assign({ al: "r" }, o));
+        d.texto(X.pre, y + 13, "PRECIO NETO", Object.assign({ al: "r" }, o)); d.texto(X.dsc, y + 13, "DESC.", Object.assign({ al: "r" }, o)); d.texto(X.val, y + 13, "VALOR NETO", Object.assign({ al: "r" }, o)); y += 20; };
+      enc(); let neto = 0, uni = 0;
+      its.forEach((x, i) => { const ls = d.partir(String(x.desc || "") + (x.promo ? " · " + x.promo : ""), wDes, 9, 0).slice(0, 3), h = 8 + ls.length * 11; neto += Number(x.v) || 0; uni += Number(x.q) || 0;
+        if (y + h > d.H - 60) { pie(d, PIE); d.pagina(); cabecera(d, "Nota de pedido", "N° " + (p.num || ""), tcx(p.cliente) || ""); y = d.y; enc(); }
+        if (i % 2) d.rect(M, y, d.W - 2 * M, h, SU);
+        d.texto(X.cod, y + 12, d.corta(x.cod, 54, 9), { sz: 9, c: GR }); ls.forEach((l, j) => d.texto(X.des, y + 12 + j * 11, l, { sz: 9 })); d.texto(X.can, y + 12, num(x.q), { sz: 9, al: "r" });
+        d.texto(X.pre, y + 12, x.pl ? pesos(x.pl) : x.pu ? pesos(x.pu) : "—", { sz: 9, al: "r" }); const ds = Number(x.dsc) || 0; d.texto(X.dsc, y + 12, ds ? num(ds <= 1 ? ds * 100 : ds, 1) + "%" : "—", { sz: 9, al: "r" });
+        d.texto(X.val, y + 12, x.v ? pesos(x.v) : "sin cargo", { sz: 9, b: 1, al: "r" }); y += h; });
+      if (!its.length) { d.texto(M + 4, y + 14, "Esta nota no trae el detalle de productos.", { sz: 9, c: GR }); y += 24; neto = Number(p.neto) || 0; }
+      d.linea(M, y, d.W - M, y, AZ, 1); y += 8; neto = Math.round(neto); const iva = Math.round(neto * 0.19), obs = d.partir(p.obs || "", d.W - 2 * M, 9, 0);
+      if (y + 86 + (p.obs ? 26 + obs.length * 11 : 0) > d.H - 60) { pie(d, PIE); d.pagina(); cabecera(d, "Nota de pedido", "N° " + (p.num || ""), tcx(p.cliente) || ""); y = d.y; }
+      const xt = d.W - M - 4, xl = d.W - M - 150; d.texto(M + 4, y + 12, its.length + " líneas · " + num(uni) + " unidades", { sz: 9, c: GR });
+      [["Neto", pesos(neto)], ["IVA 19%", pesos(iva)]].forEach(([a, b], i) => { d.texto(xl, y + 12 + i * 15, a, { sz: 10, c: GR }); d.texto(xt, y + 12 + i * 15, b, { sz: 10, al: "r" }); });
+      d.rect(xl - 8, y + 36, d.W - M - xl + 8, 24, AZ); d.texto(xl, y + 52, "TOTAL", { sz: 11, b: 1, c: [255, 255, 255] }); d.texto(xt, y + 52, pesos(neto + iva), { sz: 12, b: 1, c: [255, 255, 255], al: "r" }); y += 76;
+      if (p.obs) { d.texto(M, y, "OBSERVACIONES", { sz: 7, b: 1, c: GR }); obs.forEach((l, j) => d.texto(M, y + 13 + j * 11, l, { sz: 9 })); }
+      pie(d, PIE); return { neto, iva }; };
+    const tcN = x => typeof tc === "function" ? tc(x) : x;
+    const pdfNota = () => { if (typeof NAACT === "undefined" || !NAACT || !NAACT.p) return null; const p = NAACT.p, d = Pdf(), r = notaEn(d, p, (NAACT.items || []).filter(x => x.q > 0));
+      return { bytes: d.bytes(), paginas: d.paginas(), nombre: `Nota de pedido ${limpio(p.num)} ${limpio(tcN(p.cliente) || "cliente")}.pdf`.replace(/\s+/g, " "), msg: `Nota de pedido ${p.num || ""} · ${tcN(p.cliente) || ""} · total ${pesos(r.neto + r.iva)} (neto ${pesos(r.neto)})` }; };
+    /* varias notas en un PDF, una por página (16-11-2026: Admin → «PDF o correo» con selección) */
+    const pdfNotas = nums => { const L = (nums || []).map(n => (typeof IMP !== "undefined" && IMP.pedidos || []).find(p => String(p.num) === String(n))).filter(Boolean); if (!L.length) return null;
+      const d = Pdf(); let tn = 0, ti = 0; L.forEach((p, i) => { if (i) d.pagina(); const its = (typeof naItems === "function" ? naItems(p) : (p.items || [])).filter(x => x.q > 0); const r = notaEn(d, p, its); tn += r.neto; ti += r.iva; });
+      const hoy = new Date(), f = String(hoy.getDate()).padStart(2, "0") + "-" + String(hoy.getMonth() + 1).padStart(2, "0") + "-" + hoy.getFullYear();
+      if (L.length === 1) { const p = L[0]; return { bytes: d.bytes(), paginas: d.paginas(), nombre: `Nota de pedido ${limpio(p.num)} ${limpio(tcN(p.cliente) || "cliente")}.pdf`.replace(/\s+/g, " "), msg: `Nota de pedido ${p.num || ""} · ${tcN(p.cliente) || ""} · total ${pesos(tn + ti)} (neto ${pesos(tn)})` }; }
+      return { bytes: d.bytes(), paginas: d.paginas(), nombre: `Notas de pedido (${L.length}) ${f}.pdf`, msg: `${L.length} notas de pedido: ` + L.map(p => "N° " + p.num + " " + tcN(p.cliente)).join(", ").slice(0, 600) + ` · total ${pesos(tn + ti)} (neto ${pesos(tn)})` }; };
+    window.hwfPdfNotas = nums => generar("PDF de " + (nums.length === 1 ? "la nota de pedido" : nums.length + " notas de pedido"), () => pdfNotas(nums));
+    const poner = () => { try { const sh = document.getElementById("sheetIn"), acc = sh && sh.querySelector(".np-acc"); if (!acc || !sh.querySelector("#naApr") || sh.querySelector("#naPdf")) return;
+        const b = boton("📄 PDF de la nota (enviar o imprimir)", "naPdf"); b.style.cssText = "width:100%;margin:8px 0"; acc.parentNode.insertBefore(b, acc); b.onclick = () => generar("PDF de la nota de pedido", pdfNota); } catch (e) {} };
+    let ta = null; try { new MutationObserver(() => { clearTimeout(ta); ta = setTimeout(poner, 60); }).observe(document.getElementById("sheetIn"), { childList: true, subtree: true }); poner(); } catch (e) {}
+    window.hwfPdfNota = pdfNota;
+  }
+
+  /* ---------- CHOFER ---------- */
+  if (typeof misParadas === "function" && typeof estados === "function") {
+    const EST = { ok: "Entregado", parcial: "Entrega parcial", rech: "Rechazado", no: "No estaba" };
+    const pdfCho = () => { const X = misParadas(), E = typeof estados === "function" ? estados() : {}, P = (typeof perfil === "function" && perfil()) || {}; if (!X.paradas || !X.paradas.length) return null;
+      const hechas = X.paradas.filter(p => E[p.id]).length, f = (typeof hoy === "function" ? hoy() : ""), veh = typeof vehNom === "function" ? vehNom(P.veh) : String(P.veh || ""), d = Pdf();
+      hoja(d, { veh, sub: P.chofer || P.nombre || "", fecha: f, origen: (X.origen && X.origen.nombre) || "", k: [["PARADAS", String(X.paradas.length)], ["REGISTRADAS", hechas + " de " + X.paradas.length], ["RECORRIDO", num(X.km || 0) + " km"], ["CARGA", num(X.paradas.reduce((t, p) => t + (Number(p.kg) || 0), 0)) + " kg"]],
+        paradas: X.paradas.map(p => { const e = E[p.id]; return { ord: p.ord, cli: p.cli, dir: p.dir || "", comuna: p.comuna || "", tel: p.tel || "", kg: p.kg, monto: p.monto || 0, num: p.num || "", vend: p.vend || "", items: p.items || [],
+          estado: e ? [(EST[e.est] || e.est || ""), e.hora || "", e.pago || "", e.recibe ? "recibe " + e.recibe : "", e.obs || ""].filter(Boolean).join(" · ") : "", ok: e && e.est === "ok" }; }) }, true);
+      return { bytes: d.bytes(), paginas: d.paginas(), nombre: `Ruta ${limpio(f)} ${limpio(veh)}.pdf`.replace(/\s+/g, " "), msg: `Ruta ${veh} ${f}: ${hechas} de ${X.paradas.length} paradas registradas.` }; };
+    const poner = () => { try { ["s-ruta", "s-resumen"].forEach(id => { const s = document.getElementById(id); if (!s || s.querySelector(".cPdf")) return; let n = 0; try { n = misParadas().paradas.length; } catch (e) {} if (!n) return;
+        const cs = s.querySelectorAll(".card"), c = cs[cs.length - 1]; if (!c) return; const b = boton("📄 PDF de mi ruta (enviar o imprimir)"); b.classList.add("cPdf"); b.style.cssText = "width:100%;margin-top:10px"; c.appendChild(b); b.onclick = () => generar("PDF de mi ruta", pdfCho); }); } catch (e) {} };
+    let tc2 = null; try { new MutationObserver(() => { clearTimeout(tc2); tc2 = setTimeout(poner, 60); }).observe(document.body, { childList: true, subtree: true }); poner(); } catch (e) {}
+    window.hwfPdfCho = pdfCho;
+  }
+})();
+</script>
+<style>/* patch_iaflotante */
+#iaBtn{background:#0B3146!important;border:2px solid #80C6C9!important;box-shadow:0 4px 14px rgba(11,49,70,.35)!important;width:50px!important;height:50px!important;
+  touch-action:none;user-select:none;-webkit-user-select:none;transition:transform .2s ease,opacity .2s ease,box-shadow .2s ease;opacity:.92}
+#iaBtn svg{width:27px!important;height:27px!important}#iaBtn svg *{fill:#fff}
+#iaBtn.ia-fl{right:auto!important;bottom:auto!important}
+#iaBtn.ia-mov{transition:none;transform:scale(1.08);opacity:1;box-shadow:0 10px 26px rgba(11,49,70,.45)!important}
+#iaBtn.ia-sc{transform:scale(.78);opacity:.38}
+#iaBtn:hover{opacity:1}
+.ia-h{background:#0B3146!important;border-bottom:3px solid #80C6C9}
+.ia-u{background:#0B3146!important}.ia-f button{background:#0B3146!important}.ia-f button:hover{background:#164560!important}
+.ia-s button{border-color:#80C6C9!important}
+</style>
+<script>/* patch_iaflotante: arrastrar y ocultar al desplazar */
+(function ini(n) {
+  const b = document.getElementById("iaBtn"); if (!b) { if ((n || 0) < 40) setTimeout(() => ini((n || 0) + 1), 250); return; } if (b.dataset.fl) return; b.dataset.fl = "1";
+  const K = "hwf-ia-pos:" + location.pathname.split("/").filter(Boolean).slice(-1)[0];
+  const M = 10, tam = () => b.offsetWidth || 50, alto = () => window.innerHeight, ancho = () => document.documentElement.clientWidth;
+  const poner = (x, y) => { const s = tam(); x = Math.min(Math.max(M, x), ancho() - s - M); y = Math.min(Math.max(70, y), alto() - s - 80);
+    b.classList.add("ia-fl"); b.style.left = x + "px"; b.style.top = y + "px"; };
+  const pegar = () => { const s = tam(), x = parseFloat(b.style.left) || 0, der = x + s / 2 > ancho() / 2; poner(der ? ancho() - s - M : M, parseFloat(b.style.top) || 0); return der; };
+  try { const p = JSON.parse(localStorage.getItem(K) || "null"); if (p) { poner(p.der ? ancho() : 0, p.y * alto()); pegar(); } } catch (e) {}
+  let ini = null, movido = false;
+  b.addEventListener("pointerdown", e => { const r = b.getBoundingClientRect(); ini = { x: e.clientX, y: e.clientY, dx: e.clientX - r.left, dy: e.clientY - r.top }; movido = false; try { b.setPointerCapture(e.pointerId); } catch (x) {} });
+  b.addEventListener("pointermove", e => { if (!ini) return; if (!movido && Math.hypot(e.clientX - ini.x, e.clientY - ini.y) < 7) return; movido = true; b.classList.add("ia-mov"); poner(e.clientX - ini.dx, e.clientY - ini.dy); });
+  const soltar = () => { if (!ini) return; ini = null; b.classList.remove("ia-mov"); if (!movido) return;
+    const der = pegar(); try { localStorage.setItem(K, JSON.stringify({ der, y: (parseFloat(b.style.top) || 0) / alto() })); } catch (e) {} };
+  b.addEventListener("pointerup", soltar); b.addEventListener("pointercancel", soltar);
+  b.addEventListener("click", e => { if (movido) { e.stopImmediatePropagation(); e.preventDefault(); movido = false; } }, true);
+  addEventListener("resize", () => { if (b.classList.contains("ia-fl")) pegar(); });
+  let t = 0; addEventListener("scroll", () => { b.classList.add("ia-sc"); clearTimeout(t); t = setTimeout(() => b.classList.remove("ia-sc"), 450); }, { passive: true });
+})();
+</script>
+<style>/* patch_napp_sel */
+.ns-oculto{display:none!important}
+.ns-bar{position:sticky;top:8px;z-index:50;display:flex;flex-wrap:wrap;align-items:center;gap:8px;background:#0B3146;color:#fff;border-radius:14px;padding:10px 12px;margin:0 0 10px;box-shadow:0 6px 18px rgba(11,49,70,.3)}
+.ns-bar b{flex:1 1 140px;font-size:.92rem}.ns-bar button{border:0;border-radius:10px;padding:9px 12px;font:inherit;font-weight:800;cursor:pointer;background:rgba(255,255,255,.14);color:#fff}
+.ns-bar .ns-go{background:#80C6C9;color:#0B3146}.ns-bar .ns-go:disabled{opacity:.5;cursor:default}
+body.ns-on [data-na]{position:relative;padding-left:44px!important}
+body.ns-on [data-na]::before{content:"";position:absolute;left:12px;top:50%;width:22px;height:22px;margin-top:-11px;border-radius:7px;border:2px solid #9AA8B4;background:#fff}
+body.ns-on [data-na].ns-sel::before{border-color:#0B3146;background:#0B3146 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5 12.5l4.2 4.2L19 7' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/16px no-repeat}
+body.ns-on [data-na].ns-sel{outline:2px solid #80C6C9;outline-offset:-2px}
+</style>
+<script>/* patch_napp_sel: un botón PDF/correo con selección de notas */
+(function () {
+  if (typeof naLista !== "function") return;
+  const sel = new Set(); let on = false;
+  const visibles = () => [...document.querySelectorAll("[data-na]")].filter(b => b.offsetParent);
+  function barra() { let b = document.getElementById("nsBar"); if (!on) { if (b) b.remove(); document.body.classList.remove("ns-on"); return; }
+    document.body.classList.add("ns-on"); const pri = visibles()[0]; if (!pri) return;
+    if (!b) { b = document.createElement("div"); b.id = "nsBar"; b.className = "ns-bar"; const cont = pri.closest(".card") || pri.parentNode; cont.parentNode.insertBefore(b, cont); }
+    const html = `<b>${sel.size ? sel.size + (sel.size === 1 ? " nota elegida" : " notas elegidas") : "Toca las notas que quieres"}</b><button type="button" id="nsTodas">${visibles().every(x => sel.has(x.dataset.na)) && sel.size ? "Ninguna" : "Todas las de la vista"}</button><button type="button" class="ns-go" id="nsGo" ${sel.size ? "" : "disabled"}>📄 Generar PDF</button><button type="button" id="nsX" aria-label="Cancelar">✕</button>`;
+    if (b.dataset.h === html) return; b.dataset.h = html; b.innerHTML = html;
+    b.querySelector("#nsTodas").onclick = () => { const v = visibles(); if (v.every(x => sel.has(x.dataset.na)) && sel.size) sel.clear(); else v.forEach(x => sel.add(x.dataset.na)); marcar(); };
+    b.querySelector("#nsX").onclick = () => { on = false; sel.clear(); marcar(); };
+    b.querySelector("#nsGo").onclick = () => { if (!sel.size) return; if (typeof window.hwfPdfNotas !== "function") { (typeof toast === "function" ? toast : alert)("El generador de PDF no está disponible."); return; }
+      const orden = visibles().map(x => x.dataset.na).filter(n => sel.has(n)); [...sel].forEach(n => { if (!orden.includes(n)) orden.push(n); }); window.hwfPdfNotas(orden); }; }
+  function marcar() { document.querySelectorAll("[data-na]").forEach(b => b.classList.toggle("ns-sel", on && sel.has(b.dataset.na))); barra(); }
+  document.addEventListener("click", e => { if (!on) return; const b = e.target.closest("[data-na]"); if (!b) return; e.preventDefault(); e.stopPropagation(); const n = b.dataset.na; if (sel.has(n)) sel.delete(n); else sel.add(n); marcar(); }, true);
+  function ajustar() { const imp = document.getElementById("naImp"), xls = document.getElementById("naXls"), drv = document.getElementById("naDrv");
+    if (!imp && !xls) { if (on) marcar(); return; } const top = (imp || xls).parentNode;
+    [imp, xls].forEach(x => x && x.classList.add("ns-oculto")); if (drv) { const l = drv.closest("label"); if (l) l.classList.add("ns-oculto"); }
+    if (!top.querySelector("#nsBtn")) { const b = document.createElement("button"); b.type = "button"; b.className = "btn"; b.id = "nsBtn"; b.textContent = "📄 PDF o correo"; top.appendChild(b);
+      b.onclick = () => { on = true; sel.clear(); marcar(); const x = document.getElementById("nsBar"); if (x) x.scrollIntoView({ block: "nearest", behavior: "smooth" }); }; }
+    if (on) marcar(); }
+  let t = 0; new MutationObserver(() => { clearTimeout(t); t = setTimeout(ajustar, 50); }).observe(document.body, { childList: true, subtree: true }); ajustar();
+  addEventListener("keydown", e => { if (e.key === "Escape" && on) { on = false; sel.clear(); marcar(); } });
 })();
 </script>
 </body>
