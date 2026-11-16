@@ -7213,7 +7213,7 @@ function confirmarNota() {
   x.onclick = () => cerrarModal(); card.insertBefore(x, card.firstChild); })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261116013035";
+const HWF_VER = "20261116014052";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -9898,6 +9898,149 @@ body.m-b2b #crmMeta{display:none!important}
     setTimeout(sonda, 4000); setInterval(sonda, 300000); document.addEventListener("visibilitychange", () => { if (!document.hidden && Date.now() - ST.t > 120000) sonda(); });
   }
   montar();
+})();
+</script>
+<style>/* patch_mailing */
+.ml{display:grid;gap:12px}.ml-c{background:var(--card,#fff);border:1px solid var(--line,#DDE3E8);border-radius:14px;padding:14px}
+.ml h3{margin:0 0 8px;font-size:1rem;color:#0B3146}.ml small,.ml .ml-m{color:var(--muted,#5B6874)}
+.ml-bt{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.ml-b{border:1px solid #0B3146;background:#fff;color:#0B3146;border-radius:10px;padding:9px 12px;font:inherit;font-weight:800;cursor:pointer}
+.ml-b.pri{background:#0B3146;color:#fff}.ml-b.ok{background:#1C7A4E;border-color:#1C7A4E;color:#fff}.ml-b.no{border-color:#B42318;color:#B42318}.ml-b:disabled{opacity:.5;cursor:default}
+.ml label{display:grid;gap:4px;font-size:.78rem;font-weight:700;color:var(--muted,#5B6874)}
+.ml input[type=text],.ml input[type=email],.ml input[type=number],.ml input[type=datetime-local],.ml textarea,.ml select{font:inherit;font-weight:400;color:var(--ink,#0F1E29);padding:9px;border:1px solid var(--line,#DDE3E8);border-radius:10px;background:#fff;min-width:0;width:100%;box-sizing:border-box}
+.ml textarea{min-height:130px;resize:vertical}.ml-g{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}@media(max-width:600px){.ml-g{grid-template-columns:1fr}}
+.ml-ck{display:flex;flex-wrap:wrap;gap:6px 14px}.ml-ck label{display:flex;gap:6px;align-items:center;font-weight:600;color:var(--ink,#0F1E29);font-size:.88rem}
+.ml-n{font-size:1.6rem;font-weight:900;color:#0B3146}.ml-k{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-top:8px}.ml-k div{background:#F2F7F8;border-radius:10px;padding:6px 8px;font-size:.74rem;color:#5B6874}.ml-k b{display:block;font-size:1rem;color:#0B3146}
+.ml-e{display:inline-block;border-radius:999px;padding:2px 9px;font-size:.72rem;font-weight:800;background:#E9EEF2;color:#0B3146}.ml-e.enviada{background:#E3F4EA;color:#1C7A4E}.ml-e.enviando,.ml-e.programada{background:#FFF3D6;color:#8A5A00}.ml-e.cancelada{background:#FDE8E8;color:#B42318}
+.ml-pv{width:100%;height:560px;border:1px solid var(--line,#DDE3E8);border-radius:12px;background:#EEF2F5}
+.ml-li{display:grid;gap:4px;max-height:220px;overflow:auto;font-size:.82rem}.ml-li div{display:flex;justify-content:space-between;gap:8px;border-bottom:1px solid #EEF2F5;padding:3px 0}.ml-li span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ml-err{background:#FDE8E8;color:#B42318;border-radius:10px;padding:10px}.ml-av{background:#FFF3D6;color:#8A5A00;border-radius:10px;padding:10px;font-size:.86rem}
+</style>
+<script>/* patch_mailing (Ventas): Mailing a mi cartera */
+(function () {
+  if (typeof setModo !== "function" || typeof NAV_ORDEN === "undefined" || typeof syLlamar !== "function" || document.getElementById("mMail") || !document.getElementById("mDash")) return;
+  const ES_VEND = true;
+  const yo = () => (typeof SES !== "undefined" && SES && SES.vendedor && SES.vendedor.nombre) || "";
+  const cfg = () => { try { const c = syCfg(); return c && c.url ? c : null; } catch (e) { return null; } };
+  const llamar = async d => { const c = cfg(); if (!c) return { ok: false, error: "Esta app no está conectada al script de Google." }; if (!yo()) return { ok: false, error: "Ingresa con tu nombre de vendedor." }; return await syLlamar(c, Object.assign({ vendedor: yo() }, d)); };
+  const POR = () => yo(), VENDS = () => [], PRODS_DL = () => "";
+  let box, tab; const CONT = () => box;
+
+  const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const aviso = m => { try { (typeof toast === "function" ? toast : alert)(m); } catch (e) { } };
+  const nf = n => Math.round(Number(n) || 0).toLocaleString("es-CL"), pct = (a, b) => b ? Math.round(a / b * 100) + "%" : "—";
+  const fch = s => { const d = new Date(s); return isNaN(d) ? "" : d.toLocaleString("es-CL", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }); };
+  const TIPOS = [["clientes", "Clientes con compra"], ["b2b", "Cuentas portal B2B"], ["prospectos", "Prospectos"]];
+  const NUEVA = () => ({ asunto: "", tipo: "campaña", filtros: { tipos: ["clientes", "b2b"], vendedor: "", comunas: [], region: "", diasMin: 0, diasMax: 0 },
+    contenido: { titulo: "", texto: "Hola {nombre}:\n\n", promos: true, productos: [], precios: true, preciosProspectos: true } });
+  const ST = { vista: "lista", cams: [], aj: null, conf: true, bajas: null, ed: null, aud: null, ocup: false, err: "", t: 0, prueba: "" };
+  async function cargar() { ST.ocup = true; pintar(); const r = await llamar({ accion: "mailCampanas" }); ST.ocup = false;
+    if (r && r.ok) { ST.cams = r.campanas || []; ST.aj = r.ajustes || ST.aj; ST.conf = r.configurado !== false; ST.err = ""; ST.t = Date.now(); } else ST.err = (r && r.error) || "No se pudo conectar con el script."; pintar(); }
+  function vLista() {
+    const c = ST.cams;
+    return `<div class="ml-c"><div class="ml-bt"><h3 style="flex:1;margin:0">Mailing ${ES_VEND ? "a mi cartera" : "HWF"}</h3><button type="button" class="ml-b pri" data-a="nueva">✉ Nueva campaña</button><button type="button" class="ml-b" data-a="ref">↻</button>
+      ${ES_VEND ? "" : '<button type="button" class="ml-b" data-a="ajustes">Ajustes</button><button type="button" class="ml-b" data-a="bajas">Bajas</button>'}</div>
+      <small>Correos desde noticias@hwf.cl con los mismos productos, fotos, precios y promociones del portal B2B, la web y las apps. Cada correo lleva la baja de un clic.</small>
+      ${ST.conf ? "" : '<div class="ml-av" style="margin-top:8px">Falta terminar la configuración del envío en hwf.cl (ver la guía de mailing). Mientras tanto puedes armar campañas y enviar pruebas.</div>'}</div>
+      ${ST.err ? `<div class="ml-err">${esc(ST.err)}</div>` : ""}
+      ${c.length ? c.map(x => `<div class="ml-c"><div class="ml-bt"><b style="flex:1">${esc(x.asunto)}</b><span class="ml-e ${esc(x.estado)}">${esc(x.estado)}</span></div>
+        <small>${esc(x.tipo)} · ${fch(x.fecha)} · ${esc(x.autor || "")}${x.programada && x.estado !== "borrador" ? " · envío " + fch(x.programada) : ""}</small>
+        ${x.estado !== "borrador" ? `<div class="ml-k"><div><b>${nf(x.enviados)}/${nf(x.total)}</b>enviados</div><div><b>${pct(x.abiertos, x.enviados)}</b>abrieron (${nf(x.abiertos)})</div><div><b>${nf(x.clics)}</b>clics</div><div><b>${nf(x.bajas)}</b>bajas${x.fallidos ? " · " + nf(x.fallidos) + " fallidos" : ""}</div></div>` : ""}
+        <div class="ml-bt" style="margin-top:8px">${x.estado === "borrador" ? `<button type="button" class="ml-b" data-a="editar" data-id="${esc(x.id)}">Editar</button>` : ""}<button type="button" class="ml-b" data-a="dup" data-id="${esc(x.id)}">Duplicar</button>
+        ${x.estado === "programada" || x.estado === "enviando" ? `<button type="button" class="ml-b no" data-a="cancelar" data-id="${esc(x.id)}">Cancelar envío</button>` : ""}</div></div>`).join("")
+        : `<div class="ml-c ml-m">${ST.ocup ? "Cargando…" : "Aún no hay campañas. Toca «Nueva campaña»."}</div>`}`;
+  }
+  function vEditor() {
+    const e = ST.ed, f = e.filtros, C = e.contenido, a = ST.aud;
+    return `<div class="ml-c"><div class="ml-bt"><button type="button" class="ml-b" data-a="volver">← Campañas</button><h3 style="margin:0">${e.id ? "Editar campaña" : "Nueva campaña"}</h3></div></div>
+    <div class="ml-c"><h3>1 · Destinatarios</h3><div class="ml-ck">${TIPOS.map(([k, t]) => `<label><input type="checkbox" data-t="${k}" ${f.tipos.includes(k) ? "checked" : ""}> ${t}</label>`).join("")}</div>
+      <div class="ml-g" style="margin-top:10px">${ES_VEND ? "" : `<label>Vendedor (cartera)<select data-f="vendedor"><option value="">Todos</option>${VENDS().map(v => `<option${v === f.vendedor ? " selected" : ""}>${esc(v)}</option>`).join("")}</select></label>`}
+        <label>Comunas (separadas por coma)<input type="text" data-f="comunas" value="${esc(f.comunas.join(", "))}" placeholder="Rancagua, Machalí"></label>
+        <label>Región contiene<input type="text" data-f="region" value="${esc(f.region)}" placeholder="O'Higgins"></label>
+        <label>Clientes: días sin comprar (desde – hasta)<span style="display:flex;gap:6px"><input type="number" min="0" data-f="diasMin" value="${f.diasMin || ""}" placeholder="0"><input type="number" min="0" data-f="diasMax" value="${f.diasMax || ""}" placeholder="sin límite"></span></label></div>
+      <div class="ml-bt" style="margin-top:10px"><button type="button" class="ml-b" data-a="contar" ${ST.ocup ? "disabled" : ""}>Contar destinatarios</button>
+        ${a ? `<span class="ml-n">${nf(a.total)}</span><small>${Object.entries(a.porTipo || {}).map(([k, v]) => (TIPOS.find(t => t[0] === k) || [k, k])[1] + " " + nf(v)).join(" · ")}${a.tope && a.total > a.tope ? ` · <b style="color:#B42318">supera tu tope de ${nf(a.tope)}</b>` : ""}</small>` : ""}</div>
+      ${a && a.muestra && a.muestra.length ? `<div class="ml-li" style="margin-top:8px">${a.muestra.map(x => `<div><span>${esc(x.empresa || x.nombre)} · ${esc(x.correo)}</span><small>${esc(x.tipo)}${x.vendedor ? " · " + esc(x.vendedor) : ""}</small></div>`).join("")}</div>` : ""}</div>
+    <div class="ml-c"><h3>2 · Contenido</h3><div class="ml-g"><label>Asunto<input type="text" data-c="asunto" value="${esc(e.asunto)}" maxlength="150" placeholder="Promociones de noviembre en HWF"></label>
+      <label>Título dentro del correo<input type="text" data-c="titulo" value="${esc(C.titulo)}" maxlength="140" placeholder="(igual al asunto si lo dejas vacío)"></label></div>
+      <label style="margin-top:10px">Mensaje ({nombre} y {vendedor} se reemplazan; **negrita**; líneas que empiezan con «- » son viñetas)<textarea data-c="texto">${esc(C.texto)}</textarea></label>
+      <div class="ml-ck" style="margin-top:10px"><label><input type="checkbox" data-k="promos" ${C.promos ? "checked" : ""}> Promociones, ofertas y novedades vigentes (portal B2B)</label>
+        <label><input type="checkbox" data-k="precios" ${C.precios !== false ? "checked" : ""}> Mostrar precios</label><label><input type="checkbox" data-k="preciosProspectos" ${C.preciosProspectos !== false ? "checked" : ""}> Precios también a prospectos</label></div>
+      <label style="margin-top:10px">Productos destacados (códigos HWF separados por coma, máx. 12)<input type="text" data-c="productos" value="${esc((C.productos || []).join(", "))}" placeholder="RR0009, RR0133" list="mlProds"></label>${PRODS_DL()}
+      <div class="ml-bt" style="margin-top:10px"><button type="button" class="ml-b" data-a="vista" ${ST.ocup ? "disabled" : ""}>Vista previa</button></div>
+      ${ST.vistaHtml ? `<iframe class="ml-pv" sandbox="" title="Vista previa del correo" srcdoc="${esc(ST.vistaHtml)}"></iframe>` : ""}</div>
+    <div class="ml-c"><h3>3 · Probar y enviar</h3><div class="ml-g"><label>Enviar prueba a<input type="email" data-x="prueba" value="${esc(ST.prueba)}" placeholder="tu correo @hwf.cl"></label>
+      <label>Programar envío (vacío = ahora)<input type="datetime-local" data-x="cuando" value="${esc(ST.cuando || "")}"></label></div>
+      <div class="ml-bt" style="margin-top:10px"><button type="button" class="ml-b" data-a="probar" ${ST.ocup ? "disabled" : ""}>Enviar prueba</button><button type="button" class="ml-b" data-a="guardar" ${ST.ocup ? "disabled" : ""}>Guardar borrador</button>
+        <button type="button" class="ml-b ok" data-a="enviar" ${ST.ocup ? "disabled" : ""}>${ST.cuando ? "Programar envío" : "Enviar campaña"}</button></div>
+      <small>Se envía por tandas (${ST.aj ? nf(ST.aj.porHora) : "100"} por hora). Las personas que se dieron de baja nunca reciben correos.</small></div>`;
+  }
+  function vAjustes() { const A = ST.aj || {}, B = A.boletin || {};
+    return `<div class="ml-c"><div class="ml-bt"><button type="button" class="ml-b" data-a="volver">← Campañas</button><h3 style="margin:0">Ajustes del mailing</h3></div></div>
+    <div class="ml-c"><div class="ml-g"><label>Correos por hora (límite del hosting)<input type="number" min="1" max="5000" data-j="porHora" value="${A.porHora || 100}"></label>
+      <label>Correos por tanda<input type="number" min="1" max="50" data-j="porTanda" value="${A.porTanda || 20}"></label>
+      <label>Tope por campaña de un vendedor<input type="number" min="1" data-j="topeVendedor" value="${A.topeVendedor || 300}"></label>
+      <label>Responder a<input type="email" data-j="responder" value="${esc(A.responder || "")}"></label></div></div>
+    <div class="ml-c"><h3>Boletín mensual automático</h3><div class="ml-ck"><label><input type="checkbox" data-b="activo" ${B.activo ? "checked" : ""}> Activo</label></div>
+      <div class="ml-g" style="margin-top:8px"><label>Día del mes<input type="number" min="1" max="28" data-b="dia" value="${B.dia || 1}"></label><label>Hora<input type="number" min="0" max="23" data-b="hora" value="${B.hora == null ? 10 : B.hora}"></label></div>
+      <div class="ml-ck" style="margin-top:8px">${TIPOS.map(([k, t]) => `<label><input type="checkbox" data-bt="${k}" ${(B.tipos || []).includes(k) ? "checked" : ""}> ${t}</label>`).join("")}</div>
+      <small>Se arma solo con las promociones, ofertas y novedades vigentes y queda programado 24 h antes; te llega un aviso por correo para revisarlo o cancelarlo aquí.</small>
+      <div class="ml-bt" style="margin-top:10px"><button type="button" class="ml-b ok" data-a="guardarAj" ${ST.ocup ? "disabled" : ""}>Guardar ajustes</button></div></div>`; }
+  function vBajas() { const L = ST.bajas || [];
+    return `<div class="ml-c"><div class="ml-bt"><button type="button" class="ml-b" data-a="volver">← Campañas</button><h3 style="margin:0">Bajas (${nf(L.length)})</h3></div><small>Nunca se les vuelve a enviar mailing. Los documentos de compra siguen llegando.</small></div>
+    <div class="ml-c"><div class="ml-li" style="max-height:none">${L.map(x => `<div><span>${esc(x.correo)}</span><small>${fch(x.fecha)} · ${esc(x.motivo)}</small></div>`).join("") || '<span class="ml-m">Nadie se ha dado de baja.</span>'}</div></div>`; }
+  function html() { return `<div class="ml">${ST.vista === "editor" ? vEditor() : ST.vista === "ajustes" ? vAjustes() : ST.vista === "bajas" ? vBajas() : vLista()}</div>`; }
+  function leerEd() { const e = ST.ed, c = CONT(); if (!e || !c) return;
+    e.filtros.tipos = [...c.querySelectorAll("[data-t]")].filter(x => x.checked).map(x => x.dataset.t);
+    c.querySelectorAll("[data-f]").forEach(x => { const k = x.dataset.f; e.filtros[k] = k === "comunas" ? x.value.split(",").map(s => s.trim()).filter(Boolean) : /dias/.test(k) ? Number(x.value) || 0 : x.value; });
+    c.querySelectorAll("[data-c]").forEach(x => { const k = x.dataset.c; if (k === "asunto") e.asunto = x.value; else if (k === "productos") e.contenido.productos = x.value.split(/[\s,;]+/).map(s => s.trim().toUpperCase()).filter(Boolean).slice(0, 12); else e.contenido[k] = x.value; });
+    c.querySelectorAll("[data-k]").forEach(x => e.contenido[x.dataset.k] = x.checked);
+    const p = c.querySelector('[data-x="prueba"]'); if (p) ST.prueba = p.value.trim(); const w = c.querySelector('[data-x="cuando"]'); if (w) ST.cuando = w.value; }
+  async function act(a, id) {
+    if (ST.vista === "editor") leerEd();
+    if (a === "ref") return cargar();
+    if (a === "volver") { ST.vista = "lista"; ST.vistaHtml = ""; return pintar(); }
+    if (a === "nueva") { ST.ed = NUEVA(); ST.aud = null; ST.vistaHtml = ""; ST.cuando = ""; ST.vista = "editor"; return pintar(); }
+    if (a === "editar" || a === "dup") { const x = ST.cams.find(c => c.id === id); if (!x) return; ST.ed = { id: a === "editar" ? x.id : "", asunto: (a === "dup" ? "" : "") + x.asunto, tipo: x.tipo === "boletín" && a === "dup" ? "campaña" : x.tipo,
+        filtros: Object.assign(NUEVA().filtros, x.filtros || {}), contenido: Object.assign(NUEVA().contenido, x.contenido || {}) }; ST.aud = null; ST.vistaHtml = ""; ST.cuando = ""; ST.vista = "editor"; return pintar(); }
+    if (a === "cancelar") { if (!confirm("¿Cancelar el envío de esta campaña? Los correos que ya salieron no se pueden recuperar.")) return; const r = await ocupado(llamar({ accion: "mailCancelar", id })); if (r.ok) { aviso("Envío cancelado."); return cargar(); } return aviso(r.error); }
+    if (a === "ajustes") { ST.vista = "ajustes"; if (!ST.aj) { const r = await ocupado(llamar({ accion: "mailAjustes", leer: true })); if (r.ok) ST.aj = r.ajustes; } return pintar(); }
+    if (a === "bajas") { ST.vista = "bajas"; const r = await ocupado(llamar({ accion: "mailBajas" })); ST.bajas = r.ok ? r.bajas : []; if (!r.ok) aviso(r.error); return pintar(); }
+    if (a === "guardarAj") { const c = CONT(), g = {}, B = {}; c.querySelectorAll("[data-j]").forEach(x => g[x.dataset.j] = x.type === "number" ? Number(x.value) : x.value.trim());
+      c.querySelectorAll("[data-b]").forEach(x => B[x.dataset.b] = x.type === "checkbox" ? x.checked : Number(x.value)); B.tipos = [...c.querySelectorAll("[data-bt]")].filter(x => x.checked).map(x => x.dataset.bt); g.boletin = B;
+      const r = await ocupado(llamar({ accion: "mailAjustes", guardar: g })); if (r.ok) { ST.aj = r.ajustes; aviso("Ajustes guardados."); } else aviso(r.error); return pintar(); }
+    const e = ST.ed; if (!e) return;
+    if (a === "contar") { if (!e.filtros.tipos.length) return aviso("Elige al menos un tipo de destinatario."); const r = await ocupado(llamar({ accion: "mailAudiencia", filtros: e.filtros })); if (r.ok) ST.aud = r; else aviso(r.error); return pintar(); }
+    if (a === "vista") { const r = await ocupado(llamar({ accion: "mailVista", campana: e })); if (r.ok) ST.vistaHtml = r.html; else aviso(r.error); return pintar(); }
+    if (a === "probar") { if (!/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(ST.prueba)) return aviso("Escribe un correo válido para la prueba."); const r = await ocupado(llamar({ accion: "mailProbar", campana: e, a: ST.prueba }));
+      return aviso(r.ok ? (r.aviso || "Prueba enviada a " + ST.prueba + ".") : r.error); }
+    if (a === "guardar" || a === "enviar") {
+      if (!e.asunto.trim()) return aviso("Falta el asunto."); if (!e.filtros.tipos.length) return aviso("Elige al menos un tipo de destinatario.");
+      const g = await ocupado(llamar({ accion: "mailGuardar", campana: e, por: POR() })); if (!g.ok) return aviso(g.error); e.id = g.id;
+      if (a === "guardar") { aviso("Borrador guardado."); return cargar(); }
+      const au = await ocupado(llamar({ accion: "mailAudiencia", filtros: e.filtros })); if (!au.ok) return aviso(au.error); ST.aud = au; pintar();
+      const cuando = ST.cuando ? new Date(ST.cuando) : null; if (cuando && isNaN(cuando)) return aviso("Fecha de envío inválida.");
+      if (!confirm(`¿${cuando ? "Programar para el " + cuando.toLocaleString("es-CL") : "Enviar ahora"} «${e.asunto}» a ${nf(au.total)} destinatarios?`)) return;
+      const r = await ocupado(llamar({ accion: "mailEnviar", id: e.id, cuando: cuando ? cuando.toISOString() : "" }));
+      if (!r.ok) return aviso(r.error); aviso(`Listo: ${nf(r.total)} correos en cola${r.horas > 1 ? " (≈ " + r.horas + " h en salir)" : ""}.`); ST.vista = "lista"; return cargar(); }
+  }
+  async function ocupado(p) { ST.ocup = true; pintar(); try { return (await p) || { ok: false, error: "Sin respuesta del script." }; } finally { ST.ocup = false; pintar(); } }
+  function enganchar(c) { c.addEventListener("click", ev => { const b = ev.target.closest(".ml [data-a]"); if (!b || b.disabled) return; ev.preventDefault(); act(b.dataset.a, b.dataset.id); }); }
+
+  function pintar() { if (box && !box.hidden) box.innerHTML = html(); }
+  tab = document.createElement("button"); tab.type = "button"; tab.setAttribute("role", "tab"); tab.id = "mMail"; tab.setAttribute("aria-selected", "false"); tab.title = "Mailing"; tab.textContent = "Mailing";
+  const ref = document.getElementById("mB2b") || document.getElementById("mNut") || document.getElementById("mDash"); ref.after(tab);
+  box = document.createElement("div"); box.id = "crmMail"; box.hidden = true;
+  const ref2 = document.getElementById("crmB2b") || document.getElementById("crmNut") || document.getElementById("crmDash"); ref2.after(box);
+  enganchar(box);
+  const _sm = setModo; setModo = function (m) { const r = _sm.apply(this, arguments), on = m === "mail"; tab.setAttribute("aria-selected", on); box.hidden = !on; document.body.classList.toggle("m-mail", on);
+    if (on) { ["crmFicha", "crmLista", "crmAgenda", "crmRuta", "crmInicio", "crmCobranza", "crmEmbudo", "crmNut", "crmDash", "crmAvance", "crmMeta", "crmTec", "crmBi", "crmB2b"].forEach(id => { const x = document.getElementById(id); if (x) x.hidden = true; });
+      pintar(); if (!ST.t || Date.now() - ST.t > 60000) cargar(); window.scrollTo({ top: 0 }); }
+    return r; };
+  tab.onclick = () => setModo("mail");
+  try { const _af = abrirFicha; abrirFicha = function () { box.hidden = true; tab.setAttribute("aria-selected", "false"); document.body.classList.remove("m-mail"); return _af.apply(this, arguments); }; } catch (e) { }
+  try { if (!NAV_ORDEN.some(x => x[0] === "mail")) NAV_ORDEN.push(["mail", "mMail"]); } catch (e) { }
+  const iv = setInterval(() => { const p = document.getElementById("snPanel"); if (!p) return; clearInterval(iv);
+    new MutationObserver(() => setTimeout(() => { const it = p.querySelector('[data-sm="mail"]'); if (it) { const e = it.querySelector(".sn-e"); if (e && e.textContent.trim() === "•") e.textContent = "✉"; } }, 0)).observe(p, { childList: true }); }, 400);
 })();
 </script>
 </body>
