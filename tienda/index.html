@@ -1914,7 +1914,7 @@ const SEC = { inicio: "sInicio", ventas: "sVentas", dash: "sDash", guia: "sGuia"
 function ir(s) { if (s === "adm") bajarRanking(); vista = MODO = s; Object.entries(SEC).forEach(([k, id]) => $(id).hidden = k !== s); document.querySelectorAll("#tNav [data-s]").forEach(b => b.setAttribute("aria-current", b.dataset.s === s));
   pintar(s); window.scrollTo({ top: 0 }); if (s === "rank") bajarRanking(); }
 const setModo = ir;
-function pintar(s) { try { ({ inicio: pintarInicio, ventas: pintarVentas, plan: pintarPlan, stock: pintarStock, nut: () => { if (SES || esAdmin()) { if (!SES) SES = { vendedor: { nombre: "Administración", usuario: "admin" } }; pintarNut(); } else $("crmNut").innerHTML = '<p class="t-vacio">Inicia la jornada para usar Nutrición.</p>'; }, rank: pintarRank, adm: pintarAdm, dash: pintarDash, guia: pintarGuia })[s](); } catch (e) { console.error(e); } }
+function pintar(s) { try { ({ inicio: pintarInicio, ventas: pintarVentas, plan: pintarPlan, stock: pintarStock, nut: () => { if (SES || esAdmin()) { if (!SES) SES = { vendedor: { nombre: "Administración", usuario: "admin" } }; pintarNut(); } else pintarNut(); }, rank: pintarRank, adm: pintarAdm, dash: pintarDash, guia: pintarGuia })[s](); } catch (e) { console.error(e); } }
 function pintarTodo() { const D = DATA(), t = turno(); $("tTurno").textContent = "Turno: " + (t || "—") + " · cambiar"; $("tAct").textContent = "Datos de Drive: " + ((D && D.act && D.act.drive) || "—"); pintar(vista); }
 $("tNav").onclick = e => { const b = e.target.closest("[data-s]"); if (b) ir(b.dataset.s); };
 $("tTurno").onclick = () => { if (confirm("¿Cambiar quién está en la jornada de hoy? (o entrar como administración)")) { localStorage.removeItem(TURK); refrescarSES(); pedirTurno(); } };
@@ -2350,7 +2350,7 @@ const stAbrev = n => ST_ABR.reduce((s, [r, t]) => s.replace(r, t), String(n || "
 try { if ($("sStock") && !$("sStock").hidden) pintarStock(); } catch (e) {}
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261122214729";
+const HWF_VER = "20261122215226";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -4054,6 +4054,10 @@ window.hwfContCambio = function () { try { const b = document.getElementById("sS
   try { aplicar(JSON.parse(localStorage.getItem(K) || "null")); } catch (e) {}
   const repintar = () => { try { if (typeof pintarNut === "function" && document.getElementById("crmNut") && !document.getElementById("crmNut").hidden) pintarNut(); } catch (e) {} };
   repintar();
+  /* 22-11-2026: Nutrición se usa sin iniciar la jornada (es información de consulta): sin jornada se pinta con una sesión de lectura */
+  const INV = { vendedor: { nombre: "Tienda Hellywoof", usuario: "tienda" } };
+  const sinJornada = f => function () { if (typeof SES !== "undefined" && SES) return f.apply(this, arguments); SES = INV; try { return f.apply(this, arguments); } finally { if (SES === INV) SES = null; } };
+  try { if (!pintarNut.__sj) { pintarNut = sinJornada(pintarNut); pintarNut.__sj = 1; } if (typeof nuSaco === "function" && !nuSaco.__sj) { nuSaco = sinJornada(nuSaco); nuSaco.__sj = 1; } } catch (e) {}
   fetch("../datos/publicos.json", { cache: "no-cache" }).then(r => r.ok ? r.json() : null).then(j => { if (!j || !j.nut) return;
     const ant = NUT.version; if (aplicar(j.nut)) { try { localStorage.setItem(K, JSON.stringify(j.nut)); } catch (e) {} if (ant !== j.nut.version) repintar(); } }).catch(() => {});
 })();
