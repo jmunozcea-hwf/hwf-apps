@@ -5274,7 +5274,7 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261122100402";
+const HWF_VER = "20261122101819";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -8129,7 +8129,8 @@ body.m-b2b #crmMeta{display:none!important}
     const r = await llamar({ accion: "b2bAjustes", leer: true }); ST.cargandoAj = false;
     if (r && r.ok) { const a = k => Array.isArray(r[k]) ? JSON.parse(JSON.stringify(r[k])) : [];
       const rg = r.reglas && typeof r.reglas === "object" ? JSON.parse(JSON.stringify(r.reglas)) : {};
-      ST.aj = { promos: a("promos"), ofertas: a("ofertas"), novedades: a("novedades"), reglas: { puntosPorMil: rg.puntosPorMil != null ? rg.puntosPorMil : 1, niveles: Array.isArray(rg.niveles) ? rg.niveles : [{ n: "Bronce", min: 0 }, { n: "Plata", min: 1000000 }, { n: "Oro", min: 3000000 }], beneficios: Array.isArray(rg.beneficios) ? rg.beneficios : [] } }; }
+      const md = r.modulos && typeof r.modulos === "object" ? r.modulos : {};
+      ST.aj = { modulos: { promos: md.promos !== false, ofertas: !!md.ofertas, puntos: !!md.puntos }, promos: a("promos"), ofertas: a("ofertas"), novedades: a("novedades"), reglas: { puntosPorMil: rg.puntosPorMil != null ? rg.puntosPorMil : 1, niveles: Array.isArray(rg.niveles) ? rg.niveles : [{ n: "Bronce", min: 0 }, { n: "Plata", min: 1000000 }, { n: "Oro", min: 3000000 }], beneficios: Array.isArray(rg.beneficios) ? rg.beneficios : [] } }; }
     else ST.ajErr = (r && r.error) || "No se pudieron leer los ajustes.";
     if (vivo()) pintar();
   }
@@ -8170,6 +8171,14 @@ body.m-b2b #crmMeta{display:none!important}
       <div class="b2-bt"><button type="button" class="b2-b tq" data-add="${k}">+ Agregar</button></div></div>`;
   }
   function vContenido() { return ["promos", "ofertas", "novedades"].map(vSec).join("") + `<div class="b2-bt"><button type="button" class="b2-b ok" id="b2GC" ${ST.ocup ? "disabled" : ""}>Guardar contenido</button></div>`; }
+  /* módulos del portal: HWF los activa de a uno para que los clientes se acostumbren */
+  const MODS = [["promos", "Promociones", "Descuentos por producto en el catálogo y la pestaña «Promociones»."], ["ofertas", "Ofertas especiales", "Liquidaciones, packs y oportunidades en la pestaña «Ofertas»."], ["puntos", "Programa de puntos (fidelidad)", "Puntos por compra, niveles y canje de beneficios en la pestaña «Puntos»."]];
+  function vModulos() {
+    const m = ST.aj.modulos, n = MODS.filter(x => m[x[0]]).length;
+    return `<div class="b2-card"><h3>¿Qué ven los clientes? <small>${n} de ${MODS.length} activos</small></h3><p class="b2-p" style="margin:0 0 8px">Activa de a uno para que los clientes se acostumbren. Apagado = la pestaña no aparece y sus descuentos no se aplican. El catálogo, el carrito, los pedidos, «Mi cuenta» (lo que tienen por pagar según su RUT) y las novedades están siempre activos.</p>
+      ${MODS.map(([k, t, d], i) => `<label class="b2-it" style="display:flex;gap:12px;align-items:flex-start;cursor:pointer"><input type="checkbox" data-mod="${k}" ${m[k] ? "checked" : ""} style="width:22px;height:22px;margin-top:2px;flex:none"><span><b>Paso ${i + 1} · ${t}</b> <span class="b2-pill ${m[k] ? "activo" : "pendiente"}">${m[k] ? "Activo" : "Apagado"}</span><br><small>${d}</small></span></label>`).join("")}</div>
+      <div class="b2-bt"><button type="button" class="b2-b ok" id="b2GM" ${ST.ocup ? "disabled" : ""}>Guardar módulos</button></div>`;
+  }
   function vReglas() {
     const r = ST.aj.reglas;
     return `<div class="b2-card"><h3>Fidelización</h3>
@@ -8187,11 +8196,11 @@ body.m-b2b #crmMeta{display:none!important}
     const cont = document.getElementById("masBody"); if (!cont || !vivo() || pintando) return; pintando = true; try { pintarX(cont); } finally { pintando = false; } }
   function pintarX(cont) {
     const sc = window.scrollY, fo = document.activeElement && document.activeElement.id;
-    const T = [["cuentas", "Solicitudes y cuentas"], ["pedidos", "Pedidos y canjes"], ["contenido", "Promociones y novedades"], ["reglas", "Fidelización"]];
+    const T = [["cuentas", "Solicitudes y cuentas"], ["pedidos", "Pedidos y canjes"], ["modulos", "Módulos"], ["contenido", "Promociones y novedades"], ["reglas", "Fidelización"]];
     let cuerpo;
     if (ST.tab === "cuentas") cuerpo = vCuentas(); else if (ST.tab === "pedidos") cuerpo = vPedidos();
     else if (ST.cargandoAj) cuerpo = `<div class="b2-card b2-vac">Cargando…</div>`; else if (!ST.aj) cuerpo = `<div class="b2-err">${E(ST.ajErr || "Sin datos.")}</div><div class="b2-bt"><button type="button" class="b2-b ok" id="b2Aj">Reintentar</button></div>`;
-    else cuerpo = ST.tab === "contenido" ? vContenido() : vReglas();
+    else cuerpo = ST.tab === "contenido" ? vContenido() : ST.tab === "modulos" ? vModulos() : vReglas();
     cont.innerHTML = `<div class="b2"><div class="b2-top"><h2>Portal B2B</h2><button type="button" class="b2-b" id="b2Ref" ${ST.cargando ? "disabled" : ""}>${ST.cargando ? "Cargando…" : "↻ Actualizar"}</button></div>
       ${!cfg() ? `<div class="b2-err">Esta app no está conectada al script de Google.</div>` : ""}${ST.err ? `<div class="b2-err">${E(ST.err)}</div>` : ""}
       <div class="b2-seg">${T.map(([k, t]) => `<button type="button" class="b2-ch" data-tb="${k}" aria-pressed="${ST.tab === k}">${t}${k === "cuentas" && pend() ? `<i class="b2-bdg">${pend()}</i>` : ""}</button>`).join("")}</div>${cuerpo}</div>`;
@@ -8200,7 +8209,6 @@ body.m-b2b #crmMeta{display:none!important}
   /* ---------- acciones ---------- */
   async function actuar(c, estado) {
     if (ST.ocup) return; const d = ST.dr[c.id] || {}, vend = d.vendedor != null ? d.vendedor : (c.vendedor || ""), cli = d.cliente != null ? d.cliente : (c.cliente || "");
-    if (estado === "activo" && !cli) { aviso("Elige el cliente HWF antes de aprobar."); return elegirCli(c, () => actuar(c, estado)); }
     ST.ocup = true; const r = await llamar({ accion: "b2bAprobar", id: c.id, estado, vendedor: vend, cliente: cli, por: POR }); ST.ocup = false;
     if (r && r.ok) { delete ST.dr[c.id]; aviso(estado === "activo" ? "Guardado. Si es una cuenta nueva, el cliente recibirá su correo de bienvenida." : estado === "bloqueado" ? "Cuenta bloqueada." : "Solicitud rechazada."); await cargar(true); pintar(); }
     else aviso((r && r.error) || "No se pudo guardar.");
@@ -8215,7 +8223,8 @@ body.m-b2b #crmMeta{display:none!important}
   const hoy = () => new Date().toISOString().slice(0, 10), nid = p => p + "-" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
   async function guardar(parte) {
     if (ST.ocup || !ST.aj) return; let g = {};
-    if (parte === "contenido") {
+    if (parte === "modulos") g.modulos = Object.assign({}, ST.aj.modulos);
+    else if (parte === "contenido") {
       for (const k of ["promos", "ofertas", "novedades"]) { const sal = [];
         for (const [i, it] of ST.aj[k].entries()) { const t = String(it.titulo || "").trim(); if (!t) { aviso(`${SEC[k][0]} n.º ${i + 1}: falta el título.`); return; }
           if (!it.desde || !it.hasta) { aviso(`«${t}»: indica desde y hasta.`); return; } if (it.hasta < it.desde) { aviso(`«${t}»: «Hasta» es anterior a «Desde».`); return; }
@@ -8237,7 +8246,7 @@ body.m-b2b #crmMeta{display:none!important}
   function clic(e) {
     const t = e.target; let b;
     if (t.closest("#b2Ref")) return cargar(false); if (t.closest("#b2Aj")) return cargarAj(true);
-    if ((b = t.closest("[data-tb]"))) { ST.tab = b.dataset.tb; if (ST.tab === "contenido" || ST.tab === "reglas") cargarAj(false); window.scrollTo({ top: 0 }); return pintar(); }
+    if ((b = t.closest("[data-tb]"))) { ST.tab = b.dataset.tb; if (ST.tab === "contenido" || ST.tab === "reglas" || ST.tab === "modulos") cargarAj(false); window.scrollTo({ top: 0 }); return pintar(); }
     if ((b = t.closest("[data-fe]"))) { ST.fEst = b.dataset.fe; return pintar(); }
     if ((b = t.closest("[data-cl]"))) { const c = ST.cuentas.find(x => String(x.id) === b.dataset.cl); return c && elegirCli(c); }
     if ((b = t.closest("[data-a]"))) { const c = ST.cuentas.find(x => String(x.id) === b.dataset.id); if (!c) return; const a = b.dataset.a;
@@ -8248,11 +8257,12 @@ body.m-b2b #crmMeta{display:none!important}
       if (k === "niveles") ST.aj.reglas.niveles.push({ n: "", min: 0 }); else if (k === "beneficios") ST.aj.reglas.beneficios.push({ id: "", titulo: "", puntos: 100 });
       else ST.aj[k].push({ id: nid(k), titulo: "", texto: "", img: "", desde: hoy(), hasta: new Date(Date.now() + 30 * 864e5).toISOString().slice(0, 10), productos: [] }); return pintar(); }
     if ((b = t.closest("[data-del]"))) { const ks = b.dataset.del.split("."), i = +ks.pop(), l = dame(ST.aj, ks.join(".")); if (l && confirm("¿Quitar este elemento? (queda guardado al tocar Guardar)")) { l.splice(i, 1); pintar(); } return; }
-    if (t.closest("#b2GC")) return guardar("contenido"); if (t.closest("#b2GR")) return guardar("reglas");
+    if (t.closest("#b2GM")) return guardar("modulos"); if (t.closest("#b2GC")) return guardar("contenido"); if (t.closest("#b2GR")) return guardar("reglas");
   }
   function cambio(e) {
     const t = e.target; if (t.id === "b2Fv") { if (ST.fVend !== t.value) { ST.fVend = t.value; pintar(); } return; } if (t.id === "b2Fq") { if (ST.q !== t.value) { ST.q = t.value; pintar(); } return; }
     if (t.dataset.v) { (ST.dr[t.dataset.v] = ST.dr[t.dataset.v] || {}).vendedor = t.value; return; }
+    if (t.dataset.mod && ST.aj) { ST.aj.modulos[t.dataset.mod] = t.checked; if (e.type === "change") pintar(); return; }
     if (t.dataset.p && ST.aj) poner(t.dataset.p, t.value);
   }
   function montar() {
