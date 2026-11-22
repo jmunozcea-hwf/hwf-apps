@@ -5278,7 +5278,7 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261122210953";
+const HWF_VER = "20261122212330";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -5953,8 +5953,9 @@ setTimeout(() => { try { if (D && $("s-res") && !$("s-res").hidden && !$("kpCard
 </script>
 <style>/* patch_catalogo */
 .ct-z{border:2px dashed var(--line,#C9D3DB);border-radius:14px;padding:14px;display:grid;gap:8px;margin-top:8px}.ct-z.sobre{border-color:#1C7A4E;background:rgba(28,122,78,.06)}
-.ct-f{display:grid;grid-template-columns:1fr auto;gap:6px 10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line,#E3E9EE)}.ct-f:last-child{border-bottom:0}
-.ct-f b{word-break:break-word}.ct-f small{display:block;color:var(--muted,#5B6874);font-size:.76rem}.ct-b{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}.ct-b .btn{min-height:38px;padding:6px 10px;font-size:.84rem}
+.ct-f{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line,#E3E9EE)}.ct-f:last-child{border-bottom:0}
+.ct-f>div:first-child{min-width:0}   /* 22-11-2026: nombre arriba en todo el ancho y botones abajo (antes el nombre se cortaba letra por letra) */
+.ct-f b{overflow-wrap:anywhere;word-break:normal}.ct-f small{display:block;color:var(--muted,#5B6874);font-size:.76rem}.ct-b{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-start}@media(min-width:1200px){.ct-f{grid-template-columns:minmax(0,1fr) auto}.ct-b{justify-content:flex-end}}.ct-b .btn{min-height:38px;padding:6px 10px;font-size:.84rem}
 .ct-est{font-size:.84rem;color:var(--muted,#5B6874);min-height:1.2em}.ct-est.mal{color:#B42318}.ct-est.ok{color:#1C7A4E}
 @media(min-width:1000px){.ct-g{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}.ct-g>.card{margin:0}}
 </style>
@@ -5962,7 +5963,7 @@ setTimeout(() => { try { if (D && $("s-res") && !$("s-res").hidden && !$("kpCard
 (function () {
   if (typeof pintarMas !== "function" || typeof syCall !== "function") return;
   try { if (typeof NAV_MNOM !== "undefined") NAV_MNOM.catalogo = "Documentos"; const sp = document.querySelector('[data-sm="catalogo"] span'); if (sp) sp.textContent = "Documentos"; } catch (e) {}
-  const TIPOS = [["catalogo", "Catálogo", "El catálogo de productos (PDF, imágenes o Excel)."], ["precios", "Listas de precio", "Las listas de precio vigentes, por canal o por proveedor."], ["documentos", "Documentos", "Manuales, instructivos y otros documentos para vendedores y clientes (por ejemplo, el manual del portal)."]];
+  const TIPOS = [["catalogo", "Catálogo", "El catálogo de productos (PDF, imágenes o Excel)."], ["precios", "Listas de precio", "Las listas de precio vigentes, por canal o por proveedor."], ["documentos", "Documentos", "Manuales, instructivos y otros documentos para vendedores y clientes (por ejemplo, el manual del portal)."], ["info", "Info ventas", "Presentaciones y guías para el equipo de ventas (las ven Ventas y Admin)."], ["infoadmin", "Info admin", "Presentaciones internas: solo se ven en HWF Admin."]];
   const MAX = 20 * 1024 * 1024, DEMO = typeof RK_DEMO !== "undefined" && RK_DEMO; let DAT = null, EST = "", ESTC = "", OCUP = false;
   const tam = n => n >= 1048576 ? (n / 1048576).toLocaleString("es-CL", { maximumFractionDigits: 1 }) + " MB" : Math.max(1, Math.round(n / 1024)).toLocaleString("es-CL") + " KB";
   const fecha = ms => { const d = new Date(ms); return String(d.getDate()).padStart(2, "0") + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + d.getFullYear() + " " + String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0"); };
@@ -9349,7 +9350,7 @@ window.hwfContCambio = function () { try { if (typeof praPintar === "function" &
 </script>
 <script>/* patch_iconosmenu: íconos del menú lateral con el estilo HWF */
 (function () {
-  const MAPA = {"[data-m=\"metricas\"]": "<svg viewBox=\"0 0 32 32\" aria-hidden=\"true\" class=\"hic\"><defs><linearGradient id=\"hic-mmet\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"1\"><stop offset=\"0\" stop-color=\"#8FD3D6\"/><stop offset=\"1\" stop-color=\"#3E9EA6\"/></linearGradient></defs><rect width=\"32\" height=\"32\" rx=\"9\" fill=\"url(#hic-mmet)\"/><path d=\"M4 4h24v10C20 9 11 9 4 13z\" fill=\"#fff\" opacity=\".12\"/><g transform=\"translate(5.5 5.5) scale(.875)\" fill=\"none\" stroke=\"#fff\" stroke-width=\"2.2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M3 17l6-6 4 4 8-8\"/><path d=\"M15 7h6v6\"/></g></svg>", "[data-m=\"invita\"]": "<svg viewBox=\"0 0 32 32\" aria-hidden=\"true\" class=\"hic\"><defs><linearGradient id=\"hic-minv\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"1\"><stop offset=\"0\" stop-color=\"#3D8BB0\"/><stop offset=\"1\" stop-color=\"#1F5673\"/></linearGradient></defs><rect width=\"32\" height=\"32\" rx=\"9\" fill=\"url(#hic-minv)\"/><path d=\"M4 4h24v10C20 9 11 9 4 13z\" fill=\"#fff\" opacity=\".12\"/><g transform=\"translate(5.5 5.5) scale(.875)\" fill=\"none\" stroke=\"#fff\" stroke-width=\"2.2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M4 5h16v11H9l-5 4z\"/><path d=\"M8 9h8M8 12h5\"/></g></svg>", "[data-sm=\"inv\"]": "<svg viewBox=\"0 0 32 32\" aria-hidden=\"true\" class=\"hic\"><defs><linearGradient id=\"hic-minv2\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"1\"><stop offset=\"0\" stop-color=\"#3D8BB0\"/><stop offset=\"1\" stop-color=\"#1F5673\"/></linearGradient></defs><rect width=\"32\" height=\"32\" rx=\"9\" fill=\"url(#hic-minv2)\"/><path d=\"M4 4h24v10C20 9 11 9 4 13z\" fill=\"#fff\" opacity=\".12\"/><g transform=\"translate(5.5 5.5) scale(.875)\" fill=\"none\" stroke=\"#fff\" stroke-width=\"2.2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M4 5h16v11H9l-5 4z\"/><path d=\"M8 9h8M8 12h5\"/></g></svg>", "#qrItem": "<svg viewBox=\"0 0 32 32\" aria-hidden=\"true\" class=\"hic\"><defs><linearGradient id=\"hic-mqr\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"1\"><stop offset=\"0\" stop-color=\"#1F5673\"/><stop offset=\"1\" stop-color=\"#0B3146\"/></linearGradient></defs><rect width=\"32\" height=\"32\" rx=\"9\" fill=\"url(#hic-mqr)\"/><path d=\"M4 4h24v10C20 9 11 9 4 13z\" fill=\"#fff\" opacity=\".12\"/><g transform=\"translate(5.5 5.5) scale(.875)\" fill=\"none\" stroke=\"#fff\" stroke-width=\"2.2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"6\" y=\"2\" width=\"12\" height=\"20\" rx=\"2\"/><path d=\"M11 18h2\"/></g></svg>", "[data-m=\"eerr\"]": "<svg viewBox=\"0 0 32 32\" aria-hidden=\"true\" class=\"hic\"><defs><linearGradient id=\"hic-meer\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"1\"><stop offset=\"0\" stop-color=\"#3FBF7F\"/><stop offset=\"1\" stop-color=\"#1C7A4E\"/></linearGradient></defs><rect width=\"32\" height=\"32\" rx=\"9\" fill=\"url(#hic-meer)\"/><path d=\"M4 4h24v10C20 9 11 9 4 13z\" fill=\"#fff\" opacity=\".12\"/><g transform=\"translate(5.5 5.5) scale(.875)\" fill=\"none\" stroke=\"#fff\" stroke-width=\"2.2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 3v18M7 21h10M5 7h14\"/><path d=\"M5 7l-3 6a3 3 0 0 0 6 0zM19 7l-3 6a3 3 0 0 0 6 0z\"/></g></svg>"};
+  const MAPA = {"[data-m=\"metricas\"]": "<svg viewBox=\"0 0 32 32\" aria-hidden=\"true\" class=\"hic\"><defs><linearGradient id=\"hic-mmet\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"1\"><stop offset=\"0\" stop-color=\"#8FD3D6\"/><stop offset=\"1\" stop-color=\"#3E9EA6\"/></linearGradient></defs><rect width=\"32\" height=\"32\" rx=\"9\" fill=\"url(#hic-mmet)\"/><path d=\"M4 4h24v10C20 9 11 9 4 13z\" fill=\"#fff\" opacity=\".12\"/><g transform=\"translate(5.5 5.5) scale(.875)\" fill=\"none\" stroke=\"#fff\" stroke-width=\"2.2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M3 17l6-6 4 4 8-8\"/><path d=\"M15 7h6v6\"/></g></svg>", "[data-m=\"invita\"]": "<svg viewBox=\"0 0 32 32\" aria-hidden=\"true\" class=\"hic\"><defs><linearGradient id=\"hic-minv\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"1\"><stop offset=\"0\" stop-color=\"#3D8BB0\"/><stop offset=\"1\" stop-color=\"#1F5673\"/></linearGradient></defs><rect width=\"32\" height=\"32\" rx=\"9\" fill=\"url(#hic-minv)\"/><path d=\"M4 4h24v10C20 9 11 9 4 13z\" fill=\"#fff\" opacity=\".12\"/><g transform=\"translate(5.5 5.5) scale(.875)\" fill=\"none\" stroke=\"#fff\" stroke-width=\"2.2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M4 5h16v11H9l-5 4z\"/><path d=\"M8 9h8M8 12h5\"/></g></svg>", "[data-sm=\"inv\"]": "<svg viewBox=\"0 0 32 32\" aria-hidden=\"true\" class=\"hic\"><defs><linearGradient id=\"hic-minv2\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"1\"><stop offset=\"0\" stop-color=\"#3D8BB0\"/><stop offset=\"1\" stop-color=\"#1F5673\"/></linearGradient></defs><rect width=\"32\" height=\"32\" rx=\"9\" fill=\"url(#hic-minv2)\"/><path d=\"M4 4h24v10C20 9 11 9 4 13z\" fill=\"#fff\" opacity=\".12\"/><g transform=\"translate(5.5 5.5) scale(.875)\" fill=\"none\" stroke=\"#fff\" stroke-width=\"2.2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M4 5h16v11H9l-5 4z\"/><path d=\"M8 9h8M8 12h5\"/></g></svg>", "#qrItem": "<svg viewBox=\"0 0 32 32\" aria-hidden=\"true\" class=\"hic\"><defs><linearGradient id=\"hic-mqr\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"1\"><stop offset=\"0\" stop-color=\"#1F5673\"/><stop offset=\"1\" stop-color=\"#0B3146\"/></linearGradient></defs><rect width=\"32\" height=\"32\" rx=\"9\" fill=\"url(#hic-mqr)\"/><path d=\"M4 4h24v10C20 9 11 9 4 13z\" fill=\"#fff\" opacity=\".12\"/><g transform=\"translate(5.5 5.5) scale(.875)\" fill=\"none\" stroke=\"#fff\" stroke-width=\"2.2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"6\" y=\"2\" width=\"12\" height=\"20\" rx=\"2\"/><path d=\"M11 18h2\"/></g></svg>", "[data-m=\"eerr\"]": "<svg viewBox=\"0 0 32 32\" aria-hidden=\"true\" class=\"hic\"><defs><linearGradient id=\"hic-meer\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"1\"><stop offset=\"0\" stop-color=\"#3FBF7F\"/><stop offset=\"1\" stop-color=\"#1C7A4E\"/></linearGradient></defs><rect width=\"32\" height=\"32\" rx=\"9\" fill=\"url(#hic-meer)\"/><path d=\"M4 4h24v10C20 9 11 9 4 13z\" fill=\"#fff\" opacity=\".12\"/><g transform=\"translate(5.5 5.5) scale(.875)\" fill=\"none\" stroke=\"#fff\" stroke-width=\"2.2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 3v18M7 21h10M5 7h14\"/><path d=\"M5 7l-3 6a3 3 0 0 0 6 0zM19 7l-3 6a3 3 0 0 0 6 0z\"/></g></svg>", "[data-sm=\"eerr\"]": "<svg viewBox=\"0 0 32 32\" aria-hidden=\"true\" class=\"hic\"><defs><linearGradient id=\"hic-meer2\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"1\"><stop offset=\"0\" stop-color=\"#3FBF7F\"/><stop offset=\"1\" stop-color=\"#1C7A4E\"/></linearGradient></defs><rect width=\"32\" height=\"32\" rx=\"9\" fill=\"url(#hic-meer2)\"/><path d=\"M4 4h24v10C20 9 11 9 4 13z\" fill=\"#fff\" opacity=\".12\"/><g transform=\"translate(5.5 5.5) scale(.875)\" fill=\"none\" stroke=\"#fff\" stroke-width=\"2.2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 3v18M7 21h10M5 7h14\"/><path d=\"M5 7l-3 6a3 3 0 0 0 6 0zM19 7l-3 6a3 3 0 0 0 6 0z\"/></g></svg>"};
   const poner = () => { const p = document.getElementById("snPanel"); if (!p) return; Object.entries(MAPA).forEach(([sel, html]) => p.querySelectorAll(sel + " .sn-e").forEach(e => { if (e.dataset.ic !== "1") { e.innerHTML = html; e.dataset.ic = "1"; } })); };
   const iv = setInterval(() => { const p = document.getElementById("snPanel"); if (!p) return; clearInterval(iv); poner(); new MutationObserver(() => setTimeout(poner, 30)).observe(p, { childList: true }); }, 300);
 })();
@@ -9362,7 +9363,7 @@ window.hwfContCambio = function () { try { if (typeof praPintar === "function" &
 .er-dim button[aria-pressed="true"]{background:#0B3146;color:#fff}
 .er-t{width:100%;border-collapse:collapse;font-size:.86rem;font-variant-numeric:tabular-nums}.er-t th,.er-t td{padding:7px 6px;border-bottom:1px solid var(--line,#E3E9EE);text-align:right;white-space:nowrap}
 .er-t th:first-child,.er-t td:first-child{text-align:left;white-space:normal}.er-t thead th{font-size:.72rem;color:var(--muted,#5B6874);text-transform:uppercase;letter-spacing:.03em}
-.er-t tr.s td{font-weight:800;background:var(--sunk,#EEF2F5)}.er-t tr.r td{font-weight:900;font-size:.95rem;border-top:2px solid #0B3146}.er-t .p{color:#1B7F5A}.er-t .n{color:#B3261E}.er-t .er-s{color:var(--muted,#5B6874);font-size:.76rem;display:block}
+.er-t tr.g td{font-weight:700}.er-t tr.i td{color:var(--muted,#5B6874);font-size:.8rem;padding-top:4px;padding-bottom:4px}.er-t tr.i td:first-child{padding-left:16px}.er-t tr.s td{font-weight:800;background:var(--sunk,#EEF2F5)}.er-t tr.r td{font-weight:900;font-size:.95rem;border-top:2px solid #0B3146}.er-t .p{color:#1B7F5A}.er-t .n{color:#B3261E}.er-t .er-s{color:var(--muted,#5B6874);font-size:.76rem;display:block}
 .er-w{overflow-x:auto;margin-top:8px}.er-sim td input{width:92px;font:inherit;font-size:.86rem;padding:6px 8px;border:1px solid var(--line,#D5DEE5);border-radius:8px;text-align:right;background:var(--card,#fff);color:var(--ink,#0F1E29)}
 .er-x{margin:8px 0 0;padding-left:18px;font-size:.9rem;line-height:1.45}.er-x li{margin:0 0 6px}
 .er-b{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.er-k{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:8px}@media(min-width:900px){.er-k{grid-template-columns:repeat(4,minmax(0,1fr))}}
@@ -9371,12 +9372,23 @@ window.hwfContCambio = function () { try { if (typeof praPintar === "function" &
 </style>
 <script>/* patch_eerr: estado de resultados con simulador de precios */
 (function () {
-  if (typeof pintarMas !== "function") return;
-  try { if (typeof NAV_MNOM !== "undefined") NAV_MNOM.eerr = "Estado de resultados"; } catch (e) {}
+  const ADM = typeof pintarMas === "function", VEN = !ADM && typeof setModo === "function" && typeof NAV_ORDEN !== "undefined" && !!document.getElementById("mDash");
+  if (!ADM && !VEN) return;
+  try { if (ADM && typeof NAV_MNOM !== "undefined") NAV_MNOM.eerr = "Estado de resultados"; } catch (e) {}
+  let VBOX = null; const CONT = () => ADM ? document.getElementById("masBody") : VBOX, ACT = () => ADM ? (typeof vistaMas === "undefined" || vistaMas === "eerr") : !!(VBOX && !VBOX.hidden);
+  /* gastos de operación ESTIMADOS (22-11-2026, pedido de Jorge: «si falta un dato, elige el que más se ajuste a nuestro tipo de negocio»):
+     META no trae gastos; se usan % de la venta de referencia para una distribuidora de alimento para mascotas en Chile (gasto operacional
+     ~16 % de la venta) y una tienda de mascotas (~21 %). Editables en «Supuestos de gastos». Variables (1) se mueven con la venta simulada. */
+  const GS = [["dsue", "Sueldos del equipo de ventas", "d", 4, 0], ["dcom", "Comisiones de venta", "d", 2, 1], ["dcho", "Choferes y vehículos", "d", 3, 0], ["dcom2", "Combustible, peajes y fletes", "d", 2, 1], ["dadm", "Administración y oficina", "d", 4, 0], ["dinc", "Mermas e incobrables", "d", 1, 1],
+    ["trem", "Remuneraciones tienda", "t", 10, 0], ["tarr", "Arriendo y gastos del local", "t", 8, 0], ["tpag", "Comisión medios de pago", "t", 1.5, 1], ["totr", "Otros gastos tienda", "t", 1.5, 0]];
   const LS = "hwf-eerr", MES = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
-  const DIM = [["total", "Total"], ["canal", "Distribuidora / tienda"], ["vend", "Vendedor"], ["prov", "Proveedor"], ["marca", "Marca"], ["prod", "Producto"]];
-  let E = { anio: 0, m1: 1, m2: 12, canal: "", vend: "", prov: "", marca: "", prod: "", dim: "marca", ela: 0, sim: {} };
+  const DIM = [["total", "Total"], ["canal", "Distribuidora / tienda"], ["vend", "Vendedor"], ["prov", "Proveedor"], ["marca", "Marca"]];   /* 22-11-2026: sin «Detalle por producto» (pedido de Jorge); el filtro y el simulador siguen por producto */
+  let E = { anio: 0, m1: 1, m2: 12, canal: "", vend: "", prov: "", marca: "", prod: "", dim: "marca", ela: 0, sim: {}, gas: {} };
   try { E = Object.assign(E, JSON.parse(localStorage.getItem(LS) || "{}")); } catch (e) {}
+  const gp = id => { const v = (E.gas || {})[id], g = GS.find(x => x[0] === id); return v === undefined || v === "" || isNaN(+v) ? g[3] : +v; };
+  const gastos = (o, sim) => GS.map(g => [g, gp(g[0]) / 100 * Math.max(0, sim && g[4] ? (g[2] === "d" ? o.svd : o.svt) : (g[2] === "d" ? o.vd : o.vt))]);
+  const gtot = (o, sim) => gastos(o, sim).reduce((t, x) => t + x[1], 0), gpc = c => GS.filter(g => g[2] === c).reduce((t, g) => t + gp(g[0]), 0);
+  if (!["total", "canal", "vend", "prov", "marca"].includes(E.dim)) E.dim = "marca";
   const guarda = () => { try { localStorage.setItem(LS, JSON.stringify(E)); } catch (e) {} };
   const es = s => typeof esc === "function" ? esc(s) : String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const $ = n => (n < 0 ? "−$" : "$") + Math.round(Math.abs(n)).toLocaleString("es-CL");
@@ -9406,10 +9418,10 @@ window.hwfContCambio = function () { try { if (typeof praPintar === "function" &
       const p0 = o.v / o.q, cu = o.c / o.q, nb = +s.p > 0 ? +s.p : p0, d = Math.min(100, Math.max(0, +s.d || 0)), pf = nb * (1 - d / 100), f = pf / p0, uq = Math.max(0, 1 - (+E.ela || 0) * (f - 1));
       if (Math.abs(f - 1) < 1e-9 && Math.abs(uq - 1) < 1e-9) { SIM.push({ o, p0, cu, nb, d, pf, f, uq, nulo: true }); return; }
       fac[cod] = [f, uq]; SIM.push({ o, p0, cu, nb, d, pf, f, uq }); });
-    const z = k => ({ k, n: k, q: 0, fa: 0, nc: 0, v: 0, c: 0, sq: 0, sv: 0, sc: 0 }), G = {}, T = z("Total");
+    const z = k => ({ k, n: k, q: 0, fa: 0, nc: 0, v: 0, c: 0, sq: 0, sv: 0, sc: 0, vd: 0, vt: 0, svd: 0, svt: 0 }), G = {}, T = z("Total");
     const clave = (r, i) => E.dim === "canal" ? (r[7] === tv ? "Tienda" : "Distribuidora") : E.dim === "vend" ? (V[r[7]] || "?") : E.dim === "prov" ? i.pv : E.dim === "marca" ? i.ma : E.dim === "prod" ? i.cod : "Total";
     F.forEach(([r, i]) => { const q = r[4] || 0, v = r[5] || 0, c = q * (r[6] || 0), x = fac[i.cod] || [1, 1], k = clave(r, i), g = G[k] = G[k] || Object.assign(z(k), E.dim === "prod" ? { n: i.n, cod: i.cod, sub: i.ma } : {});
-      [g, T].forEach(o => { o.q += q; o.v += v; o.c += c; if (v >= 0) o.fa += v; else o.nc -= v; o.sq += q * x[1]; o.sv += v * x[0] * x[1]; o.sc += c * x[1]; }); });
+      [g, T].forEach(o => { o.q += q; o.v += v; o.c += c; if (v >= 0) o.fa += v; else o.nc -= v; o.sq += q * x[1]; o.sv += v * x[0] * x[1]; o.sc += c * x[1]; o[r[7] === tv ? "vt" : "vd"] += v; o[r[7] === tv ? "svt" : "svd"] += v * x[0] * x[1]; }); });
     const L = Object.values(G).sort((a, b) => b.v - a.v);
     return { B, T, L, P, SIM, opc, anios, aj: B.costoAjuste || null };
   }
@@ -9437,26 +9449,30 @@ window.hwfContCambio = function () { try { if (typeof praPintar === "function" &
       else if (dm < 0 && mu1 < mu0) { const qe = (o.v - o.c) / mu1; t += ` Para mantener el margen actual habría que vender ${nu(qe)} unidades (${nu(qe - o.q)} más, +${p1(pc(qe - o.q, o.q))}).`; }
       else if (dm > 0 && mu1 > mu0) { const qe = (o.v - o.c) / mu1; t += ` Aunque se vendieran hasta ${nu(o.q - qe)} unidades menos (−${p1(pc(o.q - qe, o.q))}) se mantendría el margen actual.`; }
       out.push(t); });
-    if (hay) out.push(`En conjunto, los cambios llevan la venta de ${mm(T.v)} a ${mm(T.sv)} (${sg(T.sv - T.v)}) y el margen bruto de ${mm(m)} a ${mm(sm)} (${sg(sm - m)}); el margen % pasa de ${p1(pc(m, T.v))} a ${p1(pc(sm, T.sv))}.`);
-    out.push("Gastos de operación (remuneraciones, arriendo, fletes, etc.) no vienen en los informes de META: este estado llega hasta el margen bruto (contribución).");
+    if (hay) out.push(`En conjunto, los cambios llevan la venta de ${mm(T.v)} a ${mm(T.sv)} (${sg(T.sv - T.v)}) y el margen bruto de ${mm(m)} a ${mm(sm)} (${sg(sm - m)}); el margen % pasa de ${p1(pc(m, T.v))} a ${p1(pc(sm, T.sv))}. El resultado operacional estimado pasa de ${mm(m - gtot(T))} a ${mm(sm - gtot(T, 1))} (${sg(sm - gtot(T, 1) - m + gtot(T))}).`);
+    const G0 = gtot(T), ro = m - G0, gv = gastos(T).filter(x => x[0][4]).reduce((t, x) => t + x[1], 0), gf = G0 - gv;
+    out.push(`Gastos de operación: no vienen en los informes de META, así que se estiman como % de la venta con referencias de nuestro rubro (distribuidora ${p1(gpc("d"))} de su venta, tienda ${p1(gpc("t"))}; se ajustan en «Supuestos de gastos»). Con eso el resultado operacional estimado es ${mm(ro)} (${p1(pc(ro, T.v))} de la venta)${ro < 0 ? ": el margen no alcanza a cubrir los gastos" : ""}.${E.dim !== "total" || E.prov || E.marca || E.prod || E.vend ? " Por grupo, los gastos se reparten en proporción a su venta." : ""}`);
+    if (T.v > 0 && G0 > 0) { const mv = pc(m, T.v) / 100 - gv / T.v, pe = mv > 0 ? gf / mv : 0; if (pe > 0) out.push(`Punto de equilibrio estimado: con el margen actual hay que vender unos ${mm(pe)} netos en el período para cubrir los gastos fijos; ${pe <= T.v ? "la venta podría caer hasta " + p1(pc(T.v - pe, T.v)) + " antes de dar pérdida" : "hoy faltan " + mm(pe - T.v) + " de venta para llegar"}.`); }
     return out;
   }
   const filtroTxt = () => [E.prov && "proveedor " + E.prov, E.marca && "marca " + E.marca, E.prod && "código " + E.prod].filter(Boolean).map(x => ", " + x).join("");
 
   /* ---------- tablas (pantalla y exportes) ---------- */
   function lineas(X) { const T = X.T, hay = X.SIM.some(s => !s.nulo), m = T.v - T.c, sm = T.sv - T.sc;
-    const f = [["Ventas brutas (facturas y boletas)", T.fa, null], ["(−) Notas de crédito", -T.nc, null], ["Ventas netas", T.v, T.sv, "s"], ["(−) Costo de ventas", -T.c, -T.sc], ["Margen bruto", m, sm, "r"], ["Margen bruto %", pc(m, T.v), pc(sm, T.sv), "%"], ["Unidades vendidas", T.q, T.sq, "u"]];
+    const f = [["Ventas brutas (facturas y boletas)", T.fa, null], ["(−) Notas de crédito", -T.nc, null], ["Ventas netas", T.v, T.sv, "s"], ["(−) Costo de ventas", -T.c, -T.sc], ["Margen bruto", m, sm, "r"], ["Margen bruto %", pc(m, T.v), pc(sm, T.sv), "%"]], G0 = gtot(T), G1 = gtot(T, 1);
+    f.push(["(−) Gastos de operación (estimados)", -G0, -G1, "g"]); gastos(T).forEach(([g, a], i) => { if (a > 0.5) f.push(["· " + g[1] + " (" + String(gp(g[0])).replace(".", ",") + "%)", -a, -gastos(T, 1)[i][1], "i"]); });
+    f.push(["Resultado operacional (estimado)", m - G0, sm - G1, "r"], ["Resultado operacional %", pc(m - G0, T.v), pc(sm - G1, T.sv), "%"], ["Unidades vendidas", T.q, T.sq, "u"]);
     return { f, hay }; }
   const cab = () => E.dim === "prod" ? "Producto" : (DIM.find(d => d[0] === E.dim) || [, "Grupo"])[1];
   function detalle(X) { const T = X.T, hay = X.SIM.some(s => !s.nulo);
-    const h = [cab(), "Unidades", "Venta neta", "Costo", "Margen", "Margen %", "% venta"].concat(hay ? ["Venta simulada", "Margen simulado", "Dif. margen"] : []);
+    const h = [cab(), "Unidades", "Venta neta", "Costo", "Margen", "Margen %", "% venta"].concat(hay ? ["Venta simulada", "Margen simulado", "Dif. margen"] : []).concat(["Res. op. est."]);
     return [h].concat(X.L.map(g => [E.dim === "prod" ? g.cod + " · " + g.n : g.n, Math.round(g.q), Math.round(g.v), Math.round(g.c), Math.round(g.v - g.c), +pc(g.v - g.c, g.v).toFixed(1), +pc(g.v, T.v).toFixed(1)]
-      .concat(hay ? [Math.round(g.sv), Math.round(g.sv - g.sc), Math.round((g.sv - g.sc) - (g.v - g.c))] : []))); }
+      .concat(hay ? [Math.round(g.sv), Math.round(g.sv - g.sc), Math.round((g.sv - g.sc) - (g.v - g.c))] : []).concat([Math.round(g.v - g.c - gtot(g))]))); }
   function simTabla(X) { return [["Código", "Producto", "Unidades", "Precio unit. actual", "Costo unit.", "Precio base", "Descuento %", "Precio final", "Unidades simuladas", "Dif. venta", "Dif. margen"]]
     .concat(X.SIM.filter(s => !s.nulo).map(s => { const o = s.o, q1 = o.q * s.uq; return [o.cod, o.n, Math.round(o.q), Math.round(s.p0), Math.round(s.cu), Math.round(s.nb), s.d, Math.round(s.pf), Math.round(q1), Math.round(s.pf * q1 - o.v), Math.round((s.pf - s.cu) * q1 - (o.v - o.c))]; })); }
 
   /* ---------- pantalla ---------- */
-  function pintar() { const box = document.getElementById("masBody"); if (!box || (typeof vistaMas !== "undefined" && vistaMas !== "eerr")) return;
+  function pintar() { const box = CONT(); if (!box || !ACT()) return;
     const X = calc(); if (!X) { box.innerHTML = '<div class="card"><h2>Estado de resultados</h2><p class="muted">Aún no hay datos de ventas cargados (se publican desde Drive «HWF META»).</p></div>'; return; }
     const T = X.T, { f, hay } = lineas(X), sel = (id, lab, val, ops) => `<label>${lab}<select id="${id}">${ops.map(([v, t]) => `<option value="${es(v)}"${String(v) === String(val) ? " selected" : ""}>${es(t)}</option>`).join("")}</select></label>`;
     const srt = s => [...s].sort((a, b) => String(a).localeCompare(String(b), "es")), m = T.v - T.c;
@@ -9474,7 +9490,7 @@ window.hwfContCambio = function () { try { if (typeof praPintar === "function" &
       <div class="er-b"><button type="button" class="btn" id="erXls">⬇ Excel</button><button type="button" class="btn" id="erPdf">⬇ PDF</button><button type="button" class="btn" id="erPpt">⬇ PowerPoint</button><button type="button" class="btn pri" id="erEnv">Enviar PDF</button></div></div>
       <div class="${hay ? "" : "er-g"}"><div class="card"><h2>Estado <span class="muted">${hay ? "actual · simulado" : "período elegido"}</span></h2><div class="er-w"><table class="er-t"><thead><tr><th></th><th>Actual</th>${hay ? "<th>Simulado</th><th>Diferencia</th>" : "<th>% venta</th>"}</tr></thead><tbody>
         ${f.map(r => `<tr class="${r[3] && r[3].length === 1 ? r[3] : ""}"><td>${r[0]}</td><td>${vfmt(r, r[1])}</td>${hay ? `<td>${vfmt(r, r[2] == null ? r[1] : r[2])}</td><td class="${r[2] == null ? "" : cls(r[2] - r[1])}">${dif(r)}</td>` : `<td>${r[3] === "%" || r[3] === "u" ? "" : p1(pc(r[1], T.v))}</td>`}</tr>`).join("")}
-        </tbody></table></div><p class="muted" style="font-size:.74rem;margin:6px 0 0">Venta = facturado neto sin IVA (facturas − notas de crédito). Costo = unidades × costo unitario, con la regla de bonificados. Sin gastos de operación (no vienen en META).</p></div>
+        </tbody></table></div><p class="muted" style="font-size:.74rem;margin:6px 0 0">Venta = facturado neto sin IVA (facturas − notas de crédito). Costo = unidades × costo unitario, con la regla de bonificados. Gastos de operación estimados como % de la venta (ver «Supuestos de gastos»): META no trae gastos reales.</p></div>
         <div class="card"><h2>Explicación</h2><ul class="er-x">${explicar(X).map(t => `<li>${es(t)}</li>`).join("")}</ul></div></div>
       <div class="card er-sim"><h2>Simular precio y descuento <span class="muted">por producto</span></h2>
         <div class="er-f"><label style="grid-column:1/-1">Agregar producto<input id="erAdd" list="erDl" placeholder="Escribe código o nombre"><datalist id="erDl">${Object.values(X.P).filter(o => o.q > 0).sort((a, b) => b.v - a.v).map(o => `<option value="${es(o.cod + " · " + o.n)}">`).join("")}</datalist></label>
@@ -9486,10 +9502,14 @@ window.hwfContCambio = function () { try { if (typeof praPintar === "function" &
               <td><input type="number" min="0" step="1" data-sp="${es(o.cod)}" value="${S.p || ""}" placeholder="${Math.round(s.p0)}" aria-label="Nuevo precio unitario"></td><td><input type="number" min="0" max="100" step="0.5" data-sd="${es(o.cod)}" value="${S.d || ""}" placeholder="0" aria-label="Descuento %"></td>
               <td>${$(s.pf)}${s.pf <= s.cu ? '<small class="er-s n">bajo el costo</small>' : ""}</td><td class="${cls(dv)}">${s.nulo ? "—" : sg(dv)}</td><td class="${cls(dm)}">${s.nulo ? "—" : sg(dm)}</td><td><button type="button" class="er-mini" data-sx="${es(o.cod)}" aria-label="Quitar">✕</button></td></tr>`; }).join("")}
           </tbody></table></div><div class="er-b"><button type="button" class="btn" id="erLimp">Quitar todas las simulaciones</button></div>` : '<p class="muted" style="margin:8px 0 0">Agrega productos para probar un nuevo precio unitario o un descuento y ver cómo cambia el resultado.</p>'}</div>
-      <div class="card"><h2>Detalle por ${es(cab().toLowerCase())} <span class="muted">${X.L.length} ${X.L.length === 1 ? "fila" : "filas"}${X.L.length > 150 ? " · se muestran 150 (el Excel trae todas)" : ""}</span></h2><div class="er-w"><table class="er-t"><thead><tr><th>${es(cab())}</th><th>Unid.</th><th>Venta neta</th><th>Costo</th><th>Margen</th><th>Mg %</th><th>% venta</th>${hay ? "<th>Margen simulado</th><th>Dif.</th>" : ""}${E.dim === "prod" ? "<th></th>" : ""}</tr></thead><tbody>
-        ${X.L.slice(0, 150).map(g => { const gm = g.v - g.c, sm = g.sv - g.sc; return `<tr><td>${es(g.n)}${g.cod ? `<small class="er-s">cód. ${es(g.cod)} · ${es(g.sub || "")}</small>` : ""}</td><td>${nu(g.q)}</td><td>${$(g.v)}</td><td>${$(g.c)}</td><td class="${gm < 0 ? "n" : ""}">${$(gm)}</td><td>${p1(pc(gm, g.v))}</td><td>${p1(pc(g.v, T.v))}</td>
+      <details class="card er-sup"${E.supA ? " open" : ""}><summary><h2 style="display:inline">Supuestos de gastos <span class="muted">estimados · % de la venta</span></h2></summary>
+        <p class="muted" style="font-size:.8rem;margin:6px 0 0">Los informes de META no traen gastos. Se usan referencias de nuestro rubro: una distribuidora de alimento para mascotas gasta en operar cerca de 14–18 % de su venta y una tienda de mascotas 18–24 %. Cambia cada % por tus cifras reales cuando las tengas; quedan guardadas en este equipo. Los marcados como variables se mueven con la venta simulada.</p>
+        <div class="er-f">${GS.map(g => `<label>${es(g[1])} · ${g[2] === "d" ? "distribuidora" : "tienda"}${g[4] ? " · variable" : ""}<input type="number" min="0" max="60" step="0.5" data-gas="${g[0]}" value="${gp(g[0])}"></label>`).join("")}</div>
+        <div class="er-b"><span class="muted" style="font-size:.84rem;align-self:center">Distribuidora ${p1(gpc("d"))} · Tienda ${p1(gpc("t"))}</span><button type="button" class="btn" id="erGasR">Volver a los valores de referencia</button></div></details>
+      <div class="card"><h2>Detalle por ${es(cab().toLowerCase())} <span class="muted">${X.L.length} ${X.L.length === 1 ? "fila" : "filas"}${X.L.length > 150 ? " · se muestran 150 (el Excel trae todas)" : ""}</span></h2><div class="er-w"><table class="er-t"><thead><tr><th>${es(cab())}</th><th>Unid.</th><th>Venta neta</th><th>Costo</th><th>Margen</th><th>Mg %</th><th>% venta</th><th>Res. op. est.</th>${hay ? "<th>Margen simulado</th><th>Dif.</th>" : ""}${E.dim === "prod" ? "<th></th>" : ""}</tr></thead><tbody>
+        ${X.L.slice(0, 150).map(g => { const gm = g.v - g.c, sm = g.sv - g.sc; return `<tr><td>${es(g.n)}${g.cod ? `<small class="er-s">cód. ${es(g.cod)} · ${es(g.sub || "")}</small>` : ""}</td><td>${nu(g.q)}</td><td>${$(g.v)}</td><td>${$(g.c)}</td><td class="${gm < 0 ? "n" : ""}">${$(gm)}</td><td>${p1(pc(gm, g.v))}</td><td>${p1(pc(g.v, T.v))}</td><td class="${gm - gtot(g) < 0 ? "n" : ""}">${$(gm - gtot(g))}</td>
           ${hay ? `<td>${$(sm)}</td><td class="${cls(sm - gm)}">${Math.abs(sm - gm) < 0.5 ? "" : sg(sm - gm)}</td>` : ""}${E.dim === "prod" ? `<td>${E.sim[g.cod] ? "" : `<button type="button" class="er-mini" data-sa="${es(g.cod)}">Simular</button>`}</td>` : ""}</tr>`; }).join("")}
-        <tr class="r"><td>Total</td><td>${nu(T.q)}</td><td>${$(T.v)}</td><td>${$(T.c)}</td><td>${$(m)}</td><td>${p1(pc(m, T.v))}</td><td>100%</td>${hay ? `<td>${$(T.sv - T.sc)}</td><td class="${cls(T.sv - T.sc - m)}">${sg(T.sv - T.sc - m)}</td>` : ""}${E.dim === "prod" ? "<td></td>" : ""}</tr></tbody></table></div></div>`;
+        <tr class="r"><td>Total</td><td>${nu(T.q)}</td><td>${$(T.v)}</td><td>${$(T.c)}</td><td>${$(m)}</td><td>${p1(pc(m, T.v))}</td><td>100%</td><td>${$(m - gtot(T))}</td>${hay ? `<td>${$(T.sv - T.sc)}</td><td class="${cls(T.sv - T.sc - m)}">${sg(T.sv - T.sc - m)}</td>` : ""}${E.dim === "prod" ? "<td></td>" : ""}</tr></tbody></table></div></div>`;
     const q = id => document.getElementById(id), cambia = (id, k, num) => { const e = q(id); if (e) e.onchange = () => { E[k] = num ? Number(e.value) : e.value; if (k === "prov") { E.marca = ""; E.prod = ""; } if (k === "marca") E.prod = ""; if (k === "m1" && E.m2 < E.m1) E.m2 = E.m1; guarda(); pintar(); }; };
     cambia("erAn", "anio", 1); cambia("erM1", "m1", 1); cambia("erM2", "m2", 1); cambia("erCa", "canal"); cambia("erVe", "vend"); cambia("erPv", "prov"); cambia("erMa", "marca"); cambia("erPr", "prod");
     box.querySelectorAll("[data-dim]").forEach(b => b.onclick = () => { E.dim = b.dataset.dim; guarda(); pintar(); });
@@ -9499,6 +9519,9 @@ window.hwfContCambio = function () { try { if (typeof praPintar === "function" &
     box.querySelectorAll("[data-sp],[data-sd]").forEach(i => i.onchange = () => { const cod = i.dataset.sp || i.dataset.sd, s = E.sim[cod] = E.sim[cod] || {}; s[i.dataset.sp ? "p" : "d"] = i.value === "" ? "" : Math.max(0, Number(i.value) || 0); guarda(); pintar(); });
     box.querySelectorAll("[data-sx]").forEach(b => b.onclick = () => { delete E.sim[b.dataset.sx]; guarda(); pintar(); });
     box.querySelectorAll("[data-sa]").forEach(b => b.onclick = () => add(b.dataset.sa));
+    box.querySelectorAll("[data-gas]").forEach(i => i.onchange = () => { E.gas = E.gas || {}; E.gas[i.dataset.gas] = i.value === "" ? "" : Math.max(0, Number(String(i.value).replace(",", ".")) || 0); E.supA = true; guarda(); pintar(); });
+    if (q("erGasR")) q("erGasR").onclick = () => { E.gas = {}; E.supA = true; guarda(); pintar(); };
+    const sd = box.querySelector(".er-sup"); if (sd) sd.ontoggle = () => { E.supA = sd.open; guarda(); };
     if (q("erLimp")) q("erLimp").onclick = () => { E.sim = {}; guarda(); pintar(); };
     q("erXls").onclick = () => excel(X); q("erPdf").onclick = () => pdf(X, "pdf"); q("erEnv").onclick = () => pdf(X, "enviar"); q("erPpt").onclick = () => ppt(X);
   }
@@ -9513,12 +9536,13 @@ window.hwfContCambio = function () { try { if (typeof praPintar === "function" &
     hoja("Estado de resultados", [["Estado de resultados HWF"], ["Período", per()], ["Alcance", alc() + filtroTxt()], ["Fuente", "Drive HWF META (procesado por el script)"], []].concat(filasEstado(X)), [36, 16, 16, 16]);
     hoja("Detalle", detalle(X), [44, 10, 14, 14, 14, 10, 10, 14, 14, 14]);
     if (X.SIM.some(s => !s.nulo)) hoja("Simulación", simTabla(X).concat([[], ["Sensibilidad de unidades al precio", +E.ela || 0]]), [10, 40, 10, 14, 12, 12, 11, 12, 14, 14, 14]);
+    hoja("Supuestos de gastos", [["Gasto de operación (estimado)", "Negocio", "% de la venta", "Variable con la venta"]].concat(GS.map(g => [g[1], g[2] === "d" ? "Distribuidora" : "Tienda", gp(g[0]), g[4] ? "sí" : "no"])).concat([[], ["Referencias del rubro: distribuidora de alimento para mascotas 14–18 % de la venta; tienda de mascotas 18–24 %. META no trae gastos reales."]]), [52, 16, 14, 20]);
     hoja("Explicación", explicar(X).map(t => [t]), [140]);
     XLSX.writeFile(wb, nombre() + ".xlsx"); }
   function pdf(X, modo) { const K = window.hwfPdfKit; if (!K) return aviso("El generador de PDF no está disponible en esta app.");
     const d = K.Pdf(), M = K.M, W = d.W - 2 * M, PIE = "HWF · Estado de resultados", TIT = "Estado de resultados"; K.cabecera(d, TIT, alc() + filtroTxt(), per()); let y = d.y;
     const salto = h => { if (y + h > d.H - 60) { K.pie(d, PIE); d.pagina(); K.cabecera(d, TIT, "", ""); y = d.y; } };
-    const tabla = (f, w1, num) => { const n = f[0].length, wc = (W - w1) / Math.max(1, n - 1); f.forEach((r, i) => { salto(15); const enc = i === 0, neg = /^(Ventas netas|Margen bruto|Total)$/.test(r[0]);
+    const tabla = (f, w1, num) => { const n = f[0].length, wc = (W - w1) / Math.max(1, n - 1); f.forEach((r, i) => { salto(15); const enc = i === 0, neg = /^(Ventas netas|Margen bruto|Total|Resultado operacional \(estimado\))$/.test(r[0]);
       if (enc) d.rect(M, y, W, 15, K.AZ); else if (neg) d.rect(M, y, W, 14, K.SU); d.texto(M + 4, y + 10, d.corta(String(r[0]), w1 - 6, 8, enc || neg), { sz: 8, b: enc || neg, c: enc ? [255, 255, 255] : undefined });
       r.slice(1).forEach((v, k) => d.texto(M + w1 + wc * (k + 1) - 4, y + 10, enc ? String(v) : num(v, r, k), { sz: 8, b: enc || neg, al: "r", c: enc ? [255, 255, 255] : undefined })); y += 15; }); y += 8; };
     const fv = (v, r) => typeof v !== "number" ? String(v) : /%$/.test(r[0]) ? p1(v) : /Unidades/.test(r[0]) ? nu(v) : $(v);
@@ -9528,7 +9552,7 @@ window.hwfContCambio = function () { try { if (typeof praPintar === "function" &
     if (X.SIM.some(s => !s.nulo)) { y += 6; salto(40); d.texto(M, y + 6, "Simulación de precios", { sz: 12, b: 1, c: K.AZ }); y += 16;
       const st = simTabla(X).map((r, i) => i === 0 ? ["Producto", "Unid.", "Precio act.", "Costo u.", "Precio final", "Dif. venta", "Dif. margen"] : [r[0] + " · " + r[1], r[2], r[3], r[4], r[7], r[9], r[10]]);
       tabla(st, W * 0.34, (v, r, k) => typeof v !== "number" ? String(v) : k === 0 ? nu(v) : k >= 4 ? sg(v) : $(v)); }
-    const D = detalle(X).map((r, i) => i === 0 ? r.map(h => ({ "Unidades": "Unid.", "Venta neta": "Venta", "Margen %": "Mg %", "Margen simulado": "Mg simulado", "Dif. margen": "Dif." }[h] || h)) : r), cols = [0, 1, 2, 4, 5].concat(D[0].length > 7 ? [8, 9] : []); y += 6; salto(40); d.texto(M, y + 6, "Detalle por " + cab().toLowerCase() + (D.length > 61 ? " (60 primeros)" : ""), { sz: 12, b: 1, c: K.AZ }); y += 16;
+    const D = detalle(X).map((r, i) => i === 0 ? r.map(h => ({ "Unidades": "Unid.", "Venta neta": "Venta", "Margen %": "Mg %", "Margen simulado": "Mg simulado", "Dif. margen": "Dif.", "Res. op. est.": "Res. op." }[h] || h)) : r), cols = [0, 1, 2, 4, 5].concat(D[0].length > 8 ? [8, 9] : []).concat([D[0].length - 1]); y += 6; salto(40); d.texto(M, y + 6, "Detalle por " + cab().toLowerCase() + (D.length > 61 ? " (60 primeros)" : ""), { sz: 12, b: 1, c: K.AZ }); y += 16;
     tabla(D.slice(0, 61).map(r => cols.map(i => r[i])), W * 0.36, (v, r, k) => typeof v !== "number" ? String(v) : cols[k + 1] === 5 ? p1(v) : cols[k + 1] === 1 ? nu(v) : cols[k + 1] === 9 ? sg(v) : $(v));
     K.pie(d, PIE); const P = { bytes: d.bytes(), paginas: d.paginas(), nombre: nombre() + ".pdf", msg: "Estado de resultados HWF · " + per() + " · " + alc() };
     if (modo === "pdf") K.bajar(P); else { let puede = false; try { puede = !!(navigator.canShare && navigator.canShare({ files: [new File([P.bytes], P.nombre, { type: "application/pdf" })] })); } catch (e) {} if (puede) K.enviar(P); else K.bajar(P); } }
@@ -9546,9 +9570,10 @@ window.hwfContCambio = function () { try { if (typeof praPintar === "function" &
         s.addText(l.toUpperCase(), { x: xx + 0.2, y: 1.4, w: 2.6, h: 0.35, fontSize: 11, bold: true, color: GR, margin: 0, isTextBox: true }); s.addText(v, { x: xx + 0.2, y: 1.8, w: 2.6, h: 0.6, fontSize: 26, bold: true, color: AZ, margin: 0, isTextBox: true });
         s.addText(x, { x: xx + 0.2, y: 2.42, w: 2.6, h: 0.35, fontSize: 11, color: GR, margin: 0, isTextBox: true }); });
     const fe = filasEstado(X), fv = (v, r) => typeof v !== "number" ? String(v) : /%$/.test(r[0]) ? p1(v) : /Unidades/.test(r[0]) ? nu(v) : $(v);
+    s = p.addSlide(); tit(s, "Estado de resultados");
     s.addTable(fe.map((r, i) => r.map((v, k) => ({ text: i === 0 ? String(v) : k === 0 ? String(v) : (k === 3 && typeof v === "number" ? (/%$/.test(r[0]) ? (v >= 0 ? "+" : "") + v.toFixed(1) + " pts" : /Unidades/.test(r[0]) ? (v >= 0 ? "+" : "−") + nu(Math.abs(v)) : sg(v)) : fv(v, r)),
-      options: { bold: i === 0 || /^(Ventas netas|Margen bruto)$/.test(r[0]), color: i === 0 ? "FFFFFF" : "0F1E29", fill: { color: i === 0 ? AZ : /^(Ventas netas|Margen bruto)$/.test(r[0]) ? SU : "FFFFFF" }, align: k ? "right" : "left" } }))),
-      { x: 0.5, y: 3.2, w: 12.3, colW: [5.1].concat(fe[0].slice(1).map(() => 7.2 / (fe[0].length - 1))), fontSize: 12, border: { type: "solid", pt: 0.5, color: "D5DEE5" }, rowH: 0.36 });
+      options: { bold: i === 0 || /^(Ventas netas|Margen bruto|Resultado operacional \(estimado\))$/.test(r[0]), color: i === 0 ? "FFFFFF" : "0F1E29", fill: { color: i === 0 ? AZ : /^(Ventas netas|Margen bruto|Resultado operacional \(estimado\))$/.test(r[0]) ? SU : "FFFFFF" }, align: k ? "right" : "left" } }))),
+      { x: 0.5, y: 1.15, w: 12.3, colW: [5.1].concat(fe[0].slice(1).map(() => 7.2 / (fe[0].length - 1))), fontSize: 11, border: { type: "solid", pt: 0.5, color: "D5DEE5" }, rowH: 0.3 });
     s = p.addSlide(); tit(s, "Explicación de los resultados"); const ex = explicar(X), mitad = ex.length > 6;
     s.addText(ex.slice(0, mitad ? 6 : 99).map((t, i, a) => ({ text: t, options: { bullet: true, breakLine: i < a.length - 1 } })), { x: 0.6, y: 1.15, w: 12.1, h: 5.7, fontSize: ex.join(" ").length > 1400 ? 12 : 14, color: "0F1E29", paraSpaceAfter: 8, valign: "top", isTextBox: true });
     if (mitad) { s = p.addSlide(); tit(s, "Explicación (continuación)"); s.addText(ex.slice(6).map((t, i, a) => ({ text: t, options: { bullet: true, breakLine: i < a.length - 1 } })), { x: 0.6, y: 1.15, w: 12.1, h: 5.7, fontSize: 13, color: "0F1E29", paraSpaceAfter: 8, valign: "top", isTextBox: true }); }
@@ -9561,7 +9586,20 @@ window.hwfContCambio = function () { try { if (typeof praPintar === "function" &
         { x: 0.5, y: 1.2, w: 12.3, colW: [0.9, 3.9, 1.0, 1.35, 1.25, 1.3, 1.3, 1.3], fontSize: 11, border: { type: "solid", pt: 0.5, color: "D5DEE5" } }); }
     try { await p.writeFile({ fileName: nombre() + ".pptx" }); } catch (e) { aviso("No se pudo generar el PowerPoint: " + (e && e.message || e)); } }
 
-  const _pm = pintarMas; pintarMas = function () { if (typeof vistaMas !== "undefined" && vistaMas === "eerr") return pintar(); return _pm.apply(this, arguments); };
+  if (ADM) { const _pm = pintarMas; pintarMas = function () { if (typeof vistaMas !== "undefined" && vistaMas === "eerr") return pintar(); return _pm.apply(this, arguments); }; return; }
+  /* VENTAS (22-11-2026): la pestaña solo aparece cuando ingresa Diego (o un vendedor con permiso de Admin) */
+  const yo = () => (typeof SES !== "undefined" && SES && SES.vendedor) || null, puede = () => { const v = yo(); return !!v && (/^diego/i.test(String(v.nombre || "")) || !!v.admin); };
+  const tab = document.createElement("button"); tab.type = "button"; tab.setAttribute("role", "tab"); tab.id = "mEerr"; tab.setAttribute("aria-selected", "false"); tab.title = "Estado de resultados"; tab.textContent = "Estado de resultados";
+  VBOX = document.createElement("div"); VBOX.id = "crmEerr"; VBOX.hidden = true; VBOX.style.cssText = "padding:0 4px"; (document.getElementById("crmBi") || document.getElementById("crmDash")).after(VBOX);
+  const OCULTA = ["crmFicha", "crmLista", "crmAgenda", "crmRuta", "crmInicio", "crmCobranza", "crmEmbudo", "crmNut", "crmDash", "crmAvance", "crmMeta", "crmTec", "crmBi", "crmB2b", "crmMail", "crmInv", "crmCat"];
+  const _sm = setModo; setModo = function (m) { if (m === "eerr" && !puede()) m = "inicio"; const r = _sm.apply(this, arguments), on = m === "eerr"; tab.setAttribute("aria-selected", on); VBOX.hidden = !on; document.body.classList.toggle("m-eerr", on);
+    if (on) { OCULTA.forEach(id => { const x = document.getElementById(id); if (x) x.hidden = true; }); pintar(); window.scrollTo({ top: 0 }); } return r; };
+  tab.onclick = () => setModo("eerr");
+  try { const _af = abrirFicha; abrirFicha = function () { VBOX.hidden = true; tab.setAttribute("aria-selected", "false"); document.body.classList.remove("m-eerr"); return _af.apply(this, arguments); }; } catch (e) {}
+  try { if (!NAV_ORDEN.some(x => x[0] === "eerr")) NAV_ORDEN.push(["eerr", "mEerr"]); } catch (e) {}
+  document.head.insertAdjacentHTML("beforeend", "<style>body.m-eerr #crmMeta{display:none!important}#crmEerr{min-width:0;max-width:100%;box-sizing:border-box}#crmEerr>.card,#crmEerr>div,#crmEerr .er-g>.card{min-width:0;max-width:100%;box-sizing:border-box}#crmEerr .er-w{max-width:100%}#crmEerr .card{background:var(--card,#fff);border:1px solid var(--line,#E3E9EE);border-radius:16px;padding:14px;margin:0 0 12px}#crmEerr .btn{border:1px solid var(--line,#D5DEE5);background:var(--card,#fff);border-radius:12px;padding:9px 14px;font:inherit;font-weight:700;cursor:pointer;color:var(--ink,#0F1E29)}#crmEerr .btn.pri{background:#0B3146;color:#fff;border-color:#0B3146}#crmEerr .muted{color:var(--muted,#5B6874);font-weight:400}#crmEerr h2{font-size:1.05rem;margin:0}</style>");
+  const ver = () => { const ok = puede(), ancla = document.getElementById("mBi") || document.getElementById("mDash"); if (ok && !tab.isConnected && ancla) ancla.after(tab); if (!ok && tab.isConnected) { if (!VBOX.hidden) setModo("inicio"); tab.remove(); } };
+  ver(); setInterval(ver, 1500);
 })();
 </script>
 <style>/* patch_menuorden */
@@ -9573,7 +9611,7 @@ window.hwfContCambio = function () { try { if (typeof praPintar === "function" &
 (function () {
   const VEN = typeof NAV_ORDEN !== "undefined" && typeof setModo === "function" && !!document.getElementById("mInicio"), ADM = !VEN && !!document.querySelector("nav.bottom") && !!document.getElementById("s-res");
   const LOG = !VEN && !ADM && !!document.querySelector('#nav [data-s="rutas"]'), TND = !VEN && !ADM && !!document.getElementById("tNav");
-  const GV = [["Mi día", ["inicio", "pedido", "clientes", "agenda", "ruta", "cobranza", "embudo", "cat"]], ["Análisis", ["dash", "avance", "bi"]], ["Aprender", ["nut", "tec"]]];
+  const GV = [["Mi día", ["inicio", "pedido", "clientes", "agenda", "ruta", "cobranza", "embudo", "cat"]], ["Análisis", ["dash", "avance", "bi", "eerr"]], ["Aprender", ["nut", "tec"]]];
   const GA = [["Dirección", ["t:hal"]], ["Ventas", ["t:res", "t:ven", "t:cli", "t:pro", "m:ranking", "m:plan", "m:zonas", "m:terreno", "m:bonif"]], ["Pedidos y cobranza", ["m:cots", "m:napp", "m:cobranza", "m:embudo"]],
     ["BI y compras", ["b:v", "b:l", "t:mar", "m:eerr", "m:abast", "m:provee"]], ["Web y portal B2B", ["m:metricas", "m:b2b", "m:mail", "m:invita", "m:roi"]], ["Archivos y datos", ["m:catalogo", "m:cambios", "m:datos"]]];   /* 22-11-2026: métricas web y B2B en su propio grupo */
   const pos = (G, k) => { let n = 0; for (const [, l] of G) { const i = l.indexOf(k); if (i >= 0) return n + i; n += l.length; } return 999; };
