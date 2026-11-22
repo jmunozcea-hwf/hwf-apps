@@ -7198,7 +7198,7 @@ function confirmarNota() {
   x.onclick = () => cerrarModal(); card.insertBefore(x, card.firstChild); })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261122201245";
+const HWF_VER = "20261122201529";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -9730,7 +9730,7 @@ body.m-b2b #crmMeta{display:none!important}
   }
   function pintar() {
     if (!box) return; const n = pend(), m = mias(), f = ST.filtro;
-    const pe = ST.cuentas.filter(c => c.estado === "pendiente"), cuentas = f === "todas" ? m : m.filter(c => c.estado === f);
+    const pe = ST.cuentas.filter(c => c.estado === "pendiente"), cuentas = f === "todas" ? m.filter(c => c.estado !== "rechazado") : m.filter(c => c.estado === f);   /* rechazadas: archivadas, fuera de «Todas» (22-11-2026) */
     const ruts = new Set(m.map(c => RK(c.rut))), ped = ST.pedidos.filter(p => p.vendedor === yo() || ruts.has(RK(p.rut))).slice(0, 25);
     const cj = ST.canjes.filter(c => ruts.has(RK(c.rut)) && c.estado === "pendiente");
     const cnt = e => m.filter(c => c.estado === e).length;
@@ -9740,7 +9740,7 @@ body.m-b2b #crmMeta{display:none!important}
       <div class="b2-card"><h3>Solicitudes pendientes <small>${n ? n + (n === 1 ? " por revisar" : " por revisar") : "al día"}</small></h3>
         ${pe.length ? pe.map(c => tarjetaCuenta(c, "", `<button type="button" class="b2-b ok" data-a="aprobar" data-id="${E(c.id)}">Aprobar</button><button type="button" class="b2-b mal" data-a="rechazado" data-id="${E(c.id)}">Rechazar</button>`)).join("") : `<div class="b2-vac">${ST.t ? "No hay solicitudes pendientes." : "Sin datos todavía."}</div>`}</div>
       <div class="b2-card"><h3>Mi cartera B2B <small>${m.length} cuenta${m.length === 1 ? "" : "s"}</small></h3>
-        <div class="b2-chips">${[["activo", "Activas"], ["bloqueado", "Bloqueadas"], ["rechazado", "Rechazadas"], ["todas", "Todas"]].map(([k, t]) => `<button type="button" class="b2-ch" data-f="${k}" aria-pressed="${f === k}">${t}${k === "todas" ? "" : " " + cnt(k)}</button>`).join("")}</div>
+        <div class="b2-chips">${[["activo", "Activas"], ["bloqueado", "Bloqueadas"], ["todas", "Todas"]].concat(cnt("rechazado") ? [["rechazado", "🗄 Archivadas"]] : []).map(([k, t]) => `<button type="button" class="b2-ch" data-f="${k}" aria-pressed="${f === k}"${k === "rechazado" ? ' style="opacity:.7"' : ""}>${t}${k === "todas" ? "" : " " + cnt(k)}</button>`).join("")}</div>
         <div style="margin-top:8px">${cuentas.length ? cuentas.map(c => tarjetaCuenta(c, "", c.estado === "activo" ? `<button type="button" class="b2-b mal" data-a="bloqueado" data-id="${E(c.id)}">Bloquear</button>` : c.estado === "bloqueado" ? `<button type="button" class="b2-b ok" data-a="aprobar" data-id="${E(c.id)}">Reactivar</button>` : `<button type="button" class="b2-b ok" data-a="aprobar" data-id="${E(c.id)}">Aprobar</button>`)).join("") : `<div class="b2-vac">No hay cuentas en esta lista.</div>`}</div></div>
       ${cj.length ? `<div class="b2-card"><h3>Canjes por entregar <small>${cj.length}</small></h3>${cj.map(c => `<div class="b2-c"><div class="b2-t"><b>${E(c.cliente || c.rut)}</b><span class="b2-pill pendiente">${E(c.puntos || 0)} pts</span></div><small>${E(F(c.fecha))} · ${E(c.beneficio || "")}</small></div>`).join("")}</div>` : ""}
       <div class="b2-card"><h3>Pedidos B2B recientes <small>${ped.length}</small></h3>${ped.length ? ped.map(tarjetaPedido).join("") : `<div class="b2-vac">Aún no hay pedidos del portal de tus clientes.</div>`}</div>`;

@@ -8251,10 +8251,10 @@ body.m-b2b #crmMeta{display:none!important}
   /* ---------- cuentas ---------- */
   function vCuentas() {
     const q = N(ST.q), vs = vendedores();
-    let l = ST.cuentas.filter(c => (!ST.fEst || c.estado === ST.fEst) && (!ST.fVend || (ST.fVend === "-" ? !c.vendedor : c.vendedor === ST.fVend)) && (!q || N([c.razon, c.rut, c.contacto, c.correo, c.comuna, c.cliente].join(" ")).includes(q)));
+    let l = ST.cuentas.filter(c => (ST.fEst ? c.estado === ST.fEst : c.estado !== "rechazado") &&   /* rechazadas: archivadas, solo en «Archivadas» */ (!ST.fVend || (ST.fVend === "-" ? !c.vendedor : c.vendedor === ST.fVend)) && (!q || N([c.razon, c.rut, c.contacto, c.correo, c.comuna, c.cliente].join(" ")).includes(q)));
     l.sort((a, b) => String(b.fecha).localeCompare(String(a.fecha)));
     const cnt = e => ST.cuentas.filter(c => c.estado === e).length;
-    return `<div class="b2-card"><div class="b2-chips">${[["pendiente", "Pendientes"], ["activo", "Activas"], ["bloqueado", "Bloqueadas"], ["rechazado", "Rechazadas"], ["", "Todas"]].map(([k, t]) => `<button type="button" class="b2-ch" data-fe="${k}" aria-pressed="${ST.fEst === k}">${t}${k ? " " + cnt(k) : " " + ST.cuentas.length}</button>`).join("")}</div>
+    return `<div class="b2-card"><div class="b2-chips">${[["pendiente", "Pendientes"], ["activo", "Activas"], ["bloqueado", "Bloqueadas"], ["", "Todas"]].concat(cnt("rechazado") ? [["rechazado", "🗄 Archivadas"]] : []).map(([k, t]) => `<button type="button" class="b2-ch" data-fe="${k}" aria-pressed="${ST.fEst === k}"${k === "rechazado" ? ' style="opacity:.7"' : ""}>${t}${k ? " " + cnt(k) : " " + (ST.cuentas.length - cnt("rechazado"))}</button>`).join("")}</div>
       <div class="b2-g2" style="margin-top:8px"><label class="b2-lbl">Vendedor<select class="b2-in" id="b2Fv"><option value="">Todos</option><option value="-" ${ST.fVend === "-" ? "selected" : ""}>Sin vendedor</option>${vs.map(v => `<option ${ST.fVend === v ? "selected" : ""}>${E(v)}</option>`).join("")}</select></label>
         <label class="b2-lbl">Buscar<input class="b2-in" id="b2Fq" type="search" value="${E(ST.q)}" placeholder="Nombre, RUT, correo…"></label></div></div>
       ${l.length ? l.map(c => { const d = ST.dr[c.id] || {}, v = d.vendedor != null ? d.vendedor : (c.vendedor || ""), cl = d.cliente != null ? d.cliente : (c.cliente || "");
@@ -8963,7 +8963,7 @@ window.hwfContCambio = function () { try { if (typeof praPintar === "function" &
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261122201245";
+const HWF_VER = "20261122201529";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
