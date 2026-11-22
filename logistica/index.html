@@ -95,8 +95,8 @@ function rtEnganchar(L) { const g = id => document.getElementById(id), set = (k,
   document.querySelectorAll("[data-dia]").forEach(b => b.onclick = () => { lsSet("fecha", b.dataset.dia); RT = null; pintarRutas(); }); }
 const rtFecha = () => lsGet("fecha", "") || (document.getElementById("rFecha") || {}).value || fLocal(new Date(Date.now() + 864e5));
 const rtAsigK = () => "rtAsig:" + rtFecha(), rtAsig = k => (lsGet(rtAsigK(), {})[k] || {});
-function rtAsigHtml(k, v) { const A = rtAsig(k), CH = lsGet("choferes", []), trans = flota().map(x => x.nombre).concat(["Flete externo"]);
-  return `<div class="rt-asig" data-rk="${esc(k)}"><label>Chofer<select data-a="chofer"><option value="">— elegir —</option>${CH.map(c => `<option${c === A.chofer ? " selected" : ""}>${esc(c)}</option>`).join("")}<option value="+">+ Agregar chofer…</option></select></label>
+function rtAsigHtml(k, v) { const A = rtAsig(k), CH = LOG_CHOFERES, trans = flota().map(x => x.nombre).concat(["Flete externo"]);
+  return `<div class="rt-asig" data-rk="${esc(k)}"><label>Chofer<select data-a="chofer"><option value="">— elegir —</option>${CH.map(c => `<option${c === A.chofer ? " selected" : ""}>${esc(c)}</option>`).join("")}</select></label>
     <label>Transporte<select data-a="trans">${trans.map(t => `<option${t === (A.trans || v.nombre) ? " selected" : ""}>${esc(t)}</option>`).join("")}</select></label></div>`; }
 document.addEventListener("change", e => { const s = e.target.closest(".rt-asig select"); if (!s) return; const k = s.closest(".rt-asig").dataset.rk, M = lsGet(rtAsigK(), {}), o = M[k] = M[k] || {};
   if (s.dataset.a === "chofer" && s.value === "+") { const n = (prompt("Nombre del chofer") || "").trim(); if (!n) { s.value = o.chofer || ""; return; } const CH = lsGet("choferes", []); if (!CH.includes(n)) CH.push(n); lsSet("choferes", CH); o.chofer = n; lsSet(rtAsigK(), M); try { pintarResultado(); } catch (x) {} return; }
@@ -271,7 +271,7 @@ const FLOTA0 = [
   { id: "g10", nombre: "Maxus G10 Cargo", kg: 945, m3: 5.2, kml: 10.5, var: 60, fijo: 45000, vel: 65, on: true, nota: "furgón · 945–1.000 kg · 5,2 m³ · diésel 11 km/l mixto" },
   { id: "partner", nombre: "Peugeot Partner L2", kg: 950, m3: 3.9, kml: 17, var: 50, fijo: 45000, vel: 65, on: true, nota: "furgón compacto · 950 kg · 3,9 m³ (4,4 con Multiflex) · diésel 1.5 · 22 km/l mixto" }];
 const PAR0 = { diesel: 1000, parada: 15, jornada: 9, factor: 1.3, util: 0.95, origen: { nombre: "Bodega principal HWF · Ruta H-30 1799, Punta de Cortés, Rancagua", lat: -34.1815, lng: -70.8309 } };
-const flota = () => { const g = lsGet("flota", null); return FLOTA0.map(v => Object.assign({}, v, (g || {})[v.id] || {})); };
+let flota = () => { const g = lsGet("flota", null); return FLOTA0.map(v => Object.assign({}, v, (g || {})[v.id] || {})); };
 const par = () => { const p = lsGet("par", {}); if (p.origen && Math.abs(p.origen.lat + 34.9828) < 1e-4 && Math.abs(p.origen.lng + 71.2394) < 1e-4) delete p.origen; return Object.assign({}, PAR0, p); };
 const COL = { hd65: "#0B3146", boxer: "#F28C28", g10: "#1C7A4E", partner: "#7A3E9D" };
 const costoKm = (v, P) => P.diesel / v.kml + v.var;
@@ -483,7 +483,7 @@ if (!cfg() || !DATA()) pantallaConexion(); else { arrancar(); bajar(true).then(n
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261122195150";
+const HWF_VER = "20261122195559";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -2353,4 +2353,33 @@ body.ia-izq #iaBtn{right:auto;left:14px}
 @media(min-width:1200px){.ct-f{grid-template-columns:minmax(0,1fr) auto!important}.ct-b{justify-content:flex-end!important}}
 @media(min-width:1500px){.bi-svg,.db-svg,.ad-svg,.roi-svg,.vm-svg,.mg-svg{max-height:280px!important}}
 </style>
+<style>/* patch_logvehdisp */
+#rVeh .vd-b{display:inline-grid;grid-template-columns:auto 1fr;gap:0 6px;text-align:left;align-items:center}#rVeh .vd-b small{grid-column:2;font-size:.7rem;font-weight:600;opacity:.85}
+#rVeh .vd-b[data-est="taller"]{background:#FDECEA;color:#8A1C14;border-color:#F3B7B1}#rVeh .vd-b[data-est="ruta"]{background:#FFF4DB;color:#8A5A00;border-color:#F0D48A}
+.vd-ley{font-size:.74rem;color:var(--muted,#5B6874);margin-top:4px}
+</style>
+<script>/* patch_logvehdisp: choferes de la app Chofer y vehículos por disponibilidad y eficiencia */
+const LOG_CHOFERES = ["Víctor", "Matías", "Jorge", "Cristóbal", "Claudia", "Diego"];
+(function () {
+  if (typeof flota !== "function" || typeof pintarRutas !== "function") return;
+  const efic = (v, P) => (costoKm(v, P) * 100 + v.fijo) / Math.max(1, v.kg);   /* $ por kg a plena carga en 100 km */
+  let ENRUTA = new Set(), consultado = "";
+  const taller = () => lsGet("vehTaller", {});
+  const _fl = flota;
+  flota = function () { const T = taller(); return _fl().map(v => Object.assign(v, { taller: !!T[v.id], enRuta: ENRUTA.has(v.id), on: v.on !== false && !T[v.id] && !ENRUTA.has(v.id) })); };
+  async function revisarEnRuta() { const hoy = fLocal(new Date()); if (consultado === hoy) return; consultado = hoy;
+    try { const c = typeof cfg === "function" ? cfg() : null; if (!c || typeof syLlamar !== "function") return; const E = await syLlamar(c, { accion: "logEstado", fecha: hoy }); if (!E || !E.ok) return;
+      const nombres = {}; _fl().forEach(v => { nombres[norm(v.nombre)] = v.id; nombres[v.id] = v.id; });
+      const s = new Set((E.jornadas || []).filter(j => !j.fin).map(j => nombres[j.veh] || nombres[norm(j.veh || "")]).filter(Boolean));
+      if ([...s].join() !== [...ENRUTA].join()) { ENRUTA = s; RT = null; pintarRutas(); if (s.size) toast(s.size + (s.size === 1 ? " vehículo está" : " vehículos están") + " en ruta ahora: no se usan para armar rutas nuevas."); } } catch (e) {} }
+  function chips() { const box = document.getElementById("rVeh"); if (!box) return; const P = par(), F = flota().slice().sort((a, b) => efic(a, P) - efic(b, P));
+    box.innerHTML = F.map((v, i) => { const est = v.enRuta ? "ruta" : v.taller ? "taller" : "ok";
+      return `<button type="button" class="vd-b" data-veh="${v.id}" data-est="${est}" aria-pressed="${est === "ok"}" title="${esc(v.nota)}"><span class="sw" style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${COL[v.id]}"></span>${esc(v.nombre)}${i === 0 ? " 🏆" : ""}<small>${est === "ruta" ? "En ruta ahora" : est === "taller" ? "En taller · toca para habilitar" : "Disponible"} · ${fmt(efic(v, P))}/kg · ${nf(v.kg)} kg</small></button>`; }).join("");
+    if (!box.nextElementSibling || !box.nextElementSibling.classList.contains("vd-ley")) box.insertAdjacentHTML("afterend", '<p class="vd-ley">Ordenados del más eficiente (🏆) al menos eficiente: costo por kg a plena carga en 100 km. Toca un vehículo para marcarlo «En taller» o volver a habilitarlo. «En ruta» se marca solo con la app Chofer. Al armar las rutas se usan los disponibles y se elige la combinación de menor costo.</p>');
+    box.onclick = e => { const b = e.target.closest("[data-veh]"); if (!b) return; const id = b.dataset.veh; if (b.dataset.est === "ruta") { toast("Ese vehículo está en ruta ahora (app Chofer)."); return; }
+      const T = taller(), poner = !T[id]; if (poner && flota().filter(v => v.on).length <= 1) { toast("Debe quedar al menos un vehículo disponible."); return; }
+      if (poner) T[id] = 1; else delete T[id]; lsSet("vehTaller", T); RT = null; pintarRutas(); toast(poner ? "Marcado en taller: no se usa para las rutas." : "Vehículo disponible."); }; }
+  const _pr = pintarRutas; pintarRutas = function () { const r = _pr.apply(this, arguments); try { chips(); } catch (e) { console.error(e); } revisarEnRuta(); return r; };
+})();
+</script>
 </body></html>
