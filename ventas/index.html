@@ -7202,7 +7202,7 @@ function confirmarNota() {
   x.onclick = () => cerrarModal(); card.insertBefore(x, card.firstChild); })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261122105129";
+const HWF_VER = "20261122105858";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -10452,8 +10452,9 @@ body:has(#rdOv) #snBtn,body:has(#rdOv) #iaBtn,body:has(#rdOv) #navBotones{displa
   const _pl = praLeer;
   praLeer = function (cambios) { const U = {};
     (cambios || []).forEach(c => { if (!c || c.codigo !== "PRODUCTO") return; let o; try { o = JSON.parse(c.detalle); } catch (e) { return; }
-      if (!o || !o.pr || !o.i) return; const a = U[o.i]; if (!a || String(o.t || "") >= String(a.t || "")) U[o.i] = { p: Number(o.p) > 0 ? Math.round(Number(o.p)) : 0, t: String(o.t || "") }; });
-    const M = {}; Object.keys(U).forEach(i => { if (U[i].p) M[i] = U[i].p; });
+      if (!o || !o.pr || !o.i) return; const a = U[o.i]; if (!a || String(o.t || "") >= String(a.t || "")) U[o.i] = { p: Number(o.p) > 0 ? Math.round(Number(o.p)) : 0, tp: String(o.tp || ""), t: String(o.t || "") }; });
+    const M = {}, TP = {}; Object.keys(U).forEach(i => { if (U[i].p) M[i] = U[i].p; if (U[i].tp) TP[i] = U[i].tp; });
+    try { localStorage.setItem("hwf-prod-tipo", JSON.stringify(TP)); } catch (e) {}   /* tipo elegido en Admin (patch_tipoventas) */
     let antes = ""; try { antes = localStorage.getItem(K) || ""; localStorage.setItem(K, JSON.stringify(M)); } catch (e) {}
     aplicar(); if (JSON.stringify(M) !== (antes || "{}")) setTimeout(() => { try { applyFilter(); } catch (e) {} try { if (typeof renderCart === "function") renderCart(); } catch (e) {} }, 0);
     return _pl.apply(this, arguments); };
@@ -10462,5 +10463,25 @@ body:has(#rdOv) #snBtn,body:has(#rdOv) #iaBtn,body:has(#rdOv) #navBotones{displa
 </script>
 <style>/* patch_singraficos */.ad-svg,.ad-ley,.vm-svg,.vm-ley,.db-svg,.bi-svg,.bi-ley{display:none!important}.vm-nota,[data-singraf]{display:none!important}</style>
 <script>/* patch_singraficos */new MutationObserver(function(){document.querySelectorAll("#vmCard p,#vmCard small,#vmCard div").forEach(function(e){if(!e.dataset.singraf&&e.children.length===0&&/^Toca el gr[aá]fico/.test(e.textContent.trim()))e.dataset.singraf="1"})}).observe(document.documentElement,{childList:true,subtree:true});</script>
+<script>/* patch_tipoventas: filtro por tipo de producto en el pedido */
+(function () {
+  if (typeof applyFilter !== "function" || typeof PRODS === "undefined" || !document.getElementById("fGrupo")) return;
+  const ORD = ["Grain free", "Low grain", "Funcional", "Tradicional", "No funcional"], BASE = {};
+  ((window.__PUB && window.__PUB.prods) || []).forEach(p => { if (p.tp) BASE[String(p.i)] = p.tp; });
+  const tipo = i => { let T = {}; try { T = JSON.parse(localStorage.getItem("hwf-prod-tipo") || "{}") || {}; } catch (e) {} return T[i] || BASE[String(i)] || ""; };
+  const g = document.getElementById("fGrupo"), s = document.createElement("select"); s.id = "fTipo"; s.setAttribute("aria-label", "Tipo de producto"); s.className = g.className; s.style.cssText = g.style.cssText;
+  g.after(s);
+  const opciones = () => { const gr = g.value, hay = new Set(PRODS.filter(p => !gr || p.g === gr).map(p => tipo(p.i)).filter(Boolean)), v = s.value;
+    s.innerHTML = '<option value="">Todos los tipos</option>' + ORD.filter(t => hay.has(t)).map(t => `<option${t === v ? " selected" : ""}>${t}</option>`).join("");
+    if (v && !hay.has(v)) s.value = ""; s.hidden = !hay.size; };
+  const _af = applyFilter;
+  const filtrar = function () { const t = s.value; if (!t) return; filtered = filtered.filter(p => tipo(p.i) === t);
+    $("rows").innerHTML = ""; shown = 0; renderMore(); $("count").textContent = `${fmtN(filtered.length)} de ${fmtN(PRODS.length)} productos`;
+    if (!filtered.length) $("rows").innerHTML = '<div class="empty">No hay productos de ese tipo con estos filtros.</div>'; };
+  applyFilter = function () { const r = _af.apply(this, arguments); filtrar(); return r; };
+  g.addEventListener("change", () => { opciones(); filtrar(); }); const o = document.getElementById("fOcasion"); if (o) o.addEventListener("change", filtrar);
+  s.addEventListener("change", () => applyFilter()); opciones();
+})();
+</script>
 </body>
 </html>
