@@ -2001,10 +2001,10 @@ function rowHTML(p){
   const L=line(p.i), u=unit(p), v=u*L.q, th=hwfFoto(p.i,true)||SINFOTO;
   return `<article class="row cols${L.q>0?" on":""}" data-c="${esc(p.i)}">
     <img class="thumb" src="${th}" alt="" data-hf="${esc(p.i)}" data-hc="1" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="hwfFotoErr(this)">
-    <div class="info"><div class="desc">${esc(p.d)}</div>
-      <div class="codes num"><span>${esc(p.s)}</span><span>${esc(p.o)}</span></div>
+    <div class="info"><div class="desc">${esc(p.d)} <span class="cod-d" style="white-space:nowrap;font-size:.8em;font-weight:700;color:var(--muted)">· Cód. ${esc(p.s || p.i)}</span></div>
+      <div class="codes num"><span>${esc(p.o || "Unidad")}${(Number(p.u) || 1) > 1 ? " · múltiplo " + p.u : ""}</span></div>
       <div class="tags"><span class="tag">${esc(p.g)}</span>${p.pr?`<span class="tag promo">${esc(p.pr)}</span>`:""}</div></div>
-    <div class="price num"><span class="lst"${L.d>0?"":" hidden"}>${fmt(p.p)}</span><span class="net" data-u>${fmt(u)}</span><span class="umv">neto · mín. ${p.u}</span></div>
+    <div class="price num"><span class="lst"${L.d>0?"":" hidden"}>${fmt(p.p)}</span><span class="net" data-u>${fmt(u)}</span><span class="umv">neto por unidad · mín. ${p.u}</span></div>
     <div class="dsc"><span class="lbl">Desc. %</span><span style="display:flex;align-items:center;gap:4px"><input class="num" data-d type="text" inputmode="decimal" value="${String(L.d).replace(".",",")}" aria-label="Descuento % de ${esc(p.d)}"><span>%</span></span></div>
     <div class="qty"><button type="button" data-m aria-label="Restar ${p.u}">−</button><input class="num" data-q type="number" inputmode="numeric" min="0" step="${p.u}" value="${L.q||""}" placeholder="0" aria-label="Cantidad de ${esc(p.d)}, múltiplos de ${p.u}"><button type="button" data-p aria-label="Sumar ${p.u}">+</button></div>
     <div class="val num${v?"":" zero"}" data-v><span class="lbl">Valor neto</span>${fmt(v)}</div>
@@ -7198,7 +7198,7 @@ function confirmarNota() {
   x.onclick = () => cerrarModal(); card.insertBefore(x, card.firstChild); })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261122200913";
+const HWF_VER = "20261122201245";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
