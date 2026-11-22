@@ -8961,7 +8961,7 @@ window.hwfContCambio = function () { try { if (typeof praPintar === "function" &
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261122160017";
+const HWF_VER = "20261122194423";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -8988,10 +8988,22 @@ const HWF_VER = "20261122160017";
     const L = (window.__PUB && window.__PUB.prods) || (typeof PRODS !== "undefined" && PRODS) || [];
     L.forEach(p => { if (p && p.m) { MAPA["c:" + p.i] = p.m; MAPA["n:" + nrm(p.d)] = p.m; } }); return MAPA; };
   const fija = n => mapa()["n:" + nrm(n)] || mapa()["c:" + String(n)] || "";
-  if (typeof pmMarca === "function") { const _pm = pmMarca; pmMarca = function (n) { return fija(n) || _pm.apply(this, arguments); }; }
-  if (typeof invMarca === "function") { const _im = invMarca; invMarca = function (n) { return fija(n) || _im.apply(this, arguments); }; }
+  if (typeof pmMarca === "function") { const _pm = pmMarca; pmMarca = function (n) { return fija(n) || String(_pm.apply(this, arguments) || "").toUpperCase(); }; }
+  if (typeof invMarca === "function") { const _im = invMarca; invMarca = function (n) { return fija(n) || String(_im.apply(this, arguments) || "").toUpperCase(); }; }
   window.hwfMarcaFija = fija;
 })();
 </script>
+<style>/* patch_graficospc2 */
+@media(min-width:900px){
+  .bi-svg,.db-svg,.ad-svg,.roi-svg,.vm-svg,.mg-svg{max-height:300px!important;width:100%!important;height:auto;margin-left:auto;margin-right:auto}
+  .chartbox{height:240px!important;max-height:260px}.chartbox.sm{height:210px!important}
+  .vd-cv{height:210px!important}
+  .card canvas,.vd-c canvas,.db-c canvas{max-height:280px!important}
+}
+/* Documentos (Catálogo, Listas de precio, Documentos): nombre arriba en todo el ancho y botones abajo (antes se cortaba letra por letra) */
+.ct-f{grid-template-columns:minmax(0,1fr)!important;gap:8px!important}.ct-f>div:first-child{min-width:0}.ct-f b{overflow-wrap:anywhere;word-break:normal!important}.ct-b{justify-content:flex-start!important}
+@media(min-width:1200px){.ct-f{grid-template-columns:minmax(0,1fr) auto!important}.ct-b{justify-content:flex-end!important}}
+@media(min-width:1500px){.bi-svg,.db-svg,.ad-svg,.roi-svg,.vm-svg,.mg-svg{max-height:280px!important}}
+</style>
 </body>
 </html>

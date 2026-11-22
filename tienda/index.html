@@ -2350,7 +2350,7 @@ const stAbrev = n => ST_ABR.reduce((s, [r, t]) => s.replace(r, t), String(n || "
 try { if ($("sStock") && !$("sStock").hidden) pintarStock(); } catch (e) {}
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261122160017";
+const HWF_VER = "20261122194423";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -4136,4 +4136,16 @@ window.hwfContCambio = function () { try { const b = document.getElementById("sS
   let t = 0; addEventListener("scroll", () => { b.classList.add("mf-sc"); clearTimeout(t); t = setTimeout(() => b.classList.remove("mf-sc"), 450); }, { passive: true });
 })();
 </script>
+<style>/* patch_graficospc2 */
+@media(min-width:900px){
+  .bi-svg,.db-svg,.ad-svg,.roi-svg,.vm-svg,.mg-svg{max-height:300px!important;width:100%!important;height:auto;margin-left:auto;margin-right:auto}
+  .chartbox{height:240px!important;max-height:260px}.chartbox.sm{height:210px!important}
+  .vd-cv{height:210px!important}
+  .card canvas,.vd-c canvas,.db-c canvas{max-height:280px!important}
+}
+/* Documentos (Catálogo, Listas de precio, Documentos): nombre arriba en todo el ancho y botones abajo (antes se cortaba letra por letra) */
+.ct-f{grid-template-columns:minmax(0,1fr)!important;gap:8px!important}.ct-f>div:first-child{min-width:0}.ct-f b{overflow-wrap:anywhere;word-break:normal!important}.ct-b{justify-content:flex-start!important}
+@media(min-width:1200px){.ct-f{grid-template-columns:minmax(0,1fr) auto!important}.ct-b{justify-content:flex-end!important}}
+@media(min-width:1500px){.bi-svg,.db-svg,.ad-svg,.roi-svg,.vm-svg,.mg-svg{max-height:280px!important}}
+</style>
 </body></html>
