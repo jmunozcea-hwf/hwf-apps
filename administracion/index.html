@@ -6132,7 +6132,7 @@ function vmPoner(cont, VM, antes) { try { if (!cont) return; const v = cont.quer
   const LOG = !VEN && !ADM && !!document.querySelector('#nav [data-s="rutas"]'), TND = !VEN && !ADM && !!document.getElementById("tNav");
   const GV = [["Mi día", ["inicio", "pedido", "clientes", "agenda", "ruta", "cobranza", "embudo", "cat"]], ["Análisis", ["dash", "avance", "bi"]], ["Aprender", ["nut", "tec"]]];
   const GA = [["Ventas", ["t:res", "t:ven", "t:cli", "t:pro", "m:ranking", "m:plan", "m:zonas", "m:terreno", "m:bonif"]], ["Pedidos y cobranza", ["m:cots", "m:napp", "m:cobranza", "m:embudo"]],
-    ["BI y compras", ["b:v", "b:l", "t:mar", "m:abast", "m:provee"]], ["Web y portal B2B", ["m:metricas", "m:b2b", "m:mail", "m:roi"]], ["Archivos y datos", ["m:catalogo", "m:cambios", "m:datos"]]];   /* 22-11-2026: métricas web y B2B en su propio grupo */
+    ["BI y compras", ["b:v", "b:l", "t:mar", "m:abast", "m:provee"]], ["Web y portal B2B", ["m:metricas", "m:b2b", "m:mail", "m:invita", "m:roi"]], ["Archivos y datos", ["m:catalogo", "m:cambios", "m:datos"]]];   /* 22-11-2026: métricas web y B2B en su propio grupo */
   const pos = (G, k) => { let n = 0; for (const [, l] of G) { const i = l.indexOf(k); if (i >= 0) return n + i; n += l.length; } return 999; };
   if (VEN) { const ord = () => { const a = NAV_ORDEN.slice(); a.sort((x, y) => pos(GV, x[0]) - pos(GV, y[0])); NAV_ORDEN.splice(0, NAV_ORDEN.length, ...a); };
     ord(); setTimeout(ord, 0); setTimeout(ord, 1500);   /* BI, Catálogos y Técnicas se agregan al cargar */ }
@@ -8963,7 +8963,7 @@ window.hwfContCambio = function () { try { if (typeof praPintar === "function" &
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261122202347";
+const HWF_VER = "20261122203721";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -9068,6 +9068,78 @@ const HWF_VER = "20261122202347";
     if (modo === "pdf") K.bajar(P); else { let puede = false; try { puede = !!(navigator.canShare && navigator.canShare({ files: [new File([P.bytes], P.nombre, { type: "application/pdf" })] })); } catch (e) {} if (puede) K.enviar(P); else K.bajar(P); } }
   async function cargar() { EST = "Consultando…"; pintar(); const r = await llamar({ accion: "webMetricas", dias: DIAS }); DAT = r; EST = r && r.ok ? "" : ((r && r.error) || "No se pudo consultar."); pintar(); }
   const _pm = pintarMas; pintarMas = function () { if (typeof vistaMas !== "undefined" && vistaMas === "metricas") { pintar(); if (!DAT) cargar(); return; } return _pm.apply(this, arguments); };
+})();
+</script>
+<style>/* patch_invitaciones */
+.iv{display:grid;gap:12px}.iv-c{background:var(--card,var(--surface,#fff));border:1px solid var(--line,#DDE3E8);border-radius:14px;padding:14px}
+.iv h3{margin:0 0 6px;font-size:1rem;color:#0B3146}.iv small,.iv .iv-m{color:var(--muted,#5B6874)}
+.iv-ch{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}.iv-ch button{border:1.5px solid var(--line,#DDE3E8);background:#fff;color:#0B3146;border-radius:999px;padding:7px 12px;font:inherit;font-weight:700;font-size:.84rem;cursor:pointer}
+.iv-ch button[aria-pressed="true"]{background:#0B3146;border-color:#0B3146;color:#fff}
+.iv-b{border:1px solid #0B3146;background:#fff;color:#0B3146;border-radius:10px;padding:8px 12px;font:inherit;font-weight:800;cursor:pointer}.iv-b.pri{background:#0B3146;color:#fff}.iv-b.ok{background:#1C7A4E;border-color:#1C7A4E;color:#fff}.iv-b.no{border-color:#B42318;color:#B42318}.iv-b:disabled{opacity:.5}
+.iv-r{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line,#EEF2F5)}.iv-r b{overflow-wrap:anywhere}.iv-r small{display:block}
+.iv-bt{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}.iv-p{display:inline-block;border-radius:999px;padding:2px 9px;font-size:.72rem;font-weight:800;background:#E9EEF2;color:#0B3146}
+.iv-p.autorizado{background:#E3F4EA;color:#1C7A4E}.iv-p.no{background:#FDE8E8;color:#B42318}.iv-p.cuenta{background:#E6F0FA;color:#0B3146}
+.iv-t{width:100%;border-collapse:collapse;font-size:.86rem}.iv-t th,.iv-t td{padding:6px;border-bottom:1px solid var(--line,#EEF2F5);text-align:right}.iv-t th:first-child,.iv-t td:first-child{text-align:left}
+.iv input[type=search],.iv select{font:inherit;padding:8px 10px;border:1px solid var(--line,#DDE3E8);border-radius:10px;width:100%;max-width:340px}
+@media(max-width:600px){.iv-r{grid-template-columns:1fr}.iv-bt{justify-content:flex-start}}
+</style>
+<script>/* patch_invitaciones: HWF Admin → Invitar clientes */
+(function () {
+  if (typeof pintarMas !== "function" || typeof syCall !== "function" || typeof SYC !== "function" || !document.getElementById("masSeg") || document.querySelector('#masSeg [data-m="invita"]')) return;
+  const ES_VEND = false, cfg = () => { try { const c = SYC(); return c && c.url ? c : null; } catch (e) { return null; } };
+  const llamar = async d => { const c = cfg(); if (!c) return { ok: false, error: "Esta app no está conectada al script de Google." }; return await syCall(c, d); };
+  const CONT = () => document.getElementById("masBody");
+
+  let ST = { L: null, f: "pendiente", q: "", v: "", ocup: false, msg: "" };
+  const N = s => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+  const E = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const estDe = c => c.cuenta ? "cuenta" : c.estado;
+  const NOM = { pendiente: "Por decidir", autorizado: "Invitar", no: "No invitar", cuenta: "Ya tiene cuenta" };
+  async function cargar() { ST.ocup = true; pintar(); const r = await llamar({ accion: "invListar" }); ST.ocup = false; if (r && r.ok) { ST.L = r.clientes || []; ST.msg = ""; } else ST.msg = (r && r.error) || "No se pudo leer la lista."; pintar(); }
+  async function guardar(lista) { if (!lista.length) return; ST.ocup = true; pintar(); const r = await llamar({ accion: "invGuardar", lista }); ST.ocup = false;
+    if (r && r.ok) { lista.forEach(o => { const c = (ST.L || []).find(x => x.correo === o.correo); if (c) c.estado = o.estado; }); ST.msg = (r.guardados || 0) + (r.guardados === 1 ? " cliente actualizado." : " clientes actualizados."); } else ST.msg = (r && r.error) || "No se pudo guardar.";
+    pintar(); }
+  function visibles() { const q = N(ST.q); return (ST.L || []).filter(c => (ST.f === "todos" || estDe(c) === ST.f) && (!ST.v || c.vendedor === ST.v) && (!q || N([c.empresa, c.nombre, c.correo, c.comuna].join(" ")).includes(q))); }
+  function lista() { const L = ST.L || [], cnt = e => L.filter(c => estDe(c) === e && (!ST.v || c.vendedor === ST.v)).length, V = visibles(), pend = V.filter(c => estDe(c) === "pendiente");
+    const vends = [...new Set(L.map(c => c.vendedor).filter(Boolean))].sort();
+    return `<div class="iv-c"><h3>${ES_VEND ? "Invitar a mis clientes a Acceso Clientes" : "Invitar clientes a Acceso Clientes"}</h3>
+      <small>${ES_VEND ? "Marca a cuáles de tus clientes de Defontana les enviamos la invitación por correo a hwf.cl y al portal. Nadie recibe la invitación sin tu autorización." : "Cada vendedor autoriza a sus clientes desde su app (pestaña «Invitar clientes»); aquí ves el avance y puedes autorizar por ellos. La campaña solo llega a los autorizados que aún no tienen cuenta."}</small>
+      <div class="iv-ch" role="group" aria-label="Estado">${[["pendiente", "Por decidir"], ["autorizado", "Invitar"], ["no", "No invitar"], ["cuenta", "Ya tienen cuenta"], ["todos", "Todos"]].map(([k, t]) => `<button type="button" data-ivf="${k}" aria-pressed="${ST.f === k}">${t}${k === "todos" ? "" : " " + cnt(k)}</button>`).join("")}</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">${ES_VEND ? "" : `<select id="ivV" aria-label="Vendedor"><option value="">Todos los vendedores</option>${vends.map(v => `<option${v === ST.v ? " selected" : ""}>${E(v)}</option>`).join("")}</select>`}<input type="search" id="ivQ" placeholder="Buscar cliente, correo o comuna" value="${E(ST.q)}" aria-label="Buscar cliente"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button type="button" class="iv-b ok" data-iva="todos" ${pend.length && !ST.ocup ? "" : "disabled"}>✅ Invitar a los ${pend.length} por decidir de la lista</button><button type="button" class="iv-b" data-iva="ref">↻ Actualizar</button></div>
+      ${ST.msg ? `<p class="iv-m" style="margin:8px 0 0">${E(ST.msg)}</p>` : ""}</div>
+      <div class="iv-c">${ST.L == null ? `<p class="iv-m">${ST.ocup ? "Cargando clientes…" : "Sin datos."}</p>` : V.length ? V.slice(0, 300).map(c => { const e = estDe(c);
+        return `<div class="iv-r"><div><b>${E(c.empresa)}</b> <span class="iv-p ${e}">${NOM[e]}</span><small>${E(c.correo)}${c.comuna ? " · " + E(c.comuna) : ""}${c.ultima ? " · última compra " + E(c.ultima.split("-").reverse().join("-")) : ""}${ES_VEND ? "" : " · " + E(c.vendedor || "sin vendedor")}</small></div>
+          <div class="iv-bt">${c.cuenta ? "" : `<button type="button" class="iv-b ${e === "autorizado" ? "ok" : ""}" data-ivs="autorizado" data-c="${E(c.correo)}" ${ST.ocup ? "disabled" : ""}>Invitar</button><button type="button" class="iv-b ${e === "no" ? "no" : ""}" data-ivs="no" data-c="${E(c.correo)}" ${ST.ocup ? "disabled" : ""}>No invitar</button>`}</div></div>`; }).join("") + (V.length > 300 ? `<p class="iv-m">… y ${V.length - 300} más (usa el buscador).</p>` : "")
+        : '<p class="iv-m">No hay clientes en esta vista.</p>'}</div>`; }
+  function enganchar(c) {
+    c.addEventListener("click", ev => { const b = ev.target.closest(".iv [data-ivf],.iv [data-ivs],.iv [data-iva]"); if (!b || b.disabled) return;
+      if (b.dataset.ivf) { ST.f = b.dataset.ivf; pintar(); return; }
+      if (b.dataset.ivs) { guardar([{ correo: b.dataset.c, estado: b.dataset.ivs }]); return; }
+      if (b.dataset.iva === "ref") { cargar(); return; }
+      if (b.dataset.iva === "todos") { const P = visibles().filter(x => estDe(x) === "pendiente"); if (P.length && confirm("¿Autorizar la invitación a " + P.length + " clientes?")) guardar(P.map(x => ({ correo: x.correo, estado: "autorizado" }))); return; }
+      if (b.dataset.iva === "camp") { crearCampana(); return; } });
+    c.addEventListener("input", ev => { if (ev.target.id === "ivQ") { ST.q = ev.target.value; clearTimeout(enganchar.t); enganchar.t = setTimeout(() => { pintar(); const i = document.getElementById("ivQ"); if (i) { i.focus(); i.setSelectionRange(i.value.length, i.value.length); } }, 250); } });
+    c.addEventListener("change", ev => { if (ev.target.id === "ivV") { ST.v = ev.target.value; pintar(); } }); }
+
+  const TXT = "Hola {nombre}:\n\nEn HWF lanzamos **Acceso Clientes**, nuestro portal mayorista en www.hwf.cl, para que tu negocio compre más fácil:\n\n- **Catálogo completo con tus precios** y las promociones vigentes.\n- **Pedidos a cualquier hora**, también desde el celular.\n- **Tus pedidos y lo que tienes por pagar**, en un solo lugar.\n\nCrear tu cuenta toma un minuto: entra a www.hwf.cl/b2b/?registro=1 con el RUT de tu negocio. Como ya eres cliente de HWF, tu cuenta queda activa al instante.\n\nCualquier duda, {vendedor} te ayuda.";
+  async function crearCampana() { const aut = (ST.L || []).filter(c => !c.cuenta && c.estado === "autorizado").length;
+    if (!aut) { ST.msg = "Todavía no hay clientes autorizados por sus vendedores."; pintar(); return; }
+    if (!confirm("Se creará un borrador en Mailing para " + aut + " clientes autorizados. Lo revisas y lo envías desde Mailing. ¿Continuar?")) return;
+    ST.ocup = true; pintar(); const r = await llamar({ accion: "mailGuardar", por: "Admin", campana: { asunto: "Te invitamos a Acceso Clientes de HWF: tus precios y pedidos en línea", tipo: "invitación",
+      filtros: { tipos: ["clientes"], invitados: true }, contenido: { titulo: "Tu cuenta en Acceso Clientes te espera", texto: TXT, promos: false, productos: [], precios: false, preciosProspectos: false } } });
+    ST.ocup = false; ST.msg = r && r.ok ? "Listo: quedó el borrador «Te invitamos a Acceso Clientes…» en Mailing. Ábrelo, mira la vista previa, mándate la prueba y envíalo." : ((r && r.error) || "No se pudo crear la campaña."); pintar(); }
+  function resumen() { const L = ST.L || [], V = {}; L.forEach(c => { const v = c.vendedor || "Sin vendedor", o = V[v] = V[v] || { a: 0, p: 0, n: 0, c: 0 }; o[c.cuenta ? "c" : c.estado === "autorizado" ? "a" : c.estado === "no" ? "n" : "p"]++; });
+    const aut = L.filter(c => !c.cuenta && c.estado === "autorizado").length;
+    return `<div class="iv-c"><h3>Avance por vendedor</h3><div style="overflow:auto"><table class="iv-t"><thead><tr><th>Vendedor</th><th>Invitar</th><th>Por decidir</th><th>No invitar</th><th>Ya tienen cuenta</th></tr></thead><tbody>${Object.keys(V).sort().map(v => `<tr><td>${E(v)}</td><td>${V[v].a}</td><td>${V[v].p}</td><td>${V[v].n}</td><td>${V[v].c}</td></tr>`).join("")}</tbody></table></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px"><button type="button" class="iv-b pri" data-iva="camp" ${aut && !ST.ocup ? "" : "disabled"}>✉ Crear campaña de invitación (${aut} autorizados)</button><small>Solo llega a los autorizados por su vendedor que aún no tienen cuenta; sin precios.</small></div></div>`; }
+  function pintar() { if (typeof vistaMas !== "undefined" && vistaMas === "invita") { const mb = CONT(); if (mb) mb.innerHTML = `<div class="iv">${ST.L ? resumen() : ""}${lista()}</div>`; } }
+  const seg = document.getElementById("masSeg"), b = document.createElement("button"); b.type = "button"; b.dataset.m = "invita"; b.setAttribute("aria-pressed", "false"); b.textContent = "Invitar clientes";
+  const ref = seg.querySelector('[data-m="mail"]') || seg.lastElementChild; ref.after(b);
+  try { if (typeof NAV_MAS !== "undefined" && !NAV_MAS.includes("invita")) { const i = NAV_MAS.indexOf("mail"); NAV_MAS.splice(i >= 0 ? i + 1 : NAV_MAS.length, 0, "invita"); } if (typeof NAV_MNOM !== "undefined") NAV_MNOM.invita = "Invitar clientes"; } catch (e) { }
+  const _pm = pintarMas; pintarMas = function () { if (vistaMas === "invita") { pintar(); if (!ST.L) cargar(); return; } return _pm.apply(this, arguments); };
+  enganchar(CONT());
+  const iv = setInterval(() => { const p = document.getElementById("snPanel"); if (!p) return; clearInterval(iv); new MutationObserver(() => setTimeout(() => { const e = p.querySelector('[data-m="invita"] .sn-e'); if (e && e.textContent.trim() === "•") e.textContent = "✉️"; }, 0)).observe(p, { childList: true }); }, 400);
 })();
 </script>
 </body>
