@@ -5673,7 +5673,9 @@ setTimeout(() => { try { if (D && $("s-res") && !$("s-res").hidden && !$("kpCard
   const F = n => E.u === "$" ? fm(n) : fu(n) + " u";
   function datos() { const B = HOST.base() || {}, P = B.productos || [], cats = B.cats || [];
     const porCod = {}; P.forEach((p, i) => porCod[String(p[2])] = i);
-    const info = P.map(p => { const [pv, ma] = provDe(cats[p[1]]); return { n: p[0], cod: String(p[2]), pv, ma: ma || "Sin marca", ft: fmtDe(p[0]) }; });
+    const provFijo = (p, r) => { const c = String(p[2]), n = String(p[0] || "");   /* Jorge 16/22-11-2026: todo IKAI y Felicity → Planet Pet */
+    return new Set(["111", "112", "764", "765", "766", "767", "768", "769", "770", "771", "772"]).has(c) || /\bikai\b/i.test(n) ? ["Planet Pet", "IKAI"] : /felicity/i.test(n) ? ["Planet Pet", "Felicity"] : /^49816[5-9]$/.test(c) || /goodwell/i.test(n) ? ["Planet Pet", "Goodwell"] : r; };
+    const info = P.map(p => { const [pv, ma] = provFijo(p, provDe(cats[p[1]])); return { n: p[0], cod: String(p[2]), pv, ma: ma || "Sin marca", ft: fmtDe(p[0]) }; });
     let C = B.compras || HOST.alt().compras || null, demo = false;
     if (!C && HOST.demo()) { demo = true;   /* demo: compras ficticias a partir del costo vendido */
       const tvD = (B.vend || []).indexOf("Tienda Hellywoof"), m = {}; (B.rows || []).forEach(r => { const y = r[8] || B.anio, t = r[7] === tvD ? 1 : 0, k = r[1] + "|" + (y * 100 + r[2]) + "|" + t; const o = m[k] = m[k] || [String(P[r[1]][2]), y * 100 + r[2], 0, 0, t]; o[2] += r[4] || 0; o[3] += (r[4] || 0) * (r[6] || 0); });
@@ -7139,7 +7141,9 @@ function npVer(n) {
   let INFO = null, INFOK = "", PN = [], CN = [];
   const prepara = () => {
     const k = D.corte + "|" + D.productos.length + "|" + D.clientes.length + "|" + D.rows.length; if (INFO && INFOK === k) return; INFOK = k;
-    INFO = D.productos.map(p => { const [pv, ma] = provDe((D.cats || [])[p[1]]); return { n: p[0], cod: String(p[2]), pv, ma: ma || "Sin marca", ft: fmtDe(p[0]) }; });
+    const provFijo = (p, r) => { const c = String(p[2]), n = String(p[0] || "");   /* Jorge 16/22-11-2026: todo IKAI y Felicity → Planet Pet */
+    return new Set(["111", "112", "764", "765", "766", "767", "768", "769", "770", "771", "772"]).has(c) || /\bikai\b/i.test(n) ? ["Planet Pet", "IKAI"] : /felicity/i.test(n) ? ["Planet Pet", "Felicity"] : /^49816[5-9]$/.test(c) || /goodwell/i.test(n) ? ["Planet Pet", "Goodwell"] : r; };
+    INFO = D.productos.map(p => { const [pv, ma] = provFijo(p, provDe((D.cats || [])[p[1]])); return { n: p[0], cod: String(p[2]), pv, ma: ma || "Sin marca", ft: fmtDe(p[0]) }; });
     PN = INFO.map(i => nrm(i.n)); CN = D.clientes.map(c => nrm(c[0]));
   };
   const hayAnt = () => D.rows.some(r => r[8]);
@@ -8957,7 +8961,7 @@ window.hwfContCambio = function () { try { if (typeof praPintar === "function" &
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261122103924";
+const HWF_VER = "20261122104633";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;

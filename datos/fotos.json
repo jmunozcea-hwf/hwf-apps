@@ -1,5 +1,5 @@
 {
- "version": "2026-11-17.1-goodwell",
+ "version": "2026-11-22.1-turkat-ikai",
  "base": "https://jmunozcea-hwf.github.io/hwf-apps/",
  "fotos": {
   "764": {
@@ -625,10 +625,14 @@
    "h": 800
   },
   "770": {
-   "fuente": "rediredi",
-   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_cd1677bf-4ea0-4721-b383-5c370e086641.jpg",
-   "calidad": "mala",
-   "nota": "contenido 228 px (<300)"
+   "fuente": "Jorge (HWF)",
+   "origen": "",
+   "calidad": "buena",
+   "nota": "foto enviada por Jorge 22-11-2026 (IKAI Mousse funcional piel y pelaje gato 60 g)",
+   "f": "fotos/770.webp",
+   "m": "fotos/m/770.webp",
+   "w": 800,
+   "h": 800
   },
   "767": {
    "fuente": "ikaichile.cl (oficial)",
@@ -1421,10 +1425,14 @@
    "h": 800
   },
   "844": {
-   "fuente": "rediredi",
-   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_287d6bcc-cac2-46f3-ba78-74166a5979f5.jpg",
-   "calidad": "mala",
-   "nota": "contenido 224 px (<300)"
+   "fuente": "Jorge (HWF)",
+   "origen": "",
+   "calidad": "buena",
+   "nota": "foto enviada por Jorge 22-11-2026 (TurKat Super Premium carbón activado 10 L / 8,6 kg)",
+   "f": "fotos/844.webp",
+   "m": "fotos/m/844.webp",
+   "w": 800,
+   "h": 800
   }
  }
 }
