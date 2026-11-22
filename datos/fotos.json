@@ -1,5 +1,5 @@
 {
- "version": "2026-11-22.3-codigos-vet",
+ "version": "2026-11-22.4-sieger-latas",
  "base": "https://jmunozcea-hwf.github.io/hwf-apps/",
  "fotos": {
   "764": {
@@ -505,20 +505,20 @@
    "h": 800
   },
   "1028": {
-   "fuente": "rediredi",
-   "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_76cc9a17-628a-4127-9739-f0aa371dc386.jpg",
+   "fuente": "Drive HWF INFO/SIEGER (oficial)",
+   "origen": "",
    "calidad": "buena",
-   "nota": "",
+   "nota": "lata 340 g oficial (22-11-2026)",
    "f": "fotos/1028.webp",
    "m": "fotos/m/1028.webp",
    "w": 800,
    "h": 800
   },
   "222": {
-   "fuente": "alican.com.ar",
-   "origen": "https://alican.com.ar/wp-content/uploads/2025/01/sieger-Recovery-.webp",
-   "calidad": "regular",
-   "nota": "imagen de la línea Sieger Recovery (lata 340 g, sobre y lata pequeña; sirve para perro y gato adultos); montaje de 3 formatos (no es el pack 340 g solo)",
+   "fuente": "Drive HWF INFO/SIEGER (oficial)",
+   "origen": "",
+   "calidad": "buena",
+   "nota": "lata 340 g oficial (22-11-2026)",
    "f": "fotos/222.webp",
    "m": "fotos/m/222.webp",
    "w": 800,
@@ -1531,6 +1531,16 @@
    "nota": "foto oficial de la lata (22-11-2026)",
    "f": "fotos/868.webp",
    "m": "fotos/m/868.webp",
+   "w": 800,
+   "h": 800
+  },
+  "231": {
+   "fuente": "Drive HWF INFO/SIEGER (oficial)",
+   "origen": "",
+   "calidad": "buena",
+   "nota": "lata 340 g oficial (22-11-2026)",
+   "f": "fotos/231.webp",
+   "m": "fotos/m/231.webp",
    "w": 800,
    "h": 800
   }
