@@ -5102,7 +5102,6 @@ function pintarDash() {
       <div class="db-c"><h3>Mejores clientes del mes <button type="button" class="lk" data-ir="cli">Clientes ›</button></h3><div class="db-l">${topH || '<p class="db-vacio">Sin ventas este mes.</p>'}</div></div>
       <div class="db-c"><h3>Habituales sin compra <small>${sin.length} · ${dbMM(sin.reduce((t, c) => t + c.hab, 0))}/mes</small></h3><div class="db-l">${sinH || '<p class="db-vacio">Todos los habituales ya compraron.</p>'}</div></div>
       <div class="db-c"><h3>Productos más vendidos <small>${MN}</small></h3><div class="db-l">${proH || '<p class="db-vacio">Sin ventas este mes.</p>'}</div></div>
-      <div class="db-c"><h3>Venta por categoría <small>${MN}</small></h3>${cTop.length ? dbDona(cTop) : '<p class="db-vacio">Sin ventas este mes.</p>'}</div>
       ${X.cob.length ? `<div class="db-c"><h3>Cobranza por antigüedad <button type="button" class="lk" data-ir="cob">Cobranza ›</button></h3><b>${dbMM(cobTot)}</b> <span class="db-act">por cobrar</span>${cobH}</div>` : ""}
       <div class="db-c"><h3>Stock crítico <small>${yo ? "de lo que vendes" : "productos con venta"}</small></h3><div class="db-l">${stH || '<p class="db-vacio">Ningún producto con venta está por agotarse.</p>'}</div></div>
       ${X.pr.length ? `<div class="db-c"><h3>Prospectos <button type="button" class="lk" data-ir="emb">Prospectos ›</button></h3><div class="db-vr">${prH}</div></div>` : ""}
@@ -7202,7 +7201,7 @@ function confirmarNota() {
   x.onclick = () => cerrarModal(); card.insertBefore(x, card.firstChild); })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261122145319";
+const HWF_VER = "20261122152509";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
