@@ -3907,8 +3907,8 @@ setQty = function (c, q) {
   const antes = line(c).q || 0; _setQtyS(c, q);
   const s = stockDe(c); if (s == null || q <= antes) return;
   const L = line(c), g = typeof gratisDe === "function" ? gratisDe(L, byCode[c]) : 0, total = (L.q || 0) + g;
-  if (s <= 0) toast(`${byCode[c].d}: sin stock al ${STOCK_FECHA.slice(0, 10)}. Confírmalo con bodega.`);
-  else if (total > s) toast(`Ojo: pides ${fmtN(total)}${g ? ` (${fmtN(g)} gratis)` : ""} y hay ${fmtN(s)} en stock.`);
+  /* sin aviso cuando no hay stock (pedido de Jorge 22-11-2026); solo si pide más de lo que hay */
+  if (s > 0 && total > s) toast(`Ojo: pides ${fmtN(total)}${g ? ` (${fmtN(g)} gratis)` : ""} y hay ${fmtN(s)} en stock.`);
 };
 $("fStock").onclick = () => { conStock = !conStock; $("fStock").setAttribute("aria-pressed", conStock); applyFilter(); };
 /* antes de exportar: avisar productos que superan el stock */
@@ -3917,7 +3917,7 @@ validate = function (t) {
   const e = _validateS(t);
   const sobre = []; const cant = {};
   t.items.forEach(({ p, L }) => { cant[p.i] = (cant[p.i] || 0) + (L.q || 0); });
-  Object.entries(cant).forEach(([c, q]) => { const s = stockDe(c); if (s != null && q > s) sobre.push(`${byCode[c].d} (pides ${fmtN(q)}, stock ${fmtN(Math.max(0, s))})`); });
+  Object.entries(cant).forEach(([c, q]) => { const s = stockDe(c); if (s != null && s > 0 && q > s) sobre.push(`${byCode[c].d} (pides ${fmtN(q)}, stock ${fmtN(Math.max(0, s))})`); });
   if (sobre.length) toast("Supera el stock: " + sobre.slice(0, 2).join(" · ") + (sobre.length > 2 ? ` y ${sobre.length - 2} más` : "") + ". Se exporta igual.");
   return e;
 };
@@ -7199,7 +7199,7 @@ function confirmarNota() {
   x.onclick = () => cerrarModal(); card.insertBefore(x, card.firstChild); })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261122154414";
+const HWF_VER = "20261122154714";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -10468,9 +10468,11 @@ body:has(#rdOv) #snBtn,body:has(#rdOv) #iaBtn,body:has(#rdOv) #navBotones{displa
   const tipo = i => { let T = {}; try { T = JSON.parse(localStorage.getItem("hwf-prod-tipo") || "{}") || {}; } catch (e) {} return T[i] || BASE[String(i)] || ""; };
   const g = document.getElementById("fGrupo"), s = document.createElement("select"); s.id = "fTipo"; s.setAttribute("aria-label", "Tipo de producto"); s.className = g.className; s.style.cssText = g.style.cssText;
   g.after(s);
-  const opciones = () => { const gr = g.value, hay = new Set(PRODS.filter(p => !gr || p.g === gr).map(p => tipo(p.i)).filter(Boolean)), v = s.value;
-    s.innerHTML = '<option value="">Todos los tipos</option>' + ORD.filter(t => hay.has(t)).map(t => `<option${t === v ? " selected" : ""}>${t}</option>`).join("");
-    if (v && !hay.has(v)) s.value = ""; s.hidden = !hay.size; };
+  /* siempre se muestran todos los tipos de la categoría, aunque aún no haya productos marcados (p. ej. Low grain) — pedido de Jorge 22-11-2026 */
+  const AL = ["Grain free", "Low grain", "Funcional", "Tradicional"], HU = ["Funcional", "No funcional"];
+  const opciones = () => { const gr = g.value, v = s.value, lista = !gr ? ORD : /alimento/i.test(gr) ? AL : /h[uú]med|lata/i.test(gr) ? HU : [];
+    s.innerHTML = '<option value="">Todos los tipos</option>' + lista.map(t => `<option${t === v ? " selected" : ""}>${t}</option>`).join("");
+    if (v && lista.indexOf(v) < 0) s.value = ""; s.hidden = !lista.length; };
   const _af = applyFilter;
   const filtrar = function () { const t = s.value; if (!t) return; filtered = filtered.filter(p => tipo(p.i) === t);
     $("rows").innerHTML = ""; shown = 0; renderMore(); $("count").textContent = `${fmtN(filtered.length)} de ${fmtN(PRODS.length)} productos`;
