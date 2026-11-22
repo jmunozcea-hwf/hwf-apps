@@ -7198,7 +7198,7 @@ function confirmarNota() {
   x.onclick = () => cerrarModal(); card.insertBefore(x, card.firstChild); })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261122204541";
+const HWF_VER = "20261122205204";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -10673,12 +10673,21 @@ body:has(#rdOv) #snBtn,body:has(#rdOv) #iaBtn,body:has(#rdOv) #navBotones{displa
   const llamar = async d => { const c = cfg(); if (!c) return { ok: false, error: "Esta app no está conectada al script de Google." }; if (!yo()) return { ok: false, error: "Ingresa con tu nombre de vendedor." }; return await syLlamar(c, Object.assign({ vendedor: yo() }, d)); };
   let box; const crearCampana = () => {};
 
-  let ST = { L: null, f: "pendiente", q: "", v: "", ocup: false, msg: "" };
+  let ST = { K: null, L: null, f: "pendiente", q: "", v: "", ocup: false, msg: "" };
   const N = s => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
   const E = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const estDe = c => c.cuenta ? "cuenta" : c.estado;
   const NOM = { pendiente: "Por decidir", autorizado: "Invitar", no: "No invitar", cuenta: "Ya tiene cuenta" };
-  async function cargar() { ST.ocup = true; pintar(); const r = await llamar({ accion: "invListar" }); ST.ocup = false; if (r && r.ok) { ST.L = r.clientes || []; ST.msg = ""; } else ST.msg = (r && r.error) || "No se pudo leer la lista."; pintar(); }
+  async function cargar() { ST.ocup = true; pintar(); const [r, k] = await Promise.all([llamar({ accion: "invListar" }), llamar({ accion: "kitLista" })]); ST.ocup = false;
+    if (k && k.ok) ST.K = k; if (r && r.ok) { ST.L = r.clientes || []; ST.msg = ""; } else ST.msg = (r && r.error) || "No se pudo leer la lista."; pintar(); }
+  /* Kit para tu local (22-11-2026): clientes del portal con sus compras; con 3 o más, enviar el Kit por WhatsApp */
+  const telWa = t => { let d = String(t || "").replace(/\D/g, ""); if (d.length === 9) d = "56" + d; if (d.length === 8) d = "569" + d; return d.length >= 11 ? d : ""; };
+  function kitHtml() { const K = ST.K; if (!K || !(K.cuentas || []).length) return "";
+    const L = K.cuentas.filter(c => !ST.v || c.vendedor === ST.v), m = K.min || 3;
+    return `<div class="iv-c"><h3>🎁 Kit para tu local <small>Nutrición + Técnicas de venta · se gana con ${m} compras por Acceso Clientes</small></h3>
+      ${L.map(c => { const t = telWa(c.telefono), msg = "Hola " + (c.contacto || c.razon || "") + ", gracias por tus compras en Acceso Clientes de HWF 🙌 Te regalamos el Kit para tu local: nutrición para recomendar el alimento correcto y técnicas de venta para tu mostrador. Ábrelo aquí: " + c.url;
+        return `<div class="iv-r"><div><b>${E(c.razon || c.rut)}</b> <span class="iv-p ${c.url ? "autorizado" : ""}">${c.compras} de ${m} compras</span><small>${E(c.comuna || "")}${ES_VEND ? "" : " · " + E(c.vendedor || "sin vendedor")}</small></div>
+          <div class="iv-bt">${c.url ? `<a class="iv-b ok" style="text-decoration:none" target="_blank" rel="noopener" href="https://wa.me/${t}?text=${encodeURIComponent(msg)}">📲 Enviar Kit por WhatsApp</a>` : `<span class="iv-m small">Le ${m - c.compras === 1 ? "falta 1 compra" : "faltan " + (m - c.compras) + " compras"}</span>`}</div></div>`; }).join("") || '<p class="iv-m">Sin clientes en el portal todavía.</p>'}</div>`; }
   async function guardar(lista) { if (!lista.length) return; ST.ocup = true; pintar(); const r = await llamar({ accion: "invGuardar", lista }); ST.ocup = false;
     if (r && r.ok) { lista.forEach(o => { const c = (ST.L || []).find(x => x.correo === o.correo); if (c) c.estado = o.estado; }); ST.msg = (r.guardados || 0) + (r.guardados === 1 ? " cliente actualizado." : " clientes actualizados."); } else ST.msg = (r && r.error) || "No se pudo guardar.";
     pintar(); }
@@ -10705,7 +10714,7 @@ body:has(#rdOv) #snBtn,body:has(#rdOv) #iaBtn,body:has(#rdOv) #navBotones{displa
     c.addEventListener("input", ev => { if (ev.target.id === "ivQ") { ST.q = ev.target.value; clearTimeout(enganchar.t); enganchar.t = setTimeout(() => { pintar(); const i = document.getElementById("ivQ"); if (i) { i.focus(); i.setSelectionRange(i.value.length, i.value.length); } }, 250); } });
     c.addEventListener("change", ev => { if (ev.target.id === "ivV") { ST.v = ev.target.value; pintar(); } }); }
 
-  function pintar() { if (box && !box.hidden) box.innerHTML = `<div class="iv">${lista()}</div>`; }
+  function pintar() { if (box && !box.hidden) box.innerHTML = `<div class="iv">${kitHtml()}${lista()}</div>`; }
   const tab = document.createElement("button"); tab.type = "button"; tab.setAttribute("role", "tab"); tab.id = "mInv"; tab.setAttribute("aria-selected", "false"); tab.title = "Invitar clientes"; tab.textContent = "Invitar clientes";
   (document.getElementById("mMail") || document.getElementById("mDash")).after(tab);
   box = document.createElement("div"); box.id = "crmInv"; box.hidden = true; (document.getElementById("crmMail") || document.getElementById("crmDash")).after(box); enganchar(box);

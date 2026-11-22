@@ -5277,7 +5277,7 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261122204541";
+const HWF_VER = "20261122205204";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -9264,7 +9264,10 @@ window.hwfContCambio = function () { try { if (typeof praPintar === "function" &
       <p class="muted" style="margin:8px 0 0;font-size:.76rem">Se cuenta una visita por página y sesión del navegador; «visitantes» = navegadores distintos por día. Sin cookies ni datos personales. Empieza a contar desde que se sube a hwf.cl el paquete del 22-11-2026.</p></div>
       ${D ? `<div class="mw-g"><div class="card"><h2>Páginas más vistas <span class="muted">hwf.cl</span></h2>${lista(W.paginas, W.visitas)}</div>
         <div class="card"><h2>De dónde llegan <span class="muted">hwf.cl</span></h2>${lista(W.origen, W.visitas)}<h3 style="margin:12px 0 0;font-size:.9rem">Dispositivo</h3>${lista(W.disp, W.visitas)}</div>
-        <div class="card"><h2>Acceso Clientes <span class="muted">de dónde llegan</span></h2>${lista(B.origen, B.visitas)}<h3 style="margin:12px 0 0;font-size:.9rem">Dispositivo</h3>${lista(B.disp, B.visitas)}</div></div>` : ""}`;
+        <div class="card"><h2>Acceso Clientes <span class="muted">de dónde llegan</span></h2>${lista(B.origen, B.visitas)}<h3 style="margin:12px 0 0;font-size:.9rem">Dispositivo</h3>${lista(B.disp, B.visitas)}</div>
+        <div class="card"><h2>Por comuna <span class="muted">visitas de clientes con sesión en Acceso Clientes</span></h2>${lista(D.comunas, (D.comunas || []).reduce((t, x) => t + x[1], 0))}
+          <p class="muted" style="margin:6px 0 0;font-size:.76rem">${nf(D.sinComuna || 0)} visitas sin comuna (visitantes anónimos de hwf.cl o del portal antes de ingresar). Sin cookies: la comuna sale de la cuenta del cliente.</p>
+          <h3 style="margin:12px 0 0;font-size:.9rem">Cuentas activas del portal por comuna</h3>${lista(D.comunasCuentas, (D.comunasCuentas || []).reduce((t, x) => t + x[1], 0))}</div></div>` : ""}`;
     box.querySelectorAll("[data-dias]").forEach(b => b.onclick = () => { DIAS = Number(b.dataset.dias); cargar(); });
     const a = document.getElementById("mwAct"); if (a) a.onclick = cargar;
     const q = id => document.getElementById(id); if (q("mwPdf")) { q("mwPdf").onclick = () => pdf("pdf"); q("mwEnv").onclick = () => pdf("enviar"); q("mwXls").onclick = excel; } }
@@ -9274,6 +9277,7 @@ window.hwfContCambio = function () { try { if (typeof praPintar === "function" &
     ["Por día", [["Día", "hwf.cl", "Acceso Clientes", "Visitantes nuevos"]].concat(D.porDia || [])],
     ["Páginas", [["Página (hwf.cl)", "Visitas"]].concat(D.web.paginas || [])],
     ["Origen", [["De dónde llegan (hwf.cl)", "Visitas"]].concat(D.web.origen || []).concat([[], ["De dónde llegan (Acceso Clientes)", "Visitas"]]).concat(D.b2b.origen || [])],
+    ["Comunas", [["Comuna (visitas con sesión)", "Visitas"]].concat(D.comunas || []).concat([[], ["Comuna (cuentas activas)", "Cuentas"]]).concat(D.comunasCuentas || [])],
     ["Dispositivo", [["Dispositivo", "hwf.cl", "Acceso Clientes"]].concat(["celular", "computador"].map(k => [k, ((D.web.disp || []).find(x => x[0] === k) || [0, 0])[1], ((D.b2b.disp || []).find(x => x[0] === k) || [0, 0])[1]]))]];
   const nombreRep = () => `Métricas web HWF ${DAT.desde || ""} a ${new Date().toISOString().slice(0, 10)}`;
   function excel() { if (!DAT || !DAT.ok) return; const T = tablas(DAT), n = nombreRep();
@@ -9316,12 +9320,21 @@ window.hwfContCambio = function () { try { if (typeof praPintar === "function" &
   const llamar = async d => { const c = cfg(); if (!c) return { ok: false, error: "Esta app no está conectada al script de Google." }; return await syCall(c, d); };
   const CONT = () => document.getElementById("masBody");
 
-  let ST = { L: null, f: "pendiente", q: "", v: "", ocup: false, msg: "" };
+  let ST = { K: null, L: null, f: "pendiente", q: "", v: "", ocup: false, msg: "" };
   const N = s => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
   const E = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const estDe = c => c.cuenta ? "cuenta" : c.estado;
   const NOM = { pendiente: "Por decidir", autorizado: "Invitar", no: "No invitar", cuenta: "Ya tiene cuenta" };
-  async function cargar() { ST.ocup = true; pintar(); const r = await llamar({ accion: "invListar" }); ST.ocup = false; if (r && r.ok) { ST.L = r.clientes || []; ST.msg = ""; } else ST.msg = (r && r.error) || "No se pudo leer la lista."; pintar(); }
+  async function cargar() { ST.ocup = true; pintar(); const [r, k] = await Promise.all([llamar({ accion: "invListar" }), llamar({ accion: "kitLista" })]); ST.ocup = false;
+    if (k && k.ok) ST.K = k; if (r && r.ok) { ST.L = r.clientes || []; ST.msg = ""; } else ST.msg = (r && r.error) || "No se pudo leer la lista."; pintar(); }
+  /* Kit para tu local (22-11-2026): clientes del portal con sus compras; con 3 o más, enviar el Kit por WhatsApp */
+  const telWa = t => { let d = String(t || "").replace(/\D/g, ""); if (d.length === 9) d = "56" + d; if (d.length === 8) d = "569" + d; return d.length >= 11 ? d : ""; };
+  function kitHtml() { const K = ST.K; if (!K || !(K.cuentas || []).length) return "";
+    const L = K.cuentas.filter(c => !ST.v || c.vendedor === ST.v), m = K.min || 3;
+    return `<div class="iv-c"><h3>🎁 Kit para tu local <small>Nutrición + Técnicas de venta · se gana con ${m} compras por Acceso Clientes</small></h3>
+      ${L.map(c => { const t = telWa(c.telefono), msg = "Hola " + (c.contacto || c.razon || "") + ", gracias por tus compras en Acceso Clientes de HWF 🙌 Te regalamos el Kit para tu local: nutrición para recomendar el alimento correcto y técnicas de venta para tu mostrador. Ábrelo aquí: " + c.url;
+        return `<div class="iv-r"><div><b>${E(c.razon || c.rut)}</b> <span class="iv-p ${c.url ? "autorizado" : ""}">${c.compras} de ${m} compras</span><small>${E(c.comuna || "")}${ES_VEND ? "" : " · " + E(c.vendedor || "sin vendedor")}</small></div>
+          <div class="iv-bt">${c.url ? `<a class="iv-b ok" style="text-decoration:none" target="_blank" rel="noopener" href="https://wa.me/${t}?text=${encodeURIComponent(msg)}">📲 Enviar Kit por WhatsApp</a>` : `<span class="iv-m small">Le ${m - c.compras === 1 ? "falta 1 compra" : "faltan " + (m - c.compras) + " compras"}</span>`}</div></div>`; }).join("") || '<p class="iv-m">Sin clientes en el portal todavía.</p>'}</div>`; }
   async function guardar(lista) { if (!lista.length) return; ST.ocup = true; pintar(); const r = await llamar({ accion: "invGuardar", lista }); ST.ocup = false;
     if (r && r.ok) { lista.forEach(o => { const c = (ST.L || []).find(x => x.correo === o.correo); if (c) c.estado = o.estado; }); ST.msg = (r.guardados || 0) + (r.guardados === 1 ? " cliente actualizado." : " clientes actualizados."); } else ST.msg = (r && r.error) || "No se pudo guardar.";
     pintar(); }
@@ -9348,7 +9361,7 @@ window.hwfContCambio = function () { try { if (typeof praPintar === "function" &
     c.addEventListener("input", ev => { if (ev.target.id === "ivQ") { ST.q = ev.target.value; clearTimeout(enganchar.t); enganchar.t = setTimeout(() => { pintar(); const i = document.getElementById("ivQ"); if (i) { i.focus(); i.setSelectionRange(i.value.length, i.value.length); } }, 250); } });
     c.addEventListener("change", ev => { if (ev.target.id === "ivV") { ST.v = ev.target.value; pintar(); } }); }
 
-  const TXT = "Hola {nombre}:\n\nEn HWF lanzamos **Acceso Clientes**, nuestro portal mayorista en www.hwf.cl, para que tu negocio compre más fácil:\n\n- **Catálogo completo con tus precios** y las promociones vigentes.\n- **Pedidos a cualquier hora**, también desde el celular.\n- **Tus pedidos y lo que tienes por pagar**, en un solo lugar.\n\nCrear tu cuenta toma un minuto: entra a www.hwf.cl/b2b/?registro=1 con el RUT de tu negocio. Como ya eres cliente de HWF, tu cuenta queda activa al instante.\n\nCualquier duda, {vendedor} te ayuda.";
+  const TXT = "Hola {nombre}:\n\nEn HWF lanzamos **Acceso Clientes**, nuestro portal mayorista en www.hwf.cl, para que tu negocio compre más fácil:\n\n- **Catálogo completo con tus precios** y las promociones vigentes.\n- **Pedidos a cualquier hora**, también desde el celular.\n- **Tus pedidos y lo que tienes por pagar**, en un solo lugar.\n\nCrear tu cuenta toma un minuto: entra a www.hwf.cl/b2b/?registro=1 con el RUT de tu negocio. Como ya eres cliente de HWF, tu cuenta queda activa al instante.\n\n🎁 **Regalo para tu local:** con tus primeras 3 compras por Acceso Clientes desbloqueas el **Kit para tu local**: nutrición para recomendar el alimento correcto (comparador con la competencia) y técnicas de venta para tu mostrador.\n\nCualquier duda, {vendedor} te ayuda.";
   async function crearCampana() { const aut = (ST.L || []).filter(c => !c.cuenta && c.estado === "autorizado").length;
     if (!aut) { ST.msg = "Todavía no hay clientes autorizados por sus vendedores."; pintar(); return; }
     if (!confirm("Se creará un borrador en Mailing para " + aut + " clientes autorizados. Lo revisas y lo envías desde Mailing. ¿Continuar?")) return;
@@ -9359,7 +9372,7 @@ window.hwfContCambio = function () { try { if (typeof praPintar === "function" &
     const aut = L.filter(c => !c.cuenta && c.estado === "autorizado").length;
     return `<div class="iv-c"><h3>Avance por vendedor</h3><div style="overflow:auto"><table class="iv-t"><thead><tr><th>Vendedor</th><th>Invitar</th><th>Por decidir</th><th>No invitar</th><th>Ya tienen cuenta</th></tr></thead><tbody>${Object.keys(V).sort().map(v => `<tr><td>${E(v)}</td><td>${V[v].a}</td><td>${V[v].p}</td><td>${V[v].n}</td><td>${V[v].c}</td></tr>`).join("")}</tbody></table></div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px"><button type="button" class="iv-b pri" data-iva="camp" ${aut && !ST.ocup ? "" : "disabled"}>✉ Crear campaña de invitación (${aut} autorizados)</button><small>Solo llega a los autorizados por su vendedor que aún no tienen cuenta; sin precios.</small></div></div>`; }
-  function pintar() { if (typeof vistaMas !== "undefined" && vistaMas === "invita") { const mb = CONT(); if (mb) mb.innerHTML = `<div class="iv">${ST.L ? resumen() : ""}${lista()}</div>`; } }
+  function pintar() { if (typeof vistaMas !== "undefined" && vistaMas === "invita") { const mb = CONT(); if (mb) mb.innerHTML = `<div class="iv">${ST.L ? resumen() : ""}${kitHtml()}${lista()}</div>`; } }
   const seg = document.getElementById("masSeg"), b = document.createElement("button"); b.type = "button"; b.dataset.m = "invita"; b.setAttribute("aria-pressed", "false"); b.textContent = "Invitar clientes";
   const ref = seg.querySelector('[data-m="mail"]') || seg.lastElementChild; ref.after(b);
   try { if (typeof NAV_MAS !== "undefined" && !NAV_MAS.includes("invita")) { const i = NAV_MAS.indexOf("mail"); NAV_MAS.splice(i >= 0 ? i + 1 : NAV_MAS.length, 0, "invita"); } if (typeof NAV_MNOM !== "undefined") NAV_MNOM.invita = "Invitar clientes"; } catch (e) { }
