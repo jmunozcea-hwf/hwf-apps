@@ -5356,7 +5356,8 @@ async function dvRevisar() {
     try { localStorage.setItem(DV_KEY, JSON.stringify({ v: r.version, d: r.paquete })); }
     catch (e) { try { localStorage.removeItem(DV_KEY); } catch (x) {} return; }
     const act = r.paquete.ACT_INFO || {};
-    if (Date.now() - dvInicio < 15000) { location.reload(); return; }   /* recién abierta: se recarga sola */
+    /* recién abierta: se recarga sola UNA vez por pestaña (la sesión del vendedor se conserva: patch_vendedor) */
+    if (Date.now() - dvInicio < 15000) { let ya = false; try { ya = !!sessionStorage.getItem("hwf-dv-recargada"); sessionStorage.setItem("hwf-dv-recargada", "1"); } catch (e) { ya = true; } if (!ya) { location.reload(); return; } }
     if (document.querySelector(".dv-ban")) document.querySelector(".dv-ban").remove();
     document.body.insertAdjacentHTML("beforeend", `<div class="dv-ban" role="status"><span>🔄 Hay datos nuevos de Drive${act.drive ? ` del <b>${act.drive}</b>` : ""}.</span><button type="button" id="dvBtn">Actualizar</button></div>`);
     document.getElementById("dvBtn").onclick = () => location.reload();
@@ -7199,7 +7200,7 @@ function confirmarNota() {
   x.onclick = () => cerrarModal(); card.insertBefore(x, card.firstChild); })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261122101819";
+const HWF_VER = "20261122103924";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -8632,7 +8633,10 @@ function prUnifV(l) {
   setTimeout(pvPicker, 300); /* también al cargar (si SES ya existe) */
 
   /* portada de ingreso cada vez que se abre la app */
-  try { if (!esAdmin()) { localStorage.removeItem(SKEY); SES = null; } } catch (e) {}
+  /* …pero una recarga de la misma pestaña (datos nuevos, versión nueva) NO saca al vendedor: la marca vive en sessionStorage */
+  try { if (!esAdmin() && !sessionStorage.getItem("hwf-ses-viva")) { localStorage.removeItem(SKEY); SES = null; } } catch (e) {}
+  { const _gs = guardarSesion; guardarSesion = function (s) { const r = _gs.apply(this, arguments); try { if (s) sessionStorage.setItem("hwf-ses-viva", "1"); } catch (e) {} return r; }; }
+  { const _cs = cerrarSesion; cerrarSesion = function () { try { sessionStorage.removeItem("hwf-ses-viva"); } catch (e) {} return _cs.apply(this, arguments); }; }
   if (!SES) { try { mostrarAcceso(); } catch (e) {} }
 })();
 </script>
