@@ -2350,7 +2350,7 @@ const stAbrev = n => ST_ABR.reduce((s, [r, t]) => s.replace(r, t), String(n || "
 try { if ($("sStock") && !$("sStock").hidden) pintarStock(); } catch (e) {}
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261122220855";
+const HWF_VER = "20261122222146";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -4055,41 +4055,6 @@ window.hwfContCambio = function () { try { const b = document.getElementById("sS
     return r; };
 })();
 </script>
-<style>/* patch_menuorden */
-#snPanel .sn-g{font-size:.7rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted,#5B6874);padding:12px 10px 4px;border-top:1px solid var(--line,#E3E9EE);margin-top:6px}
-#snPanel .sn-i .sn-e:has(svg){width:34px;min-width:34px;height:34px}#snPanel .sn-i .sn-e svg{width:34px;height:34px;display:block}
-#snPanel .sn-g.sn-g0{border-top:0;margin-top:0;padding-top:4px}
-</style>
-<script>/* patch_menuorden: menús reordenados y agrupados */
-(function () {
-  const VEN = typeof NAV_ORDEN !== "undefined" && typeof setModo === "function" && !!document.getElementById("mInicio"), ADM = !VEN && !!document.querySelector("nav.bottom") && !!document.getElementById("s-res");
-  const LOG = !VEN && !ADM && !!document.querySelector('#nav [data-s="rutas"]'), TND = !VEN && !ADM && !!document.getElementById("tNav");
-  const GV = [["Mi día", ["inicio", "pedido", "clientes", "agenda", "ruta", "cobranza", "embudo", "cat"]], ["Análisis", ["dash", "avance", "bi", "eerr"]], ["Aprender", ["nut", "tec"]]];
-  const GA = [["Dirección", ["t:hal"]], ["Ventas", ["t:res", "t:ven", "t:cli", "t:pro", "m:ranking", "m:plan", "m:zonas", "m:terreno", "m:bonif"]], ["Pedidos y cobranza", ["m:cots", "m:napp", "m:cobranza", "m:embudo"]],
-    ["BI y compras", ["b:v", "b:l", "t:mar", "m:eerr", "m:abast", "m:provee"]], ["Web y portal B2B", ["m:metricas", "m:b2b", "m:mail", "m:invita", "m:roi"]], ["Archivos y datos", ["m:catalogo", "m:cambios", "m:datos"]]];   /* 22-11-2026: métricas web y B2B en su propio grupo */
-  const pos = (G, k) => { let n = 0; for (const [, l] of G) { const i = l.indexOf(k); if (i >= 0) return n + i; n += l.length; } return 999; };
-  if (VEN) { const ord = () => { const a = NAV_ORDEN.slice(); a.sort((x, y) => pos(GV, x[0]) - pos(GV, y[0])); NAV_ORDEN.splice(0, NAV_ORDEN.length, ...a); };
-    ord(); setTimeout(ord, 0); setTimeout(ord, 1500);   /* BI, Catálogos y Técnicas se agregan al cargar */ }
-  /* títulos de grupo en el menú lateral (VENTAS y HWF) */
-  function grupos() { const pan = document.getElementById("snPanel"); if (!pan || pan.querySelector(":scope > .sn-g")) return;
-    const items = [...pan.querySelectorAll(":scope > .sn-i")]; if (!items.length) return; if (ADM && pan.querySelector('.sn-i[data-t="inv"]:not([data-biu])')) return;   /* espera a que BI reemplace Inventario */
-    pan.querySelectorAll(":scope > .sn-g").forEach(x => x.remove());
-    const key = b => VEN ? b.dataset.sm : b.dataset.biu ? "b:" + b.dataset.biu : b.dataset.t ? "t:" + b.dataset.t : "m:" + b.dataset.m, G = VEN ? GV : GA;
-    if (ADM) { const ico = s => { const x = pan.querySelector(s + " .sn-e"); return x ? x.innerHTML : ""; };   /* íconos que faltaban */
-      { const e = pan.querySelector('[data-m="metricas"] .sn-e'); if (e && e.textContent.trim() === "•") e.textContent = "📈"; }
-      [["m:provee", '[data-m="cobranza"]'], ["m:catalogo", '[data-m="cots"]']].forEach(([k, s]) => { const it = items.find(b => key(b) === k), e = it && it.querySelector(".sn-e"); if (e && e.textContent.trim() === "•") e.innerHTML = ico(s) || "•"; }); const bv = items.find(b => key(b) === "b:v"), ev = bv && bv.querySelector(".sn-e"), pl = ico('[data-m="plan"]'); if (ev && pl) ev.innerHTML = pl; }
-    items.sort((a, b) => pos(G, key(a)) - pos(G, key(b))); let g0 = -1, n = 0;
-    items.forEach(b => { const p = pos(G, key(b)); let gi = -1, acc = 0; G.forEach(([, l], i) => { if (p >= acc && p < acc + l.length) gi = i; acc += l.length; }); if (gi < 0) gi = G.length;
-      if (gi !== g0) { const h = document.createElement("div"); h.className = "sn-g" + (n ? "" : " sn-g0"); h.textContent = gi < G.length ? G[gi][0] : "Otros"; pan.appendChild(h); g0 = gi; n++; } pan.appendChild(b); });
-  }
-  if (VEN || ADM) { const sn = () => document.getElementById("snPanel"); const mo = new MutationObserver(() => setTimeout(grupos, 0)); const t = setInterval(() => { if (sn()) { mo.observe(sn(), { childList: true }); clearInterval(t); } }, 300); }
-  /* barras inferiores */
-  const barra = (sel, orden) => { const nav = document.querySelector(sel); if (!nav) return; const bs = [...nav.querySelectorAll(":scope > button")], k = b => b.dataset.biu ? "b:" + b.dataset.biu : b.dataset.s;
-    bs.sort((a, b) => { const i = orden.indexOf(k(a)), j = orden.indexOf(k(b)); return (i < 0 ? 99 : i) - (j < 0 ? 99 : j); }).forEach(b => nav.appendChild(b)); };
-  if (LOG) { const o = ["dash", "rutas", "seg", "flota", "abast", "b:v", "b:l"]; barra("#nav", o); setTimeout(() => barra("#nav", o), 500); }
-  if (TND) { const o = ["inicio", "ventas", "stock", "cat", "plan", "dash", "guia", "nut", "rank", "adm"]; barra("#tNav", o); setTimeout(() => barra("#tNav", o), 500); }
-})();
-</script>
 <style>/* patch_catventas */
 .cv-box{display:grid;gap:12px}.cv-card{background:var(--card,var(--surface,#fff));border:1px solid var(--line,#DAE1E7);border-radius:16px;padding:14px}
 .cv-card h2{margin:0 0 6px;font-size:1.05rem}.cv-card h2 span{font-weight:600;font-size:.8rem;color:var(--muted,#5B6874)}
@@ -4233,6 +4198,41 @@ window.hwfContCambio = function () { try { const b = document.getElementById("sS
   }
   aplicar(); setTimeout(aplicar, 500); setTimeout(aplicar, 1600);
   let pend = false; new MutationObserver(() => { if (pend) return; pend = true; setTimeout(() => { pend = false; aplicar(); }, 60); }).observe(document.body, { childList: true, subtree: true });
+})();
+</script>
+<style>/* patch_menuorden */
+#snPanel .sn-g{font-size:.7rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted,#5B6874);padding:12px 10px 4px;border-top:1px solid var(--line,#E3E9EE);margin-top:6px}
+#snPanel .sn-i .sn-e:has(svg){width:34px;min-width:34px;height:34px}#snPanel .sn-i .sn-e svg{width:34px;height:34px;display:block}
+#snPanel .sn-g.sn-g0{border-top:0;margin-top:0;padding-top:4px}
+</style>
+<script>/* patch_menuorden: menús reordenados y agrupados */
+(function () {
+  const VEN = typeof NAV_ORDEN !== "undefined" && typeof setModo === "function" && !!document.getElementById("mInicio"), ADM = !VEN && !!document.querySelector("nav.bottom") && !!document.getElementById("s-res");
+  const LOG = !VEN && !ADM && !!document.querySelector('#nav [data-s="rutas"]'), TND = !VEN && !ADM && !!document.getElementById("tNav");
+  const GV = [["Mi día", ["inicio", "pedido", "clientes", "agenda", "ruta", "cobranza", "embudo", "cat"]], ["Análisis", ["dash", "avance", "bi", "eerr"]], ["Aprender", ["nut", "tec"]]];
+  const GA = [["Dirección", ["t:hal"]], ["Ventas", ["t:res", "t:ven", "t:cli", "t:pro", "m:ranking", "m:plan", "m:zonas", "m:terreno", "m:bonif"]], ["Pedidos y cobranza", ["m:cots", "m:napp", "m:cobranza", "m:embudo"]],
+    ["BI y compras", ["b:v", "b:l", "t:mar", "m:eerr", "m:abast", "m:provee"]], ["Web y portal B2B", ["m:metricas", "m:instagram", "m:b2b", "m:mail", "m:invita", "m:roi"]], ["Archivos y datos", ["m:catalogo", "m:cambios", "m:datos"]]];   /* 22-11-2026: métricas web y B2B en su propio grupo */
+  const pos = (G, k) => { let n = 0; for (const [, l] of G) { const i = l.indexOf(k); if (i >= 0) return n + i; n += l.length; } return 999; };
+  if (VEN) { const ord = () => { const a = NAV_ORDEN.slice(); a.sort((x, y) => pos(GV, x[0]) - pos(GV, y[0])); NAV_ORDEN.splice(0, NAV_ORDEN.length, ...a); };
+    ord(); setTimeout(ord, 0); setTimeout(ord, 1500);   /* BI, Catálogos y Técnicas se agregan al cargar */ }
+  /* títulos de grupo en el menú lateral (VENTAS y HWF) */
+  function grupos() { const pan = document.getElementById("snPanel"); if (!pan || pan.querySelector(":scope > .sn-g")) return;
+    const items = [...pan.querySelectorAll(":scope > .sn-i")]; if (!items.length) return; if (ADM && pan.querySelector('.sn-i[data-t="inv"]:not([data-biu])')) return;   /* espera a que BI reemplace Inventario */
+    pan.querySelectorAll(":scope > .sn-g").forEach(x => x.remove());
+    const key = b => VEN ? b.dataset.sm : b.dataset.biu ? "b:" + b.dataset.biu : b.dataset.t ? "t:" + b.dataset.t : "m:" + b.dataset.m, G = VEN ? GV : GA;
+    if (ADM) { const ico = s => { const x = pan.querySelector(s + " .sn-e"); return x ? x.innerHTML : ""; };   /* íconos que faltaban */
+      { const e = pan.querySelector('[data-m="metricas"] .sn-e'); if (e && e.textContent.trim() === "•") e.textContent = "📈"; }
+      [["m:provee", '[data-m="cobranza"]'], ["m:catalogo", '[data-m="cots"]']].forEach(([k, s]) => { const it = items.find(b => key(b) === k), e = it && it.querySelector(".sn-e"); if (e && e.textContent.trim() === "•") e.innerHTML = ico(s) || "•"; }); const bv = items.find(b => key(b) === "b:v"), ev = bv && bv.querySelector(".sn-e"), pl = ico('[data-m="plan"]'); if (ev && pl) ev.innerHTML = pl; }
+    items.sort((a, b) => pos(G, key(a)) - pos(G, key(b))); let g0 = -1, n = 0;
+    items.forEach(b => { const p = pos(G, key(b)); let gi = -1, acc = 0; G.forEach(([, l], i) => { if (p >= acc && p < acc + l.length) gi = i; acc += l.length; }); if (gi < 0) gi = G.length;
+      if (gi !== g0) { const h = document.createElement("div"); h.className = "sn-g" + (n ? "" : " sn-g0"); h.textContent = gi < G.length ? G[gi][0] : "Otros"; pan.appendChild(h); g0 = gi; n++; } pan.appendChild(b); });
+  }
+  if (VEN || ADM) { const sn = () => document.getElementById("snPanel"); const mo = new MutationObserver(() => setTimeout(grupos, 0)); const t = setInterval(() => { if (sn()) { mo.observe(sn(), { childList: true }); clearInterval(t); } }, 300); }
+  /* barras inferiores */
+  const barra = (sel, orden) => { const nav = document.querySelector(sel); if (!nav) return; const bs = [...nav.querySelectorAll(":scope > button")], k = b => b.dataset.biu ? "b:" + b.dataset.biu : b.dataset.s;
+    bs.sort((a, b) => { const i = orden.indexOf(k(a)), j = orden.indexOf(k(b)); return (i < 0 ? 99 : i) - (j < 0 ? 99 : j); }).forEach(b => nav.appendChild(b)); };
+  if (LOG) { const o = ["dash", "rutas", "seg", "flota", "abast", "b:v", "b:l"]; barra("#nav", o); setTimeout(() => barra("#nav", o), 500); }
+  if (TND) { const o = ["inicio", "ventas", "stock", "cat", "plan", "dash", "guia", "nut", "rank", "adm"]; barra("#tNav", o); setTimeout(() => barra("#tNav", o), 500); }
 })();
 </script>
 </body></html>

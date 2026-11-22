@@ -1,0 +1,62 @@
+# Instagram @hwfchile automático y gratuito (22-11-2026). Copia en hwf-apps/.github/workflows/instagram.yml
+#  · domingo: plan de las próximas 2 semanas + imágenes con la marca HWF (ig/plan.json, ig/img/)
+#  · cada 30 min entre 10:00 y 20:30 (Chile): publica lo que toca (solo si existe el secreto IG_TOKEN)
+#  · cada 3 horas: responde comentarios que piden precio (mismo secreto)
+name: Instagram HWF
+on:
+  schedule:
+    - cron: "0 23 * * 0"
+    - cron: "*/30 13-23 * * *"
+    - cron: "15 */3 * * *"
+  workflow_dispatch:
+    inputs:
+      accion:
+        description: "plan | publicar | comentarios"
+        required: true
+        default: "plan"
+permissions:
+  contents: write
+concurrency:
+  group: instagram
+  cancel-in-progress: false
+jobs:
+  ig:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Qué hacer
+        id: q
+        run: |
+          A="${{ github.event.inputs.accion }}"
+          if [ -z "$A" ]; then case "${{ github.event.schedule }}" in "0 23 * * 0") A=plan;; "15 */3 * * *") A=comentarios;; *) A=publicar;; esac; fi
+          echo "accion=$A" >> "$GITHUB_OUTPUT"; echo "Acción: $A"
+      - name: Plan e imágenes
+        if: steps.q.outputs.accion == 'plan'
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.48.2
+          npx playwright install --with-deps chromium
+          node ig/bin/generar.js
+          node ig/bin/render.js
+      - name: Publicar
+        if: steps.q.outputs.accion == 'publicar' || steps.q.outputs.accion == 'plan'
+        env:
+          IG_TOKEN: ${{ secrets.IG_TOKEN }}
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+        run: node ig/bin/publicar.js publicar
+      - name: Comentarios
+        if: steps.q.outputs.accion == 'comentarios'
+        env:
+          IG_TOKEN: ${{ secrets.IG_TOKEN }}
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+        run: node ig/bin/publicar.js comentarios
+      - name: Guardar
+        run: |
+          git config user.name "HWF Instagram"; git config user.email "actions@users.noreply.github.com"
+          git add ig/plan.json ig/estado.json ig/img
+          if git diff --cached --quiet; then echo "sin cambios"; exit 0; fi
+          git commit -m "Instagram: ${{ steps.q.outputs.accion }} $(date -u +%F)"
+          for i in 1 2 3 4; do git pull --rebase -q origin main && git push -q origin HEAD:main && exit 0; sleep $((i*5)); done; exit 1
