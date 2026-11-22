@@ -8961,7 +8961,7 @@ window.hwfContCambio = function () { try { if (typeof praPintar === "function" &
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261122154714";
+const HWF_VER = "20261122160017";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -8978,6 +8978,19 @@ const HWF_VER = "20261122154714";
     document.body.appendChild(d); }
   setTimeout(revisar, 4000); setInterval(revisar, 30 * 60 * 1000);
   document.addEventListener("visibilitychange", () => { if (!document.hidden) revisar(); });
+})();
+</script>
+<script>/* patch_marcafija: marca fija desde publicos.json (campo m) */
+(function () {
+  let MAPA = null;
+  const nrm = s => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/\s+/g, " ").trim();
+  const mapa = () => { if (MAPA) return MAPA; MAPA = {};
+    const L = (window.__PUB && window.__PUB.prods) || (typeof PRODS !== "undefined" && PRODS) || [];
+    L.forEach(p => { if (p && p.m) { MAPA["c:" + p.i] = p.m; MAPA["n:" + nrm(p.d)] = p.m; } }); return MAPA; };
+  const fija = n => mapa()["n:" + nrm(n)] || mapa()["c:" + String(n)] || "";
+  if (typeof pmMarca === "function") { const _pm = pmMarca; pmMarca = function (n) { return fija(n) || _pm.apply(this, arguments); }; }
+  if (typeof invMarca === "function") { const _im = invMarca; invMarca = function (n) { return fija(n) || _im.apply(this, arguments); }; }
+  window.hwfMarcaFija = fija;
 })();
 </script>
 </body>

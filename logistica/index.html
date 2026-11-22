@@ -483,7 +483,7 @@ if (!cfg() || !DATA()) pantallaConexion(); else { arrancar(); bajar(true).then(n
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261122154714";
+const HWF_VER = "20261122160017";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -760,6 +760,18 @@ function vmPoner(cont, VM, antes) { try { if (!cont) return; const v = cont.quer
   #biBox .bi-t td:first-child{grid-column:1/-1;font-weight:800;font-size:.92rem}#biBox .bi-t td[colspan]{grid-column:1/-1}
   #biBox .bi-t td[data-l]::before{content:attr(data-l);display:block;font-size:.64rem;font-weight:800;text-transform:uppercase;letter-spacing:.03em;color:var(--muted,#5B6874)}
   #biBox .tbl{overflow:visible!important;margin:0}}
+.bi-ml{display:none}
+@media(max-width:699px){#biBox .bi-tmw{display:none}.bi-ml{display:grid;gap:2px;margin-top:6px}
+  .bi-mr{display:grid;grid-template-columns:3.2rem 1fr auto;align-items:center;gap:4px 10px;padding:9px 2px;border-bottom:1px solid var(--line,#E3E9EE)}
+  .bi-mn{font-weight:800;text-transform:capitalize;font-size:.9rem}.bi-mr b{font-variant-numeric:tabular-nums;font-size:.98rem;text-align:right;white-space:nowrap}
+  .bi-mb{height:10px;border-radius:6px;background:var(--sunk,#EEF2F5);overflow:hidden}.bi-mb i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,#26A69A,#0B3146)}
+  .bi-mr small{grid-column:2/-1;font-size:.74rem;color:var(--muted,#5B6874);margin-top:-2px}
+  .bi-mt{border-bottom:0;border-top:2px solid var(--ink,#0F1E29);margin-top:4px}.bi-mt .bi-mn,.bi-mt b{font-size:1rem}
+  .bi-gl .bi-mr{grid-template-columns:1fr auto 1rem;gap:3px 10px;cursor:pointer}.bi-gl .bi-mr:not([data-bp]){grid-template-columns:1fr auto}
+  .bi-gn{font-weight:800;font-size:.92rem;min-width:0}.bi-gn small{display:block;font-weight:600;font-size:.72rem;color:var(--muted,#5B6874)}
+  .bi-gl .bi-mb{grid-column:1/2;grid-row:2}.bi-gl em{grid-column:2/3;grid-row:2;font-style:normal;font-size:.74rem;color:var(--muted,#5B6874);text-align:right;white-space:nowrap}
+  .bi-go{grid-column:3;grid-row:1/3;font-size:1.4rem;color:var(--muted,#5B6874);align-self:center}
+  .card:has(.bi-ml) h2 .muted{display:block;font-size:.78rem;font-weight:600;margin-top:2px}}
 #crmBi{min-width:0;max-width:100%}#crmBi .bi-u{display:flex;max-width:100%;flex-wrap:wrap}#crmBi .bi-u button{flex:1 1 0;min-width:0;padding-left:6px;padding-right:6px}#crmBi .bi-seg button{min-width:0}
 .bi-svg{max-height:440px}
 .bi-fil{display:grid!important;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));align-items:end}.bi-fil label{min-width:0}.bi-fil select{width:100%;min-width:0;max-width:100%;text-overflow:ellipsis}.bi-fil .bi-full{grid-column:1/-1}.bi-u{flex-wrap:wrap;max-width:100%}.bi-fil>.btn{justify-content:center}
@@ -935,14 +947,22 @@ function vmPoner(cont, VM, antes) { try { if (!cont) return; const v = cont.quer
     <div class="card"><h2>Por ${R.diario ? "día" : "mes"} <span class="muted">${hayF ? esc(filt) : "todas las marcas"} · ${P ? "millones de $" : "unidades"}</span></h2>
       <div class="bi-ley"><span><i style="background:#0B3146;height:3px;width:16px;vertical-align:4px"></i>Ventas${P ? " netas" : ""}</span>${(RC && P) || E.un === "v" ? "" : '<span><i style="background:#E07B24;height:3px;width:16px;vertical-align:4px"></i>Compras</span>'}${PC && E.un !== "l" ? '<span><i style="background:none;border-top:2px dashed #5B6874;height:0;border-radius:0;vertical-align:4px"></i>Costo de lo vendido</span>' : ""}</div>
       ${grafico(R)}
-      <div class="tbl" style="overflow-x:auto;margin-top:8px"><table class="bi-t"><thead><tr><th>${R.diario ? "Día" : "Mes"}</th><th>Ventas</th>${PC ? '<th class="bi-v">Costo vendido</th>' : ""}<th class="bi-l">Compras${RC && P ? " (u)" : ""}</th><th class="bi-l">Compras − ${PC ? "costo" : "ventas"}${RC && P ? " (u)" : ""}</th>${PC ? '<th class="bi-v">Margen</th>' : ""}</tr></thead><tbody>
-        ${R.mes.slice(0, R.ult + 1).map(filaM).join("")}<tr class="tot"><td>Total</td><td>${F(v)}</td>${PC ? `<td class="bi-v">${fm(t.vc)}</td>` : ""}<td class="bi-l">${hay ? Fc(c) : "—"}</td><td class="bi-l ${hay ? dcl(dif) : ""}">${hay ? Fc(dif) : "—"}</td>${PC ? `<td class="bi-v">${t.vv ? Math.round((1 - t.vc / t.vv) * 100) + "%" : "—"}</td>` : ""}</tr></tbody></table></div></div>
+      <div class="tbl bi-tmw" style="overflow-x:auto;margin-top:8px"><table class="bi-t"><thead><tr><th>${R.diario ? "Día" : "Mes"}</th><th>Ventas</th>${PC ? '<th class="bi-v">Costo vendido</th>' : ""}<th class="bi-l">Compras${RC && P ? " (u)" : ""}</th><th class="bi-l">Compras − ${PC ? "costo" : "ventas"}${RC && P ? " (u)" : ""}</th>${PC ? '<th class="bi-v">Margen</th>' : ""}</tr></thead><tbody>
+        ${R.mes.slice(0, R.ult + 1).map(filaM).join("")}<tr class="tot"><td>Total</td><td>${F(v)}</td>${PC ? `<td class="bi-v">${fm(t.vc)}</td>` : ""}<td class="bi-l">${hay ? Fc(c) : "—"}</td><td class="bi-l ${hay ? dcl(dif) : ""}">${hay ? Fc(dif) : "—"}</td>${PC ? `<td class="bi-v">${t.vv ? Math.round((1 - t.vc / t.vv) * 100) + "%" : "—"}</td>` : ""}</tr></tbody></table></div>
+      ${(() => { const L = R.mes.slice(0, R.ult + 1), mx = Math.max(1, ...L.map(o => Math.abs(P ? o.vv : o.vq)));   /* celular: lista con barras (22-11-2026) */
+        return `<div class="bi-ml" role="list">${L.map((o, i) => { const vv = P ? o.vv : o.vq, cc = PC ? o.cv : o.cq;
+          return `<div class="bi-mr" role="listitem"><span class="bi-mn">${R.lab[i]}</span><span class="bi-mb"><i style="width:${Math.max(vv > 0 ? 3 : 0, Math.round(vv / mx * 100))}%"></i></span><b>${F(vv)}</b>${hay ? `<small class="bi-l">Compras ${Fc(cc)}</small>` : ""}${PC ? `<small class="bi-v">Margen ${o.vv ? Math.round((1 - o.vc / o.vv) * 100) + "%" : "—"}</small>` : ""}</div>`; }).join("")}
+          <div class="bi-mr bi-mt"><span class="bi-mn">Total</span><span></span><b>${F(v)}</b></div></div>`; })()}</div>
     ${E.un === "v" && E.canal === "d" && !E.vend && R.vend.length > 1 ? (() => { const L = R.vend.filter(o => o.vv || o.vq).sort((a, b) => P ? b.vv - a.vv : b.vq - a.vq), tv = L.reduce((s, o) => s + (P ? o.vv : o.vq), 0);
       return `<div class="card"><h2>Por vendedor <span class="muted">distribuidora · toca un vendedor para filtrar</span></h2><div class="tbl" style="overflow-x:auto"><table class="bi-t"><thead><tr><th>Vendedor</th><th>Ventas</th><th>% venta</th><th>Unidades</th>${PC ? "<th>Margen</th>" : ""}</tr></thead><tbody>
         ${L.map(o => `<tr data-bv="${esc(o.n)}" style="cursor:pointer"><td>${esc(o.n)}</td><td>${F(P ? o.vv : o.vq)}</td><td>${tv ? Math.round((P ? o.vv : o.vq) / tv * 100) + "%" : "—"}</td><td>${fu(o.vq)}</td>${PC ? `<td>${o.vv ? Math.round((1 - o.vc / o.vv) * 100) + "%" : "—"}</td>` : ""}</tr>`).join("")}</tbody></table></div></div>`; })() : ""}
     <div class="card"><h2>Por ${NV} <span class="muted">${hayF ? esc(filt) + " · " : ""}${NV === "producto" ? G.length + " productos" : "toca una fila para entrar"}</span></h2>
-      <div class="tbl" style="overflow-x:auto"><table class="bi-t"><thead><tr><th>${NV[0].toUpperCase() + NV.slice(1)}</th><th>Ventas</th><th class="bi-l">Compras${RC && P ? " (u)" : ""}</th><th class="bi-l">Compras − ${PC ? "costo" : "ventas"}${RC && P ? " (u)" : ""}</th><th class="bi-v">% venta</th></tr></thead><tbody>
+      <div class="tbl bi-tmw" style="overflow-x:auto"><table class="bi-t"><thead><tr><th>${NV[0].toUpperCase() + NV.slice(1)}</th><th>Ventas</th><th class="bi-l">Compras${RC && P ? " (u)" : ""}</th><th class="bi-l">Compras − ${PC ? "costo" : "ventas"}${RC && P ? " (u)" : ""}</th><th class="bi-v">% venta</th></tr></thead><tbody>
         ${G.slice(0, 200).map(o => filaG(o, !E.prod)).join("") || '<tr><td colspan="5" class="muted">Sin movimientos.</td></tr>'}</tbody></table></div>
+      ${(() => { const L = G.slice(0, 200), mx = Math.max(1, ...L.map(o => Math.abs(P ? o.vv : o.vq)));   /* celular: lista con barras (22-11-2026) */
+        return `<div class="bi-ml bi-gl" role="list">${L.map(o => { const vv = P ? o.vv : o.vq, cc = PC ? o.cv : o.cq, st = o.cod != null ? HOST.stock(o.cod) : null, clic = !E.prod;
+          return `<div class="bi-mr" role="listitem"${clic ? ` data-bp="${esc(o.cod != null ? o.cod : o.n)}" tabindex="0"` : ""}><span class="bi-gn">${esc(o.n)}${o.cod != null ? `<small>${esc(o.cod)}${st != null ? " · stock " + fu(st) : ""}</small>` : ""}</span><b>${F(vv)}</b>
+            <span class="bi-mb"><i style="width:${Math.max(vv > 0 ? 3 : 0, Math.round(vv / mx * 100))}%"></i></span><em>${v ? Math.round(vv / v * 100) + "% de la venta" : ""}${hay ? `<span class="bi-l"> · compras ${Fc(cc)}</span>` : ""}</em>${clic ? '<span class="bi-go" aria-hidden="true">›</span>' : ""}</div>`; }).join("") || '<p class="muted">Sin movimientos.</p>'}</div>`; })()}
       ${hayF ? '<button type="button" class="btn" id="biTodos" style="margin-top:10px">‹ Volver un nivel</button>' : ""}
       <p class="bi-nota">Ventas: facturas − notas de crédito, neto sin IVA (${CAN[E.canal]}).${E.canal ? " En «" + CAN[E.canal] + "» las compras son las ingresadas a su bodega más los traspasos netos recibidos de la otra bodega (la distribuidora los entrega, la tienda los recibe): distribuidora + tienda = total comprado." : ""} Compras: ingresos de mercadería («Parte de entrada») del Mayor Auxiliar de inventario${R.X.C ? ", informe del " + esc(String(R.X.C.fecha || "")) : ""}, ${RC ? "aquí en unidades" : "a costo sin IVA"}; no incluye devoluciones de clientes ni traspasos entre bodegas.${R.X.demo ? " Demo: compras ficticias." : ""}${R.X.C ? (hay ? "" : " <b>No hay compras de " + E.anio + " en el informe</b>: para verlas, sube a META un Mayor Auxiliar que incluya ese año.") : " <b>Las compras aparecerán con la próxima actualización de datos</b> (necesita el informe Mayor Auxiliar en la carpeta META)."} Marca = categoría Defontana del producto; formato = tamaño del envase tomado del nombre. Rojo = se compró más de lo que salió; verde = menos.</p></div>`; }
   function csvRC(R) { const f = [["Año", E.anio, "Proveedor", E.prov || "Todos", "Marca", E.marca || "Todas", "Formato", E.fmt || "Todos", "Producto", E.prod || "Todos", "Negocio", CAN[E.canal]], [], ["Mes", "Ventas unidades", "Ventas $ neto", "Compras unidades"]];
@@ -1115,7 +1135,7 @@ function vmPoner(cont, VM, antes) { try { if (!cont) return; const v = cont.quer
       if (b.dataset.p === "a") { E.m1 = 1; E.m2 = 12; } else if (b.dataset.p === "m") { E.m1 = E.m2 = ul; } else if (b.dataset.p === "t") { E.m2 = ul; E.m1 = Math.max(1, ul - 2); } else { E.perP = 1; guarda(); poner(); return; } E.perP = 0; guarda(); poner(); };
     if (q("biTodos")) q("biTodos").onclick = () => { if (E.prod) E.prod = ""; else if (E.marca) E.marca = ""; else if (E.fmt && !E.prov) E.fmt = ""; else if (E.prov) E.prov = ""; else E.fmt = ""; guarda(); poner(); };
     q("biCsv").onclick = () => excel(R); q("biPdf").onclick = () => conPdf(R, "pdf"); q("biMail").onclick = () => conPdf(R, "correo"); q("biPrint").onclick = () => conPdf(R, "imprimir");
-    s.querySelectorAll("tr[data-bp]").forEach(tr => tr.onclick = () => { const v = tr.dataset.bp, n = R.nv; if (n === "marca") E.marca = v; else E.prod = v; guarda(); poner(); window.scrollTo({ top: 0 }); }); }
+    s.querySelectorAll("[data-bp]").forEach(tr => tr.onclick = () => { const v = tr.dataset.bp, n = R.nv; if (n === "marca") E.marca = v; else E.prod = v; guarda(); poner(); window.scrollTo({ top: 0 }); }); }
   /* HWF (menú lateral) y LOGÍSTICA (barra inferior): «Inteligencia de negocio · Ventas» y «· Logística» como entradas separadas (12-11-2026) */
   function marcarMenu() { document.querySelectorAll("[data-biu]").forEach(b => { const si = document.getElementById("s-inv"), en = HOST.t === "log" ? (typeof SEC !== "undefined" && SEC === "inv") : !!(si && si.offsetParent !== null && !si.hidden); b.setAttribute("aria-current", String(en && b.dataset.biu === E.un)); }); }
   if (HOST.t !== "ventas") {
