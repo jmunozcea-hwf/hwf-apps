@@ -5276,7 +5276,7 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261122152509";
+const HWF_VER = "20261122153915";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -9155,6 +9155,33 @@ window.hwfContCambio = function () { try { if (typeof praPintar === "function" &
       const ws = XLSX.utils.aoa_to_sheet(filas), wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Tienda"); XLSX.writeFile(wb, `Abastecimiento Tienda Hellywoof ${D.corte}.xlsx`); } catch (e) { alert("No se pudo generar el Excel: " + e.message); } };
   }
   const _pa = pintarAbast; pintarAbast = function () { const r = _pa.apply(this, arguments); try { pintar(); } catch (e) { console.error(e); } return r; };
+})();
+</script>
+<style>/* patch_menuflotante */
+#snBtn,#snBtnLog{touch-action:none;user-select:none;-webkit-user-select:none;transition:transform .2s ease,opacity .2s ease,box-shadow .2s ease}
+#snBtn.mf-fl,#snBtnLog.mf-fl{right:auto!important;bottom:auto!important}
+#snBtn.mf-mov,#snBtnLog.mf-mov{transition:none;transform:scale(1.08);box-shadow:0 10px 26px rgba(11,49,70,.45)}
+#snBtn.mf-sc,#snBtnLog.mf-sc{transform:scale(.78);opacity:.38}
+</style>
+<script>/* patch_menuflotante: arrastrar el botón Menú y ocultarlo al desplazar */
+(function ini(n) {
+  const b = document.getElementById("snBtn") || document.getElementById("snBtnLog");
+  if (!b) { if ((n || 0) < 40) setTimeout(() => ini((n || 0) + 1), 250); return; } if (b.dataset.mf) return; b.dataset.mf = "1";
+  const K = "hwf-menu-pos:" + location.pathname.split("/").filter(Boolean).slice(-1)[0];
+  const MG = 10, tam = () => b.offsetWidth || 56, alto = () => window.innerHeight, ancho = () => document.documentElement.clientWidth;
+  const poner = (x, y) => { const s = tam(); x = Math.min(Math.max(MG, x), ancho() - s - MG); y = Math.min(Math.max(70, y), alto() - s - 40);
+    b.classList.add("mf-fl"); b.style.left = x + "px"; b.style.top = y + "px"; };
+  const pegar = () => { const s = tam(), x = parseFloat(b.style.left) || 0, der = x + s / 2 > ancho() / 2; poner(der ? ancho() - s - MG : MG, parseFloat(b.style.top) || 0); return der; };
+  try { const p = JSON.parse(localStorage.getItem(K) || "null"); if (p) { poner(p.der ? ancho() : 0, p.y * alto()); pegar(); } } catch (e) {}
+  let o = null, movido = false;
+  b.addEventListener("pointerdown", e => { const r = b.getBoundingClientRect(); o = { x: e.clientX, y: e.clientY, dx: e.clientX - r.left, dy: e.clientY - r.top }; movido = false; try { b.setPointerCapture(e.pointerId); } catch (x) {} });
+  b.addEventListener("pointermove", e => { if (!o) return; if (!movido && Math.hypot(e.clientX - o.x, e.clientY - o.y) < 7) return; movido = true; b.classList.add("mf-mov"); poner(e.clientX - o.dx, e.clientY - o.dy); });
+  const soltar = () => { if (!o) return; o = null; b.classList.remove("mf-mov"); if (!movido) return;
+    const der = pegar(); try { localStorage.setItem(K, JSON.stringify({ der, y: (parseFloat(b.style.top) || 0) / alto() })); } catch (e) {} };
+  b.addEventListener("pointerup", soltar); b.addEventListener("pointercancel", soltar);
+  b.addEventListener("click", e => { if (movido) { e.stopImmediatePropagation(); e.preventDefault(); movido = false; } }, true);
+  addEventListener("resize", () => { if (b.classList.contains("mf-fl")) pegar(); });
+  let t = 0; addEventListener("scroll", () => { b.classList.add("mf-sc"); clearTimeout(t); t = setTimeout(() => b.classList.remove("mf-sc"), 450); }, { passive: true });
 })();
 </script>
 </body>
