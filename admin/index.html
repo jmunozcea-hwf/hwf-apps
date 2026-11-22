@@ -5278,7 +5278,7 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261122220143";
+const HWF_VER = "20261122220855";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -9312,7 +9312,8 @@ window.hwfContCambio = function () { try { if (typeof praPintar === "function" &
   try { E = Object.assign(E, JSON.parse(localStorage.getItem(LS) || "{}")); } catch (e) {}
   const gp = id => { const v = (E.gas || {})[id], g = GS.find(x => x[0] === id); return v === undefined || v === "" || isNaN(+v) ? g[3] : +v; };
   const gastos = (o, sim) => GS.map(g => [g, gp(g[0]) / 100 * Math.max(0, sim && g[4] ? (g[2] === "d" ? o.svd : o.svt) : (g[2] === "d" ? o.vd : o.vt))]);
-  const gtot = (o, sim) => XK ? XK.tasaG * o.v : gastos(o, sim).reduce((t, x) => t + x[1], 0), gpc = c => GS.filter(g => g[2] === c).reduce((t, g) => t + gp(g[0]), 0);
+  const arrSeg = o => XK ? (XK.vD > 0 ? XK.arrD * (o.vd || 0) / XK.vD : 0) + (XK.vT > 0 ? XK.arrT * (o.vt || 0) / XK.vT : 0) : 0;   /* arriendo directo de cada canal */
+  const gtot = (o, sim) => XK ? XK.tasaGsin * o.v + arrSeg(o) : gastos(o, sim).reduce((t, x) => t + x[1], 0), gpc = c => GS.filter(g => g[2] === c).reduce((t, g) => t + gp(g[0]), 0);
   if (!["total", "canal", "vend", "prov"].includes(E.dim)) E.dim = "canal";
   const guarda = () => { try { localStorage.setItem(LS, JSON.stringify(E)); } catch (e) {} };
   const es = s => typeof esc === "function" ? esc(s) : String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -9329,8 +9330,11 @@ window.hwfContCambio = function () { try { if (typeof praPintar === "function" &
      3.1 ventas · 4.1 costo de ventas · 4.5 gastos de administración y ventas (por naturaleza) · 1.x activos · 2.x pasivos.
      Lo que la contabilidad no trae se estima y se rotula «estimado»: remuneraciones (no están contabilizadas), gastos de meses sin
      cierre contable (gasto/venta mediano del año) e impuesto a la renta (tasa editable). */
-  const RP = [["Vendedores en terreno", 2, 1100000], ["Choferes", 2, 850000], ["Vendedoras de la tienda", 2, 700000], ["Administración", 1, 950000]];
+  const COM = 0.015, GETNET = 0.014;   /* comisión de vendedores (% venta distribuidora) y Getnet/POS (% venta tienda): mismos supuestos que el Excel */
+  const RP = [["Vendedores en terreno (sueldo base)", 2, 950000], ["Choferes", 2, 850000], ["Vendedoras de la tienda", 2, 700000], ["Administración y cobranza", 1, 950000]];
   const remL = () => Array.isArray(E.rem) && E.rem.length ? E.rem : RP, remMes = () => remL().reduce((t, r) => t + (+r[1] || 0) * (+r[2] || 0), 0);
+  const arrM = k => { const v = E[k]; return v === undefined || v === "" || isNaN(+v) ? (k === "arrT" ? 1800000 : 1200000) : +v; };   /* arriendo de contrato (dato de Jorge 22-11-2026): tienda $1,8 MM y distribuidora $1,2 MM al mes */
+  const ARRG = "Arriendos (contrato tienda y distribuidora)";
   const tasaImp = () => E.imp === undefined || E.imp === "" || isNaN(+E.imp) ? (E.anio >= 2029 ? 23 : E.anio === 2028 ? 15 : E.anio >= 2025 ? 12.5 : 25) : +E.imp;   /* Pro Pyme General 14 D N°3: 12,5 % años comerciales 2025–2027, 15 % en 2028 (Ley 21.755, Circular SII 53/2025); 23 % desde 2029 (Ley 21.850) */
   const GRP = [[/ARRIENDO|COMUNES|ELECTRIC|AGUA POT|\bGAS\b|PATENTE|CONTRIBUC|ASEO|VIGILANC/, "Local: arriendo, servicios básicos y patentes"], [/COMBUST|FLETE|PEAJE|MANTENC|REPARAC|REPUESTO|VEHIC|SEGURO|ESTACIONAM/, "Vehículos, despacho y mantención"],
     [/HONORARIO|TERCERO|ASESOR|CONTAB|LEGAL/, "Honorarios y servicios de terceros"], [/PUBLICIDAD|MARKETING|PROPAGANDA|PROMOC/, "Marketing y publicidad"], [/INTERNET|TELEFON|CELULAR|SOFTWARE|SISTEMA/, "Comunicaciones y sistemas"]];
@@ -9346,13 +9350,16 @@ window.hwfContCambio = function () { try { if (typeof praPintar === "function" &
     const ks = Object.keys(CT.mov), cl = {}; ks.forEach(k => { cl[k] = clase(k, CT.nom[k]); });
     const todos = [...new Set([].concat(...ks.map(k => Object.keys(CT.mov[k]))))].sort(), ym = (y, m) => y + "-" + String(m).padStart(2, "0");
     const rango = (y, a, b) => { const L = []; for (let m = a; m <= b; m++) L.push(ym(y, m)); return L; };
-    const PM = {}; todos.forEach(x => { const o = { grp: {} }; CL.forEach(c => { o[c] = 0; }); ks.forEach(k => { const v = (CT.mov[k] || {})[x] || 0, c = cl[k]; if (!c || !v) return;
-      if (c === "ing" || c === "noi") o[c] -= v; else { o[c] += v; if (c === "gao") { const g = grupo(CT.nom[k]); o.grp[g] = (o.grp[g] || 0) + v; } } }); PM[x] = o; });
-    const rat = todos.filter(x => PM[x].ing > 0 && PM[x].gao > 0).map(x => PM[x].gao / PM[x].ing).sort((a, b) => a - b), med = rat.length ? rat[Math.floor(rat.length / 2)] : 0;
-    const sinC = todos.filter(x => PM[x].ing > 0 && med && PM[x].gao < 0.5 * med * PM[x].ing), remReal = todos.some(x => PM[x].rem > 0), impReal = todos.some(x => PM[x].imp !== 0);
-    const suma = L => { const o = { grp: {}, remE: 0, aj: 0, n: L.length, impReal }; CL.forEach(c => { o[c] = 0; });
-      L.forEach(x => { const p = PM[x]; CL.forEach(c => { o[c] += p[c]; }); Object.entries(p.grp).forEach(([g, v]) => { o.grp[g] = (o.grp[g] || 0) + v; });
-        if (!remReal) o.remE += remMes(); if (E.cmp !== false && sinC.includes(x)) o.aj += Math.max(0, med * p.ing - p.gao); }); return deriv(o); };
+    const PM = {}; todos.forEach(x => { const o = { grp: {}, arrC: 0 }; CL.forEach(c => { o[c] = 0; }); ks.forEach(k => { const v = (CT.mov[k] || {})[x] || 0, c = cl[k]; if (!c || !v) return;
+      if (c === "gao" && /ARRIENDO/i.test(CT.nom[k])) { o.arrC += v; return; }   /* el arriendo contable se reemplaza por el de contrato */
+      if (c === "ing" || c === "noi") o[c] -= v; else { o[c] += v; if (c === "gao") { const g = grupo(CT.nom[k]); o.grp[g] = (o.grp[g] || 0) + v; } } });
+      o.gaoR = o.gao; const vt = ((inf || {})[x] || [])[3] || 0; o.vD = ((inf || {})[x] || [])[2] || 0;
+      if (o.ing > 0) { o.gao += arrM("arrT") + arrM("arrD") + GETNET * vt; o.grp[ARRG] = arrM("arrT") + arrM("arrD"); if (vt > 0) o.grp["Comisión Getnet/POS (estimado)"] = GETNET * vt; } PM[x] = o; });
+    const rat = todos.filter(x => PM[x].ing > 0 && PM[x].gaoR > 0).map(x => PM[x].gaoR / PM[x].ing).sort((a, b) => a - b), med = rat.length ? rat[Math.floor(rat.length / 2)] : 0;
+    const sinC = todos.filter(x => PM[x].ing > 0 && med && PM[x].gaoR < 0.5 * med * PM[x].ing), remReal = todos.some(x => PM[x].rem > 0), impReal = todos.some(x => PM[x].imp !== 0);
+    const suma = L => { const o = { grp: {}, remE: 0, aj: 0, arrC: 0, arr: 0, n: L.length, impReal }; CL.forEach(c => { o[c] = 0; });
+      L.forEach(x => { const p = PM[x]; CL.forEach(c => { o[c] += p[c]; }); o.arrC += p.arrC; o.arr += p.grp[ARRG] || 0; Object.entries(p.grp).forEach(([g, v]) => { o.grp[g] = (o.grp[g] || 0) + v; });
+        if (!remReal) o.remE += remMes() + COM * (p.vD || 0); if (E.cmp !== false && sinC.includes(x)) o.aj += Math.max(0, med * p.ing - p.gaoR); }); return deriv(o); };
     const M = rango(E.anio, E.m1, E.m2).filter(x => todos.includes(x)); if (!M.length) return { ok: false, todos, fuente: CT.fuente };
     const T = suma(M); let P = null, pl = "";
     const Ma = rango(E.anio - 1, E.m1, E.m2); if (Ma.every(x => todos.includes(x))) { P = suma(Ma); pl = per(E.anio - 1); }
@@ -9371,7 +9378,8 @@ window.hwfContCambio = function () { try { if (typeof praPintar === "function" &
     const sinPat = !Object.keys(CT.nom).some(k => k.startsWith("23")), ivaF = bal.iva > 1e6 && bal.imp > 1e6;
     const sumInf = L => L.reduce((t, x) => t + ((inf || {})[x] || [0, 0])[0], 0), cosInf = L => L.reduce((t, x) => t + ((inf || {})[x] || [0, 0])[1], 0);
     return { ok: true, M, T, P, pl, PM, suma, sinC: sinC.filter(x => M.includes(x)), med, remReal, impReal, bal, ind, abn, sinPat, ivaF, fuente: CT.fuente, fecha: CT.fecha,
-      vInf: sumInf(M), cInf: cosInf(M), tasaG: T.ing > 0 ? T.gav / T.ing : 0 };
+      vInf: sumInf(M), cInf: cosInf(M), tasaG: T.ing > 0 ? T.gav / T.ing : 0, tasaGsin: T.ing > 0 ? (T.gav - T.arr) / T.ing : 0,
+      arrD: arrM("arrD") * M.length, arrT: arrM("arrT") * M.length, vD: M.reduce((t, x) => t + (((inf || {})[x] || [])[2] || 0), 0), vT: M.reduce((t, x) => t + (((inf || {})[x] || [])[3] || 0), 0) };
   }
   let XK = null; const hayS = L => L.some(s => !s.nulo);
 
@@ -9400,7 +9408,7 @@ window.hwfContCambio = function () { try { if (typeof praPintar === "function" &
     F.forEach(([r, i]) => { const q = r[4] || 0, v = r[5] || 0, c = q * (r[6] || 0), x = fac[i.cod] || [1, 1], k = clave(r, i), g = G[k] = G[k] || Object.assign(z(k), E.dim === "prod" ? { n: i.n, cod: i.cod, sub: i.ma } : {});
       [g, T].forEach(o => { o.q += q; o.v += v; o.c += c; if (v >= 0) o.fa += v; else o.nc -= v; o.sq += q * x[1]; o.sv += v * x[0] * x[1]; o.sc += c * x[1]; o[r[7] === tv ? "vt" : "vd"] += v; o[r[7] === tv ? "svt" : "svd"] += v * x[0] * x[1]; }); });
     const L = Object.values(G).sort((a, b) => b.v - a.v), inf = {};
-    R.forEach(r => { const k = (r[8] || B.anio) + "-" + String(r[2]).padStart(2, "0"), o = inf[k] = inf[k] || [0, 0]; o[0] += r[5] || 0; o[1] += (r[4] || 0) * (r[6] || 0); });
+    R.forEach(r => { const k = (r[8] || B.anio) + "-" + String(r[2]).padStart(2, "0"), o = inf[k] = inf[k] || [0, 0, 0, 0]; o[0] += r[5] || 0; o[1] += (r[4] || 0) * (r[6] || 0); o[r[7] === tv ? 3 : 2] += r[5] || 0; });
     const K = contable(B, inf); XK = K && K.ok ? K : null;
     if (XK && hayS(SIM)) { const S = Object.assign({}, XK.T, { grp: Object.assign({}, XK.T.grp) }); S.ing += T.sv - T.v; S.cos += T.sc - T.c; XK.S = deriv(S); } else if (XK) XK.S = null;
     return { B, T, L, P, SIM, opc, anios, aj: B.costoAjuste || null, K: XK, Kinfo: K };
@@ -9423,7 +9431,8 @@ window.hwfContCambio = function () { try { if (typeof praPintar === "function" &
     if (P) { const dv = pc(T.ing - P.ing, Math.abs(P.ing)); out.push(`Frente a ${K.pl}: la venta ${dv >= 0 ? "sube" : "baja"} ${p1(Math.abs(dv))}, el margen bruto pasa de ${p1(pc(P.mb, P.ing))} a ${p1(mbp)} (${pts(mbp - pc(P.mb, P.ing))}) y el EBITDA ${T.ebitda >= P.ebitda ? "mejora" : "cae"} ${mm(Math.abs(T.ebitda - P.ebitda))}.`); }
     const gr = Object.entries(T.grp).sort((a, b) => b[1] - a[1]).slice(0, 3);
     out.push(`Estructura de gastos: remuneraciones ${mm(remT)} (${p1(pc(remT, T.ing))} de la venta${K.remReal ? "" : ", estimadas"})${gr.length ? "; " + gr.map(([g, v]) => `${g.toLowerCase()} ${mm(v)} (${p1(pc(v, T.ing))})`).join("; ") : ""}. Como referencia, una distribuidora de alimento para mascotas sana opera con gastos de 14–18 % de la venta y un EBITDA de 4–8 %${pc(T.ebitda, T.ing) > 10 ? "; un EBITDA sobre 10 % sugiere que aún faltan gastos por registrar" : ""}.`);
-    if (!K.remReal) out.push(`Las remuneraciones no están en la contabilidad de Defontana: el resultado del Balance General, que solo resta los gastos registrados, se ve mayor que el real. Aquí se estiman en ${mm(remMes())} al mes, costo empresa (${remL().map(r => r[1] + " " + String(r[0]).toLowerCase()).join(", ")}; editable en «Supuestos»). Recomendación: que el contador centralice cada mes la nómina (sueldos y leyes sociales) en una cuenta 4.5 de remuneraciones.`);
+    out.push(`Arriendos según contrato: tienda ${mm(arrM("arrT"))} y distribuidora ${mm(arrM("arrD"))} al mes (${mm(T.arr)} en el período, ${p1(pc(T.arr, T.ing))} de la venta). La contabilidad registró ${mm(T.arrC)}${T.arr - T.arrC > 1e5 ? `: faltan ${mm(T.arr - T.arrC)} por contabilizar` : ""}. ${K.vT > 0 ? ` Solo el arriendo de la tienda equivale al ${p1(pc(K.arrT, K.vT))} de su venta.` : ""}`);
+    if (!K.remReal) out.push(`Las remuneraciones no están en la contabilidad de Defontana: el resultado del Balance General, que solo resta los gastos registrados, se ve mayor que el real. Aquí se estiman en ${mm(remMes())} al mes de sueldos (costo empresa: ${remL().map(r => r[1] + " " + String(r[0]).toLowerCase()).join(", ")}) más 1,5 % de comisión sobre la venta de la distribuidora; editable en «Supuestos». Recomendación: que el contador centralice cada mes la nómina (sueldos y leyes sociales) en una cuenta 4.5 de remuneraciones.`);
     if (K.sinC.length) out.push(`${K.sinC.map(lblYm).join(", ")} ${K.sinC.length === 1 ? "no tiene" : "no tienen"} el cierre contable completo (gastos registrados bajo la mitad de lo habitual). ${E.cmp !== false ? `Se completaron con la relación gasto/venta mediana del año (${p1(K.med * 100)}): ${mm(T.aj)} estimados.` : "No se completaron (opción desactivada en «Supuestos»): el resultado de esos meses está sobreestimado."}`);
     const gvar = T.grp["Vehículos, despacho y mantención"] || 0, gfij = T.gav - gvar, mc = (T.mb - gvar) / (T.ing || 1);
     if (mc > 0 && gfij > 0) { const pm = gfij / mc / K.M.length, vm = T.ing / K.M.length; out.push(`Punto de equilibrio: con un margen de contribución de ${p1(mc * 100)} (margen bruto menos despacho y vehículos), los gastos fijos se cubren vendiendo ${mm(pm)} al mes; el promedio del período es ${mm(vm)} (${vm >= pm ? "margen de seguridad de " + p1(pc(vm - pm, vm)) : "faltan " + mm(pm - vm) + " al mes"}).`); }
@@ -9458,7 +9467,7 @@ window.hwfContCambio = function () { try { if (typeof praPintar === "function" &
     simTxt(X).forEach(t => out.push(t));
     if (hay) out.push(`En conjunto, los cambios llevan la venta de ${mm(T.v)} a ${mm(T.sv)} (${sg(T.sv - T.v)}) y el margen bruto de ${mm(m)} a ${mm(sm)} (${sg(sm - m)}); el margen % pasa de ${p1(pc(m, T.v))} a ${p1(pc(sm, T.sv))}. El resultado operacional estimado pasa de ${mm(m - gtot(T))} a ${mm(sm - gtot(T, 1))} (${sg(sm - gtot(T, 1) - m + gtot(T))}).`);
     const G0 = gtot(T), ro = m - G0, gv = gastos(T).filter(x => x[0][4]).reduce((t, x) => t + x[1], 0), gf = G0 - gv;
-    if (X.K) out.push(`Gastos de administración y ventas reales del período (Libro Mayor${X.K.remReal ? "" : ", con remuneraciones estimadas"}): ${p1(X.K.tasaG * 100)} de la venta. Se asignan a este segmento en proporción a su venta (${mm(G0)}), con lo que su resultado antes de depreciación e impuestos es ${mm(ro)} (${p1(pc(ro, T.v))}).`);
+    if (X.K) out.push(`Gastos de administración y ventas reales del período (Libro Mayor${X.K.remReal ? "" : ", con remuneraciones estimadas"}): el arriendo de contrato va directo a su canal (tienda ${mm(arrM("arrT"))} y distribuidora ${mm(arrM("arrD"))} al mes) y el resto (${p1(X.K.tasaGsin * 100)} de la venta) se asigna en proporción a la venta: ${mm(G0)} para este segmento, con lo que su resultado antes de depreciación e impuestos es ${mm(ro)} (${p1(pc(ro, T.v))}).`);
     else out.push(`Gastos de operación: no vienen en los informes de META, así que se estiman como % de la venta con referencias de nuestro rubro (distribuidora ${p1(gpc("d"))} de su venta, tienda ${p1(gpc("t"))}; se ajustan en «Supuestos de gastos»). Con eso el resultado operacional estimado es ${mm(ro)} (${p1(pc(ro, T.v))} de la venta)${ro < 0 ? ": el margen no alcanza a cubrir los gastos" : ""}.${E.dim !== "total" || E.prov || E.marca || E.prod || E.vend ? " Por grupo, los gastos se reparten en proporción a su venta." : ""}`);
     if (!X.K && T.v > 0 && G0 > 0) { const mv = pc(m, T.v) / 100 - gv / T.v, pe = mv > 0 ? gf / mv : 0; if (pe > 0) out.push(`Punto de equilibrio estimado: con el margen actual hay que vender unos ${mm(pe)} netos en el período para cubrir los gastos fijos; ${pe <= T.v ? "la venta podría caer hasta " + p1(pc(T.v - pe, T.v)) + " antes de dar pérdida" : "hoy faltan " + mm(pe - T.v) + " de venta para llegar"}.`); }
     return out;
@@ -9479,8 +9488,9 @@ window.hwfContCambio = function () { try { if (typeof praPintar === "function" &
     return { f: L, hay: !!S, prev: !!P }; }
   function lineas(X) { if (X.K && !segm()) return lineasK(X); const T = X.T, hay = X.SIM.some(s => !s.nulo), m = T.v - T.c, sm = T.sv - T.sc;
     const f = [["Ventas brutas (facturas y boletas)", T.fa, null], ["(−) Notas de crédito", -T.nc, null], ["Ventas netas", T.v, T.sv, "s"], ["(−) Costo de ventas", -T.c, -T.sc], ["Margen bruto", m, sm, "r"], ["Margen bruto %", pc(m, T.v), pc(sm, T.sv), "%"]], G0 = gtot(T), G1 = gtot(T, 1);
-    if (X.K) { const K = X.K, r = T.v / (K.T.ing || 1); f.push(["(−) Gastos de adm. y ventas asignados (" + p1(K.tasaG * 100) + " de la venta)", -G0, -G1, "g"]);
-      f.push(["· Remuneraciones" + (K.remReal ? "" : " (estimado)"), -(K.T.rem + K.T.remE) * r, null, "i"]); Object.entries(K.T.grp).sort((a, b) => b[1] - a[1]).forEach(([g, v]) => f.push(["· " + g, -v * r, null, "i"]));
+    if (X.K) { const K = X.K, r = T.v / (K.T.ing || 1); f.push(["(−) Gastos de adm. y ventas asignados (" + p1(pc(G0, T.v)) + " de la venta)", -G0, -G1, "g"]);
+      f.push(["· Remuneraciones" + (K.remReal ? "" : " (estimado)"), -(K.T.rem + K.T.remE) * r, null, "i"]); f.push(["· Arriendo del canal (contrato)", -arrSeg(T), null, "i"]);
+      Object.entries(K.T.grp).filter(([g]) => g !== ARRG).sort((a, b) => b[1] - a[1]).forEach(([g, v]) => f.push(["· " + g, -v * r, null, "i"]));
       if (K.T.aj) f.push(["· Meses sin cierre contable (estimado)", -K.T.aj * r, null, "i"]);
       f.push(["Resultado del segmento (antes de depreciación e impuestos)", m - G0, sm - G1, "r"], ["Resultado del segmento %", pc(m - G0, T.v), pc(sm - G1, T.sv), "%"], ["Unidades vendidas", T.q, T.sq, "u"]); }
     else { f.push(["(−) Gastos de operación (estimados)", -G0, -G1, "g"]); gastos(T).forEach(([g, a], i) => { if (a > 0.5) f.push(["· " + g[1] + " (" + String(gp(g[0])).replace(".", ",") + "%)", -a, -gastos(T, 1)[i][1], "i"]); });
@@ -9509,6 +9519,7 @@ window.hwfContCambio = function () { try { if (typeof praPintar === "function" &
   const supKHtml = K => `<details class="card er-sup"${E.supA ? " open" : ""}><summary><h2 style="display:inline">Supuestos <span class="muted">lo que la contabilidad no trae</span></h2></summary>
       ${K.remReal ? '<p class="muted" style="font-size:.8rem;margin:6px 0 0">Las remuneraciones vienen de la contabilidad.</p>' : `<p class="muted" style="font-size:.8rem;margin:6px 0 0">Remuneraciones (costo empresa mensual: sueldo + leyes sociales). No están registradas en Defontana; ajusta personas y montos. Total: <b>${mm(remMes())}</b> al mes.</p>
       <div class="er-w"><table class="er-t er-sim"><thead><tr><th>Cargo</th><th>Personas</th><th>Costo mensual c/u</th></tr></thead><tbody>${remL().map((r, i) => `<tr><td>${es(r[0])}</td><td><input type="number" min="0" step="1" data-rem="${i},1" value="${r[1]}"></td><td><input type="number" min="0" step="10000" data-rem="${i},2" value="${r[2]}" style="width:120px"></td></tr>`).join("")}</tbody></table></div>`}
+      <div class="er-f"><label>Arriendo tienda ($ al mes)<input type="number" min="0" step="10000" data-arr="arrT" value="${arrM("arrT")}"></label><label>Arriendo distribuidora ($ al mes)<input type="number" min="0" step="10000" data-arr="arrD" value="${arrM("arrD")}"></label></div>
       <div class="er-f"><label>Impuesto a la renta % ${K.impReal ? "(viene de la contabilidad)" : "(estimado)"}<input id="erImp" type="number" min="0" max="60" step="0.5" value="${tasaImp()}" ${K.impReal ? "disabled" : ""}></label>
         <label style="grid-column:span 2">Meses sin cierre contable<span style="display:flex;gap:8px;align-items:center;font-weight:400"><input id="erCmp" type="checkbox" ${E.cmp !== false ? "checked" : ""} style="width:auto"> completar gastos con la relación gasto/venta mediana del año</span></label></div>
       <div class="er-b"><button type="button" class="btn" id="erRemR">Volver a los supuestos de referencia</button></div></details>`;
@@ -9573,7 +9584,8 @@ window.hwfContCambio = function () { try { if (typeof praPintar === "function" &
     box.querySelectorAll("[data-rem]").forEach(i => i.onchange = () => { const [a, b] = i.dataset.rem.split(",").map(Number), L = remL().map(r => r.slice()); L[a][b] = Math.max(0, Number(String(i.value).replace(/\./g, "").replace(",", ".")) || 0); E.rem = L; E.supA = true; guarda(); pintar(); });
     if (q("erImp")) q("erImp").onchange = () => { E.imp = Math.max(0, Math.min(60, Number(String(q("erImp").value).replace(",", ".")) || 0)); E.supA = true; guarda(); pintar(); };
     if (q("erCmp")) q("erCmp").onchange = () => { E.cmp = q("erCmp").checked; E.supA = true; guarda(); pintar(); };
-    if (q("erRemR")) q("erRemR").onclick = () => { delete E.rem; delete E.imp; delete E.cmp; E.supA = true; guarda(); pintar(); };
+    box.querySelectorAll("[data-arr]").forEach(i => i.onchange = () => { E[i.dataset.arr] = Math.max(0, Number(i.value) || 0); E.supA = true; guarda(); pintar(); });
+    if (q("erRemR")) q("erRemR").onclick = () => { delete E.rem; delete E.imp; delete E.cmp; delete E.arrT; delete E.arrD; E.supA = true; guarda(); pintar(); };
     if (q("erLimp")) q("erLimp").onclick = () => { E.sim = {}; guarda(); pintar(); };
     q("erXls").onclick = () => excel(X); q("erPdf").onclick = () => pdf(X, "pdf"); q("erEnv").onclick = () => pdf(X, "enviar"); q("erPpt").onclick = () => ppt(X);
   }
@@ -9593,7 +9605,7 @@ window.hwfContCambio = function () { try { if (typeof praPintar === "function" &
     hoja("Detalle", detalle(X), [44, 10, 14, 14, 14, 10, 10, 14, 14, 14]);
     if (X.SIM.some(s => !s.nulo)) hoja("Simulación", simTabla(X).concat([[], ["Sensibilidad de unidades al precio", +E.ela || 0]]), [10, 40, 10, 14, 12, 12, 11, 12, 14, 14, 14]);
     if (X.K) hoja("Supuestos", [["Supuesto", "Valor", "Detalle"]].concat(X.K.remReal ? [["Remuneraciones", "contabilidad", ""]] : remL().map(r => ["Remuneraciones · " + r[0], (+r[1] || 0) * (+r[2] || 0), r[1] + " × $" + nu(+r[2] || 0) + " al mes (costo empresa)"]),
-      [["Impuesto a la renta %", X.K.impReal ? "contabilidad" : tasaImp(), "Pro Pyme General 14 D N°3: 12,5 % (2025–2027) y 15 % (2028), Ley 21.755 / Circular SII 53-2025"], ["Meses sin cierre contable", E.cmp !== false ? "completados" : "sin completar", "relación gasto/venta mediana " + p1(X.K.med * 100)]]), [44, 16, 60]);
+      [["Arriendo tienda (mensual, contrato)", arrM("arrT"), "dato de Jorge 22-11-2026"], ["Arriendo distribuidora (mensual, contrato)", arrM("arrD"), "reemplaza la cuenta ARRIENDOS del Libro Mayor"], ["Impuesto a la renta %", X.K.impReal ? "contabilidad" : tasaImp(), "Pro Pyme General 14 D N°3: 12,5 % (2025–2027) y 15 % (2028), Ley 21.755 / Circular SII 53-2025"], ["Meses sin cierre contable", E.cmp !== false ? "completados" : "sin completar", "relación gasto/venta mediana " + p1(X.K.med * 100)]]), [44, 16, 60]);
     else hoja("Supuestos de gastos", [["Gasto de operación (estimado)", "Negocio", "% de la venta", "Variable con la venta"]].concat(GS.map(g => [g[1], g[2] === "d" ? "Distribuidora" : "Tienda", gp(g[0]), g[4] ? "sí" : "no"])).concat([[], ["Referencias del rubro: distribuidora de alimento para mascotas 14–18 % de la venta; tienda de mascotas 18–24 %. META no trae gastos reales."]]), [52, 16, 14, 20]);
     hoja("Explicación", explicar(X).map(t => [t]), [140]);
     XLSX.writeFile(wb, nombre() + ".xlsx"); }
