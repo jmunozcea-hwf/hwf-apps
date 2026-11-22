@@ -170,8 +170,13 @@ function pantallaConexion(msg) { const o = document.createElement("div"); o.clas
   const LH = (String(location.hash).match(/HWF1:[A-Za-z0-9+\/=_%-]+/) || [])[0]; if (LH) { try { history.replaceState(null, "", location.pathname); } catch (e) {} $("gC").value = decodeURIComponent(LH); $("gB").click(); } }
 
 /* ===== productos: peso y volumen desde el nombre ===== */
-function kgDe(n) { const s = String(n || "").toUpperCase().replace(",", "."); let kg = 0; const k = /(\d+(?:\.\d+)?)\s*(KG|KILOS?)\b/.exec(s), g = /(\d+(?:\.\d+)?)\s*(GRS?|GRAMOS|G)\b/.exec(s);
-  if (k) kg = Number(k[1]); else if (g) kg = Number(g[1]) / 1000; const u = /\(\s*(\d+)\s*U\s*\)|\bX\s*(\d+)\b|(\d+)\s*UNID/.exec(s); if (u) kg *= Number(u[1] || u[2] || u[3]) || 1; return kg > 0 ? kg : 0.8; }
+function kgDe(n) { const s = String(n || "").toUpperCase().replace(/(\d),(\d)/g, "$1.$2"); let kg = 0;   /* 22-11-2026: «X 340 GRS» es el peso, no 340 unidades; «40-60 KG» de pipetas o correas es el peso de la mascota */
+  const noAli = /PIPETA|COMPRIMID|COLLAR|CORREA|ARN[EÉ]S|JUGUETE|SIMPARICA|NEXGARD|BRAVECTO|DRONTAL|PECHERA|PLATO|COMEDERO|CAMA\b/.test(s);
+  const k = noAli ? null : /(\d+(?:\.\d+)?)\s*(KG|KILOS?|KGS)\b/.exec(s), g = /(\d+(?:\.\d+)?)\s*(GRS?|GRAMOS|G|ML|CC)\b/.exec(s);
+  if (k) kg = Number(k[1]); else if (g) kg = Number(g[1]) / 1000; else if (noAli) kg = 0.3;
+  const u = /\(\s*(?:PACK\s*|CAJA\s*|X\s*)?(\d+)\s*(?:U|UN|UNID|UNIDADES)?\.?\s*\)|\bX\s*(\d+)\s*(?:U|UN|UNID|UNIDADES)\b|\b(\d+)\s*(?:UNID|UNIDADES)\b|\bPACK\s*(?:X\s*)?(\d+)\b/.exec(s);
+  const m = u ? Number(u[1] || u[2] || u[3] || u[4]) || 1 : 1; if (m > 1 && m <= 48 && kg > 0 && kg <= 5) kg *= m;
+  return kg > 0 ? kg : 0.8; }
 function m3De(n, kg) { const s = norm(n); const f = /arena|litter|sanitari/.test(s) ? 0.0017 : /lata|sobre|pouch|humed|pate/.test(s) ? 0.0013 : 0.0028; return kg * f; }
 const PI = () => { const D = DATA(), o = {}; Object.entries(D.productos || {}).forEach(([c, p]) => o[c] = { cod: c, nombre: p[0], prov: p[1] }); return o; };
 function demanda(D) { const o = {}, z = [0, 0, 0, 0]; (D.dem || []).forEach(x => o[x[0]] = { d: x[1], t: x[2], cu: x[3], dv: x[4] || z, tv: x[5] || z });
@@ -478,7 +483,7 @@ if (!cfg() || !DATA()) pantallaConexion(); else { arrancar(); bajar(true).then(n
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261122110903";
+const HWF_VER = "20261122144811";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;

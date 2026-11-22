@@ -7202,7 +7202,7 @@ function confirmarNota() {
   x.onclick = () => cerrarModal(); card.insertBefore(x, card.firstChild); })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261122110903";
+const HWF_VER = "20261122144811";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -10461,7 +10461,7 @@ body:has(#rdOv) #snBtn,body:has(#rdOv) #iaBtn,body:has(#rdOv) #navBotones{displa
   aplicar(); try { applyFilter(); } catch (e) {}
 })();
 </script>
-<style>/* patch_singraficos */.ad-svg,.ad-ley,.vm-svg,.vm-ley,.db-svg,.bi-svg,.bi-ley{display:none!important}.vm-nota,[data-singraf]{display:none!important}</style>
+<style>/* patch_singraficos */.ad-svg,.ad-ley,.vm-svg,.vm-ley,.db-svg,.bi-svg,.bi-ley{display:none!important}.vm-nota,[data-singraf],.db-c:has(.db-don){display:none!important}</style>
 <script>/* patch_singraficos */new MutationObserver(function(){document.querySelectorAll("#vmCard p,#vmCard small,#vmCard div").forEach(function(e){if(!e.dataset.singraf&&e.children.length===0&&/^Toca el gr[aá]fico/.test(e.textContent.trim()))e.dataset.singraf="1"})}).observe(document.documentElement,{childList:true,subtree:true});</script>
 <script>/* patch_tipoventas: filtro por tipo de producto en el pedido */
 (function () {
@@ -10481,6 +10481,34 @@ body:has(#rdOv) #snBtn,body:has(#rdOv) #iaBtn,body:has(#rdOv) #navBotones{displa
   applyFilter = function () { const r = _af.apply(this, arguments); filtrar(); return r; };
   g.addEventListener("change", () => { opciones(); filtrar(); }); const o = document.getElementById("fOcasion"); if (o) o.addEventListener("change", filtrar);
   s.addEventListener("change", () => applyFilter()); opciones();
+})();
+</script>
+<style>/* patch_qrregistro */
+#qrVelo{position:fixed;inset:0;background:rgba(11,49,70,.55);z-index:9998;display:none}#qrVelo.on{display:block}
+#qrMod{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:9999;background:#fff;color:#13222D;border-radius:22px;padding:20px;width:min(92vw,420px);max-height:92vh;overflow:auto;box-shadow:0 24px 60px rgba(0,0,0,.3);display:none;text-align:center}
+#qrMod.on{display:block}#qrMod h3{margin:0 0 4px;font-size:1.15rem}#qrMod p{margin:0 0 10px;color:#4A5B68;font-size:.88rem}#qrMod .qr-svg{width:min(70vw,300px);height:auto;background:#fff;padding:6px;border-radius:12px}
+#qrMod .qr-u{font-size:.82rem;word-break:break-all;color:#0B3146;font-weight:700;margin:6px 0 12px}#qrMod .qr-b{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+#qrMod .qr-b button{border:1px solid #D9E2EA;background:#fff;color:#0B3146;border-radius:999px;padding:9px 14px;font:inherit;font-weight:700;font-size:.85rem;cursor:pointer}#qrMod .qr-b .wa{background:#1FA855;border-color:#1FA855;color:#fff}
+#qrMod .qr-x{position:absolute;top:8px;right:12px;border:0;background:none;font-size:1.6rem;cursor:pointer;color:#5B6874}
+</style>
+<script>/* patch_qrregistro: QR para que los clientes se registren en Acceso Mayoristas */
+(function () {
+  const URL = "https://www.hwf.cl/b2b/?registro=1", TXT = "Hola, te invito a crear tu cuenta en Acceso Mayoristas de HWF: catálogo con tus precios, pedidos a cualquier hora y lo que tienes por pagar. Regístrate aquí: " + URL;
+  const velo = document.createElement("div"); velo.id = "qrVelo"; const m = document.createElement("div"); m.id = "qrMod"; m.setAttribute("role", "dialog"); m.setAttribute("aria-modal", "true"); m.setAttribute("aria-labelledby", "qrTit");
+  m.innerHTML = '<button type="button" class="qr-x" aria-label="Cerrar">×</button><h3 id="qrTit">Registro de clientes</h3><p>Pide al cliente que escanee el código con la cámara de su celular. Si ya es cliente de HWF, su cuenta queda activa al instante.</p><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 264 264" class="qr-svg" role="img" aria-label="Código QR para registrarse en Acceso Mayoristas HWF"><path transform="scale(8)" class="qrline" stroke="#0b3146" d="M2 2.5h7m2 0h1m1 0h1m1 0h3m2 0h1m1 0h1m1 0h7m-29 1h1m5 0h1m1 0h1m1 0h3m2 0h1m1 0h1m4 0h1m5 0h1m-29 1h1m1 0h3m1 0h1m1 0h1m1 0h3m1 0h1m1 0h1m2 0h1m2 0h1m1 0h3m1 0h1m-29 1h1m1 0h3m1 0h1m1 0h1m1 0h3m1 0h5m1 0h1m1 0h1m1 0h3m1 0h1m-29 1h1m1 0h3m1 0h1m2 0h1m2 0h4m1 0h1m1 0h2m1 0h1m1 0h3m1 0h1m-29 1h1m5 0h1m2 0h2m1 0h3m2 0h1m4 0h1m5 0h1m-29 1h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7m-21 1h1m4 0h1m5 0h1m-20 1h1m5 0h1m1 0h1m1 0h3m1 0h2m1 0h1m2 0h3m2 0h3m-24 1h2m1 0h1m1 0h3m2 0h1m1 0h1m2 0h2m2 0h2m1 0h2m-28 1h2m4 0h1m1 0h2m2 0h1m2 0h4m2 0h2m-22 1h2m2 0h1m1 0h1m4 0h1m1 0h1m3 0h2m3 0h1m1 0h1m-26 1h3m2 0h11m3 0h2m1 0h2m4 0h1m-28 1h2m1 0h1m2 0h3m2 0h4m2 0h5m1 0h1m2 0h2m-29 1h2m4 0h2m1 0h1m2 0h5m3 0h1m2 0h1m1 0h2m-26 1h1m6 0h1m2 0h1m1 0h2m4 0h1m1 0h1m1 0h2m1 0h1m1 0h1m-29 1h3m2 0h2m3 0h2m2 0h1m1 0h2m1 0h1m3 0h1m1 0h2m-27 1h1m2 0h1m1 0h1m2 0h1m1 0h2m3 0h1m2 0h2m2 0h3m1 0h3m-29 1h7m1 0h1m2 0h5m3 0h2m1 0h1m2 0h1m2 0h1m-29 1h1m2 0h1m3 0h1m1 0h1m1 0h2m1 0h3m3 0h1m1 0h3m-25 1h1m2 0h5m1 0h3m5 0h1m1 0h6m1 0h3m-21 1h3m1 0h2m1 0h1m1 0h2m1 0h1m3 0h2m-26 1h7m4 0h1m1 0h3m2 0h3m1 0h1m1 0h3m-27 1h1m5 0h1m3 0h1m2 0h1m1 0h1m3 0h2m3 0h1m3 0h1m-29 1h1m1 0h3m1 0h1m4 0h3m1 0h1m3 0h7m1 0h2m-29 1h1m1 0h3m1 0h1m2 0h1m1 0h1m1 0h1m1 0h2m2 0h2m2 0h1m1 0h2m1 0h1m-29 1h1m1 0h3m1 0h1m7 0h2m1 0h2m2 0h7m-28 1h1m5 0h1m4 0h1m1 0h1m7 0h1m1 0h1m1 0h2m1 0h1m-29 1h7m1 0h2m3 0h1m1 0h3m1 0h1m1 0h6"/></svg><div class="qr-u">' + URL.replace("https://", "") + '</div>' +
+    '<div class="qr-b"><button type="button" class="wa" data-q="wa">📲 Enviar por WhatsApp</button><button type="button" data-q="cp">🔗 Copiar enlace</button></div>';
+  document.body.append(velo, m);
+  const cerrar = () => { m.classList.toggle("on", false); velo.classList.toggle("on", false); }, abrir = () => { m.classList.toggle("on", true); velo.classList.toggle("on", true); };
+  velo.onclick = cerrar; m.querySelector(".qr-x").onclick = cerrar; document.addEventListener("keydown", e => { if (e.key === "Escape") cerrar(); });
+  m.addEventListener("click", async e => { const b = e.target.closest("[data-q]"); if (!b) return;
+    if (b.dataset.q === "wa") window.open("https://wa.me/?text=" + encodeURIComponent(TXT), "_blank", "noopener");
+    else { try { await navigator.clipboard.writeText(URL); b.textContent = "✓ Enlace copiado"; } catch (x) { prompt("Copia el enlace:", URL); } } });
+  window.hwfQrRegistro = abrir;
+  /* opción al final del menú lateral (el menú se vuelve a dibujar cada vez que se abre) */
+  const poner = () => { const p = document.getElementById("snPanel"); if (!p || p.querySelector("#qrItem") || !p.querySelector(".sn-i")) return;
+    const b = document.createElement("button"); b.type = "button"; b.id = "qrItem"; b.className = "sn-i"; b.innerHTML = '<span class="sn-e">📱</span>QR registro de clientes';
+    b.onclick = e => { e.stopPropagation(); const v = document.getElementById("snVelo"); if (v) v.click(); p.classList.toggle("on", false); abrir(); }; p.appendChild(b); };
+  const iv = setInterval(() => { const p = document.getElementById("snPanel"); if (!p) return; clearInterval(iv); new MutationObserver(poner).observe(p, { childList: true }); poner(); }, 400);
 })();
 </script>
 </body>

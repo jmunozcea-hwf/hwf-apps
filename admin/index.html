@@ -5277,7 +5277,7 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261122110903";
+const HWF_VER = "20261122144811";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -9065,6 +9065,97 @@ window.hwfContCambio = function () { try { if (typeof praPintar === "function" &
     graficos(R); }
   const _pd = pintarDashboard; pintarDashboard = function () { const r = _pd.apply(this, arguments); try { pintar(); } catch (e) { console.error(e); } return r; };
   setTimeout(() => { try { const s = $("s-res"); if (s && s.querySelector(".db-hd") && !s.querySelector(".vd")) pintar(); } catch (e) {} }, 0);   /* el Dashboard ya se dibujó al abrir */
+})();
+</script>
+<style>/* patch_qrregistro */
+#qrVelo{position:fixed;inset:0;background:rgba(11,49,70,.55);z-index:9998;display:none}#qrVelo.on{display:block}
+#qrMod{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:9999;background:#fff;color:#13222D;border-radius:22px;padding:20px;width:min(92vw,420px);max-height:92vh;overflow:auto;box-shadow:0 24px 60px rgba(0,0,0,.3);display:none;text-align:center}
+#qrMod.on{display:block}#qrMod h3{margin:0 0 4px;font-size:1.15rem}#qrMod p{margin:0 0 10px;color:#4A5B68;font-size:.88rem}#qrMod .qr-svg{width:min(70vw,300px);height:auto;background:#fff;padding:6px;border-radius:12px}
+#qrMod .qr-u{font-size:.82rem;word-break:break-all;color:#0B3146;font-weight:700;margin:6px 0 12px}#qrMod .qr-b{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+#qrMod .qr-b button{border:1px solid #D9E2EA;background:#fff;color:#0B3146;border-radius:999px;padding:9px 14px;font:inherit;font-weight:700;font-size:.85rem;cursor:pointer}#qrMod .qr-b .wa{background:#1FA855;border-color:#1FA855;color:#fff}
+#qrMod .qr-x{position:absolute;top:8px;right:12px;border:0;background:none;font-size:1.6rem;cursor:pointer;color:#5B6874}
+</style>
+<script>/* patch_qrregistro: QR para que los clientes se registren en Acceso Mayoristas */
+(function () {
+  const URL = "https://www.hwf.cl/b2b/?registro=1", TXT = "Hola, te invito a crear tu cuenta en Acceso Mayoristas de HWF: catálogo con tus precios, pedidos a cualquier hora y lo que tienes por pagar. Regístrate aquí: " + URL;
+  const velo = document.createElement("div"); velo.id = "qrVelo"; const m = document.createElement("div"); m.id = "qrMod"; m.setAttribute("role", "dialog"); m.setAttribute("aria-modal", "true"); m.setAttribute("aria-labelledby", "qrTit");
+  m.innerHTML = '<button type="button" class="qr-x" aria-label="Cerrar">×</button><h3 id="qrTit">Registro de clientes</h3><p>Pide al cliente que escanee el código con la cámara de su celular. Si ya es cliente de HWF, su cuenta queda activa al instante.</p><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 264 264" class="qr-svg" role="img" aria-label="Código QR para registrarse en Acceso Mayoristas HWF"><path transform="scale(8)" class="qrline" stroke="#0b3146" d="M2 2.5h7m2 0h1m1 0h1m1 0h3m2 0h1m1 0h1m1 0h7m-29 1h1m5 0h1m1 0h1m1 0h3m2 0h1m1 0h1m4 0h1m5 0h1m-29 1h1m1 0h3m1 0h1m1 0h1m1 0h3m1 0h1m1 0h1m2 0h1m2 0h1m1 0h3m1 0h1m-29 1h1m1 0h3m1 0h1m1 0h1m1 0h3m1 0h5m1 0h1m1 0h1m1 0h3m1 0h1m-29 1h1m1 0h3m1 0h1m2 0h1m2 0h4m1 0h1m1 0h2m1 0h1m1 0h3m1 0h1m-29 1h1m5 0h1m2 0h2m1 0h3m2 0h1m4 0h1m5 0h1m-29 1h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7m-21 1h1m4 0h1m5 0h1m-20 1h1m5 0h1m1 0h1m1 0h3m1 0h2m1 0h1m2 0h3m2 0h3m-24 1h2m1 0h1m1 0h3m2 0h1m1 0h1m2 0h2m2 0h2m1 0h2m-28 1h2m4 0h1m1 0h2m2 0h1m2 0h4m2 0h2m-22 1h2m2 0h1m1 0h1m4 0h1m1 0h1m3 0h2m3 0h1m1 0h1m-26 1h3m2 0h11m3 0h2m1 0h2m4 0h1m-28 1h2m1 0h1m2 0h3m2 0h4m2 0h5m1 0h1m2 0h2m-29 1h2m4 0h2m1 0h1m2 0h5m3 0h1m2 0h1m1 0h2m-26 1h1m6 0h1m2 0h1m1 0h2m4 0h1m1 0h1m1 0h2m1 0h1m1 0h1m-29 1h3m2 0h2m3 0h2m2 0h1m1 0h2m1 0h1m3 0h1m1 0h2m-27 1h1m2 0h1m1 0h1m2 0h1m1 0h2m3 0h1m2 0h2m2 0h3m1 0h3m-29 1h7m1 0h1m2 0h5m3 0h2m1 0h1m2 0h1m2 0h1m-29 1h1m2 0h1m3 0h1m1 0h1m1 0h2m1 0h3m3 0h1m1 0h3m-25 1h1m2 0h5m1 0h3m5 0h1m1 0h6m1 0h3m-21 1h3m1 0h2m1 0h1m1 0h2m1 0h1m3 0h2m-26 1h7m4 0h1m1 0h3m2 0h3m1 0h1m1 0h3m-27 1h1m5 0h1m3 0h1m2 0h1m1 0h1m3 0h2m3 0h1m3 0h1m-29 1h1m1 0h3m1 0h1m4 0h3m1 0h1m3 0h7m1 0h2m-29 1h1m1 0h3m1 0h1m2 0h1m1 0h1m1 0h1m1 0h2m2 0h2m2 0h1m1 0h2m1 0h1m-29 1h1m1 0h3m1 0h1m7 0h2m1 0h2m2 0h7m-28 1h1m5 0h1m4 0h1m1 0h1m7 0h1m1 0h1m1 0h2m1 0h1m-29 1h7m1 0h2m3 0h1m1 0h3m1 0h1m1 0h6"/></svg><div class="qr-u">' + URL.replace("https://", "") + '</div>' +
+    '<div class="qr-b"><button type="button" class="wa" data-q="wa">📲 Enviar por WhatsApp</button><button type="button" data-q="cp">🔗 Copiar enlace</button></div>';
+  document.body.append(velo, m);
+  const cerrar = () => { m.classList.toggle("on", false); velo.classList.toggle("on", false); }, abrir = () => { m.classList.toggle("on", true); velo.classList.toggle("on", true); };
+  velo.onclick = cerrar; m.querySelector(".qr-x").onclick = cerrar; document.addEventListener("keydown", e => { if (e.key === "Escape") cerrar(); });
+  m.addEventListener("click", async e => { const b = e.target.closest("[data-q]"); if (!b) return;
+    if (b.dataset.q === "wa") window.open("https://wa.me/?text=" + encodeURIComponent(TXT), "_blank", "noopener");
+    else { try { await navigator.clipboard.writeText(URL); b.textContent = "✓ Enlace copiado"; } catch (x) { prompt("Copia el enlace:", URL); } } });
+  window.hwfQrRegistro = abrir;
+  /* opción al final del menú lateral (el menú se vuelve a dibujar cada vez que se abre) */
+  const poner = () => { const p = document.getElementById("snPanel"); if (!p || p.querySelector("#qrItem") || !p.querySelector(".sn-i")) return;
+    const b = document.createElement("button"); b.type = "button"; b.id = "qrItem"; b.className = "sn-i"; b.innerHTML = '<span class="sn-e">📱</span>QR registro de clientes';
+    b.onclick = e => { e.stopPropagation(); const v = document.getElementById("snVelo"); if (v) v.click(); p.classList.toggle("on", false); abrir(); }; p.appendChild(b); };
+  const iv = setInterval(() => { const p = document.getElementById("snPanel"); if (!p) return; clearInterval(iv); new MutationObserver(poner).observe(p, { childList: true }); poner(); }, 400);
+})();
+</script>
+<style>/* patch_abasttienda */
+.at-k{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin:8px 0 12px}.at-k>div{border:1px solid var(--line,#E3E8EC);border-radius:14px;padding:12px 14px;background:var(--surface,#fff)}
+.at-k span{display:block;font-size:.72rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--muted,#5B6874)}.at-k b{display:block;font-size:1.45rem;margin:4px 0 2px;font-variant-numeric:tabular-nums}.at-k small{color:var(--muted,#5B6874);font-size:.8rem}
+.at-t{width:100%;border-collapse:collapse;font-size:.86rem;font-variant-numeric:tabular-nums}.at-t th,.at-t td{padding:7px 8px;border-bottom:1px solid var(--line,#E3E8EC);text-align:right;white-space:nowrap}.at-t th:first-child,.at-t td:first-child{text-align:left;white-space:normal}
+.at-t th{font-size:.72rem;letter-spacing:.04em;text-transform:uppercase;color:var(--muted,#5B6874)}.at-cur{background:#FFF8E6}
+</style>
+<script>/* patch_abasttienda: plan de abastecimiento de la tienda e inventario valorizado */
+(function () {
+  if (typeof pintarAbast !== "function" || typeof D === "undefined") return;
+  const PLAN_TIE = {"202611": 10000000, "202612": 10000000, "202701": 11200000, "202702": 11000000, "202703": 12800000, "202704": 13500000, "202705": 14400000, "202706": 14400000, "202707": 15100000, "202708": 15700000, "202709": 14800000, "202710": 17600000, "202711": 15600000, "202712": 18600000}, TI = "Tienda Hellywoof", MS = ["", "ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
+  const $m = n => typeof mm === "function" ? mm(n) : "$" + Math.round(n).toLocaleString("es-CL");
+  const ck = c => String(c || "").replace(/'/g, "").trim();
+  function costos() { const [cy, cm] = String(D.corte || "").split("-").map(Number), lim = new Date(cy, cm - 7, 1), C = {};
+    (D.rows || []).forEach(r => { const y = r[8] || D.anio; if (new Date(y, r[2] - 1, 1) < lim || !(r[4] > 0) || !(r[6] > 0)) return; const cod = ck((D.productos[r[1]] || [])[2]); if (!cod) return;
+      const o = C[cod] = C[cod] || { q: 0, c: 0 }; o.q += r[4]; o.c += r[4] * r[6]; });
+    const PMP = typeof COSTO !== "undefined" && COSTO ? COSTO : {}; return cod => { const o = C[cod]; return o && o.q ? o.c / o.q : Number(PMP[cod]) || 0; }; }
+  function datos() {
+    const [cy, cm, cd] = String(D.corte || "").split("-").map(Number); if (!cy) return null;
+    const cu = costos(), ST = D.stockT || {}, SD = D.stock || {}, FC = (D.fc && D.fc.p) || {}, NOM = {};
+    D.productos.forEach(x => { const c = ck(x[2]); if (c) NOM[c] = x[0]; });
+    const val = S => Object.entries(S).reduce((t, [c, q]) => t + Math.max(0, Number(q) || 0) * cu(ck(c)), 0);
+    const invT = val(ST), invD = val(SD);
+    const P = typeof abPar === "function" ? abPar() : { lead: 7, rev: 7, modo: "medio" }, Z = { alto: { A: 2.05, B: 1.65, C: 1.28 }, medio: { A: 1.65, B: 1.28, C: 1.04 } }[P.modo] || null;
+    const L = Object.keys(FC).filter(c => FC[c][4] > 0).map(c => { const f = FC[c], s = Math.max(0, Number(ST[c]) || 0);
+      const ss = Z ? (Z[f[7]] || 1.04) * (f[6] || 0) * Math.sqrt(((P.lead || 7) + (P.rev || 7)) / 30) : f[4] * (P.seg || 15) / 30;
+      return { cod: c, nombre: NOM[c] || c, qm: f[4], vm: f[5], cls: f[7] || "C", ss, stock: s, cu: cu(c), compras: [] }; });
+    const base = L.reduce((t, o) => t + o.vm, 0); if (!(base > 0)) return { invT, invD, L: [], tot: [] };
+    let vMes = 0; (D.rows || []).forEach(r => { const y = r[8] || D.anio; if (y === cy && r[2] === cm && typeof cartRow === "function" && cartRow(r) === TI) vMes += r[5] || 0; });
+    const meses = Object.keys(PLAN_TIE).map(Number).filter(ym => ym >= cy * 100 + cm).slice(0, 6);
+    L.forEach(o => { let st = o.stock; meses.forEach((ym, i) => { const meta = PLAN_TIE[ym], f = (i === 0 ? Math.max(0, meta - vMes) : meta) / base, dem = o.qm * f;
+      const obj = dem + o.ss + (i === 0 ? o.qm * f * (P.lead || 7) / 30 : 0), q = Math.max(0, Math.ceil(obj - st)); o.compras.push({ q, monto: q * o.cu, dem }); st = st + q - dem; }); });
+    const tot = meses.map((ym, i) => ({ ym, meta: PLAN_TIE[ym], compra: L.reduce((t, o) => t + o.compras[i].monto, 0), cv: L.reduce((t, o) => t + o.compras[i].dem * o.cu, 0), n: L.filter(o => o.compras[i].q > 0).length }));
+    let inv = invT; tot.forEach(t => { inv = inv + t.compra - t.cv; t.inv = inv; });
+    const cvDia = L.reduce((t, o) => t + o.qm * o.cu, 0) / 30;
+    return { invT, invD, L, tot, vMes, dias: cvDia > 0 ? invT / cvDia : 0, sinCosto: L.filter(o => !(o.cu > 0)).length };
+  }
+  function pintar() { const box = $("masBody"); if (!box || !box.innerHTML.includes("Plan de abastecimiento")) return; const old = box.querySelector("#atBox"); if (old) old.parentNode.removeChild(old);
+    let X = null; try { X = datos(); } catch (e) { console.error(e); } if (!X) return;
+    const lab = ym => MS[ym % 100] + " " + Math.floor(ym / 100), t0 = X.tot[0] || { compra: 0, n: 0 }, t3 = X.tot.slice(0, 3);
+    const top = X.L.filter(o => o.compras[0] && o.compras[0].q > 0).sort((a, b) => b.compras[0].monto - a.compras[0].monto);
+    const h = `<div id="atBox"><div class="card"><h2>Inventario valorizado <span class="muted">a costo · sin la bodega MERMA · stock al ${esc(D.stockFecha || "")}</span></h2>
+      <div class="at-k"><div><span>Tienda Hellywoof</span><b>${$m(X.invT)}</b><small>bodega HELLYWOOF${X.dias ? " · " + Math.round(X.dias) + " días de venta" : ""}</small></div>
+        <div><span>Distribuidora</span><b>${$m(X.invD)}</b><small>bodega DISTRIBUIDORA</small></div>
+        <div><span>Total</span><b>${$m(X.invT + X.invD)}</b><small>tienda + distribuidora</small></div></div></div>
+      <div class="card"><h2>Plan de abastecimiento · Tienda Hellywoof <span class="muted">compras para cumplir la meta de la tienda</span></h2>
+      ${X.L.length ? `<div class="at-k"><div><span>Comprar este mes</span><b>${$m(t0.compra)}</b><small>${t0.n} productos · a costo</small></div>
+        <div><span>Próximos 3 meses</span><b>${$m(t3.reduce((t, x) => t + x.compra, 0))}</b><small>${t3.map(x => lab(x.ym) + " " + $m(x.compra)).join(" · ")}</small></div>
+        <div><span>Meta tienda este mes</span><b>${$m(t0.meta || 0)}</b><small>vendido ${$m(X.vMes)}</small></div></div>
+      <div style="overflow:auto"><table class="at-t"><thead><tr><th>Mes</th><th>Meta venta</th><th>Costo de lo vendido</th><th>Compras</th><th>Inventario fin de mes</th></tr></thead><tbody>
+        ${X.tot.map((t, i) => `<tr${i === 0 ? ' class="at-cur"' : ""}><td>${lab(t.ym)}${i === 0 ? " · en curso" : ""}</td><td>${$m(t.meta)}</td><td>${$m(t.cv)}</td><td><b>${$m(t.compra)}</b></td><td>${$m(t.inv)}</td></tr>`).join("")}</tbody></table></div>
+      <details style="margin-top:10px"><summary><b>Qué comprar este mes</b> (${top.length} productos)</summary><div style="overflow:auto"><table class="at-t"><thead><tr><th>Producto</th><th>Clase</th><th>Stock tienda</th><th>Venta/mes</th><th>Comprar</th><th>$ costo</th></tr></thead><tbody>
+        ${top.map(o => `<tr><td>${esc(o.nombre)} <small class="muted">${esc(o.cod)}</small></td><td>${esc(o.cls)}</td><td>${o.stock}</td><td>${o.qm.toFixed(1).replace(".", ",")}</td><td><b>${o.compras[0].q}</b></td><td>${$m(o.compras[0].monto)}</td></tr>`).join("")}</tbody></table></div></details>
+      <div style="margin-top:10px"><button type="button" class="btn" id="atXls">Descargar orden sugerida de la tienda (Excel)</button></div>
+      <p class="muted" style="margin-top:8px;font-size:.82rem">Cómo se calcula: venta de cada producto = pronóstico de la tienda (script), escalado a la meta mensual de la tienda (nov y dic 2026 del archivo META; 2027 del plan de $1.000 MM). Compra = venta esperada + stock de seguridad (según el error del pronóstico y la clase A/B/C, mismo nivel de servicio y plazo que la distribuidora) − stock proyectado de la bodega HELLYWOOF.${X.sinCosto ? ` ${X.sinCosto} productos sin costo conocido se valorizan en $0.` : ""}</p>`
+      : `<p class="muted">Todavía no hay pronóstico de la tienda en los datos (se calcula en el script con la venta de la tienda).</p>`}</div></div>`;
+    box.insertAdjacentHTML("beforeend", h);
+    const b = $("atXls"); if (b) b.onclick = () => { try { const head = ["Código", "Producto", "Clase", "Stock tienda", "Venta/mes (u)", "Costo unitario"].concat(...X.tot.slice(0, 3).map(t => [lab(t.ym) + " unidades", lab(t.ym) + " $ costo"]));
+      const filas = [head]; X.L.filter(o => o.compras.slice(0, 3).some(c => c.q > 0)).sort((a, z) => a.nombre.localeCompare(z.nombre, "es")).forEach(o => filas.push([o.cod, o.nombre, o.cls, o.stock, Math.round(o.qm * 10) / 10, Math.round(o.cu)].concat(...o.compras.slice(0, 3).map(c => [c.q, Math.round(c.monto)]))));
+      const ws = XLSX.utils.aoa_to_sheet(filas), wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Tienda"); XLSX.writeFile(wb, `Abastecimiento Tienda Hellywoof ${D.corte}.xlsx`); } catch (e) { alert("No se pudo generar el Excel: " + e.message); } };
+  }
+  const _pa = pintarAbast; pintarAbast = function () { const r = _pa.apply(this, arguments); try { pintar(); } catch (e) { console.error(e); } return r; };
 })();
 </script>
 </body>
