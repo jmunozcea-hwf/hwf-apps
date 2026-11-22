@@ -5274,7 +5274,7 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261116232646";
+const HWF_VER = "20261122095040";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -8902,7 +8902,7 @@ window.hwfContCambio = function () { try { if (typeof praPintar === "function" &
     /* asignaciones fijas (Jorge 16-11-2026): todo IKAI y Felicity son de Planet Pet; los mousses 60 g, aceite y caldo de salmón
        gato son IKAI aunque su nombre no lo diga (ikaichile.cl). El caldo de hueso 250 g es Pura Natura (no IKAI). */
     const IKAI = new Set(["111", "112", "764", "765", "766", "767", "768", "769", "770", "771", "772"]);
-    const fijo = p => IKAI.has(String(p[0])) || /\bikai\b/i.test(p[1]) ? ["Planet Pet", "IKAI"] : /felicity/i.test(p[1]) ? ["Planet Pet", "Felicity"] : String(p[0]) === "95" ? ["Comercial Pet-Food", "Pura Natura"] : null;   /* 95 = caldo de hueso Pura Natura */
+    const fijo = p => IKAI.has(String(p[0])) || /\bikai\b/i.test(p[1]) ? ["Planet Pet", "IKAI"] : /felicity/i.test(p[1]) ? ["Planet Pet", "Felicity"] : String(p[0]) === "95" ? ["Comercial Pet-Food", "Pura Natura"] : /^49816[5-9]$/.test(String(p[0])) || /goodwell/i.test(p[1]) ? ["Planet Pet", "Goodwell"] : null;   /* suplementos Goodwell (Jorge 17-11-2026) */   /* 95 = caldo de hueso Pura Natura */
     CAT_APP.forEach(p => { let r = fijo(p) || porCod[p[0]] || porNom[nz(p[1])];
       if (!r) { const n = nz(p[1]), m = ms.find(k => k.length > 2 && n.includes(k)); r = m ? marcas[m] : ["Sin proveedor", ""]; }
       PM[p[0]] = { pv: r[0] || "Sin proveedor", ma: r[1] || "Sin marca" }; });
