@@ -2350,7 +2350,7 @@ const stAbrev = n => ST_ABR.reduce((s, [r, t]) => s.replace(r, t), String(n || "
 try { if ($("sStock") && !$("sStock").hidden) pintarStock(); } catch (e) {}
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261122203721";
+const HWF_VER = "20261122204152";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -4148,6 +4148,20 @@ window.hwfContCambio = function () { try { const b = document.getElementById("sS
 @media(min-width:1200px){.ct-f{grid-template-columns:minmax(0,1fr) auto!important}.ct-b{justify-content:flex-end!important}}
 @media(min-width:1500px){.bi-svg,.db-svg,.ad-svg,.roi-svg,.vm-svg,.mg-svg{max-height:280px!important}}
 </style>
+<script>/* patch_tdanut: nutrición desde datos/publicos.json (igual que Ventas) */
+(function () {
+  if (typeof NUT === "undefined" || typeof nuPrep !== "function") return;
+  const K = "hwf-tda-nut";
+  const aplicar = n => { if (!n || !Array.isArray(n.hwf) || !n.hwf.length) return false;
+    NUT.hwf = n.hwf.map(x => Object.assign({}, x)); NUT.comp = (n.comp || []).map(x => Object.assign({}, x)); NUT.sup = n.sup || { hwf: [], comp: [] }; if (n.version) NUT.version = n.version;
+    NUT.hwf.forEach(nuPrep); NUT.comp.forEach(nuPrep); return true; };
+  try { aplicar(JSON.parse(localStorage.getItem(K) || "null")); } catch (e) {}
+  const repintar = () => { try { if (typeof pintarNut === "function" && document.getElementById("crmNut") && !document.getElementById("crmNut").hidden) pintarNut(); } catch (e) {} };
+  repintar();
+  fetch("../datos/publicos.json", { cache: "no-cache" }).then(r => r.ok ? r.json() : null).then(j => { if (!j || !j.nut) return;
+    const ant = NUT.version; if (aplicar(j.nut)) { try { localStorage.setItem(K, JSON.stringify(j.nut)); } catch (e) {} if (ant !== j.nut.version) repintar(); } }).catch(() => {});
+})();
+</script>
 <style>/* patch_nutsup */
 .nu-tabs.nu-t3{grid-template-columns:repeat(3,1fr)}
 .ns-f{display:grid;gap:8px;grid-template-columns:repeat(2,minmax(0,1fr))}.ns-f .f{min-width:0}
