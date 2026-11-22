@@ -1,5 +1,5 @@
 {
- "version": "2026-11-22.1-turkat-ikai",
+ "version": "2026-11-22.2-siegervet",
  "base": "https://jmunozcea-hwf.github.io/hwf-apps/",
  "fotos": {
   "764": {
@@ -1431,6 +1431,116 @@
    "nota": "foto enviada por Jorge 22-11-2026 (TurKat Super Premium carbón activado 10 L / 8,6 kg)",
    "f": "fotos/844.webp",
    "m": "fotos/m/844.webp",
+   "w": 800,
+   "h": 800
+  },
+  "SVET01": {
+   "fuente": "Drive Planet Pet (SIEGER VET / SiegerVet Wet)",
+   "origen": "",
+   "calidad": "buena",
+   "nota": "foto oficial de la lata (22-11-2026)",
+   "f": "fotos/SVET01.webp",
+   "m": "fotos/m/SVET01.webp",
+   "w": 800,
+   "h": 800
+  },
+  "SVET02": {
+   "fuente": "Drive Planet Pet (SIEGER VET / SiegerVet Wet)",
+   "origen": "",
+   "calidad": "buena",
+   "nota": "foto oficial de la lata (22-11-2026)",
+   "f": "fotos/SVET02.webp",
+   "m": "fotos/m/SVET02.webp",
+   "w": 800,
+   "h": 800
+  },
+  "SVET03": {
+   "fuente": "Drive Planet Pet (SIEGER VET / SiegerVet Wet)",
+   "origen": "",
+   "calidad": "buena",
+   "nota": "foto oficial de la lata (22-11-2026)",
+   "f": "fotos/SVET03.webp",
+   "m": "fotos/m/SVET03.webp",
+   "w": 800,
+   "h": 800
+  },
+  "SVET04": {
+   "fuente": "Drive Planet Pet (SIEGER VET / SiegerVet Wet)",
+   "origen": "",
+   "calidad": "buena",
+   "nota": "foto oficial de la lata (22-11-2026)",
+   "f": "fotos/SVET04.webp",
+   "m": "fotos/m/SVET04.webp",
+   "w": 800,
+   "h": 800
+  },
+  "SVET05": {
+   "fuente": "Drive Planet Pet (SIEGER VET / SiegerVet Wet)",
+   "origen": "",
+   "calidad": "buena",
+   "nota": "foto oficial de la lata (22-11-2026)",
+   "f": "fotos/SVET05.webp",
+   "m": "fotos/m/SVET05.webp",
+   "w": 800,
+   "h": 800
+  },
+  "SVET06": {
+   "fuente": "Drive Planet Pet (SIEGER VET / SiegerVet Wet)",
+   "origen": "",
+   "calidad": "buena",
+   "nota": "foto oficial de la lata (22-11-2026)",
+   "f": "fotos/SVET06.webp",
+   "m": "fotos/m/SVET06.webp",
+   "w": 800,
+   "h": 800
+  },
+  "SVET09": {
+   "fuente": "Drive Planet Pet (SIEGER VET / SiegerVet Wet)",
+   "origen": "",
+   "calidad": "buena",
+   "nota": "foto oficial de la lata (22-11-2026)",
+   "f": "fotos/SVET09.webp",
+   "m": "fotos/m/SVET09.webp",
+   "w": 800,
+   "h": 800
+  },
+  "865": {
+   "fuente": "Drive Planet Pet (SIEGER VET / SiegerVet Wet)",
+   "origen": "",
+   "calidad": "buena",
+   "nota": "foto oficial de la lata (22-11-2026)",
+   "f": "fotos/865.webp",
+   "m": "fotos/m/865.webp",
+   "w": 800,
+   "h": 800
+  },
+  "866": {
+   "fuente": "Drive Planet Pet (SIEGER VET / SiegerVet Wet)",
+   "origen": "",
+   "calidad": "buena",
+   "nota": "foto oficial de la lata (22-11-2026)",
+   "f": "fotos/866.webp",
+   "m": "fotos/m/866.webp",
+   "w": 800,
+   "h": 800
+  },
+  "SVET07": {
+   "fuente": "Drive Planet Pet (SIEGER VET / SiegerVet Wet)",
+   "origen": "",
+   "calidad": "buena",
+   "nota": "foto oficial de la lata (22-11-2026)",
+   "f": "fotos/SVET07.webp",
+   "m": "fotos/m/SVET07.webp",
+   "w": 800,
+   "h": 800
+  },
+  "SVET08": {
+   "fuente": "Drive Planet Pet (SIEGER VET / SiegerVet Wet)",
+   "origen": "",
+   "calidad": "buena",
+   "nota": "foto oficial de la lata (22-11-2026)",
+   "f": "fotos/SVET08.webp",
+   "m": "fotos/m/SVET08.webp",
    "w": 800,
    "h": 800
   }

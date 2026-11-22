@@ -5277,7 +5277,7 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261122105858";
+const HWF_VER = "20261122110903";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -9008,6 +9008,63 @@ window.hwfContCambio = function () { try { if (typeof praPintar === "function" &
     });
   }
   aplicar();
+})();
+</script>
+<style>/* patch_ventadiaria */
+.vd{display:grid;gap:12px;margin:0 0 14px}.vd-c{background:var(--surface,#fff);border:1px solid var(--line,#E3E8EC);border-radius:16px;padding:14px 16px}
+.vd-c h3{margin:0 0 8px;font-size:1rem}.vd-c h3 small{font-weight:500;color:var(--muted,#5B6874);font-size:.78rem}
+.vd-k{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.vd-k div{background:var(--sunk,#F4F7F9);border-radius:12px;padding:10px}
+.vd-k span{display:block;font-size:.74rem;color:var(--muted,#5B6874)}.vd-k b{display:block;font-size:1.35rem;font-variant-numeric:tabular-nums}.vd-k small{font-size:.74rem;color:var(--muted,#5B6874)}
+.vd-k small.up{color:#1C7A4E}.vd-k small.dn{color:#B42318}.vd-cv{position:relative;height:230px}
+.vd-seg{display:inline-flex;gap:4px;background:var(--sunk,#F4F7F9);border-radius:999px;padding:3px;margin:0 0 8px}.vd-seg button{border:0;background:none;border-radius:999px;padding:6px 12px;font:inherit;font-size:.82rem;font-weight:700;color:var(--ink,#13222D);cursor:pointer}
+.vd-seg button[aria-pressed="true"]{background:#0B3146;color:#fff}
+.vd-t{width:100%;border-collapse:collapse;font-size:.82rem;font-variant-numeric:tabular-nums}.vd-t th,.vd-t td{padding:5px 8px;border-bottom:1px solid var(--line,#E3E8EC);text-align:right}.vd-t th:first-child,.vd-t td:first-child{text-align:left}
+@media(max-width:560px){.vd-k b{font-size:1.05rem}}
+</style>
+<script>/* patch_ventadiaria: venta del día, semana en curso y distribución diaria del mes */
+(function () {
+  if (typeof pintarDashboard !== "function" || typeof D === "undefined" || typeof chart !== "function") return;
+  let modo = "total"; const DS = ["dom", "lun", "mar", "mié", "jue", "vie", "sáb"], TI = "Tienda Hellywoof";
+  const MS = ["", "enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
+  const key = (y, m, d) => y * 10000 + m * 100 + d, dde = k => new Date(Math.floor(k / 10000), Math.floor(k / 100) % 100 - 1, k % 100);
+  const kd = dt => key(dt.getFullYear(), dt.getMonth() + 1, dt.getDate());
+  function porDia() { const V = {}; (D.rows || []).forEach(r => { const y = r[8] || D.anio, k = key(y, r[2], r[3]), t = cartRow(r) === TI;
+      const o = V[k] = V[k] || { d: 0, t: 0 }; if (t) o.t += r[5]; else o.d += r[5]; }); return V; }
+  const pc = (a, b) => b ? (a / b - 1) : null;
+  function armar(V) {
+    const [cy, cm, cd] = String(D.corte || "").split("-").map(Number); if (!cy) return null;
+    const kc = key(cy, cm, cd), hoy = V[kc] || { d: 0, t: 0 }, ant = V[kd(new Date(cy, cm - 1, cd - 7))] || { d: 0, t: 0 };
+    const tot = hoy.d + hoy.t, totA = ant.d + ant.t, dc = dde(kc);
+    const chip = (a, b) => { const v = pc(a, b); return v == null ? "<small>&nbsp;</small>" : `<small class="${v >= 0 ? "up" : "dn"}">${v >= 0 ? "▲" : "▼"} ${Math.abs(Math.round(v * 100))} % vs ${DS[dc.getDay()]} anterior</small>`; };
+    let h = `<div class="vd"><div class="vd-c"><h3>Venta del día <small>${DS[dc.getDay()]} ${String(cd).padStart(2, "0")}-${String(cm).padStart(2, "0")} · último día informado · neto sin IVA</small></h3>
+      <div class="vd-k"><div><span>Total</span><b>${fmt(tot)}</b>${chip(tot, totA)}</div><div><span>Distribuidora</span><b>${fmt(hoy.d)}</b>${chip(hoy.d, ant.d)}</div><div><span>Tienda</span><b>${fmt(hoy.t)}</b>${chip(hoy.t, ant.t)}</div></div></div>`;
+    const lun = new Date(cy, cm - 1, cd - ((dc.getDay() + 6) % 7)), sem = [];
+    for (let i = 0; i < 7; i++) { const dt = new Date(lun.getFullYear(), lun.getMonth(), lun.getDate() + i), o = V[kd(dt)] || { d: 0, t: 0 }; sem.push({ lab: DS[dt.getDay()] + " " + dt.getDate(), d: o.d, t: o.t }); }
+    const st = sem.reduce((a, x) => a + x.d + x.t, 0);
+    h += `<div class="vd-c"><h3>Venta diaria · semana en curso <small>desde el lunes ${lun.getDate()}-${String(lun.getMonth() + 1).padStart(2, "0")} · ${fmt(st)} en la semana</small></h3><div class="vd-cv"><canvas id="vdSem" role="img" aria-label="Venta diaria de la semana en curso"></canvas></div></div>`;
+    const dm = new Date(cy, cm, 0).getDate(), mes = []; for (let d = 1; d <= dm; d++) { const o = V[key(cy, cm, d)] || { d: 0, t: 0 }; mes.push({ d, dist: o.d, tie: o.t }); }
+    const sum = f => mes.reduce((a, x) => a + f(x), 0), dias = mes.filter(x => x.dist + x.tie !== 0);
+    h += `<div class="vd-c"><h3>Distribución de la venta diaria del mes <small>${MS[cm]} ${cy} · total ${fmt(sum(x => x.dist + x.tie))} = distribuidora ${fmt(sum(x => x.dist))} + tienda ${fmt(sum(x => x.tie))}</small></h3>
+      <div class="vd-seg" role="group" aria-label="Ver">${[["total", "Total"], ["dist", "Distribuidora"], ["tie", "Tienda"]].map(([k, t]) => `<button type="button" data-vd="${k}" aria-pressed="${modo === k}">${t}</button>`).join("")}</div>
+      <div class="vd-cv"><canvas id="vdMes" role="img" aria-label="Venta diaria del mes"></canvas></div>
+      <details style="margin-top:8px"><summary>Ver tabla por día (${dias.length} días con venta)</summary><div style="overflow:auto"><table class="vd-t"><thead><tr><th>Día</th><th>Distribuidora</th><th>Tienda</th><th>Total</th><th>% tienda</th></tr></thead><tbody>${dias.map(x => { const t = x.dist + x.tie; return `<tr><td>${DS[new Date(cy, cm - 1, x.d).getDay()]} ${x.d}</td><td>${fmt(x.dist)}</td><td>${fmt(x.tie)}</td><td><b>${fmt(t)}</b></td><td>${t ? Math.round(x.tie / t * 100) + " %" : "—"}</td></tr>`; }).join("")}</tbody></table></div></details></div></div>`;
+    return { h, sem, mes };
+  }
+  function graficos(R) {
+    const C1 = "#0B3146", C2 = "#26A69A", op = pila => ({ maintainAspectRatio: false, animation: { duration: 200 }, plugins: { legend: { position: "bottom", labels: { boxWidth: 10, boxHeight: 10, font: { size: 11 } } },
+      tooltip: { callbacks: { label: x => `${x.dataset.label}: ${fmt(x.raw)}`, footer: it => pila && it.length > 1 ? "Total: " + fmt(it.reduce((a, x) => a + x.raw, 0)) : "" } } },
+      scales: { x: { stacked: pila, grid: { display: false } }, y: { stacked: pila, beginAtZero: true, ticks: { callback: v => Math.abs(v) >= 1e6 ? (v / 1e6).toLocaleString("es-CL", { maximumFractionDigits: 1 }) + " MM" : Math.round(v / 1e3).toLocaleString("es-CL") + " mil" } } } });
+    chart("vdSem", { type: "bar", data: { labels: R.sem.map(x => x.lab), datasets: [{ label: "Distribuidora", data: R.sem.map(x => x.d), backgroundColor: C1, borderRadius: 4 }, { label: "Tienda", data: R.sem.map(x => x.t), backgroundColor: C2, borderRadius: 4 }] }, options: op(true) });
+    const dD = { label: "Distribuidora", data: R.mes.map(x => x.dist), backgroundColor: C1, borderRadius: 3 }, dT = { label: "Tienda", data: R.mes.map(x => x.tie), backgroundColor: C2, borderRadius: 3 };
+    chart("vdMes", { type: "bar", data: { labels: R.mes.map(x => x.d), datasets: modo === "dist" ? [dD] : modo === "tie" ? [dT] : [dD, dT] }, options: op(modo === "total") });
+  }
+  function pintar() { const s = $("s-res"); if (!s) return; s.querySelectorAll(".vd").forEach(x => x.parentNode.removeChild(x));
+    let R = null; try { R = armar(porDia()); } catch (e) { console.error(e); } if (!R) return;
+    const hd = s.querySelector(".db-hd"); if (hd) hd.insertAdjacentHTML("afterend", R.h); else s.insertAdjacentHTML("afterbegin", R.h);
+    s.querySelectorAll("[data-vd]").forEach(b => b.onclick = () => { modo = b.dataset.vd; s.querySelectorAll("[data-vd]").forEach(x => x.setAttribute("aria-pressed", x.dataset.vd === modo)); graficos(R); });
+    graficos(R); }
+  const _pd = pintarDashboard; pintarDashboard = function () { const r = _pd.apply(this, arguments); try { pintar(); } catch (e) { console.error(e); } return r; };
+  setTimeout(() => { try { const s = $("s-res"); if (s && s.querySelector(".db-hd") && !s.querySelector(".vd")) pintar(); } catch (e) {} }, 0);   /* el Dashboard ya se dibujó al abrir */
 })();
 </script>
 </body>
