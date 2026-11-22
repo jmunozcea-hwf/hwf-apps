@@ -1318,6 +1318,7 @@ function npRitmo(cots, Y, M, n, real, lim, ant) {
       <button type="button" data-m="abast" aria-pressed="false">Abastecimiento</button>
       <button type="button" data-m="provee" aria-pressed="false">Pago a proveedores</button>
       <button type="button" data-m="catalogo" aria-pressed="false">Documentos</button>
+      <button type="button" data-m="metricas" aria-pressed="false">Métricas web</button>
       <button type="button" data-m="ranking" aria-pressed="false">Ranking</button>
       <button type="button" data-m="cots" aria-pressed="false">NP Defontana</button>
       <button type="button" data-m="napp" aria-pressed="false">NP App</button>
@@ -5276,7 +5277,7 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261122194423";
+const HWF_VER = "20261122195150";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -9231,5 +9232,43 @@ window.hwfContCambio = function () { try { if (typeof praPintar === "function" &
 @media(min-width:1200px){.ct-f{grid-template-columns:minmax(0,1fr) auto!important}.ct-b{justify-content:flex-end!important}}
 @media(min-width:1500px){.bi-svg,.db-svg,.ad-svg,.roi-svg,.vm-svg,.mg-svg{max-height:280px!important}}
 </style>
+<style>/* patch_metricasweb */
+.mw-k{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:8px}.mw-k div{background:var(--sunk,#EEF2F5);border-radius:12px;padding:10px 12px;font-size:.76rem;color:var(--muted,#5B6874)}
+.mw-k b{display:block;font-size:1.3rem;color:var(--ink,#0F1E29);font-variant-numeric:tabular-nums}
+@media(min-width:900px){.mw-k{grid-template-columns:repeat(4,minmax(0,1fr))}.mw-g{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}.mw-g>.card{margin:0}}
+.mw-l{display:grid;gap:2px;margin-top:6px}.mw-r{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 10px;padding:6px 0;border-bottom:1px solid var(--line,#E3E9EE);font-size:.88rem}
+.mw-r span{overflow-wrap:anywhere}.mw-r b{font-variant-numeric:tabular-nums}.mw-r i{grid-column:1/-1;display:block;height:6px;border-radius:4px;background:linear-gradient(90deg,#26A69A var(--p),var(--sunk,#EEF2F5) var(--p))}
+.mw-d{display:flex;align-items:flex-end;gap:2px;height:120px;margin-top:10px}.mw-d div{flex:1;display:flex;flex-direction:column-reverse;min-width:0}.mw-d .w{background:#0B3146;border-radius:2px 2px 0 0}.mw-d .b{background:#26A69A}
+.mw-sel{display:inline-flex;gap:4px;background:var(--sunk,#EEF2F5);border-radius:999px;padding:3px}.mw-sel button{border:0;background:none;border-radius:999px;padding:6px 12px;font:inherit;font-weight:700;font-size:.82rem;cursor:pointer;color:var(--ink,#0F1E29)}.mw-sel button[aria-pressed="true"]{background:#0B3146;color:#fff}
+</style>
+<script>/* patch_metricasweb: visitas de hwf.cl y del portal */
+(function () {
+  if (typeof pintarMas !== "function") return;
+  try { if (typeof NAV_MNOM !== "undefined") NAV_MNOM.metricas = "Métricas web"; } catch (e) {}
+  let DAT = null, DIAS = 30, EST = "";
+  const nf = n => Math.round(Number(n) || 0).toLocaleString("es-CL"), mm = n => { n = Number(n) || 0; return "$" + (n >= 1e6 ? (n / 1e6).toLocaleString("es-CL", { maximumFractionDigits: 1 }) + " MM" : Math.round(n).toLocaleString("es-CL")); };
+  const llamar = async datos => { const cfg = typeof SYC === "function" ? SYC() : null; if (!cfg) return { ok: false, error: "Esta app no está conectada al script de Google." };
+    try { const r = await fetch(cfg.url, { method: "POST", body: JSON.stringify(Object.assign({ clave: cfg.clave }, datos)) }), t = await r.text(); try { return JSON.parse(t); } catch (e) { return { ok: false, error: "El script de Google aún no tiene esta función (se actualiza solo dentro de la hora)." }; } }
+    catch (e) { return { ok: false, error: "Sin conexión a internet." }; } };
+  const lista = (L, tot) => L && L.length ? `<div class="mw-l">${L.map(([k, v]) => `<div class="mw-r"><span>${esc(k)}</span><b>${nf(v)}</b><i style="--p:${tot ? Math.round(v / tot * 100) : 0}%"></i></div>`).join("")}</div>` : '<p class="muted" style="margin:6px 0 0">Aún sin visitas.</p>';
+  function pintar() { const box = document.getElementById("masBody"); if (!box || (typeof vistaMas !== "undefined" && vistaMas !== "metricas")) return;
+    const D = DAT && DAT.ok ? DAT : null, W = D ? D.web : null, B = D ? D.b2b : null, PD = D ? D.porDia : [], mx = Math.max(1, ...PD.map(x => x[1] + x[2]));
+    box.innerHTML = `<div class="card"><h2>Métricas web <span class="muted">hwf.cl y Acceso Clientes · últimos ${DIAS} días</span></h2>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:6px"><span class="mw-sel" role="group" aria-label="Período">${[7, 30, 90, 365].map(d => `<button type="button" data-dias="${d}" aria-pressed="${d === DIAS}">${d === 365 ? "1 año" : d + " días"}</button>`).join("")}</span><button type="button" class="btn" id="mwAct">↻ Actualizar</button></div>
+      ${EST ? `<p class="muted" style="margin:8px 0 0">${esc(EST)}</p>` : ""}
+      ${D ? `<div class="mw-k"><div>Visitas hwf.cl<b>${nf(W.visitas)}</b>${nf(W.visitantes)} visitantes</div><div>Visitas Acceso Clientes<b>${nf(B.visitas)}</b>${nf(B.visitantes)} visitantes</div>
+        <div>Cuentas de clientes<b>${nf(B.cuentas)}</b>${(B.estados || []).map(([k, v]) => nf(v) + " " + esc(k)).join(" · ") || "—"}</div><div>Pedidos por el portal<b>${nf(B.pedidos)}</b>${mm(B.neto)} neto en el período</div></div>
+        <div class="mw-d" role="img" aria-label="Visitas por día">${PD.map(x => `<div title="${x[0]}: ${x[1]} web · ${x[2]} portal"><span class="w" style="height:${Math.round(x[1] / mx * 110)}px"></span><span class="b" style="height:${Math.round(x[2] / mx * 110)}px"></span></div>`).join("")}</div>
+        <p class="muted" style="margin:4px 0 0;font-size:.76rem"><span style="color:#0B3146">■</span> hwf.cl &nbsp; <span style="color:#26A69A">■</span> Acceso Clientes · visitas por día</p>` : ""}
+      <p class="muted" style="margin:8px 0 0;font-size:.76rem">Se cuenta una visita por página y sesión del navegador; «visitantes» = navegadores distintos por día. Sin cookies ni datos personales. Empieza a contar desde que se sube a hwf.cl el paquete del 22-11-2026.</p></div>
+      ${D ? `<div class="mw-g"><div class="card"><h2>Páginas más vistas <span class="muted">hwf.cl</span></h2>${lista(W.paginas, W.visitas)}</div>
+        <div class="card"><h2>De dónde llegan <span class="muted">hwf.cl</span></h2>${lista(W.origen, W.visitas)}<h3 style="margin:12px 0 0;font-size:.9rem">Dispositivo</h3>${lista(W.disp, W.visitas)}</div>
+        <div class="card"><h2>Acceso Clientes <span class="muted">de dónde llegan</span></h2>${lista(B.origen, B.visitas)}<h3 style="margin:12px 0 0;font-size:.9rem">Dispositivo</h3>${lista(B.disp, B.visitas)}</div></div>` : ""}`;
+    box.querySelectorAll("[data-dias]").forEach(b => b.onclick = () => { DIAS = Number(b.dataset.dias); cargar(); });
+    const a = document.getElementById("mwAct"); if (a) a.onclick = cargar; }
+  async function cargar() { EST = "Consultando…"; pintar(); const r = await llamar({ accion: "webMetricas", dias: DIAS }); DAT = r; EST = r && r.ok ? "" : ((r && r.error) || "No se pudo consultar."); pintar(); }
+  const _pm = pintarMas; pintarMas = function () { if (typeof vistaMas !== "undefined" && vistaMas === "metricas") { pintar(); if (!DAT) cargar(); return; } return _pm.apply(this, arguments); };
+})();
+</script>
 </body>
 </html>
