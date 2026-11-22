@@ -1318,7 +1318,7 @@ function npRitmo(cots, Y, M, n, real, lim, ant) {
       <button type="button" data-m="abast" aria-pressed="false">Abastecimiento</button>
       <button type="button" data-m="provee" aria-pressed="false">Pago a proveedores</button>
       <button type="button" data-m="catalogo" aria-pressed="false">Documentos</button>
-      <button type="button" data-m="metricas" aria-pressed="false">Métricas web</button>
+      <button type="button" data-m="metricas" aria-pressed="false">Métricas web y B2B</button>
       <button type="button" data-m="ranking" aria-pressed="false">Ranking</button>
       <button type="button" data-m="cots" aria-pressed="false">NP Defontana</button>
       <button type="button" data-m="napp" aria-pressed="false">NP App</button>
@@ -5277,7 +5277,7 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261122200035";
+const HWF_VER = "20261122200913";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -6128,7 +6128,7 @@ function vmPoner(cont, VM, antes) { try { if (!cont) return; const v = cont.quer
   const LOG = !VEN && !ADM && !!document.querySelector('#nav [data-s="rutas"]'), TND = !VEN && !ADM && !!document.getElementById("tNav");
   const GV = [["Mi día", ["inicio", "pedido", "clientes", "agenda", "ruta", "cobranza", "embudo", "cat"]], ["Análisis", ["dash", "avance", "bi"]], ["Aprender", ["nut", "tec"]]];
   const GA = [["Dirección", ["t:hal"]], ["Ventas", ["t:res", "t:ven", "t:cli", "t:pro", "m:ranking", "m:plan", "m:zonas", "m:terreno", "m:bonif"]], ["Pedidos y cobranza", ["m:cots", "m:napp", "m:cobranza", "m:embudo"]],
-    ["BI y compras", ["b:v", "b:l", "t:mar", "m:abast", "m:provee"]], ["Archivos y datos", ["m:catalogo", "m:cambios", "m:datos"]]];
+    ["BI y compras", ["b:v", "b:l", "t:mar", "m:abast", "m:provee"]], ["Web y portal B2B", ["m:metricas", "m:b2b", "m:mail", "m:roi"]], ["Archivos y datos", ["m:catalogo", "m:cambios", "m:datos"]]];   /* 22-11-2026: métricas web y B2B en su propio grupo */
   const pos = (G, k) => { let n = 0; for (const [, l] of G) { const i = l.indexOf(k); if (i >= 0) return n + i; n += l.length; } return 999; };
   if (VEN) { const ord = () => { const a = NAV_ORDEN.slice(); a.sort((x, y) => pos(GV, x[0]) - pos(GV, y[0])); NAV_ORDEN.splice(0, NAV_ORDEN.length, ...a); };
     ord(); setTimeout(ord, 0); setTimeout(ord, 1500);   /* BI, Catálogos y Técnicas se agregan al cargar */ }
@@ -6138,6 +6138,7 @@ function vmPoner(cont, VM, antes) { try { if (!cont) return; const v = cont.quer
     pan.querySelectorAll(":scope > .sn-g").forEach(x => x.remove());
     const key = b => VEN ? b.dataset.sm : b.dataset.biu ? "b:" + b.dataset.biu : b.dataset.t ? "t:" + b.dataset.t : "m:" + b.dataset.m, G = VEN ? GV : GA;
     if (ADM) { const ico = s => { const x = pan.querySelector(s + " .sn-e"); return x ? x.innerHTML : ""; };   /* íconos que faltaban */
+      { const e = pan.querySelector('[data-m="metricas"] .sn-e'); if (e && e.textContent.trim() === "•") e.textContent = "📈"; }
       [["m:provee", '[data-m="cobranza"]'], ["m:catalogo", '[data-m="cots"]']].forEach(([k, s]) => { const it = items.find(b => key(b) === k), e = it && it.querySelector(".sn-e"); if (e && e.textContent.trim() === "•") e.innerHTML = ico(s) || "•"; }); const bv = items.find(b => key(b) === "b:v"), ev = bv && bv.querySelector(".sn-e"), pl = ico('[data-m="plan"]'); if (ev && pl) ev.innerHTML = pl; }
     items.sort((a, b) => pos(G, key(a)) - pos(G, key(b))); let g0 = -1, n = 0;
     items.forEach(b => { const p = pos(G, key(b)); let gi = -1, acc = 0; G.forEach(([, l], i) => { if (p >= acc && p < acc + l.length) gi = i; acc += l.length; }); if (gi < 0) gi = G.length;
@@ -9244,7 +9245,7 @@ window.hwfContCambio = function () { try { if (typeof praPintar === "function" &
 <script>/* patch_metricasweb: visitas de hwf.cl y del portal */
 (function () {
   if (typeof pintarMas !== "function") return;
-  try { if (typeof NAV_MNOM !== "undefined") NAV_MNOM.metricas = "Métricas web"; } catch (e) {}
+  try { if (typeof NAV_MNOM !== "undefined") NAV_MNOM.metricas = "Métricas web y B2B"; } catch (e) {}
   let DAT = null, DIAS = 30, EST = "";
   const nf = n => Math.round(Number(n) || 0).toLocaleString("es-CL"), mm = n => { n = Number(n) || 0; return "$" + (n >= 1e6 ? (n / 1e6).toLocaleString("es-CL", { maximumFractionDigits: 1 }) + " MM" : Math.round(n).toLocaleString("es-CL")); };
   const llamar = async datos => { const cfg = typeof SYC === "function" ? SYC() : null; if (!cfg) return { ok: false, error: "Esta app no está conectada al script de Google." };

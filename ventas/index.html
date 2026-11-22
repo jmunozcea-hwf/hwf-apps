@@ -7198,7 +7198,7 @@ function confirmarNota() {
   x.onclick = () => cerrarModal(); card.insertBefore(x, card.firstChild); })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261122200035";
+const HWF_VER = "20261122200913";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -10466,7 +10466,8 @@ body:has(#rdOv) #snBtn,body:has(#rdOv) #iaBtn,body:has(#rdOv) #navBotones{displa
   if (typeof praLeer !== "function" || typeof PRODS === "undefined") return;
   const K = "hwf-prod-precio", B = {}; PRODS.forEach(p => B[p.i] = p.p);
   const aplicar = () => { let M = {}; try { M = JSON.parse(localStorage.getItem(K) || "{}") || {}; } catch (e) {}
-    PRODS.forEach(p => { p.p = M[p.i] > 0 ? M[p.i] : B[p.i]; }); };
+    PRODS.forEach(p => { let v = M[p.i] > 0 ? M[p.i] : 0; const u = Number(p.u) || 1; if (v && u > 1 && v >= B[p.i] * u * 0.5) v = Math.round(v / u);   /* precio propio guardado por pack → por unidad (22-11-2026) */
+      p.p = v || B[p.i]; }); };
   const _pl = praLeer;
   praLeer = function (cambios) { const U = {};
     (cambios || []).forEach(c => { if (!c || c.codigo !== "PRODUCTO") return; let o; try { o = JSON.parse(c.detalle); } catch (e) { return; }
@@ -10583,5 +10584,73 @@ body:has(#rdOv) #snBtn,body:has(#rdOv) #iaBtn,body:has(#rdOv) #navBotones{displa
 @media(min-width:1200px){.ct-f{grid-template-columns:minmax(0,1fr) auto!important}.ct-b{justify-content:flex-end!important}}
 @media(min-width:1500px){.bi-svg,.db-svg,.ad-svg,.roi-svg,.vm-svg,.mg-svg{max-height:280px!important}}
 </style>
+<style>/* patch_nutsup */
+.nu-tabs.nu-t3{grid-template-columns:repeat(3,1fr)}
+.ns-f{display:grid;gap:8px;grid-template-columns:repeat(2,minmax(0,1fr))}.ns-f .f{min-width:0}
+.ns-cat{display:flex;gap:6px;flex-wrap:wrap}.ns-cat button{border:1.5px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:7px 12px;font:inherit;font-weight:700;font-size:.84rem;cursor:pointer}
+.ns-cat button[aria-pressed="true"]{background:#0B3146;border-color:#0B3146;color:#fff}
+.ns-vs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.ns-vs>div{border:1px solid var(--line);border-radius:12px;padding:10px}.ns-vs .hw{border-color:#26A69A;background:rgba(38,166,154,.06)}
+.ns-vs h4{margin:0 0 2px;font-size:.92rem}.ns-vs .m{font-size:.72rem;font-weight:800;letter-spacing:.06em;color:var(--muted)}
+.ns-t{width:100%;border-collapse:collapse;font-size:.84rem;margin-top:6px}.ns-t th,.ns-t td{padding:5px 6px;border-bottom:1px solid var(--line);text-align:right}.ns-t th:first-child,.ns-t td:first-child{text-align:left}
+.ns-t td.mej{color:#1C7A4E;font-weight:800}
+@media(min-width:700px){.ns-f{grid-template-columns:repeat(4,minmax(0,1fr))}}
+</style>
+<script>/* patch_nutsup: suplementos y su comparador */
+(function () {
+  if (typeof pintarNut !== "function" || typeof NUT === "undefined") return;
+  const SUP = () => (NUT && NUT.sup) || ((window.__PUB && window.__PUB.nut && window.__PUB.nut.sup) || { hwf: [], comp: [] });
+  const CATS = [["articular", "Articular"], ["piel", "Piel y alergias"], ["calmante", "Calmante"], ["omega3", "Omega 3"]];
+  let ST = { esp: "perro", peso: 15, cat: "articular", comp: "" };
+  try { ST = Object.assign(ST, JSON.parse(localStorage.getItem("hwf-nutsup") || "{}")); } catch (e) {}
+  const guarda = () => { try { localStorage.setItem("hwf-nutsup", JSON.stringify(ST)); } catch (e) {} };
+  const nrm = s => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
+  const esEsp = (x, e) => String(x.esp || "").includes(e);
+  const udDia = (x, kg) => { const d = (x.dosis || []).slice().sort((a, b) => a[0] - b[0]); const r = d.find(z => kg <= z[0]) || d[d.length - 1]; return r ? Number(r[1]) || null : null; };
+  const pesos = n => "$" + Math.round(n).toLocaleString("es-CL");
+  const precioHwf = x => { const c = (x.skus || [])[0]; const p = typeof PRODS !== "undefined" ? (PRODS.find(q => String(q.i) === String(c)) || null) : null; return p ? p.p : (x.precio || null); };
+  /* mismo activo aunque cambie el nombre («Glucosamina HCl 95 %» = «Glucosamina sulfato», «EPA (por ml)» = «EPA») */
+  const CANON = ["glucosamina", "condroitin", "msm", "acido hialuronico", "colageno", "epa", "dha", "omega 3", "zinc", "biotina", "vitamina c", "vitamina e", "tiamina", "triptofano", "teanina", "valeriana", "manzanilla", "pasiflora", "passiflora", "curcuma", "boswellia", "melatonina", "quercetina"];
+  const canon = n => { const t = nrm(n); const c = CANON.find(k => t.includes(k)); return c === "passiflora" ? "pasiflora" : c === "condroitin" || /condroit/.test(t) ? "condroitin" : (c || t); };
+  const activosDia = (x, u) => (x.activos || []).map(a => ({ n: a.n, k: canon(a.n), v: a.mg != null ? a.mg * u : a.ui != null ? a.ui * u : null, un: a.mg != null ? "mg" : a.ui != null ? "UI" : "" }));
+  function ficha(x, kg, hwf) { const u = udDia(x, kg), pr = hwf ? precioHwf(x) : x.precio, dura = u && x.unid ? x.unid / u : null, cd = pr && dura ? pr / dura : null;
+    return { x, u, pr, dura, cd, act: u ? activosDia(x, u) : [] }; }
+  function razones(H, C) { const r = []; if (!C) return (H.x.claves || []).slice(0, 3);
+    H.act.forEach(a => { const b = C.act.find(z => z.k === a.k); if (b && a.v && b.v && a.v > b.v * 1.1) r.push(`Entrega ${Math.round((a.v / b.v - 1) * 100)} % más de ${a.n} por día (${a.v.toLocaleString("es-CL")} vs ${b.v.toLocaleString("es-CL")} ${a.un}).`); if (!b && a.v) r.push(`Incluye ${a.n} (${a.v.toLocaleString("es-CL")} ${a.un}/día), que ${C.x.marca} no trae.`); });
+    if (H.dura && C.dura && H.dura > C.dura * 1.1) r.push(`El envase dura ${Math.round(H.dura)} días vs ${Math.round(C.dura)} días.`);
+    if (H.cd && C.cd && H.cd < C.cd) r.push(`Costo por día ${pesos(H.cd)} (precio mayorista neto) vs ${pesos(C.cd)} (precio público de ${esc(C.x.tienda || "la competencia")}).`);
+    return r.concat(H.x.claves || []).slice(0, 4); }
+  function tablaVs(H, C) { const nombres = []; [H].concat(C ? [C] : []).forEach(F => F.act.forEach(a => { if (!nombres.some(n => n.k === a.k)) nombres.push({ k: a.k, n: a.n, un: a.un }); }));
+    const val = (F, k) => { const a = F && F.act.find(z => z.k === k); return a && a.v != null ? a.v : null; };
+    return `<table class="ns-t"><thead><tr><th>Por día</th><th>${esc(H.x.marca)}</th>${C ? `<th>${esc(C.x.marca)}</th>` : ""}</tr></thead><tbody>
+      <tr><td>Unidades</td><td>${H.u || "–"}</td>${C ? `<td>${C.u || "–"}</td>` : ""}</tr>
+      ${nombres.map(n => { const a = val(H, n.k), b = val(C, n.k); return `<tr><td>${esc(n.n)}</td><td class="${a != null && (b == null || a > b) && C ? "mej" : ""}">${a != null ? a.toLocaleString("es-CL") + " " + n.un : "–"}</td>${C ? `<td>${b != null ? b.toLocaleString("es-CL") + " " + n.un : "–"}</td>` : ""}</tr>`; }).join("")}
+      <tr><td>El envase dura</td><td>${H.dura ? Math.round(H.dura) + " días" : "–"}</td>${C ? `<td>${C.dura ? Math.round(C.dura) + " días" : "–"}</td>` : ""}</tr>
+      <tr><td>Costo por día</td><td>${H.cd ? pesos(H.cd) + "<small> neto</small>" : "–"}</td>${C ? `<td>${C.cd ? pesos(C.cd) + "<small> público</small>" : "–"}</td>` : ""}</tr></tbody></table>`; }
+  function comparador(cu) { const S = SUP(), kg = ST.peso, comps = (S.comp || []).filter(x => x.cat === ST.cat && esEsp(x, ST.esp)), hw = (S.hwf || []).filter(x => x.cat === ST.cat && esEsp(x, ST.esp));
+    if (ST.comp && !comps.some(x => x.id === ST.comp)) ST.comp = "";
+    const C = ST.comp ? ficha(comps.find(x => x.id === ST.comp), kg, false) : null;
+    cu.innerHTML = `<div class="nu-card"><b>¿Qué suplemento usa el cliente?</b>
+      <div class="ns-f"><div class="f"><label for="nsEsp">Especie</label><select id="nsEsp"><option value="perro"${ST.esp === "perro" ? " selected" : ""}>Perro</option><option value="gato"${ST.esp === "gato" ? " selected" : ""}>Gato</option></select></div>
+        <div class="f"><label for="nsKg">Peso (kg)</label><input id="nsKg" type="number" inputmode="decimal" min="0.5" step="0.5" value="${kg}"></div>
+        <div class="f" style="grid-column:span 2"><label for="nsComp">Producto de la competencia</label><select id="nsComp"><option value="">— ninguno: ver el nuestro —</option>${comps.map(x => `<option value="${esc(x.id)}"${x.id === ST.comp ? " selected" : ""}>${esc(x.marca)} · ${esc(x.linea)}</option>`).join("")}</select></div></div>
+      <div class="ns-cat" role="group" aria-label="Categoría">${CATS.map(([k, t]) => `<button type="button" data-nsc="${k}" aria-pressed="${k === ST.cat}">${t}</button>`).join("")}</div></div>
+      ${hw.length ? hw.map(h => { const H = ficha(h, kg, true), R = razones(H, C);
+        return `<div class="nu-card"><div class="ns-vs"><div class="hw"><span class="m">HWF · ${esc(h.marca)}</span><h4>${esc(h.linea)}</h4><span class="nu-mut">${esc(h.forma || "")} · ${h.unid || "?"} por envase${H.pr ? " · " + pesos(H.pr) + " neto" : ""}</span></div>
+          ${C ? `<div><span class="m">${esc(C.x.marca)}</span><h4>${esc(C.x.linea)}</h4><span class="nu-mut">${esc(C.x.forma || "")} · ${C.x.unid || "?"} por envase${C.pr ? " · " + pesos(C.pr) + (C.x.tienda ? " en " + esc(C.x.tienda) : "") : ""}</span></div>` : `<div class="nu-mut">Elige el producto que usa el cliente para comparar.</div>`}</div>
+          ${tablaVs(H, C)}<div><b>Por qué recomendarlo</b><ul class="nu-raz">${R.map(t => `<li>${esc(t)}</li>`).join("")}</ul></div>
+          ${C && C.x.fuente ? `<div class="nu-mut" style="font-size:.74rem">Fuente competencia: <a href="${esc(C.x.fuente)}" target="_blank" rel="noopener">${esc(String(C.x.fuente).replace(/^https?:\/\//, "").split("/")[0])}</a></div>` : ""}</div>`; }).join("")
+        : `<div class="nu-card nu-mut">No tenemos un suplemento GOODWELL de esta categoría para ${ST.esp === "gato" ? "gatos" : "perros"}.</div>`}`;
+    cu.querySelector("#nsEsp").onchange = e => { ST.esp = e.target.value; guarda(); comparador(cu); };
+    cu.querySelector("#nsKg").onchange = e => { ST.peso = Math.max(0.5, Number(String(e.target.value).replace(",", ".")) || ST.peso); guarda(); comparador(cu); };
+    cu.querySelector("#nsComp").onchange = e => { ST.comp = e.target.value; guarda(); comparador(cu); };
+    cu.querySelectorAll("[data-nsc]").forEach(b => b.onclick = () => { ST.cat = b.dataset.nsc; ST.comp = ""; guarda(); comparador(cu); }); }
+  const _pn = pintarNut;
+  pintarNut = function () { const sup = nuVista === "sup"; if (sup) nuVista = "fichas"; const r = _pn.apply(this, arguments); if (sup) nuVista = "sup";
+    const tabs = document.querySelector("#crmNut .nu-tabs, .nu-tabs"); if (tabs && !tabs.querySelector('[data-nv="sup"]')) { tabs.classList.add("nu-t3"); const b = document.createElement("button"); b.type = "button"; b.dataset.nv = "sup"; b.textContent = "Suplementos"; tabs.appendChild(b); b.onclick = () => { nuVista = "sup"; pintarNut(); }; }
+    if (tabs) tabs.querySelectorAll("[data-nv]").forEach(b => b.setAttribute("aria-pressed", b.dataset.nv === nuVista));
+    if (sup) { const cu = document.getElementById("nuCuerpo"); if (cu) comparador(cu); }
+    return r; };
+})();
+</script>
 </body>
 </html>
