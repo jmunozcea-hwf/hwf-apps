@@ -2003,7 +2003,7 @@ function rowHTML(p){
     <img class="thumb" src="${th}" alt="" data-hf="${esc(p.i)}" data-hc="1" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="hwfFotoErr(this)">
     <div class="info"><div class="desc">${esc(p.d)} <span class="cod-d" style="white-space:nowrap;font-size:.8em;font-weight:700;color:var(--muted)">· Cód. ${esc(p.s || p.i)}</span></div>
       <div class="codes num"><span>${esc(p.o || "Unidad")}${(Number(p.u) || 1) > 1 ? " · múltiplo " + p.u : ""}</span></div>
-      <div class="tags"><span class="tag">${esc(p.g)}</span>${p.pr?`<span class="tag promo">${esc(p.pr)}</span>`:""}</div></div>
+      <div class="tags">${(window.__CONT && (window.__CONT.novedades || []).some(n => (n.productos || []).map(String).includes(String(p.i)) && (!n.desde || n.desde <= new Date().toISOString().slice(0, 10)) && (!n.hasta || new Date().toISOString().slice(0, 10) <= n.hasta))) ? `<span class="tag" style="background:#0B3146;color:#fff">NUEVO</span>` : ""}<span class="tag">${esc(p.g)}</span>${p.pr?`<span class="tag promo">${esc(p.pr)}</span>`:""}</div></div>
     <div class="price num"><span class="lst"${L.d>0?"":" hidden"}>${fmt(p.p)}</span><span class="net" data-u>${fmt(u)}</span><span class="umv">neto por unidad · mín. ${p.u}</span></div>
     <div class="dsc"><span class="lbl">Desc. %</span><span style="display:flex;align-items:center;gap:4px"><input class="num" data-d type="text" inputmode="decimal" value="${String(L.d).replace(".",",")}" aria-label="Descuento % de ${esc(p.d)}"><span>%</span></span></div>
     <div class="qty"><button type="button" data-m aria-label="Restar ${p.u}">−</button><input class="num" data-q type="number" inputmode="numeric" min="0" step="${p.u}" value="${L.q||""}" placeholder="0" aria-label="Cantidad de ${esc(p.d)}, múltiplos de ${p.u}"><button type="button" data-p aria-label="Sumar ${p.u}">+</button></div>
@@ -7198,7 +7198,7 @@ function confirmarNota() {
   x.onclick = () => cerrarModal(); card.insertBefore(x, card.firstChild); })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261122201529";
+const HWF_VER = "20261122202347";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
