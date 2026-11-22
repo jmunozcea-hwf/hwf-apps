@@ -5278,7 +5278,7 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261122215746";
+const HWF_VER = "20261122220143";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -9331,7 +9331,7 @@ window.hwfContCambio = function () { try { if (typeof praPintar === "function" &
      cierre contable (gasto/venta mediano del año) e impuesto a la renta (tasa editable). */
   const RP = [["Vendedores en terreno", 2, 1100000], ["Choferes", 2, 850000], ["Vendedoras de la tienda", 2, 700000], ["Administración", 1, 950000]];
   const remL = () => Array.isArray(E.rem) && E.rem.length ? E.rem : RP, remMes = () => remL().reduce((t, r) => t + (+r[1] || 0) * (+r[2] || 0), 0);
-  const tasaImp = () => E.imp === undefined || E.imp === "" || isNaN(+E.imp) ? 25 : +E.imp;
+  const tasaImp = () => E.imp === undefined || E.imp === "" || isNaN(+E.imp) ? (E.anio >= 2029 ? 23 : E.anio === 2028 ? 15 : E.anio >= 2025 ? 12.5 : 25) : +E.imp;   /* Pro Pyme General 14 D N°3: 12,5 % años comerciales 2025–2027, 15 % en 2028 (Ley 21.755, Circular SII 53/2025); 23 % desde 2029 (Ley 21.850) */
   const GRP = [[/ARRIENDO|COMUNES|ELECTRIC|AGUA POT|\bGAS\b|PATENTE|CONTRIBUC|ASEO|VIGILANC/, "Local: arriendo, servicios básicos y patentes"], [/COMBUST|FLETE|PEAJE|MANTENC|REPARAC|REPUESTO|VEHIC|SEGURO|ESTACIONAM/, "Vehículos, despacho y mantención"],
     [/HONORARIO|TERCERO|ASESOR|CONTAB|LEGAL/, "Honorarios y servicios de terceros"], [/PUBLICIDAD|MARKETING|PROPAGANDA|PROMOC/, "Marketing y publicidad"], [/INTERNET|TELEFON|CELULAR|SOFTWARE|SISTEMA/, "Comunicaciones y sistemas"]];
   const clase = (k, n) => { const N = String(n || "").toUpperCase(); if (k[0] === "3") return k.startsWith("31") ? "ing" : "noi"; if (k[0] < "4") return "";
@@ -9437,7 +9437,7 @@ window.hwfContCambio = function () { try { if (typeof praPintar === "function" &
     if (q.length) out.push(`Revisión contable sugerida: ${q.join("; ")}.`);
     simTxt(X).forEach(t => out.push(t));
     if (K.S) out.push(`En conjunto, los cambios simulados llevan la venta de ${mm(T.ing)} a ${mm(K.S.ing)}, el EBITDA de ${mm(T.ebitda)} a ${mm(K.S.ebitda)} (${sg(K.S.ebitda - T.ebitda)}) y el resultado neto de ${mm(T.neto)} a ${mm(K.S.neto)}.`);
-    out.push(`Impuesto a la renta: ${K.impReal ? "según la contabilidad" : `estimado con tasa ${String(tasaImp()).replace(".", ",")} % sobre el resultado antes de impuesto (régimen general Pro Pyme; confírmalo con el contador, la tasa se cambia en «Supuestos»)`}. Depreciación registrada: ${mm(T.dep)}.`);
+    out.push(`Impuesto a la renta: ${K.impReal ? "según la contabilidad" : `estimado con tasa ${String(tasaImp()).replace(".", ",")} % sobre el resultado antes de impuesto (Régimen Pro Pyme General, art. 14 D N° 3: 12,5 % en los años comerciales 2025–2027 y 15 % en 2028 según la Ley 21.755 y la Circular SII N° 53/2025; HWF vende menos de 50.000 UF al año, por lo que su PPM es 0,125 % de las ventas)`}. Depreciación registrada: ${mm(T.dep)}.`);
     return out;
   }
   function explicar(X) { if (X.K && !segm()) return explicarK(X);
@@ -9593,7 +9593,7 @@ window.hwfContCambio = function () { try { if (typeof praPintar === "function" &
     hoja("Detalle", detalle(X), [44, 10, 14, 14, 14, 10, 10, 14, 14, 14]);
     if (X.SIM.some(s => !s.nulo)) hoja("Simulación", simTabla(X).concat([[], ["Sensibilidad de unidades al precio", +E.ela || 0]]), [10, 40, 10, 14, 12, 12, 11, 12, 14, 14, 14]);
     if (X.K) hoja("Supuestos", [["Supuesto", "Valor", "Detalle"]].concat(X.K.remReal ? [["Remuneraciones", "contabilidad", ""]] : remL().map(r => ["Remuneraciones · " + r[0], (+r[1] || 0) * (+r[2] || 0), r[1] + " × $" + nu(+r[2] || 0) + " al mes (costo empresa)"]),
-      [["Impuesto a la renta %", X.K.impReal ? "contabilidad" : tasaImp(), "régimen general Pro Pyme; confirmar con el contador"], ["Meses sin cierre contable", E.cmp !== false ? "completados" : "sin completar", "relación gasto/venta mediana " + p1(X.K.med * 100)]]), [44, 16, 60]);
+      [["Impuesto a la renta %", X.K.impReal ? "contabilidad" : tasaImp(), "Pro Pyme General 14 D N°3: 12,5 % (2025–2027) y 15 % (2028), Ley 21.755 / Circular SII 53-2025"], ["Meses sin cierre contable", E.cmp !== false ? "completados" : "sin completar", "relación gasto/venta mediana " + p1(X.K.med * 100)]]), [44, 16, 60]);
     else hoja("Supuestos de gastos", [["Gasto de operación (estimado)", "Negocio", "% de la venta", "Variable con la venta"]].concat(GS.map(g => [g[1], g[2] === "d" ? "Distribuidora" : "Tienda", gp(g[0]), g[4] ? "sí" : "no"])).concat([[], ["Referencias del rubro: distribuidora de alimento para mascotas 14–18 % de la venta; tienda de mascotas 18–24 %. META no trae gastos reales."]]), [52, 16, 14, 20]);
     hoja("Explicación", explicar(X).map(t => [t]), [140]);
     XLSX.writeFile(wb, nombre() + ".xlsx"); }
