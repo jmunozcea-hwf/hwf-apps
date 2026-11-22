@@ -5277,7 +5277,7 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261122195559";
+const HWF_VER = "20261122200035";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -9254,7 +9254,7 @@ window.hwfContCambio = function () { try { if (typeof praPintar === "function" &
   function pintar() { const box = document.getElementById("masBody"); if (!box || (typeof vistaMas !== "undefined" && vistaMas !== "metricas")) return;
     const D = DAT && DAT.ok ? DAT : null, W = D ? D.web : null, B = D ? D.b2b : null, PD = D ? D.porDia : [], mx = Math.max(1, ...PD.map(x => x[1] + x[2]));
     box.innerHTML = `<div class="card"><h2>Métricas web <span class="muted">hwf.cl y Acceso Clientes · últimos ${DIAS} días</span></h2>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:6px"><span class="mw-sel" role="group" aria-label="Período">${[7, 30, 90, 365].map(d => `<button type="button" data-dias="${d}" aria-pressed="${d === DIAS}">${d === 365 ? "1 año" : d + " días"}</button>`).join("")}</span><button type="button" class="btn" id="mwAct">↻ Actualizar</button></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:6px"><span class="mw-sel" role="group" aria-label="Período">${[7, 30, 90, 365].map(d => `<button type="button" data-dias="${d}" aria-pressed="${d === DIAS}">${d === 365 ? "1 año" : d + " días"}</button>`).join("")}</span><button type="button" class="btn" id="mwAct">↻ Actualizar</button>${D ? '<button type="button" class="btn" id="mwPdf">📄 Reporte PDF</button><button type="button" class="btn" id="mwXls">📊 Excel</button><button type="button" class="btn" id="mwEnv">✉️ Enviar</button>' : ""}</div>
       ${EST ? `<p class="muted" style="margin:8px 0 0">${esc(EST)}</p>` : ""}
       ${D ? `<div class="mw-k"><div>Visitas hwf.cl<b>${nf(W.visitas)}</b>${nf(W.visitantes)} visitantes</div><div>Visitas Acceso Clientes<b>${nf(B.visitas)}</b>${nf(B.visitantes)} visitantes</div>
         <div>Cuentas de clientes<b>${nf(B.cuentas)}</b>${(B.estados || []).map(([k, v]) => nf(v) + " " + esc(k)).join(" · ") || "—"}</div><div>Pedidos por el portal<b>${nf(B.pedidos)}</b>${mm(B.neto)} neto en el período</div></div>
@@ -9265,7 +9265,32 @@ window.hwfContCambio = function () { try { if (typeof praPintar === "function" &
         <div class="card"><h2>De dónde llegan <span class="muted">hwf.cl</span></h2>${lista(W.origen, W.visitas)}<h3 style="margin:12px 0 0;font-size:.9rem">Dispositivo</h3>${lista(W.disp, W.visitas)}</div>
         <div class="card"><h2>Acceso Clientes <span class="muted">de dónde llegan</span></h2>${lista(B.origen, B.visitas)}<h3 style="margin:12px 0 0;font-size:.9rem">Dispositivo</h3>${lista(B.disp, B.visitas)}</div></div>` : ""}`;
     box.querySelectorAll("[data-dias]").forEach(b => b.onclick = () => { DIAS = Number(b.dataset.dias); cargar(); });
-    const a = document.getElementById("mwAct"); if (a) a.onclick = cargar; }
+    const a = document.getElementById("mwAct"); if (a) a.onclick = cargar;
+    const q = id => document.getElementById(id); if (q("mwPdf")) { q("mwPdf").onclick = () => pdf("pdf"); q("mwEnv").onclick = () => pdf("enviar"); q("mwXls").onclick = excel; } }
+  /* reporte (22-11-2026): PDF con el formato de los informes HWF y Excel con una hoja por tabla */
+  const tablas = D => [["Resumen", [["Indicador", "hwf.cl", "Acceso Clientes"], ["Visitas", D.web.visitas, D.b2b.visitas], ["Visitantes (navegadores distintos por día)", D.web.visitantes, D.b2b.visitantes],
+      ["Cuentas de clientes", "", D.b2b.cuentas], ...(D.b2b.estados || []).map(([k, v]) => ["  · " + k, "", v]), ["Pedidos por el portal (período)", "", D.b2b.pedidos], ["Monto neto de esos pedidos", "", Math.round(D.b2b.neto || 0)]]],
+    ["Por día", [["Día", "hwf.cl", "Acceso Clientes", "Visitantes nuevos"]].concat(D.porDia || [])],
+    ["Páginas", [["Página (hwf.cl)", "Visitas"]].concat(D.web.paginas || [])],
+    ["Origen", [["De dónde llegan (hwf.cl)", "Visitas"]].concat(D.web.origen || []).concat([[], ["De dónde llegan (Acceso Clientes)", "Visitas"]]).concat(D.b2b.origen || [])],
+    ["Dispositivo", [["Dispositivo", "hwf.cl", "Acceso Clientes"]].concat(["celular", "computador"].map(k => [k, ((D.web.disp || []).find(x => x[0] === k) || [0, 0])[1], ((D.b2b.disp || []).find(x => x[0] === k) || [0, 0])[1]]))]];
+  const nombreRep = () => `Métricas web HWF ${DAT.desde || ""} a ${new Date().toISOString().slice(0, 10)}`;
+  function excel() { if (!DAT || !DAT.ok) return; const T = tablas(DAT), n = nombreRep();
+    try { if (window.XLSX && XLSX.utils && XLSX.writeFile) { const wb = XLSX.utils.book_new(); T.forEach(([h, f]) => XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(f), h)); XLSX.writeFile(wb, n + ".xlsx"); return; } } catch (e) {}
+    const f = []; T.forEach(([h, l], i) => { if (i) f.push([]); f.push([h.toUpperCase()]); l.forEach(r => f.push(r)); });
+    const t = "\ufeff" + f.map(r => r.map(x => { const s = String(x == null ? "" : x); return /[;"\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; }).join(";")).join("\r\n");
+    const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([t], { type: "text/csv;charset=utf-8" })); a.download = n + ".csv"; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); }
+  function pdf(modo) { const K = window.hwfPdfKit; if (!K || !DAT || !DAT.ok) { try { toast("El generador de PDF no está disponible en esta app."); } catch (e) {} return; }
+    const D = DAT, d = K.Pdf(), M = K.M, W = d.W - 2 * M, PIE = "HWF · Métricas web y portal"; K.cabecera(d, "Métricas web y portal", "hwf.cl y Acceso Clientes", "Últimos " + DIAS + " días" + (D.desde ? " · desde " + D.desde.split("-").reverse().join("-") : "")); let y = d.y;
+    const salto = h => { if (y + h > d.H - 60) { K.pie(d, PIE); d.pagina(); K.cabecera(d, "Métricas web y portal", "", ""); y = d.y; } };
+    const ks = [["Visitas hwf.cl", nf(D.web.visitas), nf(D.web.visitantes) + " visitantes"], ["Visitas Acceso Clientes", nf(D.b2b.visitas), nf(D.b2b.visitantes) + " visitantes"], ["Cuentas de clientes", nf(D.b2b.cuentas), (D.b2b.estados || []).map(([k, v]) => v + " " + k).join(" · ")], ["Pedidos por el portal", nf(D.b2b.pedidos), mm(D.b2b.neto) + " neto"]], kw = (W - 24) / 4;
+    ks.forEach(([l, v, s], i) => { const x = M + i * (kw + 8); d.rect(x, y, kw, 50, K.SU); d.texto(x + 7, y + 12, d.corta(l.toUpperCase(), kw - 12, 6.5, 1), { sz: 6.5, b: 1, c: K.GR }); d.texto(x + 7, y + 30, v, { sz: 14, b: 1 }); d.texto(x + 7, y + 43, d.corta(s, kw - 12, 7), { sz: 7, c: K.GR }); }); y += 64;
+    tablas(D).slice(1).forEach(([tit, f]) => { salto(50); d.texto(M, y + 4, tit, { sz: 12, b: 1, c: K.AZ }); y += 14; const n = f[0].length, w1 = W * (n > 2 ? 0.46 : 0.7), wc = (W - w1) / Math.max(1, n - 1);
+      f.forEach((r, i) => { if (!r.length) { y += 6; return; } salto(14); const enc = i === 0 || (r[1] === "Visitas" && typeof r[1] === "string"); if (enc) d.rect(M, y, W, 15, K.AZ); else if (i % 2) d.rect(M, y, W, 14, K.SU);
+        d.texto(M + 4, y + 10, d.corta(String(r[0]), w1 - 6, 8, enc), { sz: 8, b: enc, c: enc ? [255, 255, 255] : undefined }); r.slice(1).forEach((v, k) => d.texto(M + w1 + wc * (k + 1) - 4, y + 10, typeof v === "number" ? nf(v) : String(v), { sz: 8, b: enc, al: "r", c: enc ? [255, 255, 255] : undefined })); y += enc ? 15 : 14; }); y += 10; });
+    salto(30); d.texto(M, y + 6, d.corta("Se cuenta una visita por página y sesión del navegador; visitantes = navegadores distintos por día. Sin cookies ni datos personales.", W, 7.5), { sz: 7.5, c: K.GR });
+    K.pie(d, PIE); const P = { bytes: d.bytes(), paginas: d.paginas(), nombre: nombreRep() + ".pdf", msg: "Métricas de hwf.cl y Acceso Clientes · últimos " + DIAS + " días" };
+    if (modo === "pdf") K.bajar(P); else { let puede = false; try { puede = !!(navigator.canShare && navigator.canShare({ files: [new File([P.bytes], P.nombre, { type: "application/pdf" })] })); } catch (e) {} if (puede) K.enviar(P); else K.bajar(P); } }
   async function cargar() { EST = "Consultando…"; pintar(); const r = await llamar({ accion: "webMetricas", dias: DIAS }); DAT = r; EST = r && r.ok ? "" : ((r && r.error) || "No se pudo consultar."); pintar(); }
   const _pm = pintarMas; pintarMas = function () { if (typeof vistaMas !== "undefined" && vistaMas === "metricas") { pintar(); if (!DAT) cargar(); return; } return _pm.apply(this, arguments); };
 })();
