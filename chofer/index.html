@@ -229,7 +229,7 @@ function arrancar() { const P = perfil(); if (!P || !cfg()) return puerta(); if 
 if (!cfg() || !perfil()) puerta(); else arrancar();
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 </script><script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261123004810";
+const HWF_VER = "20261123005248";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -503,6 +503,104 @@ const HWF_VER = "20261123004810";
   }
   aplicar(); setTimeout(aplicar, 500); setTimeout(aplicar, 1600);
   let pend = false; new MutationObserver(() => { if (pend) return; pend = true; setTimeout(() => { pend = false; aplicar(); }, 60); }).observe(document.body, { childList: true, subtree: true });
+})();
+</script>
+<style>/* patch_choferservicios */
+.sv-a{display:grid;gap:6px;margin:0 0 10px}.sv-a div{display:flex;gap:8px;align-items:flex-start;border-radius:12px;padding:9px 11px;font-size:.86rem;font-weight:600}
+.sv-a .r{background:#FDE7E4;color:#8A1C12}.sv-a .w{background:#FFF1DC;color:#7A4A00}.sv-a .i{background:#E6F0F7;color:#0B3146}.sv-a .o{background:#E3F4EA;color:#14593A}
+.sv-b{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.sv-b button{border:0;border-radius:14px;padding:10px 4px 8px;font:inherit;font-size:.74rem;font-weight:800;display:grid;justify-items:center;gap:3px;cursor:pointer;color:#0F1E29}
+.sv-b button span{font-size:1.45rem;line-height:1}.sv-b [data-t="comer"]{background:#FFF1DC}.sv-b [data-t="comb"]{background:#E6F0F7}.sv-b [data-t="vulc"]{background:#EEE8F8}.sv-b [data-t="taller"]{background:#E3F4EA}
+.sv-l{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}.sv-l:last-child{border-bottom:0}.sv-l small{display:block;color:var(--muted);font-size:.78rem}
+.sv-l .g{display:flex;gap:4px}.sv-l .btn{min-height:38px;padding:6px 10px}
+.sv-m{display:flex;gap:6px;overflow-x:auto;padding:2px 2px 8px;scrollbar-width:none}.sv-m::-webkit-scrollbar{display:none}
+.sv-m button{flex:none;border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:7px 12px;font:inherit;font-size:.8rem;font-weight:800;cursor:pointer;color:#0F1E29}
+.sv-m button[aria-pressed="true"]{background:#0B3146;border-color:#0B3146;color:#fff}
+.sv-pin{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-size:16px;background:#fff;border:2px solid var(--c,#0B3146);box-shadow:0 2px 6px rgba(0,0,0,.3)}
+</style>
+<script>/* patch_choferservicios: servicios y alertas en la ruta */
+(function () {
+  if (typeof pintarRuta !== "function" || typeof misParadas !== "function") return;
+  const PO = () => (typeof POS !== "undefined" ? POS : null);
+  const T = { comer: ["🍽", "Comer", "#C2621A"], comb: ["⛽", "Combustible", "#2563A8"], vulc: ["🛞", "Vulcanización", "#7247B8"], taller: ["🔧", "Taller mecánico", "#1C7A4E"],
+    radar: ["📷", "Radar de velocidad", "#B42318"], peaje: ["🛣", "Peaje", "#B26B00"], tren: ["🚆", "Paso a nivel", "#B42318"] };
+  const km = (a, b) => { const R = 6371, r = Math.PI / 180, dLa = (b.lat - a.lat) * r, dLo = (b.lng - a.lng) * r, x = Math.sin(dLa / 2) ** 2 + Math.cos(a.lat * r) * Math.cos(b.lat * r) * Math.sin(dLo / 2) ** 2; return 2 * R * Math.asin(Math.sqrt(x)); };
+  const kmTxt = d => d < 1 ? Math.round(d * 1000) + " m" : d.toFixed(1).replace(".", ",") + " km";
+  const lsG = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } }, lsS = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
+  /* puntos de la ruta (bodega, paradas y posición actual) */
+  function ruta() { const X = misParadas(), p = [], o = X.origen; if (o && o.lat) p.push({ lat: +o.lat, lng: +o.lng }); X.paradas.forEach(s => { if (s.lat) p.push({ lat: +s.lat, lng: +s.lng }); }); if (o && o.lat && p.length > 1) p.push({ lat: +o.lat, lng: +o.lng }); return p; }
+  function caja() { const p = ruta().slice(); if (PO()) p.push(POS); if (!p.length) p.push({ lat: -34.17, lng: -70.74 });
+    let s = Math.min(...p.map(x => x.lat)) - .03, w = Math.min(...p.map(x => x.lng)) - .03, n = Math.max(...p.map(x => x.lat)) + .03, e = Math.max(...p.map(x => x.lng)) + .03;
+    if (n - s > 1.2 || e - w > 1.2) { const c = PO() || p[0]; s = c.lat - .15; n = c.lat + .15; w = c.lng - .15; e = c.lng + .15; }   /* ruta muy larga: alrededor de ti */
+    return [s, w, n, e].map(v => v.toFixed(2)); }
+  function tipo(t) { if (t.highway === "speed_camera") return "radar"; if (t.barrier === "toll_booth") return "peaje"; if (t.railway === "level_crossing") return "tren";
+    if (t.amenity === "fuel") return "comb"; if (t.shop === "tyres" || t.craft === "tyres" || /vulcani/i.test(t.name || "")) return "vulc"; if (t.shop === "car_repair" || t.craft === "car_repair") return "taller";
+    if (/^(restaurant|fast_food|cafe|food_court)$/.test(t.amenity || "")) return "comer"; return ""; }
+  let LUG = null, CARGANDO = null;
+  async function lugares(forzar) { const b = caja(), k = "hwfSvc", c = lsG(k, null);
+    if (!forzar && c && c.b === b.join() && Date.now() - c.t < 3 * 864e5) return (LUG = c.l);
+    if (CARGANDO) return CARGANDO; if (!navigator.onLine) return (LUG = c ? c.l : []);
+    const bb = "(" + b.join(",") + ")", q = `[out:json][timeout:25];(nwr["amenity"~"^(restaurant|fast_food|cafe|food_court|fuel)$"]${bb};nwr["shop"~"^(tyres|car_repair)$"]${bb};nwr["craft"~"^(tyres|car_repair)$"]${bb};nwr["name"~"vulcaniz",i]${bb};node["highway"="speed_camera"]${bb};node["barrier"="toll_booth"]${bb};node["railway"="level_crossing"]${bb};);out center tags 2500;`;
+    CARGANDO = (async () => { for (const u of ["https://overpass-api.de/api/interpreter", "https://overpass.kumi.systems/api/interpreter"]) {
+      try { const r = await fetch(u, { method: "POST", body: "data=" + encodeURIComponent(q), headers: { "content-type": "application/x-www-form-urlencoded" } }); if (!r.ok) continue; const j = await r.json(), vis = {};
+        const l = (j.elements || []).map(e => { const t = e.tags || {}, ti = tipo(t), lat = e.lat || (e.center && e.center.lat), lng = e.lon || (e.center && e.center.lon); if (!ti || !lat || vis[e.type + e.id]) return null; vis[e.type + e.id] = 1;
+          return { t: ti, lat, lng, n: t.name || t.brand || T[ti][1], h: t.opening_hours || "", tel: t.phone || t["contact:phone"] || "", d: [t["addr:street"], t["addr:housenumber"]].filter(Boolean).join(" ") }; }).filter(Boolean);
+        lsS(k, { b: b.join(), t: Date.now(), l }); return (LUG = l); } catch (e) {} }
+      return (LUG = c ? c.l : []); })().finally(() => { CARGANDO = null; });
+    return CARGANDO; }
+  /* distancia de un punto a la ruta (tramos rectos entre paradas) */
+  function aRuta(p, R) { if (R.length < 2) return R.length ? km(p, R[0]) : 1e9; let m = 1e9; for (let i = 1; i < R.length; i++) { const a = R[i - 1], b = R[i], k = Math.cos(a.lat * Math.PI / 180);
+      const ax = a.lng * k, ay = a.lat, bx = b.lng * k, by = b.lat, px = p.lng * k, py = p.lat, dx = bx - ax, dy = by - ay, L2 = dx * dx + dy * dy, u = L2 ? Math.max(0, Math.min(1, ((px - ax) * dx + (py - ay) * dy) / L2)) : 0;
+      m = Math.min(m, km(p, { lat: ay + u * dy, lng: (ax + u * dx) / k })); } return m; }
+  /* clima del día (Open-Meteo) */
+  async function clima() { const c = lsG("hwfClima", null), R = ruta(), p = PO() || R[1] || R[0]; if (!p) return null; const hoyS = new Date().toISOString().slice(0, 10);
+    if (c && c.f === hoyS && Date.now() - c.t < 3 * 36e5) return c.w; if (!navigator.onLine) return c && c.f === hoyS ? c.w : null;
+    try { const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${p.lat.toFixed(3)}&longitude=${p.lng.toFixed(3)}&daily=precipitation_probability_max,precipitation_sum,wind_gusts_10m_max,temperature_2m_max,temperature_2m_min&timezone=America%2FSantiago&forecast_days=1`);
+      const j = await r.json(), d = j.daily || {}, w = { lluv: (d.precipitation_probability_max || [0])[0], mm: (d.precipitation_sum || [0])[0], viento: (d.wind_gusts_10m_max || [0])[0], max: (d.temperature_2m_max || [0])[0], min: (d.temperature_2m_min || [0])[0] };
+      lsS("hwfClima", { f: hoyS, t: Date.now(), w }); return w; } catch (e) { return c ? c.w : null; } }
+  function alertas(L, W) { const A = [], R = ruta(), cerca = t => L.filter(x => x.t === t && aRuta(x, R) < .3).length;
+    if (W) { if (W.lluv >= 60 || W.mm >= 3) A.push(["r", "🌧", `Lluvia probable hoy (${W.lluv}%${W.mm ? ", " + String(W.mm).replace(".", ",") + " mm" : ""}): maneja con más distancia y protege la carga.`]);
+      if (W.viento >= 50) A.push(["w", "💨", `Ráfagas de viento de hasta ${Math.round(W.viento)} km/h.`]); if (W.max >= 32) A.push(["w", "🌡", `Calor: máxima de ${Math.round(W.max)}°. Lleva agua y no dejes la carga al sol.`]);
+      if (W.min <= 1) A.push(["w", "❄", `Mínima de ${Math.round(W.min)}°: posible escarcha temprano.`]); }
+    const ra = cerca("radar"), pe = cerca("peaje"), tr = cerca("tren");
+    if (ra) A.push(["r", "📷", `${ra} radar${ra > 1 ? "es" : ""} de velocidad en la ruta: respeta los límites.`]); if (pe) A.push(["w", "🛣", `${pe} peaje${pe > 1 ? "s" : ""} en la ruta: ten el TAG o efectivo a mano.`]);
+    if (tr) A.push(["w", "🚆", `${tr} paso${tr > 1 ? "s" : ""} a nivel en la ruta: detente y mira.`]);
+    const h = new Date().getHours(); if (h >= 12 && h < 15) A.push(["i", "🍽", "Hora de almuerzo: toca «Comer» para ver lugares cerca."]);
+    if (!A.length) A.push(["o", "✅", W ? "Sin alertas para la ruta de hoy." : "Sin alertas por ahora."]); return A; }
+  const navU = p => `https://www.google.com/maps/dir/?api=1${PO() ? `&origin=${POS.lat},${POS.lng}` : ""}&destination=${p.lat},${p.lng}&travelmode=driving`;
+  function lista(t) { const ref = () => { if (PO()) return [POS, "de ti"]; const X = misParadas(), E = estados(), s = X.paradas.find(p => !E[p.id]); return s && s.lat ? [{ lat: +s.lat, lng: +s.lng }, "de la siguiente parada"] : [ruta()[0] || { lat: -34.17, lng: -70.74 }, "de la bodega"]; };
+    const o = document.createElement("div"); o.className = "ov"; document.body.appendChild(o);
+    const pinta = () => { const [r, txt] = ref(), L = (LUG || []).filter(x => x.t === t).map(x => Object.assign({ k: km(r, x) }, x)).sort((a, b) => a.k - b.k).slice(0, 12);
+      o.innerHTML = `<div class="in"><div class="card"><h2>${T[t][0]} ${T[t][1]} <small class="muted">más cercanos ${txt}</small></h2>
+        ${L.length ? L.map(x => `<div class="sv-l"><div><b>${esc(x.n)}</b><small>${kmTxt(x.k)}${x.d ? " · " + esc(x.d) : ""}${x.h ? " · " + esc(x.h) : ""}</small></div><div class="g"><a class="btn pri" target="_blank" rel="noopener" href="${esc(navU(x))}">🧭</a>${x.tel ? `<a class="btn" href="tel:${esc(String(x.tel).replace(/[^\d+]/g, ""))}">📞</a>` : ""}</div></div>`).join("")
+          : `<p class="muted">${CARGANDO ? "Buscando lugares…" : navigator.onLine ? "No encontré lugares de este tipo cerca de la ruta." : "Sin señal: abre esta lista con internet una vez y quedará guardada."}</p>`}
+        <p class="nota">Datos de OpenStreetMap; los horarios pueden no estar al día.</p>
+        <div class="g2" style="margin-top:8px"><a class="btn" target="_blank" rel="noopener" href="https://www.google.com/maps/search/${encodeURIComponent({ comer: "restaurantes", comb: "bencinera", vulc: "vulcanización", taller: "taller mecánico" }[t])}/@${r.lat},${r.lng},14z">Buscar en Google Maps</a><button type="button" class="btn pri" id="svX">Cerrar</button></div></div></div>`;
+      o.querySelector("#svX").onclick = () => o.remove(); };
+    pinta(); if (!LUG || CARGANDO) lugares().then(() => { if (o.isConnected) pinta(); }); }
+  /* tarjeta en la pantalla Ruta */
+  async function tarjeta() { const s = document.getElementById("s-ruta"); if (!s || s.hidden && SEC !== "ruta") return; let c = document.getElementById("svCard");
+    if (!c) { c = document.createElement("div"); c.className = "card"; c.id = "svCard"; const nx = s.querySelector(".nx"); if (nx) nx.after(c); else s.prepend(c); }
+    const pin = (A) => { c.innerHTML = `<h2>En el camino</h2><div class="sv-a">${A.map(a => `<div class="${a[0]}"><span>${a[1]}</span><span>${esc(a[2])}</span></div>`).join("")}</div>
+      <div class="sv-b">${["comer", "comb", "vulc", "taller"].map(t => `<button type="button" data-t="${t}"><span>${T[t][0]}</span>${t === "taller" ? "Taller" : t === "comb" ? "Bencina" : T[t][1]}</button>`).join("")}</div>`;
+      c.querySelectorAll("[data-t]").forEach(b => b.onclick = () => lista(b.dataset.t)); };
+    pin(alertas(LUG || [], lsG("hwfClima", {}).w || null)); const [L, W] = await Promise.all([lugares(), clima()]); if (c.isConnected) pin(alertas(L || [], W)); }
+  const _pr = pintarRuta; pintarRuta = function () { const r = _pr.apply(this, arguments); try { tarjeta(); } catch (e) {} return r; };
+  /* mapa: capas por tipo */
+  const ON = lsG("hwfSvcCapas", { alertas: true, comer: false, comb: true, vulc: false, taller: false }); let capa = null;
+  function capas() { if (!window.L || typeof mapa === "undefined" || !mapa) return; if (capa) capa.remove(); capa = L.layerGroup().addTo(mapa);
+    (LUG || []).forEach(x => { const al = x.t === "radar" || x.t === "peaje" || x.t === "tren"; if (!(al ? ON.alertas : ON[x.t])) return;
+      L.marker([x.lat, x.lng], { icon: L.divIcon({ className: "", html: `<div class="sv-pin" style="--c:${T[x.t][2]}">${T[x.t][0]}</div>`, iconSize: [30, 30], iconAnchor: [15, 15] }) }).addTo(capa)
+        .bindPopup(`<b>${esc(x.n)}</b><br>${T[x.t][1]}${x.h ? "<br>" + esc(x.h) : ""}<br><a target="_blank" rel="noopener" href="${esc(navU(x))}">🧭 Navegar</a>`); }); }
+  const _pm = pintarMapa; pintarMapa = function () { const r = _pm.apply(this, arguments), sec = document.getElementById("s-mapa"); let bar = document.getElementById("svBar");
+    if (!bar) { bar = document.createElement("div"); bar.className = "sv-m"; bar.id = "svBar"; sec.prepend(bar);
+      bar.onclick = e => { const b = e.target.closest("[data-c]"); if (!b) return; ON[b.dataset.c] = !ON[b.dataset.c]; lsS("hwfSvcCapas", ON); b.setAttribute("aria-pressed", ON[b.dataset.c]); capas(); }; }
+    bar.innerHTML = [["alertas", "⚠ Alertas"], ["comer", "🍽 Comer"], ["comb", "⛽ Bencina"], ["vulc", "🛞 Vulcanización"], ["taller", "🔧 Talleres"]].map(([k, n]) => `<button type="button" data-c="${k}" aria-pressed="${!!ON[k]}">${n}</button>`).join("");
+    setTimeout(capas, 200); lugares().then(() => setTimeout(capas, 0)); return r; };
+  /* aviso al acercarse a radar, peaje o paso a nivel */
+  const avisados = {}; setInterval(() => { if (!PO() || !LUG || (POS.vel || 0) < 3) return;
+    LUG.forEach(x => { if (!(x.t === "radar" || x.t === "peaje" || x.t === "tren")) return; const id = x.t + x.lat + x.lng, d = km(POS, x); if (d > .5) { if (d > 2) delete avisados[id]; return; }
+      if (avisados[id]) return; avisados[id] = 1; toast(`${T[x.t][0]} ${T[x.t][1]} a ${kmTxt(d)}`); try { navigator.vibrate && navigator.vibrate([200, 100, 200]); } catch (e) {} }); }, 5000);
+  if (SEC === "ruta") tarjeta();
 })();
 </script>
 </body></html>
