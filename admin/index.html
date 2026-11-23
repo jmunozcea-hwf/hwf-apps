@@ -2682,13 +2682,15 @@ function prGuardarAdm(id, cambio) {
   const c = store.get("adm-prosp-cola", {}); c[id] = Object.assign(c[id] || {}, cambio); store.set("adm-prosp-cola", c);
   pintarEmbudo(); prSyncAdm().then(() => pintarEmbudo());
 }
+/* patch_prospactivos */ function prEsActivo(o) { if (!o || o.etapa === "Descartado") return false; if (o.etapa === "7. Cliente activo") return true;
+  try { const c = typeof prCliDe === "function" ? prCliDe(o) : null; if (c && c.ultima_compra) return (Date.now() - new Date(String(c.ultima_compra).slice(0, 10) + "T12:00:00")) / 864e5 <= 180; } catch (e) {} return false; }
 function pintarEmbudo() {
   const todos = prTodos(), hoy = prHoyISO(), vends = [...new Set(todos.map(o => o.vendedor))].filter(Boolean).sort(), regs = [...new Set(todos.map(o => o.region))].filter(Boolean).sort();
   const base = todos.filter(o => (!prVend || o.vendedor === prVend) && (!prReg || o.region === prReg)), cnt = prConteo(base), max = Math.max(1, ...cnt);
   const act = base.filter(o => o.etapa !== "Descartado"), conNota = act.filter(o => prIdx(o.etapa) >= 3).length, ganados = act.filter(o => prIdx(o.etapa) >= 4).length;
   const atras = act.filter(o => o.proximo_contacto && o.proximo_contacto < hoy).length, hoyN = act.filter(o => o.proximo_contacto === hoy).length;
   const q = prN(prQ), s = store.get("adm-prosp", null), pend = Object.keys(store.get("adm-prosp-cola", {})).length;
-  let l = base.filter(o => (prFiltro === -1 ? o.etapa !== "Descartado" : prFiltro === -2 ? o.proximo_contacto && o.proximo_contacto <= hoy && o.etapa !== "Descartado" : prIdx(o.etapa) === prFiltro) && (!q || prN([o.nombre, o.comuna, o.segmento, o.vendedor].join(" ")).includes(q)));
+  let l = base.filter(o => (prFiltro === 6 || q || !prEsActivo(o)) && (prFiltro === -1 ? o.etapa !== "Descartado" : prFiltro === -2 ? o.proximo_contacto && o.proximo_contacto <= hoy && o.etapa !== "Descartado" : prIdx(o.etapa) === prFiltro) && (!q || prN([o.nombre, o.comuna, o.segmento, o.vendedor].join(" ")).includes(q)));
   l.sort((a, b) => prIdx(b.etapa === "Descartado" ? "" : b.etapa) - prIdx(a.etapa === "Descartado" ? "" : a.etapa) || a.comuna.localeCompare(b.comuna, "es") || a.nombre.localeCompare(b.nombre, "es"));
   const tabla = (filas, clave) => `<div class="tbl"><table class="pr-tbl"><thead><tr><th>${clave}</th>${PR_CORTO.map(t => `<th class="n">${esc(t)}</th>`).join("")}<th class="n">Total</th></tr></thead><tbody>${filas.map(([n, ls]) => { const c = prConteo(ls);
     return `<tr><td>${esc(n)}</td>${c.map(x => `<td class="n">${x || "·"}</td>`).join("")}<td class="n"><b>${ls.length}</b></td></tr>`; }).join("")}</tbody></table></div>`;
@@ -5280,7 +5282,7 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261123010806";
+const HWF_VER = "20261123011439";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;

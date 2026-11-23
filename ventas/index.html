@@ -4243,13 +4243,15 @@ bE.onclick = () => setModo("embudo");
 const _abrirFichaPr = abrirFicha;
 abrirFicha = function (cod) { $("crmEmbudo").hidden = true; document.body.classList.remove("m-embudo"); $("mEmbudo").setAttribute("aria-selected", "false"); _abrirFichaPr(cod); };
 
+/* patch_prospactivos */ function prEsActivo(o) { if (!o || o.etapa === "Descartado") return false; if (o.etapa === "7. Cliente activo") return true;
+  try { const c = typeof prCliDe === "function" ? prCliDe(o) : null; if (c && c.ultima_compra) return (Date.now() - new Date(String(c.ultima_compra).slice(0, 10) + "T12:00:00")) / 864e5 <= 180; } catch (e) {} return false; }
 function pintarEmbudo() {
   const box = $("crmEmbudo"); if (!SES) return;
   const todos = (typeof prUnifV === "function" ? prUnifV(prMios()) : prMios()), vends = [...new Set(todos.map(o => o.vendedor))].filter(Boolean).sort(), verTodos = prSinCartera();
   const base = todos.filter(o => !prVend || o.vendedor === prVend), cnt = prConteo(base), max = Math.max(1, ...cnt), hoy = prHoyISO();
   const q = prN(prQ);
-  let l = base.filter(o => (prFiltro < 0 ? o.etapa !== "Descartado" : prIdx(o.etapa) === prFiltro) && prBusca(o, prQ) && prPasaF(o));   /* patch_prlibre */
-  if (prFiltro === -2) l = base.filter(o => o.proximo_contacto && o.proximo_contacto <= hoy && o.etapa !== "Descartado");
+  let l = base.filter(o => (prFiltro === 6 || prQ || !prEsActivo(o)) && (prFiltro < 0 ? o.etapa !== "Descartado" : prIdx(o.etapa) === prFiltro) && prBusca(o, prQ) && prPasaF(o));   /* patch_prlibre */
+  if (prFiltro === -2) l = base.filter(o => !prEsActivo(o) && o.proximo_contacto && o.proximo_contacto <= hoy && o.etapa !== "Descartado");
   l.sort((a, b) => { const va = a.proximo_contacto && a.proximo_contacto <= hoy ? 0 : 1, vb = b.proximo_contacto && b.proximo_contacto <= hoy ? 0 : 1;
     return va - vb || (a.proximo_contacto || "9") .localeCompare(b.proximo_contacto || "9") || prIdx(a.etapa) - prIdx(b.etapa) || a.comuna.localeCompare(b.comuna, "es") || a.nombre.localeCompare(b.nombre, "es"); });
   const vencen = base.filter(o => o.proximo_contacto && o.proximo_contacto <= hoy && o.etapa !== "Descartado").length;
@@ -7198,7 +7200,7 @@ function confirmarNota() {
   x.onclick = () => cerrarModal(); card.insertBefore(x, card.firstChild); })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261123010806";
+const HWF_VER = "20261123011439";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
