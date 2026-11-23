@@ -8964,7 +8964,7 @@ window.hwfContCambio = function () { try { if (typeof praPintar === "function" &
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261123014903";
+const HWF_VER = "20261123015117";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -9019,11 +9019,11 @@ const HWF_VER = "20261123014903";
 </style>
 <script>/* patch_metricasweb: visitas de hwf.cl y del portal */
 (function () {
-  /* 23-11-2026: también en la app Ventas, solo para Diego (o un vendedor con permiso de Admin) */
+  /* 23-11-2026: también en la app Ventas, solo para Diego y Jorge (o un vendedor con permiso de Admin) */
   const VEN = typeof setModo === "function" && typeof NAV_ORDEN !== "undefined" && !!document.getElementById("mInicio");
   if (!VEN && typeof pintarMas !== "function") return;
   try { if (typeof NAV_MNOM !== "undefined") NAV_MNOM.metricas = "Métricas web y B2B"; } catch (e) {}
-  const yoV = () => (typeof SES !== "undefined" && SES && SES.vendedor) || null, puedeV = () => { const v = yoV(); return !!v && (/^diego/i.test(String(v.nombre || "")) || !!v.admin); };
+  const yoV = () => (typeof SES !== "undefined" && SES && SES.vendedor) || null, puedeV = () => { const v = yoV(); return !!v && (/^(diego|jorge)/i.test(String(v.nombre || "")) || !!v.admin); };
   let VBOX = null, VTAB = null;
   let DAT = null, DIAS = 30, EST = "";
   const nf = n => Math.round(Number(n) || 0).toLocaleString("es-CL"), mm = n => { n = Number(n) || 0; return "$" + (n >= 1e6 ? (n / 1e6).toLocaleString("es-CL", { maximumFractionDigits: 1 }) + " MM" : Math.round(n).toLocaleString("es-CL")); };
