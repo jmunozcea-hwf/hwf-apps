@@ -5284,7 +5284,7 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261123013310";
+const HWF_VER = "20261123014108";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -8883,28 +8883,48 @@ window.hwfContCambio = function () { try { if (typeof praPintar === "function" &
   const lista = (L, tot) => L && L.length ? `<div class="mw-l">${L.map(([k, v]) => `<div class="mw-r"><span>${esc(k)}</span><b>${nf(v)}</b><i style="--p:${tot ? Math.round(v / tot * 100) : 0}%"></i></div>`).join("")}</div>` : '<p class="muted" style="margin:6px 0 0">Aún sin visitas.</p>';
   function pintar() { const box = document.getElementById("masBody"); if (!box || (typeof vistaMas !== "undefined" && vistaMas !== "metricas")) return;
     const D = DAT && DAT.ok ? DAT : null, W = D ? D.web : null, B = D ? D.b2b : null, PD = D ? D.porDia : [], mx = Math.max(1, ...PD.map(x => x[1] + x[2]));
-    box.innerHTML = `<div class="card"><h2>Métricas web <span class="muted">hwf.cl y Acceso Clientes · últimos ${DIAS} días</span></h2>
+    box.innerHTML = `<div class="card"><h2>Métricas web y B2B <span class="muted">hwf.cl y Acceso Clientes · últimos ${DIAS} días</span></h2>
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:6px"><span class="mw-sel" role="group" aria-label="Período">${[7, 30, 90, 365].map(d => `<button type="button" data-dias="${d}" aria-pressed="${d === DIAS}">${d === 365 ? "1 año" : d + " días"}</button>`).join("")}</span><button type="button" class="btn" id="mwAct">↻ Actualizar</button>${D ? '<button type="button" class="btn" id="mwPdf">📄 Reporte PDF</button><button type="button" class="btn" id="mwXls">📊 Excel</button><button type="button" class="btn" id="mwEnv">✉️ Enviar</button>' : ""}</div>
       ${EST ? `<p class="muted" style="margin:8px 0 0">${esc(EST)}</p>` : ""}
       ${D ? `<div class="mw-k"><div>Visitas hwf.cl<b>${nf(W.visitas)}</b>${nf(W.visitantes)} visitantes</div><div>Visitas Acceso Clientes<b>${nf(B.visitas)}</b>${nf(B.visitantes)} visitantes</div>
         <div>Cuentas de clientes<b>${nf(B.cuentas)}</b>${(B.estados || []).map(([k, v]) => nf(v) + " " + esc(k)).join(" · ") || "—"}</div><div>Pedidos por el portal<b>${nf(B.pedidos)}</b>${mm(B.neto)} neto en el período</div></div>
         <div class="mw-d" role="img" aria-label="Visitas por día">${PD.map(x => `<div title="${x[0]}: ${x[1]} web · ${x[2]} portal"><span class="w" style="height:${Math.round(x[1] / mx * 110)}px"></span><span class="b" style="height:${Math.round(x[2] / mx * 110)}px"></span></div>`).join("")}</div>
         <p class="muted" style="margin:4px 0 0;font-size:.76rem"><span style="color:#0B3146">■</span> hwf.cl &nbsp; <span style="color:#26A69A">■</span> Acceso Clientes · visitas por día</p>` : ""}
-      <p class="muted" style="margin:8px 0 0;font-size:.76rem">Se cuenta una visita por página y sesión del navegador; «visitantes» = navegadores distintos por día. Sin cookies ni datos personales. Empieza a contar desde que se sube a hwf.cl el paquete del 22-11-2026.</p></div>
+      <p class="muted" style="margin:8px 0 0;font-size:.76rem">Se cuenta una visita por página y sesión del navegador; «visitantes» = navegadores distintos por día. Sin datos personales. Desde el 23-11-2026, con las cookies de analítica aceptadas, se mide además la navegación (más abajo).</p></div>
       ${D ? `<div class="mw-g"><div class="card"><h2>Páginas más vistas <span class="muted">hwf.cl</span></h2>${lista(W.paginas, W.visitas)}</div>
         <div class="card"><h2>De dónde llegan <span class="muted">hwf.cl</span></h2>${lista(W.origen, W.visitas)}<h3 style="margin:12px 0 0;font-size:.9rem">Dispositivo</h3>${lista(W.disp, W.visitas)}</div>
         <div class="card"><h2>Acceso Clientes <span class="muted">de dónde llegan</span></h2>${lista(B.origen, B.visitas)}<h3 style="margin:12px 0 0;font-size:.9rem">Dispositivo</h3>${lista(B.disp, B.visitas)}</div>
         <div class="card"><h2>Por comuna <span class="muted">visitas de clientes con sesión en Acceso Clientes</span></h2>${lista(D.comunas, (D.comunas || []).reduce((t, x) => t + x[1], 0))}
           <p class="muted" style="margin:6px 0 0;font-size:.76rem">${nf(D.sinComuna || 0)} visitas sin comuna (visitantes anónimos de hwf.cl o del portal antes de ingresar). Sin cookies: la comuna sale de la cuenta del cliente.</p>
-          <h3 style="margin:12px 0 0;font-size:.9rem">Cuentas activas del portal por comuna</h3>${lista(D.comunasCuentas, (D.comunasCuentas || []).reduce((t, x) => t + x[1], 0))}</div></div>` : ""}`;
+          <h3 style="margin:12px 0 0;font-size:.9rem">Cuentas activas del portal por comuna</h3>${lista(D.comunasCuentas, (D.comunasCuentas || []).reduce((t, x) => t + x[1], 0))}</div></div>` : ""}${D ? navHtml(D) : ""}`;
     box.querySelectorAll("[data-dias]").forEach(b => b.onclick = () => { DIAS = Number(b.dataset.dias); cargar(); });
     const a = document.getElementById("mwAct"); if (a) a.onclick = cargar;
     const q = id => document.getElementById(id); if (q("mwPdf")) { q("mwPdf").onclick = () => pdf("pdf"); q("mwEnv").onclick = () => pdf("enviar"); q("mwXls").onclick = excel; } }
   /* reporte (22-11-2026): PDF con el formato de los informes HWF y Excel con una hoja por tabla */
+  /* navegación con cookies de analítica aceptadas (23-11-2026) */
+  const seg = n => { n = Math.round(Number(n) || 0); return n >= 60 ? Math.floor(n / 60) + " min " + (n % 60) + " s" : n + " s"; };
+  function navHtml(D) { const N = D.nav; if (!N || N.error) return `<div class="card"><h2>Navegación</h2><p class="muted">${esc((N && N.error) || "Sin datos de navegación.")}</p></div>`;
+    const ck = D.cookies || [], ckt = ck.reduce((t, x) => t + x[1], 0), ac = ck.filter(x => x[0] === "todas" || x[0] === "analitica").reduce((t, x) => t + x[1], 0), W = N.web, B = N.b2b, e0 = (B.embudo[0] || [0, 0])[1];
+    const kp = (t, X) => `<div class="mw-k"><div>Sesiones<b>${nf(X.sesiones)}</b>${nf(X.visitantes)} visitantes únicos</div><div>Páginas por sesión<b>${String(X.paginasSesion).replace(".", ",")}</b>&nbsp;</div><div>Tiempo medio por sesión<b>${seg(X.segSesion)}</b>&nbsp;</div>${X.rebote != null ? `<div>Rebote<b>${nf(X.rebote)} %</b>1 página y menos de 10 s</div>` : `<div>Registros nuevos<b>${nf(B.registros)}</b>solicitudes desde el portal</div>`}</div>`;
+    return `<div class="card" style="margin-top:14px"><h2>Navegación <span class="muted">solo visitantes que aceptaron cookies de analítica</span></h2>
+      <p class="muted" style="margin:4px 0 0;font-size:.8rem">Cookies: ${ckt ? `${nf(ckt)} decisiones · ${Math.round(ac / ckt * 100)} % acepta analítica (${ck.map(([k, v]) => nf(v) + " " + esc(k)).join(" · ")})` : "aún sin decisiones registradas"}. Los números de esta sección cubren solo a quienes aceptaron; las visitas de arriba cuentan a todos los que aceptaron analítica.</p>
+      <h3 style="margin:12px 0 0;font-size:.95rem">hwf.cl</h3>${kp("web", W)}<h3 style="margin:12px 0 0;font-size:.95rem">Acceso Clientes</h3>${kp("b2b", B)}</div>
+      <div class="mw-g" style="margin-top:14px"><div class="card"><h2>Embudo del portal <span class="muted">sesiones</span></h2>${lista(B.embudo, e0)}<p class="muted" style="margin:6px 0 0;font-size:.76rem">De cada 100 sesiones en el portal, ${e0 ? Math.round(((B.embudo[4] || [0, 0])[1]) / e0 * 100) : 0} terminan en pedido.</p></div>
+        <div class="card"><h2>Clics en botones <span class="muted">hwf.cl</span></h2>${lista(W.clics, W.clics.reduce((t, x) => t + x[1], 0))}</div>
+        <div class="card"><h2>Búsquedas en el portal</h2>${lista(B.busquedas, B.busquedas.reduce((t, x) => t + x[1], 0))}<h3 style="margin:12px 0 0;font-size:.9rem">Sin resultados <span class="muted">(productos que piden y no tenemos)</span></h3>${lista(B.sinResultado, B.sinResultado.reduce((t, x) => t + x[1], 0))}</div>
+        <div class="card"><h2>Productos agregados al carrito <span class="muted">unidades</span></h2>${lista(B.carrito, B.carrito.reduce((t, x) => t + x[1], 0))}</div>
+        <div class="card"><h2>Filtros usados <span class="muted">portal</span></h2>${lista(B.filtros, B.filtros.reduce((t, x) => t + x[1], 0))}<h3 style="margin:12px 0 0;font-size:.9rem">Pestañas abiertas</h3>${lista(B.pestanas, B.pestanas.reduce((t, x) => t + x[1], 0))}</div>
+        <div class="card"><h2>Lectura por página <span class="muted">hwf.cl · % de la página que se ve en promedio</span></h2>${W.lectura.length ? `<div class="mw-l">${W.lectura.map(([k, v]) => `<div class="mw-r"><span>${esc(k)}</span><b>${nf(v)} %</b><i style="--p:${v}%"></i></div>`).join("")}</div>` : '<p class="muted">Sin datos.</p>'}
+          <h3 style="margin:12px 0 0;font-size:.9rem">Tiempo medio por página</h3>${W.tiempo.length ? `<div class="mw-l">${W.tiempo.map(([k, v]) => `<div class="mw-r"><span>${esc(k)}</span><b>${seg(v)}</b></div>`).join("")}</div>` : '<p class="muted">Sin datos.</p>'}</div></div>`; }
   const tablas = D => [["Resumen", [["Indicador", "hwf.cl", "Acceso Clientes"], ["Visitas", D.web.visitas, D.b2b.visitas], ["Visitantes (navegadores distintos por día)", D.web.visitantes, D.b2b.visitantes],
       ["Cuentas de clientes", "", D.b2b.cuentas], ...(D.b2b.estados || []).map(([k, v]) => ["  · " + k, "", v]), ["Pedidos por el portal (período)", "", D.b2b.pedidos], ["Monto neto de esos pedidos", "", Math.round(D.b2b.neto || 0)]]],
     ["Por día", [["Día", "hwf.cl", "Acceso Clientes", "Visitantes nuevos"]].concat(D.porDia || [])],
     ["Páginas", [["Página (hwf.cl)", "Visitas"]].concat(D.web.paginas || [])],
+    ...(D.nav && !D.nav.error ? [["Navegación", [["Indicador (con cookies de analítica)", "hwf.cl", "Acceso Clientes"], ["Sesiones", D.nav.web.sesiones, D.nav.b2b.sesiones], ["Visitantes únicos", D.nav.web.visitantes, D.nav.b2b.visitantes], ["Páginas por sesión", D.nav.web.paginasSesion, D.nav.b2b.paginasSesion], ["Segundos por sesión", D.nav.web.segSesion, D.nav.b2b.segSesion], ["Rebote %", D.nav.web.rebote, ""]].concat([[], ["Decisión de cookies", "Cantidad"]]).concat(D.cookies || [])],
+      ["Embudo portal", [["Etapa", "Sesiones"]].concat(D.nav.b2b.embudo)], ["Clics hwf.cl", [["Botón", "Clics"]].concat(D.nav.web.clics)],
+      ["Búsquedas", [["Búsqueda en el portal", "Veces"]].concat(D.nav.b2b.busquedas).concat([[], ["Sin resultados", "Veces"]]).concat(D.nav.b2b.sinResultado)],
+      ["Carrito", [["Producto agregado", "Unidades"]].concat(D.nav.b2b.carrito)], ["Filtros", [["Filtro", "Veces"]].concat(D.nav.b2b.filtros).concat([[], ["Pestaña", "Veces"]]).concat(D.nav.b2b.pestanas)],
+      ["Lectura", [["Página", "% leído", "Segundos medios"]].concat(D.nav.web.lectura.map(([p, v]) => [p, v, ((D.nav.web.tiempo.find(x => x[0] === p) || [0, ""])[1])]))]] : []),
     ["Origen", [["De dónde llegan (hwf.cl)", "Visitas"]].concat(D.web.origen || []).concat([[], ["De dónde llegan (Acceso Clientes)", "Visitas"]]).concat(D.b2b.origen || [])],
     ["Comunas", [["Comuna (visitas con sesión)", "Visitas"]].concat(D.comunas || []).concat([[], ["Comuna (cuentas activas)", "Cuentas"]]).concat(D.comunasCuentas || [])],
     ["Dispositivo", [["Dispositivo", "hwf.cl", "Acceso Clientes"]].concat(["celular", "computador"].map(k => [k, ((D.web.disp || []).find(x => x[0] === k) || [0, 0])[1], ((D.b2b.disp || []).find(x => x[0] === k) || [0, 0])[1]]))]];
