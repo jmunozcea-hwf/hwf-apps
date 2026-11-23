@@ -1551,7 +1551,7 @@ main,.t-card{min-width:0;max-width:100%}#sDash .t-t td:first-child{white-space:n
 <nav class="t-nav" id="tNav">
   <button type="button" data-s="inicio"><span>🏠</span>Inicio</button><button type="button" data-s="ventas"><span>💰</span>Ventas</button><button type="button" data-s="dash"><span>📊</span>Panel</button>
   <button type="button" data-s="plan"><span>📈</span>Plan</button><button type="button" data-s="stock"><span>📦</span>Stock</button>
-  <button type="button" data-s="nut"><span>🐶</span>Nutrición</button><button type="button" data-s="guia"><span>🤝</span>Venta</button><button type="button" data-s="rank"><span>🏆</span>Ranking</button><button type="button" data-s="adm" id="navAdm" hidden><span>🔑</span>Avances</button></nav>
+  <button type="button" data-s="nut"><span>🐶</span>INFO</button><button type="button" data-s="guia"><span>🤝</span>Venta</button><button type="button" data-s="rank"><span>🏆</span>Ranking</button><button type="button" data-s="adm" id="navAdm" hidden><span>🔑</span>Avances</button></nav>
 <main>
   <section class="t-sec" id="sInicio"></section><section class="t-sec" id="sVentas" hidden></section><section class="t-sec" id="sDash" hidden></section><section class="t-sec" id="sPlan" hidden></section>
   <section class="t-sec" id="sStock" hidden></section><section class="t-sec" id="sNut" hidden><div id="crmNut"></div></section><section class="t-sec" id="sRank" hidden></section><section class="t-sec" id="sGuia" hidden></section><section class="t-sec" id="sAdm" hidden></section>
@@ -2069,7 +2069,7 @@ function nuRazones(c, h, k, p) {
 }
 function pintarNut() {
   const box = $("crmNut"); if (!SES) return;
-  box.innerHTML = `<div class="nu-hero"><h2>Nutrición</h2><p>Compara el alimento que usa el cliente con los nuestros y calcula la ración diaria equivalente.</p></div>
+  box.innerHTML = `<div class="nu-hero"><h2>INFO · Nutrición y suplementos</h2><p>Compara el alimento que usa el cliente con los nuestros y calcula la ración diaria equivalente.</p></div>
     <div class="nu-tabs" role="tablist"><button type="button" data-nv="comp" aria-pressed="${nuVista === "comp"}">Comparar competencia</button><button type="button" data-nv="fichas" aria-pressed="${nuVista === "fichas"}">Fichas HWF</button></div>
     <div id="nuCuerpo"></div>`;
   box.querySelectorAll("[data-nv]").forEach(b => b.onclick = () => { nuVista = b.dataset.nv; pintarNut(); });
@@ -2350,7 +2350,7 @@ const stAbrev = n => ST_ABR.reduce((s, [r, t]) => s.replace(r, t), String(n || "
 try { if ($("sStock") && !$("sStock").hidden) pintarStock(); } catch (e) {}
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261123005526";
+const HWF_VER = "20261123010031";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -3989,6 +3989,8 @@ window.hwfContCambio = function () { try { const b = document.getElementById("sS
 </script>
 <style>/* patch_nutsup */
 .nu-tabs.nu-t3{grid-template-columns:repeat(3,1fr)}
+.nu-sec{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:0 0 8px}.nu-sec button{border:1.5px solid var(--line);background:var(--surface);color:var(--ink);border-radius:14px;padding:12px 8px;font:inherit;font-weight:800;font-size:.95rem;cursor:pointer}
+.nu-sec button[aria-pressed="true"]{background:#0B3146;border-color:#0B3146;color:#fff;box-shadow:0 4px 12px rgba(11,49,70,.2)}.nu-tabs[hidden]{display:none}#crmNut.nu-supv .ms-btn:has(+ .nu-tabs){display:none!important}
 .ns-f{display:grid;gap:8px;grid-template-columns:repeat(2,minmax(0,1fr))}.ns-f .f{min-width:0}
 .ns-cat{display:flex;gap:6px;flex-wrap:wrap}.ns-cat button{border:1.5px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:7px 12px;font:inherit;font-weight:700;font-size:.84rem;cursor:pointer}
 .ns-cat button[aria-pressed="true"]{background:#0B3146;border-color:#0B3146;color:#fff}
@@ -4047,10 +4049,16 @@ window.hwfContCambio = function () { try { const b = document.getElementById("sS
     cu.querySelector("#nsKg").onchange = e => { ST.peso = Math.max(0.5, Number(String(e.target.value).replace(",", ".")) || ST.peso); guarda(); comparador(cu); };
     cu.querySelector("#nsComp").onchange = e => { ST.comp = e.target.value; guarda(); comparador(cu); };
     cu.querySelectorAll("[data-nsc]").forEach(b => b.onclick = () => { ST.cat = b.dataset.nsc; ST.comp = ""; guarda(); comparador(cu); }); }
-  const _pn = pintarNut;
+  const _pn = pintarNut; let nuAl = "comp";
   pintarNut = function () { const sup = nuVista === "sup"; if (sup) nuVista = "fichas"; const r = _pn.apply(this, arguments); if (sup) nuVista = "sup";
-    const tabs = document.querySelector("#crmNut .nu-tabs, .nu-tabs"); if (tabs && !tabs.querySelector('[data-nv="sup"]')) { tabs.classList.add("nu-t3"); const b = document.createElement("button"); b.type = "button"; b.dataset.nv = "sup"; b.textContent = "Suplementos"; tabs.appendChild(b); b.onclick = () => { nuVista = "sup"; pintarNut(); }; }
-    if (tabs) tabs.querySelectorAll("[data-nv]").forEach(b => b.setAttribute("aria-pressed", b.dataset.nv === nuVista));
+    /* 23-11-2026: primero se elige Alimentos o Suplementos; dentro de Alimentos, Comparar competencia / Fichas HWF */
+    const tabs = document.querySelector("#crmNut .nu-tabs, .nu-tabs"); if (tabs && !tabs.previousElementSibling?.classList.contains("nu-sec")) { const sec = document.createElement("div"); sec.className = "nu-sec"; sec.setAttribute("role", "tablist"); sec.setAttribute("aria-label", "Información de");
+      sec.innerHTML = '<button type="button" data-ns="al">🍖 Alimentos</button><button type="button" data-ns="sup">💊 Suplementos</button>'; tabs.before(sec);
+      sec.querySelector('[data-ns="al"]').onclick = () => { nuVista = nuAl || "comp"; pintarNut(); }; sec.querySelector('[data-ns="sup"]').onclick = () => { nuVista = "sup"; pintarNut(); }; }
+    if (nuVista !== "sup") nuAl = nuVista;
+    { const cn = document.getElementById("crmNut"); if (cn) cn.classList.toggle("nu-supv", nuVista === "sup"); }
+    if (tabs) { tabs.hidden = nuVista === "sup"; tabs.setAttribute("aria-label", "Alimentos"); tabs.querySelectorAll("[data-nv]").forEach(b => b.setAttribute("aria-pressed", b.dataset.nv === nuVista));
+      const sec = tabs.previousElementSibling; if (sec && sec.classList.contains("nu-sec")) sec.querySelectorAll("[data-ns]").forEach(b => b.setAttribute("aria-pressed", (b.dataset.ns === "sup") === (nuVista === "sup"))); }
     if (sup) { const cu = document.getElementById("nuCuerpo"); if (cu) comparador(cu); }
     return r; };
 })();
