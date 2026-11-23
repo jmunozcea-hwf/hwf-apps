@@ -5284,7 +5284,7 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261123023730";
+const HWF_VER = "20261123095730";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -5969,7 +5969,7 @@ setTimeout(() => { try { if (D && $("s-res") && !$("s-res").hidden && !$("kpCard
 (function () {
   if (typeof pintarMas !== "function" || typeof syCall !== "function") return;
   try { if (typeof NAV_MNOM !== "undefined") NAV_MNOM.catalogo = "Documentos"; const sp = document.querySelector('[data-sm="catalogo"] span'); if (sp) sp.textContent = "Documentos"; } catch (e) {}
-  const TIPOS = [["catalogo", "Catálogo", "El catálogo de productos (PDF, imágenes o Excel)."], ["precios", "Listas de precio", "Las listas de precio vigentes, por canal o por proveedor."], ["documentos", "Documentos", "Manuales, instructivos y otros documentos para vendedores y clientes (por ejemplo, el manual del portal)."], ["info", "Info ventas", "Presentaciones y guías para el equipo de ventas (las ven Ventas y Admin)."], ["infoadmin", "Info admin", "Presentaciones internas: solo se ven en HWF Admin."]];
+  const TIPOS = [["catalogo", "Catálogo", "El catálogo de productos (PDF, imágenes o Excel)."], ["precios", "Listas de precio", "Las listas de precio vigentes, por canal o por proveedor."], ["documentos", "Documentos", "Manuales, instructivos y otros documentos para vendedores y clientes (por ejemplo, el manual del portal)."], ["info", "Info ventas", "Presentaciones y guías para el equipo de ventas (las ven Ventas y Admin)."], ["infoadmin", "Info admin", "Presentaciones internas: solo se ven en HWF Admin."], ["whatsapp", "Enviar por WhatsApp", "Posts e imágenes (PNG o JPG) para que los vendedores los envíen a sus clientes por WhatsApp; en Ventas se envían como imagen."]];
   const MAX = 20 * 1024 * 1024, DEMO = typeof RK_DEMO !== "undefined" && RK_DEMO; let DAT = null, EST = "", ESTC = "", OCUP = false;
   const tam = n => n >= 1048576 ? (n / 1048576).toLocaleString("es-CL", { maximumFractionDigits: 1 }) + " MB" : Math.max(1, Math.round(n / 1024)).toLocaleString("es-CL") + " KB";
   const fecha = ms => { const d = new Date(ms); return String(d.getDate()).padStart(2, "0") + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + d.getFullYear() + " " + String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0"); };
@@ -6002,7 +6002,7 @@ setTimeout(() => { try { if (D && $("s-res") && !$("s-res").hidden && !$("kpCard
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button type="button" class="btn" id="ctAct">↻ Actualizar lista</button>${DAT && DAT.carpeta ? `<a class="btn" target="_blank" rel="noopener" href="${esc(DAT.carpeta)}">Abrir la carpeta en Drive</a>` : ""}</div>
         <div id="ctEst" class="ct-est ${ESTC}" role="status" style="margin-top:8px">${esc(EST)}</div>${DEMO ? '<p class="muted" style="margin:6px 0 0">Demo: aquí no se suben archivos reales.</p>' : ""}</div>
       <div class="ct-g">${TIPOS.map(([t, n, d]) => `<div class="card"><h2>${n} <span class="muted">${A.filter(x => x.tipo === t).length} ${A.filter(x => x.tipo === t).length === 1 ? "archivo" : "archivos"}</span></h2>
-        <div class="ct-z" data-z="${t}"><span class="muted" style="font-size:.86rem">${d} Arrastra archivos aquí o elígelos.</span><input type="file" multiple data-in="${t}" accept=".pdf,.xlsx,.xls,.csv,.doc,.docx,.ppt,.pptx,.jpg,.jpeg,.png,.webp" hidden><button type="button" class="btn pri" data-sub="${t}">⬆ Subir ${t === "catalogo" ? "catálogo" : "lista de precio"}</button></div>
+        <div class="ct-z" data-z="${t}"><span class="muted" style="font-size:.86rem">${d} Arrastra archivos aquí o elígelos.</span><input type="file" multiple data-in="${t}" accept=".pdf,.xlsx,.xls,.csv,.doc,.docx,.ppt,.pptx,.jpg,.jpeg,.png,.webp" hidden><button type="button" class="btn pri" data-sub="${t}">⬆ Subir ${t === "catalogo" ? "catálogo" : t === "precios" ? "lista de precio" : t === "whatsapp" ? "imágenes" : "archivo"}</button></div>
         <div style="margin-top:6px">${lista(t)}</div></div>`).join("")}</div>
       ${otros.length ? `<div class="card"><h2>Otros archivos de la carpeta <span class="muted">dejados a mano en Drive, fuera de las subcarpetas</span></h2>${lista("otros")}</div>` : ""}`;
     document.getElementById("ctAct").onclick = async () => { estado("Leyendo la carpeta…"); await cargar(); if (!ESTC) EST = ""; pintar(); };

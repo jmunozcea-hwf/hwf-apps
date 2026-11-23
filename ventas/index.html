@@ -7200,7 +7200,7 @@ function confirmarNota() {
   x.onclick = () => cerrarModal(); card.insertBefore(x, card.firstChild); })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261123023730";
+const HWF_VER = "20261123095730";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -10391,76 +10391,6 @@ body:has(#rdOv) #snBtn,body:has(#rdOv) #iaBtn,body:has(#rdOv) #navBotones{displa
   const iv = setInterval(() => { const p = document.getElementById("snPanel"); if (!p) return; clearInterval(iv); poner(); new MutationObserver(() => setTimeout(poner, 30)).observe(p, { childList: true }); }, 300);
 })();
 </script>
-<style>/* patch_catventas */
-.cv-box{display:grid;gap:12px}.cv-card{background:var(--card,var(--surface,#fff));border:1px solid var(--line,#DAE1E7);border-radius:16px;padding:14px}
-.cv-card h2{margin:0 0 6px;font-size:1.05rem}.cv-card h2 span{font-weight:600;font-size:.8rem;color:var(--muted,#5B6874)}
-.cv-f{display:grid;gap:8px;padding:12px 0;border-bottom:1px solid var(--line,#E3E9EE)}.cv-f:last-child{border-bottom:0}.cv-f b{word-break:break-word}.cv-f small{display:block;color:var(--muted,#5B6874);font-size:.76rem}
-.cv-b{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.cv-b button{border:1px solid var(--line,#C9D3DB);background:var(--card,#fff);color:inherit;border-radius:10px;min-height:42px;font:inherit;font-weight:700;font-size:.82rem;cursor:pointer;padding:6px}
-.cv-b button.wa{background:#1FA855;border-color:#1FA855;color:#fff}.cv-b button:disabled{opacity:.5}
-.cv-est{font-size:.86rem;color:var(--muted,#5B6874);min-height:1.2em}.cv-est.mal{color:#B42318}.cv-est.ok{color:#1C7A4E}
-@media(min-width:1000px){.cv-g{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}}
-</style>
-<script>/* patch_catventas: catálogos y listas de precio en PDF (WhatsApp, imprimir, descargar) */
-(function () {
-  const VEN = typeof NAV_ORDEN !== "undefined" && typeof setModo === "function" && !!document.getElementById("mInicio");
-  const TND = !VEN && document.getElementById("tNav") && typeof ir === "function"; if (!VEN && !TND) return;
-  const DEMO = /DEMO/.test(document.title), esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-  const conn = () => { try { if (typeof syCfg === "function") { const c = syCfg(); if (c && c.url) return c; } } catch (e) {} try { if (typeof cfg === "function") { const c = cfg(); if (c && c.url) return c; } } catch (e) {} return null; };
-  const llamar = async (d, seg) => { const c = conn(); if (!c) return { ok: false, error: "Esta app no está conectada al script de Google." }; const ctrl = new AbortController(), tm = setTimeout(() => ctrl.abort(), (seg || 60) * 1000);
-    try { const r = await fetch(c.url, { method: "POST", body: JSON.stringify(Object.assign({ clave: c.clave }, d)), signal: ctrl.signal }), t = await r.text(); try { return JSON.parse(t); } catch (e) { return { ok: false, error: "El script de Google aún no tiene esta función. Espera unos minutos y vuelve a intentar." }; } }
-    catch (e) { return { ok: false, error: "Sin conexión a internet o la descarga tardó demasiado." }; } finally { clearTimeout(tm); } };
-  const fecha = ms => { const d = new Date(ms); return String(d.getDate()).padStart(2, "0") + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + d.getFullYear(); };
-  const tam = n => n >= 1048576 ? (n / 1048576).toLocaleString("es-CL", { maximumFractionDigits: 1 }) + " MB" : Math.max(1, Math.round(n / 1024)) + " KB";
-  let DAT = null, EST = "", ESTC = "", OCUP = false; const PDF = {};
-  const estado = (t, c) => { EST = t; ESTC = c || ""; const e = document.getElementById("cvEst"); if (e) { e.textContent = t; e.className = "cv-est " + ESTC; } };
-  async function cargar() { if (DEMO) { DAT = { archivos: [] }; return; } estado("Leyendo los archivos…"); const r = await llamar({ accion: "catListar", app: "ventas" }); if (r && r.ok) { DAT = r; estado(""); } else { DAT = DAT || { archivos: [] }; estado((r && r.error) || "No se pudo leer la carpeta.", "mal"); } }
-  async function pdfDe(id) { if (PDF[id]) return PDF[id]; estado("Preparando el PDF… (la primera vez puede tardar unos segundos)"); const r = await llamar({ accion: "catPdf", id }, 150);
-    if (!r || !r.ok) { estado((r && r.error) || "No se pudo preparar el PDF.", "mal"); return null; }
-    const bin = atob(r.b64), u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); estado(""); return PDF[id] = { blob: new Blob([u], { type: "application/pdf" }), nombre: r.nombre }; }
-  const bajar = P => { const url = URL.createObjectURL(P.blob), a = document.createElement("a"); a.href = url; a.download = P.nombre; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 10000); };
-  async function accion(id, modo, btn) { if (OCUP) return; OCUP = true; if (btn) btn.disabled = true;
-    try { const P = await pdfDe(id); if (!P) return;
-      if (modo === "wa") { const f = new File([P.blob], P.nombre, { type: "application/pdf" });
-        try { if (navigator.canShare && navigator.canShare({ files: [f] })) { await navigator.share({ files: [f], title: P.nombre, text: "Te envío " + P.nombre.replace(/\.pdf$/i, "") + " de HWF." }); estado("Listo: elige WhatsApp en el menú para enviarlo.", "ok"); return; } } catch (e) { if (e && e.name === "AbortError") return; }
-        bajar(P); estado("Este equipo no permite adjuntar directo: el PDF se descargó; adjúntalo en WhatsApp (📎 → Documento).", "ok"); return; }
-      if (modo === "imp") { const url = URL.createObjectURL(P.blob), fr = document.createElement("iframe"); fr.style.cssText = "position:fixed;right:0;bottom:0;width:0;height:0;border:0"; fr.src = url; document.body.appendChild(fr);
-        fr.onload = () => { try { fr.contentWindow.focus(); fr.contentWindow.print(); } catch (e) { window.open(url, "_blank"); } setTimeout(() => { fr.remove(); URL.revokeObjectURL(url); }, 60000); };
-        if (/Android|iPhone|iPad/i.test(navigator.userAgent)) { fr.onload = null; fr.remove(); if (!window.open(url, "_blank")) bajar(P); estado("Se abrió el PDF: usa ⋮ → Imprimir (o Compartir → Imprimir).", "ok"); } return; }
-      bajar(P); estado("«" + P.nombre + "» descargado.", "ok"); }
-    finally { OCUP = false; if (btn) btn.disabled = false; } }
-  function pintaCat(box) { if (!box) return; const A = ((DAT && DAT.archivos) || []).filter(x => x.tipo === "catalogo" || x.tipo === "precios" || x.tipo === "documentos" || x.tipo === "info").sort((a, b) => b.fecha - a.fecha);
-    const lista = t => { const L = A.filter(x => x.tipo === t); return L.length ? L.map(x => `<div class="cv-f"><div><b>${esc(x.nombre.replace(/\.[^.]+$/, ""))}</b><small>actualizado el ${fecha(x.fecha)} · ${tam(x.tam)}${/pdf/i.test(x.mime) ? "" : " · se entrega como PDF"}</small></div>
-      <div class="cv-b"><button type="button" class="wa" data-cv="wa" data-id="${esc(x.id)}">📲 WhatsApp</button><button type="button" data-cv="imp" data-id="${esc(x.id)}">🖨 Imprimir</button><button type="button" data-cv="pdf" data-id="${esc(x.id)}">⬇ PDF</button></div></div>`).join("") : '<p class="cv-est">Todavía no hay archivos. Los sube HWF en su app (Documentos).</p>'; };
-    box.innerHTML = `<div class="cv-box"><div class="cv-card"><h2>Documentos <span>siempre en PDF</span></h2>
-        <p class="cv-est" style="margin:0">Envía el catálogo, la lista de precio o un documento (como el manual del portal) por WhatsApp con el PDF adjunto, imprímelo o descárgalo. Siempre está la última versión que subió HWF.</p>
-        <div style="display:flex;gap:8px;margin-top:10px"><button type="button" class="btn" id="cvAct" style="min-height:40px">↻ Actualizar</button></div>
-        <div id="cvEst" class="cv-est ${ESTC}" role="status" style="margin-top:8px">${esc(EST)}</div>${DEMO ? '<p class="cv-est">Demo: aquí no hay archivos reales.</p>' : ""}</div>
-      <div class="cv-g"><div class="cv-card"><h2>Catálogo</h2>${lista("catalogo")}</div><div class="cv-card"><h2>Listas de precio</h2>${lista("precios")}</div><div class="cv-card"><h2>Documentos</h2>${lista("documentos")}</div><div class="cv-card"><h2>Info ventas</h2>${lista("info")}</div></div></div>`;
-    box.querySelector("#cvAct").onclick = async () => { await cargar(); pintaCat(box); };
-    box.querySelectorAll("[data-cv]").forEach(b => b.onclick = () => accion(b.dataset.id, b.dataset.cv, b)); }
-  async function abrir(box) { pintaCat(box); if (!DAT) { await cargar(); pintaCat(box); } }
-  const ICO = '<svg viewBox="0 0 32 32" aria-hidden="true" class="hic"><defs><linearGradient id="hic-cat" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FF8A6B"/><stop offset="1" stop-color="#D9483B"/></linearGradient></defs><rect width="32" height="32" rx="9" fill="url(#hic-cat)"/><g transform="translate(5.5 5.5) scale(.875)" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6M9 13h6M9 17h6"/></g></svg>';
-  if (VEN) {   /* VENTAS: apartado propio del menú (como Técnicas de venta) */
-    const b = document.createElement("button"); b.type = "button"; b.setAttribute("role", "tab"); b.id = "mCat"; b.setAttribute("aria-selected", "false"); b.textContent = "Documentos";
-    const ref = document.getElementById("mNut") || document.getElementById("mInicio"); ref.after(b);
-    const d = document.createElement("div"); d.id = "crmCat"; d.hidden = true; (document.getElementById("crmNut") || document.getElementById("crmInicio")).after(d);
-    const _sm = setModo; setModo = function (m) { const r = _sm.apply(this, arguments), on = m === "cat"; b.setAttribute("aria-selected", on); d.hidden = !on; document.body.classList.toggle("m-cat", on);
-      if (on) { ["crmFicha", "crmLista", "crmAgenda", "crmRuta", "crmInicio", "crmCobranza", "crmEmbudo", "crmNut", "crmDash", "crmAvance", "crmMeta", "crmTec", "crmBi"].forEach(id => { const x = document.getElementById(id); if (x) x.hidden = true; }); abrir(d); window.scrollTo({ top: 0 }); }
-      return r; };
-    b.onclick = () => setModo("cat");
-    try { const _af = abrirFicha; abrirFicha = function () { d.hidden = true; b.setAttribute("aria-selected", "false"); return _af.apply(this, arguments); }; } catch (e) {}
-    try { if (!NAV_ORDEN.some(x => x[0] === "cat")) { const i = NAV_ORDEN.findIndex(x => x[0] === "nut"); NAV_ORDEN.splice(i >= 0 ? i + 1 : NAV_ORDEN.length, 0, ["cat", "mCat"]); } } catch (e) {}
-    document.head.insertAdjacentHTML("beforeend", "<style>body.m-cat #crmMeta{display:none!important}</style>");
-    new MutationObserver(() => { const it = document.querySelector('#snPanel [data-sm="cat"] .sn-e'); if (it && !it.dataset.cv) { it.dataset.cv = "1"; it.innerHTML = ICO; } }).observe(document.body, { childList: true, subtree: true });
-  } else {   /* TIENDA: botón en la barra y sección propia */
-    const nav = document.getElementById("tNav"), s = document.createElement("section"); s.className = "t-sec"; s.id = "sCat"; s.hidden = true; document.querySelector("main").appendChild(s);
-    SEC.cat = "sCat"; const b = document.createElement("button"); b.type = "button"; b.dataset.s = "cat"; b.innerHTML = '<span class="hic-w">' + ICO.replace('id="hic-cat"', 'id="hic-catt"').replace("url(#hic-cat)", "url(#hic-catt)") + "</span>Catálogo"; const adm = document.getElementById("navAdm"); if (adm) adm.before(b); else nav.appendChild(b);
-    if (!b.onclick && !nav.onclick) b.onclick = () => ir("cat");
-    const _p = pintar; pintar = function (x) { if (x === "cat") return abrir(s); return _p.apply(this, arguments); };
-    document.head.insertAdjacentHTML("beforeend", "<style>#tNav{grid-template-columns:none!important;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr)}</style>");
-  }
-})();
-</script>
 <style>/* patch_menusel */
 .ms-oc{display:none!important}
 .ms-btn{display:flex;align-items:center;gap:12px;width:100%;margin:0 0 12px;border:1.5px solid var(--line,#C9D3DB);border-radius:16px;padding:10px 14px;background:var(--surface,#fff);color:var(--ink,#0F1E29);font:inherit;cursor:pointer;text-align:left;box-shadow:0 2px 8px rgba(11,49,70,.07);min-height:56px}
@@ -10930,6 +10860,99 @@ body.m-b2b #crmMeta{display:none!important}
     setTimeout(sonda, 4000); setInterval(sonda, 300000); document.addEventListener("visibilitychange", () => { if (!document.hidden && Date.now() - ST.t > 120000) sonda(); });
   }
   montar();
+})();
+</script>
+<style>/* patch_catventas */
+.cv-wa{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.cv-wa figure{margin:0;border:1px solid var(--line,#E3E9EE);border-radius:14px;padding:8px;background:var(--surface,#fff)}
+.cv-im{aspect-ratio:4/5;border-radius:10px;background:var(--sunk,#EEF2F5);display:flex;align-items:center;justify-content:center;overflow:hidden;color:var(--muted,#5B6874);font-size:.8rem}.cv-im img{width:100%;height:100%;object-fit:cover}
+.cv-wa figcaption{font-size:.82rem;font-weight:700;margin:6px 0;text-transform:capitalize}.cv-wa .cv-b{grid-template-columns:3fr 1fr}@media(min-width:800px){.cv-wa{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.cv-box{display:grid;gap:12px}.cv-card{background:var(--card,var(--surface,#fff));border:1px solid var(--line,#DAE1E7);border-radius:16px;padding:14px}
+.cv-card h2{margin:0 0 6px;font-size:1.05rem}.cv-card h2 span{font-weight:600;font-size:.8rem;color:var(--muted,#5B6874)}
+.cv-f{display:grid;gap:8px;padding:12px 0;border-bottom:1px solid var(--line,#E3E9EE)}.cv-f:last-child{border-bottom:0}.cv-f b{word-break:break-word}.cv-f small{display:block;color:var(--muted,#5B6874);font-size:.76rem}
+.cv-b{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.cv-b button{border:1px solid var(--line,#C9D3DB);background:var(--card,#fff);color:inherit;border-radius:10px;min-height:42px;font:inherit;font-weight:700;font-size:.82rem;cursor:pointer;padding:6px}
+.cv-b button.wa{background:#1FA855;border-color:#1FA855;color:#fff}.cv-b button:disabled{opacity:.5}
+.cv-est{font-size:.86rem;color:var(--muted,#5B6874);min-height:1.2em}.cv-est.mal{color:#B42318}.cv-est.ok{color:#1C7A4E}
+@media(min-width:1000px){.cv-g{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}}
+</style>
+<script>/* patch_catventas: catálogos y listas de precio en PDF (WhatsApp, imprimir, descargar) */
+(function () {
+  const VEN = typeof NAV_ORDEN !== "undefined" && typeof setModo === "function" && !!document.getElementById("mInicio");
+  const TND = !VEN && document.getElementById("tNav") && typeof ir === "function"; if (!VEN && !TND) return;
+  const DEMO = /DEMO/.test(document.title), esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const conn = () => { try { if (typeof syCfg === "function") { const c = syCfg(); if (c && c.url) return c; } } catch (e) {} try { if (typeof cfg === "function") { const c = cfg(); if (c && c.url) return c; } } catch (e) {} return null; };
+  const llamar = async (d, seg) => { const c = conn(); if (!c) return { ok: false, error: "Esta app no está conectada al script de Google." }; const ctrl = new AbortController(), tm = setTimeout(() => ctrl.abort(), (seg || 60) * 1000);
+    try { const r = await fetch(c.url, { method: "POST", body: JSON.stringify(Object.assign({ clave: c.clave }, d)), signal: ctrl.signal }), t = await r.text(); try { return JSON.parse(t); } catch (e) { return { ok: false, error: "El script de Google aún no tiene esta función. Espera unos minutos y vuelve a intentar." }; } }
+    catch (e) { return { ok: false, error: "Sin conexión a internet o la descarga tardó demasiado." }; } finally { clearTimeout(tm); } };
+  const fecha = ms => { const d = new Date(ms); return String(d.getDate()).padStart(2, "0") + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + d.getFullYear(); };
+  const tam = n => n >= 1048576 ? (n / 1048576).toLocaleString("es-CL", { maximumFractionDigits: 1 }) + " MB" : Math.max(1, Math.round(n / 1024)) + " KB";
+  let DAT = null, EST = "", ESTC = "", OCUP = false; const PDF = {};
+  const estado = (t, c) => { EST = t; ESTC = c || ""; const e = document.getElementById("cvEst"); if (e) { e.textContent = t; e.className = "cv-est " + ESTC; } };
+  async function cargar() { if (DEMO) { DAT = { archivos: [] }; return; } estado("Leyendo los archivos…"); const r = await llamar({ accion: "catListar", app: "ventas" }); if (r && r.ok) { DAT = r; estado(""); } else { DAT = DAT || { archivos: [] }; estado((r && r.error) || "No se pudo leer la carpeta.", "mal"); } }
+  async function pdfDe(id) { if (PDF[id]) return PDF[id]; estado("Preparando el PDF… (la primera vez puede tardar unos segundos)"); const r = await llamar({ accion: "catPdf", id }, 150);
+    if (!r || !r.ok) { estado((r && r.error) || "No se pudo preparar el PDF.", "mal"); return null; }
+    const bin = atob(r.b64), u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); estado(""); return PDF[id] = { blob: new Blob([u], { type: "application/pdf" }), nombre: r.nombre }; }
+  const bajar = P => { const url = URL.createObjectURL(P.blob), a = document.createElement("a"); a.href = url; a.download = P.nombre; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 10000); };
+  async function accion(id, modo, btn) { if (OCUP) return; OCUP = true; if (btn) btn.disabled = true;
+    try { const P = await pdfDe(id); if (!P) return;
+      if (modo === "wa") { const f = new File([P.blob], P.nombre, { type: "application/pdf" });
+        try { if (navigator.canShare && navigator.canShare({ files: [f] })) { await navigator.share({ files: [f], title: P.nombre, text: "Te envío " + P.nombre.replace(/\.pdf$/i, "") + " de HWF." }); estado("Listo: elige WhatsApp en el menú para enviarlo.", "ok"); return; } } catch (e) { if (e && e.name === "AbortError") return; }
+        bajar(P); estado("Este equipo no permite adjuntar directo: el PDF se descargó; adjúntalo en WhatsApp (📎 → Documento).", "ok"); return; }
+      if (modo === "imp") { const url = URL.createObjectURL(P.blob), fr = document.createElement("iframe"); fr.style.cssText = "position:fixed;right:0;bottom:0;width:0;height:0;border:0"; fr.src = url; document.body.appendChild(fr);
+        fr.onload = () => { try { fr.contentWindow.focus(); fr.contentWindow.print(); } catch (e) { window.open(url, "_blank"); } setTimeout(() => { fr.remove(); URL.revokeObjectURL(url); }, 60000); };
+        if (/Android|iPhone|iPad/i.test(navigator.userAgent)) { fr.onload = null; fr.remove(); if (!window.open(url, "_blank")) bajar(P); estado("Se abrió el PDF: usa ⋮ → Imprimir (o Compartir → Imprimir).", "ok"); } return; }
+      bajar(P); estado("«" + P.nombre + "» descargado.", "ok"); }
+    finally { OCUP = false; if (btn) btn.disabled = false; } }
+  function pintaCat(box) { if (!box) return; const A = ((DAT && DAT.archivos) || []).filter(x => x.tipo === "catalogo" || x.tipo === "precios" || x.tipo === "documentos" || x.tipo === "info" || x.tipo === "whatsapp").sort((a, b) => b.fecha - a.fecha);
+    const lista = t => { const L = A.filter(x => x.tipo === t); return L.length ? L.map(x => `<div class="cv-f"><div><b>${esc(x.nombre.replace(/\.[^.]+$/, ""))}</b><small>actualizado el ${fecha(x.fecha)} · ${tam(x.tam)}${/pdf/i.test(x.mime) ? "" : " · se entrega como PDF"}</small></div>
+      <div class="cv-b"><button type="button" class="wa" data-cv="wa" data-id="${esc(x.id)}">📲 WhatsApp</button><button type="button" data-cv="imp" data-id="${esc(x.id)}">🖨 Imprimir</button><button type="button" data-cv="pdf" data-id="${esc(x.id)}">⬇ PDF</button></div></div>`).join("") : '<p class="cv-est">Todavía no hay archivos. Los sube HWF en su app (Documentos).</p>'; };
+    box.innerHTML = `<div class="cv-box"><div class="cv-card"><h2>Documentos <span>siempre en PDF</span></h2>
+        <p class="cv-est" style="margin:0">Envía el catálogo, la lista de precio o un documento (como el manual del portal) por WhatsApp con el PDF adjunto, imprímelo o descárgalo. Siempre está la última versión que subió HWF.</p>
+        <div style="display:flex;gap:8px;margin-top:10px"><button type="button" class="btn" id="cvAct" style="min-height:40px">↻ Actualizar</button></div>
+        <div id="cvEst" class="cv-est ${ESTC}" role="status" style="margin-top:8px">${esc(EST)}</div>${DEMO ? '<p class="cv-est">Demo: aquí no hay archivos reales.</p>' : ""}</div>
+      <div class="cv-g">${waHtml(A)}<div class="cv-card"><h2>Catálogo</h2>${lista("catalogo")}</div><div class="cv-card"><h2>Listas de precio</h2>${lista("precios")}</div><div class="cv-card"><h2>Documentos</h2>${lista("documentos")}</div><div class="cv-card"><h2>Info ventas</h2>${lista("info")}</div></div></div>`;
+    box.querySelector("#cvAct").onclick = async () => { await cargar(); pintaCat(box); };
+    box.querySelectorAll("[data-cv]").forEach(b => b.onclick = () => accion(b.dataset.id, b.dataset.cv, b));
+    box.querySelectorAll("[data-wi]").forEach(b => b.onclick = () => waAccion(b.dataset.id, b.dataset.wi, b)); vistas(box); }
+  /* «Enviar por WhatsApp» (23-11-2026): posts e imágenes; se envían tal cual (imagen), con vista previa */
+  const IMG = {};
+  async function imgDe(id) { if (IMG[id]) return IMG[id]; const r = await llamar({ accion: "catBajar", id }, 120); if (!r || !r.ok) return null;
+    const bin = atob(r.b64), u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); const bl = new Blob([u], { type: r.mime || "image/png" });
+    return IMG[id] = { blob: bl, nombre: r.nombre, url: URL.createObjectURL(bl) }; }
+  const titWa = n => n.replace(/\.[^.]+$/, "").replace(/^\d+[-_ ]*/, "").replace(/[-_]+/g, " ");
+  function waHtml(A) { const L = A.filter(x => x.tipo === "whatsapp"); if (!L.length) return "";
+    return `<div class="cv-card" style="grid-column:1/-1"><h2>Enviar por WhatsApp <span>posts listos para tus clientes</span></h2>
+      <p class="cv-est" style="margin:0 0 8px">Toca «Enviar» y elige WhatsApp: la imagen va tal cual, con el logo y los colores de HWF.</p>
+      <div class="cv-wa">${L.map(x => `<figure><div class="cv-im" data-im="${esc(x.id)}"><span>Cargando…</span></div><figcaption>${esc(titWa(x.nombre))}</figcaption>
+        <div class="cv-b"><button type="button" class="wa" data-wi="env" data-id="${esc(x.id)}">📲 Enviar</button><button type="button" data-wi="baj" data-id="${esc(x.id)}">⬇</button></div></figure>`).join("")}</div></div>`; }
+  async function vistas(box) { for (const d of box.querySelectorAll("[data-im]")) { const I = await imgDe(d.dataset.im); if (I && d.isConnected) d.innerHTML = `<img src="${I.url}" alt="${esc(titWa(I.nombre))}">`; else if (d.isConnected) d.innerHTML = "<span>Sin vista previa</span>"; } }
+  async function waAccion(id, modo, btn) { if (OCUP) return; OCUP = true; btn.disabled = true;
+    try { estado("Preparando la imagen…"); const I = await imgDe(id); if (!I) { estado("No se pudo bajar la imagen.", "mal"); return; } estado("");
+      if (modo === "env") { const f = new File([I.blob], I.nombre, { type: I.blob.type });
+        try { if (navigator.canShare && navigator.canShare({ files: [f] })) { await navigator.share({ files: [f], text: "Hola, te comparto esta información de HWF. ¿Te preparo un pedido?" }); estado("Listo: elige WhatsApp y el contacto.", "ok"); return; } } catch (e) { if (e && e.name === "AbortError") return; } }
+      const a = document.createElement("a"); a.href = I.url; a.download = I.nombre; document.body.appendChild(a); a.click(); a.remove();
+      estado(modo === "env" ? "Este equipo no permite adjuntar directo: la imagen se descargó; adjúntala en WhatsApp (📎 → Galería)." : "Imagen descargada.", "ok"); }
+    finally { OCUP = false; btn.disabled = false; } }
+  async function abrir(box) { pintaCat(box); if (!DAT) { await cargar(); pintaCat(box); } }
+  const ICO = '<svg viewBox="0 0 32 32" aria-hidden="true" class="hic"><defs><linearGradient id="hic-cat" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FF8A6B"/><stop offset="1" stop-color="#D9483B"/></linearGradient></defs><rect width="32" height="32" rx="9" fill="url(#hic-cat)"/><g transform="translate(5.5 5.5) scale(.875)" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6M9 13h6M9 17h6"/></g></svg>';
+  if (VEN) {   /* VENTAS: apartado propio del menú (como Técnicas de venta) */
+    const b = document.createElement("button"); b.type = "button"; b.setAttribute("role", "tab"); b.id = "mCat"; b.setAttribute("aria-selected", "false"); b.textContent = "Documentos";
+    const ref = document.getElementById("mNut") || document.getElementById("mInicio"); ref.after(b);
+    const d = document.createElement("div"); d.id = "crmCat"; d.hidden = true; (document.getElementById("crmNut") || document.getElementById("crmInicio")).after(d);
+    const _sm = setModo; setModo = function (m) { const r = _sm.apply(this, arguments), on = m === "cat"; b.setAttribute("aria-selected", on); d.hidden = !on; document.body.classList.toggle("m-cat", on);
+      if (on) { ["crmFicha", "crmLista", "crmAgenda", "crmRuta", "crmInicio", "crmCobranza", "crmEmbudo", "crmNut", "crmDash", "crmAvance", "crmMeta", "crmTec", "crmBi"].forEach(id => { const x = document.getElementById(id); if (x) x.hidden = true; }); abrir(d); window.scrollTo({ top: 0 }); }
+      return r; };
+    b.onclick = () => setModo("cat");
+    try { const _af = abrirFicha; abrirFicha = function () { d.hidden = true; b.setAttribute("aria-selected", "false"); return _af.apply(this, arguments); }; } catch (e) {}
+    try { if (!NAV_ORDEN.some(x => x[0] === "cat")) { const i = NAV_ORDEN.findIndex(x => x[0] === "nut"); NAV_ORDEN.splice(i >= 0 ? i + 1 : NAV_ORDEN.length, 0, ["cat", "mCat"]); } } catch (e) {}
+    document.head.insertAdjacentHTML("beforeend", "<style>body.m-cat #crmMeta{display:none!important}</style>");
+    new MutationObserver(() => { const it = document.querySelector('#snPanel [data-sm="cat"] .sn-e'); if (it && !it.dataset.cv) { it.dataset.cv = "1"; it.innerHTML = ICO; } }).observe(document.body, { childList: true, subtree: true });
+  } else {   /* TIENDA: botón en la barra y sección propia */
+    const nav = document.getElementById("tNav"), s = document.createElement("section"); s.className = "t-sec"; s.id = "sCat"; s.hidden = true; document.querySelector("main").appendChild(s);
+    SEC.cat = "sCat"; const b = document.createElement("button"); b.type = "button"; b.dataset.s = "cat"; b.innerHTML = '<span class="hic-w">' + ICO.replace('id="hic-cat"', 'id="hic-catt"').replace("url(#hic-cat)", "url(#hic-catt)") + "</span>Catálogo"; const adm = document.getElementById("navAdm"); if (adm) adm.before(b); else nav.appendChild(b);
+    if (!b.onclick && !nav.onclick) b.onclick = () => ir("cat");
+    const _p = pintar; pintar = function (x) { if (x === "cat") return abrir(s); return _p.apply(this, arguments); };
+    document.head.insertAdjacentHTML("beforeend", "<style>#tNav{grid-template-columns:none!important;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr)}</style>");
+  }
 })();
 </script>
 </body>
