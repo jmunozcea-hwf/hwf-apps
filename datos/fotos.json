@@ -1,5 +1,5 @@
 {
- "version": "2026-11-22.4-sieger-latas",
+ "version": "2026-11-23.1-fondos-blancos",
  "base": "https://jmunozcea-hwf.github.io/hwf-apps/",
  "fotos": {
   "764": {
@@ -489,8 +489,8 @@
    "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_ed68b773-cc93-43d6-8aa0-93b18c41a79e.jpg",
    "calidad": "regular",
    "nota": "contenido 390 px (300-599) · fondo gris limpiado a blanco (23-11-2026)",
-   "f": "fotos/332.webp",
-   "m": "fotos/m/332.webp",
+   "f": "fotos/332.webp?v=20261123",
+   "m": "fotos/m/332.webp?v=20261123",
    "w": 800,
    "h": 800
   },
@@ -529,8 +529,8 @@
    "origen": "https://www.puranatura.pet/wp-content/uploads/2026/05/humedo-perro-carne-pack-oferta-pura-natura.webp",
    "calidad": "buena",
    "nota": "pack x12 (caja + bandejas 300 g), fondo gris claro de estudio · fondo gris limpiado a blanco (23-11-2026)",
-   "f": "fotos/89.webp",
-   "m": "fotos/m/89.webp",
+   "f": "fotos/89.webp?v=20261123",
+   "m": "fotos/m/89.webp?v=20261123",
    "w": 800,
    "h": 800
   },
@@ -549,8 +549,8 @@
    "origen": "https://www.puranatura.pet/wp-content/uploads/2026/05/cachorros-humedo-pack-oferta.webp",
    "calidad": "buena",
    "nota": "pack x12 (caja + bandejas 300 g), fondo gris claro de estudio · fondo gris limpiado a blanco (23-11-2026)",
-   "f": "fotos/87.webp",
-   "m": "fotos/m/87.webp",
+   "f": "fotos/87.webp?v=20261123",
+   "m": "fotos/m/87.webp?v=20261123",
    "w": 800,
    "h": 800
   },
@@ -579,8 +579,8 @@
    "origen": "https://www.puranatura.pet/wp-content/uploads/2026/05/pack-12-humedo-gatos-pollo.webp",
    "calidad": "buena",
    "nota": "pack x12 (caja + bandejas 300 g), fondo gris claro de estudio · fondo gris limpiado a blanco (23-11-2026)",
-   "f": "fotos/91.webp",
-   "m": "fotos/m/91.webp",
+   "f": "fotos/91.webp?v=20261123",
+   "m": "fotos/m/91.webp?v=20261123",
    "w": 800,
    "h": 800
   },
@@ -1379,8 +1379,8 @@
    "origen": "https://assets.rediredi.com/items/images/95a62d91-1171-4739-90b9-db1224ce7b80_0c84abb7-2686-45eb-b790-a321c5871188.jpg",
    "calidad": "regular",
    "nota": "contenido 340 px (300-599) · fondo gris limpiado a blanco (23-11-2026)",
-   "f": "fotos/857.webp",
-   "m": "fotos/m/857.webp",
+   "f": "fotos/857.webp?v=20261123",
+   "m": "fotos/m/857.webp?v=20261123",
    "w": 800,
    "h": 800
   },
