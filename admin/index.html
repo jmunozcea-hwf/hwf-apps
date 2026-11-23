@@ -5285,7 +5285,7 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261123194256";
+const HWF_VER = "20261123194731";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -9195,12 +9195,12 @@ window.hwfContCambio = function () { try { if (typeof praPintar === "function" &
     R.forEach(r => { const k = (r[8] || B.anio) + "-" + String(r[2]).padStart(2, "0"), o = inf[k] = inf[k] || [0, 0, 0, 0]; o[0] += r[5] || 0; o[1] += (r[4] || 0) * (r[6] || 0); o[r[7] === tv ? 3 : 2] += r[5] || 0; });
     const K = contable(B, inf); XK = K && K.ok ? K : null;
     if (XK && hayS(SIM)) { const S = Object.assign({}, XK.T, { grp: Object.assign({}, XK.T.grp) }); S.ing += T.sv - T.v; S.cos += T.sc - T.c; XK.S = deriv(S); } else if (XK) XK.S = null;
-    /* escenario (23-11-2026): ingresos de explotación y % de margen operacional editables. Ingresos: el costo de ventas acompaña
-       (mismo margen bruto %) y los gastos quedan iguales en $; % margen operacional: se ajustan los gastos de adm. y ventas para llegar a ese EBIT. */
+    /* escenario (23-11-2026): ingresos de explotación y % de margen bruto editables. Ingresos: el costo de ventas acompaña
+       (mismo margen bruto %, salvo que se fije otro) y los gastos quedan iguales en $; % margen bruto: costo de ventas = ingresos × (1 − %). */
     if (XK) { const Z = E.esc || {}, zi = Number(Z.ing) > 0 ? Number(Z.ing) : 0, zm = Z.mop !== "" && Z.mop != null && isFinite(Number(Z.mop)) ? Number(Z.mop) : null;
       if (zi || zm != null) { const B0 = XK.S || XK.T, S = Object.assign({}, B0, { grp: Object.assign({}, B0.grp), esc: 0 });
         if (zi) { S.cos = B0.cos * zi / (B0.ing || 1); S.ing = zi; } deriv(S);
-        if (zm != null) { S.esc = S.ebit - S.ing * zm / 100; deriv(S); } XK.S = S; } }
+        if (zm != null) { S.cos = S.ing * (1 - zm / 100); deriv(S); } XK.S = S; } }
     return { B, T, L, P, SIM, opc, anios, aj: B.costoAjuste || null, K: XK, Kinfo: K };
   }
 
@@ -9342,11 +9342,11 @@ window.hwfContCambio = function () { try { if (typeof praPintar === "function" &
         </tbody></table></div><p class="muted" style="font-size:.74rem;margin:6px 0 0">${K ? `Fuente: Libro Mayor de Defontana (${es(K.fuente || "")}${K.fecha ? ", " + es(K.fecha) : ""}), cuentas 3 (ingresos) y 4 (costos y gastos). Ingresos netos de IVA. «Estimado» = no está en la contabilidad (ver «Supuestos»).` : X.K ? "Ventas y costo del informe de ventas (facturado neto sin IVA; costo con la regla de bonificados). Gastos reales del Libro Mayor asignados en proporción a la venta." : "Venta = facturado neto sin IVA (facturas − notas de crédito). Costo = unidades × costo unitario, con la regla de bonificados. Gastos de operación estimados como % de la venta (ver «Supuestos de gastos»): no hay Libro Mayor cargado."}</p></div>
         <div class="card"><h2>Explicación <span class="muted">análisis financiero</span></h2><ul class="er-x">${explicar(X).map(t => `<li>${es(t)}</li>`).join("")}</ul></div></div>
       ${K ? evolHtml(K) + indHtml(K) : ""}
-      ${K ? `<div class="card er-sim"><h2>Escenario <span class="muted">ingresos y margen operacional</span></h2>
+      ${K ? `<div class="card er-sim"><h2>Escenario <span class="muted">ingresos y margen bruto</span></h2>
         <div class="er-f"><label>Ingresos de explotación ($)<input id="erEscI" type="text" inputmode="numeric" placeholder="${es(Math.round(K.T.ing).toLocaleString("es-CL"))}" value="${(E.esc || {}).ing ? Math.round(E.esc.ing).toLocaleString("es-CL") : ""}"></label>
-          <label>% margen operacional<input id="erEscM" type="text" inputmode="decimal" placeholder="${es(p1(pc(K.T.ebit, K.T.ing)))}" value="${(E.esc || {}).mop !== "" && (E.esc || {}).mop != null ? String(E.esc.mop).replace(".", ",") : ""}"></label>
+          <label>% margen bruto<input id="erEscM" type="text" inputmode="decimal" placeholder="${es(p1(pc(K.T.mb, K.T.ing)))}" value="${(E.esc || {}).mop !== "" && (E.esc || {}).mop != null ? String(E.esc.mop).replace(".", ",") : ""}"></label>
           <label style="align-self:end"><button type="button" class="btn ghost" id="erEscL">Limpiar escenario</button></label></div>
-        <p class="muted" style="font-size:.76rem;margin:6px 0 0">Vacío = valor real del período (en gris). Ingresos: el costo de ventas acompaña (mismo margen bruto %) y los gastos quedan iguales en $. % margen operacional: se ajustan los gastos de adm. y ventas para llegar a ese resultado operacional. El estado muestra la columna «Simulado».</p></div>` : ""}
+        <p class="muted" style="font-size:.76rem;margin:6px 0 0">Vacío = valor real del período (en gris). Ingresos: el costo de ventas acompaña (mismo margen bruto %) y los gastos quedan iguales en $. % margen bruto: el costo de ventas pasa a ser ingresos × (100 − %); los gastos no cambian. El estado muestra la columna «Simulado».</p></div>` : ""}
       <div class="card er-sim"><h2>Simular precio y descuento <span class="muted">por producto</span></h2>
         <div class="er-f"><label style="grid-column:1/-1">Agregar producto<input id="erAdd" list="erDl" placeholder="Escribe código o nombre"><datalist id="erDl">${Object.values(X.P).filter(o => o.q > 0).sort((a, b) => b.v - a.v).map(o => `<option value="${es(o.cod + " · " + o.n)}">`).join("")}</datalist></label>
           <label>Sensibilidad de unidades<input id="erEla" type="number" step="0.1" min="0" value="${+E.ela || 0}" title="0 = mismas unidades. 1,5 = por cada 1 % que baja el precio, las unidades suben 1,5 %"></label></div>
