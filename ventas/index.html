@@ -7198,7 +7198,7 @@ function confirmarNota() {
   x.onclick = () => cerrarModal(); card.insertBefore(x, card.firstChild); })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261123002717";
+const HWF_VER = "20261123003107";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -10707,7 +10707,7 @@ body:has(#rdOv) #snBtn,body:has(#rdOv) #iaBtn,body:has(#rdOv) #navBotones{displa
 <script>/* patch_actividades: Ventas → Actividades */
 (function () {
   if (typeof calMontar !== "function" || typeof setModo !== "function" || typeof NAV_ORDEN === "undefined" || document.getElementById("mAct")) return;
-  const tab = document.createElement("button"); tab.type = "button"; tab.setAttribute("role", "tab"); tab.id = "mAct"; tab.setAttribute("aria-selected", "false"); tab.title = "Actividades"; tab.textContent = "Actividades";
+  const tab = document.createElement("button"); tab.type = "button"; tab.setAttribute("role", "tab"); tab.id = "mAct"; tab.setAttribute("aria-selected", "false"); tab.title = "Calendario del equipo"; tab.textContent = "Calendario del equipo";
   (document.getElementById("mClientes") || document.getElementById("mDash")).after(tab);
   const box = document.createElement("div"); box.id = "crmAct"; box.hidden = true; (document.getElementById("crmInicio") || document.getElementById("crmDash")).after(box);
   const card = document.createElement("section"); card.className = "cal-card"; box.appendChild(card);
@@ -10730,8 +10730,8 @@ body:has(#rdOv) #snBtn,body:has(#rdOv) #iaBtn,body:has(#rdOv) #navBotones{displa
 (function () {
   const VEN = typeof NAV_ORDEN !== "undefined" && typeof setModo === "function" && !!document.getElementById("mInicio"), ADM = !VEN && !!document.querySelector("nav.bottom") && !!document.getElementById("s-res");
   const LOG = !VEN && !ADM && !!document.querySelector('#nav [data-s="rutas"]'), TND = !VEN && !ADM && !!document.getElementById("tNav");
-  const GV = [["Mi día", ["inicio", "pedido", "clientes", "act", "agenda", "ruta", "cobranza", "embudo", "cat"]], ["Análisis", ["dash", "avance", "bi", "eerr"]], ["Aprender", ["nut", "tec"]]];
-  const GA = [["Dirección", ["t:hal", "m:actividades"]], ["Ventas", ["t:res", "t:ven", "t:cli", "t:pro", "m:ranking", "m:plan", "m:zonas", "m:terreno", "m:bonif"]], ["Pedidos y cobranza", ["m:cots", "m:napp", "m:cobranza", "m:embudo"]],
+  const GV = [["Mi día", ["inicio", "pedido", "clientes", "agenda", "ruta", "cobranza", "embudo", "cat"]], ["Equipo", ["act"]], ["Análisis", ["dash", "avance", "bi", "eerr"]], ["Aprender", ["nut", "tec"]]];
+  const GA = [["Dirección", ["t:hal"]], ["Equipo", ["m:actividades"]], ["Ventas", ["t:res", "t:ven", "t:cli", "t:pro", "m:ranking", "m:plan", "m:zonas", "m:terreno", "m:bonif"]], ["Pedidos y cobranza", ["m:cots", "m:napp", "m:cobranza", "m:embudo"]],
     ["BI y compras", ["b:v", "b:l", "t:mar", "m:eerr", "m:abast", "m:provee"]], ["Web y portal B2B", ["m:metricas", "m:instagram", "m:b2b", "m:mail", "m:invita", "m:roi"]], ["Archivos y datos", ["m:catalogo", "m:cambios", "m:datos"]]];   /* 22-11-2026: métricas web y B2B en su propio grupo */
   const pos = (G, k) => { let n = 0; for (const [, l] of G) { const i = l.indexOf(k); if (i >= 0) return n + i; n += l.length; } return 999; };
   if (VEN) { const ord = () => { const a = NAV_ORDEN.slice(); a.sort((x, y) => pos(GV, x[0]) - pos(GV, y[0])); NAV_ORDEN.splice(0, NAV_ORDEN.length, ...a); };

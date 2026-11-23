@@ -1360,7 +1360,7 @@ body{padding-bottom:calc(84px + env(safe-area-inset-bottom))!important}
   <section class="sec" id="s-mas" hidden>
     <div class="seg" id="masSeg">
       <button type="button" data-m="plan" aria-pressed="true">Plan de ventas</button>
-      <button type="button" data-m="actividades" aria-pressed="false">Actividades</button>
+      <button type="button" data-m="actividades" aria-pressed="false">Calendario del equipo</button>
       <button type="button" data-m="abast" aria-pressed="false">Abastecimiento</button>
       <button type="button" data-m="provee" aria-pressed="false">Pago a proveedores</button>
       <button type="button" data-m="catalogo" aria-pressed="false">Documentos</button>
@@ -8964,7 +8964,7 @@ window.hwfContCambio = function () { try { if (typeof praPintar === "function" &
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261123002717";
+const HWF_VER = "20261123003107";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -9169,7 +9169,7 @@ const HWF_VER = "20261123002717";
 <script>/* patch_actividades: Admin → Más → Actividades */
 (function () {
   if (typeof calMontar !== "function" || typeof pintarMas !== "function") return;
-  try { if (typeof NAV_MNOM !== "undefined") NAV_MNOM.actividades = "Actividades"; } catch (e) {}
+  try { if (typeof NAV_MNOM !== "undefined") NAV_MNOM.actividades = "Calendario del equipo"; } catch (e) {}
   const pintar = () => { const mb = document.getElementById("masBody"); if (!mb || (typeof vistaMas !== "undefined" && vistaMas !== "actividades")) return;
     mb.innerHTML = '<div class="cal-card act" id="calAct"></div>'; calMontar(document.getElementById("calAct"), pintar); };
   const _pm = pintarMas; pintarMas = function () { if (typeof vistaMas !== "undefined" && vistaMas === "actividades") return pintar(); return _pm.apply(this, arguments); };
