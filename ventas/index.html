@@ -7198,7 +7198,7 @@ function confirmarNota() {
   x.onclick = () => cerrarModal(); card.insertBefore(x, card.firstChild); })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261123010031";
+const HWF_VER = "20261123010806";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -9436,181 +9436,6 @@ body.ini-u.it-dia .iu-pl{max-height:190px;overflow:hidden;position:relative}
   let t = 0; addEventListener("scroll", () => { b.classList.add("ia-sc"); clearTimeout(t); t = setTimeout(() => b.classList.remove("ia-sc"), 450); }, { passive: true });
 })();
 </script>
-<style>/* patch_b2b_apps */
-.b2{display:grid;gap:12px;min-width:0;max-width:100%}.b2 *{box-sizing:border-box}
-.b2-top{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
-.b2-top h2{margin:0;font-size:1.15rem;color:#0B3146}
-.b2-card{background:var(--surface,#fff);border:1px solid var(--line,#DAE1E7);border-radius:14px;padding:12px;min-width:0;overflow-wrap:anywhere}
-.b2-card h3{margin:0 0 8px;font-size:1rem;color:#0B3146;display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap}
-.b2-card h3 small{font-weight:600;color:var(--muted,#5B6874);font-size:.78rem}
-.b2-c{border:1px solid var(--line,#DAE1E7);border-radius:12px;padding:10px;display:grid;gap:4px;background:var(--surface,#fff);min-width:0}
-.b2-c+.b2-c{margin-top:8px}.b2-c.pend{border-color:#80C6C9;box-shadow:inset 4px 0 0 #80C6C9}
-.b2-t{display:flex;gap:8px;justify-content:space-between;align-items:flex-start}.b2-t b{color:#0B3146;min-width:0}
-.b2-c small,.b2-p{color:var(--muted,#5B6874);font-size:.82rem;line-height:1.35}
-.b2-c a{color:#0B3146;font-weight:700}
-.b2-pill{display:inline-block;border-radius:999px;padding:2px 9px;font-size:.72rem;font-weight:800;white-space:nowrap;background:#E6EEF3;color:#0B3146}
-.b2-pill.pendiente{background:#FFF1CC;color:#7A5300}.b2-pill.activo{background:#DDF3E6;color:#0F6B3B}.b2-pill.rechazado{background:#EDEDED;color:#555}.b2-pill.bloqueado{background:#FBE0DD;color:#B42318}
-.b2-bt{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
-.b2 button.b2-b,.b2-md button.b2-b{border:0;border-radius:10px;padding:9px 12px;font:inherit;font-weight:800;font-size:.86rem;cursor:pointer;background:#E6EEF3;color:#0B3146;min-height:38px}
-.b2 button.b2-b.ok,.b2-md button.b2-b.ok{background:#0B3146;color:#fff}.b2 button.b2-b.tq{background:#80C6C9;color:#0B3146}
-.b2 button.b2-b.mal{background:#FBE0DD;color:#B42318}.b2 button.b2-b:disabled{opacity:.5;cursor:default}
-.b2-chips{display:flex;gap:6px;flex-wrap:wrap}.b2 button.b2-ch{border:1px solid var(--line,#DAE1E7);background:var(--surface,#fff);border-radius:999px;padding:6px 12px;font:inherit;font-weight:700;font-size:.82rem;color:var(--ink,#0F1E29);cursor:pointer}
-.b2 button.b2-ch[aria-pressed="true"]{background:#0B3146;color:#fff;border-color:#0B3146}
-.b2-in,.b2 select.b2-in,.b2 textarea.b2-in,.b2-md .b2-in{width:100%;min-width:0;max-width:100%;border:1px solid var(--line,#DAE1E7);border-radius:10px;padding:9px 10px;font:inherit;font-size:.92rem;background:var(--surface,#fff);color:var(--ink,#0F1E29)}
-.b2 textarea.b2-in{min-height:64px;resize:vertical;font-weight:500}
-.b2-md .b2-in,.b2 .b2-in{font-weight:500}
-.b2-lbl{display:grid;gap:3px;font-size:.74rem;font-weight:800;color:var(--muted,#5B6874);min-width:0}.b2-lbl .b2-in{font-weight:500}
-.b2-g2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
-.b2-it{border:1px solid var(--line,#DAE1E7);border-radius:12px;padding:10px;display:grid;gap:8px;margin-bottom:8px;background:var(--sunk,#F6F8FA)}
-.b2-vac{padding:14px;text-align:center;color:var(--muted,#5B6874);font-size:.9rem}
-.b2-err{background:#FBE0DD;color:#7A1A12;border-radius:12px;padding:10px;font-size:.88rem}
-.b2-seg{display:flex;gap:6px;flex-wrap:wrap}
-.b2-bdg{display:inline-block;min-width:18px;height:18px;line-height:18px;border-radius:9px;background:#B42318;color:#fff;font-size:.68rem;font-weight:800;text-align:center;padding:0 5px;margin-left:6px;font-style:normal;vertical-align:middle}
-.b2-bdg[hidden]{display:none}
-#masSeg [data-m="b2b"][data-n]::after{content:attr(data-n);display:inline-block;min-width:18px;height:18px;line-height:18px;border-radius:9px;background:#B42318;color:#fff;font-size:.68rem;font-weight:800;text-align:center;padding:0 5px;margin-left:6px}
-#snBtn.b2-punto::after{content:"";position:absolute;top:6px;right:6px;width:11px;height:11px;border-radius:50%;background:#B42318;border:2px solid #fff}
-.b2-ov{position:fixed;inset:0;z-index:9900;background:rgba(11,49,70,.55);display:flex;align-items:flex-end;justify-content:center}
-.b2-md{background:var(--surface,#fff);width:min(560px,100%);max-height:88vh;border-radius:18px 18px 0 0;padding:14px 14px calc(14px + env(safe-area-inset-bottom));display:grid;gap:8px;grid-template-rows:auto auto auto auto minmax(0,1fr);overflow:hidden}
-.b2-mh{display:flex;align-items:center;justify-content:space-between;color:#0B3146}.b2-mh .b2-x{border:0;background:none;font-size:1.6rem;cursor:pointer;color:var(--muted,#5B6874)}
-.b2-sub{margin:0;font-size:.84rem;color:var(--muted,#5B6874)}.b2-chk{display:flex;gap:8px;align-items:center;font-size:.84rem;color:var(--ink,#0F1E29)}
-.b2-ls{overflow-y:auto;display:grid;gap:6px;align-content:start;min-height:120px}
-.b2-ls button{display:block;width:100%;text-align:left;border:1px solid var(--line,#DAE1E7);background:var(--surface,#fff);border-radius:10px;padding:9px 10px;font:inherit;cursor:pointer;color:var(--ink,#0F1E29)}
-.b2-ls button b{display:block;color:#0B3146;font-size:.9rem}.b2-ls button small{color:var(--muted,#5B6874);font-size:.76rem}.b2-ls button.rut{border-color:#80C6C9;background:#EAF7F7}
-body.m-b2b #crmMeta{display:none!important}
-</style>
-<script>/* patch_b2b_apps (Ventas): Clientes B2B */
-(function () {
-  if (typeof setModo !== "function" || typeof NAV_ORDEN === "undefined" || typeof syLlamar !== "function" || document.getElementById("mB2b") || !document.getElementById("mDash")) return;
-
-  const E = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-  const M = n => "$" + Math.round(Number(n) || 0).toLocaleString("es-CL");
-  const F = s => { s = String(s || ""); const m = /^(\d{4})-(\d\d)-(\d\d)/.exec(s); return m ? m[3] + "-" + m[2] + "-" + m[1] : s.slice(0, 16); };
-  const N = s => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
-  const RK = s => String(s || "").replace(/[^0-9kK]/g, "").toUpperCase();
-  const aviso = m => { try { (typeof toast === "function" ? toast : alert)(m); } catch (e) { } };
-  const EST = { pendiente: "Pendiente", activo: "Activa", rechazado: "Rechazada", bloqueado: "Bloqueada" };
-  const pill = e => `<span class="b2-pill ${E(e)}">${E(EST[e] || e || "—")}</span>`;
-  /* ventana con buscador para elegir el cliente exacto */
-  function elegir(o) {
-    const ov = document.createElement("div"); ov.className = "b2-ov";
-    ov.innerHTML = `<div class="b2-md" role="dialog" aria-label="${E(o.titulo)}"><div class="b2-mh"><b>${E(o.titulo)}</b><button type="button" class="b2-x" aria-label="Cerrar">×</button></div>
-      <p class="b2-sub">${o.sub || ""}</p><input class="b2-in" type="search" placeholder="Buscar por nombre, RUT o comuna" autocomplete="off">
-      <label class="b2-chk" ${o.mas ? "" : "hidden"}><input type="checkbox"> Incluir clientes de otras carteras</label><div class="b2-ls"></div></div>`;
-    document.body.appendChild(ov);
-    const inp = ov.querySelector("input[type=search]"), chk = ov.querySelector(".b2-chk input"), ls = ov.querySelector(".b2-ls"); let lista = o.lista;
-    const cerrar = () => { ov.remove(); document.removeEventListener("keydown", esc); }, esc = e => { if (e.key === "Escape") cerrar(); };
-    document.addEventListener("keydown", esc);
-    function pintar() {
-      const q = N(inp.value).split(/\s+/).filter(Boolean);
-      let l = lista.filter(c => { const t = N([c.nombre, c.rut, c.comuna, c.cart].join(" ")); return q.every(w => t.includes(w)); });
-      if (o.rut) l.sort((a, b) => (RK(b.rut) === o.rut) - (RK(a.rut) === o.rut));
-      const tot = l.length; l = l.slice(0, 40);
-      ls.innerHTML = l.length ? l.map((c, i) => `<button type="button" data-i="${i}" class="${o.rut && RK(c.rut) === o.rut ? "rut" : ""}"><b>${E(c.nombre)}</b><small>${E([c.rut, c.comuna, c.cart].filter(Boolean).join(" · "))}${o.rut && RK(c.rut) === o.rut ? " · coincide el RUT" : ""}</small></button>`).join("") + (tot > 40 ? `<p class="b2-sub">Hay ${tot} resultados; escribe más para afinar.</p>` : "")
-        : `<p class="b2-vac">No hay clientes que coincidan.</p>`;
-      ls._l = l; }
-    inp.oninput = pintar; if (chk) chk.onchange = () => { lista = chk.checked ? o.mas() : o.lista; pintar(); };
-    ls.onclick = e => { const b = e.target.closest("button[data-i]"); if (!b) return; const c = ls._l[+b.dataset.i]; cerrar(); o.ok(c); };
-    ov.onclick = e => { if (e.target === ov || e.target.closest(".b2-x")) cerrar(); };
-    pintar(); setTimeout(() => inp.focus(), 50);
-  }
-  function tarjetaCuenta(c, extra, botones) {
-    return `<div class="b2-c ${c.estado === "pendiente" ? "pend" : ""}" data-id="${E(c.id)}"><div class="b2-t"><b>${E(c.razon || "(sin razón social)")}</b>${pill(c.estado)}</div>
-      <small>RUT ${E(c.rut || "—")}${c.contacto ? " · " + E(c.contacto) : ""}</small>
-      <small>${c.correo ? `<a href="mailto:${E(c.correo)}">${E(c.correo)}</a>` : ""}${c.telefono ? ` · <a href="tel:${E(String(c.telefono).replace(/[^0-9+]/g, ""))}">${E(c.telefono)}</a>` : ""}${c.comuna ? " · " + E(c.comuna) : ""}</small>
-      <small>Solicitó el ${E(F(c.fecha))}${c.cliente ? ` · Cliente HWF: <b>${E(c.cliente)}</b>` : ""}${c.vendedor ? ` · Vendedor: ${E(c.vendedor)}` : ""}</small>${extra || ""}
-      <div class="b2-bt">${botones}</div></div>`;
-  }
-  const items = p => { let a = p.items; if (typeof a === "string") { try { a = JSON.parse(a); } catch (e) { a = null; } } return Array.isArray(a) ? a : null; };
-  function tarjetaPedido(p) {
-    const it = items(p), n = it ? it.length : 0;
-    return `<div class="b2-c"><div class="b2-t"><b>${E(p.cliente || p.rut || "—")}</b><b>${M(p.neto)}</b></div>
-      <small>${E(F(p.fecha))}${n ? ` · ${n} producto${n === 1 ? "" : "s"}` : ""}${p.vendedor ? " · " + E(p.vendedor) : ""}</small>
-      <small>${p.estado ? "Estado: " + E(p.estado) : ""}${p.nota ? ` · Nota de pedido ${E(p.nota)}` : ""}</small></div>`;
-  }
-
-  const yo = () => (typeof SES !== "undefined" && SES && SES.vendedor && SES.vendedor.nombre) || "";
-  const cfg = () => { try { const c = syCfg(); return c && c.url ? c : null; } catch (e) { return null; } };
-  const llamar = async d => { const c = cfg(); if (!c) return { ok: false, error: "Esta app no está conectada al script de Google." }; return await syLlamar(c, d); };
-  const ST = { cuentas: [], pedidos: [], canjes: [], cargando: false, err: "", filtro: "activo", t: 0, ocup: false, avisado: false };
-  const pend = () => ST.cuentas.filter(c => c.estado === "pendiente").length;
-  const mias = () => { const n = yo(); return ST.cuentas.filter(c => c.estado !== "pendiente" && (!c.vendedor || c.vendedor === n)); };
-  let box, tab;
-  function insignias() {
-    const n = pend(), s = n ? `<i class="b2-bdg">${n}</i>` : "";
-    if (tab) { tab.querySelectorAll(".b2-bdg").forEach(x => x.remove()); if (n) tab.insertAdjacentHTML("beforeend", s); }
-    const it = document.querySelector('#snPanel [data-sm="b2b"]'); if (it) { it.querySelectorAll(".b2-bdg").forEach(x => x.remove()); if (n) it.insertAdjacentHTML("beforeend", s); }
-    const sb = document.getElementById("snBtn"); if (sb) sb.classList.toggle("b2-punto", n > 0);
-  }
-  async function cargar(silencio) {
-    if (ST.cargando) return; if (!cfg() || !yo()) return; ST.cargando = true; ST.err = ""; if (!silencio) pintar();
-    const r = await llamar({ accion: "b2bSolicitudes", vendedor: yo() }); ST.cargando = false; ST.t = Date.now();
-    if (r && r.ok) { ST.cuentas = r.cuentas || []; ST.pedidos = r.pedidos || []; ST.canjes = r.canjes || []; ST.err = ""; }
-    else if (!silencio || !ST.cuentas.length) ST.err = (r && r.error) || "No se pudo consultar el portal B2B.";
-    insignias(); if (typeof MODO !== "undefined" && MODO === "b2b") pintar();
-    if (!ST.avisado && pend() && r && r.ok) { ST.avisado = true; aviso("Tienes " + pend() + (pend() === 1 ? " solicitud B2B pendiente" : " solicitudes B2B pendientes")); }
-  }
-  function pintar() {
-    if (!box) return; const n = pend(), m = mias(), f = ST.filtro;
-    const pe = ST.cuentas.filter(c => c.estado === "pendiente"), cuentas = f === "todas" ? m.filter(c => c.estado !== "rechazado") : m.filter(c => c.estado === f);   /* rechazadas: archivadas, fuera de «Todas» (22-11-2026) */
-    const ruts = new Set(m.map(c => RK(c.rut))), ped = ST.pedidos.filter(p => p.vendedor === yo() || ruts.has(RK(p.rut))).slice(0, 25);
-    const cj = ST.canjes.filter(c => ruts.has(RK(c.rut)) && c.estado === "pendiente");
-    const cnt = e => m.filter(c => c.estado === e).length;
-    box.innerHTML = `<div class="b2-top"><h2>Clientes B2B</h2><button type="button" class="b2-b" id="b2Ref" ${ST.cargando ? "disabled" : ""}>${ST.cargando ? "Cargando…" : "↻ Actualizar"}</button></div>
-      ${!cfg() ? `<div class="b2-err">Esta app no está conectada al script de Google. Conéctala desde los ajustes para ver las solicitudes.</div>` : ""}
-      ${ST.err ? `<div class="b2-err">${E(ST.err)}</div>` : ""}
-      <div class="b2-card"><h3>Solicitudes pendientes <small>${n ? n + (n === 1 ? " por revisar" : " por revisar") : "al día"}</small></h3>
-        ${pe.length ? pe.map(c => tarjetaCuenta(c, "", `<button type="button" class="b2-b ok" data-a="aprobar" data-id="${E(c.id)}">Aprobar</button><button type="button" class="b2-b mal" data-a="rechazado" data-id="${E(c.id)}">Rechazar</button>`)).join("") : `<div class="b2-vac">${ST.t ? "No hay solicitudes pendientes." : "Sin datos todavía."}</div>`}</div>
-      <div class="b2-card"><h3>Mi cartera B2B <small>${m.length} cuenta${m.length === 1 ? "" : "s"}</small></h3>
-        <div class="b2-chips">${[["activo", "Activas"], ["bloqueado", "Bloqueadas"], ["todas", "Todas"]].concat(cnt("rechazado") ? [["rechazado", "🗄 Archivadas"]] : []).map(([k, t]) => `<button type="button" class="b2-ch" data-f="${k}" aria-pressed="${f === k}"${k === "rechazado" ? ' style="opacity:.7"' : ""}>${t}${k === "todas" ? "" : " " + cnt(k)}</button>`).join("")}</div>
-        <div style="margin-top:8px">${cuentas.length ? cuentas.map(c => tarjetaCuenta(c, "", c.estado === "activo" ? `<button type="button" class="b2-b mal" data-a="bloqueado" data-id="${E(c.id)}">Bloquear</button>` : c.estado === "bloqueado" ? `<button type="button" class="b2-b ok" data-a="aprobar" data-id="${E(c.id)}">Reactivar</button>` : `<button type="button" class="b2-b ok" data-a="aprobar" data-id="${E(c.id)}">Aprobar</button>`)).join("") : `<div class="b2-vac">No hay cuentas en esta lista.</div>`}</div></div>
-      ${cj.length ? `<div class="b2-card"><h3>Canjes por entregar <small>${cj.length}</small></h3>${cj.map(c => `<div class="b2-c"><div class="b2-t"><b>${E(c.cliente || c.rut)}</b><span class="b2-pill pendiente">${E(c.puntos || 0)} pts</span></div><small>${E(F(c.fecha))} · ${E(c.beneficio || "")}</small></div>`).join("")}</div>` : ""}
-      <div class="b2-card"><h3>Pedidos B2B recientes <small>${ped.length}</small></h3>${ped.length ? ped.map(tarjetaPedido).join("") : `<div class="b2-vac">Aún no hay pedidos del portal de tus clientes.</div>`}</div>`;
-  }
-  async function actuar(c, estado, cliente) {
-    if (ST.ocup) return; ST.ocup = true;
-    const r = await llamar({ accion: "b2bAprobar", id: c.id, estado, vendedor: yo(), cliente: cliente || c.cliente || "", por: yo() }); ST.ocup = false;
-    if (r && r.ok) { aviso(estado === "activo" ? "Cuenta aprobada. El cliente recibirá un correo de bienvenida." : estado === "bloqueado" ? "Cuenta bloqueada." : "Solicitud rechazada."); await cargar(true); pintar(); }
-    else aviso((r && r.error) || "No se pudo guardar.");
-  }
-  function clientesCartera() { try { const d = crmMio(); return d && d.clientes ? d.clientes.map(c => ({ nombre: c.nombre, rut: c.rut, comuna: c.comuna, cart: "" })) : []; } catch (e) { return []; } }
-  function clientesTodos() { try { return clientesLocal().map(c => ({ nombre: c.nombre, rut: c.rut, comuna: c.comuna, cart: c.vendedor || "" })); } catch (e) { return []; } }
-  function aprobar(c) {
-    if (c.estado !== "pendiente" && c.cliente) { if (confirm(`¿${c.estado === "bloqueado" ? "Reactivar" : "Aprobar"} la cuenta de ${c.razon}?`)) actuar(c, "activo", c.cliente); return; }
-    elegir({ titulo: "Elegir el cliente HWF", sub: `Solicitud de <b>${E(c.razon)}</b> · RUT ${E(c.rut)}. Elige el cliente exacto de tu cartera; así sus pedidos y su cobranza quedan en esa ficha.`, lista: clientesCartera(), mas: clientesTodos, rut: RK(c.rut),
-      ok: x => { if (confirm(`¿Aprobar a ${c.razon} como cliente «${x.nombre}»?`)) actuar(c, "activo", x.nombre); } });
-  }
-  function montar() {
-    tab = document.createElement("button"); tab.type = "button"; tab.setAttribute("role", "tab"); tab.id = "mB2b"; tab.setAttribute("aria-selected", "false"); tab.title = "Clientes B2B"; tab.textContent = "Clientes B2B";
-    const ref = document.getElementById("mNut") || document.getElementById("mEmbudo") || document.getElementById("mDash"); ref.after(tab);
-    box = document.createElement("div"); box.id = "crmB2b"; box.className = "b2"; box.hidden = true;
-    const ref2 = document.getElementById("crmNut") || document.getElementById("crmEmbudo") || document.getElementById("crmDash"); ref2.after(box);
-    const _sm = setModo; setModo = function (m) { const r = _sm.apply(this, arguments), on = m === "b2b"; tab.setAttribute("aria-selected", on); box.hidden = !on; document.body.classList.toggle("m-b2b", on);
-      if (on) { ["crmFicha", "crmLista", "crmAgenda", "crmRuta", "crmInicio", "crmCobranza", "crmEmbudo", "crmNut", "crmDash", "crmAvance", "crmMeta", "crmTec", "crmBi"].forEach(id => { const x = document.getElementById(id); if (x) x.hidden = true; });
-        pintar(); if (!ST.t || Date.now() - ST.t > 60000) cargar(false); window.scrollTo({ top: 0 }); }
-      return r; };
-    tab.onclick = () => setModo("b2b");
-    try { const _af = abrirFicha; abrirFicha = function () { box.hidden = true; tab.setAttribute("aria-selected", "false"); document.body.classList.remove("m-b2b"); return _af.apply(this, arguments); }; } catch (e) { }
-    try { if (!NAV_ORDEN.some(x => x[0] === "b2b")) NAV_ORDEN.push(["b2b", "mB2b"]); } catch (e) { }
-    box.addEventListener("click", e => {
-      if (e.target.closest("#b2Ref")) return cargar(false);
-      const f = e.target.closest("[data-f]"); if (f) { ST.filtro = f.dataset.f; return pintar(); }
-      const b = e.target.closest("[data-a]"); if (!b) return; const c = ST.cuentas.find(x => String(x.id) === b.dataset.id); if (!c) return;
-      if (b.dataset.a === "aprobar") return aprobar(c);
-      if (confirm(b.dataset.a === "bloqueado" ? `¿Bloquear el acceso de ${c.razon}?` : `¿Rechazar la solicitud de ${c.razon}?`)) actuar(c, b.dataset.a);
-    });
-    /* menú lateral: ícono, grupo y contador */
-    const pan = document.getElementById("snPanel");
-    const ajustar = () => { const p = document.getElementById("snPanel"); if (!p) return; const it = p.querySelector('[data-sm="b2b"]'); if (it) { const e = it.querySelector(".sn-e"); if (e && (e.textContent.trim() === "•" || !e.dataset.b2)) { e.dataset.b2 = "1"; /* ícono: patch_iconos_extra */ }
-        if (!it.querySelector(".b2-bdg") && pend()) it.insertAdjacentHTML("beforeend", `<i class="b2-bdg">${pend()}</i>`);
-        const g = [...p.querySelectorAll(".sn-g")].find(x => /^Otros$/.test(x.textContent.trim())); if (g) g.textContent = "Portal B2B"; } };
-    const iv = setInterval(() => { const p = document.getElementById("snPanel"); if (p) { clearInterval(iv); new MutationObserver(() => setTimeout(ajustar, 0)).observe(p, { childList: true }); } }, 400);
-    /* sondeo: cuenta las pendientes con la sesión abierta */
-    const sonda = () => { if (document.hidden || typeof SES === "undefined" || !SES || !cfg()) return; cargar(true); };
-    setTimeout(sonda, 4000); setInterval(sonda, 300000); document.addEventListener("visibilitychange", () => { if (!document.hidden && Date.now() - ST.t > 120000) sonda(); });
-  }
-  montar();
-})();
-</script>
 <script>/* patch_congruencia_cat: VENTAS (catálogo y pedido, Inicio) */
 { const _rh = rowHTML; rowHTML = function (p) { let h = _rh.apply(this, arguments);
     try { const ch = hwfPxChips(p), li = hwfPxLinea(p);
@@ -10822,6 +10647,181 @@ body:has(#rdOv) #snBtn,body:has(#rdOv) #iaBtn,body:has(#rdOv) #navBotones{displa
     bs.sort((a, b) => { const i = orden.indexOf(k(a)), j = orden.indexOf(k(b)); return (i < 0 ? 99 : i) - (j < 0 ? 99 : j); }).forEach(b => nav.appendChild(b)); };
   if (LOG) { const o = ["dash", "rutas", "seg", "flota", "abast", "b:v", "b:l"]; barra("#nav", o); setTimeout(() => barra("#nav", o), 500); }
   if (TND) { const o = ["inicio", "ventas", "stock", "cat", "plan", "dash", "guia", "nut", "rank", "adm"]; barra("#tNav", o); setTimeout(() => barra("#tNav", o), 500); }
+})();
+</script>
+<style>/* patch_b2b_apps */
+.b2{display:grid;gap:12px;min-width:0;max-width:100%}.b2 *{box-sizing:border-box}
+.b2-top{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.b2-top h2{margin:0;font-size:1.15rem;color:#0B3146}
+.b2-card{background:var(--surface,#fff);border:1px solid var(--line,#DAE1E7);border-radius:14px;padding:12px;min-width:0;overflow-wrap:anywhere}
+.b2-card h3{margin:0 0 8px;font-size:1rem;color:#0B3146;display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.b2-card h3 small{font-weight:600;color:var(--muted,#5B6874);font-size:.78rem}
+.b2-c{border:1px solid var(--line,#DAE1E7);border-radius:12px;padding:10px;display:grid;gap:4px;background:var(--surface,#fff);min-width:0}
+.b2-c+.b2-c{margin-top:8px}.b2-c.pend{border-color:#80C6C9;box-shadow:inset 4px 0 0 #80C6C9}
+.b2-t{display:flex;gap:8px;justify-content:space-between;align-items:flex-start}.b2-t b{color:#0B3146;min-width:0}
+.b2-c small,.b2-p{color:var(--muted,#5B6874);font-size:.82rem;line-height:1.35}
+.b2-c a{color:#0B3146;font-weight:700}
+.b2-pill{display:inline-block;border-radius:999px;padding:2px 9px;font-size:.72rem;font-weight:800;white-space:nowrap;background:#E6EEF3;color:#0B3146}
+.b2-pill.pendiente{background:#FFF1CC;color:#7A5300}.b2-pill.activo{background:#DDF3E6;color:#0F6B3B}.b2-pill.rechazado{background:#EDEDED;color:#555}.b2-pill.bloqueado{background:#FBE0DD;color:#B42318}
+.b2-bt{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.b2 button.b2-b,.b2-md button.b2-b{border:0;border-radius:10px;padding:9px 12px;font:inherit;font-weight:800;font-size:.86rem;cursor:pointer;background:#E6EEF3;color:#0B3146;min-height:38px}
+.b2 button.b2-b.ok,.b2-md button.b2-b.ok{background:#0B3146;color:#fff}.b2 button.b2-b.tq{background:#80C6C9;color:#0B3146}
+.b2 button.b2-b.mal{background:#FBE0DD;color:#B42318}.b2 button.b2-b:disabled{opacity:.5;cursor:default}
+.b2-chips{display:flex;gap:6px;flex-wrap:wrap}.b2 button.b2-ch{border:1px solid var(--line,#DAE1E7);background:var(--surface,#fff);border-radius:999px;padding:6px 12px;font:inherit;font-weight:700;font-size:.82rem;color:var(--ink,#0F1E29);cursor:pointer}
+.b2 button.b2-ch[aria-pressed="true"]{background:#0B3146;color:#fff;border-color:#0B3146}
+.b2-in,.b2 select.b2-in,.b2 textarea.b2-in,.b2-md .b2-in{width:100%;min-width:0;max-width:100%;border:1px solid var(--line,#DAE1E7);border-radius:10px;padding:9px 10px;font:inherit;font-size:.92rem;background:var(--surface,#fff);color:var(--ink,#0F1E29)}
+.b2 textarea.b2-in{min-height:64px;resize:vertical;font-weight:500}
+.b2-md .b2-in,.b2 .b2-in{font-weight:500}
+.b2-lbl{display:grid;gap:3px;font-size:.74rem;font-weight:800;color:var(--muted,#5B6874);min-width:0}.b2-lbl .b2-in{font-weight:500}
+.b2-g2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.b2-it{border:1px solid var(--line,#DAE1E7);border-radius:12px;padding:10px;display:grid;gap:8px;margin-bottom:8px;background:var(--sunk,#F6F8FA)}
+.b2-vac{padding:14px;text-align:center;color:var(--muted,#5B6874);font-size:.9rem}
+.b2-err{background:#FBE0DD;color:#7A1A12;border-radius:12px;padding:10px;font-size:.88rem}
+.b2-seg{display:flex;gap:6px;flex-wrap:wrap}
+.b2-bdg{display:inline-block;min-width:18px;height:18px;line-height:18px;border-radius:9px;background:#B42318;color:#fff;font-size:.68rem;font-weight:800;text-align:center;padding:0 5px;margin-left:6px;font-style:normal;vertical-align:middle}
+.b2-bdg[hidden]{display:none}
+#masSeg [data-m="b2b"][data-n]::after{content:attr(data-n);display:inline-block;min-width:18px;height:18px;line-height:18px;border-radius:9px;background:#B42318;color:#fff;font-size:.68rem;font-weight:800;text-align:center;padding:0 5px;margin-left:6px}
+#snBtn.b2-punto::after{content:"";position:absolute;top:6px;right:6px;width:11px;height:11px;border-radius:50%;background:#B42318;border:2px solid #fff}
+.b2-ov{position:fixed;inset:0;z-index:9900;background:rgba(11,49,70,.55);display:flex;align-items:flex-end;justify-content:center}
+.b2-md{background:var(--surface,#fff);width:min(560px,100%);max-height:88vh;border-radius:18px 18px 0 0;padding:14px 14px calc(14px + env(safe-area-inset-bottom));display:grid;gap:8px;grid-template-rows:auto auto auto auto minmax(0,1fr);overflow:hidden}
+.b2-mh{display:flex;align-items:center;justify-content:space-between;color:#0B3146}.b2-mh .b2-x{border:0;background:none;font-size:1.6rem;cursor:pointer;color:var(--muted,#5B6874)}
+.b2-sub{margin:0;font-size:.84rem;color:var(--muted,#5B6874)}.b2-chk{display:flex;gap:8px;align-items:center;font-size:.84rem;color:var(--ink,#0F1E29)}
+.b2-ls{overflow-y:auto;display:grid;gap:6px;align-content:start;min-height:120px}
+.b2-ls button{display:block;width:100%;text-align:left;border:1px solid var(--line,#DAE1E7);background:var(--surface,#fff);border-radius:10px;padding:9px 10px;font:inherit;cursor:pointer;color:var(--ink,#0F1E29)}
+.b2-ls button b{display:block;color:#0B3146;font-size:.9rem}.b2-ls button small{color:var(--muted,#5B6874);font-size:.76rem}.b2-ls button.rut{border-color:#80C6C9;background:#EAF7F7}
+body.m-b2b #crmMeta{display:none!important}
+</style>
+<script>/* patch_b2b_apps (Ventas): Clientes B2B */
+(function () {
+  if (typeof setModo !== "function" || typeof NAV_ORDEN === "undefined" || typeof syLlamar !== "function" || document.getElementById("mB2b") || !document.getElementById("mDash")) return;
+
+  const E = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const M = n => "$" + Math.round(Number(n) || 0).toLocaleString("es-CL");
+  const F = s => { s = String(s || ""); const m = /^(\d{4})-(\d\d)-(\d\d)/.exec(s); return m ? m[3] + "-" + m[2] + "-" + m[1] : s.slice(0, 16); };
+  const N = s => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+  const RK = s => String(s || "").replace(/[^0-9kK]/g, "").toUpperCase();
+  const aviso = m => { try { (typeof toast === "function" ? toast : alert)(m); } catch (e) { } };
+  const EST = { pendiente: "Pendiente", activo: "Activa", rechazado: "Rechazada", bloqueado: "Bloqueada" };
+  const pill = e => `<span class="b2-pill ${E(e)}">${E(EST[e] || e || "—")}</span>`;
+  /* ventana con buscador para elegir el cliente exacto */
+  function elegir(o) {
+    const ov = document.createElement("div"); ov.className = "b2-ov";
+    ov.innerHTML = `<div class="b2-md" role="dialog" aria-label="${E(o.titulo)}"><div class="b2-mh"><b>${E(o.titulo)}</b><button type="button" class="b2-x" aria-label="Cerrar">×</button></div>
+      <p class="b2-sub">${o.sub || ""}</p><input class="b2-in" type="search" placeholder="Buscar por nombre, RUT o comuna" autocomplete="off">
+      <label class="b2-chk" ${o.mas ? "" : "hidden"}><input type="checkbox"> Incluir clientes de otras carteras</label><div class="b2-ls"></div></div>`;
+    document.body.appendChild(ov);
+    const inp = ov.querySelector("input[type=search]"), chk = ov.querySelector(".b2-chk input"), ls = ov.querySelector(".b2-ls"); let lista = o.lista;
+    const cerrar = () => { ov.remove(); document.removeEventListener("keydown", esc); }, esc = e => { if (e.key === "Escape") cerrar(); };
+    document.addEventListener("keydown", esc);
+    function pintar() {
+      const q = N(inp.value).split(/\s+/).filter(Boolean);
+      let l = lista.filter(c => { const t = N([c.nombre, c.rut, c.comuna, c.cart].join(" ")); return q.every(w => t.includes(w)); });
+      if (o.rut) l.sort((a, b) => (RK(b.rut) === o.rut) - (RK(a.rut) === o.rut));
+      const tot = l.length; l = l.slice(0, 40);
+      ls.innerHTML = l.length ? l.map((c, i) => `<button type="button" data-i="${i}" class="${o.rut && RK(c.rut) === o.rut ? "rut" : ""}"><b>${E(c.nombre)}</b><small>${E([c.rut, c.comuna, c.cart].filter(Boolean).join(" · "))}${o.rut && RK(c.rut) === o.rut ? " · coincide el RUT" : ""}</small></button>`).join("") + (tot > 40 ? `<p class="b2-sub">Hay ${tot} resultados; escribe más para afinar.</p>` : "")
+        : `<p class="b2-vac">No hay clientes que coincidan.</p>`;
+      ls._l = l; }
+    inp.oninput = pintar; if (chk) chk.onchange = () => { lista = chk.checked ? o.mas() : o.lista; pintar(); };
+    ls.onclick = e => { const b = e.target.closest("button[data-i]"); if (!b) return; const c = ls._l[+b.dataset.i]; cerrar(); o.ok(c); };
+    ov.onclick = e => { if (e.target === ov || e.target.closest(".b2-x")) cerrar(); };
+    pintar(); setTimeout(() => inp.focus(), 50);
+  }
+  function tarjetaCuenta(c, extra, botones) {
+    return `<div class="b2-c ${c.estado === "pendiente" ? "pend" : ""}" data-id="${E(c.id)}"><div class="b2-t"><b>${E(c.razon || "(sin razón social)")}</b>${pill(c.estado)}</div>
+      <small>RUT ${E(c.rut || "—")}${c.contacto ? " · " + E(c.contacto) : ""}</small>
+      <small>${c.correo ? `<a href="mailto:${E(c.correo)}">${E(c.correo)}</a>` : ""}${c.telefono ? ` · <a href="tel:${E(String(c.telefono).replace(/[^0-9+]/g, ""))}">${E(c.telefono)}</a>` : ""}${c.comuna ? " · " + E(c.comuna) : ""}</small>
+      <small>Solicitó el ${E(F(c.fecha))}${c.cliente ? ` · Cliente HWF: <b>${E(c.cliente)}</b>` : ""}${c.vendedor ? ` · Vendedor: ${E(c.vendedor)}` : ""}</small>${extra || ""}
+      <div class="b2-bt">${botones}</div></div>`;
+  }
+  const items = p => { let a = p.items; if (typeof a === "string") { try { a = JSON.parse(a); } catch (e) { a = null; } } return Array.isArray(a) ? a : null; };
+  function tarjetaPedido(p) {
+    const it = items(p), n = it ? it.length : 0;
+    return `<div class="b2-c"><div class="b2-t"><b>${E(p.cliente || p.rut || "—")}</b><b>${M(p.neto)}</b></div>
+      <small>${E(F(p.fecha))}${n ? ` · ${n} producto${n === 1 ? "" : "s"}` : ""}${p.vendedor ? " · " + E(p.vendedor) : ""}</small>
+      <small>${p.estado ? "Estado: " + E(p.estado) : ""}${p.nota ? ` · Nota de pedido ${E(p.nota)}` : ""}</small></div>`;
+  }
+
+  const yo = () => (typeof SES !== "undefined" && SES && SES.vendedor && SES.vendedor.nombre) || "";
+  const cfg = () => { try { const c = syCfg(); return c && c.url ? c : null; } catch (e) { return null; } };
+  const llamar = async d => { const c = cfg(); if (!c) return { ok: false, error: "Esta app no está conectada al script de Google." }; return await syLlamar(c, d); };
+  const ST = { cuentas: [], pedidos: [], canjes: [], cargando: false, err: "", filtro: "activo", t: 0, ocup: false, avisado: false };
+  const pend = () => ST.cuentas.filter(c => c.estado === "pendiente").length;
+  const mias = () => { const n = yo(); return ST.cuentas.filter(c => c.estado !== "pendiente" && (!c.vendedor || c.vendedor === n)); };
+  let box, tab;
+  function insignias() {
+    const n = pend(), s = n ? `<i class="b2-bdg">${n}</i>` : "";
+    if (tab) { tab.querySelectorAll(".b2-bdg").forEach(x => x.remove()); if (n) tab.insertAdjacentHTML("beforeend", s); }
+    const it = document.querySelector('#snPanel [data-sm="b2b"]'); if (it) { it.querySelectorAll(".b2-bdg").forEach(x => x.remove()); if (n) it.insertAdjacentHTML("beforeend", s); }
+    const sb = document.getElementById("snBtn"); if (sb) sb.classList.toggle("b2-punto", n > 0);
+  }
+  async function cargar(silencio) {
+    if (ST.cargando) return; if (!cfg() || !yo()) return; ST.cargando = true; ST.err = ""; if (!silencio) pintar();
+    const r = await llamar({ accion: "b2bSolicitudes", vendedor: yo() }); ST.cargando = false; ST.t = Date.now();
+    if (r && r.ok) { ST.cuentas = r.cuentas || []; ST.pedidos = r.pedidos || []; ST.canjes = r.canjes || []; ST.err = ""; }
+    else if (!silencio || !ST.cuentas.length) ST.err = (r && r.error) || "No se pudo consultar el portal B2B.";
+    insignias(); if (typeof MODO !== "undefined" && MODO === "b2b") pintar();
+    if (!ST.avisado && pend() && r && r.ok) { ST.avisado = true; aviso("Tienes " + pend() + (pend() === 1 ? " solicitud B2B pendiente" : " solicitudes B2B pendientes")); }
+  }
+  function pintar() {
+    if (!box) return; const n = pend(), m = mias(), f = ST.filtro;
+    const pe = ST.cuentas.filter(c => c.estado === "pendiente"), cuentas = f === "todas" ? m.filter(c => c.estado !== "rechazado") : m.filter(c => c.estado === f);   /* rechazadas: archivadas, fuera de «Todas» (22-11-2026) */
+    const ruts = new Set(m.map(c => RK(c.rut))), ped = ST.pedidos.filter(p => p.vendedor === yo() || ruts.has(RK(p.rut))).slice(0, 25);
+    const cj = ST.canjes.filter(c => ruts.has(RK(c.rut)) && c.estado === "pendiente");
+    const cnt = e => m.filter(c => c.estado === e).length;
+    box.innerHTML = `<div class="b2-top"><h2>Clientes B2B</h2><button type="button" class="b2-b" id="b2Ref" ${ST.cargando ? "disabled" : ""}>${ST.cargando ? "Cargando…" : "↻ Actualizar"}</button></div>
+      ${!cfg() ? `<div class="b2-err">Esta app no está conectada al script de Google. Conéctala desde los ajustes para ver las solicitudes.</div>` : ""}
+      ${ST.err ? `<div class="b2-err">${E(ST.err)}</div>` : ""}
+      <div class="b2-card"><h3>Solicitudes pendientes <small>${n ? n + (n === 1 ? " por revisar" : " por revisar") : "al día"}</small></h3>
+        ${pe.length ? pe.map(c => tarjetaCuenta(c, "", `<button type="button" class="b2-b ok" data-a="aprobar" data-id="${E(c.id)}">Aprobar</button><button type="button" class="b2-b mal" data-a="rechazado" data-id="${E(c.id)}">Rechazar</button>`)).join("") : `<div class="b2-vac">${ST.t ? "No hay solicitudes pendientes." : "Sin datos todavía."}</div>`}</div>
+      <div class="b2-card"><h3>Mi cartera B2B <small>${m.length} cuenta${m.length === 1 ? "" : "s"}</small></h3>
+        <div class="b2-chips">${[["activo", "Activas"], ["bloqueado", "Bloqueadas"], ["todas", "Todas"]].concat(cnt("rechazado") ? [["rechazado", "🗄 Archivadas"]] : []).map(([k, t]) => `<button type="button" class="b2-ch" data-f="${k}" aria-pressed="${f === k}"${k === "rechazado" ? ' style="opacity:.7"' : ""}>${t}${k === "todas" ? "" : " " + cnt(k)}</button>`).join("")}</div>
+        <div style="margin-top:8px">${cuentas.length ? cuentas.map(c => tarjetaCuenta(c, "", c.estado === "activo" ? `<button type="button" class="b2-b mal" data-a="bloqueado" data-id="${E(c.id)}">Bloquear</button>` : c.estado === "bloqueado" ? `<button type="button" class="b2-b ok" data-a="aprobar" data-id="${E(c.id)}">Reactivar</button>` : `<button type="button" class="b2-b ok" data-a="aprobar" data-id="${E(c.id)}">Aprobar</button>`)).join("") : `<div class="b2-vac">No hay cuentas en esta lista.</div>`}</div></div>
+      ${cj.length ? `<div class="b2-card"><h3>Canjes por entregar <small>${cj.length}</small></h3>${cj.map(c => `<div class="b2-c"><div class="b2-t"><b>${E(c.cliente || c.rut)}</b><span class="b2-pill pendiente">${E(c.puntos || 0)} pts</span></div><small>${E(F(c.fecha))} · ${E(c.beneficio || "")}</small></div>`).join("")}</div>` : ""}
+      <div class="b2-card"><h3>Pedidos B2B recientes <small>${ped.length}</small></h3>${ped.length ? ped.map(tarjetaPedido).join("") : `<div class="b2-vac">Aún no hay pedidos del portal de tus clientes.</div>`}</div>`;
+  }
+  async function actuar(c, estado, cliente) {
+    if (ST.ocup) return; ST.ocup = true;
+    const r = await llamar({ accion: "b2bAprobar", id: c.id, estado, vendedor: yo(), cliente: cliente || c.cliente || "", por: yo() }); ST.ocup = false;
+    if (r && r.ok) { aviso(estado === "activo" ? "Cuenta aprobada. El cliente recibirá un correo de bienvenida." : estado === "bloqueado" ? "Cuenta bloqueada." : "Solicitud rechazada."); await cargar(true); pintar(); }
+    else aviso((r && r.error) || "No se pudo guardar.");
+  }
+  function clientesCartera() { try { const d = crmMio(); return d && d.clientes ? d.clientes.map(c => ({ nombre: c.nombre, rut: c.rut, comuna: c.comuna, cart: "" })) : []; } catch (e) { return []; } }
+  function clientesTodos() { try { return clientesLocal().map(c => ({ nombre: c.nombre, rut: c.rut, comuna: c.comuna, cart: c.vendedor || "" })); } catch (e) { return []; } }
+  function aprobar(c) {
+    if (c.estado !== "pendiente" && c.cliente) { if (confirm(`¿${c.estado === "bloqueado" ? "Reactivar" : "Aprobar"} la cuenta de ${c.razon}?`)) actuar(c, "activo", c.cliente); return; }
+    elegir({ titulo: "Elegir el cliente HWF", sub: `Solicitud de <b>${E(c.razon)}</b> · RUT ${E(c.rut)}. Elige el cliente exacto de tu cartera; así sus pedidos y su cobranza quedan en esa ficha.`, lista: clientesCartera(), mas: clientesTodos, rut: RK(c.rut),
+      ok: x => { if (confirm(`¿Aprobar a ${c.razon} como cliente «${x.nombre}»?`)) actuar(c, "activo", x.nombre); } });
+  }
+  function montar() {
+    tab = document.createElement("button"); tab.type = "button"; tab.setAttribute("role", "tab"); tab.id = "mB2b"; tab.setAttribute("aria-selected", "false"); tab.title = "Clientes B2B"; tab.textContent = "Clientes B2B";
+    const ref = document.getElementById("mNut") || document.getElementById("mEmbudo") || document.getElementById("mDash"); ref.after(tab);
+    box = document.createElement("div"); box.id = "crmB2b"; box.className = "b2"; box.hidden = true;
+    const ref2 = document.getElementById("crmNut") || document.getElementById("crmEmbudo") || document.getElementById("crmDash"); ref2.after(box);
+    const _sm = setModo; setModo = function (m) { const r = _sm.apply(this, arguments), on = m === "b2b"; tab.setAttribute("aria-selected", on); box.hidden = !on; document.body.classList.toggle("m-b2b", on);
+      if (on) { ["crmFicha", "crmLista", "crmAgenda", "crmRuta", "crmInicio", "crmCobranza", "crmEmbudo", "crmNut", "crmDash", "crmAvance", "crmMeta", "crmTec", "crmBi"].forEach(id => { const x = document.getElementById(id); if (x) x.hidden = true; });
+        pintar(); if (!ST.t || Date.now() - ST.t > 60000) cargar(false); window.scrollTo({ top: 0 }); }
+      return r; };
+    tab.onclick = () => setModo("b2b");
+    try { const _af = abrirFicha; abrirFicha = function () { box.hidden = true; tab.setAttribute("aria-selected", "false"); document.body.classList.remove("m-b2b"); return _af.apply(this, arguments); }; } catch (e) { }
+    try { if (!NAV_ORDEN.some(x => x[0] === "b2b")) NAV_ORDEN.push(["b2b", "mB2b"]); } catch (e) { }
+    box.addEventListener("click", e => {
+      if (e.target.closest("#b2Ref")) return cargar(false);
+      const f = e.target.closest("[data-f]"); if (f) { ST.filtro = f.dataset.f; return pintar(); }
+      const b = e.target.closest("[data-a]"); if (!b) return; const c = ST.cuentas.find(x => String(x.id) === b.dataset.id); if (!c) return;
+      if (b.dataset.a === "aprobar") return aprobar(c);
+      if (confirm(b.dataset.a === "bloqueado" ? `¿Bloquear el acceso de ${c.razon}?` : `¿Rechazar la solicitud de ${c.razon}?`)) actuar(c, b.dataset.a);
+    });
+    /* menú lateral: ícono, grupo y contador */
+    const pan = document.getElementById("snPanel");
+    const ajustar = () => { const p = document.getElementById("snPanel"); if (!p) return; const it = p.querySelector('[data-sm="b2b"]'); if (it) { const e = it.querySelector(".sn-e"); if (e && (e.textContent.trim() === "•" || !e.dataset.b2)) { e.dataset.b2 = "1"; /* ícono: patch_iconos_extra */ }
+        if (!it.querySelector(".b2-bdg") && pend()) it.insertAdjacentHTML("beforeend", `<i class="b2-bdg">${pend()}</i>`);
+        const g = [...p.querySelectorAll(".sn-g")].find(x => /^Otros$/.test(x.textContent.trim())); if (g) g.textContent = "Portal B2B"; } };
+    const iv = setInterval(() => { const p = document.getElementById("snPanel"); if (p) { clearInterval(iv); new MutationObserver(() => setTimeout(ajustar, 0)).observe(p, { childList: true }); } }, 400);
+    /* sondeo: cuenta las pendientes con la sesión abierta */
+    const sonda = () => { if (document.hidden || typeof SES === "undefined" || !SES || !cfg()) return; cargar(true); };
+    setTimeout(sonda, 4000); setInterval(sonda, 300000); document.addEventListener("visibilitychange", () => { if (!document.hidden && Date.now() - ST.t > 120000) sonda(); });
+  }
+  montar();
 })();
 </script>
 </body>
