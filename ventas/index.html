@@ -7200,7 +7200,7 @@ function confirmarNota() {
   x.onclick = () => cerrarModal(); card.insertBefore(x, card.firstChild); })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261124005638";
+const HWF_VER = "20261124010101";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -10866,7 +10866,7 @@ body.m-b2b #crmMeta{display:none!important}
   const es = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const nf = n => "$" + Math.round(Number(n) || 0).toLocaleString("es-CL");
   const pri = x => String(x || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase().trim().split(/\s+/)[0] || "";
-  const puede = p => !VEN || (!!pri(yo()) && (pri(p.vend) === pri(yo()) || pri(p.cart) === pri(yo())));
+  const puede = p => !VEN || p.b2b || (!!pri(yo()) && (pri(p.vend) === pri(yo()) || pri(p.cart) === pri(yo())));   /* Ventas: todos los B2B y sus notas de la app (24-11-2026) */
   const yo = () => { try { return (SES && SES.vendedor && SES.vendedor.nombre) || ""; } catch (e) { return ""; } };
   const conf = () => { try { if (typeof SYC === "function") return SYC(); } catch (e) {} try { if (typeof syCfg === "function") return syCfg(); } catch (e) {} try { if (typeof cfg === "function") return cfg(); } catch (e) {} return null; };
   async function llamar(d) { const c = conf(); if (!c || !c.url) return { ok: false, error: "Esta app no está conectada al script de Google." };
