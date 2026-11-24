@@ -1,5 +1,5 @@
 {
- "version": "2026-11-23.1-fondos-blancos",
+ "version": "2026-11-24.1-merluza",
  "base": "https://jmunozcea-hwf.github.io/hwf-apps/",
  "fotos": {
   "764": {
@@ -1541,6 +1541,16 @@
    "nota": "lata 340 g oficial (22-11-2026)",
    "f": "fotos/231.webp",
    "m": "fotos/m/231.webp",
+   "w": 800,
+   "h": 800
+  },
+  "24": {
+   "fuente": "alican (agilitypets.com)",
+   "origen": "https://alican.com.ar/wp-content/uploads/2024/12/Agility_Render_Lata340_Merluza_Gato_Adult_2500x2500-1024x1024.webp",
+   "calidad": "buena",
+   "nota": "Agility Cats Adultos Merluza lata 340 g",
+   "f": "fotos/24.webp",
+   "m": "fotos/m/24.webp",
    "w": 800,
    "h": 800
   }
