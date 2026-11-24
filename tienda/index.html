@@ -2350,7 +2350,7 @@ const stAbrev = n => ST_ABR.reduce((s, [r, t]) => s.replace(r, t), String(n || "
 try { if ($("sStock") && !$("sStock").hidden) pintarStock(); } catch (e) {}
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261124153612";
+const HWF_VER = "20261124155131";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -3495,7 +3495,7 @@ body.ia-izq #iaBtn{right:auto;left:14px}
   function ctxTienda() { const D = DATA() || {}, R = D.rows || [], P = D.productos || [], L = [], tab = (t, cab, filas) => { if (!filas.length) return; L.push("", "## " + t, cab.join(" | ")); filas.forEach(f => L.push(f.join(" | "))); };
     const cy = Number(String(D.corte || "").slice(0, 4)) || D.anio, cm = Number(String(D.corte || "").slice(5, 7)) || 12, cd = Number(String(D.corte || "").slice(8, 10)) || 0, dim = new Date(cy, cm, 0).getDate();
     L.push("APP: " + NOM, "ALCANCE Y FUNCIONES: " + ALC, "Fecha de hoy: " + new Date().toLocaleDateString("es-CL") + ". Ventas de la tienda (boletas y facturas, neto sin IVA) al " + (D.corte || "?") + "; " + MES[cm - 1] + " " + cy + " va en curso. Stock de la tienda al " + (D.stockFecha || "?") + ".",
-      "La tienda abre todos los días salvo feriados irrenunciables. Plan: la meta de la tienda parte en $10 MM en nov-26 y sube con estacionalidad (plan total nov-26 a dic-27 con distribuidora: $1.000 MM).");
+      "La tienda abre todos los días salvo feriados irrenunciables. Plan: la meta de la tienda parte en $10 MM en nov-26 y sube con estacionalidad (plan total ene-27 a dic-27 con distribuidora: $1.000 MM).");
     const mk = {}; R.forEach(r => { const k = (r[6] || D.anio) * 100 + r[1], o = mk[k] = mk[k] || { v: 0, u: 0, docs: new Set() }; o.v += Number(r[4]) || 0; o.u += Number(r[3]) || 0; if (r[7] && Number(r[4]) > 0) o.docs.add(r[7]); });
     tab("Venta neta mensual de la tienda", ["Mes", "Venta $", "Unidades", "Tickets", "Ticket promedio $"], Object.keys(mk).map(Number).sort().map(k => { const o = mk[k], n = o.docs.size; return [MES[k % 100 - 1] + "-" + Math.floor(k / 100), pz(o.v), n0(o.u), n || "s/d", n ? pz(o.v / n) : "s/d"]; }));
     let PL = []; try { PL = typeof PLAN !== "undefined" ? PLAN : []; } catch (e) {} tab("Meta mensual de la tienda (plan)", ["Mes", "Meta $"], PL.map(x => [MES[x.m - 1] + "-" + x.y, pz(x.meta)]));

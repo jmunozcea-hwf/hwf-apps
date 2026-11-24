@@ -6051,7 +6051,7 @@ setTimeout(() => { try { if (D && $("s-res") && !$("s-res").hidden && !$("kpCard
 .vm-res b{display:block;font-size:.95rem;color:var(--ink,#0F1E29);font-variant-numeric:tabular-nums}
 </style>
 <script>/* patch_grafventas: venta neta mensual 2025, 2026 y plan (distribuidora) */
-const VM_PLAN = [[202611, 63000000], [202612, 69800000], [202701, 62100000], [202702, 63700000], [202703, 68100000], [202704, 69100000], [202705, 64900000], [202706, 76600000], [202707, 73900000], [202708, 68500000], [202709, 82500000], [202710, 76400000], [202711, 75900000], [202712, 85500000]];
+const VM_PLAN = [[202701,  71600000],  [202702,  73500000],  [202703,  78500000],  [202704,  79700000],  [202705,  74800000],  [202706,  88300000],  [202707,  85200000],  [202708,  79000000],  [202709,  95200000],  [202710,  88100000],  [202711,  87600000],  [202712,  98500000]];
 function vmDeBase(B) { try {
   if (!B || !B.rows || !B.rows.length) return null;
   const a = {}; B.rows.forEach(r => { const y = r[8] || B.anio; (a[y] = a[y] || new Array(12).fill(0))[r[2] - 1] += Number(r[5]) || 0; });   /* TOTAL: distribuidora + tienda */
@@ -6085,7 +6085,7 @@ function vmHtml(VM, id) {
     <div class="vm-ley"><span><i style="background:#9AA8B4"></i>2025</span><span><i style="background:#0B3146"></i>2026${parc ? " (○ " + VM_MES[CM - 1] + " parcial al " + String(CD).padStart(2, "0") + "-" + String(CM).padStart(2, "0") + ")" : ""}</span><span><i style="background:#E07B24"></i>Meta 2026</span><span><i style="background:#F5C25B"></i>Plan 2027</span></div>
     <svg class="vm-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Venta neta mensual 2025 y 2026 y meta, mismo eje">${g}</svg>
     <div class="vm-det">Toca el gráfico para ver cada mes.</div>
-    <div class="vm-res"><div>${ytdH ? "2026 YTD (ene → " + CD + " " + VM_MES[CM - 1] + ")" : "2026 ene–" + VM_MES[Math.max(0, mesesCerr - 1)]}<b>${vmMM(t26)}</b></div><div>vs mismo período 2025${t25 ? `<b style="color:${vs >= 0 ? "#1C7A4E" : "#B42318"}">${(vs >= 0 ? "+" : "−") + Math.abs(vs * 100).toLocaleString("es-CL", { maximumFractionDigits: 1 })}%</b>` : "<b>—</b>"}</div><div>Plan nov-26 → dic-27<b>${plan14 ? vmMM(plan14) : "—"}</b>${plan12 ? "2027: " + vmMM(plan12) : ""}</div></div></div>`;
+    <div class="vm-res"><div>${ytdH ? "2026 YTD (ene → " + CD + " " + VM_MES[CM - 1] + ")" : "2026 ene–" + VM_MES[Math.max(0, mesesCerr - 1)]}<b>${vmMM(t26)}</b></div><div>vs mismo período 2025${t25 ? `<b style="color:${vs >= 0 ? "#1C7A4E" : "#B42318"}">${(vs >= 0 ? "+" : "−") + Math.abs(vs * 100).toLocaleString("es-CL", { maximumFractionDigits: 1 })}%</b>` : "<b>—</b>"}</div><div>Plan 2027 (ene → dic)<b>${plan14 ? vmMM(plan14) : "—"}</b>distribuidora 825,3 + tienda 174,7 MM</div></div></div>`;
 }
 /* metas por mes (ym → $): plan total (distribuidora + tienda) y, si el script las manda, metas guardadas de meses anteriores */
 function vmMetas(VM) { const o = {}; VM_PLAN.forEach(([ym, v]) => o[ym] = v); try { Object.keys(VM.metas || {}).forEach(k => { const ym = Number(String(k).replace("-", "")); if (VM.metas[k] && !o[ym]) o[ym] = VM.metas[k]; }); } catch (e) {} return o; }
@@ -7529,7 +7529,7 @@ body.ia-izq #iaBtn{right:auto;left:14px}
   const NOM = { admin: "HWF (administración)", ventas: "VENTAS (app de los vendedores)", log: "LOGÍSTICA", tienda: "TIENDA (Tienda Hellywoof)" }[T] || T;
   const ALC = {
     ventas: "App de los vendedores de HWF. Secciones: Inicio (avance del mes, buenas noticias), Pedido (crear notas de pedido, se envían al script y llegan por correo con PDF y Excel; botones para PDF, enviar e imprimir), Clientes (cartera, ficha, última compra, sugerencias de productos), Ruta (planificar visitas del día, PDF), Cobranza (documentos por cobrar), Prospectos (clientes potenciales), Panel, BI (apartado propio: venta de la distribuidora por marca, formato y producto; exportar a PDF, Excel, correo e imprimir), Documentos (catálogo, listas de precio y manuales; descargar en PDF para enviar por WhatsApp o imprimir). ESTE ASISTENTE SOLO REVISA: ventas, stock de la bodega distribuidora, prospectos y cobranza. No tiene costos, márgenes ni compras: si preguntan otra cosa, dilo.",
-    admin: "App de administración HWF (gerencia). Secciones: Inicio (avance del mes contra la meta, proyección de cierre), Ventas y ranking por vendedor, cliente y producto, Inventario con BI (unidades Ventas y Logística: ventas y compras en $ o unidades, filtros proveedor/marca/formato/producto, canal, análisis avanzado con Pareto, alertas y pronóstico, exportar PDF/Excel/correo/imprimir), Abastecimiento (compra sugerida por mes según pronóstico y stock de seguridad por clase ABC), Plan de ventas nov-26 a dic-27 ($1.000 MM: distribuidora 827,8 + tienda 172,2), Pago a proveedores (plan a 14 meses: Planet Pet a contado, Montaraz −50 % de la deuda), Catálogo y listas de precio (archivos en Drive), Cobranza, Prospectos y notas de pedido de la app.",
+    admin: "App de administración HWF (gerencia). Secciones: Inicio (avance del mes contra la meta, proyección de cierre), Ventas y ranking por vendedor, cliente y producto, Inventario con BI (unidades Ventas y Logística: ventas y compras en $ o unidades, filtros proveedor/marca/formato/producto, canal, análisis avanzado con Pareto, alertas y pronóstico, exportar PDF/Excel/correo/imprimir), Abastecimiento (compra sugerida por mes según pronóstico y stock de seguridad por clase ABC), Plan de ventas ene-27 a dic-27 ($1.000 MM: distribuidora 825,3 + tienda 174,7), Pago a proveedores (plan a 14 meses: Planet Pet a contado, Montaraz −50 % de la deuda), Catálogo y listas de precio (archivos en Drive), Cobranza, Prospectos y notas de pedido de la app.",
     tienda: "App de la Tienda Hellywoof (venta en local con boleta). Secciones: Inicio, Ventas, Panel, Plan (meta mensual de la tienda), Stock (bodega de la tienda), Nutrición, Ranking y Documentos. ESTE ASISTENTE SOLO REVISA: ventas de la tienda y stock de la bodega de la tienda. No tiene costos ni márgenes: si preguntan otra cosa, dilo.",
     log: "App de logística HWF. Secciones: Panel (buenas noticias, avance), BI (unidades Ventas y Logística: ventas, compras y stock por proveedor/marca/formato/producto y canal; exportar PDF/Excel/correo/imprimir), Abastecimiento (compra sugerida según pronóstico y stock de seguridad), Rutas de despacho (armar rutas del día, enviarlas a la app Chofer, seguimiento GPS y entregas con foto/firma; PDF), stock de todas las bodegas, pedidos pendientes y clientes para despacho."
   }[T] || "";
@@ -7559,7 +7559,7 @@ body.ia-izq #iaBtn{right:auto;left:14px}
     L.push("APP: " + NOM, "ALCANCE Y FUNCIONES: " + ALC, "Usuario: " + usuario(),
       "Fecha de hoy: " + hoy.toLocaleDateString("es-CL") + ". Ventas facturadas (Defontana, neto sin IVA) al " + (B.corte || "?") + "; " + MES[cm - 1] + " " + cy + " va en curso. Stock al " + (B.stockFecha || (X && X.stockFecha) || "?") + ".",
       RC ? "Esta app NO muestra costos, márgenes ni compras en pesos: no los tienes." : "Costo = cantidad × costo unitario; margen = venta − costo.",
-      "Plan de ventas nov-26 a dic-27: $1.000 MM en 14 meses (distribuidora 827,8 MM + tienda 172,2 MM), con estacionalidad.");
+      "Plan de ventas ene-27 a dic-27: $1.000 MM en 12 meses (distribuidora 825,3 MM + tienda 174,7 MM; nov y dic 2026 usan el archivo META del mes), con estacionalidad.");
     const info = P.map(p => { const pm = HB.prov(cats[p[1]]); return { n: p[0], cod: String(p[2]), pv: pm[0], ma: pm[1] || pm[0] }; });
     /* venta mensual */
     const mesK = {}, z = () => ({ dv: 0, du: 0, dc: 0, tv: 0, tu: 0, tc: 0 });
@@ -7629,7 +7629,7 @@ body.ia-izq #iaBtn{right:auto;left:14px}
   function ctxTienda() { const D = DATA() || {}, R = D.rows || [], P = D.productos || [], L = [], tab = (t, cab, filas) => { if (!filas.length) return; L.push("", "## " + t, cab.join(" | ")); filas.forEach(f => L.push(f.join(" | "))); };
     const cy = Number(String(D.corte || "").slice(0, 4)) || D.anio, cm = Number(String(D.corte || "").slice(5, 7)) || 12, cd = Number(String(D.corte || "").slice(8, 10)) || 0, dim = new Date(cy, cm, 0).getDate();
     L.push("APP: " + NOM, "ALCANCE Y FUNCIONES: " + ALC, "Fecha de hoy: " + new Date().toLocaleDateString("es-CL") + ". Ventas de la tienda (boletas y facturas, neto sin IVA) al " + (D.corte || "?") + "; " + MES[cm - 1] + " " + cy + " va en curso. Stock de la tienda al " + (D.stockFecha || "?") + ".",
-      "La tienda abre todos los días salvo feriados irrenunciables. Plan: la meta de la tienda parte en $10 MM en nov-26 y sube con estacionalidad (plan total nov-26 a dic-27 con distribuidora: $1.000 MM).");
+      "La tienda abre todos los días salvo feriados irrenunciables. Plan: la meta de la tienda parte en $10 MM en nov-26 y sube con estacionalidad (plan total ene-27 a dic-27 con distribuidora: $1.000 MM).");
     const mk = {}; R.forEach(r => { const k = (r[6] || D.anio) * 100 + r[1], o = mk[k] = mk[k] || { v: 0, u: 0, docs: new Set() }; o.v += Number(r[4]) || 0; o.u += Number(r[3]) || 0; if (r[7] && Number(r[4]) > 0) o.docs.add(r[7]); });
     tab("Venta neta mensual de la tienda", ["Mes", "Venta $", "Unidades", "Tickets", "Ticket promedio $"], Object.keys(mk).map(Number).sort().map(k => { const o = mk[k], n = o.docs.size; return [MES[k % 100 - 1] + "-" + Math.floor(k / 100), pz(o.v), n0(o.u), n || "s/d", n ? pz(o.v / n) : "s/d"]; }));
     let PL = []; try { PL = typeof PLAN !== "undefined" ? PLAN : []; } catch (e) {} tab("Meta mensual de la tienda (plan)", ["Mes", "Meta $"], PL.map(x => [MES[x.m - 1] + "-" + x.y, pz(x.meta)]));
@@ -8990,7 +8990,7 @@ window.hwfContCambio = function () { try { if (typeof praPintar === "function" &
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261124153612";
+const HWF_VER = "20261124155131";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;

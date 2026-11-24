@@ -483,7 +483,7 @@ if (!cfg() || !DATA()) pantallaConexion(); else { arrancar(); bajar(true).then(n
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261124153612";
+const HWF_VER = "20261124155131";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -612,7 +612,7 @@ const HWF_VER = "20261124153612";
 .vm-res b{display:block;font-size:.95rem;color:var(--ink,#0F1E29);font-variant-numeric:tabular-nums}
 </style>
 <script>/* patch_grafventas: venta neta mensual 2025, 2026 y plan (distribuidora) */
-const VM_PLAN = [[202611, 63000000], [202612, 69800000], [202701, 62100000], [202702, 63700000], [202703, 68100000], [202704, 69100000], [202705, 64900000], [202706, 76600000], [202707, 73900000], [202708, 68500000], [202709, 82500000], [202710, 76400000], [202711, 75900000], [202712, 85500000]];
+const VM_PLAN = [[202701,  71600000],  [202702,  73500000],  [202703,  78500000],  [202704,  79700000],  [202705,  74800000],  [202706,  88300000],  [202707,  85200000],  [202708,  79000000],  [202709,  95200000],  [202710,  88100000],  [202711,  87600000],  [202712,  98500000]];
 function vmDeBase(B) { try {
   if (!B || !B.rows || !B.rows.length) return null;
   const a = {}; B.rows.forEach(r => { const y = r[8] || B.anio; (a[y] = a[y] || new Array(12).fill(0))[r[2] - 1] += Number(r[5]) || 0; });   /* TOTAL: distribuidora + tienda */
@@ -646,7 +646,7 @@ function vmHtml(VM, id) {
     <div class="vm-ley"><span><i style="background:#9AA8B4"></i>2025</span><span><i style="background:#0B3146"></i>2026${parc ? " (○ " + VM_MES[CM - 1] + " parcial al " + String(CD).padStart(2, "0") + "-" + String(CM).padStart(2, "0") + ")" : ""}</span><span><i style="background:#E07B24"></i>Meta 2026</span><span><i style="background:#F5C25B"></i>Plan 2027</span></div>
     <svg class="vm-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Venta neta mensual 2025 y 2026 y meta, mismo eje">${g}</svg>
     <div class="vm-det">Toca el gráfico para ver cada mes.</div>
-    <div class="vm-res"><div>${ytdH ? "2026 YTD (ene → " + CD + " " + VM_MES[CM - 1] + ")" : "2026 ene–" + VM_MES[Math.max(0, mesesCerr - 1)]}<b>${vmMM(t26)}</b></div><div>vs mismo período 2025${t25 ? `<b style="color:${vs >= 0 ? "#1C7A4E" : "#B42318"}">${(vs >= 0 ? "+" : "−") + Math.abs(vs * 100).toLocaleString("es-CL", { maximumFractionDigits: 1 })}%</b>` : "<b>—</b>"}</div><div>Plan nov-26 → dic-27<b>${plan14 ? vmMM(plan14) : "—"}</b>${plan12 ? "2027: " + vmMM(plan12) : ""}</div></div></div>`;
+    <div class="vm-res"><div>${ytdH ? "2026 YTD (ene → " + CD + " " + VM_MES[CM - 1] + ")" : "2026 ene–" + VM_MES[Math.max(0, mesesCerr - 1)]}<b>${vmMM(t26)}</b></div><div>vs mismo período 2025${t25 ? `<b style="color:${vs >= 0 ? "#1C7A4E" : "#B42318"}">${(vs >= 0 ? "+" : "−") + Math.abs(vs * 100).toLocaleString("es-CL", { maximumFractionDigits: 1 })}%</b>` : "<b>—</b>"}</div><div>Plan 2027 (ene → dic)<b>${plan14 ? vmMM(plan14) : "—"}</b>distribuidora 825,3 + tienda 174,7 MM</div></div></div>`;
 }
 /* metas por mes (ym → $): plan total (distribuidora + tienda) y, si el script las manda, metas guardadas de meses anteriores */
 function vmMetas(VM) { const o = {}; VM_PLAN.forEach(([ym, v]) => o[ym] = v); try { Object.keys(VM.metas || {}).forEach(k => { const ym = Number(String(k).replace("-", "")); if (VM.metas[k] && !o[ym]) o[ym] = VM.metas[k]; }); } catch (e) {} return o; }
@@ -728,7 +728,7 @@ function vmPoner(cont, VM, antes) { try { if (!cont) return; const v = cont.quer
     else if (prev && prev.quiebres != null && M.quiebres != null && M.quiebres < prev.quiebres) N.push([70, "📦", "Menos quiebres en productos clave", "Bajamos de " + prev.quiebres + " a " + M.quiebres + " productos clave sin stock desde la revisión anterior."]);
     if (M.pend != null) { if (M.atras === 0) N.push([86, "🚚", "Ningún pedido atrasado", "Los " + M.pend + " pedidos por despachar tienen menos de 3 días: los clientes reciben a tiempo."]);
       else if (prev && prev.atras != null && M.atras < prev.atras) N.push([68, "🚚", "Menos pedidos esperando", "Los pedidos con 3 días o más bajaron de " + prev.atras + " a " + M.atras + "."]); }
-    /* plan de $1.000 MM (nov-26 → dic-27) */
+    /* plan de $1.000 MM (ene-27 → dic-27) */
     const plan = vPlan > 0 && cy * 100 + cm >= 202611 ? { v: vPlan, p: Math.min(1, vPlan / 1e9) } : null;
     return { N: N.sort((a, b) => b[0] - a[0]).slice(0, 5), plan, mesN, corte: B.corte }; }
   function html(R) { if (!R || (!R.N.length && !R.plan)) return "";
@@ -1743,7 +1743,7 @@ body.ia-izq #iaBtn{right:auto;left:14px}
   function ctxTienda() { const D = DATA() || {}, R = D.rows || [], P = D.productos || [], L = [], tab = (t, cab, filas) => { if (!filas.length) return; L.push("", "## " + t, cab.join(" | ")); filas.forEach(f => L.push(f.join(" | "))); };
     const cy = Number(String(D.corte || "").slice(0, 4)) || D.anio, cm = Number(String(D.corte || "").slice(5, 7)) || 12, cd = Number(String(D.corte || "").slice(8, 10)) || 0, dim = new Date(cy, cm, 0).getDate();
     L.push("APP: " + NOM, "ALCANCE Y FUNCIONES: " + ALC, "Fecha de hoy: " + new Date().toLocaleDateString("es-CL") + ". Ventas de la tienda (boletas y facturas, neto sin IVA) al " + (D.corte || "?") + "; " + MES[cm - 1] + " " + cy + " va en curso. Stock de la tienda al " + (D.stockFecha || "?") + ".",
-      "La tienda abre todos los días salvo feriados irrenunciables. Plan: la meta de la tienda parte en $10 MM en nov-26 y sube con estacionalidad (plan total nov-26 a dic-27 con distribuidora: $1.000 MM).");
+      "La tienda abre todos los días salvo feriados irrenunciables. Plan: la meta de la tienda parte en $10 MM en nov-26 y sube con estacionalidad (plan total ene-27 a dic-27 con distribuidora: $1.000 MM).");
     const mk = {}; R.forEach(r => { const k = (r[6] || D.anio) * 100 + r[1], o = mk[k] = mk[k] || { v: 0, u: 0, docs: new Set() }; o.v += Number(r[4]) || 0; o.u += Number(r[3]) || 0; if (r[7] && Number(r[4]) > 0) o.docs.add(r[7]); });
     tab("Venta neta mensual de la tienda", ["Mes", "Venta $", "Unidades", "Tickets", "Ticket promedio $"], Object.keys(mk).map(Number).sort().map(k => { const o = mk[k], n = o.docs.size; return [MES[k % 100 - 1] + "-" + Math.floor(k / 100), pz(o.v), n0(o.u), n || "s/d", n ? pz(o.v / n) : "s/d"]; }));
     let PL = []; try { PL = typeof PLAN !== "undefined" ? PLAN : []; } catch (e) {} tab("Meta mensual de la tienda (plan)", ["Mes", "Meta $"], PL.map(x => [MES[x.m - 1] + "-" + x.y, pz(x.meta)]));
