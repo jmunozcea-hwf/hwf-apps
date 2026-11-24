@@ -483,7 +483,7 @@ if (!cfg() || !DATA()) pantallaConexion(); else { arrancar(); bajar(true).then(n
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261123194731";
+const HWF_VER = "20261124005638";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -2361,6 +2361,7 @@ const LOG_CHOFERES = ["Víctor", "Matías", "Jorge", "Cristóbal", "Claudia", "D
 .pd-o{display:inline-block;font-size:.66rem;font-weight:900;border-radius:999px;padding:2px 8px;margin-right:4px;vertical-align:1px}.pd-o.b{background:#D8F2EF;color:#0F6E73}.pd-o.a{background:#E6EEF3;color:#0B3146}
 .pd-e{font-size:.7rem;font-weight:800;color:#8A5300}.pd-t{width:100%;border-collapse:collapse;font-size:.82rem;margin-top:8px}.pd-t td{padding:4px 2px;border-top:1px solid var(--line,#EEF2F5)}.pd-t td:last-child,.pd-t td:nth-child(2){text-align:right;white-space:nowrap}
 .pd-ob{font-size:.78rem;color:var(--muted,#5B6874);margin-top:6px;white-space:pre-line}
+.pd-del{display:flex;justify-content:flex-end;margin-top:8px}.pd-del button{border:1px solid #F1B8B3;background:#FDECEA;color:#B3261E;border-radius:10px;padding:7px 12px;font:inherit;font-size:.8rem;font-weight:700;cursor:pointer}.pd-del button:disabled{opacity:.6;cursor:default}
 </style>
 <script>/* patch_pedidos: pedidos de la app y del portal B2B */
 (function () {
@@ -2370,6 +2371,8 @@ const LOG_CHOFERES = ["Víctor", "Matías", "Jorge", "Cristóbal", "Claudia", "D
   if (!VEN && !LOG && !ADM) return;
   const es = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const nf = n => "$" + Math.round(Number(n) || 0).toLocaleString("es-CL");
+  const pri = x => String(x || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase().trim().split(/\s+/)[0] || "";
+  const puede = p => !VEN || (!!pri(yo()) && (pri(p.vend) === pri(yo()) || pri(p.cart) === pri(yo())));
   const yo = () => { try { return (SES && SES.vendedor && SES.vendedor.nombre) || ""; } catch (e) { return ""; } };
   const conf = () => { try { if (typeof SYC === "function") return SYC(); } catch (e) {} try { if (typeof syCfg === "function") return syCfg(); } catch (e) {} try { if (typeof cfg === "function") return cfg(); } catch (e) {} return null; };
   async function llamar(d) { const c = conf(); if (!c || !c.url) return { ok: false, error: "Esta app no está conectada al script de Google." };
@@ -2397,12 +2400,19 @@ const LOG_CHOFERES = ["Víctor", "Matías", "Jorge", "Cristóbal", "Claudia", "D
         <span class="c"><span class="pd-o ${p.b2b ? "b" : "a"}">${p.b2b ? "B2B" : "APP"}</span>${es(p.cliente)}</span><span class="n">${nf(p.neto)}</span>
         <small>${es(p.num)} · ${fch(p.emision)}${p.comuna ? " · " + es(p.comuna) : ""}${p.entrega ? " · entrega " + fch(p.entrega) : ""}</small><span class="pd-e">${es(p.estado)}</span></summary>
         <table class="pd-t">${(p.items || []).map(x => `<tr><td>${es(x[1])} <small>${es(x[0])}</small></td><td>${Number(x[2]).toLocaleString("es-CL")} u.</td><td>${nf(x[3])}</td></tr>`).join("")}</table>
-        ${p.obs ? `<div class="pd-ob">${es(p.obs)}</div>` : ""}<small>Total con IVA ${nf(p.total)}${p.despacho ? " · " + es(p.despacho) : ""}${p.rut ? " · RUT " + es(p.rut) : ""}</small></details>`).join("")}</div>`).join("")
+        ${p.obs ? `<div class="pd-ob">${es(p.obs)}</div>` : ""}<small>Total con IVA ${nf(p.total)}${p.despacho ? " · " + es(p.despacho) : ""}${p.rut ? " · RUT " + es(p.rut) : ""}</small>${puede(p) ? `<div class="pd-del"><button type="button" data-pdx="${es(p.id)}">🗑 Eliminar pedido</button></div>` : ""}</details>`).join("")}</div>`).join("")
         || `<p class="muted">${ST.cargando || !ST.L ? "Cargando pedidos…" : "No hay pedidos con ese filtro."}</p>`}</div>`;
     box.querySelectorAll("[data-pdd]").forEach(b => b.onclick = () => { ST.dias = +b.dataset.pdd; cargar(box); });
     box.querySelectorAll("[data-pdo]").forEach(b => b.onclick = () => { ST.o = b.dataset.pdo; pintarP(box); });
     box.querySelectorAll("[data-pdv]").forEach(b => b.onclick = () => { ST.v = b.dataset.pdv; pintarP(box); });
     const a = box.querySelector("[data-pda]"); if (a) a.onclick = () => cargar(box);
+    /* eliminar pedidos de la app y del portal B2B (24-11-2026): Admin y Logística cualquiera; Ventas solo los suyos (vendedor o cartera).
+       El script lo quita de «Notas de pedido» y guarda copia en la hoja «Notas eliminadas». */
+    box.querySelectorAll("[data-pdx]").forEach(b => b.onclick = async ev => { ev.preventDefault(); const p = (ST.L || []).find(x => x.id === b.dataset.pdx); if (!p) return;
+      if (!confirm(`¿Eliminar el pedido ${p.num || ""} de ${p.cliente}${p.b2b ? " (portal B2B)" : ""}? Se quita de la planilla y queda una copia en «Notas eliminadas».`)) return;
+      b.disabled = true; b.textContent = "Eliminando…";
+      const r = await llamar(VEN ? { accion: "eliminar", id: p.id, vendedor: yo() } : { accion: "eliminar", id: p.id, admin: true });
+      if (r && r.ok) { ST.L = ST.L.filter(x => x.id !== p.id); pintarP(box); } else { b.disabled = false; b.textContent = "🗑 Eliminar pedido"; alert((r && r.error) || "No se pudo eliminar."); } });
     const i = box.querySelector("#pdQ"); i.oninput = () => { ST.q = i.value; clearTimeout(pintarP.t); pintarP.t = setTimeout(() => { pintarP(box); const j = box.querySelector("#pdQ"); j.focus(); j.setSelectionRange(j.value.length, j.value.length); }, 250); }; }
   const abrir = box => { pintarP(box); if (!ST.L || Date.now() - ST.t > 120000) cargar(box); };
   if (ADM) { try { if (typeof NAV_MNOM !== "undefined") NAV_MNOM.pedidos = "Pedidos"; } catch (e) {}
