@@ -2,6 +2,8 @@
 # - Siempre gana el último push: los envíos intermedios en cola se descartan (nunca se publica una versión vieja encima).
 # - Reintenta una vez si GitHub falla al publicar (como el timeout «syncing_files» del 10-11).
 # - Verifica que version.json en línea sea el del commit publicado.
+# - 24-11-2026: GitHub a veces tarda en «ver» el artefacto recién subido («No artifacts named github-pages»): se espera
+#   a que la API lo liste y se reintenta 3 veces con pausas (antes el reintento era inmediato y fallaba igual).
 # Requiere: Settings → Pages → Build and deployment → Source: «GitHub Actions». Mientras siga en «Deploy from branch»
 # este flujo no hace nada (lo detecta y termina en verde) y sigue publicando el modo antiguo.
 name: Publicar sitio
@@ -11,6 +13,7 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+  actions: read
   pages: write
   id-token: write
 concurrency:
@@ -36,7 +39,7 @@ jobs:
     timeout-minutes: 30
     environment:
       name: github-pages
-      url: ${{ steps.d1.outputs.page_url || steps.d2.outputs.page_url }}
+      url: ${{ steps.d1.outputs.page_url || steps.d2.outputs.page_url || steps.d3.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -45,19 +48,40 @@ jobs:
       - uses: actions/upload-pages-artifact@v3
         with:
           path: .
+      - name: Esperar a que GitHub registre el artefacto
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for i in $(seq 1 30); do
+            n=$(gh api "repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts" --jq '[.artifacts[]|select(.name=="github-pages")]|length' 2>/dev/null || echo 0)
+            echo "Intento $i: artefactos github-pages visibles = $n"
+            [ "$n" -ge 1 ] && { sleep 5; exit 0; }
+            sleep 6
+          done
+          echo "::warning::El artefacto no aparece en la API; se intenta publicar igual."
       - id: d1
         uses: actions/deploy-pages@v4
         continue-on-error: true
         with:
-          timeout: 900000
+          timeout: 600000
+      - if: steps.d1.outcome == 'failure'
+        run: sleep 45
       - id: d2
         if: steps.d1.outcome == 'failure'
         uses: actions/deploy-pages@v4
+        continue-on-error: true
         with:
-          timeout: 900000
+          timeout: 600000
+      - if: steps.d1.outcome == 'failure' && steps.d2.outcome == 'failure'
+        run: sleep 120
+      - id: d3
+        if: steps.d1.outcome == 'failure' && steps.d2.outcome == 'failure'
+        uses: actions/deploy-pages@v4
+        with:
+          timeout: 600000
       - name: Verificar versión en línea
         run: |
-          url="${{ steps.d1.outputs.page_url || steps.d2.outputs.page_url }}"
+          url="${{ steps.d1.outputs.page_url || steps.d2.outputs.page_url || steps.d3.outputs.page_url }}"
           esperada=$(python3 -c "import json;print(json.load(open('version.json'))['v'])" 2>/dev/null || echo "")
           [ -z "$esperada" ] && { echo "Sin version.json en el repo: no se verifica."; exit 0; }
           for i in $(seq 1 20); do
