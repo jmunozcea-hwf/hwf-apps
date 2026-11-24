@@ -2350,7 +2350,7 @@ const stAbrev = n => ST_ABR.reduce((s, [r, t]) => s.replace(r, t), String(n || "
 try { if ($("sStock") && !$("sStock").hidden) pintarStock(); } catch (e) {}
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261124122131";
+const HWF_VER = "20261124123558";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -4264,74 +4264,6 @@ window.hwfContCambio = function () { try { const b = document.getElementById("sS
     bs.sort((a, b) => { const i = orden.indexOf(k(a)), j = orden.indexOf(k(b)); return (i < 0 ? 99 : i) - (j < 0 ? 99 : j); }).forEach(b => nav.appendChild(b)); };
   if (LOG) { const o = ["dash", "rutas", "seg", "flota", "abast", "b:v", "b:l"]; barra("#nav", o); setTimeout(() => barra("#nav", o), 500); }
   if (TND) { const o = ["inicio", "ventas", "stock", "cat", "plan", "dash", "guia", "nut", "rank", "adm"]; barra("#tNav", o); setTimeout(() => barra("#tNav", o), 500); }
-})();
-</script>
-<style>/* patch_claudia */
-.cia .cia-h{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.cia h2{margin:0;font-size:1.08rem}.cia .muted{color:var(--muted,#5B6874);font-weight:500}
-.cia-f{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 4px}.cia-f button{border:1.5px solid var(--line,#D5DEE5);background:var(--surface,#fff);color:var(--ink,#0F1E29);border-radius:999px;padding:6px 12px;font:inherit;font-size:.82rem;font-weight:700;cursor:pointer}
-.cia-f button[aria-pressed="true"]{background:#0B3147;border-color:#0B3147;color:#fff}
-.cia-k{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:10px 0}@media(min-width:760px){.cia-k{grid-template-columns:repeat(4,minmax(0,1fr))}}
-.cia-k div{background:var(--sunk,#EEF2F5);border-radius:12px;padding:10px 12px;font-size:.76rem;color:var(--muted,#5B6874)}.cia-k b{display:block;font-size:1.3rem;color:var(--ink,#0F1E29);font-variant-numeric:tabular-nums}
-.cia-bars{display:flex;align-items:flex-end;gap:3px;height:90px;padding:6px 0;border-bottom:1px solid var(--line,#E3E9EE)}.cia-bars i{flex:1;background:#80C6C9;border-radius:4px 4px 0 0;min-height:2px;position:relative}
-.cia-bars i:hover::after{content:attr(data-t);position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:#0B3147;color:#fff;font:600 11px system-ui;padding:3px 6px;border-radius:6px;white-space:nowrap;font-style:normal}
-.cia-ch{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}.cia-ch span{background:#E6F2F3;color:#0B3147;border-radius:999px;padding:4px 10px;font-size:.78rem;font-weight:700}
-.cia-al{background:#FFF4E5;color:#8A4B00;border-radius:12px;padding:9px 12px;font-size:.84rem;margin:8px 0}
-.cia-t{width:100%;border-collapse:collapse;font-size:.84rem}.cia-t td,.cia-t th{padding:7px 6px;border-bottom:1px solid var(--line,#E3E9EE);text-align:left;vertical-align:top}.cia-t th{font-size:.72rem;text-transform:uppercase;color:var(--muted,#5B6874)}
-.cia-t a{color:#1D5A78;font-weight:700}
-.cia-c{border:1px solid var(--line,#E3E9EE);border-radius:12px;margin:6px 0;background:var(--surface,#fff)}.cia-c summary{cursor:pointer;padding:9px 12px;display:flex;gap:8px;align-items:baseline;list-style:none}.cia-c summary::-webkit-details-marker{display:none}
-.cia-c summary b{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}.cia-c small{color:var(--muted,#5B6874);font-size:.74rem;white-space:nowrap}
-.cia-c .r{padding:0 12px 10px;font-size:.86rem;line-height:1.45;white-space:pre-line}.cia-c .r p{margin:4px 0}.cia-tag{font-size:.68rem;font-weight:800;border-radius:6px;padding:1px 6px;background:#E6EEF3;color:#0B3147}.cia-tag.t{background:#FCE7F3;color:#9D174D}
-</style>
-<script>/* patch_claudia: reporte de claudIA */
-(function () {
-  const TND = !!document.getElementById("tNav") && typeof pintar === "function";
-  const ADM = !TND && typeof pintarMas === "function";
-  if (!TND && !ADM) return;
-  const es = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-  const nf = n => Math.round(Number(n) || 0).toLocaleString("es-CL");
-  const conf = () => { try { if (typeof SYC === "function") return SYC(); } catch (e) {} try { if (typeof syCfg === "function") return syCfg(); } catch (e) {} try { if (typeof cfg === "function") return cfg(); } catch (e) {} return null; };
-  async function llamar(d) { const c = conf(); if (!c || !c.url) return { ok: false, error: "Esta app no está conectada al script de Google." };
-    try { const r = await fetch(c.url, { method: "POST", body: JSON.stringify(Object.assign({ clave: c.clave }, d)) }), t = await r.text(); try { return JSON.parse(t); } catch (e) { return { ok: false, error: "El script no respondió bien." }; } }
-    catch (e) { return { ok: false, error: "Sin conexión a internet." }; } }
-  const ST = { dias: 30, marca: TND ? "tienda" : "", R: null, cargando: false, err: "", vista: "conv" };
-  const CAN = { web: "Web hwf.cl", portal: "Portal B2B", whatsapp: "WhatsApp", app: "Apps" }, ROL = { publico: "Visitantes", cliente: "Clientes B2B", equipo: "Equipo", tienda: "Clientes tienda" };
-  const HER = { buscar_productos: "buscó productos", buscar_tienda: "buscó en la tienda", info_nutricional: "nutrición", registrar_contacto: "dejó sus datos", estado_cuenta: "estado de cuenta", mis_pedidos: "sus pedidos", proponer_pedido: "propuesta de pedido", pedidos_recientes: "pedidos (equipo)", cobranza_vencida: "cobranza (equipo)", clientes_por_recuperar: "por recuperar (equipo)", prospectos: "prospectos (equipo)" };
-  async function cargar(box) { if (ST.cargando) return; ST.cargando = true; ST.err = ""; pintarC(box);
-    const r = await llamar({ accion: "agenteReporte", marca: ST.marca, dias: ST.dias }); ST.cargando = false;
-    if (r && r.ok) ST.R = r; else ST.err = (r && r.error) || "No se pudo leer el reporte."; pintarC(box); }
-  const wa = t => { const d = String(t || "").replace(/\D/g, ""); return d.length >= 8 ? "https://wa.me/" + (d.length === 9 ? "56" + d : d) : ""; };
-  function pintarC(box) { if (!box) return; const R = ST.R;
-    const dias = []; for (let i = ST.dias - 1; i >= 0; i--) { const d = new Date(Date.now() - i * 864e5); dias.push(d.toISOString().slice(0, 10)); }
-    const mx = R ? Math.max(1, ...dias.map(d => R.porDia[d] || 0)) : 1;
-    box.innerHTML = `<div class="card cia"><div class="cia-h"><h2>🤖 claudIA <span class="muted">${TND ? "asistente IA de la Tienda Hellywoof" : "asistente IA · distribuidora y tienda"}</span></h2></div>
-      <p class="muted" style="font-size:.8rem;margin:4px 0 0">${TND ? "Lo que conversan los clientes de la tienda con claudIA (WhatsApp y web), los encargos y datos que dejaron, y lo que más preguntan." : "Conversaciones de claudIA en hwf.cl, el portal B2B y WhatsApp: qué preguntan, pedidos que envió con CONFIRMO, contactos captados y costo de la IA."}</p>
-      <div class="cia-f">${[7, 30, 90].map(d => `<button type="button" data-cd="${d}" aria-pressed="${ST.dias === d}">${d} días</button>`).join("")}${TND ? "" : [["", "Todo"], ["distribuidora", "Distribuidora"], ["tienda", "Tienda"]].map(([k, t]) => `<button type="button" data-cm="${k}" aria-pressed="${ST.marca === k}">${t}</button>`).join("")}<button type="button" data-ca="1">${ST.cargando ? "Cargando…" : "↻ Actualizar"}</button></div>
-      ${ST.err ? `<p style="color:#B3261E;font-weight:600">${es(ST.err)}</p>` : ""}
-      ${R && !R.configurado ? `<div class="cia-al">claudIA funciona en <b>modo guiado gratis</b> (menús y búsquedas, sin IA). Para que converse libremente, carga la clave ANTHROPIC_API_KEY en Propiedades del script.</div>` : ""}
-      ${R && TND && !R.tiendaInfo ? `<div class="cia-al">Carga los datos de la tienda (dirección, horario, despacho, medios de pago) en la Propiedad del script TIENDA_INFO para que claudIA los pueda contestar.</div>` : ""}
-      ${R ? `<div class="cia-k"><div>Mensajes<b>${nf(R.mensajes)}</b>últimos ${R.dias} días</div><div>${TND ? "Encargos y contactos" : "Contactos captados"}<b>${nf(R.contactos.length)}</b>para devolver el llamado</div>
-        ${TND ? `<div>Clientes que escribieron<b>${nf(new Set(R.ultimos.map(u => u.quien || u.canal + u.fecha.slice(0, 10))).size)}</b>conversaciones distintas</div>` : `<div>Pedidos con CONFIRMO<b>${nf(R.pedidos)}</b>enviados por WhatsApp</div>`}
-        <div>Costo IA estimado<b>US$ ${(R.costoUSD || 0).toLocaleString("es-CL", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</b>${R.mensajes ? "≈ US$ " + (R.costoUSD / R.mensajes).toFixed(3).replace(".", ",") + " por mensaje" : "sin mensajes"}</div></div>
-        <div class="cia-bars" aria-label="Mensajes por día">${dias.map(d => `<i style="height:${Math.round((R.porDia[d] || 0) / mx * 100)}%" data-t="${d.slice(8, 10)}-${d.slice(5, 7)}: ${R.porDia[d] || 0}"></i>`).join("")}</div>
-        <div class="cia-ch">${Object.entries(R.porCanal).map(([k, n]) => `<span>${es(CAN[k] || k)} · ${n}</span>`).join("")}${Object.entries(R.porRol).map(([k, n]) => `<span>${es(ROL[k] || k)} · ${n}</span>`).join("")}</div>
-        <div class="cia-ch">${Object.entries(R.herramientas).sort((a, b) => b[1] - a[1]).map(([k, n]) => `<span style="background:#F1ECFA;color:#4C2A85">${es(HER[k] || k)} · ${n}</span>`).join("") || '<span style="background:none;color:var(--muted)">Aún sin consultas con herramientas</span>'}</div>
-        <div class="cia-f"><button type="button" data-cv="conv" aria-pressed="${ST.vista === "conv"}">💬 Conversaciones (${R.ultimos.length})</button><button type="button" data-cv="cont" aria-pressed="${ST.vista === "cont"}">📇 ${TND ? "Encargos y contactos" : "Contactos"} (${R.contactos.length})</button></div>
-        ${ST.vista === "cont" ? (R.contactos.length ? `<div style="overflow:auto"><table class="cia-t"><thead><tr><th>Fecha</th><th>Nombre${TND ? "" : " / negocio"}</th><th>Comuna</th><th>Contacto</th><th>Qué necesita</th></tr></thead><tbody>${R.contactos.map(c => `<tr><td>${es(c.fecha)}${ST.marca ? "" : `<br><span class="cia-tag ${c.marca === "tienda" ? "t" : ""}">${c.marca === "tienda" ? "Tienda" : "Distrib."}</span>`}</td><td>${es(c.nombre)}${c.negocio ? "<br><small>" + es(c.negocio) + "</small>" : ""}</td><td>${es(c.comuna)}</td>
-          <td>${wa(c.telefono) ? `<a href="${wa(c.telefono)}" target="_blank" rel="noopener">${es(c.telefono)}</a>` : es(c.telefono)}${c.correo ? `<br><a href="mailto:${es(c.correo)}">${es(c.correo)}</a>` : ""}</td><td>${es(c.interes)}</td></tr>`).join("")}</tbody></table></div>` : `<p class="muted">Aún nadie dejó sus datos en este período.</p>`)
-        : (R.ultimos.length ? R.ultimos.map(u => `<details class="cia-c"><summary>${ST.marca ? "" : `<span class="cia-tag ${u.marca === "tienda" ? "t" : ""}">${u.marca === "tienda" ? "Tienda" : "Distrib."}</span>`}<b>${es(u.mensaje)}</b><small>${es(CAN[u.canal] || u.canal)} · ${es(u.fecha.slice(5).replace(" ", " "))}</small></summary>
-          <div class="r"><p><b>${es(ROL[u.rol] || u.rol)}${u.quien ? " · " + es(u.quien) : ""}:</b> ${es(u.mensaje)}</p><p><b>claudIA:</b> ${es(u.respuesta || "—")}</p>${u.herramientas ? `<small>Usó: ${es(u.herramientas.split(",").map(h => HER[h] || h).join(", "))}</small>` : ""}</div></details>`).join("") : `<p class="muted">Aún no hay conversaciones en este período.</p>`)}`
-      : `<p class="muted">${ST.cargando ? "Cargando reporte…" : "Sin datos."}</p>`}</div>`;
-    box.querySelectorAll("[data-cd]").forEach(b => b.onclick = () => { ST.dias = +b.dataset.cd; cargar(box); });
-    box.querySelectorAll("[data-cm]").forEach(b => b.onclick = () => { ST.marca = b.dataset.cm; cargar(box); });
-    box.querySelectorAll("[data-cv]").forEach(b => b.onclick = () => { ST.vista = b.dataset.cv; pintarC(box); });
-    const a = box.querySelector("[data-ca]"); if (a) a.onclick = () => cargar(box); }
-  const abrir = box => { pintarC(box); if (!ST.R && !ST.cargando) cargar(box); };
-  if (ADM) { const _pm = pintarMas; pintarMas = function () { if (typeof vistaMas !== "undefined" && vistaMas === "claudia") return abrir(document.getElementById("masBody")); return _pm.apply(this, arguments); }; return; }
-  /* TIENDA: pestaña propia */
-  const nav = document.getElementById("tNav"), main = document.querySelector("main");
-  if (!nav.querySelector('[data-s="cia"]')) { const b = document.createElement("button"); b.type = "button"; b.dataset.s = "cia"; b.innerHTML = "<span>🤖</span>claudIA"; const adm = nav.querySelector('[data-s="adm"]'); nav.insertBefore(b, adm || null); }
-  if (!document.getElementById("sCia")) { const s = document.createElement("section"); s.className = "t-sec"; s.id = "sCia"; s.hidden = true; main.appendChild(s); }
-  const _p = pintar; pintar = function (s) { if (s === "cia") return abrir(document.getElementById("sCia")); return _p.apply(this, arguments); };
 })();
 </script>
 </body></html>
