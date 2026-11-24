@@ -5285,7 +5285,7 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261124155131";
+const HWF_VER = "20261124155837";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -6762,7 +6762,7 @@ function npVer(n) {
         const ovV = ov[String(ci)] || null;
         const actual = ovV || autoV;
         return { ci, nombre: c[0] || '', comuna: c[1] || '', autoV, ovV, actual };
-      });
+      }).filter(x => !/^\s*CLIENTE BOLETA/i.test(x.nombre));   /* la boleta es de la tienda: no se asigna a vendedor (24-11-2026) */
       if (filtV) list = list.filter(x => _vcN1(x.actual) === _vcN1(filtV));
       if (filtQ) {
         const q = filtQ.toLowerCase();
