@@ -5285,7 +5285,7 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261124144656";
+const HWF_VER = "20261124152642";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -9835,7 +9835,18 @@ body.m-b2b #crmMeta{display:none!important}
     return `<div class="b2-c"><div class="b2-t"><b>${E(p.cliente || p.rut || "—")}</b><b>${M(p.neto)}</b></div>
       <small>${E(F(p.fecha))}${n ? ` · ${n} producto${n === 1 ? "" : "s"}` : ""}${p.vendedor ? " · " + E(p.vendedor) : ""}</small>
       <small>${p.estado ? "Estado: " + E(p.estado) : ""}${p.nota ? ` · Nota de pedido ${E(p.nota)}` : ""}</small>
-      <div style="margin-top:6px"><button type="button" class="b2-b mal" data-delped="${E(p.nota || p.id)}">🗑 Eliminar pedido</button></div></div>`;
+      <div style="margin-top:6px"><button type="button" class="b2-b tq" data-pdfped="${E(p.nota || p.id)}">📄 PDF</button> <button type="button" class="b2-b mal" data-delped="${E(p.nota || p.id)}">🗑 Eliminar pedido</button></div></div>`;
+  }
+  /* 24-11-2026: PDF de la nota de pedido (compartir por WhatsApp en el celular o descargar) */
+  async function pdfPedido(id, btn) {
+    if (btn) { btn.disabled = true; btn.textContent = "Generando…"; } aviso("Generando el PDF…");
+    const r = await llamar({ accion: "notaPdf", id, admin: true, vendedor: typeof yo === "function" ? yo() : "" });
+    if (btn) { btn.disabled = false; btn.textContent = "📄 PDF"; }
+    if (!r || !r.ok) return aviso((r && r.error) || "No se pudo generar el PDF.");
+    const bin = atob(r.b64), u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
+    const bl = new Blob([u], { type: "application/pdf" });
+    try { const f = new File([bl], r.nombre, { type: "application/pdf" }); if (navigator.canShare && navigator.canShare({ files: [f] })) { await navigator.share({ files: [f], title: r.nombre }); return; } } catch (e) { if (e && e.name === "AbortError") return; }
+    const url = URL.createObjectURL(bl), a = document.createElement("a"); a.href = url; a.download = r.nombre; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 8000); aviso("PDF descargado.");
   }
   /* 24-11-2026: eliminar un pedido del portal (lo saca de la planilla y de esta lista; queda en «Notas eliminadas») */
   async function borrarPedido(id) {
@@ -9995,6 +10006,7 @@ body.m-b2b #crmMeta{display:none!important}
     if (t.closest("#b2Ref")) return cargar(false); if (t.closest("#b2Aj")) return cargarAj(true);
     if ((b = t.closest("[data-tb]"))) { ST.tab = b.dataset.tb; if (ST.tab === "contenido" || ST.tab === "reglas" || ST.tab === "modulos") cargarAj(false); window.scrollTo({ top: 0 }); return pintar(); }
     if ((b = t.closest("[data-fe]"))) { ST.fEst = b.dataset.fe; return pintar(); }
+    if ((b = t.closest("[data-pdfped]"))) return pdfPedido(b.dataset.pdfped, b);
     if ((b = t.closest("[data-delped]"))) return borrarPedido(b.dataset.delped);
     if ((b = t.closest("[data-cl]"))) { const c = ST.cuentas.find(x => String(x.id) === b.dataset.cl); return c && elegirCli(c); }
     if ((b = t.closest("[data-a]"))) { const c = ST.cuentas.find(x => String(x.id) === b.dataset.id); if (!c) return; const a = b.dataset.a;
