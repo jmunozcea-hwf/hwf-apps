@@ -2245,6 +2245,7 @@ async function nuSync() {
 }
 NUT.hwf.forEach(nuPrep); NUT.comp.forEach(nuPrep);
 </script>
+<style>/* nu-fichas aparte */.nu-fbx{margin:0 0 12px}.nu-fb{width:100%;border:1.5px solid #0B3146;background:#fff;color:#0B3146;border-radius:14px;padding:12px 14px;font:inherit;font-weight:800;cursor:pointer;text-align:left}.nu-fb[aria-pressed="true"]{background:#0B3146;color:#fff}</style>
 <script>
 /* Nutrición cuenta para la misión: cada comparación distinta del día */
 { const _pn = pintarNut; let vistoSel = null; pintarNut = function () { const r = _pn.apply(this, arguments); try { if (nuSel && nuSel !== vistoSel) { vistoSel = nuSel; misSumar("nut", 1); } } catch (e) {} return r; }; }
@@ -2350,7 +2351,7 @@ const stAbrev = n => ST_ABR.reduce((s, [r, t]) => s.replace(r, t), String(n || "
 try { if ($("sStock") && !$("sStock").hidden) pintarStock(); } catch (e) {}
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261124160409";
+const HWF_VER = "20261124160726";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -4049,16 +4050,20 @@ window.hwfContCambio = function () { try { const b = document.getElementById("sS
     cu.querySelector("#nsKg").onchange = e => { ST.peso = Math.max(0.5, Number(String(e.target.value).replace(",", ".")) || ST.peso); guarda(); comparador(cu); };
     cu.querySelector("#nsComp").onchange = e => { ST.comp = e.target.value; guarda(); comparador(cu); };
     cu.querySelectorAll("[data-nsc]").forEach(b => b.onclick = () => { ST.cat = b.dataset.nsc; ST.comp = ""; guarda(); comparador(cu); }); }
-  const _pn = pintarNut; let nuAl = "comp";
+  const _pn = pintarNut; let nuAl = "comp", nuAl2 = "comp";
   pintarNut = function () { const sup = nuVista === "sup"; if (sup) nuVista = "fichas"; const r = _pn.apply(this, arguments); if (sup) nuVista = "sup";
     /* 24-11-2026: un solo selector «¿Qué quieres ver?» con 3 opciones (antes dos selectores anidados: «Información de» y «Alimentos») */
     const tabs = document.querySelector("#crmNut .nu-tabs, .nu-tabs");
     if (tabs) { if (tabs._msBtn) { tabs._msBtn.remove(); tabs._msBtn = null; } tabs.classList.add("ms-oc"); tabs.hidden = true;
       let sec = tabs.parentNode.querySelector(".nu-sec");
       if (!sec) { sec = document.createElement("div"); sec.className = "nu-sec"; sec.setAttribute("role", "tablist"); sec.setAttribute("aria-label", "¿Qué quieres ver?");
-        sec.innerHTML = '<button type="button" data-ns="comp">⚖️ Comparar alimentos con la competencia</button><button type="button" data-ns="fichas">📋 Fichas de alimentos HWF</button><button type="button" data-ns="sup">💊 Comparar suplementos</button>'; tabs.before(sec);
-        sec.querySelectorAll("[data-ns]").forEach(b => b.onclick = () => { nuVista = b.dataset.ns; pintarNut(); }); }
-      sec.querySelectorAll("[data-ns]").forEach(b => b.setAttribute("aria-pressed", b.dataset.ns === nuVista)); }
+        sec.innerHTML = '<button type="button" data-ns="comp">Comparar alimentos con la competencia</button><button type="button" data-ns="sup">Comparar suplementos</button>'; tabs.before(sec);
+        /* las fichas HWF van aparte, en su propio botón (no son una comparación) */
+        const fb = document.createElement("div"); fb.className = "nu-fbx"; fb.innerHTML = '<button type="button" class="nu-fb" data-ns="fichas"></button>'; sec.after(fb);
+        [sec, fb].forEach(x => x.querySelectorAll("[data-ns]").forEach(b => b.onclick = () => { nuVista = b.dataset.ns === "fichas" && nuVista === "fichas" ? (nuAl2 || "comp") : b.dataset.ns; pintarNut(); })); }
+      sec.querySelectorAll("[data-ns]").forEach(b => b.setAttribute("aria-pressed", b.dataset.ns === nuVista));
+      const fb = tabs.parentNode.querySelector(".nu-fb"); if (fb) { const on = nuVista === "fichas"; fb.setAttribute("aria-pressed", on); fb.textContent = on ? "✕ Cerrar fichas y volver a comparar" : "📋 Ver fichas de alimentos HWF"; }
+      if (nuVista !== "fichas") nuAl2 = nuVista; }
     if (nuVista !== "sup") nuAl = nuVista;
     { const cn = document.getElementById("crmNut"); if (cn) cn.classList.toggle("nu-supv", nuVista === "sup"); }
     if (sup) { const cu = document.getElementById("nuCuerpo"); if (cu) comparador(cu); }
