@@ -6008,8 +6008,7 @@ setTimeout(() => { try { if (D && $("s-res") && !$("s-res").hidden && !$("kpCard
     box.querySelectorAll("[data-z]").forEach(z => { z.ondragover = e => { e.preventDefault(); z.classList.add("sobre"); }; z.ondragleave = () => z.classList.remove("sobre"); z.ondrop = e => { e.preventDefault(); z.classList.remove("sobre"); const fs = [...(e.dataTransfer.files || [])]; if (fs.length) subir(z.dataset.z, fs); }; });
     box.querySelectorAll("[data-ver]").forEach(b => b.onclick = () => bajar(b.dataset.ver, "ver")); box.querySelectorAll("[data-env]").forEach(b => b.onclick = () => bajar(b.dataset.env, "enviar"));
     box.querySelectorAll("[data-baj]").forEach(b => b.onclick = () => bajar(b.dataset.baj, "bajar")); box.querySelectorAll("[data-del]").forEach(b => b.onclick = () => borrar(b.dataset.del, b.dataset.n)); }
-  /* 24-11-2026: Documentos = solo un enlace a la carpeta de Drive (antes listaba y bajaba los archivos: pesaba mucho) */
-  async function pintarCatalogo() { const box = document.getElementById("masBody"); if (box) box.innerHTML = `<div class="card" style="padding:18px"><h2 style="margin:0 0 6px">Documentos <span class="muted">en Google Drive</span></h2><p class="muted" style="margin:0 0 14px">Catálogo, listas de precio, posts para WhatsApp, manuales y guías están en la carpeta «HWF Documentos · Ventas y Admin». Se abren directo en Drive (más rápido y sin descargar nada a la app).</p><a class="btn" href="https://drive.google.com/drive/folders/1btOc2fUXYE5mg3Ia2VKpBh-kaW1m-YaI" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;background:#0B3147;color:#fff;border-radius:12px;padding:12px 18px;font-weight:800;text-decoration:none">📁 Abrir carpeta de documentos</a></div>`; }
+  async function pintarCatalogo() { pintar(); if (!DAT) { estado("Leyendo la carpeta…"); await cargar(); if (!ESTC) EST = ""; pintar(); } }
   const _pm = pintarMas; pintarMas = function () { if (typeof vistaMas !== "undefined" && vistaMas === "catalogo") return pintarCatalogo(); return _pm.apply(this, arguments); };
   window.hwfCatalogo = { subir, cargar, datos: () => DAT };
 })();
@@ -8991,7 +8990,7 @@ window.hwfContCambio = function () { try { if (typeof praPintar === "function" &
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261124171907";
+const HWF_VER = "20261124172205";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;

@@ -7200,7 +7200,7 @@ function confirmarNota() {
   x.onclick = () => cerrarModal(); card.insertBefore(x, card.firstChild); })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261124171907";
+const HWF_VER = "20261124172205";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -10861,7 +10861,7 @@ body.m-b2b #crmMeta{display:none!important}
       estado(modo === "env" ? "Este equipo no permite adjuntar directo: la imagen se descargó; adjúntala en WhatsApp (📎 → Galería)." : "Imagen descargada.", "ok"); }
     finally { OCUP = false; btn.disabled = false; } }
   /* 24-11-2026: Documentos = solo un enlace a la carpeta de Drive (antes listaba y bajaba los archivos: pesaba mucho) */
-  async function abrir(box) { box.innerHTML = `<div class="cv-card" style="padding:18px"><h2 style="margin:0 0 6px">Documentos <span class="muted">en Google Drive</span></h2><p class="muted" style="margin:0 0 14px">Catálogo, listas de precio, posts para WhatsApp, manuales y guías están en la carpeta «HWF Documentos · Ventas y Admin». Se abren directo en Drive (más rápido y sin descargar nada a la app).</p><a class="btn" href="https://drive.google.com/drive/folders/1btOc2fUXYE5mg3Ia2VKpBh-kaW1m-YaI" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;background:#0B3147;color:#fff;border-radius:12px;padding:12px 18px;font-weight:800;text-decoration:none">📁 Abrir carpeta de documentos</a></div>`; }
+  async function abrir(box) { box.innerHTML = `<div class="cv-card" style="padding:18px"><h2 style="margin:0 0 6px">Documentos <span class="muted">en Google Drive</span></h2><p class="muted" style="margin:0 0 14px">Catálogo, listas de precio, posts para WhatsApp, manuales y guías están en la carpeta «HWF Documentos · Ventas». Se abren directo en Drive (más rápido y sin descargar nada a la app).</p><a class="btn" href="https://drive.google.com/drive/folders/1btOc2fUXYE5mg3Ia2VKpBh-kaW1m-YaI" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;background:#0B3147;color:#fff;border-radius:12px;padding:12px 18px;font-weight:800;text-decoration:none">📁 Abrir carpeta de documentos</a></div>`; }
   const ICO = '<svg viewBox="0 0 32 32" aria-hidden="true" class="hic"><defs><linearGradient id="hic-cat" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FF8A6B"/><stop offset="1" stop-color="#D9483B"/></linearGradient></defs><rect width="32" height="32" rx="9" fill="url(#hic-cat)"/><g transform="translate(5.5 5.5) scale(.875)" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6M9 13h6M9 17h6"/></g></svg>';
   if (VEN) {   /* VENTAS: apartado propio del menú (como Técnicas de venta) */
     const b = document.createElement("button"); b.type = "button"; b.setAttribute("role", "tab"); b.id = "mCat"; b.setAttribute("aria-selected", "false"); b.textContent = "Documentos";
