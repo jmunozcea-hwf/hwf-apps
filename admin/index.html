@@ -5285,7 +5285,7 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261124152642";
+const HWF_VER = "20261124153612";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -9861,7 +9861,7 @@ body.m-b2b #crmMeta{display:none!important}
   const POR = "Admin";
   const ST = { tab: "cuentas", fEst: "pendiente", fVend: "", q: "", cuentas: [], pedidos: [], canjes: [], aj: null, ajErr: "", cargando: false, cargandoAj: false, err: "", t: 0, ocup: false, dr: {}, avisado: false };
   const pend = () => ST.cuentas.filter(c => c.estado === "pendiente").length;
-  const vendedores = () => { const s = new Set(); try { CARTERAS().forEach(v => s.add(v)); } catch (e) { } try { A.clientes.forEach(c => c.cart && s.add(c.cart)); } catch (e) { } ST.cuentas.forEach(c => c.vendedor && s.add(c.vendedor)); s.delete("Tienda Hellywoof"); return [...s].filter(Boolean).sort((a, b) => a.localeCompare(b, "es")); };
+  const vendedores = () => { const s = new Set(); try { CARTERAS().forEach(v => s.add(v)); } catch (e) { } try { A.clientes.forEach(c => c.cart && s.add(c.cart)); } catch (e) { } ST.cuentas.forEach(c => c.vendedor && s.add(c.vendedor)); s.delete("Tienda Hellywoof"); s.add("Vendedor B2B"); return [...s].filter(v => v && !/^gen[eé]rico$/i.test(String(v).trim())).sort((a, b) => a.localeCompare(b, "es")); };
   const clientes = () => { try { return (A.clientes || []).map(c => ({ nombre: c.nombre, comuna: c.comuna, cart: c.cart, rut: "" })); } catch (e) { return []; } };
   const vivo = () => typeof vistaMas !== "undefined" && vistaMas === "b2b" && typeof TAB !== "undefined" && TAB === "mas";
   function insignias() {
