@@ -7200,7 +7200,7 @@ function confirmarNota() {
   x.onclick = () => cerrarModal(); card.insertBefore(x, card.firstChild); })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261124200125";
+const HWF_VER = "20261124201220";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -11129,6 +11129,50 @@ body:has(#rdOv) #snBtn,body:has(#rdOv) #iaBtn,body:has(#rdOv) #navBotones{displa
   /* sin entrada en el menú lateral (16-11-2026, «redunda»): lo mismo está en Inicio → «Mi día» */
   const quitar = () => document.querySelectorAll("#snRd, #rdOv").forEach(x => x.remove()); quitar();
   const vigila = setInterval(() => { const pan = document.getElementById("snPanel"); if (!pan) return; clearInterval(vigila); new MutationObserver(quitar).observe(pan, { childList: true }); }, 400);
+})();
+</script>
+<style>/* patch_pedb2b */
+.pb-bar{display:grid;gap:10px;margin:8px 0 12px}
+.pb-esp{display:inline-flex;background:var(--sunk,#EEF2F5);border-radius:14px;padding:4px;gap:4px;max-width:440px;width:100%}
+.pb-esp button{flex:1;border:0;background:transparent;border-radius:10px;padding:9px 10px;font:inherit;font-weight:800;color:var(--muted,#5B6874);cursor:pointer}
+.pb-esp button[aria-pressed="true"]{background:var(--surface,#fff);color:var(--ink,#0B3146);box-shadow:0 1px 3px rgba(0,0,0,.12),inset 0 -3px 0 #0B3146}
+.pb-tp{display:flex;gap:8px;flex-wrap:wrap}
+.pb-tp button{--c:#0B3146;--b:#EEF2F5;border:1.5px solid transparent;background:var(--b);color:var(--c);border-radius:999px;padding:8px 14px;font:inherit;font-weight:800;font-size:.9rem;cursor:pointer}
+.pb-tp button small{font-weight:600;opacity:.75;margin-left:4px}
+.pb-tp button[aria-pressed="true"]{border-color:var(--c);box-shadow:0 0 0 2px var(--c) inset}
+.pb-tp [data-pbt="seco"]{--c:#2563A8;--b:#E8F1FB}.pb-tp [data-pbt="humedo"]{--c:#0F7C6E;--b:#E2F5F1}.pb-tp [data-pbt="vet"]{--c:#C0392B;--b:#FDECEA}
+.pb-tp [data-pbt="snacks"]{--c:#9A5B00;--b:#FFF3D6}.pb-tp [data-pbt="arenas"]{--c:#6B3FA0;--b:#EFE7FA}.pb-tp [data-pbt="suplementos"]{--c:#1C7A4E;--b:#E3F4EA}
+</style>
+<script>/* patch_pedb2b: pedido ordenado como el B2B */
+(function () {
+  if (typeof applyFilter !== "function" || typeof renderMore !== "function" || !document.getElementById("rows") || typeof PRODS === "undefined") return;
+  const N = s => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+  const tipoDe = g => { const n = N(g); return /humed|lata/.test(n) ? "humedo" : /snack|premio/.test(n) ? "snacks" : /arena/.test(n) ? "arenas" : /suplement/.test(n) ? "suplementos" : /seco|alimento/.test(n) ? "seco" : "otros"; };
+  const esVet = p => /ownat\s+care/i.test(p.d || "") || /(^|[^a-z])vet([^a-z]|$)/i.test(p.d || "") || tipoDe(p.g) === "suplementos";
+  const tipoP = p => (p._pbk === undefined ? (p._pbk = esVet(p) ? "vet" : tipoDe(p.g)) : p._pbk);
+  const espDe = g => { const n = N(g); return /perro/.test(n) && !/gato/.test(n) ? "perro" : /gato|arena/.test(n) && !/perro/.test(n) ? "gato" : "ambos"; };
+  const pasaEsp = (p, e) => !e || espDe(p.g) === e || espDe(p.g) === "ambos";
+  const TIPOS = [["seco", "Seco"], ["humedo", "Húmedo"], ["vet", "Vet"], ["snacks", "Snacks"], ["arenas", "Arenas"], ["suplementos", "Suplementos"], ["otros", "Otros"]];
+  const ST = { e: "", k: "" }; try { const s = JSON.parse(localStorage.getItem("hwf-pedb2b") || "{}"); ST.e = s.e || ""; ST.k = s.k || ""; } catch (e) {}
+  const guardar = () => { try { localStorage.setItem("hwf-pedb2b", JSON.stringify(ST)); } catch (e) {} };
+  const bar = document.createElement("div"); bar.className = "pb-bar"; bar.id = "pbBar";
+  const rows = document.getElementById("rows"); (document.getElementById("count") || rows).before(bar);
+  function pintarBar() {
+    const base = PRODS.filter(p => pasaEsp(p, ST.e)), cnt = {}; base.forEach(p => { const k = tipoP(p); cnt[k] = (cnt[k] || 0) + 1; });
+    bar.innerHTML = `<div class="pb-esp" role="group" aria-label="Especie">${[["", "Todo"], ["perro", "🐶 Perro"], ["gato", "🐱 Gato"]].map(([v, t]) => `<button type="button" data-pbe="${v}" aria-pressed="${ST.e === v}">${t}</button>`).join("")}</div>
+      <div class="pb-tp" role="group" aria-label="Tipo de producto">${TIPOS.filter(([k]) => cnt[k]).map(([k, t]) => `<button type="button" data-pbt="${k}" aria-pressed="${ST.k === k}">${t}<small>${cnt[k]}</small></button>`).join("")}</div>`; }
+  bar.addEventListener("click", ev => { const e = ev.target.closest("[data-pbe]"), t = ev.target.closest("[data-pbt]");
+    if (e) ST.e = e.dataset.pbe; else if (t) ST.k = ST.k === t.dataset.pbt ? "" : t.dataset.pbt; else return;
+    guardar(); try { if (typeof pmSel !== "undefined") pmSel = null; } catch (x) {} applyFilter(); });
+  const box = (t, ps) => `<section class="mbox"><h3>${t}<small>${ps.length} ${ps.length === 1 ? "producto" : "productos"}</small></h3><div class="mgrid">${ps.map(rowHTML).join("")}</div></section>`;
+  renderMore = function () {
+    filtered = filtered.filter(p => pasaEsp(p, ST.e) && (!ST.k || tipoP(p) === ST.k));
+    pintarBar(); if (shown >= filtered.length) return;
+    const orden = new Map(PRODS.map((p, i) => [p, i])), G = {};
+    filtered.slice().sort((a, b) => orden.get(a) - orden.get(b)).forEach(p => { (G[tipoP(p)] = G[tipoP(p)] || []).push(p); });
+    rows.insertAdjacentHTML("beforeend", TIPOS.filter(([k]) => G[k]).map(([k, t]) => box(t, G[k])).join("")); shown = filtered.length;
+  };
+  try { applyFilter(); } catch (e) {}
 })();
 </script>
 </body>

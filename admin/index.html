@@ -1328,6 +1328,7 @@ function npRitmo(cots, Y, M, n, real, lim, ant) {
       <button type="button" data-m="cots" aria-pressed="false">NP Defontana</button>
       <button type="button" data-m="pedidos" aria-pressed="false">Pedidos</button>
       <button type="button" data-m="napp" aria-pressed="false">NP App</button>
+      <button type="button" data-m="clientes" aria-pressed="false">Clientes</button>
       <button type="button" data-m="cobranza" aria-pressed="false">Cobranza</button>
       <button type="button" data-m="embudo" aria-pressed="false">Prospectos</button>
       <button type="button" data-m="cambios" aria-pressed="false">Cambios clientes</button>
@@ -5285,7 +5286,7 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261124200125";
+const HWF_VER = "20261124201220";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -10213,6 +10214,98 @@ body.m-b2b #crmMeta{display:none!important}
     if (typeof vistaMas !== "undefined" && vistaMas === "info") { const box = document.getElementById("masBody"); if (box && !box.querySelector("#infoFr"))
       box.innerHTML = '<div class="card" style="padding:0;overflow:hidden"><iframe id="infoFr" src="../tienda/?solo=info&t=' + Date.now() + '" title="INFO · Nutrición y suplementos" style="width:100%;height:calc(100vh - 150px);min-height:640px;border:0;display:block"></iframe></div>'; return; }
     return _pm.apply(this, arguments); };
+})();
+</script>
+<style>/* patch_admclientes */
+#acW{min-width:0}#acW .ac-k{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:10px 0}
+@media(max-width:700px){#acW .ac-k{grid-template-columns:repeat(2,minmax(0,1fr))}}
+#acW .ac-k div{background:var(--surface,#fff);border:1px solid var(--line,#E3E9EE);border-radius:16px;padding:12px 14px;font-size:.72rem;font-weight:800;letter-spacing:.04em;color:var(--muted,#5B6874);text-transform:uppercase}
+#acW .ac-k b{display:block;font-size:1.35rem;letter-spacing:0;text-transform:none;color:var(--ink,#0F1E29);font-variant-numeric:tabular-nums}#acW .ac-k b.wa{color:#B4400B}#acW .ac-k b.ba{color:#B3261E}
+#acW .ac-f{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+#acW .ac-f button{border:1.5px solid var(--line,#D5DEE5);background:var(--surface,#fff);color:inherit;border-radius:999px;padding:8px 14px;font:inherit;font-weight:700;font-size:.86rem;cursor:pointer}
+#acW .ac-f button small{opacity:.7;margin-left:4px}#acW .ac-f button[aria-pressed="true"]{background:#0B3146;border-color:#0B3146;color:#fff}
+#acW .ac-f.v button[aria-pressed="true"]{background:#26A69A;border-color:#26A69A}
+#acW .ac-s{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}#acW input,#acW select{width:100%;box-sizing:border-box;font:inherit;border:1px solid var(--line,#D5DEE5);border-radius:12px;padding:10px 12px;background:var(--surface,#fff);color:inherit}
+#acW .ac-g{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:12px;margin-top:8px}
+#acW .ac-c{background:var(--surface,#fff);border:1px solid var(--line,#E3E9EE);border-left:5px solid #E0A33A;border-radius:16px;padding:14px;display:grid;gap:8px;min-width:0}
+#acW .ac-c.aldia{border-left-color:#1C7A4E}#acW .ac-c.riesgo{border-left-color:#B4400B}#acW .ac-c.perdido{border-left-color:#B3261E}#acW .ac-c.sin{border-left-color:#9AA7B1}
+#acW .ac-h{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}#acW .ac-h b{font-size:1.02rem;overflow-wrap:anywhere}#acW .ac-h small{display:block;color:var(--muted,#5B6874);font-size:.82rem;font-weight:400}
+#acW .ac-e{font-size:.72rem;font-weight:800;border-radius:999px;padding:3px 9px;white-space:nowrap;background:#FFF3D6;color:#8A5300}
+#acW .ac-c.aldia .ac-e{background:#E3F4EA;color:#1C7A4E}#acW .ac-c.riesgo .ac-e{background:#FDEBDD;color:#B4400B}#acW .ac-c.perdido .ac-e{background:#FDECEA;color:#B3261E}#acW .ac-c.sin .ac-e{background:#EEF2F5;color:#5B6874}
+#acW .ac-n{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}#acW .ac-n div{background:var(--sunk,#EEF2F5);border-radius:10px;padding:7px 9px;font-size:.66rem;font-weight:800;color:var(--muted,#5B6874);text-transform:uppercase}
+#acW .ac-n b{display:block;font-size:.95rem;color:var(--ink,#0F1E29);text-transform:none;font-variant-numeric:tabular-nums}
+#acW .ac-t{display:flex;gap:6px;flex-wrap:wrap}#acW .ac-t span{font-size:.74rem;font-weight:700;border-radius:999px;padding:3px 9px;background:#EEF2F5;color:#5B6874}
+#acW .ac-t .f{background:#FFF3D6;color:#8A5300}#acW .ac-t .v{background:#FDECEA;color:#B3261E}#acW .ac-t .np{background:#E6EEF8;color:#2563A8}#acW .ac-t .ve{background:#D8F2EF;color:#0F6E73}
+#acW .ac-b{display:flex;gap:6px;flex-wrap:wrap}#acW .ac-b a{flex:1;text-align:center;border:1px solid var(--line,#D5DEE5);border-radius:10px;padding:8px;font-weight:700;font-size:.82rem;color:inherit;text-decoration:none;min-width:70px}
+#acW .ac-mas{display:block;margin:12px auto;border:1px solid var(--line,#D5DEE5);background:var(--surface,#fff);border-radius:999px;padding:9px 18px;font:inherit;font-weight:700;cursor:pointer}
+</style>
+<script>/* patch_admclientes: Clientes con filtro por vendedor */
+(function () {
+  if (typeof pintarMas !== "function") return;
+  try { if (typeof NAV_MNOM !== "undefined") NAV_MNOM.clientes = "Clientes"; } catch (e) {}
+  const es = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const nz = s => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
+  const tcap = s => String(s || "").toLowerCase().replace(/(^|[\s.,(\/-])([a-záéíóúñ])/g, (m, a, b) => a + b.toUpperCase()).replace(/\b(Spa|Eirl|Ltda)\b/g, x => x === "Spa" ? "SpA" : x.toUpperCase());
+  const MM = n => { const a = Math.abs(n || 0); return "$" + (a >= 1e6 ? (a / 1e6).toLocaleString("es-CL", { maximumFractionDigits: 1 }) + " MM" : a >= 1e3 ? Math.round(a / 1e3).toLocaleString("es-CL") + " mil" : Math.round(a).toLocaleString("es-CL")); };
+  const MES = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"][new Date().getMonth()];
+  const conf = () => { try { if (typeof SYC === "function") return SYC(); } catch (e) {} return null; };
+  async function llamar(d) { const c = conf(); if (!c || !c.url) return { ok: false, error: "Esta app no está conectada al script de Google." };
+    try { const r = await fetch(c.url, { method: "POST", body: JSON.stringify(Object.assign({ clave: c.clave }, d)) }); return JSON.parse(await r.text()); } catch (e) { return { ok: false, error: "Sin conexión a internet." }; } }
+  const KEY = "hwf-admcli";
+  const ST = { L: null, v: "", e: "falta", q: "", o: "prio", com: "", n: 60, cargando: false, err: "" };
+  try { const s = JSON.parse(localStorage.getItem(KEY) || "null"); if (s && s.c) ST.L = s.c; ST.v = localStorage.getItem(KEY + "-v") || ""; } catch (e) {}
+  async function cargar() { if (ST.cargando) return; ST.cargando = true; ST.err = ""; pintar();
+    const r = await llamar({ accion: "datos", app: "ventas", version: "" }); ST.cargando = false;
+    const C = r && r.ok && r.paquete && r.paquete.CRM_BASE && r.paquete.CRM_BASE.clientes;
+    if (C && C.length) { ST.L = C.map(c => ({ codigo: c.codigo, nombre: c.nombre, comuna: c.comuna, direccion: c.direccion, vendedor: c.vendedor, compra_2026: c.compra_2026, compra_habitual: c.compra_habitual, octubre: c.octubre, ultima_compra: c.ultima_compra, cotizacion_pendiente: c.cotizacion_pendiente, rut: c.rut, telefono: c.telefono, lat: c.lat, lng: c.lng }));
+      try { localStorage.setItem(KEY, JSON.stringify({ t: Date.now(), c: ST.L })); } catch (e) {} }
+    else ST.err = (r && r.error) || "No llegaron los clientes de la app Ventas.";
+    pintar(); }
+  const dias = f => f ? Math.floor((Date.now() - new Date(String(f).slice(0, 10) + "T12:00:00")) / 864e5) : null;
+  function filas() {
+    const cx = {}; try { cxClientes(cxTodos()).forEach(c => { cx["n:" + nz(c.cli)] = c; if (c.rut) cx["r:" + String(c.rut).replace(/\./g, "").toUpperCase()] = c; }); } catch (e) {}
+    return (ST.L || []).filter(c => !/cliente boleta/i.test(c.nombre || "") && !/tienda|hellyw/i.test(nz(c.vendedor))).map(c => {
+      const hab = Number(c.compra_habitual) || 0, mes = Number(c.octubre) || 0, falta = Math.max(0, hab - mes), d = dias(c.ultima_compra), y = Number(c.compra_2026) || 0;
+      const dx = cx["r:" + String(c.rut || "").replace(/\./g, "").toUpperCase()] || cx["n:" + nz(c.nombre)], venc = dx ? dx.venc || 0 : 0, np = Number(c.cotizacion_pendiente) || 0;
+      const est = !(y > 0) && !(mes > 0) ? "sin" : d != null && d >= 90 && !(mes > 0) ? "perdido" : d != null && d >= 45 && !(mes > 0) ? "riesgo" : falta > 0 ? "falta" : "aldia";
+      const prio = falta + venc * .5 + np * .5 + (est === "riesgo" ? hab * .8 : est === "perdido" ? hab * .5 : 0);
+      return { c, hab, mes, falta, d, venc, np, est, prio, y, sinUb: !(c.lat && c.lng) }; }); }
+  const FIL = [["todos", "Todos", () => true], ["falta", "Les falta comprar", x => x.est === "falta"], ["riesgo", "En riesgo", x => x.est === "riesgo"], ["perdido", "Perdidos", x => x.est === "perdido"],
+    ["aldia", "Al día", x => x.est === "aldia"], ["deuda", "Con deuda vencida", x => x.venc > 0], ["np", "Con nota de pedido", x => x.np > 0], ["sin", "Sin compras este año", x => x.est === "sin"]];
+  const ETQ = { falta: "Le falta comprar", riesgo: "En riesgo", perdido: "Perdido", aldia: "Al día", sin: "Sin compras este año" };
+  const ORD = [["prio", "Prioridad", (a, b) => b.prio - a.prio], ["falta", "Mayor falta", (a, b) => b.falta - a.falta], ["hab", "Mayor compra habitual", (a, b) => b.hab - a.hab],
+    ["ult", "Más días sin comprar", (a, b) => (b.d == null ? 1e9 : b.d) - (a.d == null ? 1e9 : a.d)], ["venc", "Mayor vencido", (a, b) => b.venc - a.venc], ["nom", "Nombre", (a, b) => String(a.c.nombre).localeCompare(String(b.c.nombre), "es")]];
+  const tel = t => { const d = String(t || "").split(/[,;/]/)[0].replace(/\D/g, ""); return d ? (d.length === 9 ? "56" + d : d) : ""; };
+  function card(x) { const c = x.c, t = tel(c.telefono), dir = [tcap(c.direccion), tcap(c.comuna)].filter(Boolean).join(", ");
+    const ir = c.lat && c.lng ? `https://www.google.com/maps/dir/?api=1&destination=${c.lat},${c.lng}` : dir ? "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(dir) : "";
+    return `<article class="ac-c ${x.est}"><div class="ac-h"><div><b>${es(tcap(c.nombre))}</b><small>${es(dir || "sin dirección")}</small></div><span class="ac-e">${ETQ[x.est]}</span></div>
+      <div class="ac-n"><div>Habitual/mes<b>${MM(x.hab)}</b></div><div>${MES}<b>${MM(x.mes)}</b></div><div>Última compra<b>${x.d == null ? "–" : "hace " + x.d + " d"}</b></div></div>
+      <div class="ac-t"><span class="ve">${es(c.vendedor || "Sin vendedor")}</span>${x.falta ? `<span class="f">Falta ${MM(x.falta)}</span>` : ""}${x.venc ? `<span class="v">Vencido ${MM(x.venc)}</span>` : ""}${x.np ? `<span class="np">NP Defontana ${MM(x.np)}</span>` : ""}${x.sinUb ? "<span>Sin ubicación</span>" : ""}</div>
+      <div class="ac-b">${t ? `<a href="https://wa.me/${t}" target="_blank" rel="noopener">WhatsApp</a><a href="tel:+${t}">Llamar</a>` : ""}${ir ? `<a href="${ir}" target="_blank" rel="noopener">Ir</a>` : ""}</div></article>`; }
+  function pintar() { const box = document.getElementById("masBody"); if (!box || vistaMas !== "clientes") return;
+    if (!ST.L) { box.innerHTML = `<div id="acW"><h2>Clientes</h2><p class="muted">${ST.err ? es(ST.err) : "Cargando clientes…"}</p>${ST.err ? '<button type="button" class="ac-mas" data-acr>Reintentar</button>' : ""}</div>`; const b = box.querySelector("[data-acr]"); if (b) b.onclick = cargar; return; }
+    const T = filas(), vends = [...new Set(T.map(x => x.c.vendedor).filter(Boolean))].sort((a, b) => a.localeCompare(b, "es"));
+    if (ST.v && !vends.includes(ST.v)) ST.v = "";
+    const V = T.filter(x => !ST.v || x.c.vendedor === ST.v), q = nz(ST.q), cnt = {}; FIL.forEach(([k, , fn]) => cnt[k] = V.filter(fn).length);
+    const coms = [...new Set(V.map(x => tcap(x.c.comuna)).filter(Boolean))].sort((a, b) => a.localeCompare(b, "es"));
+    const fn = (FIL.find(f => f[0] === ST.e) || FIL[0])[2], L = V.filter(fn).filter(x => (!ST.com || tcap(x.c.comuna) === ST.com) && (!q || nz([x.c.nombre, x.c.rut, x.c.direccion, x.c.comuna].join(" ")).includes(q))).sort((ORD.find(o => o[0] === ST.o) || ORD[0])[2]);
+    const hab = V.reduce((s, x) => s + x.hab, 0), falta = V.reduce((s, x) => s + x.falta, 0), venc = V.reduce((s, x) => s + x.venc, 0);
+    box.innerHTML = `<div id="acW"><h2 style="margin:0">Clientes <span class="muted" style="font-size:.85rem;font-weight:400">cartera de cada vendedor · datos de la app Ventas</span></h2>
+      <div class="ac-f v" role="group" aria-label="Vendedor"><button type="button" data-acv="" aria-pressed="${!ST.v}">Todos<small>${T.length}</small></button>${vends.map(v => `<button type="button" data-acv="${es(v)}" aria-pressed="${ST.v === v}">${es(v)}<small>${T.filter(x => x.c.vendedor === v).length}</small></button>`).join("")}</div>
+      <div class="ac-k"><div>Clientes<b>${V.length}</b></div><div>Habitual al mes<b>${MM(hab)}</b></div><div>Falta en ${MES}<b class="wa">${MM(falta)}</b></div><div>Vencido<b class="ba">${MM(venc)}</b></div></div>
+      <input id="acQ" type="search" placeholder="Buscar cliente, RUT, dirección o comuna" value="${es(ST.q)}">
+      <div class="ac-f" role="group" aria-label="Estado">${FIL.map(([k, t]) => `<button type="button" data-ace="${k}" aria-pressed="${ST.e === k}">${t}<small>${cnt[k]}</small></button>`).join("")}</div>
+      <div class="ac-s"><select id="acO" aria-label="Ordenar">${ORD.map(([k, t]) => `<option value="${k}"${ST.o === k ? " selected" : ""}>Ordenar: ${t}</option>`).join("")}</select>
+        <select id="acC" aria-label="Comuna"><option value="">Todas las comunas</option>${coms.map(c => `<option${ST.com === c ? " selected" : ""}>${es(c)}</option>`).join("")}</select></div>
+      <p class="muted" style="margin:6px 0">${L.length} clientes${ST.v ? " · " + es(ST.v) : ""}${ST.cargando ? " · actualizando…" : ""}</p>
+      <div class="ac-g">${L.slice(0, ST.n).map(card).join("") || '<p class="muted">No hay clientes con ese filtro.</p>'}</div>
+      ${L.length > ST.n ? `<button type="button" class="ac-mas" data-acm>Ver ${Math.min(60, L.length - ST.n)} más</button>` : ""}</div>`;
+    box.querySelectorAll("[data-acv]").forEach(b => b.onclick = () => { ST.v = b.dataset.acv; ST.n = 60; try { localStorage.setItem(KEY + "-v", ST.v); } catch (e) {} pintar(); });
+    box.querySelectorAll("[data-ace]").forEach(b => b.onclick = () => { ST.e = b.dataset.ace; ST.n = 60; pintar(); });
+    const m = box.querySelector("[data-acm]"); if (m) m.onclick = () => { ST.n += 60; pintar(); };
+    box.querySelector("#acO").onchange = e => { ST.o = e.target.value; pintar(); }; box.querySelector("#acC").onchange = e => { ST.com = e.target.value; pintar(); };
+    const i = box.querySelector("#acQ"); i.oninput = () => { ST.q = i.value; clearTimeout(pintar.t); pintar.t = setTimeout(() => { pintar(); const j = document.getElementById("acQ"); if (j) { j.focus(); j.setSelectionRange(j.value.length, j.value.length); } }, 250); }; }
+  const _pm = pintarMas; pintarMas = function () { if (typeof vistaMas !== "undefined" && vistaMas === "clientes") { pintar(); if (!ST.t || Date.now() - ST.t > 600000) { ST.t = Date.now(); cargar(); } return; } return _pm.apply(this, arguments); };
 })();
 </script>
 </body>
