@@ -483,7 +483,7 @@ if (!cfg() || !DATA()) pantallaConexion(); else { arrancar(); bajar(true).then(n
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261124132648";
+const HWF_VER = "20261124144656";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -2392,7 +2392,7 @@ const LOG_CHOFERES = ["Víctor", "Matías", "Jorge", "Cristóbal", "Claudia", "D
       <p class="muted" style="font-size:.8rem;margin:4px 0 0">${VEN ? "Tus notas de pedido de la app y todos los pedidos del portal B2B (de todos los vendedores, marcados B2B). Los de tus clientes te llegan además por correo en PDF y Excel." : "Todos los pedidos, por vendedor. Los del portal van marcados B2B y llegan por correo (PDF y Excel) al vendedor, a Víctor, a Jorge y a administración."}</p>
       <div class="pd-f">${[7, 30, 90].map(d => `<button type="button" data-pdd="${d}" aria-pressed="${ST.dias === d}">${d} días</button>`).join("")}<button type="button" data-pda="1">${ST.cargando ? "Cargando…" : "↻ Actualizar"}</button></div>
       <div class="pd-f">${[["todos", "Todos"], ["b2b", "Portal B2B"], ["app", "App ventas"]].map(([k, t]) => `<button type="button" data-pdo="${k}" aria-pressed="${ST.o === k}">${t}</button>`).join("")}</div>
-      ${vends.length > 1 ? `<div class="pd-f"><button type="button" data-pdv="" aria-pressed="${!ST.v}">Todos los vendedores</button>${vends.map(v => `<button type="button" data-pdv="${es(v)}" aria-pressed="${ST.v === v}">${es(v)}</button>`).join("")}</div>` : ""}
+      ${vends.length > 1 ? `<div class="pd-f"><button type="button" data-pdv="" aria-pressed="${!ST.v}">Todos</button>${vends.filter(v => String(v || "").trim()).map(v => `<button type="button" data-pdv="${es(v)}" aria-pressed="${ST.v === v}">${es(v)}</button>`).join("")}</div>` : ""}
       <input class="pd-q" id="pdQ" type="search" placeholder="Buscar cliente, N°, comuna o RUT" value="${es(ST.q)}">
       ${ST.err ? `<p style="color:#B3261E;font-weight:600">${es(ST.err)}</p>` : ""}
       ${ST.L ? `<div class="pd-k"><div>Pedidos<b>${F.length}</b>${nf(F.reduce((t, p) => t + p.neto, 0))} neto</div><div>Del portal B2B<b>${nB}</b>${nHoy} hoy</div><div>De la app<b>${F.length - nB}</b>${Object.keys(g).length} vendedor${Object.keys(g).length === 1 ? "" : "es"}</div></div>` : ""}

@@ -7200,7 +7200,7 @@ function confirmarNota() {
   x.onclick = () => cerrarModal(); card.insertBefore(x, card.firstChild); })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261124132648";
+const HWF_VER = "20261124144656";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -10663,7 +10663,15 @@ body.m-b2b #crmMeta{display:none!important}
     const it = items(p), n = it ? it.length : 0;
     return `<div class="b2-c"><div class="b2-t"><b>${E(p.cliente || p.rut || "—")}</b><b>${M(p.neto)}</b></div>
       <small>${E(F(p.fecha))}${n ? ` · ${n} producto${n === 1 ? "" : "s"}` : ""}${p.vendedor ? " · " + E(p.vendedor) : ""}</small>
-      <small>${p.estado ? "Estado: " + E(p.estado) : ""}${p.nota ? ` · Nota de pedido ${E(p.nota)}` : ""}</small></div>`;
+      <small>${p.estado ? "Estado: " + E(p.estado) : ""}${p.nota ? ` · Nota de pedido ${E(p.nota)}` : ""}</small>
+      <div style="margin-top:6px"><button type="button" class="b2-b mal" data-delped="${E(p.nota || p.id)}">🗑 Eliminar pedido</button></div></div>`;
+  }
+  /* 24-11-2026: eliminar un pedido del portal (lo saca de la planilla y de esta lista; queda en «Notas eliminadas») */
+  async function borrarPedido(id) {
+    const p = ST.pedidos.find(x => String(x.nota || x.id) === id); if (!p || !confirm("¿Eliminar el pedido de " + (p.cliente || p.rut || "este cliente") + " por " + M(p.neto) + "?")) return;
+    const i = ST.pedidos.indexOf(p); ST.pedidos.splice(i, 1); pintar(); aviso("Eliminando…");
+    const r = await llamar({ accion: "eliminar", id, admin: true, vendedor: typeof yo === "function" ? yo() : "" });   /* con la clave de Ventas el script nunca lo trata como admin */
+    if (r && r.ok) aviso("Pedido eliminado."); else { ST.pedidos.splice(i, 0, p); pintar(); aviso((r && r.error) || "No se pudo eliminar."); }
   }
 
   const yo = () => (typeof SES !== "undefined" && SES && SES.vendedor && SES.vendedor.nombre) || "";
@@ -10706,9 +10714,11 @@ body.m-b2b #crmMeta{display:none!important}
   }
   async function actuar(c, estado, cliente) {
     if (ST.ocup) return; ST.ocup = true;
-    const r = await llamar({ accion: "b2bAprobar", id: c.id, estado, vendedor: yo(), cliente: cliente || c.cliente || "", por: yo() }); ST.ocup = false;
-    if (r && r.ok) { aviso(estado === "activo" ? "Cuenta aprobada. El cliente recibirá un correo de bienvenida." : estado === "bloqueado" ? "Cuenta bloqueada." : "Solicitud rechazada."); await cargar(true); pintar(); }
-    else aviso((r && r.error) || "No se pudo guardar.");
+    /* 24-11-2026: respuesta inmediata; se guarda en segundo plano y la cuenta sale de pendientes al tiro */
+    const antes = { estado: c.estado, vendedor: c.vendedor, cliente: c.cliente }; Object.assign(c, { estado, vendedor: yo(), cliente: cliente || c.cliente || "" }); aviso("Guardando…"); pintar(); insignias();
+    const r = await llamar({ accion: "b2bAprobar", id: c.id, estado, vendedor: yo(), cliente: cliente || antes.cliente || "", por: yo() }); ST.ocup = false;
+    if (r && r.ok) { aviso(estado === "activo" ? "Cuenta aprobada. El cliente recibirá un correo de bienvenida." : estado === "bloqueado" ? "Cuenta bloqueada." : "Solicitud rechazada."); pintar(); cargar(true); }
+    else { Object.assign(c, antes); pintar(); insignias(); aviso((r && r.error) || "No se pudo guardar."); }
   }
   function clientesCartera() { try { const d = crmMio(); return d && d.clientes ? d.clientes.map(c => ({ nombre: c.nombre, rut: c.rut, comuna: c.comuna, cart: "" })) : []; } catch (e) { return []; } }
   function clientesTodos() { try { return clientesLocal().map(c => ({ nombre: c.nombre, rut: c.rut, comuna: c.comuna, cart: c.vendedor || "" })); } catch (e) { return []; } }
@@ -10732,6 +10742,7 @@ body.m-b2b #crmMeta{display:none!important}
     box.addEventListener("click", e => {
       if (e.target.closest("#b2Ref")) return cargar(false);
       const f = e.target.closest("[data-f]"); if (f) { ST.filtro = f.dataset.f; return pintar(); }
+      const dp = e.target.closest("[data-delped]"); if (dp) return borrarPedido(dp.dataset.delped);
       const b = e.target.closest("[data-a]"); if (!b) return; const c = ST.cuentas.find(x => String(x.id) === b.dataset.id); if (!c) return;
       if (b.dataset.a === "aprobar") return aprobar(c);
       if (confirm(b.dataset.a === "bloqueado" ? `¿Bloquear el acceso de ${c.razon}?` : `¿Rechazar la solicitud de ${c.razon}?`)) actuar(c, b.dataset.a);
@@ -10886,7 +10897,7 @@ body.m-b2b #crmMeta{display:none!important}
       <p class="muted" style="font-size:.8rem;margin:4px 0 0">${VEN ? "Tus notas de pedido de la app y todos los pedidos del portal B2B (de todos los vendedores, marcados B2B). Los de tus clientes te llegan además por correo en PDF y Excel." : "Todos los pedidos, por vendedor. Los del portal van marcados B2B y llegan por correo (PDF y Excel) al vendedor, a Víctor, a Jorge y a administración."}</p>
       <div class="pd-f">${[7, 30, 90].map(d => `<button type="button" data-pdd="${d}" aria-pressed="${ST.dias === d}">${d} días</button>`).join("")}<button type="button" data-pda="1">${ST.cargando ? "Cargando…" : "↻ Actualizar"}</button></div>
       <div class="pd-f">${[["todos", "Todos"], ["b2b", "Portal B2B"], ["app", "App ventas"]].map(([k, t]) => `<button type="button" data-pdo="${k}" aria-pressed="${ST.o === k}">${t}</button>`).join("")}</div>
-      ${vends.length > 1 ? `<div class="pd-f"><button type="button" data-pdv="" aria-pressed="${!ST.v}">Todos los vendedores</button>${vends.map(v => `<button type="button" data-pdv="${es(v)}" aria-pressed="${ST.v === v}">${es(v)}</button>`).join("")}</div>` : ""}
+      ${vends.length > 1 ? `<div class="pd-f"><button type="button" data-pdv="" aria-pressed="${!ST.v}">Todos</button>${vends.filter(v => String(v || "").trim()).map(v => `<button type="button" data-pdv="${es(v)}" aria-pressed="${ST.v === v}">${es(v)}</button>`).join("")}</div>` : ""}
       <input class="pd-q" id="pdQ" type="search" placeholder="Buscar cliente, N°, comuna o RUT" value="${es(ST.q)}">
       ${ST.err ? `<p style="color:#B3261E;font-weight:600">${es(ST.err)}</p>` : ""}
       ${ST.L ? `<div class="pd-k"><div>Pedidos<b>${F.length}</b>${nf(F.reduce((t, p) => t + p.neto, 0))} neto</div><div>Del portal B2B<b>${nB}</b>${nHoy} hoy</div><div>De la app<b>${F.length - nB}</b>${Object.keys(g).length} vendedor${Object.keys(g).length === 1 ? "" : "es"}</div></div>` : ""}

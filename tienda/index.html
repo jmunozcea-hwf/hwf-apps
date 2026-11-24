@@ -1875,7 +1875,7 @@ function rankCalc(ini, fin) {
   const misM = {}; lsGet(RKK, []).concat(Object.values(lsGet(RKK + "-loc", {}))).forEach(x => { const k = x.f + "|" + x.v; if (!misM[k] || x.pts > misM[k].pts) misM[k] = x; });
   const dias = []; for (let d = new Date(ini + "T12:00:00"); isoD(d) <= fin; d.setDate(d.getDate() + 1)) { const f = isoD(d); if (!diaTienda(f) || f > P.corte || (f === P.corte && !(P.G[f] && P.G[f].venta))) continue;   /* el día del corte sin ventas aún no cuenta */
     const q = quienDia(f); dias.push(puntajeDia(P, f, misM[f + "|" + q + TAG])); }
-  const L = USUARIOS.map(u => { const l = dias.filter(x => x.quien === u), n = l.length, sv = l.reduce((s, x) => s + x.venta, 0), se = l.reduce((s, x) => s + x.esp, 0), tk = l.filter(x => x.tickets);
+  const L = USUARIOS.filter(u => u !== "Genérico").map(u => { const l = dias.filter(x => x.quien === u), n = l.length, sv = l.reduce((s, x) => s + x.venta, 0), se = l.reduce((s, x) => s + x.esp, 0), tk = l.filter(x => x.tickets);
     return { u, dias: n, venta: sv, cumpl: se ? sv / se : 0, sacos: l.reduce((s, x) => s + x.sacos, 0), ticket: tk.length ? tk.reduce((s, x) => s + x.ticket, 0) / tk.length : 0, sku: tk.length ? tk.reduce((s, x) => s + x.sku, 0) / tk.length : 0,
       mis: l.reduce((s, x) => s + x.mis, 0), misMax: l.reduce((s, x) => s + x.misMax, 0), score: n ? l.reduce((s, x) => s + x.score, 0) / n : 0 }; }).sort((a, b) => b.score - a.score);
   return { L, dias, P };
@@ -2350,7 +2350,7 @@ const stAbrev = n => ST_ABR.reduce((s, [r, t]) => s.replace(r, t), String(n || "
 try { if ($("sStock") && !$("sStock").hidden) pintarStock(); } catch (e) {}
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261124132648";
+const HWF_VER = "20261124144656";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;

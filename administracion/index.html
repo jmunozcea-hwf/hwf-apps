@@ -2034,7 +2034,7 @@ function pintarNApp() {
     ${todos.length ? `<input class="na-busca" id="naQ" type="search" placeholder="Buscar por cliente, N° o vendedor" value="${esc(naBusca)}">
     <div class="seg" id="naSegE">${[["pen", "Por revisar", cuenta.pen + cuenta.mod], ["apr", "Aprobadas", cuenta.apr], ["rec", "Rechazadas", cuenta.rec], ["todas", "Todas", base.length]]
       .map(([k, t, n]) => `<button type="button" data-f="${k}" aria-pressed="${naFiltro === k}">${t} (${n})</button>`).join("")}</div>
-    ${carts.length > 1 ? `<div class="seg" id="naSeg"><button type="button" data-v="" aria-pressed="${!naVend}">Todos los vendedores</button>${carts.map(v => `<button type="button" data-v="${esc(v)}" aria-pressed="${naVend === v}">${esc(v.split(" ")[0])}</button>`).join("")}</div>` : ""}` : ""}
+    ${carts.length > 1 ? `<div class="seg" id="naSeg"><button type="button" data-v="" aria-pressed="${!naVend}">Todos</button>${carts.filter(v => String(v || "").trim()).map(v => `<button type="button" data-v="${esc(v)}" aria-pressed="${naVend === v}">${esc(v.split(" ")[0])}</button>`).join("")}</div>` : ""}` : ""}
     <div class="card"><div class="lst">${L.map(p => { const e = naEst(p.num), it = naItems(p);
         return `<button type="button" class="it e-${e}" data-na="${esc(p.num)}"><span class="n"><b>${esc(tc(p.cliente))}</b><small>N° ${esc(p.num)} · ${naFecha(p)} · ${esc(p.vend)}${p.items ? ` · ${it.filter(x => x.q > 0).length} ${it.filter(x => x.q > 0).length === 1 ? "producto" : "productos"}` : " · sin detalle"}${p.entrega ? ` · entrega ${naFISO(p.entrega)}` : ""}</small></span><span class="v num">${mm(naNeto(p))}${(r => r.venta ? `<br><small style="color:${mgCol(r.mg)};font-weight:700">margen ${mgPct(r.mg)}</small>` : "")(mgDe(naItems(p)))}<br><span class="est ${e}">${NA_EST[e]}</span></span></button>`; }).join("")
       || `<p class="muted" style="margin:0">${todos.length ? "No hay notas de pedido en esta vista." : "Todavía no hay notas de pedido importadas. Toca “Importar notas de pedido” y elige los Excel que te enviaron los vendedores."}</p>`}</div></div>`;
@@ -2405,7 +2405,7 @@ function pintarBonif() {
       <div class="np-top"><button class="btn pri" type="button" id="bnXls" ${L.length ? "" : "disabled"}>Exportar a Excel</button></div></div>
     <div class="seg" id="bnSegAp">${[["", "Todos"], ["propio", "Aporte propio"], ["proveedor", "Aporte proveedor"]].map(([k, t]) => `<button type="button" data-ap="${k}" aria-pressed="${bnAp === k}">${t}</button>`).join("")}
       <button type="button" id="bnRec" aria-pressed="${bnConRec}">${bnConRec ? "Incluye rechazadas" : "Sin rechazadas"}</button></div>
-    ${carts.length > 1 ? `<div class="seg" id="bnSegV"><button type="button" data-v="" aria-pressed="${!bnVend}">Todos los vendedores</button>${carts.map(v => `<button type="button" data-v="${esc(v)}" aria-pressed="${bnVend === v}">${esc(v.split(" ")[0])}</button>`).join("")}</div>` : ""}
+    ${carts.length > 1 ? `<div class="seg" id="bnSegV"><button type="button" data-v="" aria-pressed="${!bnVend}">Todos</button>${carts.filter(v => String(v || "").trim()).map(v => `<button type="button" data-v="${esc(v)}" aria-pressed="${bnVend === v}">${esc(v.split(" ")[0])}</button>`).join("")}</div>` : ""}
     ${Object.keys(porMarca).length ? `<div class="card"><h2>Aporte proveedor por marca <span class="muted">para cobrar o descontar</span></h2><div class="lst">${Object.entries(porMarca).sort((a, b) => b[1].v - a[1].v)
       .map(([m, x]) => `<div class="it" style="cursor:default"><span class="n"><b>${esc(m)}</b><small>${uds(x.q)} · ${x.n.size} ${x.n.size === 1 ? "nota" : "notas"}</small></span><span class="v num">${fmt(x.v)}</span></div>`).join("")}</div></div>` : ""}
     <div class="card"><h2>Notas con bonificación</h2><div class="lst">${lista.map(n => `<div class="bn-nota e-${n.e}" data-bn="${esc(n.p.num)}">
@@ -2579,7 +2579,7 @@ function pintarCobranza() {
     <div class="card"><h2>Por vendedor <span class="muted">según cobrador en Defontana</span></h2><div class="tbl"><table><thead><tr><th>Vendedor</th><th class="r">Por cobrar</th><th class="r">Vencido</th><th class="r">+30 días</th><th class="r">Hoy y 7 días</th><th class="r">Clientes</th></tr></thead>
       <tbody>${porV.map(x => `<tr data-cxv="${esc(x.v)}" style="cursor:pointer"><td><span class="dot" style="background:${colorDe(x.v)}"></span> ${esc(x.v)}</td><td class="r num">${fmt(x.total)}</td><td class="r num">${fmt(x.venc)}</td><td class="r num">${x.v30 ? fmt(x.v30) : "—"}</td><td class="r num">${fmt(x.sem)}</td><td class="r num">${x.nCli}</td></tr>`).join("")}
       <tr><td><b>Total</b></td><td class="r num"><b>${fmt(cxResumen(todos).total)}</b></td><td class="r num"><b>${fmt(cxResumen(todos).venc)}</b></td><td class="r num"><b>${fmt(cxResumen(todos).v30)}</b></td><td class="r num"><b>${fmt(cxResumen(todos).sem)}</b></td><td class="r num"><b>${cxResumen(todos).nCli}</b></td></tr></tbody></table></div></div>
-    <div class="seg" id="cxSegV" aria-label="Vendedor"><button type="button" data-v="" aria-pressed="${!cxVend}">Todos los vendedores</button>${vends.map(v => `<button type="button" data-v="${esc(v)}" aria-pressed="${cxVend === v}">${esc(v.split(" ")[0])}</button>`).join("")}</div>
+    <div class="seg" id="cxSegV" aria-label="Vendedor"><button type="button" data-v="" aria-pressed="${!cxVend}">Todos</button>${vends.filter(v => String(v || "").trim()).map(v => `<button type="button" data-v="${esc(v)}" aria-pressed="${cxVend === v}">${esc(v.split(" ")[0])}</button>`).join("")}</div>
     <div class="card"><h2>Por cliente <span class="muted">${cl.length} ${cl.length === 1 ? "cliente" : "clientes"} · ${fmt(cl.reduce((t, c) => t + c.saldo, 0))}</span></h2>
       <input type="search" id="cxQ" placeholder="Buscar cliente o RUT" value="${esc(cxQ)}" style="width:100%;margin-bottom:10px">
       <div class="lst">${cl.map(c => `<div class="cx-cli ${c.est}"><div class="t"><b>${esc(tc(c.cli))}</b><b class="num">${fmt(c.saldo)}</b></div>
@@ -6254,7 +6254,7 @@ pintarNApp = function () {
       <div class="np-top" style="margin-top:10px"><button class="btn" type="button" id="naImp">Importar notas</button><button class="btn" type="button" id="naXls" ${L.length ? "" : "disabled"}>Exportar a Excel</button></div>
       <label class="np-chk"><input type="checkbox" id="naDrv" ${npDrive() ? "checked" : ""}> Al descargar, subir también a Google Drive</label></div>
     ${todos.length ? `<input class="na-busca" id="naQ" type="search" placeholder="Buscar cliente o N° de nota" value="${esc(naBusca)}">
-    ${carts.length > 1 ? `<div class="seg" id="naSeg" aria-label="Vendedor"><button type="button" data-v="" aria-pressed="${!naVend}">Todos los vendedores</button>${carts.map(v => `<button type="button" data-v="${esc(v)}" aria-pressed="${naVend === v}">${esc(v.split(" ")[0])}</button>`).join("")}</div>` : ""}` : ""}
+    ${carts.length > 1 ? `<div class="seg" id="naSeg" aria-label="Vendedor"><button type="button" data-v="" aria-pressed="${!naVend}">Todos</button>${carts.filter(v => String(v || "").trim()).map(v => `<button type="button" data-v="${esc(v)}" aria-pressed="${naVend === v}">${esc(v.split(" ")[0])}</button>`).join("")}</div>` : ""}` : ""}
     <div>${LR.map(([p, r]) => { const it = naItems(p).filter(x => x.q > 0).length;
         return `<button type="button" class="na-n ${naSev(r)}" data-na="${esc(p.num)}"><span class="na-f"><b>${esc(tc(p.cliente))}</b><b class="num">${mm(naNeto(p))}</b></span>
           <small>N° ${esc(p.num)} · ${naFecha(p)} · ${esc(p.vend)} · ${it} ${it === 1 ? "producto" : "productos"}${r.mg != null ? ` · margen ${Math.round(r.mg * 100)}%` : ""}${p.entrega ? ` · entrega ${naFISO(p.entrega)}` : ""}</small>
@@ -6344,7 +6344,7 @@ pintarCots = function () {
       <div class="np-top" style="margin-top:10px"><button class="btn" type="button" id="npXls">Exportar a Excel</button></div>
       <label class="np-chk"><input type="checkbox" id="npDrv" ${npDrive() ? "checked" : ""}> Al descargar, subir también a Google Drive</label></div>
     <input class="na-busca" id="npQ" type="search" placeholder="Buscar cliente o N° de nota" value="${esc(npBusca)}">
-    ${carts.length > 1 ? `<div class="seg" id="npSegV" aria-label="Vendedor"><button type="button" data-v="" aria-pressed="${!npVend}">Todos los vendedores</button>${carts.map(v => `<button type="button" data-v="${esc(v)}" aria-pressed="${npVend === v}">${esc(v.split(" ")[0])}</button>`).join("")}</div>` : ""}
+    ${carts.length > 1 ? `<div class="seg" id="npSegV" aria-label="Vendedor"><button type="button" data-v="" aria-pressed="${!npVend}">Todos</button>${carts.filter(v => String(v || "").trim()).map(v => `<button type="button" data-v="${esc(v)}" aria-pressed="${npVend === v}">${esc(v.split(" ")[0])}</button>`).join("")}</div>` : ""}
     <div>${vis.length ? npGrupos(vis, x => { const r = R.get(x); return `<button type="button" class="na-n ${npSev(r)}" data-np="${esc(x.n)}"><span class="na-f"><b>${esc(tc(x.cl))}</b><b class="num">${mm(x.t)}</b></span>
         <small>N° ${esc(x.n)} · ${esc(x.f)} (${npDias(x.f)} días) · ${esc(x.cart)} · ${x.lin.filter(l => l.q > 0).length} productos${r.mg != null ? ` · margen ${Math.round(r.mg * 100)}%` : ""}</small>
         <span class="na-al">${npBadges(r)}</span></button>`; }) : `<div class="card"><p class="muted" style="margin:0">No hay notas de pedido pendientes en esta vista.</p></div>`}</div>`;
@@ -8216,7 +8216,15 @@ body.m-b2b #crmMeta{display:none!important}
     const it = items(p), n = it ? it.length : 0;
     return `<div class="b2-c"><div class="b2-t"><b>${E(p.cliente || p.rut || "—")}</b><b>${M(p.neto)}</b></div>
       <small>${E(F(p.fecha))}${n ? ` · ${n} producto${n === 1 ? "" : "s"}` : ""}${p.vendedor ? " · " + E(p.vendedor) : ""}</small>
-      <small>${p.estado ? "Estado: " + E(p.estado) : ""}${p.nota ? ` · Nota de pedido ${E(p.nota)}` : ""}</small></div>`;
+      <small>${p.estado ? "Estado: " + E(p.estado) : ""}${p.nota ? ` · Nota de pedido ${E(p.nota)}` : ""}</small>
+      <div style="margin-top:6px"><button type="button" class="b2-b mal" data-delped="${E(p.nota || p.id)}">🗑 Eliminar pedido</button></div></div>`;
+  }
+  /* 24-11-2026: eliminar un pedido del portal (lo saca de la planilla y de esta lista; queda en «Notas eliminadas») */
+  async function borrarPedido(id) {
+    const p = ST.pedidos.find(x => String(x.nota || x.id) === id); if (!p || !confirm("¿Eliminar el pedido de " + (p.cliente || p.rut || "este cliente") + " por " + M(p.neto) + "?")) return;
+    const i = ST.pedidos.indexOf(p); ST.pedidos.splice(i, 1); pintar(); aviso("Eliminando…");
+    const r = await llamar({ accion: "eliminar", id, admin: true, vendedor: typeof yo === "function" ? yo() : "" });   /* con la clave de Ventas el script nunca lo trata como admin */
+    if (r && r.ok) aviso("Pedido eliminado."); else { ST.pedidos.splice(i, 0, p); pintar(); aviso((r && r.error) || "No se pudo eliminar."); }
   }
 
   const cfg = () => { try { const c = SYC(); return c && c.url ? c : null; } catch (e) { return null; } };
@@ -8252,10 +8260,12 @@ body.m-b2b #crmMeta{display:none!important}
   /* ---------- cuentas ---------- */
   function vCuentas() {
     const q = N(ST.q), vs = vendedores();
-    let l = ST.cuentas.filter(c => (ST.fEst ? c.estado === ST.fEst : c.estado !== "rechazado") &&   /* rechazadas: archivadas, solo en «Archivadas» */ (!ST.fVend || (ST.fVend === "-" ? !c.vendedor : c.vendedor === ST.fVend)) && (!q || N([c.razon, c.rut, c.contacto, c.correo, c.comuna, c.cliente].join(" ")).includes(q)));
+    const asignada = c => c.estado === "activo" && c.vendedor && c.vendedor !== "Vendedor B2B" && c.cliente;   /* 24-11-2026: asignadas salen de «Por asignar» */
+    const okEst = c => ST.fEst === "porasignar" ? c.estado === "activo" && !asignada(c) : ST.fEst === "asignada" ? asignada(c) : ST.fEst ? c.estado === ST.fEst : c.estado !== "rechazado";
+    let l = ST.cuentas.filter(c => okEst(c) &&   /* rechazadas: archivadas, solo en «Archivadas» */ (!ST.fVend || (ST.fVend === "-" ? !c.vendedor : c.vendedor === ST.fVend)) && (!q || N([c.razon, c.rut, c.contacto, c.correo, c.comuna, c.cliente].join(" ")).includes(q)));
     l.sort((a, b) => String(b.fecha).localeCompare(String(a.fecha)));
-    const cnt = e => ST.cuentas.filter(c => c.estado === e).length;
-    return `<div class="b2-card"><div class="b2-chips">${[["pendiente", "Pendientes"], ["activo", "Activas"], ["bloqueado", "Bloqueadas"], ["", "Todas"]].concat(cnt("rechazado") ? [["rechazado", "🗄 Archivadas"]] : []).map(([k, t]) => `<button type="button" class="b2-ch" data-fe="${k}" aria-pressed="${ST.fEst === k}"${k === "rechazado" ? ' style="opacity:.7"' : ""}>${t}${k ? " " + cnt(k) : " " + (ST.cuentas.length - cnt("rechazado"))}</button>`).join("")}</div>
+    const cnt = e => ST.cuentas.filter(c => e === "porasignar" ? c.estado === "activo" && !asignada(c) : e === "asignada" ? asignada(c) : c.estado === e).length;
+    return `<div class="b2-card"><div class="b2-chips">${[["pendiente", "Pendientes"], ["porasignar", "Por asignar"], ["asignada", "Asignadas"], ["bloqueado", "Bloqueadas"], ["", "Todas"]].concat(cnt("rechazado") ? [["rechazado", "🗄 Archivadas"]] : []).map(([k, t]) => `<button type="button" class="b2-ch" data-fe="${k}" aria-pressed="${ST.fEst === k}"${k === "rechazado" ? ' style="opacity:.7"' : ""}>${t}${k ? " " + cnt(k) : " " + (ST.cuentas.length - cnt("rechazado"))}</button>`).join("")}</div>
       <div class="b2-g2" style="margin-top:8px"><label class="b2-lbl">Vendedor<select class="b2-in" id="b2Fv"><option value="">Todos</option><option value="-" ${ST.fVend === "-" ? "selected" : ""}>Sin vendedor</option>${vs.map(v => `<option ${ST.fVend === v ? "selected" : ""}>${E(v)}</option>`).join("")}</select></label>
         <label class="b2-lbl">Buscar<input class="b2-in" id="b2Fq" type="search" value="${E(ST.q)}" placeholder="Nombre, RUT, correo…"></label></div></div>
       ${l.length ? l.map(c => { const d = ST.dr[c.id] || {}, v = d.vendedor != null ? d.vendedor : (c.vendedor || ""), cl = d.cliente != null ? d.cliente : (c.cliente || "");
@@ -8317,9 +8327,12 @@ body.m-b2b #crmMeta{display:none!important}
   async function actuar(c, estado) {
     if (ST.ocup) return; const d = ST.dr[c.id] || {}, vend = d.vendedor != null ? d.vendedor : (c.vendedor || ""), cli = d.cliente != null ? d.cliente : (c.cliente || "");
     if (estado === "activo" && !cli) { aviso("Elige el cliente HWF antes de aprobar."); return elegirCli(c, () => actuar(c, estado)); }
-    ST.ocup = true; const r = await llamar({ accion: "b2bAprobar", id: c.id, estado, vendedor: vend, cliente: cli, por: POR }); ST.ocup = false;
-    if (r && r.ok) { delete ST.dr[c.id]; aviso(estado === "activo" ? "Guardado. Si es una cuenta nueva, el cliente recibirá su correo de bienvenida." : estado === "bloqueado" ? "Cuenta bloqueada." : "Solicitud rechazada."); await cargar(true); pintar(); }
-    else aviso((r && r.error) || "No se pudo guardar.");
+    /* 24-11-2026: respuesta inmediata (antes esperaba al script y a recargar todo): se actualiza la tarjeta al tiro y se guarda en segundo plano */
+    const antes = { estado: c.estado, vendedor: c.vendedor, cliente: c.cliente }; Object.assign(c, { estado, vendedor: vend, cliente: cli }); delete ST.dr[c.id];
+    ST.ocup = true; aviso("Guardando…"); pintar();
+    const r = await llamar({ accion: "b2bAprobar", id: c.id, estado, vendedor: vend, cliente: cli, por: POR }); ST.ocup = false;
+    if (r && r.ok) { aviso(estado === "activo" ? "Guardado. Si es una cuenta nueva, el cliente recibirá su correo de bienvenida." : estado === "bloqueado" ? "Cuenta bloqueada." : "Solicitud rechazada."); pintar(); cargar(true).then(() => { if (vivo()) pintar(); }); }
+    else { Object.assign(c, antes); pintar(); aviso((r && r.error) || "No se pudo guardar."); }
   }
   function elegirCli(c, luego) {
     const lista = clientes(), v = (ST.dr[c.id] || {}).vendedor != null ? ST.dr[c.id].vendedor : c.vendedor;
@@ -8355,6 +8368,7 @@ body.m-b2b #crmMeta{display:none!important}
     if (t.closest("#b2Ref")) return cargar(false); if (t.closest("#b2Aj")) return cargarAj(true);
     if ((b = t.closest("[data-tb]"))) { ST.tab = b.dataset.tb; if (ST.tab === "contenido" || ST.tab === "reglas") cargarAj(false); window.scrollTo({ top: 0 }); return pintar(); }
     if ((b = t.closest("[data-fe]"))) { ST.fEst = b.dataset.fe; return pintar(); }
+    if ((b = t.closest("[data-delped]"))) return borrarPedido(b.dataset.delped);
     if ((b = t.closest("[data-cl]"))) { const c = ST.cuentas.find(x => String(x.id) === b.dataset.cl); return c && elegirCli(c); }
     if ((b = t.closest("[data-a]"))) { const c = ST.cuentas.find(x => String(x.id) === b.dataset.id); if (!c) return; const a = b.dataset.a;
       if (a === "guardar") return actuar(c, c.estado);
@@ -8964,7 +8978,7 @@ window.hwfContCambio = function () { try { if (typeof praPintar === "function" &
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261124132648";
+const HWF_VER = "20261124144656";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
