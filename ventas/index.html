@@ -7200,7 +7200,7 @@ function confirmarNota() {
   x.onclick = () => cerrarModal(); card.insertBefore(x, card.firstChild); })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261124201220";
+const HWF_VER = "20261124203634";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -8548,6 +8548,9 @@ function prUnifV(l) {
       if (vn !== _pvAngelica1) return;
       m[ci].v = cotVend[ci] || claudiaVend;
     });
+    /* 5. carteras fijas (24-11-2026, pedido de Jorge): mandan sobre la última factura */
+    const _pvK = s => _pvNrm(s).replace(/[^a-z0-9]+/g, " ").trim(), _pvFija = {}; Object.keys(D.cartFija || {}).forEach(k => _pvFija[_pvK(k)] = _pvN1(D.cartFija[k]));   /* viene en los datos privados (hoja «Carteras fijas»), nunca en el código */
+    (D.clientes || []).forEach((c, ci) => { const fx = _pvFija[_pvK(c[0])]; if (!fx) return; const vv = (D.vend || []).find(v => _pvN1(v) === fx); if (vv) m[ci] = { f: (m[ci] && m[ci].f) || 0, v: vv }; });
     return m;
   }
   function pvBuildMapCachedDB() {
