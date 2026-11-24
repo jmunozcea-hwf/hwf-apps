@@ -5286,7 +5286,7 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261124203634";
+const HWF_VER = "20261124222938";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -10311,5 +10311,12 @@ body.m-b2b #crmMeta{display:none!important}
   const _pm = pintarMas; pintarMas = function () { if (typeof vistaMas !== "undefined" && vistaMas === "clientes") { pintar(); if (!ST.t || Date.now() - ST.t > 600000) { ST.t = Date.now(); cargar(); } return; } return _pm.apply(this, arguments); };
 })();
 </script>
+<style>/* patch_movil_ancho */
+html,body{max-width:100%;overflow-x:clip}
+.vd-c,.card,.av2,.av2-blk,#acW,.pd-w,section{min-width:0;max-width:100%;box-sizing:border-box}
+.vd-c details>div,.vd-c .vd-tw{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.vd-t{min-width:0}.vd-c canvas{max-width:100%!important}
+@media(max-width:700px){#acW .ac-g{grid-template-columns:minmax(0,1fr)}}
+</style>
 </body>
 </html>

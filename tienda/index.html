@@ -2351,7 +2351,7 @@ const stAbrev = n => ST_ABR.reduce((s, [r, t]) => s.replace(r, t), String(n || "
 try { if ($("sStock") && !$("sStock").hidden) pintarStock(); } catch (e) {}
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261124203634";
+const HWF_VER = "20261124222938";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -4297,4 +4297,11 @@ window.hwfContCambio = function () { try { const b = document.getElementById("sS
 })();
 </script>
 <style>/* patch_infoadmin */html.solo-info body{padding:0!important;background:transparent}html.solo-info #sNut{display:block!important;padding:8px}</style>
+<style>/* patch_movil_ancho */
+html,body{max-width:100%;overflow-x:clip}
+.vd-c,.card,.av2,.av2-blk,#acW,.pd-w,section{min-width:0;max-width:100%;box-sizing:border-box}
+.vd-c details>div,.vd-c .vd-tw{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.vd-t{min-width:0}.vd-c canvas{max-width:100%!important}
+@media(max-width:700px){#acW .ac-g{grid-template-columns:minmax(0,1fr)}}
+</style>
 </body></html>
