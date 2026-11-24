@@ -2350,7 +2350,7 @@ const stAbrev = n => ST_ABR.reduce((s, [r, t]) => s.replace(r, t), String(n || "
 try { if ($("sStock") && !$("sStock").hidden) pintarStock(); } catch (e) {}
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261124114003";
+const HWF_VER = "20261124122131";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -4307,7 +4307,7 @@ window.hwfContCambio = function () { try { const b = document.getElementById("sS
       <p class="muted" style="font-size:.8rem;margin:4px 0 0">${TND ? "Lo que conversan los clientes de la tienda con claudIA (WhatsApp y web), los encargos y datos que dejaron, y lo que más preguntan." : "Conversaciones de claudIA en hwf.cl, el portal B2B y WhatsApp: qué preguntan, pedidos que envió con CONFIRMO, contactos captados y costo de la IA."}</p>
       <div class="cia-f">${[7, 30, 90].map(d => `<button type="button" data-cd="${d}" aria-pressed="${ST.dias === d}">${d} días</button>`).join("")}${TND ? "" : [["", "Todo"], ["distribuidora", "Distribuidora"], ["tienda", "Tienda"]].map(([k, t]) => `<button type="button" data-cm="${k}" aria-pressed="${ST.marca === k}">${t}</button>`).join("")}<button type="button" data-ca="1">${ST.cargando ? "Cargando…" : "↻ Actualizar"}</button></div>
       ${ST.err ? `<p style="color:#B3261E;font-weight:600">${es(ST.err)}</p>` : ""}
-      ${R && !R.configurado ? `<div class="cia-al">claudIA aún no está activa: falta la clave de la IA (ANTHROPIC_API_KEY) en Propiedades del script.</div>` : ""}
+      ${R && !R.configurado ? `<div class="cia-al">claudIA funciona en <b>modo guiado gratis</b> (menús y búsquedas, sin IA). Para que converse libremente, carga la clave ANTHROPIC_API_KEY en Propiedades del script.</div>` : ""}
       ${R && TND && !R.tiendaInfo ? `<div class="cia-al">Carga los datos de la tienda (dirección, horario, despacho, medios de pago) en la Propiedad del script TIENDA_INFO para que claudIA los pueda contestar.</div>` : ""}
       ${R ? `<div class="cia-k"><div>Mensajes<b>${nf(R.mensajes)}</b>últimos ${R.dias} días</div><div>${TND ? "Encargos y contactos" : "Contactos captados"}<b>${nf(R.contactos.length)}</b>para devolver el llamado</div>
         ${TND ? `<div>Clientes que escribieron<b>${nf(new Set(R.ultimos.map(u => u.quien || u.canal + u.fecha.slice(0, 10))).size)}</b>conversaciones distintas</div>` : `<div>Pedidos con CONFIRMO<b>${nf(R.pedidos)}</b>enviados por WhatsApp</div>`}
