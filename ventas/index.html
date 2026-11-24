@@ -7200,7 +7200,7 @@ function confirmarNota() {
   x.onclick = () => cerrarModal(); card.insertBefore(x, card.firstChild); })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261124163224";
+const HWF_VER = "20261124163347";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -10224,12 +10224,12 @@ try { if (document.getElementById("crmInicio") && SES) pintarInicio(); } catch (
     if (tabs) { if (tabs._msBtn) { tabs._msBtn.remove(); tabs._msBtn = null; } tabs.classList.add("ms-oc"); tabs.hidden = true;
       let sec = tabs.parentNode.querySelector(".nu-sec");
       if (!sec) { sec = document.createElement("div"); sec.className = "nu-sec"; sec.setAttribute("aria-label", "¿Qué quieres comparar?");   /* 2 botones a la vista (sin rol tablist: no se convierte en menú desplegable) */
-        sec.innerHTML = '<button type="button" data-ns="comp">🍖 Alimentos</button><button type="button" data-ns="sup">💊 Suplementos</button>'; tabs.before(sec);
+        sec.innerHTML = '<button type="button" data-ns="comp"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-4px;margin-right:6px"><path d="M3 11h18a9 9 0 0 1-18 0z"/><path d="M8 7c0-1.5 1-2 1-3.5"/><path d="M12 7c0-1.5 1-2 1-3.5"/><path d="M16 7c0-1.5 1-2 1-3.5"/></svg>Alimentos</button><button type="button" data-ns="sup"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-4px;margin-right:6px"><path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/></svg>Suplementos</button>'; tabs.before(sec);
         /* las fichas HWF van aparte, en su propio botón (no son una comparación) */
         const fb = document.createElement("div"); fb.className = "nu-fbx"; fb.innerHTML = '<button type="button" class="nu-fb" data-ns="fichas"></button>'; sec.after(fb);
         [sec, fb].forEach(x => x.querySelectorAll("[data-ns]").forEach(b => b.onclick = () => { nuVista = b.dataset.ns === "fichas" && nuVista === "fichas" ? (nuAl2 || "comp") : b.dataset.ns; pintarNut(); })); }
       sec.querySelectorAll("[data-ns]").forEach(b => b.setAttribute("aria-pressed", b.dataset.ns === nuVista));
-      const fb = tabs.parentNode.querySelector(".nu-fb"); if (fb) { const on = nuVista === "fichas"; fb.setAttribute("aria-pressed", on); fb.textContent = on ? "✕ Cerrar fichas y volver a comparar" : "📋 Ver fichas de alimentos HWF"; }
+      const fb = tabs.parentNode.querySelector(".nu-fb"); if (fb) { const on = nuVista === "fichas"; fb.setAttribute("aria-pressed", on); fb.innerHTML = on ? "✕ Cerrar fichas y volver a comparar" : '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-4px;margin-right:6px"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M8 13h8"/><path d="M8 17h5"/></svg>Ver fichas de alimentos HWF'; }
       if (nuVista !== "fichas") nuAl2 = nuVista; }
     if (nuVista !== "sup") nuAl = nuVista;
     { const cn = document.getElementById("crmNut"); if (cn) cn.classList.toggle("nu-supv", nuVista === "sup"); }
