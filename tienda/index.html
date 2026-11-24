@@ -2351,7 +2351,7 @@ const stAbrev = n => ST_ABR.reduce((s, [r, t]) => s.replace(r, t), String(n || "
 try { if ($("sStock") && !$("sStock").hidden) pintarStock(); } catch (e) {}
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261124162651";
+const HWF_VER = "20261124163224";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -4056,8 +4056,8 @@ window.hwfContCambio = function () { try { const b = document.getElementById("sS
     const tabs = document.querySelector("#crmNut .nu-tabs, .nu-tabs");
     if (tabs) { if (tabs._msBtn) { tabs._msBtn.remove(); tabs._msBtn = null; } tabs.classList.add("ms-oc"); tabs.hidden = true;
       let sec = tabs.parentNode.querySelector(".nu-sec");
-      if (!sec) { sec = document.createElement("div"); sec.className = "nu-sec"; sec.setAttribute("role", "tablist"); sec.setAttribute("aria-label", "¿Qué quieres ver?");
-        sec.innerHTML = '<button type="button" data-ns="comp">Comparar alimentos con la competencia</button><button type="button" data-ns="sup">Comparar suplementos</button>'; tabs.before(sec);
+      if (!sec) { sec = document.createElement("div"); sec.className = "nu-sec"; sec.setAttribute("aria-label", "¿Qué quieres comparar?");   /* 2 botones a la vista (sin rol tablist: no se convierte en menú desplegable) */
+        sec.innerHTML = '<button type="button" data-ns="comp">🍖 Alimentos</button><button type="button" data-ns="sup">💊 Suplementos</button>'; tabs.before(sec);
         /* las fichas HWF van aparte, en su propio botón (no son una comparación) */
         const fb = document.createElement("div"); fb.className = "nu-fbx"; fb.innerHTML = '<button type="button" class="nu-fb" data-ns="fichas"></button>'; sec.after(fb);
         [sec, fb].forEach(x => x.querySelectorAll("[data-ns]").forEach(b => b.onclick = () => { nuVista = b.dataset.ns === "fichas" && nuVista === "fichas" ? (nuAl2 || "comp") : b.dataset.ns; pintarNut(); })); }
