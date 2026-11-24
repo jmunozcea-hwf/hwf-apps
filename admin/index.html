@@ -5285,7 +5285,7 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261124194317";
+const HWF_VER = "20261124194659";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -5366,13 +5366,13 @@ function av2Html(B, yo, act) {
     html += `<div class="av2-blk"><div class="av2-top"><span class="t">Tu avance</span><b>${pmm(v.venta)}</b><span class="de">de ${v.meta ? pmm(v.meta) : "sin meta"}</span>${v.meta ? `<span class="av2-st ${sc}">${st}</span>` : ""}</div>
       ${v.meta ? bar(v.venta, np, v.meta, tp) + ley(v.venta, np, v.meta, tp) : ""}
       <div class="av2-g">${k("Proyección de cierre", pmm(pr), v.meta ? pc(pr / v.meta) + " de tu meta" : "al ritmo actual", v.meta ? (pr >= v.meta ? "ok" : pr >= v.meta * .85 ? "wa" : "ba") : "")}
-        ${k("Falta facturar", pmm(falta), rest ? pmm(falta / rest) + " por día hábil (" + rest + ")" : "último día")}
+        ${k("Falta facturar", pmm(falta), rest ? pmm(falta / rest) + " por día hábil (" + rest + ")" : "último día")}${k("Tus NP Defontana", pmm(np), "pedidos por facturar")}
         ${k("Tu margen", pc(v.margPct), pmm(v.marg))}${k("Nuevos · SKU/cliente", v.nuevos + " · " + n1(v.sku), "clientes nuevos · productos por cliente")}</div></div>`; }
   const a = K.meta ? K.venta / K.meta : 0, [sc, st] = est(a, tp);
   html += `<div class="av2-blk"><div class="av2-top"><span class="t">Distribuidora${yo ? " (todo el equipo)" : ""} · sin tienda</span><b>${pmm(K.venta)}</b><span class="de">de ${pmm(K.meta)}</span><span class="av2-st ${sc}">${st}</span></div>
     ${bar(K.venta, K.npDist, K.meta, tp)}${ley(K.venta, K.npDist, K.meta, tp)}
     <div class="av2-g">${k("Proyección de cierre", pmm(K.proy), pc(K.meta ? K.proy / K.meta : 0) + " de la meta", K.proy >= K.meta ? "ok" : K.proy >= K.meta * .85 ? "wa" : "ba")}
-      ${k("Falta facturar", pmm(Math.max(0, K.meta - K.venta)), rest ? pmm(Math.max(0, K.meta - K.venta) / rest) + " por día hábil" : "")}
+      ${k("Falta facturar", pmm(Math.max(0, K.meta - K.venta)), rest ? pmm(Math.max(0, K.meta - K.venta) / rest) + " por día hábil" : "")}${k("Total NP Defontana", pmm(K.npDist), "pedidos por facturar")}
       ${k("Margen", pc(K.venta ? 1 - K.costo / K.venta : 0), pmm(K.venta - K.costo))}${k("Nuevos · SKU/cliente", K.nuevos + " · " + n1(K.sku), K.nc + " clientes compraron")}</div>`;
   if (!yo) html += `<div style="overflow-x:auto"><table class="av2-t"><thead><tr><th>Vendedor</th><th>Facturado</th><th>Pendiente</th><th>Avance</th><th>Proyección</th><th>Margen</th><th>Nuevos</th><th>SKU/cl.</th></tr></thead><tbody>
     ${R.L.map(x => { const np = K.np[av2N(x.v)] || 0, pr = R.hPas ? x.venta / R.hPas * R.hTot : x.venta, W = y => Math.max(0, Math.min(100, x.meta ? y / x.meta * 100 : 0)).toFixed(1) + "%", c = est(x.meta ? x.venta / x.meta : 0, tp)[0];
@@ -10054,7 +10054,7 @@ body.m-b2b #crmMeta{display:none!important}
 .pd-o{display:inline-block;font-size:.66rem;font-weight:900;border-radius:999px;padding:2px 8px;margin-right:4px;vertical-align:1px}.pd-o.b{background:#D8F2EF;color:#0F6E73}.pd-o.a{background:#E6EEF3;color:#0B3146}
 .pd-e{font-size:.7rem;font-weight:800;color:#8A5300}.pd-t{width:100%;border-collapse:collapse;font-size:.82rem;margin-top:8px}.pd-t td{padding:4px 2px;border-top:1px solid var(--line,#EEF2F5)}.pd-t td:last-child,.pd-t td:nth-child(2){text-align:right;white-space:nowrap}
 .pd-ob{font-size:.78rem;color:var(--muted,#5B6874);margin-top:6px;white-space:pre-line}
-.pd-del{display:flex;justify-content:flex-end;margin-top:8px}.pd-del button{border:1px solid #F1B8B3;background:#FDECEA;color:#B3261E;border-radius:10px;padding:7px 12px;font:inherit;font-size:.8rem;font-weight:700;cursor:pointer}.pd-del button:disabled{opacity:.6;cursor:default}
+.pd-del{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;margin-top:8px}.pd-del button.pd-wa{border-color:#9BE3B5;background:#E7F8EE;color:#14753C}.pd-del button{border:1px solid #F1B8B3;background:#FDECEA;color:#B3261E;border-radius:10px;padding:7px 12px;font:inherit;font-size:.8rem;font-weight:700;cursor:pointer}.pd-del button:disabled{opacity:.6;cursor:default}
 </style>
 <script>/* patch_pedidos: pedidos de la app y del portal B2B */
 (function () {
@@ -10093,7 +10093,7 @@ body.m-b2b #crmMeta{display:none!important}
         <span class="c"><span class="pd-o ${p.b2b ? "b" : "a"}">${p.b2b ? "B2B" : "APP"}</span>${es(p.cliente)}</span><span class="n">${nf(p.neto)}</span>
         <small>${es(p.num)} · ${fch(p.emision)}${p.comuna ? " · " + es(p.comuna) : ""}${p.entrega ? " · entrega " + fch(p.entrega) : ""}</small><span class="pd-e">${es(p.estado)}</span></summary>
         <table class="pd-t">${(p.items || []).map(x => `<tr><td>${es(x[1])} <small>${es(x[0])}</small></td><td>${Number(x[2]).toLocaleString("es-CL")} u.</td><td>${nf(x[3])}</td></tr>`).join("")}</table>
-        ${p.obs ? `<div class="pd-ob">${es(p.obs)}</div>` : ""}<small>Total con IVA ${nf(p.total)}${p.despacho ? " · " + es(p.despacho) : ""}${p.rut ? " · RUT " + es(p.rut) : ""}</small>${puede(p) ? `<div class="pd-del"><button type="button" data-pdx="${es(p.id)}">🗑 Eliminar pedido</button></div>` : ""}</details>`).join("")}</div>`).join("")
+        ${p.obs ? `<div class="pd-ob">${es(p.obs)}</div>` : ""}<small>Total con IVA ${nf(p.total)}${p.despacho ? " · " + es(p.despacho) : ""}${p.rut ? " · RUT " + es(p.rut) : ""}</small><div class="pd-del"><button type="button" class="pd-wa" data-pdw="${es(p.id)}">📲 Imagen para WhatsApp</button>${puede(p) ? `<button type="button" data-pdx="${es(p.id)}">🗑 Eliminar pedido</button>` : ""}</div></details>`).join("")}</div>`).join("")
         || `<p class="muted">${ST.cargando || !ST.L ? "Cargando pedidos…" : "No hay pedidos con ese filtro."}</p>`}</div>`;
     box.querySelectorAll("[data-pdd]").forEach(b => b.onclick = () => { ST.dias = +b.dataset.pdd; cargar(box); });
     box.querySelectorAll("[data-pdo]").forEach(b => b.onclick = () => { ST.o = b.dataset.pdo; pintarP(box); });
@@ -10106,7 +10106,48 @@ body.m-b2b #crmMeta{display:none!important}
       b.disabled = true; b.textContent = "Eliminando…";
       const r = await llamar(VEN ? { accion: "eliminar", id: p.id, vendedor: yo() } : { accion: "eliminar", id: p.id, admin: true });
       if (r && r.ok) { ST.L = ST.L.filter(x => x.id !== p.id); pintarP(box); } else { b.disabled = false; b.textContent = "🗑 Eliminar pedido"; alert((r && r.error) || "No se pudo eliminar."); } });
+    box.querySelectorAll("[data-pdw]").forEach(b => b.onclick = ev => { ev.preventDefault(); const p = (ST.L || []).find(x => x.id === b.dataset.pdw); if (p) pdImagen(p); });
     const i = box.querySelector("#pdQ"); i.oninput = () => { ST.q = i.value; clearTimeout(pintarP.t); pintarP.t = setTimeout(() => { pintarP(box); const j = box.querySelector("#pdQ"); j.focus(); j.setSelectionRange(j.value.length, j.value.length); }, 250); }; }
+  /* Imagen del pedido completo para WhatsApp (24-11-2026, como «Imagen para WhatsApp» de Cobranza) */
+  function pdCanvas(p) {
+    const W = 1080, P = 64, it = p.items || [], RH = 96, H = 520 + it.length * RH + (p.obs ? 120 : 0) + 260;
+    const cv = document.createElement("canvas"); cv.width = W; cv.height = H; const x = cv.getContext("2d");
+    const F = (s, w) => `${w || 400} ${s}px Inter, "Segoe UI", Roboto, Arial, sans-serif`;
+    const txt = (t, X, Y, s, w, col, al) => { x.font = F(s, w); x.fillStyle = col || "#0B3146"; x.textAlign = al || "left"; x.fillText(String(t), X, Y); };
+    const fit = (t, s, w, max) => { x.font = F(s, w); let u = String(t || ""); const o = u; while (x.measureText(u).width > max && u.length > 4) u = u.slice(0, -2); return u === o ? u : u + "…"; };
+    const rr = (X, Y, w, h, r, col) => { x.fillStyle = col; x.beginPath(); x.roundRect ? x.roundRect(X, Y, w, h, r) : x.rect(X, Y, w, h); x.fill(); };
+    x.fillStyle = "#F3F6F8"; x.fillRect(0, 0, W, H);
+    const g = x.createLinearGradient(0, 0, W, 300); g.addColorStop(0, "#0B3146"); g.addColorStop(1, "#13506F"); x.fillStyle = g; x.fillRect(0, 0, W, 300);
+    txt("hwf", P, 112, 92, 800, "#fff"); txt("HWF Mascotas · Distribuidora", P, 160, 30, 500, "rgba(255,255,255,.8)");
+    txt("Nota de pedido", W - P, 100, 34, 700, "#fff", "right"); txt((p.num ? "N° " + p.num : "") + (p.emision ? " · " + p.emision.split("-").reverse().join("-") : ""), W - P, 146, 28, 400, "rgba(255,255,255,.8)", "right");
+    txt(fit(p.cliente, 46, 800, W - 2 * P), P, 236, 46, 800, "#fff"); txt([p.rut ? "RUT " + p.rut : "", p.comuna].filter(Boolean).join(" · "), P, 278, 28, 400, "rgba(255,255,255,.8)");
+    const hw = (W - 2 * P - 24) / 2; rr(P, 330, hw, 130, 20, "#fff"); rr(P + hw + 24, 330, hw, 130, 20, "#E3F4EA");
+    txt("NETO", P + 30, 374, 24, 700, "#5B6B78"); txt(nf(p.neto), P + 30, 436, 50, 800);
+    txt("TOTAL CON IVA", P + hw + 54, 374, 24, 700, "#1C7A4E"); txt(nf(p.total), P + hw + 54, 436, 50, 800, "#1C7A4E");
+    let y = 512; txt("Producto", P, y, 24, 700, "#5B6B78"); txt("Cant.", 760, y, 24, 700, "#5B6B78", "right"); txt("Valor", W - P, y, 24, 700, "#5B6B78", "right"); y += 16;
+    it.forEach(r => { rr(P, y, W - 2 * P, RH - 12, 16, "#fff");
+      txt(fit(r[1], 30, 700, 600), P + 24, y + 42, 30, 700); txt("Cód. " + r[0], P + 24, y + 72, 22, 500, "#5B6B78");
+      txt(Number(r[2]).toLocaleString("es-CL"), 760, y + 56, 30, 700, "#0B3146", "right"); txt(nf(r[3]), W - P - 24, y + 56, 30, 800, "#0B3146", "right"); y += RH; });
+    if (p.obs) { y += 20; txt(fit("Obs.: " + String(p.obs).replace(/\s+/g, " "), 24, 400, W - 2 * P), P, y + 30, 24, 400, "#5B6B78"); y += 100; }
+    y += 24; x.fillStyle = "#D5DEE5"; x.fillRect(P, y, W - 2 * P, 2);
+    txt([p.entrega ? "Entrega " + p.entrega.split("-").reverse().join("-") : "", p.despacho].filter(Boolean).join(" · ") || "Gracias por su pedido", P, y + 58, 28, 600);
+    const v = yo() || p.cart || p.vend; txt(v ? `Consultas: ${v} · HWF` : "Consultas: HWF", P, y + 104, 26, 400, "#5B6B78");
+    return cv; }
+  function pdImagen(p) {
+    const cv = pdCanvas(p), nombre = "pedido-" + String(p.num || p.cliente || "hwf").toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 40) + ".png";
+    const msg = `Hola, le envío el detalle de su pedido ${p.num || ""} de HWF: neto ${nf(p.neto)}, total con IVA ${nf(p.total)}.` + (p.entrega ? ` Entrega estimada ${p.entrega.split("-").reverse().join("-")}.` : "") + " ¡Gracias por su compra!";
+    const tel = String(p.tel || "").replace(/\D/g, ""), t = tel ? (tel.length === 9 ? "56" + tel : tel) : "";
+    const ov = document.createElement("div"); ov.style.cssText = "position:fixed;inset:0;z-index:9999;background:rgba(11,49,70,.55);display:grid;place-items:center;padding:16px";
+    ov.innerHTML = `<div style="background:#fff;border-radius:16px;max-width:520px;width:100%;max-height:92vh;overflow:auto;padding:14px;display:grid;gap:10px;color:#0F1E29">
+      <b>Pedido ${es(p.num || "")} · ${es(p.cliente)}</b><img src="${cv.toDataURL("image/png")}" alt="Pedido" style="width:100%;border-radius:12px;border:1px solid #E3E9EE">
+      <p style="margin:0;font-size:.8rem;color:#5B6874">En el teléfono, «Enviar» abre las apps para compartir: elige WhatsApp y el chat del cliente.</p>
+      <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap"><button type="button" data-k="c" class="btn">Cerrar</button><button type="button" data-k="d" class="btn">Descargar</button><button type="button" data-k="w" class="btn primary" style="background:#25D366;border-color:#25D366;color:#fff">Enviar por WhatsApp</button></div></div>`;
+    document.body.appendChild(ov); const cerrar = () => ov.remove(); ov.onclick = e => { if (e.target === ov) cerrar(); };
+    const bajar = bl => { const a = document.createElement("a"); a.href = URL.createObjectURL(bl); a.download = nombre; a.click(); };
+    ov.querySelector('[data-k="c"]').onclick = cerrar; ov.querySelector('[data-k="d"]').onclick = () => cv.toBlob(bajar, "image/png");
+    ov.querySelector('[data-k="w"]').onclick = () => cv.toBlob(async bl => { const f = new File([bl], nombre, { type: "image/png" });
+      try { if (navigator.canShare && navigator.canShare({ files: [f] })) { await navigator.share({ files: [f], text: msg }); return; } } catch (e) { if (e && e.name === "AbortError") return; }
+      bajar(bl); window.open((t ? "https://wa.me/" + t : "https://wa.me/") + "?text=" + encodeURIComponent(msg), "_blank", "noopener"); }, "image/png"); }
   const abrir = box => { pintarP(box); if (!ST.L || Date.now() - ST.t > 120000) cargar(box); };
   if (ADM) { try { if (typeof NAV_MNOM !== "undefined") NAV_MNOM.pedidos = "Pedidos"; } catch (e) {}
     const _pm = pintarMas; pintarMas = function () { if (typeof vistaMas !== "undefined" && vistaMas === "pedidos") return abrir(document.getElementById("masBody")); return _pm.apply(this, arguments); }; return; }

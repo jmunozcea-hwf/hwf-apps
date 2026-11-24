@@ -5385,13 +5385,13 @@ function av2Html(B, yo, act) {
     html += `<div class="av2-blk"><div class="av2-top"><span class="t">Tu avance</span><b>${pmm(v.venta)}</b><span class="de">de ${v.meta ? pmm(v.meta) : "sin meta"}</span>${v.meta ? `<span class="av2-st ${sc}">${st}</span>` : ""}</div>
       ${v.meta ? bar(v.venta, np, v.meta, tp) + ley(v.venta, np, v.meta, tp) : ""}
       <div class="av2-g">${k("Proyección de cierre", pmm(pr), v.meta ? pc(pr / v.meta) + " de tu meta" : "al ritmo actual", v.meta ? (pr >= v.meta ? "ok" : pr >= v.meta * .85 ? "wa" : "ba") : "")}
-        ${k("Falta facturar", pmm(falta), rest ? pmm(falta / rest) + " por día hábil (" + rest + ")" : "último día")}
+        ${k("Falta facturar", pmm(falta), rest ? pmm(falta / rest) + " por día hábil (" + rest + ")" : "último día")}${k("Tus NP Defontana", pmm(np), "pedidos por facturar")}
         ${k("Tu margen", pc(v.margPct), pmm(v.marg))}${k("Nuevos · SKU/cliente", v.nuevos + " · " + n1(v.sku), "clientes nuevos · productos por cliente")}</div></div>`; }
   const a = K.meta ? K.venta / K.meta : 0, [sc, st] = est(a, tp);
   html += `<div class="av2-blk"><div class="av2-top"><span class="t">Distribuidora${yo ? " (todo el equipo)" : ""} · sin tienda</span><b>${pmm(K.venta)}</b><span class="de">de ${pmm(K.meta)}</span><span class="av2-st ${sc}">${st}</span></div>
     ${bar(K.venta, K.npDist, K.meta, tp)}${ley(K.venta, K.npDist, K.meta, tp)}
     <div class="av2-g">${k("Proyección de cierre", pmm(K.proy), pc(K.meta ? K.proy / K.meta : 0) + " de la meta", K.proy >= K.meta ? "ok" : K.proy >= K.meta * .85 ? "wa" : "ba")}
-      ${k("Falta facturar", pmm(Math.max(0, K.meta - K.venta)), rest ? pmm(Math.max(0, K.meta - K.venta) / rest) + " por día hábil" : "")}
+      ${k("Falta facturar", pmm(Math.max(0, K.meta - K.venta)), rest ? pmm(Math.max(0, K.meta - K.venta) / rest) + " por día hábil" : "")}${k("Total NP Defontana", pmm(K.npDist), "pedidos por facturar")}
       ${k("Margen", pc(K.venta ? 1 - K.costo / K.venta : 0), pmm(K.venta - K.costo))}${k("Nuevos · SKU/cliente", K.nuevos + " · " + n1(K.sku), K.nc + " clientes compraron")}</div>`;
   if (!yo) html += `<div style="overflow-x:auto"><table class="av2-t"><thead><tr><th>Vendedor</th><th>Facturado</th><th>Pendiente</th><th>Avance</th><th>Proyección</th><th>Margen</th><th>Nuevos</th><th>SKU/cl.</th></tr></thead><tbody>
     ${R.L.map(x => { const np = K.np[av2N(x.v)] || 0, pr = R.hPas ? x.venta / R.hPas * R.hTot : x.venta, W = y => Math.max(0, Math.min(100, x.meta ? y / x.meta * 100 : 0)).toFixed(1) + "%", c = est(x.meta ? x.venta / x.meta : 0, tp)[0];
@@ -8991,7 +8991,7 @@ window.hwfContCambio = function () { try { if (typeof praPintar === "function" &
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261124194317";
+const HWF_VER = "20261124194659";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
