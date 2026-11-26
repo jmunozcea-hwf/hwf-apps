@@ -5286,7 +5286,7 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261126164935";
+const HWF_VER = "20261126165402";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -10372,6 +10372,64 @@ html,body{max-width:100%;overflow-x:clip}
   const HTML = `<div class="ad-w"><h2>Documentos <span class="muted" style="font-weight:400;font-size:.85rem">en Google Drive</span></h2><p>Todo se abre directo en Drive: más rápido y sin cargar archivos en la app. Para agregar o cambiar un documento, súbelo a la carpeta en Drive.</p><a class="ad-c" href="https://drive.google.com/drive/folders/1btOc2fUXYE5mg3Ia2VKpBh-kaW1m-YaI" target="_blank" rel="noopener"><span class="ad-i">📁</span><span><b>Documentos de ventas</b><small>Catálogo, listas de precio, posts para enviar por WhatsApp, manuales y guías («HWF Documentos · Ventas»).</small></span><span class="ad-f">Abrir ›</span></a><a class="ad-c" href="https://drive.google.com/drive/folders/12gZZOy2h_lAgVtdWRxum5s6c1dkOmQxO" target="_blank" rel="noopener"><span class="ad-i">📣</span><span><b>Posts para redes sociales</b><small>Publicaciones, logos e imágenes para Instagram y redes («RRSS HWF»).</small></span><span class="ad-f">Abrir ›</span></a><a class="ad-c" href="https://drive.google.com/drive/folders/1APWFjCn9coYeJRzs97PhWwvkOVaomD6h" target="_blank" rel="noopener"><span class="ad-i">🔒</span><span><b>Info admin</b><small>Información interna de administración («HWF Info admin»).</small></span><span class="ad-f">Abrir ›</span></a></div>`;
   const _pm = pintarMas; pintarMas = function () { if (typeof vistaMas !== "undefined" && vistaMas === "catalogo") { const b = document.getElementById("masBody"); if (b) { b.innerHTML = HTML; return; } } return _pm.apply(this, arguments); };
   try { if (typeof vistaMas !== "undefined" && vistaMas === "catalogo") pintarMas(); } catch (e) {}
+})();
+</script>
+<style>/* patch_admgrupos */
+#snPanel [data-biu="l"],#snPanel [data-t="mar"],#snPanel [data-m="eerr"],#sideSub [data-sm="eerr"],#masSeg [data-m="eerr"]{display:none!important}
+.mg-tabs{display:flex;gap:4px;background:var(--sunk,#EEF2F5);border-radius:14px;padding:4px;margin:0 0 12px;overflow-x:auto;scrollbar-width:none}
+.mg-tabs::-webkit-scrollbar{display:none}
+.mg-tabs button{flex:1 0 auto;white-space:nowrap;border:0;background:none;border-radius:10px;padding:9px 12px;font:inherit;font-weight:800;font-size:.86rem;color:var(--muted,#5B6874);cursor:pointer}
+.mg-tabs button[aria-selected="true"]{background:var(--surface,#fff);color:#0B3146;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.mg-tabs b{display:inline-block;min-width:18px;margin-left:6px;padding:1px 7px;border-radius:999px;background:#B3261E;color:#fff;font-size:.7rem}
+#urHoy{margin:0 0 14px;background:var(--surface,#fff);border:1px solid var(--line,#E3E9EE);border-radius:18px;padding:14px}
+#urHoy h3{margin:0 0 10px;font-size:1rem;display:flex;justify-content:space-between;gap:8px;align-items:baseline}#urHoy h3 small{font-weight:600;color:var(--muted,#5B6874);font-size:.78rem}
+#urHoy .ur-g{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px}
+#urHoy button{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;text-align:left;border:1px solid var(--line,#E3E9EE);background:var(--sunk,#F4F7F9);border-radius:14px;padding:10px 12px;font:inherit;color:inherit;cursor:pointer}
+#urHoy button:hover{border-color:#26A69A}#urHoy .ur-n{font-size:1.35rem;font-weight:900;color:#B3261E;font-variant-numeric:tabular-nums}
+#urHoy .ur-t{font-weight:800;font-size:.88rem;line-height:1.2}#urHoy .ur-t small{display:block;font-weight:500;color:var(--muted,#5B6874);font-size:.74rem}
+#urHoy .ur-f{color:#0B3146;font-weight:900}#urHoy .ur-ok{margin:0;color:#1C7A4E;font-weight:700}
+</style>
+<script>/* patch_admgrupos: grupos de menú con pestañas + «Para hoy» */
+(function () {
+  if (typeof navIrMas !== "function" || typeof navIrTab !== "function") return;
+  const G = [
+    { n: "Clientes", it: [["t:cli", "Ventas por cliente"], ["m:clientes", "Cartera por vendedor"], ["m:cambios", "Cambios"]] },
+    { n: "Marketing", it: [["m:metricas", "Métricas web y B2B"], ["m:instagram", "Instagram"], ["m:mail", "Mailing"], ["m:invita", "Invitar clientes"], ["m:roi", "ROI promos"], ["qr", "QR registro"]] }
+  ];
+  const sel = k => k === "qr" ? "#qrItem" : k[0] === "t" ? '[data-t="' + k.slice(2) + '"]' : '[data-m="' + k.slice(2) + '"]';
+  const existe = k => k === "qr" || (k[0] === "t" ? !!document.querySelector('nav.bottom [data-t="' + k.slice(2) + '"]') : !!document.querySelector('#masSeg [data-m="' + k.slice(2) + '"]'));
+  G.forEach(g => g.it = g.it.filter(([k]) => existe(k)));
+  const ocultar = [].concat(...G.map(g => g.it.slice(1).map(([k]) => k)));
+  document.head.insertAdjacentHTML("beforeend", "<style>" + ocultar.map(k => "#snPanel " + sel(k) + (k[0] === "m" ? ',#sideSub [data-sm="' + k.slice(2) + '"],#masSeg [data-m="' + k.slice(2) + '"]' : "")).join(",") + "{display:none!important}</style>");
+  const txt = (b, t) => { const n = [...b.childNodes].reverse().find(x => x.nodeType === 3 && x.textContent.trim()); if (n && n.textContent.trim() !== t) n.textContent = t; };
+  const activo = () => { try { return TAB === "mas" ? "m:" + vistaMas : "t:" + TAB; } catch (e) { return ""; } };
+  const cnt = () => { try { return typeof navContadores === "function" ? navContadores() : {}; } catch (e) { return {}; } };
+  function ir(k) { if (k === "qr") { const q = document.getElementById("qrItem"); if (q) q.click(); return; }
+    if (k[0] === "t") navIrTab(k.slice(2)); else { if (TAB !== "mas") navIrTab("mas"); navIrMas(k.slice(2)); }
+    try { if (typeof navMarcar === "function") navMarcar(); } catch (e) {} window.scrollTo({ top: 0 }); }
+  function menu() { const p = document.getElementById("snPanel"); if (!p) return; const a = activo();
+    G.forEach(g => { if (!g.it.length) return; const it = p.querySelector(sel(g.it[0][0])); if (!it) return; txt(it, g.n);
+      if (g.it.some(([k]) => k === a)) { p.querySelectorAll('[aria-current="true"]').forEach(x => x.setAttribute("aria-current", "false")); it.setAttribute("aria-current", "true"); } });
+    const sm = document.querySelector('#sideSub [data-sm="clientes"] span'); if (sm) sm.textContent = "Clientes"; }
+  function barra() { const a = activo(), g = G.find(g => g.it.some(([k]) => k === a));
+    document.querySelectorAll(".mg-tabs").forEach(t => { if (!g || t.dataset.g !== g.n || !t.isConnected) t.remove(); });
+    if (!g || g.it.length < 2) return; const box = a[0] === "t" ? document.getElementById("s-" + a.slice(2)) : document.getElementById("masBody"); if (!box) return;
+    document.querySelectorAll(".mg-tabs").forEach(t => { if (t.parentNode !== box) t.remove(); });
+    let t = box.querySelector(":scope > .mg-tabs"); const c = cnt();
+    const html = g.it.map(([k, n]) => { const q = c[k.slice(2)] || 0; return `<button type="button" role="tab" data-mg="${k}" aria-selected="${k === a}">${n}${q ? `<b>${q}</b>` : ""}</button>`; }).join("");
+    if (!t) { t = document.createElement("div"); t.className = "mg-tabs"; t.dataset.g = g.n; t.setAttribute("role", "tablist"); t.onclick = ev => { const b = ev.target.closest("[data-mg]"); if (b && b.dataset.mg !== activo()) ir(b.dataset.mg); }; box.prepend(t); }
+    if (t.innerHTML !== html) t.innerHTML = html; }
+  function hoy() { const s = document.getElementById("s-res"); if (!s) return; const c = cnt();
+    const b2 = (() => { const e = document.querySelector('[data-m="b2b"] .b2-bdg'); return e ? parseInt(e.textContent, 10) || 0 : 0; })();
+    const L = [["m:napp", c.napp, "Por aprobar", "notas de la app"], ["m:cots", c.cots, "Pendientes Defontana", "notas por facturar"], ["m:cobranza", c.cobranza, "Cobranza vencida", "clientes con deuda vencida"],
+      ["m:cambios", c.cambios, "Cambios de clientes", "por revisar"], ["m:b2b", b2, "Portal B2B", "cuentas por asignar"]].filter(x => x[1] > 0 && (x[0] === "m:b2b" || existe(x[0])));
+    const html = `<h3>📌 Para hoy <small>${L.length ? "toca para ir" : ""}</small></h3>` + (L.length ? `<div class="ur-g">${L.map(([k, n, t, d]) => `<button type="button" data-ur="${k}"><span class="ur-n">${n}</span><span class="ur-t">${t}<small>${d}</small></span><span class="ur-f">›</span></button>`).join("")}</div>` : `<p class="ur-ok">✅ Todo al día: no hay pedidos por aprobar ni cobranza vencida.</p>`);
+    let u = document.getElementById("urHoy"); if (!u) { u = document.createElement("section"); u.id = "urHoy"; u.onclick = ev => { const b = ev.target.closest("[data-ur]"); if (b) ir(b.dataset.ur); }; s.prepend(u); }
+    else if (u.parentNode !== s || s.firstElementChild !== u) s.prepend(u);
+    if (u.innerHTML !== html) u.innerHTML = html; }
+  const paso = () => { try { barra(); } catch (e) {} try { hoy(); } catch (e) {} };
+  setInterval(paso, 700); paso();
+  const iv = setInterval(() => { const p = document.getElementById("snPanel"); if (!p) return; clearInterval(iv); menu(); new MutationObserver(() => setTimeout(menu, 40)).observe(p, { childList: true }); }, 300);
 })();
 </script>
 </body>
