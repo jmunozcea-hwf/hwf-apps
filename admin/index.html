@@ -5289,7 +5289,7 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261126225749";
+const HWF_VER = "20261126231137";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -10582,10 +10582,15 @@ function vmPoner(cont, VM, antes) { try { if (!cont) return; const v = cont.quer
     const clave = (B.corte || "") + "|" + R.length + "|" + ST.vend; if (CACHE && CACHE.k === clave) return CACHE.r;
     const tv = VE.indexOf("Tienda Hellywoof"), boleta = new Set(); CL.forEach((c, i) => { if (/CLIENTE\s+BOLETA/i.test((c && c[0]) || "")) boleta.add(i); });
     let tienda = new Set(); try { if (typeof window.esClienteTienda === "function") CL.forEach((c, i) => { if (window.esClienteTienda(c[0])) tienda.add(i); }); } catch (e) { }
-    const L = []; let ref = 0;
-    R.forEach(r => { if (r[7] === tv || boleta.has(r[0]) || tienda.has(r[0])) return; if (ST.vend && VE[r[7]] !== ST.vend) return;
-      const y = r[8] || B.anio, t = Date.UTC(y, (r[2] || 1) - 1, r[3] || 1); const q = +r[4] || 0, v = +r[5] || 0; L.push([r[0], r[1], t, q, v, q * (+r[6] || 0)]); if (t > ref && v) ref = t; });
-    if (!L.length || !ref) { const o = { vacio: true }; CACHE = { k: clave, r: o }; return o; }
+    /* 27-11-2026: fecha de referencia = última venta de TODA la distribuidora (no del vendedor elegido); en el filtro solo
+       vendedores con venta en los últimos 12 meses y sin «Genérico» (Jorge: «quita a Leslie y genérico») */
+    const A = []; let ref = 0;
+    R.forEach(r => { if (r[7] === tv || boleta.has(r[0]) || tienda.has(r[0])) return;
+      const y = r[8] || B.anio, t = Date.UTC(y, (r[2] || 1) - 1, r[3] || 1); const q = +r[4] || 0, v = +r[5] || 0; A.push([r[0], r[1], t, q, v, q * (+r[6] || 0), r[7]]); if (t > ref && v) ref = t; });
+    const vAct = new Set(); A.forEach(x => { if (x[4] > 0 && x[2] > ref - 365 * DIA && VE[x[6]] && !/gen[eé]rico/i.test(VE[x[6]])) vAct.add(VE[x[6]]); });
+    const vendedores = VE.filter(v => vAct.has(v)); if (ST.vend && !vAct.has(ST.vend)) ST.vend = "";
+    const L = ST.vend ? A.filter(x => VE[x[6]] === ST.vend) : A;
+    if (!L.length || !ref) { const o = { vacio: true, vendedores }; CACHE = { k: clave, r: o }; return o; }
     const d12 = ref - 365 * DIA, d24 = ref - 730 * DIA, d90 = ref - 90 * DIA, d180 = ref - 180 * DIA, R0 = new Date(ref), Y = R0.getUTCFullYear();
     const ini = L.reduce((m, x) => Math.min(m, x[2]), Infinity), cubre12 = ini <= d12 + 31 * DIA, cubre24 = ini <= d24 + 31 * DIA;
     /* --- resumen --- */
@@ -10639,7 +10644,7 @@ function vmPoner(cont, VM, antes) { try { if (!cont) return; const v = cont.quer
     const cambio = Object.values(prod).filter(p => p.v90a >= 500000 || p.v90 >= 500000).map(p => Object.assign(p, { d: p.v90 - p.v90a }));
     const alza = cambio.filter(p => p.d > 0).sort((a, b) => b.d - a.d).slice(0, 8), baja = cambio.filter(p => p.d < 0).sort((a, b) => a.d - b.d).slice(0, 8);
     const lineas = Object.values(lin).filter(l => l.v > 0).sort((a, b) => b.v - a.v), mg = v12 ? (v12 - c12) / v12 : null;
-    const r = { vacio: false, ref, Y, cubre12, cubre24, v12, c12, v12a, ytd, ytdA, v90, v90a, mg, top10, hhi, act90, compran, tot, SEG, riesgoMes, caida, abc, reglas, pl, MX, alza, baja, lineas, mes, CL, PR, CA, VE, ini };
+    const r = { vacio: false, vendedores, ref, Y, cubre12, cubre24, v12, c12, v12a, ytd, ytdA, v90, v90a, mg, top10, hhi, act90, compran, tot, SEG, riesgoMes, caida, abc, reglas, pl, MX, alza, baja, lineas, mes, CL, PR, CA, VE, ini };
     CACHE = { k: clave, r }; return r; }
 
   const nomC = (X, o) => es(((X.CL[o.i] || [])[0]) || "Cliente " + o.i), venC = (X, o) => es(((X.CL[o.i] || [])[2]) || "");
@@ -10670,7 +10675,7 @@ function vmPoner(cont, VM, antes) { try { if (!cont) return; const v = cont.quer
     return h; }
 
   function html() { const X = calcular();
-    const vends = (window.hwfBi.base() || {}).vend || [], opts = [""].concat(vends.filter(v => v && v !== "Tienda Hellywoof"));
+    const opts = [""].concat(X.vendedores || []);
     const filtro = `<div class="mi-fl"><label for="miVend" style="font-size:.8rem;font-weight:700;color:#5B6874">Vendedor</label><select id="miVend" data-s="vend">${opts.map(v => `<option value="${es(v)}"${v === ST.vend ? " selected" : ""}>${v ? es(v) : "Toda la distribuidora"}</option>`).join("")}</select></div>`;
     if (X.vacio) return `<div class="mi"><div class="mi-c"><h3>Inteligencia de datos</h3>${filtro}<p class="mi-s">Aún no hay ventas de la distribuidora en la base de la app.</p></div></div>`;
     const S = X.SEG, sel = S[ST.seg] ? ST.seg : "riesgo", ls = S[sel];
