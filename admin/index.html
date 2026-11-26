@@ -5288,7 +5288,7 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261126183717";
+const HWF_VER = "20261126184038";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -9903,7 +9903,7 @@ body.m-b2b #crmMeta{display:none!important}
   function vCuentas() {
     const q = N(ST.q), vs = vendedores();
     const asignada = c => c.estado === "activo" && c.vendedor && c.vendedor !== "Vendedor B2B" && c.cliente;   /* 24-11-2026: asignadas salen de «Por asignar» */
-    const okEst = c => (ST.est && ST.est[c.id]) || ST.fEst === "porasignar" ? c.estado === "activo" && !asignada(c) : ST.fEst === "asignada" ? asignada(c) : ST.fEst ? c.estado === ST.fEst : c.estado !== "rechazado";
+    const okEst = c => !!(ST.est && ST.est[c.id]) || (ST.fEst === "porasignar" ? c.estado === "activo" && !asignada(c) : ST.fEst === "asignada" ? asignada(c) : ST.fEst ? c.estado === ST.fEst : c.estado !== "rechazado");
     let l = ST.cuentas.filter(c => okEst(c) &&   /* rechazadas: archivadas, solo en «Archivadas» */ (!ST.fVend || (ST.fVend === "-" ? !c.vendedor : c.vendedor === ST.fVend)) && (!q || N([c.razon, c.rut, c.contacto, c.correo, c.comuna, c.cliente].join(" ")).includes(q)));
     l.sort((a, b) => String(b.fecha).localeCompare(String(a.fecha)));
     const cnt = e => ST.cuentas.filter(c => e === "porasignar" ? c.estado === "activo" && !asignada(c) : e === "asignada" ? asignada(c) : c.estado === e).length;
@@ -9913,7 +9913,7 @@ body.m-b2b #crmMeta{display:none!important}
       ${l.length ? l.map(c => { const d = ST.dr[c.id] || {}, v = d.vendedor != null ? d.vendedor : (c.vendedor || ""), cl = d.cliente != null ? d.cliente : (c.cliente || "");
         const asig = `<div class="b2-g2" style="margin-top:6px"><label class="b2-lbl">Vendedor<select class="b2-in" data-v="${E(c.id)}"><option value="">Sin vendedor</option>${vs.concat(v && !vs.includes(v) ? [v] : []).map(x => `<option ${x === v ? "selected" : ""}>${E(x)}</option>`).join("")}</select></label>
           <div class="b2-lbl">Cliente HWF<button type="button" class="b2-b" data-cl="${E(c.id)}" style="text-align:left;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${cl ? E(cl) : "Elegir cliente…"}</button></div></div>`;
-        const bt = (c.estado === "pendiente" ? `<button type="button" class="b2-b ok" data-a="aprobar" data-id="${E(c.id)}">Aprobar</button><button type="button" class="b2-b mal" data-a="rechazado" data-id="${E(c.id)}">Rechazar</button>`
+        const bt = (c.estado === "pendiente" ? `<button type="button" class="b2-b tq" data-a="guardar" data-id="${E(c.id)}">Guardar asignación</button><button type="button" class="b2-b ok" data-a="aprobar" data-id="${E(c.id)}">Aprobar</button><button type="button" class="b2-b mal" data-a="rechazado" data-id="${E(c.id)}">Rechazar</button>`
           : c.estado === "activo" ? `<button type="button" class="b2-b tq" data-a="guardar" data-id="${E(c.id)}">Guardar asignación</button><button type="button" class="b2-b mal" data-a="bloqueado" data-id="${E(c.id)}">Bloquear</button>`
             : c.estado === "bloqueado" ? `<button type="button" class="b2-b ok" data-a="aprobar" data-id="${E(c.id)}">Reactivar</button>` : `<button type="button" class="b2-b ok" data-a="aprobar" data-id="${E(c.id)}">Aprobar</button>`);
         const es = ST.est && ST.est[c.id], estH = es ? `<span class="b2-est ${es.t}" role="status">${E(es.m)}</span>` : "";   /* 26-11-2026: respuesta visible en la misma tarjeta */
@@ -9982,7 +9982,7 @@ body.m-b2b #crmMeta{display:none!important}
     ST.est = ST.est || {}; const fin = () => setTimeout(() => { delete ST.est[c.id]; if (vivo()) pintar(); }, 3500);
     ST.ocup = true; ST.est[c.id] = { t: "g", m: "⏳ Guardando…" }; pintar();
     const r = await llamar({ accion: "b2bAprobar", id: c.id, estado, vendedor: vend, cliente: cli, por: POR }); ST.ocup = false;
-    ST.est[c.id] = r && r.ok ? { t: "ok", m: estado === "activo" && r.altaDefontana ? "✓ Aprobada · se envió a administración el correo para crearla en Defontana" : estado === "activo" ? "✓ Guardado" + (vend ? " · vendedor " + vend : "") + (cli ? " · cliente " + cli : " · falta el cliente HWF (si es nuevo, créalo en Defontana)") : estado === "bloqueado" ? "✓ Cuenta bloqueada" : "✓ Solicitud rechazada" } : { t: "mal", m: "✗ " + ((r && r.error) || "No se pudo guardar") }; fin();
+    ST.est[c.id] = r && r.ok ? { t: "ok", m: estado === "activo" && r.altaDefontana ? "✓ Aprobada · se envió a administración el correo para crearla en Defontana" : estado === "activo" ? "✓ Guardado" + (vend ? " · vendedor " + vend : "") + (cli ? " · cliente " + cli : " · falta el cliente HWF (si es nuevo, créalo en Defontana)") : estado === "pendiente" ? "✓ Asignación guardada" + (vend ? " · vendedor " + vend : "") + " · sigue pendiente de tu aprobación" : estado === "bloqueado" ? "✓ Cuenta bloqueada" : "✓ Solicitud rechazada" } : { t: "mal", m: "✗ " + ((r && r.error) || "No se pudo guardar") }; fin();
     if (r && r.ok) { aviso(estado === "activo" ? "Guardado. Si es una cuenta nueva, el cliente recibirá su correo de bienvenida." : estado === "bloqueado" ? "Cuenta bloqueada." : "Solicitud rechazada."); pintar(); cargar(true).then(() => { if (vivo()) pintar(); }); }
     else { Object.assign(c, antes); pintar(); aviso((r && r.error) || "No se pudo guardar."); }
   }
