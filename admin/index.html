@@ -5288,7 +5288,7 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261126182257";
+const HWF_VER = "20261126182702";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -10347,7 +10347,7 @@ html,body{max-width:100%;overflow-x:clip}
 (function () {
   if (typeof pintarMas !== "function") return;
   const tiene = k => !!document.querySelector('#masSeg [data-m="' + k + '"]');
-  const TABS = (tiene("pedidos") ? [["pedidos", "App y B2B"]] : []).concat([["napp", "Por aprobar"], ["cots", "Pendientes Defontana"]]).filter(([k]) => tiene(k));
+  const TABS = (tiene("pedidos") ? [["pedidos", "App y B2B"]] : []).concat([["napp", "Notas de la app"], ["cots", "Pendientes Defontana"]]).filter(([k]) => tiene(k));
   if (TABS.length < 2) return;
   const MAIN = TABS[0][0], OTROS = TABS.slice(1).map(t => t[0]), GRUPO = TABS.map(t => t[0]);
   try { if (typeof NAV_MNOM !== "undefined") { NAV_MNOM[MAIN] = "Pedidos"; OTROS.forEach(k => NAV_MNOM[k] = "Pedidos"); } } catch (e) {}
@@ -10358,12 +10358,12 @@ html,body{max-width:100%;overflow-x:clip}
     const b = [...it.querySelectorAll("i,b,span")].reverse().find(e => /^\d+$/.test(e.textContent.trim()) && !e.classList.contains("sn-e")); return b ? +b.textContent.trim() : 0; };
   const enGrupo = () => typeof vistaMas !== "undefined" && GRUPO.includes(vistaMas);
   function menu() { const p = document.getElementById("snPanel"); if (!p) return; const it = p.querySelector('[data-m="' + MAIN + '"]'); if (!it) return;
-    txt(it, "Pedidos"); const s = OTROS.reduce((t, k) => t + cnt(k), 0); let e = it.querySelector(".mp-suma");
+    txt(it, "Pedidos"); const s = OTROS.filter(k => k !== "napp").reduce((t, k) => t + cnt(k), 0);   /* notas de la app: solo se ven, no se aprueban (26-11-2026) */ let e = it.querySelector(".mp-suma");
     if (s) { if (!e) { e = document.createElement("i"); e.className = "mp-suma"; it.appendChild(e); } e.textContent = s; } else if (e) e.remove();
     if (enGrupo() && p.querySelector('[aria-current="true"]:not([data-m="' + MAIN + '"])')) { const a = p.querySelector('[aria-current="true"]'); if (a && GRUPO.includes(a.dataset.m)) { a.setAttribute("aria-current", "false"); it.setAttribute("aria-current", "true"); } } }
   function barra() { const box = document.getElementById("masBody"); if (!box || !enGrupo() || box.querySelector(".mp-tabs")) return;
     const d = document.createElement("div"); d.className = "mp-tabs"; d.setAttribute("role", "tablist");
-    d.innerHTML = TABS.map(([k, t]) => { const n = k === MAIN ? 0 : cnt(k); return `<button type="button" role="tab" data-mpt="${k}" aria-selected="${vistaMas === k}">${t}${n ? `<b>${n}</b>` : ""}</button>`; }).join("");
+    d.innerHTML = TABS.map(([k, t]) => { const n = k === MAIN || k === "napp" ? 0 : cnt(k); return `<button type="button" role="tab" data-mpt="${k}" aria-selected="${vistaMas === k}">${t}${n ? `<b>${n}</b>` : ""}</button>`; }).join("");
     d.onclick = ev => { const b = ev.target.closest("[data-mpt]"); if (!b || b.dataset.mpt === vistaMas) return; const m = document.querySelector('#masSeg [data-m="' + b.dataset.mpt + '"]'); if (m) m.click(); };
     box.prepend(d); }
   const _pm = pintarMas; pintarMas = function () { const r = _pm.apply(this, arguments); try { barra(); menu(); } catch (e) {} return r; };
@@ -10432,9 +10432,9 @@ html,body{max-width:100%;overflow-x:clip}
     if (t.innerHTML !== html) t.innerHTML = html; }
   function hoy() { const s = document.getElementById("s-res"); if (!s) return; const c = cnt();
     const b2 = (() => { const e = document.querySelector('[data-m="b2b"] .b2-bdg'); return e ? parseInt(e.textContent, 10) || 0 : 0; })();
-    const L = [["m:napp", c.napp, "Por aprobar", "notas de la app"], ["m:cots", c.cots, "Pendientes Defontana", "notas por facturar"], ["m:cobranza", c.cobranza, "Cobranza vencida", "clientes con deuda vencida"],
+    const L = [["m:cots", c.cots, "Pendientes Defontana", "notas por facturar"], ["m:cobranza", c.cobranza, "Cobranza vencida", "clientes con deuda vencida"],
       ["m:cambios", c.cambios, "Cambios de clientes", "por revisar"], ["m:b2b", b2, "Portal B2B", "cuentas por asignar"], ["m:b2b", window.B2B_VOK || 0, "Clientes nuevos B2B", "ya los aprobó el vendedor: falta tu aprobación"]].filter(x => x[1] > 0 && (x[0] === "m:b2b" || existe(x[0])));
-    const html = `<h3>📌 Para hoy <small>${L.length ? "toca para ir" : ""}</small></h3>` + (L.length ? `<div class="ur-g">${L.map(([k, n, t, d]) => `<button type="button" data-ur="${k}"><span class="ur-n">${n}</span><span class="ur-t">${t}<small>${d}</small></span><span class="ur-f">›</span></button>`).join("")}</div>` : `<p class="ur-ok">✅ Todo al día: no hay pedidos por aprobar ni cobranza vencida.</p>`);
+    const html = `<h3>📌 Para hoy <small>${L.length ? "toca para ir" : ""}</small></h3>` + (L.length ? `<div class="ur-g">${L.map(([k, n, t, d]) => `<button type="button" data-ur="${k}"><span class="ur-n">${n}</span><span class="ur-t">${t}<small>${d}</small></span><span class="ur-f">›</span></button>`).join("")}</div>` : `<p class="ur-ok">✅ Todo al día: sin pendientes de Defontana ni cobranza vencida.</p>`);
     let u = document.getElementById("urHoy"); if (!u) { u = document.createElement("section"); u.id = "urHoy"; u.onclick = ev => { const b = ev.target.closest("[data-ur]"); if (b) ir(b.dataset.ur); }; s.prepend(u); }
     else if (u.parentNode !== s || s.firstElementChild !== u) s.prepend(u);
     if (u.innerHTML !== html) u.innerHTML = html; }
