@@ -5289,7 +5289,7 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261126192205";
+const HWF_VER = "20261126203300";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -9705,6 +9705,7 @@ window.hwfContCambio = function () { try { if (typeof praPintar === "function" &
 .b2-vac{padding:14px;text-align:center;color:var(--muted,#5B6874);font-size:.9rem}
 .b2-err{background:#FBE0DD;color:#7A1A12;border-radius:12px;padding:10px;font-size:.88rem}
 .b2-seg{display:flex;gap:6px;flex-wrap:wrap}
+.b2-sincli{display:block;margin-top:6px;padding:6px 10px;border-radius:10px;background:#FFF7E6;color:#8A5300;font-weight:700;font-size:.82rem}
 .b2-vok{display:block;margin-top:6px;padding:8px 12px;border-radius:10px;background:#E3F4EA;color:#1C7A4E;font-weight:700}
 .b2-est{display:inline-flex;align-items:center;padding:10px 14px;border-radius:12px;font-weight:800;font-size:.9rem;animation:b2E .25s ease-out}.b2-est.g{background:#EEF2F5;color:#5B6874}.b2-est.ok{background:#E3F4EA;color:#1C7A4E}.b2-est.mal{background:#FDECEA;color:#B3261E}@keyframes b2E{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
 .b2-bdg{display:inline-block;min-width:18px;height:18px;line-height:18px;border-radius:9px;background:#B42318;color:#fff;font-size:.68rem;font-weight:800;text-align:center;padding:0 5px;margin-left:6px;font-style:normal;vertical-align:middle}
@@ -9824,7 +9825,7 @@ body.m-b2b #crmMeta{display:none!important}
   /* ---------- cuentas ---------- */
   function vCuentas() {
     const q = N(ST.q), vs = vendedores();
-    const asignada = c => c.estado === "activo" && c.vendedor && c.vendedor !== "Vendedor B2B" && c.cliente;   /* 24-11-2026: asignadas salen de «Por asignar» */
+    const asignada = c => c.estado === "activo" && c.vendedor && c.vendedor !== "Vendedor B2B";   /* 27-11-2026 (Jorge): asignada = con vendedor real; el cliente HWF puede faltar (cliente nuevo aún no creado en Defontana) */   /* 24-11-2026: asignadas salen de «Por asignar» */
     const okEst = c => !!(ST.est && ST.est[c.id]) || (ST.fEst === "porasignar" ? c.estado === "activo" && !asignada(c) : ST.fEst === "asignada" ? asignada(c) : ST.fEst ? c.estado === ST.fEst : c.estado !== "rechazado");
     let l = ST.cuentas.filter(c => okEst(c) &&   /* rechazadas: archivadas, solo en «Archivadas» */ (!ST.fVend || (ST.fVend === "-" ? !c.vendedor : c.vendedor === ST.fVend)) && (!q || N([c.razon, c.rut, c.contacto, c.correo, c.comuna, c.cliente].join(" ")).includes(q)));
     l.sort((a, b) => String(b.fecha).localeCompare(String(a.fecha)));
@@ -9839,7 +9840,7 @@ body.m-b2b #crmMeta{display:none!important}
           : c.estado === "activo" ? `<button type="button" class="b2-b tq" data-a="guardar" data-id="${E(c.id)}">Guardar asignación</button><button type="button" class="b2-b mal" data-a="bloqueado" data-id="${E(c.id)}">Bloquear</button>`
             : c.estado === "bloqueado" ? `<button type="button" class="b2-b ok" data-a="aprobar" data-id="${E(c.id)}">Reactivar</button>` : `<button type="button" class="b2-b ok" data-a="aprobar" data-id="${E(c.id)}">Aprobar</button>`);
         const es = ST.est && ST.est[c.id], estH = es ? `<span class="b2-est ${es.t}" role="status">${E(es.m)}</span>` : "";   /* 26-11-2026: respuesta visible en la misma tarjeta */
-        return tarjetaCuenta(c, asig, bt + estH).replace(/<small>Solicitó el [^<]*(?:<b>.*?<\/b>)?[^<]*<\/small>/, `<small>Solicitó el ${E(F(c.fecha))}</small>`); }).join("") : `<div class="b2-card b2-vac">${ST.t ? "No hay cuentas con ese filtro." : "Sin datos todavía."}</div>`}`;
+        return tarjetaCuenta(c, asig + (c.estado === "activo" && !cl ? `<small class="b2-sincli">⚠ Falta el cliente HWF: si es nuevo, créalo en Defontana y luego elígelo aquí</small>` : ""), bt + estH).replace(/<small>Solicitó el [^<]*(?:<b>.*?<\/b>)?[^<]*<\/small>/, `<small>Solicitó el ${E(F(c.fecha))}</small>`); }).join("") : `<div class="b2-card b2-vac">${ST.t ? "No hay cuentas con ese filtro." : "Sin datos todavía."}</div>`}`;
   }
   function vPedidos() {
     return `<div class="b2-card"><h3>Pedidos del portal <small>${ST.pedidos.length}</small></h3>${ST.pedidos.length ? ST.pedidos.map(tarjetaPedido).join("") : `<div class="b2-vac">Aún no hay pedidos.</div>`}</div>
