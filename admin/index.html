@@ -5289,7 +5289,7 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261126222955";
+const HWF_VER = "20261126225749";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -10118,7 +10118,7 @@ body.m-b2b #crmMeta{display:none!important}
   const VEN = typeof NAV_ORDEN !== "undefined" && typeof setModo === "function" && !!document.getElementById("mInicio"), ADM = !VEN && !!document.querySelector("nav.bottom") && !!document.getElementById("s-res");
   const LOG = !VEN && !ADM && !!document.querySelector('#nav [data-s="rutas"]'), TND = !VEN && !ADM && !!document.getElementById("tNav");
   const GV = [["Mi día", ["inicio", "pedido", "peds", "clientes", "agenda", "ruta", "cobranza", "embudo", "cat"]], ["Equipo", ["act"]], ["Análisis", ["dash", "avance", "bi", "eerr", "met"]], ["", ["nut"]], ["Aprender", ["tec"]], ["Redes sociales", ["ig"]]];
-  const GA = [["Dirección", ["t:hal"]], ["Equipo", ["m:actividades", "m:postul"]], ["Ventas", ["t:res", "t:ven", "t:cli", "m:clientes", "t:pro", "m:ranking", "m:plan", "m:zonas", "m:terreno", "m:bonif"]], ["", ["m:info"]], ["Pedidos y cobranza", ["m:pedidos", "m:cots", "m:napp", "m:cobranza", "m:embudo"]],
+  const GA = [["Dirección", ["t:hal", "m:intel"]], ["Equipo", ["m:actividades", "m:postul"]], ["Ventas", ["t:res", "t:ven", "t:cli", "m:clientes", "t:pro", "m:ranking", "m:plan", "m:zonas", "m:terreno", "m:bonif"]], ["", ["m:info"]], ["Pedidos y cobranza", ["m:pedidos", "m:cots", "m:napp", "m:cobranza", "m:embudo"]],
     ["BI y compras", ["b:v", "b:l", "t:mar", "m:eerr", "m:abast", "m:provee"]], ["Web y portal B2B", ["m:metricas", "m:instagram", "m:linkedin", "m:b2b", "m:mail", "m:invita", "m:roi"]], ["Archivos y datos", ["m:catalogo", "m:cambios", "m:datos"]]];   /* 22-11-2026: métricas web y B2B en su propio grupo */
   const pos = (G, k) => { let n = 0; for (const [, l] of G) { const i = l.indexOf(k); if (i >= 0) return n + i; n += l.length; } return 999; };
   if (VEN) { const ord = () => { const a = NAV_ORDEN.slice(); a.sort((x, y) => pos(GV, x[0]) - pos(GV, y[0])); NAV_ORDEN.splice(0, NAV_ORDEN.length, ...a); };
@@ -10534,5 +10534,191 @@ function vmPoner(cont, VM, antes) { try { if (!cont) return; const v = cont.quer
 </script>
 <script>/* patch_grafventas: HWF */ { const _pd = pintarDashboard; pintarDashboard = function () { const r = _pd.apply(this, arguments); try { vmPoner(document.getElementById("s-res"), vmDeBase(BASE)); } catch (e) {} return r; };
   try { if (document.getElementById("s-res") && document.getElementById("s-res").children.length) vmPoner(document.getElementById("s-res"), vmDeBase(BASE)); } catch (e) {} }</script>
+<style>/* patch_mineria */
+.mi{display:grid;gap:12px;min-width:0}.mi *{box-sizing:border-box}
+.mi-c{background:var(--card,#fff);border:1px solid var(--line,#DDE3E8);border-radius:14px;padding:14px;min-width:0}
+.mi h3{margin:0 0 4px;font-size:1rem;color:#0B3146}.mi .mi-s{color:var(--muted,#5B6874);font-size:.78rem;margin:0 0 8px;line-height:1.35}
+.mi-k{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.mi-k div{background:#F2F7F8;border-radius:10px;padding:8px 10px;font-size:.74rem;color:#5B6874;min-width:0}
+.mi-k b{display:block;font-size:1.08rem;color:#0B3146;overflow-wrap:anywhere}.mi .pos{color:#1C7A4E}.mi .neg{color:#B42318}
+.mi-hz{margin:0;padding-left:18px;font-size:.86rem;line-height:1.45}.mi-hz li{margin:3px 0}
+.mi-t{width:100%;border-collapse:collapse;table-layout:fixed;min-width:0!important;margin:0}
+.mi-t th,.mi-t td{padding:5px 4px;border-bottom:1px solid #EEF2F5;font-size:.8rem;text-align:right;overflow-wrap:anywhere;vertical-align:top}
+.mi-t th{font-size:.7rem;color:#5B6874;font-weight:700}.mi-t th:first-child,.mi-t td:first-child{text-align:left;width:38%}
+.mi-t td small{display:block;color:#5B6874;font-size:.7rem}
+.mi-seg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.mi-sg{border-radius:12px;padding:9px 10px;font-size:.74rem;border:0;text-align:left;font:inherit;cursor:pointer;min-width:0}
+.mi-sg b{display:block;font-size:1.05rem}.mi-sg span{display:block;font-size:.72rem;opacity:.85}
+.mi-sg[aria-pressed="true"]{outline:3px solid #0B3146;outline-offset:1px}
+.mi-bar{display:flex;height:14px;border-radius:7px;overflow:hidden;margin:6px 0}.mi-bar i{display:block;height:100%}
+.mi-lg{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:.74rem;color:#5B6874}.mi-lg i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;vertical-align:-1px}
+.mi-mx{display:grid;grid-template-columns:auto repeat(3,minmax(0,1fr));gap:4px;font-size:.74rem;text-align:center}
+.mi-mx div{border-radius:8px;padding:6px 2px;min-width:0}.mi-mx .h{font-weight:800;color:#5B6874;background:none}
+.mi-mx b{display:block;font-size:.92rem}
+.mi-fl{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.mi-fl select{font:inherit;padding:8px;border:1px solid var(--line,#DDE3E8);border-radius:10px;background:var(--card,#fff);color:var(--ink,#0F1E29);min-width:0;max-width:100%}
+.mi-svg{width:100%;height:auto;display:block}
+.mi-av{background:#FFF3D6;color:#6B4600;border-radius:10px;padding:8px 10px;font-size:.8rem}
+.mi-rg{border-top:1px solid #EEF2F5;padding:8px 0;font-size:.84rem;line-height:1.35}.mi-rg:first-of-type{border-top:0}
+.mi-rg small{color:#5B6874}.mi-rg small.l{display:block;margin-top:2px}
+@media(min-width:700px){.mi-k{grid-template-columns:repeat(4,minmax(0,1fr))}.mi-seg{grid-template-columns:repeat(3,minmax(0,1fr))}.mi-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}}
+</style>
+<script>/* patch_mineria (Admin): inteligencia de datos */
+(function () {
+  if (!window.hwfBi || typeof pintarMas !== "function" || !document.getElementById("masSeg") || document.querySelector('#masSeg [data-m="intel"]')) return;
+  const ST = { vend: "", seg: "riesgo" }; try { Object.assign(ST, JSON.parse(localStorage.getItem("hwf-intel") || "{}")); } catch (e) { }
+  const guardar = () => { try { localStorage.setItem("hwf-intel", JSON.stringify(ST)); } catch (e) { } };
+  const es = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+  const $ = n => "$" + Math.round(n || 0).toLocaleString("es-CL");
+  const MM = n => { const a = Math.abs(n || 0); return (n < 0 ? "−" : "") + (a >= 1e6 ? "$" + (a / 1e6).toFixed(1).replace(".", ",") + " MM" : "$" + Math.round(a / 1e3).toLocaleString("es-CL") + " mil"); };
+  const pc = (x, d) => (x == null || !isFinite(x)) ? "—" : (x * 100).toFixed(d == null ? 0 : d).replace(".", ",") + " %";
+  const vr = x => (x == null || !isFinite(x)) ? "—" : `<span class="${x >= 0 ? "pos" : "neg"}">${x >= 0 ? "+" : "−"}${Math.abs(x * 100).toFixed(1).replace(".", ",")} %</span>`;
+  const med = a => { if (!a.length) return 0; const s = a.slice().sort((x, y) => x - y), h = s.length >> 1; return s.length % 2 ? s[h] : (s[h - 1] + s[h]) / 2; };
+  const DIA = 864e5, MESES = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
+  const fch = t => { const d = new Date(t); return String(d.getDate()).padStart(2, "0") + "-" + MESES[d.getMonth()] + "-" + String(d.getFullYear()).slice(2); };
+  let CACHE = null;
+
+  function calcular() {
+    const B = window.hwfBi.base() || {}, R = B.rows || [], CL = B.clientes || [], PR = B.productos || [], CA = B.cats || [], VE = B.vend || [];
+    const clave = (B.corte || "") + "|" + R.length + "|" + ST.vend; if (CACHE && CACHE.k === clave) return CACHE.r;
+    const tv = VE.indexOf("Tienda Hellywoof"), boleta = new Set(); CL.forEach((c, i) => { if (/CLIENTE\s+BOLETA/i.test((c && c[0]) || "")) boleta.add(i); });
+    let tienda = new Set(); try { if (typeof window.esClienteTienda === "function") CL.forEach((c, i) => { if (window.esClienteTienda(c[0])) tienda.add(i); }); } catch (e) { }
+    const L = []; let ref = 0;
+    R.forEach(r => { if (r[7] === tv || boleta.has(r[0]) || tienda.has(r[0])) return; if (ST.vend && VE[r[7]] !== ST.vend) return;
+      const y = r[8] || B.anio, t = Date.UTC(y, (r[2] || 1) - 1, r[3] || 1); const q = +r[4] || 0, v = +r[5] || 0; L.push([r[0], r[1], t, q, v, q * (+r[6] || 0)]); if (t > ref && v) ref = t; });
+    if (!L.length || !ref) { const o = { vacio: true }; CACHE = { k: clave, r: o }; return o; }
+    const d12 = ref - 365 * DIA, d24 = ref - 730 * DIA, d90 = ref - 90 * DIA, d180 = ref - 180 * DIA, R0 = new Date(ref), Y = R0.getUTCFullYear();
+    const ini = L.reduce((m, x) => Math.min(m, x[2]), Infinity), cubre12 = ini <= d12 + 31 * DIA, cubre24 = ini <= d24 + 31 * DIA;
+    /* --- resumen --- */
+    let v12 = 0, c12 = 0, v12a = 0, ytd = 0, ytdA = 0, v90 = 0, v90a = 0;
+    const iniA = Date.UTC(Y, 0, 1), iniB = Date.UTC(Y - 1, 0, 1), finB = Date.UTC(Y - 1, R0.getUTCMonth(), R0.getUTCDate());
+    const cli = {}, prod = {}, lin = {}, mes = {};
+    const C = i => cli[i] = cli[i] || { i, v12: 0, c12: 0, v90: 0, v90a: 0, fechas: new Set(), pri: Infinity, ult: 0, lin: {}, v24: 0 };
+    const P = i => prod[i] = prod[i] || { i, v12: 0, c12: 0, v90: 0, v90a: 0, q: new Array(12).fill(0) };
+    L.forEach(([ci, pi, t, q, v, c]) => {
+      const k = new Date(t), ym = k.getUTCFullYear() * 100 + k.getUTCMonth() + 1; mes[ym] = (mes[ym] || 0) + v;
+      if (t > d12) { v12 += v; c12 += c; } else if (t > d24) v12a += v;
+      if (t >= iniA) ytd += v; else if (t >= iniB && t <= finB) ytdA += v;
+      if (t > d90) v90 += v; else if (t > d180) v90a += v;
+      if (t > d24) { const o = C(ci); o.v24 += v; if (v > 0) { o.fechas.add(t); if (t < o.pri) o.pri = t; if (t > o.ult) o.ult = t; }
+        if (t > d12) { o.v12 += v; o.c12 += c; const ca = CA[(PR[pi] || [])[1]] || "Sin línea"; o.lin[ca] = (o.lin[ca] || 0) + v;
+          const l = lin[ca] = lin[ca] || { n: ca, v: 0, c: 0 }; l.v += v; l.c += c; }
+        if (t > d90) o.v90 += v; else if (t > d180) o.v90a += v; }
+      if (t > d12) { const p = P(pi); p.v12 += v; p.c12 += c; const mi = Math.min(11, Math.floor((ref - t) / (30.42 * DIA))); p.q[mi] += q; }
+      if (t > d90) P(pi).v90 += v; else if (t > d180) P(pi).v90a += v; });
+    L.forEach(([ci, , t]) => { const o = cli[ci]; if (o && t < o.pri) o.pri = t; });   /* primera compra en toda la base */
+    const lista = Object.values(cli), compran = lista.filter(o => o.v12 > 0).sort((a, b) => b.v12 - a.v12), tot = compran.reduce((s, o) => s + o.v12, 0) || 1;
+    const top10 = compran.slice(0, 10).reduce((s, o) => s + o.v12, 0) / tot, hhi = compran.reduce((s, o) => s + Math.pow(o.v12 / tot, 2), 0) * 1e4;
+    const act90 = lista.filter(o => o.v90 > 0).length;
+    /* --- segmentos --- */
+    const corteCamp = compran.length ? compran[Math.max(0, Math.ceil(compran.length * .2) - 1)].v12 : Infinity;
+    const SEG = { campeon: [], activo: [], nuevo: [], riesgo: [], dormido: [], perdido: [] };
+    lista.forEach(o => { if (!o.ult) return; const f = [...o.fechas].sort((a, b) => a - b), gaps = []; for (let j = 1; j < f.length; j++) gaps.push((f[j] - f[j - 1]) / DIA);
+      o.ciclo = f.length >= 3 ? Math.max(7, med(gaps)) : null; o.dias = Math.round((ref - o.ult) / DIA); o.mens = o.v12 / 12;
+      const atr = o.ciclo ? o.dias > 1.5 * o.ciclo && o.dias > 30 : o.dias > 60;
+      let s; if (o.dias > 365) s = "perdido"; else if (o.dias > 180 || (o.ciclo && o.dias > 3 * o.ciclo && o.dias > 60)) s = "dormido";
+      else if (cubre12 && o.pri > d90) s = "nuevo"; else if (atr) s = "riesgo"; else if (o.v12 >= corteCamp && o.v12 > 0) s = "campeon"; else s = "activo";
+      o.seg = s; SEG[s].push(o); });
+    Object.values(SEG).forEach(a => a.sort((x, y) => y.v12 - x.v12 || y.v24 - x.v24));
+    const riesgoMes = SEG.riesgo.reduce((s, o) => s + o.mens, 0);
+    const caida = lista.filter(o => o.v90a >= 300000 && o.v90 < .5 * o.v90a && o.seg !== "perdido").sort((a, b) => (b.v90a - b.v90) - (a.v90a - a.v90));
+    /* --- ABC clientes --- */
+    let ac = 0; const abc = { A: [0, 0], B: [0, 0], C: [0, 0] }; compran.forEach(o => { const k = ac / tot < .8 ? "A" : ac / tot < .95 ? "B" : "C"; abc[k][0]++; abc[k][1] += o.v12; ac += o.v12; });
+    /* --- venta cruzada entre líneas --- */
+    const lns = Object.keys(lin).filter(n => n !== "Sin línea"), compr = compran.map(o => new Set(Object.keys(o.lin).filter(n => o.lin[n] > 0))), N = compr.length || 1;
+    const reglas = []; lns.forEach(x => { const cx = compr.filter(s => s.has(x)).length; if (cx < 5) return;
+      lns.forEach(y => { if (x === y) return; const cy = compr.filter(s => s.has(y)).length, xy = compr.filter(s => s.has(x) && s.has(y)).length; if (xy < 5) return;
+        const conf = xy / cx, lift = conf / (cy / N); if (conf < .4 || lift < 1.2) return;
+        const sinY = compran.filter((o, j) => compr[j].has(x) && !compr[j].has(y)), mY = med(compran.filter((o, j) => compr[j].has(x) && compr[j].has(y)).map(o => o.lin[y]));
+        reglas.push({ x, y, xy, conf, lift, sinY, pot: sinY.length * mY }); }); });
+    reglas.sort((a, b) => b.pot - a.pot); for (let j = reglas.length - 1; j >= 0; j--) if (!reglas[j].sinY.length) reglas.splice(j, 1);   /* solo reglas con clientes por conquistar */
+    /* --- productos --- */
+    const pl = Object.values(prod).filter(p => p.v12 > 0).sort((a, b) => b.v12 - a.v12), tp = pl.reduce((s, p) => s + p.v12, 0) || 1; let ap = 0;
+    const MX = {}; ["A", "B", "C"].forEach(a => ["X", "Y", "Z"].forEach(z => MX[a + z] = { n: 0, v: 0 }));
+    pl.forEach(p => { const a = ap / tp < .8 ? "A" : ap / tp < .95 ? "B" : "C"; ap += p.v12; const m = p.q.reduce((s, x) => s + x, 0) / 12, sd = Math.sqrt(p.q.reduce((s, x) => s + (x - m) * (x - m), 0) / 12), cv = m ? sd / m : 9;
+      p.abc = a; p.xyz = cv <= .5 ? "X" : cv <= 1 ? "Y" : "Z"; p.cv = cv; MX[a + p.xyz].n++; MX[a + p.xyz].v += p.v12; });
+    const cambio = Object.values(prod).filter(p => p.v90a >= 500000 || p.v90 >= 500000).map(p => Object.assign(p, { d: p.v90 - p.v90a }));
+    const alza = cambio.filter(p => p.d > 0).sort((a, b) => b.d - a.d).slice(0, 8), baja = cambio.filter(p => p.d < 0).sort((a, b) => a.d - b.d).slice(0, 8);
+    const lineas = Object.values(lin).filter(l => l.v > 0).sort((a, b) => b.v - a.v), mg = v12 ? (v12 - c12) / v12 : null;
+    const r = { vacio: false, ref, Y, cubre12, cubre24, v12, c12, v12a, ytd, ytdA, v90, v90a, mg, top10, hhi, act90, compran, tot, SEG, riesgoMes, caida, abc, reglas, pl, MX, alza, baja, lineas, mes, CL, PR, CA, VE, ini };
+    CACHE = { k: clave, r }; return r; }
+
+  const nomC = (X, o) => es(((X.CL[o.i] || [])[0]) || "Cliente " + o.i), venC = (X, o) => es(((X.CL[o.i] || [])[2]) || "");
+  const nomP = (X, p) => es(((X.PR[p.i] || [])[0]) || "Producto " + p.i);
+  const SEGI = { campeon: ["Campeones", "#E3F4EA", "#14553A", "20 % que más compra y al día"], activo: ["Activos", "#EAF2FB", "#1F4E79", "compran a su ritmo"],
+    nuevo: ["Nuevos", "#EFE9FB", "#4B2A86", "primera compra ≤ 90 días"], riesgo: ["En riesgo", "#FFF3D6", "#6B4600", "atrasados vs su ciclo"],
+    dormido: ["Dormidos", "#FDE8E8", "#8E1B12", "> 180 días sin comprar"], perdido: ["Perdidos", "#ECEFF2", "#42505C", "> 1 año sin comprar"] };
+
+  function grafico(X) { const y = X.Y, a = [], b = []; for (let m = 1; m <= 12; m++) { a.push(X.mes[y * 100 + m] || 0); b.push(X.mes[(y - 1) * 100 + m] || 0); }
+    const R0 = new Date(X.ref), mHasta = R0.getUTCMonth() + 1, mx = Math.max(1, ...a, ...b), W = 320, H = 150, px = i => 22 + i * (W - 30) / 11, py = v => H - 18 - v / mx * (H - 30);
+    const linea = (s, n, col, dash) => { const pts = s.slice(0, n).map((v, i) => px(i).toFixed(1) + "," + py(v).toFixed(1)).join(" "); return `<polyline fill="none" stroke="${col}" stroke-width="2.4" ${dash ? 'stroke-dasharray="5 4"' : ""} points="${pts}"/>`; };
+    const hayB = b.some(v => v > 0);
+    return `<svg class="mi-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Venta mensual ${y} vs ${y - 1}">${[0, .5, 1].map(f => `<line x1="20" x2="${W - 6}" y1="${py(mx * f)}" y2="${py(mx * f)}" stroke="#EEF2F5"/><text x="0" y="${py(mx * f) + 3}" font-size="8" fill="#5B6874">${(mx * f / 1e6).toFixed(0)}</text>`).join("")}
+      ${MESES.map((m, i) => `<text x="${px(i)}" y="${H - 4}" font-size="8" text-anchor="middle" fill="#5B6874">${m[0].toUpperCase()}</text>`).join("")}
+      ${hayB ? linea(b, 12, "#9AA8B4", true) : ""}${linea(a, mHasta, "#0B3146")}<circle cx="${px(mHasta - 1)}" cy="${py(a[mHasta - 1])}" r="3.5" fill="#0B3146"/></svg>
+      <div class="mi-lg"><span><i style="background:#0B3146"></i>${y}</span>${hayB ? `<span><i style="background:#9AA8B4"></i>${y - 1}</span>` : ""}<span>millones de $ netos · el mes en curso va hasta el ${fch(X.ref)}</span></div>`; }
+
+  function hallazgos(X) { const h = [];
+    if (X.cubre24 && X.v12a) h.push(`Venta de los últimos 12 meses: <b>${MM(X.v12)}</b> (${vr(X.v12 / X.v12a - 1)} vs los 12 anteriores).`);
+    if (X.ytdA) h.push(`Año ${X.Y} a la fecha: <b>${MM(X.ytd)}</b>, ${vr(X.ytd / X.ytdA - 1)} vs el mismo tramo de ${X.Y - 1}.`);
+    if (X.SEG.riesgo.length) h.push(`<b>${X.SEG.riesgo.length} clientes en riesgo</b> (atrasados respecto de su ritmo habitual) que compran en promedio <b>${MM(X.riesgoMes)} al mes</b>. Son la prioridad de llamadas.`);
+    if (X.caida.length) h.push(`${X.caida.length} clientes compraron menos de la mitad en los últimos 90 días que en los 90 anteriores (−${MM(X.caida.reduce((s, o) => s + o.v90a - o.v90, 0)).replace("−", "")}).`);
+    h.push(`Los 10 mayores clientes son el <b>${pc(X.top10)}</b> de la venta (HHI ${Math.round(X.hhi).toLocaleString("es-CL")}: ${X.hhi > 2500 ? "concentración alta, riesgo si se pierde uno" : X.hhi > 1500 ? "concentración moderada" : "cartera diversificada"}).`);
+    if (X.reglas[0]) { const g = X.reglas[0]; h.push(`Mejor venta cruzada: <b>${g.sinY.length} clientes</b> compran ${es(g.x)} y aún no ${es(g.y)} (el ${pc(g.conf)} de quienes compran ${es(g.x)} sí lo hace); potencial ≈ <b>${MM(g.pot)} al año</b>.`); }
+    const bajoM = X.lineas.filter(l => l.v > X.v12 * .05 && X.mg != null && (l.v - l.c) / l.v < X.mg - .05)[0];
+    if (bajoM) h.push(`${es(bajoM.n)} vende ${MM(bajoM.v)} con margen ${pc((bajoM.v - bajoM.c) / bajoM.v, 1)}, bajo el promedio (${pc(X.mg, 1)}): revisar precio o costo.`);
+    const az = X.MX.AZ; if (az.n) h.push(`${az.n} productos A (los que más venden) tienen demanda errática (Z): conviene stock de seguridad mayor o compras más frecuentes.`);
+    return h; }
+
+  function html() { const X = calcular();
+    const vends = (window.hwfBi.base() || {}).vend || [], opts = [""].concat(vends.filter(v => v && v !== "Tienda Hellywoof"));
+    const filtro = `<div class="mi-fl"><label for="miVend" style="font-size:.8rem;font-weight:700;color:#5B6874">Vendedor</label><select id="miVend" data-s="vend">${opts.map(v => `<option value="${es(v)}"${v === ST.vend ? " selected" : ""}>${v ? es(v) : "Toda la distribuidora"}</option>`).join("")}</select></div>`;
+    if (X.vacio) return `<div class="mi"><div class="mi-c"><h3>Inteligencia de datos</h3>${filtro}<p class="mi-s">Aún no hay ventas de la distribuidora en la base de la app.</p></div></div>`;
+    const S = X.SEG, sel = S[ST.seg] ? ST.seg : "riesgo", ls = S[sel];
+    const avisoCob = X.cubre12 ? "" : `<div class="mi-av">La base empieza el ${fch(X.ini)}: hay menos de 12 meses de historia, así que algunas comparaciones quedan parciales.</div>`;
+    const kpi = `<div class="mi-k"><div>Venta 12 meses<b>${MM(X.v12)}</b>${X.cubre24 && X.v12a ? vr(X.v12 / X.v12a - 1) : ""}</div><div>Año ${X.Y} a la fecha<b>${MM(X.ytd)}</b>${X.ytdA ? vr(X.ytd / X.ytdA - 1) : ""}</div>
+      <div>Margen bruto 12 m<b>${pc(X.mg, 1)}</b>${MM(X.v12 - X.c12)}</div><div>Clientes activos (90 días)<b>${X.act90}</b>${X.compran.length} con compra en 12 m</div></div>`;
+    const segs = `<div class="mi-seg">${Object.keys(SEGI).map(k => { const [t, bg, fg, d] = SEGI[k], a = S[k]; return `<button type="button" class="mi-sg" data-a="seg" data-v="${k}" aria-pressed="${k === sel}" style="background:${bg};color:${fg}"><b>${a.length}</b>${t}<span>${d}</span></button>`; }).join("")}</div>`;
+    const tSeg = ls.length ? `<table class="mi-t"><thead><tr><th>${SEGI[sel][0]}</th><th>Última compra</th><th>Ritmo</th><th>Venta 12 m</th></tr></thead><tbody>${ls.slice(0, 15).map(o => `<tr><td>${nomC(X, o)}<small>${venC(X, o)}</small></td><td>hace ${o.dias} d<small>${fch(o.ult)}</small></td><td>${o.ciclo ? "cada " + Math.round(o.ciclo) + " d" : "—"}</td><td>${MM(o.v12)}<small>${MM(o.mens)}/mes</small></td></tr>`).join("")}</tbody></table>${ls.length > 15 ? `<p class="mi-s">… y ${ls.length - 15} más.</p>` : ""}` : `<p class="mi-s">Sin clientes en este grupo.</p>`;
+    const tCaida = X.caida.length ? `<table class="mi-t"><thead><tr><th>Cliente</th><th>90 días ant.</th><th>Últimos 90</th><th>Cambio</th></tr></thead><tbody>${X.caida.slice(0, 10).map(o => `<tr><td>${nomC(X, o)}<small>${venC(X, o)}</small></td><td>${MM(o.v90a)}</td><td>${MM(o.v90)}</td><td>${vr(o.v90 / o.v90a - 1)}</td></tr>`).join("")}</tbody></table>` : `<p class="mi-s">Ningún cliente relevante bajó a menos de la mitad.</p>`;
+    const A = X.abc, tA = A.A[1] + A.B[1] + A.C[1] || 1;
+    const pareto = `<div class="mi-bar">${[["A", "#0B3146"], ["B", "#26A69A"], ["C", "#C9D3DB"]].map(([k, c]) => `<i style="width:${(A[k][1] / tA * 100).toFixed(1)}%;background:${c}"></i>`).join("")}</div>
+      <div class="mi-lg">${[["A", "#0B3146", "80 % de la venta"], ["B", "#26A69A", "siguiente 15 %"], ["C", "#C9D3DB", "último 5 %"]].map(([k, c, d]) => `<span><i style="background:${c}"></i><b>${A[k][0]}</b> clientes ${k} · ${d}</span>`).join("")}</div>
+      <p class="mi-s" style="margin-top:6px">${A.A[0]} de ${X.compran.length} clientes (${pc(A.A[0] / (X.compran.length || 1))}) hacen el 80 % de la venta. Top 10: ${pc(X.top10)} · HHI ${Math.round(X.hhi).toLocaleString("es-CL")}.</p>`;
+    const cruz = X.reglas.length ? X.reglas.slice(0, 6).map(g => `<div class="mi-rg">Compran <b>${es(g.x)}</b> → también <b>${es(g.y)}</b><br><small>${pc(g.conf)} de confianza · ${g.lift.toFixed(1).replace(".", ",")}× más que el promedio · ${g.xy} clientes ya compran ambas</small><br>
+      <b>${g.sinY.length} clientes</b> sin ${es(g.y)} · potencial ≈ <b>${MM(g.pot)}/año</b><small class="l">${g.sinY.slice(0, 5).map(o => nomC(X, o)).join(" · ")}${g.sinY.length > 5 ? " …" : ""}</small></div>`).join("") : `<p class="mi-s">No hay combinaciones con suficiente evidencia (≥ 5 clientes, confianza ≥ 40 %).</p>`;
+    const colMx = { AX: "#C8EBD7", AY: "#E3F4EA", AZ: "#FFE2B8", BX: "#E3F4EA", BY: "#F2F7F8", BZ: "#FFF3D6", CX: "#F2F7F8", CY: "#F2F7F8", CZ: "#FDE8E8" };
+    const mx = `<div class="mi-mx"><div class="h"></div><div class="h">X estable</div><div class="h">Y variable</div><div class="h">Z errático</div>${["A", "B", "C"].map(a => `<div class="h">${a}</div>` + ["X", "Y", "Z"].map(z => { const c = X.MX[a + z]; return `<div style="background:${colMx[a + z]}"><b>${c.n}</b>${MM(c.v)}</div>`; }).join("")).join("")}</div>
+      <p class="mi-s" style="margin-top:6px">AX: nunca deben faltar (stock fijo). AZ: venden mucho pero irregular (stock de seguridad). CZ: candidatos a sacar del catálogo o vender a pedido.</p>`;
+    const tProd = (a, t) => a.length ? `<table class="mi-t"><thead><tr><th>${t}</th><th>90 d ant.</th><th>Últ. 90 d</th><th>Cambio</th></tr></thead><tbody>${a.map(p => `<tr><td>${nomP(X, p)}<small>${p.abc || ""}${p.xyz || ""}</small></td><td>${MM(p.v90a)}</td><td>${MM(p.v90)}</td><td>${p.v90a ? vr(p.v90 / p.v90a - 1) : "nuevo"}</td></tr>`).join("")}</tbody></table>` : `<p class="mi-s">Sin cambios relevantes.</p>`;
+    const tLin = `<table class="mi-t"><thead><tr><th>Línea</th><th>Venta 12 m</th><th>Participación</th><th>Margen</th></tr></thead><tbody>${X.lineas.slice(0, 14).map(l => { const m = (l.v - l.c) / l.v; return `<tr><td>${es(l.n)}</td><td>${MM(l.v)}</td><td>${pc(l.v / (X.v12 || 1), 1)}</td><td class="${X.mg != null && m < X.mg - .05 ? "neg" : m > X.mg + .05 ? "pos" : ""}">${pc(m, 1)}</td></tr>`; }).join("")}</tbody></table>`;
+    return `<div class="mi">
+      <div class="mi-c"><h3>Inteligencia de datos · distribuidora</h3><p class="mi-s">Calculado con las ventas de la app hasta el ${fch(X.ref)} (neto sin IVA, sin la tienda).</p>${filtro}</div>${avisoCob}
+      <div class="mi-c"><h3>Lo más importante</h3><ul class="mi-hz">${hallazgos(X).map(x => `<li>${x}</li>`).join("")}</ul></div>
+      <div class="mi-c">${kpi}</div>
+      <div class="mi-c"><h3>Tendencia mensual</h3>${grafico(X)}</div>
+      <div class="mi-c"><h3>Segmentos de clientes</h3><p class="mi-s">Según cuándo compraron por última vez comparado con su ritmo habitual (mediana de días entre compras). Toca un grupo para ver la lista.</p>${segs}<div style="margin-top:10px">${tSeg}</div></div>
+      <div class="mi-2"><div class="mi-c"><h3>Clientes en caída</h3><p class="mi-s">Compraron menos de la mitad en los últimos 90 días que en los 90 anteriores.</p>${tCaida}</div>
+      <div class="mi-c"><h3>Concentración (Pareto)</h3>${pareto}</div></div>
+      <div class="mi-c"><h3>Oportunidades de venta cruzada</h3><p class="mi-s">Reglas de asociación entre líneas en los últimos 12 meses: qué líneas suelen comprarse juntas y quién aún no compra la segunda.</p>${cruz}</div>
+      <div class="mi-c"><h3>Productos ABC-XYZ</h3><p class="mi-s">A/B/C = 80/15/5 % de la venta 12 m · X/Y/Z = qué tan estable es la demanda mensual. Cantidad de productos y venta.</p>${mx}</div>
+      <div class="mi-2"><div class="mi-c"><h3>Productos en alza</h3>${tProd(X.alza, "Producto")}</div><div class="mi-c"><h3>Productos en declive</h3>${tProd(X.baja, "Producto")}</div></div>
+      <div class="mi-c"><h3>Margen por línea (12 meses)</h3><p class="mi-s">En rojo: margen más de 5 puntos bajo el promedio (${pc(X.mg, 1)}).</p>${tLin}</div>
+    </div>`; }
+
+  function pintar() { if (typeof vistaMas !== "undefined" && vistaMas === "intel") { const mb = document.getElementById("masBody"); if (mb) mb.innerHTML = html(); } }
+  const mb0 = document.getElementById("masBody");
+  if (mb0) { mb0.addEventListener("click", ev => { const b = ev.target.closest(".mi [data-a]"); if (!b) return; if (b.dataset.a === "seg") { ST.seg = b.dataset.v; guardar(); pintar(); } });
+    mb0.addEventListener("change", ev => { const s = ev.target.closest(".mi [data-s]"); if (s && s.dataset.s === "vend") { ST.vend = s.value; guardar(); pintar(); } }); }
+  const seg = document.getElementById("masSeg"), b = document.createElement("button"); b.type = "button"; b.dataset.m = "intel"; b.setAttribute("aria-pressed", "false");
+  b.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20h18"/><path d="M6 16l4-5 3 3 5-7"/><circle cx="18" cy="7" r="1.6"/></svg><span>Inteligencia</span>`;
+  seg.prepend(b);
+  try { if (typeof NAV_MAS !== "undefined" && !NAV_MAS.includes("intel")) NAV_MAS.unshift("intel"); if (typeof NAV_MNOM !== "undefined") NAV_MNOM.intel = "Inteligencia"; } catch (e) { }
+  const _pm = pintarMas; pintarMas = function () { if (vistaMas === "intel") return pintar(); return _pm.apply(this, arguments); };
+  /* ícono del menú ☰ (mismo estilo degradado que los demás) */
+  const ICO = '<svg viewBox="0 0 32 32" aria-hidden="true" class="hic"><defs><linearGradient id="hic-intel" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5EC8F2"/><stop offset="1" stop-color="#2B6CB0"/></linearGradient></defs><rect width="32" height="32" rx="9" fill="url(#hic-intel)"/><path d="M4 4h24v10C20 9 11 9 4 13z" fill="#fff" opacity=".12"/><g transform="translate(5.5 5.5) scale(.875)" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18"/><path d="M5 16l4-5 3 3 6-8"/><circle cx="18" cy="6" r="1.8"/></g></svg>';
+  const pan = document.getElementById("snPanel"); if (pan) new MutationObserver(() => { const e = pan.querySelector('[data-m="intel"] .sn-e'); if (e && !e.querySelector("svg")) e.innerHTML = ICO; }).observe(pan, { childList: true, subtree: true });
+  window.hwfIntel = { calc: calcular };
+})();
+</script>
 </body>
 </html>
