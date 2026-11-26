@@ -5288,7 +5288,7 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261126183400";
+const HWF_VER = "20261126183717";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -9837,7 +9837,7 @@ body.m-b2b #crmMeta{display:none!important}
     return `<div class="b2-c ${c.estado === "pendiente" ? "pend" : ""}" data-id="${E(c.id)}"><div class="b2-t"><b>${E(c.razon || "(sin razón social)")}</b>${pill(c.estado)}</div>
       <small>RUT ${E(c.rut || "—")}${c.contacto ? " · " + E(c.contacto) : ""}</small>
       <small>${c.correo ? `<a href="mailto:${E(c.correo)}">${E(c.correo)}</a>` : ""}${c.telefono ? ` · <a href="tel:${E(String(c.telefono).replace(/[^0-9+]/g, ""))}">${E(c.telefono)}</a>` : ""}${c.comuna ? " · " + E(c.comuna) : ""}</small>
-      <small>Solicitó el ${E(F(c.fecha))}${c.cliente ? ` · Cliente HWF: <b>${E(c.cliente)}</b>` : ""}${c.vendedor ? ` · Vendedor: ${E(c.vendedor)}` : ""}</small>${c.estado === "pendiente" && c.vendedorOk ? `<small class="b2-vok">✓ Aprobó el vendedor (${E(c.vendedorOk)}) · falta la aprobación de Admin</small>` : ""}${extra || ""}
+      <small>Solicitó el ${E(F(c.fecha))}${c.cliente ? ` · Cliente HWF: <b>${E(c.cliente)}</b>` : ""}${c.vendedor ? ` · Vendedor: ${E(c.vendedor)}` : ""}</small>${c.estado === "pendiente" && c.vendedorOk ? `<small class="b2-vok">✓ La tomó el vendedor ${E(c.vendedorOk)} · falta la aprobación de Admin</small>` : ""}${extra || ""}
       <div class="b2-bt">${botones}</div></div>`;
   }
   const items = p => { let a = p.items; if (typeof a === "string") { try { a = JSON.parse(a); } catch (e) { a = null; } } return Array.isArray(a) ? a : null; };
@@ -10433,7 +10433,7 @@ html,body{max-width:100%;overflow-x:clip}
   function hoy() { const s = document.getElementById("s-res"); if (!s) return; const c = cnt();
     const b2 = (() => { const e = document.querySelector('[data-m="b2b"] .b2-bdg'); return e ? parseInt(e.textContent, 10) || 0 : 0; })();
     const L = [["m:cots", c.cots, "Pendientes Defontana", "notas por facturar"], ["m:cobranza", c.cobranza, "Cobranza vencida", "clientes con deuda vencida"],
-      ["m:cambios", c.cambios, "Cambios de clientes", "por revisar"], ["m:b2b", b2, "Portal B2B", "cuentas por asignar"], ["m:b2b", window.B2B_VOK || 0, "Clientes nuevos B2B", "ya los aprobó el vendedor: falta tu aprobación"]].filter(x => x[1] > 0 && (x[0] === "m:b2b" || existe(x[0])));
+      ["m:cambios", c.cambios, "Cambios de clientes", "por revisar"], ["m:b2b", b2, "Portal B2B", "cuentas por asignar"], ["m:b2b", window.B2B_VOK || 0, "Solicitudes B2B", "ya las tomó un vendedor: falta tu aprobación"]].filter(x => x[1] > 0 && (x[0] === "m:b2b" || existe(x[0])));
     const html = `<h3>📌 Para hoy <small>${L.length ? "toca para ir" : ""}</small></h3>` + (L.length ? `<div class="ur-g">${L.map(([k, n, t, d]) => `<button type="button" data-ur="${k}"><span class="ur-n">${n}</span><span class="ur-t">${t}<small>${d}</small></span><span class="ur-f">›</span></button>`).join("")}</div>` : `<p class="ur-ok">✅ Todo al día: sin pendientes de Defontana ni cobranza vencida.</p>`);
     let u = document.getElementById("urHoy"); if (!u) { u = document.createElement("section"); u.id = "urHoy"; u.onclick = ev => { const b = ev.target.closest("[data-ur]"); if (b) ir(b.dataset.ur); }; s.prepend(u); }
     else if (u.parentNode !== s || s.firstElementChild !== u) s.prepend(u);

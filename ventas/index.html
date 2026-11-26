@@ -7202,7 +7202,7 @@ function confirmarNota() {
   x.onclick = () => cerrarModal(); card.insertBefore(x, card.firstChild); })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261126183400";
+const HWF_VER = "20261126183717";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -10683,7 +10683,7 @@ body.m-b2b #crmMeta{display:none!important}
     return `<div class="b2-c ${c.estado === "pendiente" ? "pend" : ""}" data-id="${E(c.id)}"><div class="b2-t"><b>${E(c.razon || "(sin razón social)")}</b>${pill(c.estado)}</div>
       <small>RUT ${E(c.rut || "—")}${c.contacto ? " · " + E(c.contacto) : ""}</small>
       <small>${c.correo ? `<a href="mailto:${E(c.correo)}">${E(c.correo)}</a>` : ""}${c.telefono ? ` · <a href="tel:${E(String(c.telefono).replace(/[^0-9+]/g, ""))}">${E(c.telefono)}</a>` : ""}${c.comuna ? " · " + E(c.comuna) : ""}</small>
-      <small>Solicitó el ${E(F(c.fecha))}${c.cliente ? ` · Cliente HWF: <b>${E(c.cliente)}</b>` : ""}${c.vendedor ? ` · Vendedor: ${E(c.vendedor)}` : ""}</small>${c.estado === "pendiente" && c.vendedorOk ? `<small class="b2-vok">✓ Aprobó el vendedor (${E(c.vendedorOk)}) · falta la aprobación de Admin</small>` : ""}${extra || ""}
+      <small>Solicitó el ${E(F(c.fecha))}${c.cliente ? ` · Cliente HWF: <b>${E(c.cliente)}</b>` : ""}${c.vendedor ? ` · Vendedor: ${E(c.vendedor)}` : ""}</small>${c.estado === "pendiente" && c.vendedorOk ? `<small class="b2-vok">✓ La tomó el vendedor ${E(c.vendedorOk)} · falta la aprobación de Admin</small>` : ""}${extra || ""}
       <div class="b2-bt">${botones}</div></div>`;
   }
   const items = p => { let a = p.items; if (typeof a === "string") { try { a = JSON.parse(a); } catch (e) { a = null; } } return Array.isArray(a) ? a : null; };
@@ -10743,8 +10743,8 @@ body.m-b2b #crmMeta{display:none!important}
     box.innerHTML = `<div class="b2-top"><h2>Clientes B2B</h2><button type="button" class="b2-b" id="b2Ref" ${ST.cargando ? "disabled" : ""}>${ST.cargando ? "Cargando…" : "↻ Actualizar"}</button></div>
       ${!cfg() ? `<div class="b2-err">Esta app no está conectada al script de Google. Conéctala desde los ajustes para ver las solicitudes.</div>` : ""}
       ${ST.err ? `<div class="b2-err">${E(ST.err)}</div>` : ""}
-      <div class="b2-card"><h3>Solicitudes pendientes <small>${n ? n + (n === 1 ? " por revisar" : " por revisar") : "al día"}</small></h3>
-        ${pe.length ? pe.map(c => tarjetaCuenta(c, "", c.vendedorOk ? `<span class="b2-est ok">✓ Ya la aprobaste · esperando a Admin</span>` : `<button type="button" class="b2-b ok" data-a="aprobar" data-id="${E(c.id)}">Aprobar</button><button type="button" class="b2-b mal" data-a="rechazado" data-id="${E(c.id)}">Rechazar</button>`)).join("") : `<div class="b2-vac">${ST.t ? "No hay solicitudes pendientes." : "Sin datos todavía."}</div>`}</div>
+      <div class="b2-card"><h3>Solicitudes del portal <small>${n ? n + (n === 1 ? " por revisar" : " por revisar") : "al día"}</small></h3>
+        ${pe.length ? pe.map(c => tarjetaCuenta(c, "", c.vendedorOk ? (c.vendedor === yo() ? `<span class="b2-est ok">✓ La tomaste · esperando la aprobación de Admin</span>` : `<span class="b2-est g">🔒 Ya la tomó ${E(c.vendedor)}</span>`) : `<button type="button" class="b2-b ok" data-a="aprobar" data-id="${E(c.id)}">✋ Tomar este cliente</button><button type="button" class="b2-b mal" data-a="rechazado" data-id="${E(c.id)}">Rechazar</button>`)).join("") : `<div class="b2-vac">${ST.t ? "No hay solicitudes pendientes." : "Sin datos todavía."}</div>`}</div>
       <div class="b2-card"><h3>Mi cartera B2B <small>${m.length} cuenta${m.length === 1 ? "" : "s"}</small></h3>
         <div class="b2-chips">${[["activo", "Activas"], ["bloqueado", "Bloqueadas"], ["todas", "Todas"]].concat(cnt("rechazado") ? [["rechazado", "🗄 Archivadas"]] : []).map(([k, t]) => `<button type="button" class="b2-ch" data-f="${k}" aria-pressed="${f === k}"${k === "rechazado" ? ' style="opacity:.7"' : ""}>${t}${k === "todas" ? "" : " " + cnt(k)}</button>`).join("")}</div>
         <div style="margin-top:8px">${cuentas.length ? cuentas.map(c => tarjetaCuenta(c, "", c.estado === "activo" ? `<button type="button" class="b2-b mal" data-a="bloqueado" data-id="${E(c.id)}">Bloquear</button>` : c.estado === "bloqueado" ? `<button type="button" class="b2-b ok" data-a="aprobar" data-id="${E(c.id)}">Reactivar</button>` : `<button type="button" class="b2-b ok" data-a="aprobar" data-id="${E(c.id)}">Aprobar</button>`)).join("") : `<div class="b2-vac">No hay cuentas en esta lista.</div>`}</div></div>
@@ -10758,7 +10758,7 @@ body.m-b2b #crmMeta{display:none!important}
     const r = await llamar({ accion: "b2bAprobar", id: c.id, estado, vendedor: yo(), cliente: cliente || antes.cliente || "", por: yo(), etapa: "vendedor" }); ST.ocup = false;
     if (r && r.ok && r.etapa === "vendedor") { Object.assign(c, { estado: "pendiente", vendedorOk: yo() + " · recién" }); aviso(r.mensaje || "Aprobada: falta Admin."); pintar(); insignias(); cargar(true); }
     else if (r && r.ok) { aviso(estado === "activo" ? "Cuenta aprobada. El cliente recibirá un correo de bienvenida." : estado === "bloqueado" ? "Cuenta bloqueada." : "Solicitud rechazada."); pintar(); cargar(true); }
-    else { Object.assign(c, antes); pintar(); insignias(); aviso((r && r.error) || "No se pudo guardar."); }
+    else { Object.assign(c, antes); pintar(); insignias(); aviso((r && r.error) || "No se pudo guardar."); if (r && r.tomada) cargar(true); }
   }
   function clientesCartera() { try { const d = crmMio(); return d && d.clientes ? d.clientes.map(c => ({ nombre: c.nombre, rut: c.rut, comuna: c.comuna, cart: "" })) : []; } catch (e) { return []; } }
   function clientesTodos() { try { return clientesLocal().map(c => ({ nombre: c.nombre, rut: c.rut, comuna: c.comuna, cart: c.vendedor || "" })); } catch (e) { return []; } }
@@ -10766,8 +10766,8 @@ body.m-b2b #crmMeta{display:none!important}
   function aprobar(c) {
     if (c.estado !== "pendiente" && c.cliente) { if (confirm(`¿${c.estado === "bloqueado" ? "Reactivar" : "Aprobar"} la cuenta de ${c.razon}?`)) actuar(c, "activo", c.cliente); return; }
     elegir({ titulo: "Elegir el cliente HWF", sub: `Solicitud de <b>${E(c.razon)}</b> · RUT ${E(c.rut)}. Elige el cliente exacto de tu cartera; así sus pedidos y su cobranza quedan en esa ficha.`, lista: [NUEVO].concat(clientesCartera()), mas: () => [NUEVO].concat(clientesTodos()), rut: RK(c.rut),
-      ok: x => { if (x.nuevo) { if (confirm(`¿Aprobar a ${c.razon} como CLIENTE NUEVO?\n\nDespués la aprueba Admin y se pide su creación en Defontana.`)) actuar(c, "activo", ""); return; }
-        if (confirm(`¿Aprobar a ${c.razon} como cliente «${x.nombre}»?`)) actuar(c, "activo", x.nombre); } });
+      ok: x => { if (x.nuevo) { if (confirm(`¿Tomar a ${c.razon} como CLIENTE NUEVO?\n\nQueda asignado a ti (el primero que lo toma se lo queda). Después lo aprueba Admin y se pide su creación en Defontana.`)) actuar(c, "activo", ""); return; }
+        if (confirm(`¿Tomar a ${c.razon} como cliente «${x.nombre}»?\n\nQueda asignado a ti y después lo aprueba Admin.`)) actuar(c, "activo", x.nombre); } });
   }
   function montar() {
     tab = document.createElement("button"); tab.type = "button"; tab.setAttribute("role", "tab"); tab.id = "mB2b"; tab.setAttribute("aria-selected", "false"); tab.title = "Clientes B2B"; tab.textContent = "Clientes B2B";
@@ -11245,8 +11245,8 @@ html,body{max-width:100%;overflow-x:clip}
   function paso() { const tab = document.getElementById("mB2b"), h = document.getElementById("crmInicio"); if (!h) return;
     const n = tab ? parseInt(((tab.querySelector(".b2-bdg") || {}).textContent) || "0", 10) || 0 : 0; let a = document.getElementById("b2Alerta");
     if (!n) { if (a) a.remove(); return; }
-    const t = `🆕 ${n === 1 ? "Un cliente nuevo del portal espera" : n + " clientes nuevos del portal esperan"} tu aprobación`;
-    if (!a) { a = document.createElement("div"); a.id = "b2Alerta"; a.setAttribute("role", "alert"); a.innerHTML = `<span></span><button type="button">Revisar</button>`; a.querySelector("button").onclick = () => setModo("b2b"); }
+    const t = `🆕 ${n === 1 ? "Una solicitud nueva del portal está" : n + " solicitudes nuevas del portal están"} sin vendedor: el primero que la toma se queda con el cliente`;
+    if (!a) { a = document.createElement("div"); a.id = "b2Alerta"; a.setAttribute("role", "alert"); a.innerHTML = `<span></span><button type="button">Ver solicitudes</button>`; a.querySelector("button").onclick = () => setModo("b2b"); }
     if (a.parentNode !== h || h.firstElementChild !== a) h.prepend(a); if (a.firstChild.textContent !== t) a.firstChild.textContent = t; }
   setInterval(paso, 1500);
 })();
