@@ -1293,7 +1293,7 @@ function npRitmo(cots, Y, M, n, real, lim, ant) {
   return { np, tot };
 }
 </script>
-<script>/* hwfAutoAct (liviano): revisa version.json y recarga sola al volver a la app si hay versión nueva */(function(){var t0=0;function raiz(){return location.pathname.replace(/\/(demo\/)?(ventas|admin|tienda|logistica|chofer)\/[^/]*$/,"/")}function ocupado(){var a=document.activeElement;return !!(a&&/INPUT|TEXTAREA|SELECT/.test(a.tagName))}function chk(){if(Date.now()-t0<60000||!navigator.onLine)return;t0=Date.now();fetch(raiz()+"version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.json():null}).then(function(j){var v=typeof HWF_VER!=="undefined"?String(HWF_VER):"";if(!j||!j.v||!v||String(j.v)<=v||ocupado())return;var k="hwf-autoact-"+j.v;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,"1")}catch(e){return}location.reload()}).catch(function(){})}document.addEventListener("visibilitychange",function(){if(document.visibilityState==="visible")chk()});window.addEventListener("load",function(){setTimeout(chk,5000)})})();</script>
+<script>/* hwfAutoAct (liviano): revisa version.json y recarga sola al volver a la app si hay versión nueva */(function(){var t0=0,oc=0;function raiz(){return location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/,"/")}function ocupado(){var a=document.activeElement;return !!(a&&/INPUT|TEXTAREA|SELECT/.test(a.tagName))}function chk(){if(Date.now()-t0<60000||!navigator.onLine)return;t0=Date.now();fetch(raiz()+"version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.json():null}).then(function(j){var v=typeof HWF_VER!=="undefined"?String(HWF_VER):"";if(!j||!j.v||!v||String(j.v)<=v||ocupado())return;var k="hwf-autoact-"+j.v;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,"1")}catch(e){return}location.reload()}).catch(function(){})}document.addEventListener("visibilitychange",function(){if(document.visibilityState==="hidden"){oc=Date.now();return}if(oc&&Date.now()-oc>=600000)chk();oc=0})})();</script>
 <style>.p14t td,.p14t th{white-space:nowrap;padding:6px 8px}.p14t td:first-child{white-space:normal;min-width:110px}</style><style>/* administracion */
 nav.bottom,#masSeg,.nav-pasos,#snBtn,#snVelo,#snPanel,#iaBtn,#iaPan,#bus,#btnBus,#resAv,#vcBtn,#vcWrap{display:none!important}
 body{padding-bottom:calc(84px + env(safe-area-inset-bottom))!important}
@@ -2187,6 +2187,7 @@ const SYC_DEF = {"url": "", "clave": ""};
 const SYC = () => { const v = store.get("adm-sync", null); return v === false ? null : (v || Object.assign({ desde: "" }, SYC_DEF)); };
 let syOcup = false, syErr = "", syUlt = store.get("adm-sync-ult", 0);
 async function syCall(cfg, datos) {
+  if (!cfg || !cfg.url) return { ok: false, error: "Esta app aún no está conectada al script de Google (Más → Datos)." };   /* 27-11-2026: sin URL no se consulta (antes enviaba la consulta a la misma página) */
   const ctrl = new AbortController(), tm = setTimeout(() => ctrl.abort(), 30000);
   try { const r = await fetch(cfg.url, { method: "POST", body: JSON.stringify(Object.assign({ clave: cfg.clave }, datos)), signal: ctrl.signal });
     const t = await r.text(); try { return JSON.parse(t); } catch (e) { return { ok: false, red: true, error: "El script de Google no respondió bien. Revisa que la URL termine en /exec y que el acceso sea “Cualquier usuario”." }; } }
@@ -5427,7 +5428,7 @@ setTimeout(() => { try { if (D && $("s-res") && !$("s-res").hidden && !$("kpCard
   async function revisar() {
     try {
       const cfg = typeof SYC === "function" ? SYC() : null; if (!cfg || !cfg.url || typeof syCall !== "function") return;
-      const raiz = location.pathname.replace(/\/(demo\/)?admin\/[^/]*$/, "/");
+      const raiz = location.pathname.replace(/\/(demo\/)?(administracion|admin)\/[^/]*$/, "/");   /* 27-11-2026: también la app Administración */
       let esperado = ""; try { const j = await (await fetch(raiz + "version.json?t=" + Date.now(), { cache: "no-store" })).json(); esperado = j.script || ""; } catch (e) {}
       const r = await syCall(cfg, { accion: "estadoScript" }); if (!r) return;
       const pasos = "En la planilla: Extensiones → Apps Script. Instrucciones en hwf-fuente/script/INSTALAR_AUTOACTUALIZACION.md.";
@@ -5457,26 +5458,12 @@ setTimeout(() => { try { if (D && $("s-res") && !$("s-res").hidden && !$("kpCard
 .cz{min-width:0;max-width:100%;overflow:hidden}
 </style>
 
-<script>/* patch_grafventas: HWF */ { const _pd = pintarDashboard; pintarDashboard = function () { const r = _pd.apply(this, arguments); try { vmPoner(document.getElementById("s-res"), vmDeBase(BASE)); } catch (e) {} return r; };
-  try { if (document.getElementById("s-res") && document.getElementById("s-res").children.length) vmPoner(document.getElementById("s-res"), vmDeBase(BASE)); } catch (e) {} }</script>
 
-<script>/* patch_grafventas: HWF */ { const _pd = pintarDashboard; pintarDashboard = function () { const r = _pd.apply(this, arguments); try { vmPoner(document.getElementById("s-res"), vmDeBase(BASE)); } catch (e) {} return r; };
-  try { if (document.getElementById("s-res") && document.getElementById("s-res").children.length) vmPoner(document.getElementById("s-res"), vmDeBase(BASE)); } catch (e) {} }</script>
 
-<script>/* patch_grafventas: HWF */ { const _pd = pintarDashboard; pintarDashboard = function () { const r = _pd.apply(this, arguments); try { vmPoner(document.getElementById("s-res"), vmDeBase(BASE)); } catch (e) {} return r; };
-  try { if (document.getElementById("s-res") && document.getElementById("s-res").children.length) vmPoner(document.getElementById("s-res"), vmDeBase(BASE)); } catch (e) {} }</script>
 
-<script>/* patch_grafventas: HWF */ { const _pd = pintarDashboard; pintarDashboard = function () { const r = _pd.apply(this, arguments); try { vmPoner(document.getElementById("s-res"), vmDeBase(BASE)); } catch (e) {} return r; };
-  try { if (document.getElementById("s-res") && document.getElementById("s-res").children.length) vmPoner(document.getElementById("s-res"), vmDeBase(BASE)); } catch (e) {} }</script>
 
-<script>/* patch_grafventas: HWF */ { const _pd = pintarDashboard; pintarDashboard = function () { const r = _pd.apply(this, arguments); try { vmPoner(document.getElementById("s-res"), vmDeBase(BASE)); } catch (e) {} return r; };
-  try { if (document.getElementById("s-res") && document.getElementById("s-res").children.length) vmPoner(document.getElementById("s-res"), vmDeBase(BASE)); } catch (e) {} }</script>
 
-<script>/* patch_grafventas: HWF */ { const _pd = pintarDashboard; pintarDashboard = function () { const r = _pd.apply(this, arguments); try { vmPoner(document.getElementById("s-res"), vmDeBase(BASE)); } catch (e) {} return r; };
-  try { if (document.getElementById("s-res") && document.getElementById("s-res").children.length) vmPoner(document.getElementById("s-res"), vmDeBase(BASE)); } catch (e) {} }</script>
 
-<script>/* patch_grafventas: HWF */ { const _pd = pintarDashboard; pintarDashboard = function () { const r = _pd.apply(this, arguments); try { vmPoner(document.getElementById("s-res"), vmDeBase(BASE)); } catch (e) {} return r; };
-  try { if (document.getElementById("s-res") && document.getElementById("s-res").children.length) vmPoner(document.getElementById("s-res"), vmDeBase(BASE)); } catch (e) {} }</script>
 <style>/* patch_planprov */
 .pp-par{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px}.pp-par label{display:grid;gap:3px;font-size:.74rem;font-weight:700;color:var(--muted,#5B6874)}
 .pp-par input,.pp-par select{font:inherit;padding:8px 10px;border-radius:10px;border:1px solid var(--line,#C9D3DB);background:var(--card,#fff);color:var(--ink,#0F1E29);width:100%;min-width:0}
@@ -8995,7 +8982,7 @@ window.hwfContCambio = function () { try { if (typeof praPintar === "function" &
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261126184038";
+const HWF_VER = "20261126190134";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
