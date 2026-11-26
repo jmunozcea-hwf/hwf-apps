@@ -2350,7 +2350,7 @@ const stAbrev = n => ST_ABR.reduce((s, [r, t]) => s.replace(r, t), String(n || "
 try { if ($("sStock") && !$("sStock").hidden) pintarStock(); } catch (e) {}
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261126175857";
+const HWF_VER = "20261126182257";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -3919,11 +3919,13 @@ window.hwfContCambio = function () { try { const b = document.getElementById("sS
   const esc2 = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   const host = () => ADM ? document.getElementById("s-res") : VEN ? document.getElementById("crmInicio") : document.getElementById("sInicio");
   let ocup = false;
+  /* primer lugar = primero después de «Para hoy» (#urHoy, patch_admgrupos): así no se pelean el primer puesto (salto/parpadeo, 26-11-2026) */
+  const adTope = h => { let f = h.firstElementChild; while (f && f.id === "urHoy") f = f.nextElementSibling; return f; };
   function poner() { const h = host(); if (!h || ocup) return; ocup = true; try { const v = h.querySelector("#adCard"); let t = ""; try { t = html(); } catch (e) { console.error(e); }
-      if (!t) { if (v) v.remove(); return; } if (v) v.outerHTML = t; else h.insertAdjacentHTML("afterbegin", t); const c = h.querySelector("#adCard"); if (c !== h.firstElementChild) h.insertBefore(c, h.firstElementChild);
+      if (!t) { if (v) v.remove(); return; } if (v) v.outerHTML = t; else h.insertAdjacentHTML("afterbegin", t); const c = h.querySelector("#adCard"); if (c !== adTope(h)) h.insertBefore(c, adTope(h));
       c.querySelectorAll("[data-ad]").forEach(b => b.onclick = () => { vista = b.dataset.ad; try { localStorage.setItem(LS, vista); } catch (e) {} poner(); }); } finally { setTimeout(() => { ocup = false; }, 0); } }
   const h0 = host(); if (!h0) return; let t0 = 0;
-  new MutationObserver(() => { if (ocup) return; const c = h0.querySelector("#adCard"); if (c && c === h0.firstElementChild && c.dataset.f === firma()) return; clearTimeout(t0); t0 = setTimeout(() => { poner(); const c2 = h0.querySelector("#adCard"); if (c2) c2.dataset.f = firma(); }, 30); }).observe(h0, { childList: true });
+  new MutationObserver(() => { if (ocup) return; const c = h0.querySelector("#adCard"); if (c && c === adTope(h0) && c.dataset.f === firma()) return; clearTimeout(t0); t0 = setTimeout(() => { poner(); const c2 = h0.querySelector("#adCard"); if (c2) c2.dataset.f = firma(); }, 30); }).observe(h0, { childList: true });
   function firma() { const s = document.getElementById("selMes"); return (s ? s.value : "") + "|" + vista; }
   poner(); const c = h0.querySelector("#adCard"); if (c) c.dataset.f = firma();
   [800, 2500, 6000].forEach(t => setTimeout(() => { if (!h0.querySelector("#adCard")) poner(); }, t));   /* por si los datos llegan después */
@@ -4302,4 +4304,13 @@ html,body{max-width:100%;overflow-x:clip}
 .vd-t{min-width:0}.vd-c canvas{max-width:100%!important}
 @media(max-width:700px){#acW .ac-g{grid-template-columns:minmax(0,1fr)}}
 </style>
+<script>/* patch_menuvacio: títulos de grupo sin opciones visibles, ocultos */
+(function () {
+  function revisar() { const p = document.getElementById("snPanel"); if (!p) return;
+    p.querySelectorAll(":scope > .sn-g").forEach(h => { let x = h.nextElementSibling, hay = false;
+      while (x && !x.classList.contains("sn-g")) { if (getComputedStyle(x).display !== "none" && (x.matches(".sn-i,a,button") || x.querySelector(".sn-i,a,button"))) { hay = true; break; } x = x.nextElementSibling; }
+      const v = hay && h.textContent.trim() ? "" : "none"; if (h.style.display !== v) h.style.display = v; }); }   /* sin título: oculto como antes */
+  setInterval(revisar, 1000); revisar();
+})();
+</script>
 </body></html>

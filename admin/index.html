@@ -5288,7 +5288,7 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261126175857";
+const HWF_VER = "20261126182257";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -8526,11 +8526,13 @@ window.hwfContCambio = function () { try { if (typeof praPintar === "function" &
   const esc2 = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   const host = () => ADM ? document.getElementById("s-res") : VEN ? document.getElementById("crmInicio") : document.getElementById("sInicio");
   let ocup = false;
+  /* primer lugar = primero después de «Para hoy» (#urHoy, patch_admgrupos): así no se pelean el primer puesto (salto/parpadeo, 26-11-2026) */
+  const adTope = h => { let f = h.firstElementChild; while (f && f.id === "urHoy") f = f.nextElementSibling; return f; };
   function poner() { const h = host(); if (!h || ocup) return; ocup = true; try { const v = h.querySelector("#adCard"); let t = ""; try { t = html(); } catch (e) { console.error(e); }
-      if (!t) { if (v) v.remove(); return; } if (v) v.outerHTML = t; else h.insertAdjacentHTML("afterbegin", t); const c = h.querySelector("#adCard"); if (c !== h.firstElementChild) h.insertBefore(c, h.firstElementChild);
+      if (!t) { if (v) v.remove(); return; } if (v) v.outerHTML = t; else h.insertAdjacentHTML("afterbegin", t); const c = h.querySelector("#adCard"); if (c !== adTope(h)) h.insertBefore(c, adTope(h));
       c.querySelectorAll("[data-ad]").forEach(b => b.onclick = () => { vista = b.dataset.ad; try { localStorage.setItem(LS, vista); } catch (e) {} poner(); }); } finally { setTimeout(() => { ocup = false; }, 0); } }
   const h0 = host(); if (!h0) return; let t0 = 0;
-  new MutationObserver(() => { if (ocup) return; const c = h0.querySelector("#adCard"); if (c && c === h0.firstElementChild && c.dataset.f === firma()) return; clearTimeout(t0); t0 = setTimeout(() => { poner(); const c2 = h0.querySelector("#adCard"); if (c2) c2.dataset.f = firma(); }, 30); }).observe(h0, { childList: true });
+  new MutationObserver(() => { if (ocup) return; const c = h0.querySelector("#adCard"); if (c && c === adTope(h0) && c.dataset.f === firma()) return; clearTimeout(t0); t0 = setTimeout(() => { poner(); const c2 = h0.querySelector("#adCard"); if (c2) c2.dataset.f = firma(); }, 30); }).observe(h0, { childList: true });
   function firma() { const s = document.getElementById("selMes"); return (s ? s.value : "") + "|" + vista; }
   poner(); const c = h0.querySelector("#adCard"); if (c) c.dataset.f = firma();
   [800, 2500, 6000].forEach(t => setTimeout(() => { if (!h0.querySelector("#adCard")) poner(); }, t));   /* por si los datos llegan después */
@@ -9781,6 +9783,8 @@ window.hwfContCambio = function () { try { if (typeof praPintar === "function" &
 .b2-vac{padding:14px;text-align:center;color:var(--muted,#5B6874);font-size:.9rem}
 .b2-err{background:#FBE0DD;color:#7A1A12;border-radius:12px;padding:10px;font-size:.88rem}
 .b2-seg{display:flex;gap:6px;flex-wrap:wrap}
+.b2-vok{display:block;margin-top:6px;padding:8px 12px;border-radius:10px;background:#E3F4EA;color:#1C7A4E;font-weight:700}
+.b2-est{display:inline-flex;align-items:center;padding:10px 14px;border-radius:12px;font-weight:800;font-size:.9rem;animation:b2E .25s ease-out}.b2-est.g{background:#EEF2F5;color:#5B6874}.b2-est.ok{background:#E3F4EA;color:#1C7A4E}.b2-est.mal{background:#FDECEA;color:#B3261E}@keyframes b2E{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
 .b2-bdg{display:inline-block;min-width:18px;height:18px;line-height:18px;border-radius:9px;background:#B42318;color:#fff;font-size:.68rem;font-weight:800;text-align:center;padding:0 5px;margin-left:6px;font-style:normal;vertical-align:middle}
 .b2-bdg[hidden]{display:none}
 #masSeg [data-m="b2b"][data-n]::after{content:attr(data-n);display:inline-block;min-width:18px;height:18px;line-height:18px;border-radius:9px;background:#B42318;color:#fff;font-size:.68rem;font-weight:800;text-align:center;padding:0 5px;margin-left:6px}
@@ -9833,7 +9837,7 @@ body.m-b2b #crmMeta{display:none!important}
     return `<div class="b2-c ${c.estado === "pendiente" ? "pend" : ""}" data-id="${E(c.id)}"><div class="b2-t"><b>${E(c.razon || "(sin razón social)")}</b>${pill(c.estado)}</div>
       <small>RUT ${E(c.rut || "—")}${c.contacto ? " · " + E(c.contacto) : ""}</small>
       <small>${c.correo ? `<a href="mailto:${E(c.correo)}">${E(c.correo)}</a>` : ""}${c.telefono ? ` · <a href="tel:${E(String(c.telefono).replace(/[^0-9+]/g, ""))}">${E(c.telefono)}</a>` : ""}${c.comuna ? " · " + E(c.comuna) : ""}</small>
-      <small>Solicitó el ${E(F(c.fecha))}${c.cliente ? ` · Cliente HWF: <b>${E(c.cliente)}</b>` : ""}${c.vendedor ? ` · Vendedor: ${E(c.vendedor)}` : ""}</small>${extra || ""}
+      <small>Solicitó el ${E(F(c.fecha))}${c.cliente ? ` · Cliente HWF: <b>${E(c.cliente)}</b>` : ""}${c.vendedor ? ` · Vendedor: ${E(c.vendedor)}` : ""}</small>${c.estado === "pendiente" && c.vendedorOk ? `<small class="b2-vok">✓ Aprobó el vendedor (${E(c.vendedorOk)}) · falta la aprobación de Admin</small>` : ""}${extra || ""}
       <div class="b2-bt">${botones}</div></div>`;
   }
   const items = p => { let a = p.items; if (typeof a === "string") { try { a = JSON.parse(a); } catch (e) { a = null; } } return Array.isArray(a) ? a : null; };
@@ -9872,6 +9876,7 @@ body.m-b2b #crmMeta{display:none!important}
   const clientes = () => { try { return (A.clientes || []).map(c => ({ nombre: c.nombre, comuna: c.comuna, cart: c.cart, rut: "" })); } catch (e) { return []; } };
   const vivo = () => typeof vistaMas !== "undefined" && vistaMas === "b2b" && typeof TAB !== "undefined" && TAB === "mas";
   function insignias() {
+    window.B2B_VOK = ST.cuentas.filter(c => c.estado === "pendiente" && c.vendedorOk).length;   /* alerta «Para hoy» (26-11-2026) */
     const b = document.querySelector('#masSeg [data-m="b2b"]'), n = pend(); if (b) { if (n) b.dataset.n = n; else delete b.dataset.n; }
     const it = document.querySelector('#snPanel [data-m="b2b"]'); if (it) { it.querySelectorAll(".b2-bdg").forEach(x => x.remove()); if (n) it.insertAdjacentHTML("beforeend", `<i class="b2-bdg" style="margin-left:auto">${n}</i>`); }
     const sb = document.getElementById("snBtn"); if (sb) sb.classList.toggle("b2-punto", n > 0);   /* el menú lateral toma el contador del texto del botón */
@@ -9898,7 +9903,7 @@ body.m-b2b #crmMeta{display:none!important}
   function vCuentas() {
     const q = N(ST.q), vs = vendedores();
     const asignada = c => c.estado === "activo" && c.vendedor && c.vendedor !== "Vendedor B2B" && c.cliente;   /* 24-11-2026: asignadas salen de «Por asignar» */
-    const okEst = c => ST.fEst === "porasignar" ? c.estado === "activo" && !asignada(c) : ST.fEst === "asignada" ? asignada(c) : ST.fEst ? c.estado === ST.fEst : c.estado !== "rechazado";
+    const okEst = c => (ST.est && ST.est[c.id]) || ST.fEst === "porasignar" ? c.estado === "activo" && !asignada(c) : ST.fEst === "asignada" ? asignada(c) : ST.fEst ? c.estado === ST.fEst : c.estado !== "rechazado";
     let l = ST.cuentas.filter(c => okEst(c) &&   /* rechazadas: archivadas, solo en «Archivadas» */ (!ST.fVend || (ST.fVend === "-" ? !c.vendedor : c.vendedor === ST.fVend)) && (!q || N([c.razon, c.rut, c.contacto, c.correo, c.comuna, c.cliente].join(" ")).includes(q)));
     l.sort((a, b) => String(b.fecha).localeCompare(String(a.fecha)));
     const cnt = e => ST.cuentas.filter(c => e === "porasignar" ? c.estado === "activo" && !asignada(c) : e === "asignada" ? asignada(c) : c.estado === e).length;
@@ -9911,7 +9916,8 @@ body.m-b2b #crmMeta{display:none!important}
         const bt = (c.estado === "pendiente" ? `<button type="button" class="b2-b ok" data-a="aprobar" data-id="${E(c.id)}">Aprobar</button><button type="button" class="b2-b mal" data-a="rechazado" data-id="${E(c.id)}">Rechazar</button>`
           : c.estado === "activo" ? `<button type="button" class="b2-b tq" data-a="guardar" data-id="${E(c.id)}">Guardar asignación</button><button type="button" class="b2-b mal" data-a="bloqueado" data-id="${E(c.id)}">Bloquear</button>`
             : c.estado === "bloqueado" ? `<button type="button" class="b2-b ok" data-a="aprobar" data-id="${E(c.id)}">Reactivar</button>` : `<button type="button" class="b2-b ok" data-a="aprobar" data-id="${E(c.id)}">Aprobar</button>`);
-        return tarjetaCuenta(c, asig, bt).replace(/<small>Solicitó el [^<]*(?:<b>.*?<\/b>)?[^<]*<\/small>/, `<small>Solicitó el ${E(F(c.fecha))}</small>`); }).join("") : `<div class="b2-card b2-vac">${ST.t ? "No hay cuentas con ese filtro." : "Sin datos todavía."}</div>`}`;
+        const es = ST.est && ST.est[c.id], estH = es ? `<span class="b2-est ${es.t}" role="status">${E(es.m)}</span>` : "";   /* 26-11-2026: respuesta visible en la misma tarjeta */
+        return tarjetaCuenta(c, asig, bt + estH).replace(/<small>Solicitó el [^<]*(?:<b>.*?<\/b>)?[^<]*<\/small>/, `<small>Solicitó el ${E(F(c.fecha))}</small>`); }).join("") : `<div class="b2-card b2-vac">${ST.t ? "No hay cuentas con ese filtro." : "Sin datos todavía."}</div>`}`;
   }
   function vPedidos() {
     return `<div class="b2-card"><h3>Pedidos del portal <small>${ST.pedidos.length}</small></h3>${ST.pedidos.length ? ST.pedidos.map(tarjetaPedido).join("") : `<div class="b2-vac">Aún no hay pedidos.</div>`}</div>
@@ -9973,8 +9979,10 @@ body.m-b2b #crmMeta{display:none!important}
     if (ST.ocup) return; const d = ST.dr[c.id] || {}, vend = d.vendedor != null ? d.vendedor : (c.vendedor || ""), cli = d.cliente != null ? d.cliente : (c.cliente || "");
     /* 24-11-2026: respuesta inmediata (antes esperaba al script y a recargar todo): se actualiza la tarjeta al tiro y se guarda en segundo plano */
     const antes = { estado: c.estado, vendedor: c.vendedor, cliente: c.cliente }; Object.assign(c, { estado, vendedor: vend, cliente: cli }); delete ST.dr[c.id];
-    ST.ocup = true; aviso("Guardando…"); pintar();
+    ST.est = ST.est || {}; const fin = () => setTimeout(() => { delete ST.est[c.id]; if (vivo()) pintar(); }, 3500);
+    ST.ocup = true; ST.est[c.id] = { t: "g", m: "⏳ Guardando…" }; pintar();
     const r = await llamar({ accion: "b2bAprobar", id: c.id, estado, vendedor: vend, cliente: cli, por: POR }); ST.ocup = false;
+    ST.est[c.id] = r && r.ok ? { t: "ok", m: estado === "activo" && r.altaDefontana ? "✓ Aprobada · se envió a administración el correo para crearla en Defontana" : estado === "activo" ? "✓ Guardado" + (vend ? " · vendedor " + vend : "") + (cli ? " · cliente " + cli : " · falta el cliente HWF (si es nuevo, créalo en Defontana)") : estado === "bloqueado" ? "✓ Cuenta bloqueada" : "✓ Solicitud rechazada" } : { t: "mal", m: "✗ " + ((r && r.error) || "No se pudo guardar") }; fin();
     if (r && r.ok) { aviso(estado === "activo" ? "Guardado. Si es una cuenta nueva, el cliente recibirá su correo de bienvenida." : estado === "bloqueado" ? "Cuenta bloqueada." : "Solicitud rechazada."); pintar(); cargar(true).then(() => { if (vivo()) pintar(); }); }
     else { Object.assign(c, antes); pintar(); aviso((r && r.error) || "No se pudo guardar."); }
   }
@@ -10425,7 +10433,7 @@ html,body{max-width:100%;overflow-x:clip}
   function hoy() { const s = document.getElementById("s-res"); if (!s) return; const c = cnt();
     const b2 = (() => { const e = document.querySelector('[data-m="b2b"] .b2-bdg'); return e ? parseInt(e.textContent, 10) || 0 : 0; })();
     const L = [["m:napp", c.napp, "Por aprobar", "notas de la app"], ["m:cots", c.cots, "Pendientes Defontana", "notas por facturar"], ["m:cobranza", c.cobranza, "Cobranza vencida", "clientes con deuda vencida"],
-      ["m:cambios", c.cambios, "Cambios de clientes", "por revisar"], ["m:b2b", b2, "Portal B2B", "cuentas por asignar"]].filter(x => x[1] > 0 && (x[0] === "m:b2b" || existe(x[0])));
+      ["m:cambios", c.cambios, "Cambios de clientes", "por revisar"], ["m:b2b", b2, "Portal B2B", "cuentas por asignar"], ["m:b2b", window.B2B_VOK || 0, "Clientes nuevos B2B", "ya los aprobó el vendedor: falta tu aprobación"]].filter(x => x[1] > 0 && (x[0] === "m:b2b" || existe(x[0])));
     const html = `<h3>📌 Para hoy <small>${L.length ? "toca para ir" : ""}</small></h3>` + (L.length ? `<div class="ur-g">${L.map(([k, n, t, d]) => `<button type="button" data-ur="${k}"><span class="ur-n">${n}</span><span class="ur-t">${t}<small>${d}</small></span><span class="ur-f">›</span></button>`).join("")}</div>` : `<p class="ur-ok">✅ Todo al día: no hay pedidos por aprobar ni cobranza vencida.</p>`);
     let u = document.getElementById("urHoy"); if (!u) { u = document.createElement("section"); u.id = "urHoy"; u.onclick = ev => { const b = ev.target.closest("[data-ur]"); if (b) ir(b.dataset.ur); }; s.prepend(u); }
     else if (u.parentNode !== s || s.firstElementChild !== u) s.prepend(u);
@@ -10481,6 +10489,36 @@ html,body{max-width:100%;overflow-x:clip}
     ocupado = true; pintar(); const r = await llamar({ accion: "defSolicitar", por: "HWF Admin" }); ocupado = false; E = r; pintar(); programar(); }
   let visto = false; setInterval(() => { pintar(); if (enDatos() && !visto) { visto = true; estado(); } if (!enDatos()) visto = false; }, 600);
   document.addEventListener("visibilitychange", () => { if (!document.hidden) estado(); });
+})();
+</script>
+<style>/* patch_b2bcodigo */
+.b2-b.b2-cod{background:#FFF7E6;color:#8A5300;border:1px solid #F0C36B}
+</style>
+<script>/* patch_b2bcodigo: enviar código para nueva clave del portal */
+(function () {
+  const llamar = d => { try { if (typeof syCall === "function" && typeof SYC === "function") { const c = SYC(); if (c && c.url) return syCall(c, d); }
+      if (typeof syLlamar === "function" && typeof syCfg === "function") { const c = syCfg(); if (c && c.url) return syLlamar(c, d); } } catch (e) {}
+    return Promise.resolve({ ok: false, error: "Esta app no está conectada al script de Google." }); };
+  const poner = () => document.querySelectorAll('.b2-b[data-a="bloqueado"][data-id]').forEach(b => {
+    if (b.parentNode.querySelector('[data-cod="' + CSS.escape(b.dataset.id) + '"]')) return;
+    const x = document.createElement("button"); x.type = "button"; x.className = "b2-b b2-cod"; x.dataset.cod = b.dataset.id; x.textContent = "🔑 Enviar código de clave";
+    x.title = "Envía al correo del cliente un código para crear una nueva clave del portal"; b.before(x); });
+  document.addEventListener("click", async ev => { const x = ev.target.closest("[data-cod]"); if (!x) return; ev.stopPropagation();
+    const card = x.closest(".b2-c") || x.parentNode, nom = ((card.querySelector("b") || {}).textContent || "el cliente").trim();
+    if (!confirm("¿Enviar a " + nom + " un código para crear una nueva clave del portal?\n\nLe llega a su correo registrado; vence en 15 minutos. Su clave actual sigue igual hasta que la cambie.")) return;
+    x.disabled = true; const t = x.textContent; x.textContent = "Enviando…";
+    let r; try { r = await llamar({ accion: "b2bEnviarCodigo", id: x.dataset.cod }); } catch (e) { r = { ok: false, error: "Sin conexión." }; }
+    x.disabled = false; x.textContent = t; alert(r && r.ok ? "✅ " + (r.mensaje || "Código enviado.") : "No se pudo enviar: " + ((r && r.error) || "error")); }, true);
+  setInterval(poner, 800);
+})();
+</script>
+<script>/* patch_menuvacio: títulos de grupo sin opciones visibles, ocultos */
+(function () {
+  function revisar() { const p = document.getElementById("snPanel"); if (!p) return;
+    p.querySelectorAll(":scope > .sn-g").forEach(h => { let x = h.nextElementSibling, hay = false;
+      while (x && !x.classList.contains("sn-g")) { if (getComputedStyle(x).display !== "none" && (x.matches(".sn-i,a,button") || x.querySelector(".sn-i,a,button"))) { hay = true; break; } x = x.nextElementSibling; }
+      const v = hay && h.textContent.trim() ? "" : "none"; if (h.style.display !== v) h.style.display = v; }); }   /* sin título: oculto como antes */
+  setInterval(revisar, 1000); revisar();
 })();
 </script>
 </body>

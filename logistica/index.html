@@ -483,7 +483,7 @@ if (!cfg() || !DATA()) pantallaConexion(); else { arrancar(); bajar(true).then(n
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261126175857";
+const HWF_VER = "20261126182257";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -2521,4 +2521,13 @@ html,body{max-width:100%;overflow-x:clip}
 .vd-t{min-width:0}.vd-c canvas{max-width:100%!important}
 @media(max-width:700px){#acW .ac-g{grid-template-columns:minmax(0,1fr)}}
 </style>
+<script>/* patch_menuvacio: títulos de grupo sin opciones visibles, ocultos */
+(function () {
+  function revisar() { const p = document.getElementById("snPanel"); if (!p) return;
+    p.querySelectorAll(":scope > .sn-g").forEach(h => { let x = h.nextElementSibling, hay = false;
+      while (x && !x.classList.contains("sn-g")) { if (getComputedStyle(x).display !== "none" && (x.matches(".sn-i,a,button") || x.querySelector(".sn-i,a,button"))) { hay = true; break; } x = x.nextElementSibling; }
+      const v = hay && h.textContent.trim() ? "" : "none"; if (h.style.display !== v) h.style.display = v; }); }   /* sin título: oculto como antes */
+  setInterval(revisar, 1000); revisar();
+})();
+</script>
 </body></html>

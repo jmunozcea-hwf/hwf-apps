@@ -7202,7 +7202,7 @@ function confirmarNota() {
   x.onclick = () => cerrarModal(); card.insertBefore(x, card.firstChild); })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261126175857";
+const HWF_VER = "20261126182257";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -10016,11 +10016,13 @@ try { if (document.getElementById("crmInicio") && SES) pintarInicio(); } catch (
   const esc2 = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   const host = () => ADM ? document.getElementById("s-res") : VEN ? document.getElementById("crmInicio") : document.getElementById("sInicio");
   let ocup = false;
+  /* primer lugar = primero después de «Para hoy» (#urHoy, patch_admgrupos): así no se pelean el primer puesto (salto/parpadeo, 26-11-2026) */
+  const adTope = h => { let f = h.firstElementChild; while (f && f.id === "urHoy") f = f.nextElementSibling; return f; };
   function poner() { const h = host(); if (!h || ocup) return; ocup = true; try { const v = h.querySelector("#adCard"); let t = ""; try { t = html(); } catch (e) { console.error(e); }
-      if (!t) { if (v) v.remove(); return; } if (v) v.outerHTML = t; else h.insertAdjacentHTML("afterbegin", t); const c = h.querySelector("#adCard"); if (c !== h.firstElementChild) h.insertBefore(c, h.firstElementChild);
+      if (!t) { if (v) v.remove(); return; } if (v) v.outerHTML = t; else h.insertAdjacentHTML("afterbegin", t); const c = h.querySelector("#adCard"); if (c !== adTope(h)) h.insertBefore(c, adTope(h));
       c.querySelectorAll("[data-ad]").forEach(b => b.onclick = () => { vista = b.dataset.ad; try { localStorage.setItem(LS, vista); } catch (e) {} poner(); }); } finally { setTimeout(() => { ocup = false; }, 0); } }
   const h0 = host(); if (!h0) return; let t0 = 0;
-  new MutationObserver(() => { if (ocup) return; const c = h0.querySelector("#adCard"); if (c && c === h0.firstElementChild && c.dataset.f === firma()) return; clearTimeout(t0); t0 = setTimeout(() => { poner(); const c2 = h0.querySelector("#adCard"); if (c2) c2.dataset.f = firma(); }, 30); }).observe(h0, { childList: true });
+  new MutationObserver(() => { if (ocup) return; const c = h0.querySelector("#adCard"); if (c && c === adTope(h0) && c.dataset.f === firma()) return; clearTimeout(t0); t0 = setTimeout(() => { poner(); const c2 = h0.querySelector("#adCard"); if (c2) c2.dataset.f = firma(); }, 30); }).observe(h0, { childList: true });
   function firma() { const s = document.getElementById("selMes"); return (s ? s.value : "") + "|" + vista; }
   poner(); const c = h0.querySelector("#adCard"); if (c) c.dataset.f = firma();
   [800, 2500, 6000].forEach(t => setTimeout(() => { if (!h0.querySelector("#adCard")) poner(); }, t));   /* por si los datos llegan después */
@@ -10627,6 +10629,8 @@ try { if (document.getElementById("crmInicio") && SES) pintarInicio(); } catch (
 .b2-vac{padding:14px;text-align:center;color:var(--muted,#5B6874);font-size:.9rem}
 .b2-err{background:#FBE0DD;color:#7A1A12;border-radius:12px;padding:10px;font-size:.88rem}
 .b2-seg{display:flex;gap:6px;flex-wrap:wrap}
+.b2-est{display:inline-flex;align-items:center;padding:10px 14px;border-radius:12px;font-weight:800;font-size:.9rem;animation:b2E .25s ease-out}.b2-est.g{background:#EEF2F5;color:#5B6874}.b2-est.ok{background:#E3F4EA;color:#1C7A4E}.b2-est.mal{background:#FDECEA;color:#B3261E}@keyframes b2E{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.b2-vok{display:block;margin-top:6px;padding:8px 12px;border-radius:10px;background:#E3F4EA;color:#1C7A4E;font-weight:700}
 .b2-bdg{display:inline-block;min-width:18px;height:18px;line-height:18px;border-radius:9px;background:#B42318;color:#fff;font-size:.68rem;font-weight:800;text-align:center;padding:0 5px;margin-left:6px;font-style:normal;vertical-align:middle}
 .b2-bdg[hidden]{display:none}
 #masSeg [data-m="b2b"][data-n]::after{content:attr(data-n);display:inline-block;min-width:18px;height:18px;line-height:18px;border-radius:9px;background:#B42318;color:#fff;font-size:.68rem;font-weight:800;text-align:center;padding:0 5px;margin-left:6px}
@@ -10679,7 +10683,7 @@ body.m-b2b #crmMeta{display:none!important}
     return `<div class="b2-c ${c.estado === "pendiente" ? "pend" : ""}" data-id="${E(c.id)}"><div class="b2-t"><b>${E(c.razon || "(sin razón social)")}</b>${pill(c.estado)}</div>
       <small>RUT ${E(c.rut || "—")}${c.contacto ? " · " + E(c.contacto) : ""}</small>
       <small>${c.correo ? `<a href="mailto:${E(c.correo)}">${E(c.correo)}</a>` : ""}${c.telefono ? ` · <a href="tel:${E(String(c.telefono).replace(/[^0-9+]/g, ""))}">${E(c.telefono)}</a>` : ""}${c.comuna ? " · " + E(c.comuna) : ""}</small>
-      <small>Solicitó el ${E(F(c.fecha))}${c.cliente ? ` · Cliente HWF: <b>${E(c.cliente)}</b>` : ""}${c.vendedor ? ` · Vendedor: ${E(c.vendedor)}` : ""}</small>${extra || ""}
+      <small>Solicitó el ${E(F(c.fecha))}${c.cliente ? ` · Cliente HWF: <b>${E(c.cliente)}</b>` : ""}${c.vendedor ? ` · Vendedor: ${E(c.vendedor)}` : ""}</small>${c.estado === "pendiente" && c.vendedorOk ? `<small class="b2-vok">✓ Aprobó el vendedor (${E(c.vendedorOk)}) · falta la aprobación de Admin</small>` : ""}${extra || ""}
       <div class="b2-bt">${botones}</div></div>`;
   }
   const items = p => { let a = p.items; if (typeof a === "string") { try { a = JSON.parse(a); } catch (e) { a = null; } } return Array.isArray(a) ? a : null; };
@@ -10713,7 +10717,7 @@ body.m-b2b #crmMeta{display:none!important}
   const cfg = () => { try { const c = syCfg(); return c && c.url ? c : null; } catch (e) { return null; } };
   const llamar = async d => { const c = cfg(); if (!c) return { ok: false, error: "Esta app no está conectada al script de Google." }; return await syLlamar(c, d); };
   const ST = { cuentas: [], pedidos: [], canjes: [], cargando: false, err: "", filtro: "activo", t: 0, ocup: false, avisado: false };
-  const pend = () => ST.cuentas.filter(c => c.estado === "pendiente").length;
+  const pend = () => ST.cuentas.filter(c => c.estado === "pendiente" && !c.vendedorOk).length;   /* las que ya aprobó el vendedor esperan a Admin */
   const mias = () => { const n = yo(); return ST.cuentas.filter(c => c.estado !== "pendiente" && (!c.vendedor || c.vendedor === n)); };
   let box, tab;
   function insignias() {
@@ -10740,7 +10744,7 @@ body.m-b2b #crmMeta{display:none!important}
       ${!cfg() ? `<div class="b2-err">Esta app no está conectada al script de Google. Conéctala desde los ajustes para ver las solicitudes.</div>` : ""}
       ${ST.err ? `<div class="b2-err">${E(ST.err)}</div>` : ""}
       <div class="b2-card"><h3>Solicitudes pendientes <small>${n ? n + (n === 1 ? " por revisar" : " por revisar") : "al día"}</small></h3>
-        ${pe.length ? pe.map(c => tarjetaCuenta(c, "", `<button type="button" class="b2-b ok" data-a="aprobar" data-id="${E(c.id)}">Aprobar</button><button type="button" class="b2-b mal" data-a="rechazado" data-id="${E(c.id)}">Rechazar</button>`)).join("") : `<div class="b2-vac">${ST.t ? "No hay solicitudes pendientes." : "Sin datos todavía."}</div>`}</div>
+        ${pe.length ? pe.map(c => tarjetaCuenta(c, "", c.vendedorOk ? `<span class="b2-est ok">✓ Ya la aprobaste · esperando a Admin</span>` : `<button type="button" class="b2-b ok" data-a="aprobar" data-id="${E(c.id)}">Aprobar</button><button type="button" class="b2-b mal" data-a="rechazado" data-id="${E(c.id)}">Rechazar</button>`)).join("") : `<div class="b2-vac">${ST.t ? "No hay solicitudes pendientes." : "Sin datos todavía."}</div>`}</div>
       <div class="b2-card"><h3>Mi cartera B2B <small>${m.length} cuenta${m.length === 1 ? "" : "s"}</small></h3>
         <div class="b2-chips">${[["activo", "Activas"], ["bloqueado", "Bloqueadas"], ["todas", "Todas"]].concat(cnt("rechazado") ? [["rechazado", "🗄 Archivadas"]] : []).map(([k, t]) => `<button type="button" class="b2-ch" data-f="${k}" aria-pressed="${f === k}"${k === "rechazado" ? ' style="opacity:.7"' : ""}>${t}${k === "todas" ? "" : " " + cnt(k)}</button>`).join("")}</div>
         <div style="margin-top:8px">${cuentas.length ? cuentas.map(c => tarjetaCuenta(c, "", c.estado === "activo" ? `<button type="button" class="b2-b mal" data-a="bloqueado" data-id="${E(c.id)}">Bloquear</button>` : c.estado === "bloqueado" ? `<button type="button" class="b2-b ok" data-a="aprobar" data-id="${E(c.id)}">Reactivar</button>` : `<button type="button" class="b2-b ok" data-a="aprobar" data-id="${E(c.id)}">Aprobar</button>`)).join("") : `<div class="b2-vac">No hay cuentas en esta lista.</div>`}</div></div>
@@ -10751,16 +10755,19 @@ body.m-b2b #crmMeta{display:none!important}
     if (ST.ocup) return; ST.ocup = true;
     /* 24-11-2026: respuesta inmediata; se guarda en segundo plano y la cuenta sale de pendientes al tiro */
     const antes = { estado: c.estado, vendedor: c.vendedor, cliente: c.cliente }; Object.assign(c, { estado, vendedor: yo(), cliente: cliente || c.cliente || "" }); aviso("Guardando…"); pintar(); insignias();
-    const r = await llamar({ accion: "b2bAprobar", id: c.id, estado, vendedor: yo(), cliente: cliente || antes.cliente || "", por: yo() }); ST.ocup = false;
-    if (r && r.ok) { aviso(estado === "activo" ? "Cuenta aprobada. El cliente recibirá un correo de bienvenida." : estado === "bloqueado" ? "Cuenta bloqueada." : "Solicitud rechazada."); pintar(); cargar(true); }
+    const r = await llamar({ accion: "b2bAprobar", id: c.id, estado, vendedor: yo(), cliente: cliente || antes.cliente || "", por: yo(), etapa: "vendedor" }); ST.ocup = false;
+    if (r && r.ok && r.etapa === "vendedor") { Object.assign(c, { estado: "pendiente", vendedorOk: yo() + " · recién" }); aviso(r.mensaje || "Aprobada: falta Admin."); pintar(); insignias(); cargar(true); }
+    else if (r && r.ok) { aviso(estado === "activo" ? "Cuenta aprobada. El cliente recibirá un correo de bienvenida." : estado === "bloqueado" ? "Cuenta bloqueada." : "Solicitud rechazada."); pintar(); cargar(true); }
     else { Object.assign(c, antes); pintar(); insignias(); aviso((r && r.error) || "No se pudo guardar."); }
   }
   function clientesCartera() { try { const d = crmMio(); return d && d.clientes ? d.clientes.map(c => ({ nombre: c.nombre, rut: c.rut, comuna: c.comuna, cart: "" })) : []; } catch (e) { return []; } }
   function clientesTodos() { try { return clientesLocal().map(c => ({ nombre: c.nombre, rut: c.rut, comuna: c.comuna, cart: c.vendedor || "" })); } catch (e) { return []; } }
+  const NUEVO = { nombre: "🆕 Cliente nuevo (aún no está en Defontana)", rut: "", comuna: "", cart: "", nuevo: true };
   function aprobar(c) {
     if (c.estado !== "pendiente" && c.cliente) { if (confirm(`¿${c.estado === "bloqueado" ? "Reactivar" : "Aprobar"} la cuenta de ${c.razon}?`)) actuar(c, "activo", c.cliente); return; }
-    elegir({ titulo: "Elegir el cliente HWF", sub: `Solicitud de <b>${E(c.razon)}</b> · RUT ${E(c.rut)}. Elige el cliente exacto de tu cartera; así sus pedidos y su cobranza quedan en esa ficha.`, lista: clientesCartera(), mas: clientesTodos, rut: RK(c.rut),
-      ok: x => { if (confirm(`¿Aprobar a ${c.razon} como cliente «${x.nombre}»?`)) actuar(c, "activo", x.nombre); } });
+    elegir({ titulo: "Elegir el cliente HWF", sub: `Solicitud de <b>${E(c.razon)}</b> · RUT ${E(c.rut)}. Elige el cliente exacto de tu cartera; así sus pedidos y su cobranza quedan en esa ficha.`, lista: [NUEVO].concat(clientesCartera()), mas: () => [NUEVO].concat(clientesTodos()), rut: RK(c.rut),
+      ok: x => { if (x.nuevo) { if (confirm(`¿Aprobar a ${c.razon} como CLIENTE NUEVO?\n\nDespués la aprueba Admin y se pide su creación en Defontana.`)) actuar(c, "activo", ""); return; }
+        if (confirm(`¿Aprobar a ${c.razon} como cliente «${x.nombre}»?`)) actuar(c, "activo", x.nombre); } });
   }
   function montar() {
     tab = document.createElement("button"); tab.type = "button"; tab.setAttribute("role", "tab"); tab.id = "mB2b"; tab.setAttribute("aria-selected", "false"); tab.title = "Clientes B2B"; tab.textContent = "Clientes B2B";
@@ -11196,6 +11203,52 @@ html,body{max-width:100%;overflow-x:clip}
 (function () {
   const fija = () => { const v = document.querySelector('#biSeg [data-un="v"]'); if (v && v.getAttribute("aria-pressed") !== "true") v.click(); };
   new MutationObserver(() => setTimeout(fija, 30)).observe(document.body, { childList: true, subtree: true }); fija();
+})();
+</script>
+<style>/* patch_b2bcodigo */
+.b2-b.b2-cod{background:#FFF7E6;color:#8A5300;border:1px solid #F0C36B}
+</style>
+<script>/* patch_b2bcodigo: enviar código para nueva clave del portal */
+(function () {
+  const llamar = d => { try { if (typeof syCall === "function" && typeof SYC === "function") { const c = SYC(); if (c && c.url) return syCall(c, d); }
+      if (typeof syLlamar === "function" && typeof syCfg === "function") { const c = syCfg(); if (c && c.url) return syLlamar(c, d); } } catch (e) {}
+    return Promise.resolve({ ok: false, error: "Esta app no está conectada al script de Google." }); };
+  const poner = () => document.querySelectorAll('.b2-b[data-a="bloqueado"][data-id]').forEach(b => {
+    if (b.parentNode.querySelector('[data-cod="' + CSS.escape(b.dataset.id) + '"]')) return;
+    const x = document.createElement("button"); x.type = "button"; x.className = "b2-b b2-cod"; x.dataset.cod = b.dataset.id; x.textContent = "🔑 Enviar código de clave";
+    x.title = "Envía al correo del cliente un código para crear una nueva clave del portal"; b.before(x); });
+  document.addEventListener("click", async ev => { const x = ev.target.closest("[data-cod]"); if (!x) return; ev.stopPropagation();
+    const card = x.closest(".b2-c") || x.parentNode, nom = ((card.querySelector("b") || {}).textContent || "el cliente").trim();
+    if (!confirm("¿Enviar a " + nom + " un código para crear una nueva clave del portal?\n\nLe llega a su correo registrado; vence en 15 minutos. Su clave actual sigue igual hasta que la cambie.")) return;
+    x.disabled = true; const t = x.textContent; x.textContent = "Enviando…";
+    let r; try { r = await llamar({ accion: "b2bEnviarCodigo", id: x.dataset.cod }); } catch (e) { r = { ok: false, error: "Sin conexión." }; }
+    x.disabled = false; x.textContent = t; alert(r && r.ok ? "✅ " + (r.mensaje || "Código enviado.") : "No se pudo enviar: " + ((r && r.error) || "error")); }, true);
+  setInterval(poner, 800);
+})();
+</script>
+<script>/* patch_menuvacio: títulos de grupo sin opciones visibles, ocultos */
+(function () {
+  function revisar() { const p = document.getElementById("snPanel"); if (!p) return;
+    p.querySelectorAll(":scope > .sn-g").forEach(h => { let x = h.nextElementSibling, hay = false;
+      while (x && !x.classList.contains("sn-g")) { if (getComputedStyle(x).display !== "none" && (x.matches(".sn-i,a,button") || x.querySelector(".sn-i,a,button"))) { hay = true; break; } x = x.nextElementSibling; }
+      const v = hay && h.textContent.trim() ? "" : "none"; if (h.style.display !== v) h.style.display = v; }); }   /* sin título: oculto como antes */
+  setInterval(revisar, 1000); revisar();
+})();
+</script>
+<style>/* patch_b2balerta */
+#b2Alerta{display:flex;align-items:center;gap:12px;margin:0 0 12px;padding:12px 14px;border-radius:16px;background:#FFF7E6;border:1px solid #F0C36B;color:#5C3B00;font-weight:700}
+#b2Alerta span{flex:1;line-height:1.3}#b2Alerta button{border:0;border-radius:12px;padding:10px 16px;font:inherit;font-weight:800;background:#0B3146;color:#fff;cursor:pointer;white-space:nowrap}
+</style>
+<script>/* patch_b2balerta: alerta de clientes nuevos del portal por aprobar */
+(function () {
+  if (typeof setModo !== "function") return;
+  function paso() { const tab = document.getElementById("mB2b"), h = document.getElementById("crmInicio"); if (!h) return;
+    const n = tab ? parseInt(((tab.querySelector(".b2-bdg") || {}).textContent) || "0", 10) || 0 : 0; let a = document.getElementById("b2Alerta");
+    if (!n) { if (a) a.remove(); return; }
+    const t = `🆕 ${n === 1 ? "Un cliente nuevo del portal espera" : n + " clientes nuevos del portal esperan"} tu aprobación`;
+    if (!a) { a = document.createElement("div"); a.id = "b2Alerta"; a.setAttribute("role", "alert"); a.innerHTML = `<span></span><button type="button">Revisar</button>`; a.querySelector("button").onclick = () => setModo("b2b"); }
+    if (a.parentNode !== h || h.firstElementChild !== a) h.prepend(a); if (a.firstChild.textContent !== t) a.firstChild.textContent = t; }
+  setInterval(paso, 1500);
 })();
 </script>
 </body>
