@@ -1328,7 +1328,7 @@ function npRitmo(cots, Y, M, n, real, lim, ant) {
       <button type="button" data-m="cots" aria-pressed="false">NP Defontana</button>
       <button type="button" data-m="pedidos" aria-pressed="false">Pedidos</button>
       <button type="button" data-m="napp" aria-pressed="false">NP App</button>
-      <button type="button" data-m="clientes" aria-pressed="false">Clientes</button>
+      <button type="button" data-m="clientes" aria-pressed="false">Clientes por vendedor</button>
       <button type="button" data-m="cobranza" aria-pressed="false">Cobranza</button>
       <button type="button" data-m="embudo" aria-pressed="false">Prospectos</button>
       <button type="button" data-m="cambios" aria-pressed="false">Cambios clientes</button>
@@ -5286,7 +5286,7 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261126145059";
+const HWF_VER = "20261126164827";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -10185,7 +10185,7 @@ body.m-b2b #crmMeta{display:none!important}
   const VEN = typeof NAV_ORDEN !== "undefined" && typeof setModo === "function" && !!document.getElementById("mInicio"), ADM = !VEN && !!document.querySelector("nav.bottom") && !!document.getElementById("s-res");
   const LOG = !VEN && !ADM && !!document.querySelector('#nav [data-s="rutas"]'), TND = !VEN && !ADM && !!document.getElementById("tNav");
   const GV = [["Mi día", ["inicio", "pedido", "peds", "clientes", "agenda", "ruta", "cobranza", "embudo", "cat"]], ["Equipo", ["act"]], ["Análisis", ["dash", "avance", "bi", "eerr", "met"]], ["", ["nut"]], ["Aprender", ["tec"]], ["Redes sociales", ["ig"]]];
-  const GA = [["Dirección", ["t:hal"]], ["Equipo", ["m:actividades", "m:postul"]], ["Ventas", ["t:res", "t:ven", "t:cli", "t:pro", "m:ranking", "m:plan", "m:zonas", "m:terreno", "m:bonif"]], ["", ["m:info"]], ["Pedidos y cobranza", ["m:pedidos", "m:cots", "m:napp", "m:cobranza", "m:embudo"]],
+  const GA = [["Dirección", ["t:hal"]], ["Equipo", ["m:actividades", "m:postul"]], ["Ventas", ["t:res", "t:ven", "t:cli", "m:clientes", "t:pro", "m:ranking", "m:plan", "m:zonas", "m:terreno", "m:bonif"]], ["", ["m:info"]], ["Pedidos y cobranza", ["m:pedidos", "m:cots", "m:napp", "m:cobranza", "m:embudo"]],
     ["BI y compras", ["b:v", "b:l", "t:mar", "m:eerr", "m:abast", "m:provee"]], ["Web y portal B2B", ["m:metricas", "m:instagram", "m:linkedin", "m:b2b", "m:mail", "m:invita", "m:roi"]], ["Archivos y datos", ["m:catalogo", "m:cambios", "m:datos"]]];   /* 22-11-2026: métricas web y B2B en su propio grupo */
   const pos = (G, k) => { let n = 0; for (const [, l] of G) { const i = l.indexOf(k); if (i >= 0) return n + i; n += l.length; } return 999; };
   if (VEN) { const ord = () => { const a = NAV_ORDEN.slice(); a.sort((x, y) => pos(GV, x[0]) - pos(GV, y[0])); NAV_ORDEN.splice(0, NAV_ORDEN.length, ...a); };
@@ -10245,7 +10245,7 @@ body.m-b2b #crmMeta{display:none!important}
 <script>/* patch_admclientes: Clientes con filtro por vendedor */
 (function () {
   if (typeof pintarMas !== "function") return;
-  try { if (typeof NAV_MNOM !== "undefined") NAV_MNOM.clientes = "Clientes"; } catch (e) {}
+  try { if (typeof NAV_MNOM !== "undefined") NAV_MNOM.clientes = "Clientes por vendedor"; } catch (e) {}
   const es = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const nz = s => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
   const tcap = s => String(s || "").toLowerCase().replace(/(^|[\s.,(\/-])([a-záéíóúñ])/g, (m, a, b) => a + b.toUpperCase()).replace(/\b(Spa|Eirl|Ltda)\b/g, x => x === "Spa" ? "SpA" : x.toUpperCase());
@@ -10318,5 +10318,61 @@ html,body{max-width:100%;overflow-x:clip}
 .vd-t{min-width:0}.vd-c canvas{max-width:100%!important}
 @media(max-width:700px){#acW .ac-g{grid-template-columns:minmax(0,1fr)}}
 </style>
+<style>/* patch_menupedidos */
+#snPanel .sn-i{position:relative}
+#snPanel .sn-i[aria-current="true"]{background:#E3EEF4;color:#0B3146}
+#snPanel .sn-i[aria-current="true"]::before{content:"";position:absolute;left:0;top:8px;bottom:8px;width:4px;border-radius:4px;background:#26A69A}
+#snPanel .sn-i:not([aria-current="true"]):focus{background:none}
+@media(hover:none){#snPanel .sn-i:not([aria-current="true"]):hover{background:none}}
+#snPanel .hic-w,#snPanel [aria-current="true"] .hic-w{outline:none!important}
+#snPanel [data-m="linkedin"],#masSeg [data-m="linkedin"]{display:none!important}
+.mp-tabs{display:flex;gap:4px;background:var(--sunk,#EEF2F5);border-radius:14px;padding:4px;margin:0 0 12px;overflow-x:auto}
+.mp-tabs button{flex:1;white-space:nowrap;border:0;background:none;border-radius:10px;padding:9px 12px;font:inherit;font-weight:800;font-size:.88rem;color:var(--muted,#5B6874);cursor:pointer}
+.mp-tabs button[aria-selected="true"]{background:var(--surface,#fff);color:#0B3146;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.mp-tabs b{display:inline-block;min-width:20px;margin-left:6px;padding:1px 7px;border-radius:999px;background:#B3261E;color:#fff;font-size:.72rem}
+.mp-suma{margin-left:auto;min-width:22px;padding:2px 8px;border-radius:999px;background:#B3261E;color:#fff;font-size:.75rem;font-weight:800;font-style:normal;text-align:center}
+</style>
+<script>/* patch_menupedidos: un solo menú Pedidos con pestañas */
+(function () {
+  if (typeof pintarMas !== "function") return;
+  const tiene = k => !!document.querySelector('#masSeg [data-m="' + k + '"]');
+  const TABS = (tiene("pedidos") ? [["pedidos", "App y B2B"]] : []).concat([["napp", "Por aprobar"], ["cots", "Pendientes Defontana"]]).filter(([k]) => tiene(k));
+  if (TABS.length < 2) return;
+  const MAIN = TABS[0][0], OTROS = TABS.slice(1).map(t => t[0]), GRUPO = TABS.map(t => t[0]);
+  try { if (typeof NAV_MNOM !== "undefined") { NAV_MNOM[MAIN] = "Pedidos"; OTROS.forEach(k => NAV_MNOM[k] = "Pedidos"); } } catch (e) {}
+  document.head.insertAdjacentHTML("beforeend", "<style>" + OTROS.map(k => '#snPanel [data-m="' + k + '"],#masSeg [data-m="' + k + '"]').join(",") + "{display:none!important}</style>");
+  const txt = (b, t) => { const n = [...b.childNodes].reverse().find(x => x.nodeType === 3 && x.textContent.trim()); if (n) n.textContent = t; };
+  document.querySelectorAll('#masSeg [data-m="' + MAIN + '"]').forEach(b => txt(b, "Pedidos"));
+  const cnt = k => { const p = document.getElementById("snPanel"), it = p && p.querySelector('[data-m="' + k + '"]'); if (!it) return 0;
+    const b = [...it.querySelectorAll("i,b,span")].reverse().find(e => /^\d+$/.test(e.textContent.trim()) && !e.classList.contains("sn-e")); return b ? +b.textContent.trim() : 0; };
+  const enGrupo = () => typeof vistaMas !== "undefined" && GRUPO.includes(vistaMas);
+  function menu() { const p = document.getElementById("snPanel"); if (!p) return; const it = p.querySelector('[data-m="' + MAIN + '"]'); if (!it) return;
+    txt(it, "Pedidos"); const s = OTROS.reduce((t, k) => t + cnt(k), 0); let e = it.querySelector(".mp-suma");
+    if (s) { if (!e) { e = document.createElement("i"); e.className = "mp-suma"; it.appendChild(e); } e.textContent = s; } else if (e) e.remove();
+    if (enGrupo() && p.querySelector('[aria-current="true"]:not([data-m="' + MAIN + '"])')) { const a = p.querySelector('[aria-current="true"]'); if (a && GRUPO.includes(a.dataset.m)) { a.setAttribute("aria-current", "false"); it.setAttribute("aria-current", "true"); } } }
+  function barra() { const box = document.getElementById("masBody"); if (!box || !enGrupo() || box.querySelector(".mp-tabs")) return;
+    const d = document.createElement("div"); d.className = "mp-tabs"; d.setAttribute("role", "tablist");
+    d.innerHTML = TABS.map(([k, t]) => { const n = k === MAIN ? 0 : cnt(k); return `<button type="button" role="tab" data-mpt="${k}" aria-selected="${vistaMas === k}">${t}${n ? `<b>${n}</b>` : ""}</button>`; }).join("");
+    d.onclick = ev => { const b = ev.target.closest("[data-mpt]"); if (!b || b.dataset.mpt === vistaMas) return; const m = document.querySelector('#masSeg [data-m="' + b.dataset.mpt + '"]'); if (m) m.click(); };
+    box.prepend(d); }
+  const _pm = pintarMas; pintarMas = function () { const r = _pm.apply(this, arguments); try { barra(); menu(); } catch (e) {} return r; };
+  const box = document.getElementById("masBody"); if (box) new MutationObserver(() => { try { barra(); } catch (e) {} }).observe(box, { childList: true });
+  const iv = setInterval(() => { const p = document.getElementById("snPanel"); if (!p) return; clearInterval(iv); menu(); new MutationObserver(() => setTimeout(menu, 30)).observe(p, { childList: true }); }, 300);
+})();
+</script>
+<style>/* patch_admdocs */
+.ad-w{display:grid;gap:10px}.ad-w h2{margin:0;font-size:1.05rem}.ad-w p{margin:0;color:var(--muted,#5B6874);font-size:.88rem}
+.ad-c{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;background:var(--surface,#fff);border:1px solid var(--line,#E3E9EE);border-radius:16px;padding:14px;text-decoration:none;color:inherit}
+.ad-c:hover{border-color:#26A69A}.ad-i{font-size:1.6rem}.ad-c b{display:block}.ad-c small{display:block;color:var(--muted,#5B6874);font-size:.8rem;margin-top:2px}
+.ad-f{font-weight:800;color:#0B3146;white-space:nowrap}
+</style>
+<script>/* patch_admdocs: Documentos = enlaces a Drive */
+(function () {
+  if (typeof pintarMas !== "function") return;
+  const HTML = `<div class="ad-w"><h2>Documentos <span class="muted" style="font-weight:400;font-size:.85rem">en Google Drive</span></h2><p>Todo se abre directo en Drive: más rápido y sin cargar archivos en la app. Para agregar o cambiar un documento, súbelo a la carpeta en Drive.</p><a class="ad-c" href="https://drive.google.com/drive/folders/1btOc2fUXYE5mg3Ia2VKpBh-kaW1m-YaI" target="_blank" rel="noopener"><span class="ad-i">📁</span><span><b>Documentos de ventas</b><small>Catálogo, listas de precio, posts para enviar por WhatsApp, manuales y guías («HWF Documentos · Ventas»).</small></span><span class="ad-f">Abrir ›</span></a><a class="ad-c" href="https://drive.google.com/drive/folders/12gZZOy2h_lAgVtdWRxum5s6c1dkOmQxO" target="_blank" rel="noopener"><span class="ad-i">📣</span><span><b>Posts para redes sociales</b><small>Publicaciones, logos e imágenes para Instagram y redes («RRSS HWF»).</small></span><span class="ad-f">Abrir ›</span></a><a class="ad-c" href="https://drive.google.com/drive/folders/1APWFjCn9coYeJRzs97PhWwvkOVaomD6h" target="_blank" rel="noopener"><span class="ad-i">🔒</span><span><b>Info admin</b><small>Información interna de administración («HWF Info admin»).</small></span><span class="ad-f">Abrir ›</span></a></div>`;
+  const _pm = pintarMas; pintarMas = function () { if (typeof vistaMas !== "undefined" && vistaMas === "catalogo") { const b = document.getElementById("masBody"); if (b) { b.innerHTML = HTML; return; } } return _pm.apply(this, arguments); };
+  try { if (typeof vistaMas !== "undefined" && vistaMas === "catalogo") pintarMas(); } catch (e) {}
+})();
+</script>
 </body>
 </html>
