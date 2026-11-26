@@ -5289,7 +5289,7 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261126203917";
+const HWF_VER = "20261126222955";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -10383,7 +10383,7 @@ html,body{max-width:100%;overflow-x:clip}
 #defAct .da-h{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}#defAct .da-h b{font-size:1rem}
 #defAct button{border:0;border-radius:12px;padding:11px 16px;font:inherit;font-weight:800;background:#0B3146;color:#fff;cursor:pointer}#defAct button:disabled{opacity:.55;cursor:default}
 #defAct .da-e{font-size:.86rem;color:var(--muted,#5B6874)}#defAct .da-e.ok{color:#1C7A4E}#defAct .da-e.wa{color:#8A5300}#defAct .da-e.ba{color:#B3261E}
-#defAct .da-p{height:6px;border-radius:6px;background:var(--sunk,#EEF2F5);overflow:hidden}#defAct .da-p i{display:block;height:100%;width:40%;background:#26A69A;border-radius:6px;animation:daMov 1.4s ease-in-out infinite}
+#defAct .da-p{height:6px;border-radius:6px;background:var(--sunk,#EEF2F5);overflow:hidden}#defAct .da-p b{display:block;height:100%;background:#26A69A;border-radius:6px;transition:width .4s}.da-p i{display:block;height:100%;width:40%;background:#26A69A;border-radius:6px;animation:daMov 1.4s ease-in-out infinite}
 #defAct .da-m summary{cursor:pointer;font-weight:700;font-size:.86rem;color:#0B3146}#defAct .da-m table{width:100%;border-collapse:collapse;margin-top:6px;font-size:.84rem}
 #defAct .da-m td{padding:5px 2px;border-top:1px solid var(--line,#EEF2F5)}#defAct .da-m td:last-child{text-align:right;font-variant-numeric:tabular-nums}#defAct .da-m td.vj{color:#B4400B;font-weight:700}
 @keyframes daMov{0%{margin-left:-40%}100%{margin-left:100%}}
@@ -10401,7 +10401,9 @@ html,body{max-width:100%;overflow-x:clip}
     switch (E.estado) {
       case "sin_solicitud": return ["Pide al PC de la oficina que descargue los informes de Defontana (ventas, pedidos, inventario, cobranza y contabilidad).", ""];
       case "pendiente": return [E.aviso || "Solicitud enviada a las " + hh(E.solicitado_en) + ": esperando que el PC la tome (revisa cada 10 min).", E.aviso ? "ba" : "wa"];
-      case "en_curso": return [E.aviso || "Descargando informes en el PC desde las " + hh(E.tomado_en) + "…", E.aviso ? "ba" : "wa"];
+      case "en_curso": { const P = E.progreso, m = P && P.actualizado_en ? Math.max(0, Math.round((Date.now() - new Date(P.actualizado_en)) / 60000)) : null;   /* 27-11-2026: avance que informa el PC */
+        if (P && P.total) return [(P.hechos || 0) + " de " + P.total + (P.actual ? (P.actual === "Moviendo a META" ? " · Moviendo los archivos a META" : " · Descargando: " + P.actual) : "") + (m != null ? " · última señal " + (m < 1 ? "recién" : "hace " + m + " min") : "") + (E.aviso ? ". " + E.aviso : ""), E.aviso ? "ba" : "wa"];
+        return [E.aviso || "Descargando informes en el PC desde las " + hh(E.tomado_en) + "…", E.aviso ? "ba" : "wa"]; }
       case "listo": return ["Informes descargados a las " + hh(E.terminado_en) + (n ? " (" + n + " archivos)" : "") + ". " + (E.procesado_en ? "Los datos se recalculan en unos minutos: cierra y abre la app para verlos." : "Procesando…"), "ok"];
       case "error": return ["No se pudo descargar: " + (E.error || "error en el PC") + ". Revisa que Defontana esté abierto en Chrome y vuelve a pedirlo.", "ba"];
       default: return ["Estado: " + E.estado, ""]; } }
@@ -10422,7 +10424,7 @@ html,body{max-width:100%;overflow-x:clip}
     if (!b || b.parentNode !== host) { if (b) b.remove(); b = document.createElement("section"); b.id = "defAct"; if (dc) { const h2 = dc.querySelector("h2"); h2 ? h2.after(b) : dc.prepend(b); } else s.prepend(b);
       b.onclick = ev => { if (ev.target.closest("#dfBtn")) pedir(); }; }
     const [t, c] = texto(), act = E && E.ok && (E.estado === "pendiente" || E.estado === "en_curso");
-    const html = `<div class="da-h"><b>1 · Descargar los informes de Defontana</b><button type="button" id="dfBtn"${ocupado || act ? " disabled" : ""}>${act ? "Actualizando…" : "Actualizar datos de Defontana"}</button></div>${act ? '<div class="da-p"><i></i></div>' : ""}<div class="da-e ${c}">${es(t)}</div>${metaHtml()}`;
+    const html = `<div class="da-h"><b>1 · Descargar los informes de Defontana</b><button type="button" id="dfBtn"${ocupado || act ? " disabled" : ""}>${act ? "Actualizando…" : "Actualizar datos de Defontana"}</button></div>${act ? (E.progreso && E.progreso.total ? `<div class="da-p"><b style="width:${Math.max(4, Math.min(100, Math.round(100 * (E.progreso.hechos || 0) / E.progreso.total)))}%"></b></div>` : '<div class="da-p"><i></i></div>') : ""}<div class="da-e ${c}">${es(t)}</div>${metaHtml()}`;
     const mH = metaHtml(), mBox = document.getElementById("dfMeta");
     const html2 = mBox ? html.replace(mH, "") : html; if (b.innerHTML !== html2) b.innerHTML = html2;
     if (mBox && mBox.innerHTML !== mH) mBox.innerHTML = mH; }
