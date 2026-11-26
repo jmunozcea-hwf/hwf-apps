@@ -7202,7 +7202,7 @@ function confirmarNota() {
   x.onclick = () => cerrarModal(); card.insertBefore(x, card.firstChild); })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261126190134";
+const HWF_VER = "20261126191003";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -11008,7 +11008,7 @@ body:has(#rdOv) #snBtn,body:has(#rdOv) #iaBtn,body:has(#rdOv) #navBotones{displa
   const hoyS = () => { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
   const FER = new Set(["2026-01-01","2026-04-03","2026-04-04","2026-05-01","2026-05-21","2026-06-21","2026-06-29","2026-07-16","2026-08-15","2026-09-18","2026-09-19","2026-10-12","2026-10-31","2026-11-01","2026-12-08","2026-12-25","2027-01-01","2027-03-26","2027-03-27","2027-05-01","2027-05-21","2027-06-21","2027-06-28","2027-07-16","2027-08-15","2027-09-17","2027-09-18","2027-09-19","2027-10-11","2027-10-31","2027-11-01","2027-12-08","2027-12-25","2028-01-01","2028-04-14","2028-04-15","2028-05-01","2028-05-21","2028-06-20","2028-06-26","2028-07-16","2028-08-15","2028-09-18","2028-09-19","2028-10-09","2028-10-27","2028-11-01","2028-12-08","2028-12-25"]);
   const hab = (y, m, d1, d2) => { let n = 0; for (let d = d1; d <= d2; d++) { const w = new Date(y, m - 1, d).getDay(), k = y + "-" + String(m).padStart(2, "0") + "-" + String(d).padStart(2, "0"); if (w && w < 6 && !FER.has(k)) n++; } return n; };
-  function calc() { const B = HB.base() || {}, R = B.rows || [], P = B.productos || [], V = B.vend || [], CL = B.clientes || [], tv = V.indexOf("Tienda Hellywoof"), S = SES && SES.vendedor ? SES.vendedor : {}, yo = S.cartera || S.nombre || "", iy = V.findIndex(v => nr(v) === nr(yo));
+  function calc() { const B = HB.base() || {}, R = B.rows || [], P = B.productos || [], V = B.vend || [], CL = B.clientes || [], tfI = new Set(typeof esClienteTienda === "function" ? CL.map((c, i) => esClienteTienda(c && c[0]) ? i : -1).filter(i => i >= 0) : []),   /* 27-11-2026: clientes de la tienda fuera de «por recuperar» */ tv = V.indexOf("Tienda Hellywoof"), S = SES && SES.vendedor ? SES.vendedor : {}, yo = S.cartera || S.nombre || "", iy = V.findIndex(v => nr(v) === nr(yo));
     const cy = Number(String(B.corte || "").slice(0, 4)) || B.anio, cm = Number(String(B.corte || "").slice(5, 7)), cd = Number(String(B.corte || "").slice(8, 10)) || 1, dim = new Date(cy, cm, 0).getDate();
     const hT = hab(cy, cm, 1, dim), hP = hab(cy, cm, 1, cd), hR = Math.max(0, hT - hP);
     /* clientes de MI CARTERA (23-11-2026): la cartera es del vendedor de la última factura (BASE.clientes[i][2]);
@@ -11016,7 +11016,7 @@ body:has(#rdOv) #snBtn,body:has(#rdOv) #iaBtn,body:has(#rdOv) #navBotones{displa
     const miCart = new Set(); CL.forEach((c, i) => { if (c && iy >= 0 && nr(c[2]) === nr(V[iy])) miCart.add(i); });
     let fD = 0, fY = 0; const vend = {}, prodM = {}, ult = {}, cliY = {}; R.forEach(r => { const y = r[8] || B.anio, v = Number(r[5]) || 0, f = y * 10000 + r[2] * 100 + (r[3] || 1);
       if (y === cy && r[2] === cm && r[7] !== tv) { fD += v; vend[V[r[7]]] = (vend[V[r[7]]] || 0) + v; if (r[7] === iy) fY += v; const p = P[r[1]]; if (p) prodM[p[0]] = (prodM[p[0]] || 0) + (Number(r[4]) || 0); }
-      if (r[7] !== tv && v > 0 && r[0] > 0 && (miCart.size ? miCart.has(r[0]) : r[7] === iy)) { if (!ult[r[0]] || f > ult[r[0]]) ult[r[0]] = f; if (y === cy || y === cy - 1) cliY[r[0]] = (cliY[r[0]] || 0) + v; } });
+      if (r[7] !== tv && v > 0 && r[0] > 0 && !tfI.has(r[0]) && (miCart.size ? miCart.has(r[0]) : r[7] === iy)) { if (!ult[r[0]] || f > ult[r[0]]) ult[r[0]] = f; if (y === cy || y === cy - 1) cliY[r[0]] = (cliY[r[0]] || 0) + v; } });
     let mD = 0; try { mD = HB.meta(cy, cm) || 0; } catch (x) {} const mY = Number(B.metaMes) === cm ? Number((B.metas || {})[V[iy]]) || 0 : 0;
     const pend = (B.cots || []).filter(c => nr(c[3]) === nr(yo) || nr(c[4]) === nr(yo)), pendD = (B.cots || []).reduce((t, c) => t + (Number(c[7]) || 0), 0), pendY = pend.reduce((t, c) => t + (Number(c[7]) || 0), 0), nPend = new Set(pend.map(c => c[0])).size;
     const hoyD = new Date(), dd = f => Math.round((hoyD - new Date(Math.floor(f / 10000), Math.floor(f / 100) % 100 - 1, f % 100)) / 864e5);
@@ -11239,5 +11239,23 @@ function vmPoner(cont, VM, antes) { try { if (!cont) return; const v = cont.quer
 </script>
 <script>/* patch_grafventas: VENTAS */ { const _pi = pintarInicio; pintarInicio = function () { const r = _pi.apply(this, arguments); try { vmPoner(document.getElementById("crmInicio"), vmDeBase(DB && DB.d)); } catch (e) {} return r; };
   try { if (typeof MODO !== "undefined" && MODO === "inicio") pintarInicio(); } catch (e) {} }</script>
+<script>/* patch_ventas_sintienda: clientes de la tienda (última factura en Tienda Hellywoof) fuera de las listas de Ventas */
+(function () {
+  const N = s => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toUpperCase().replace(/[^A-Z0-9]+/g, " ").trim();
+  let memo = null, memoB = null;
+  window.tiendaFac = function () { const B = (typeof DB !== "undefined" && DB && DB.d) || null; if (!B || !B.rows || !B.clientes || !B.vend) return new Set();
+    if (memo && memoB === B) return memo; const tv = B.vend.indexOf("Tienda Hellywoof"), ult = {};
+    B.rows.forEach(r => { if (!(r[5] > 0)) return; const f = ((r[8] || B.anio) * 100 + r[2]) * 100 + r[3], u = ult[r[0]], t = r[7] === tv;
+      if (!u || f > u.f || (f === u.f && t)) ult[r[0]] = { f, t }; });
+    const s = new Set(); Object.keys(ult).forEach(ci => { if (!ult[ci].t) return; const c = B.clientes[ci]; if (!c) return; const n = N(c[0]); if (n && !/CLIENTE BOLETA/.test(n)) s.add(n); });
+    memo = s; memoB = B; return s; };
+  const es = n => !!n && tiendaFac().has(N(n));
+  window.esClienteTienda = es;
+  if (typeof clientesLocal === "function") { const _c = clientesLocal; clientesLocal = function () { return _c.apply(this, arguments).filter(c => !es(c && c.nombre)); }; }
+  if (typeof prTodos === "function") { const _p = prTodos; prTodos = function () { return _p.apply(this, arguments).filter(o => !(es(o.cliente) || es(o.nombre))); }; }
+  const limpiarBase = () => { try { if (typeof CRM_BASE !== "undefined" && tiendaFac().size) CRM_BASE.clientes = CRM_BASE.clientes.filter(c => !es(c.nombre)); } catch (e) {} };
+  limpiarBase(); let vB = null; setInterval(() => { const B = typeof DB !== "undefined" && DB ? DB.d : null; if (B && B !== vB) { vB = B; limpiarBase(); } }, 3000);
+})();
+</script>
 </body>
 </html>
