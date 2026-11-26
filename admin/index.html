@@ -5288,7 +5288,7 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261126182702";
+const HWF_VER = "20261126183400";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -10445,6 +10445,9 @@ html,body{max-width:100%;overflow-x:clip}
 </script>
 <style>/* patch_defactualizar */
 #defAct{margin:0 0 14px;background:var(--surface,#fff);border:1px solid var(--line,#E3E9EE);border-radius:18px;padding:14px;display:grid;gap:10px}
+#daCard #defAct{margin:10px 0 6px;border:0;border-radius:0;padding:0}
+#daCard .da-paso{margin:16px 0 8px;font-weight:800;font-size:1rem;color:#0B3146}
+#dfMeta .da-m{margin-top:10px}#dfMeta .da-m table{width:100%;border-collapse:collapse;font-size:.84rem;margin-top:6px}#dfMeta .da-m td{padding:5px 2px;border-top:1px solid var(--line,#EEF2F5)}#dfMeta .da-m td:last-child{text-align:right}#dfMeta .da-m td.vj{color:#B4400B;font-weight:700}#dfMeta summary{cursor:pointer;font-weight:700;font-size:.86rem;color:#0B3146}
 #defAct .da-h{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}#defAct .da-h b{font-size:1rem}
 #defAct button{border:0;border-radius:12px;padding:11px 16px;font:inherit;font-weight:800;background:#0B3146;color:#fff;cursor:pointer}#defAct button:disabled{opacity:.55;cursor:default}
 #defAct .da-e{font-size:.86rem;color:var(--muted,#5B6874)}#defAct .da-e.ok{color:#1C7A4E}#defAct .da-e.wa{color:#8A5300}#defAct .da-e.ba{color:#B3261E}
@@ -10477,11 +10480,20 @@ html,body{max-width:100%;overflow-x:clip}
       return `<tr><td>${es(x.tipo)}</td><td class="${v > 3 ? "vj" : ""}">${fcorta(x.fecha)}</td></tr>`; }).join("")}</table></details>`; }
   function pintar() { const old = document.getElementById("defAct"); if (!enDatos()) { if (old) old.remove(); return; }
     const s = document.getElementById("masBody"); if (!s) return; let b = old;
-    if (!b || b.parentNode !== s) { if (b) b.remove(); b = document.createElement("section"); b.id = "defAct"; s.prepend(b);
-      b.onclick = ev => { if (ev.target.closest("#daBtn")) pedir(); }; }
+    /* 26-11-2026 (Jorge: «sí»): un solo cuadro «Datos de las apps» en 3 pasos: 1 descargar (PC), 2 procesar, 3 estado */
+    const dc = document.getElementById("daCard"), host = dc || s;
+    if (dc && !dc.dataset.pasos) { dc.dataset.pasos = 1; const h2 = dc.querySelector("h2"); if (h2) h2.textContent = "Datos de las apps";
+      const p = h2 && h2.nextElementSibling, lst = dc.querySelector(".lst"), tools = dc.querySelector(".tools"), msg = dc.querySelector("#daMsg"), det = dc.querySelector("details");
+      const tit = t => { const x = document.createElement("div"); x.className = "da-paso"; x.textContent = t; return x; };
+      if (p && tools) { p.before(tit("2 · Procesar los datos")); [tools, msg, det].filter(Boolean).reverse().forEach(x => p.after(x)); }
+      if (lst) { lst.before(tit("3 · Estado de los datos")); const m = document.createElement("div"); m.id = "dfMeta"; lst.after(m); } }
+    if (!b || b.parentNode !== host) { if (b) b.remove(); b = document.createElement("section"); b.id = "defAct"; if (dc) { const h2 = dc.querySelector("h2"); h2 ? h2.after(b) : dc.prepend(b); } else s.prepend(b);
+      b.onclick = ev => { if (ev.target.closest("#dfBtn")) pedir(); }; }
     const [t, c] = texto(), act = E && E.ok && (E.estado === "pendiente" || E.estado === "en_curso");
-    const html = `<div class="da-h"><b>🔄 Datos de Defontana</b><button type="button" id="daBtn"${ocupado || act ? " disabled" : ""}>${act ? "Actualizando…" : "Actualizar datos de Defontana"}</button></div>${act ? '<div class="da-p"><i></i></div>' : ""}<div class="da-e ${c}">${es(t)}</div>${metaHtml()}`;
-    if (b.innerHTML !== html) b.innerHTML = html; }
+    const html = `<div class="da-h"><b>1 · Descargar los informes de Defontana</b><button type="button" id="dfBtn"${ocupado || act ? " disabled" : ""}>${act ? "Actualizando…" : "Actualizar datos de Defontana"}</button></div>${act ? '<div class="da-p"><i></i></div>' : ""}<div class="da-e ${c}">${es(t)}</div>${metaHtml()}`;
+    const mH = metaHtml(), mBox = document.getElementById("dfMeta");
+    const html2 = mBox ? html.replace(mH, "") : html; if (b.innerHTML !== html2) b.innerHTML = html2;
+    if (mBox && mBox.innerHTML !== mH) mBox.innerHTML = mH; }
   async function estado() { E = await llamar({ accion: "defEstado" }); pintar(); programar(); }
   function programar() { clearTimeout(tPoll); const act = E && E.ok && (E.estado === "pendiente" || E.estado === "en_curso" || (E.estado === "listo" && !E.procesado_en));
     tPoll = setTimeout(() => { if (!document.hidden) estado(); else programar(); }, act ? 60000 : 10 * 60000); }
