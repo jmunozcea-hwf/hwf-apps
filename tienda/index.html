@@ -1836,8 +1836,7 @@ function pintarInicio() {
    50 venta del día ponderada (venta / esperado para ese día según el peso histórico de cada día de la semana y la meta del mes)
    15 sacos grandes (10 kg o más) · 10 ticket promedio · 10 SKU por ticket (si el informe trae el n° de documento) · 15 misiones de la app.
    Día → persona: la jornada registrada en este computador; si no hay, lunes a viernes Francisco, fines de semana y feriados Benjamín. */
-const FERCL = new Set(["2026-01-01","2026-04-03","2026-04-04","2026-05-01","2026-05-21","2026-06-21","2026-06-29","2026-07-16","2026-08-15","2026-09-18","2026-09-19","2026-10-12","2026-10-31","2026-11-01","2026-12-08","2026-12-25",
-  "2027-01-01","2027-03-26","2027-03-27","2027-05-01","2027-05-21","2027-06-21","2027-06-28","2027-07-16","2027-08-15","2027-09-18","2027-09-19","2027-10-11","2027-10-31","2027-11-01","2027-12-08","2027-12-25"]);
+const FERCL = new Set(["2026-01-01","2026-04-03","2026-04-04","2026-05-01","2026-05-21","2026-06-21","2026-06-29","2026-07-16","2026-08-15","2026-09-18","2026-09-19","2026-10-12","2026-10-31","2026-11-01","2026-12-08","2026-12-25","2027-01-01","2027-03-26","2027-03-27","2027-05-01","2027-05-21","2027-06-21","2027-06-28","2027-07-16","2027-08-15","2027-09-17","2027-09-18","2027-09-19","2027-10-11","2027-10-31","2027-11-01","2027-12-08","2027-12-25","2028-01-01","2028-04-14","2028-04-15","2028-05-01","2028-05-21","2028-06-20","2028-06-26","2028-07-16","2028-08-15","2028-09-18","2028-09-19","2028-10-09","2028-10-27","2028-11-01","2028-12-08","2028-12-25"]);
 const finSemana = f => { const d = new Date(f + "T12:00:00"), w = d.getDay(); return w === 0 || w === 6 || FERCL.has(f); };
 const quienDia = f => (lsGet("turnos", {})[f]) || (finSemana(f) ? "Benjamín" : "Francisco");
 const kgDe = n => { const m = /(\d+(?:[.,]\d+)?)\s*K(?:G|ILOS?)\b/i.exec(String(n || "")); return m ? Number(m[1].replace(",", ".")) : 0; };
@@ -2351,7 +2350,7 @@ const stAbrev = n => ST_ABR.reduce((s, [r, t]) => s.replace(r, t), String(n || "
 try { if ($("sStock") && !$("sStock").hidden) pintarStock(); } catch (e) {}
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261126172831";
+const HWF_VER = "20261126175857";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -3864,8 +3863,7 @@ window.hwfContCambio = function () { try { const b = document.getElementById("sS
 (function () {
   const ADM = !!document.getElementById("s-res") && typeof pintarDashboard === "function", VEN = !ADM && typeof NAV_ORDEN !== "undefined" && !!document.getElementById("mInicio"), TND = !ADM && !VEN && !!document.getElementById("tNav") && typeof DATA === "function";
   if (!ADM && !VEN && !TND) return;
-  const FER = new Set(["2026-01-01", "2026-04-03", "2026-04-04", "2026-05-01", "2026-05-21", "2026-06-21", "2026-06-29", "2026-07-16", "2026-08-15", "2026-09-18", "2026-09-19", "2026-10-12", "2026-10-31", "2026-11-01", "2026-12-08", "2026-12-25",
-    "2027-01-01", "2027-04-02", "2027-04-03", "2027-05-01", "2027-05-21", "2027-06-21", "2027-06-28", "2027-07-16", "2027-08-15", "2027-09-17", "2027-09-18", "2027-09-19", "2027-10-11", "2027-10-31", "2027-11-01", "2027-12-08", "2027-12-25"]);
+  const FER = new Set(["2026-01-01","2026-04-03","2026-04-04","2026-05-01","2026-05-21","2026-06-21","2026-06-29","2026-07-16","2026-08-15","2026-09-18","2026-09-19","2026-10-12","2026-10-31","2026-11-01","2026-12-08","2026-12-25","2027-01-01","2027-03-26","2027-03-27","2027-05-01","2027-05-21","2027-06-21","2027-06-28","2027-07-16","2027-08-15","2027-09-17","2027-09-18","2027-09-19","2027-10-11","2027-10-31","2027-11-01","2027-12-08","2027-12-25","2028-01-01","2028-04-14","2028-04-15","2028-05-01","2028-05-21","2028-06-20","2028-06-26","2028-07-16","2028-08-15","2028-09-18","2028-09-19","2028-10-09","2028-10-27","2028-11-01","2028-12-08","2028-12-25"]);
   const IRR = ["01-01", "05-01", "09-18", "09-19", "12-25"], MESL = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
   const k = (y, m, d) => y + "-" + String(m).padStart(2, "0") + "-" + String(d).padStart(2, "0"), dim = (y, m) => new Date(y, m, 0).getDate();
   const habil = (y, m, d, tienda) => { const w = new Date(y, m - 1, d).getDay(); return tienda ? !IRR.includes(k(y, m, d).slice(5)) : w && w !== 6 && !FER.has(k(y, m, d)); };

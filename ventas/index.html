@@ -2904,7 +2904,7 @@ bExp.onclick = () => {
 const SUG = __dvGet("SUG") || {"mg": {}, "h": {}, "top": {}};
 const COM = {"linares": [-35.846, -71.593], "rancagua": [-34.17, -70.744], "talca": [-35.427, -71.655], "curico": [-34.985, -71.239], "san fernando": [-34.585, -70.989], "machali": [-34.18, -70.649], "molina": [-35.114, -71.282], "santa cruz": [-34.639, -71.366], "rengo": [-34.402, -70.858], "requinoa": [-34.287, -70.818], "los angeles": [-37.469, -72.353], "constitucion": [-35.333, -72.412], "pichilemu": [-34.387, -72.003], "parral": [-36.143, -71.826], "donihue": [-34.226, -70.965], "san carlos": [-36.425, -71.958], "isla de maipo": [-33.751, -70.9], "teno": [-34.871, -71.162], "buin": [-33.732, -70.742], "san javier": [-35.595, -71.729], "chimbarongo": [-34.712, -71.043], "olivar": [-34.208, -70.825], "san clemente": [-35.537, -71.486], "placilla": [-34.627, -71.096], "quinta de tilcoco": [-34.351, -70.958], "curacavi": [-33.403, -71.133], "navidad": [-33.957, -71.833], "angol": [-37.795, -72.716], "coltauco": [-34.29, -71.077], "rauco": [-34.928, -71.315], "hualane": [-34.977, -71.806], "yerbas buenas": [-35.749, -71.584], "las cabras": [-34.293, -71.309], "peralillo": [-34.477, -71.484], "san vicente": [-34.438, -71.077], "san vicente de tt": [-34.438, -71.077], "san vicente de tagua tagua": [-34.438, -71.077], "cauquenes": [-35.967, -72.322], "romeral": [-34.963, -71.125], "paredones": [-34.648, -71.899], "maule": [-35.507, -71.707], "vina del mar": [-33.024, -71.552], "casablanca": [-33.319, -71.41], "pelarco": [-35.375, -71.327], "san francisco de mostazal": [-33.979, -70.712], "mostazal": [-33.979, -70.712], "chillan": [-36.607, -72.103], "lolol": [-34.729, -71.645], "sagrada familia": [-35.0, -71.383], "codegua": [-34.036, -70.666], "quillon": [-36.739, -72.469], "valdivia": [-39.814, -73.246], "longavi": [-35.966, -71.684], "retiro": [-36.047, -71.761], "coinco": [-34.27, -70.966], "colbun": [-35.693, -71.405], "licanten": [-34.984, -72.0], "pelluhue": [-35.818, -72.57], "villa alegre": [-35.686, -71.669], "graneros": [-34.065, -70.727], "malloa": [-34.446, -70.944], "nancagua": [-34.661, -71.177], "chepica": [-34.731, -71.271], "palmilla": [-34.604, -71.358], "marchigue": [-34.397, -71.619], "rio claro": [-35.284, -71.266], "san rafael": [-35.315, -71.524], "santiago": [-33.448, -70.669]};
 const EKEY = "hwf-exportados-v1", GKEY = "hwf-geo-v1", RKEY = "hwf-ruta-v1", RVKEY = "hwf-ruta-visto";
-const FER = new Set(["2026-01-01","2026-04-03","2026-04-04","2026-05-01","2026-05-21","2026-06-21","2026-06-29","2026-07-16","2026-08-15","2026-09-18","2026-09-19","2026-10-12","2026-10-31","2026-11-01","2026-12-08","2026-12-25"]);
+const FER = new Set(["2026-01-01","2026-04-03","2026-04-04","2026-05-01","2026-05-21","2026-06-21","2026-06-29","2026-07-16","2026-08-15","2026-09-18","2026-09-19","2026-10-12","2026-10-31","2026-11-01","2026-12-08","2026-12-25","2027-01-01","2027-03-26","2027-03-27","2027-05-01","2027-05-21","2027-06-21","2027-06-28","2027-07-16","2027-08-15","2027-09-17","2027-09-18","2027-09-19","2027-10-11","2027-10-31","2027-11-01","2027-12-08","2027-12-25","2028-01-01","2028-04-14","2028-04-15","2028-05-01","2028-05-21","2028-06-20","2028-06-26","2028-07-16","2028-08-15","2028-09-18","2028-09-19","2028-10-09","2028-10-27","2028-11-01","2028-12-08","2028-12-25"]);
 const lsGet = (k, d) => { try { return JSON.parse(localStorage.getItem(k) || "null") ?? d; } catch (e) { return d; } };
 const lsSet = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
 const isoD = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
@@ -6937,7 +6937,7 @@ function bajasNombres() { try { return new Set((Object.values(ccEstados()).filte
 </script>
 
 <script>/* misionhabil: misiones y puntos solo en días hábiles (feriados de Chile) */
-["2027-01-01","2027-03-26","2027-03-27","2027-05-01","2027-05-21","2027-06-21","2027-06-28","2027-07-16","2027-08-15","2027-09-18","2027-09-19","2027-10-11","2027-10-31","2027-11-01","2027-12-08","2027-12-25"].forEach(f => FER.add(f));   /* feriados de Chile 2027 */
+["2026-01-01","2026-04-03","2026-04-04","2026-05-01","2026-05-21","2026-06-21","2026-06-29","2026-07-16","2026-08-15","2026-09-18","2026-09-19","2026-10-12","2026-10-31","2026-11-01","2026-12-08","2026-12-25","2027-01-01","2027-03-26","2027-03-27","2027-05-01","2027-05-21","2027-06-21","2027-06-28","2027-07-16","2027-08-15","2027-09-17","2027-09-18","2027-09-19","2027-10-11","2027-10-31","2027-11-01","2027-12-08","2027-12-25","2028-01-01","2028-04-14","2028-04-15","2028-05-01","2028-05-21","2028-06-20","2028-06-26","2028-07-16","2028-08-15","2028-09-18","2028-09-19","2028-10-09","2028-10-27","2028-11-01","2028-12-08","2028-12-25"].forEach(f => FER.add(f));   /* feriados de Chile 2027 */
 const diaHabil = f => { const d = f instanceof Date ? f : new Date(String(f).slice(0, 10) + "T12:00:00"); const w = d.getDay(), k = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; return w > 0 && w < 6 && !FER.has(k); };
 
 const proxHabil = () => { const d = new Date(); do { d.setDate(d.getDate() + 1); } while (!diaHabil(d)); return d.toLocaleDateString("es-CL", { weekday: "long", day: "numeric", month: "long" }); };
@@ -6980,9 +6980,11 @@ function rkdCalc(B, y, m) {
   const YM = y * 100 + m, prim = {}, V = {}, base = { venta: 0, costo: 0, cli: {}, docs: 0, cont: 0 };
   B.rows.forEach(r => { const k = ym(r), f = k * 100 + r[3]; if (r[5] > 0 && (prim[r[0]] == null || f < prim[r[0]].f)) prim[r[0]] = { f, v: r[7] }; });
   B.rows.forEach(r => { const v = B.vend[r[7]]; if (fuera(v)) return; const k = ym(r);
-    if (k === YM && r[3] <= ultDia) { const o = V[v] = V[v] || { v, venta: 0, costo: 0, cli: {}, docs: 0, cont: 0, nuevos: 0, vw: 0 }; o.venta += r[5]; o.vw += r[5] * rkdPesoDia(r[3], nDias); o.costo += r[4] * r[6]; if (r[5] > 0) (o.cli[r[0]] = o.cli[r[0]] || new Set()).add(r[1]); }
-    else if (prev.includes(k)) { base.venta += r[5]; base.costo += r[4] * r[6]; const kk = k + "|" + r[0]; if (r[5] > 0) (base.cli[kk] = base.cli[kk] || new Set()).add(r[1]); } });
+    if (k === YM && r[3] <= ultDia) { const o = V[v] = V[v] || { v, venta: 0, costo: 0, cli: {}, docs: 0, cont: 0, nuevos: 0, vw: 0 }; o.venta += r[5]; o.vw += r[5] * rkdPesoDia(r[3], nDias); o.costo += r[4] * r[6]; { const q = o.cn = o.cn || {}, kq = r[0] + "|" + r[1]; q[kq] = (q[kq] || 0) + r[5]; } }
+    else if (prev.includes(k)) { base.venta += r[5]; base.costo += r[4] * r[6]; const kk = k + "|" + r[0]; const bq = base.cn = base.cn || {}, kb = kk + "|" + r[1]; bq[kb] = (bq[kb] || 0) + r[5]; } });
   Object.entries(prim).forEach(([ci, p]) => { if (Math.floor(p.f / 100) !== YM || p.f % 100 > ultDia) return; const v = B.vend[p.v]; if (V[v]) V[v].nuevos++; });
+  { const skuN = (M, D) => Object.entries(M || {}).forEach(([kq, q]) => { if (!(q > 0)) return; const i = kq.lastIndexOf("|"), c = kq.slice(0, i); (D[c] = D[c] || new Set()).add(+kq.slice(i + 1)); });   /* skuneto */
+    Object.values(V).forEach(o => skuN(o.cn, o.cli)); skuN(base.cn, base.cli); }
   let hayDocs = false, hayCont = false;
   (B.vdia || []).forEach(([f, vi, nd, ct]) => { const k = Math.floor(f / 100), v = B.vend[vi]; if (fuera(v)) return; if (nd) hayDocs = true; if (ct) hayCont = true;
     if (k === YM && f % 100 <= ultDia && V[v]) { V[v].docs += nd; V[v].cont += ct; } else if (prev.includes(k)) { base.docs += nd; base.cont += ct; } });
@@ -7200,7 +7202,7 @@ function confirmarNota() {
   x.onclick = () => cerrarModal(); card.insertBefore(x, card.firstChild); })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261126172831";
+const HWF_VER = "20261126175857";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -7251,10 +7253,11 @@ function av2DiasTienda(y, m, hasta) { const IRR = ["01-01", "05-01", "09-18", "0
 function av2Datos(B) {
   if (!B || !B.rows || !B.rows.length || !B.vend) return null; const [y, m] = String(B.corte || "").split("-").map(Number); if (!y) return null;
   const R = rkdCalc(B, y, m); if (!R) return null;
-  const tv = B.vend.indexOf("Tienda Hellywoof"), an = r => r[8] || B.anio, prim = {}, cli = {}; let venta = 0, costo = 0, nuevos = 0, vT = 0;
+  const tv = B.vend.indexOf("Tienda Hellywoof"), an = r => r[8] || B.anio, prim = {}, cli = {}, cn = {}; let venta = 0, costo = 0, nuevos = 0, vT = 0;
   B.rows.forEach(r => { const f = (an(r) * 100 + r[2]) * 100 + r[3]; if (r[5] > 0 && (prim[r[0]] == null || f < prim[r[0]])) prim[r[0]] = f; });
   B.rows.forEach(r => { if (an(r) !== y || r[2] !== m || r[3] > R.ultDia) return; if (r[7] === tv) { vT += r[5]; return; }
-    venta += r[5]; costo += r[4] * r[6]; if (r[5] > 0) (cli[r[0]] = cli[r[0]] || new Set()).add(r[1]); });
+    venta += r[5]; costo += r[4] * r[6]; cn[r[0] + "|" + r[1]] = (cn[r[0] + "|" + r[1]] || 0) + r[5]; });
+  Object.entries(cn).forEach(([kq, q]) => { if (!(q > 0)) return; const i = kq.lastIndexOf("|"), c = kq.slice(0, i); (cli[c] = cli[c] || new Set()).add(+kq.slice(i + 1)); });   /* skuneto */
   Object.entries(prim).forEach(([ci, f]) => { if (Math.floor(f / 100) === y * 100 + m && f % 100 <= R.ultDia && cli[ci]) nuevos++; });
   const np = {}; (B.cots || []).forEach(c => { const k = av2N(c[4]); np[k] = (np[k] || 0) + (Number(c[7]) || 0); });
   const npDist = Object.entries(np).filter(([k]) => k !== av2N("Tienda Hellywoof")).reduce((t, [, v]) => t + v, 0);
@@ -9957,8 +9960,7 @@ try { if (document.getElementById("crmInicio") && SES) pintarInicio(); } catch (
 (function () {
   const ADM = !!document.getElementById("s-res") && typeof pintarDashboard === "function", VEN = !ADM && typeof NAV_ORDEN !== "undefined" && !!document.getElementById("mInicio"), TND = !ADM && !VEN && !!document.getElementById("tNav") && typeof DATA === "function";
   if (!ADM && !VEN && !TND) return;
-  const FER = new Set(["2026-01-01", "2026-04-03", "2026-04-04", "2026-05-01", "2026-05-21", "2026-06-21", "2026-06-29", "2026-07-16", "2026-08-15", "2026-09-18", "2026-09-19", "2026-10-12", "2026-10-31", "2026-11-01", "2026-12-08", "2026-12-25",
-    "2027-01-01", "2027-04-02", "2027-04-03", "2027-05-01", "2027-05-21", "2027-06-21", "2027-06-28", "2027-07-16", "2027-08-15", "2027-09-17", "2027-09-18", "2027-09-19", "2027-10-11", "2027-10-31", "2027-11-01", "2027-12-08", "2027-12-25"]);
+  const FER = new Set(["2026-01-01","2026-04-03","2026-04-04","2026-05-01","2026-05-21","2026-06-21","2026-06-29","2026-07-16","2026-08-15","2026-09-18","2026-09-19","2026-10-12","2026-10-31","2026-11-01","2026-12-08","2026-12-25","2027-01-01","2027-03-26","2027-03-27","2027-05-01","2027-05-21","2027-06-21","2027-06-28","2027-07-16","2027-08-15","2027-09-17","2027-09-18","2027-09-19","2027-10-11","2027-10-31","2027-11-01","2027-12-08","2027-12-25","2028-01-01","2028-04-14","2028-04-15","2028-05-01","2028-05-21","2028-06-20","2028-06-26","2028-07-16","2028-08-15","2028-09-18","2028-09-19","2028-10-09","2028-10-27","2028-11-01","2028-12-08","2028-12-25"]);
   const IRR = ["01-01", "05-01", "09-18", "09-19", "12-25"], MESL = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
   const k = (y, m, d) => y + "-" + String(m).padStart(2, "0") + "-" + String(d).padStart(2, "0"), dim = (y, m) => new Date(y, m, 0).getDate();
   const habil = (y, m, d, tienda) => { const w = new Date(y, m - 1, d).getDay(); return tienda ? !IRR.includes(k(y, m, d).slice(5)) : w && w !== 6 && !FER.has(k(y, m, d)); };
@@ -11076,7 +11078,7 @@ body:has(#rdOv) #snBtn,body:has(#rdOv) #iaBtn,body:has(#rdOv) #navBotones{displa
   const e = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])), nr = s => String(s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").trim();
   const MM = v => "$" + (Math.abs(v) >= 1e6 ? (v / 1e6).toLocaleString("es-CL", { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + " MM" : Math.round(v).toLocaleString("es-CL")), pc = x => isFinite(x) ? Math.round(x * 100) + "%" : "–";
   const hoyS = () => { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
-  const FER = new Set(["2026-11-01", "2026-12-08", "2026-12-25", "2027-01-01", "2027-04-02", "2027-04-03", "2027-05-01", "2027-05-21", "2027-06-21", "2027-06-28", "2027-07-16", "2027-08-15", "2027-09-17", "2027-09-18", "2027-09-19", "2027-10-11", "2027-10-31", "2027-11-01", "2027-12-08", "2027-12-25"]);
+  const FER = new Set(["2026-01-01","2026-04-03","2026-04-04","2026-05-01","2026-05-21","2026-06-21","2026-06-29","2026-07-16","2026-08-15","2026-09-18","2026-09-19","2026-10-12","2026-10-31","2026-11-01","2026-12-08","2026-12-25","2027-01-01","2027-03-26","2027-03-27","2027-05-01","2027-05-21","2027-06-21","2027-06-28","2027-07-16","2027-08-15","2027-09-17","2027-09-18","2027-09-19","2027-10-11","2027-10-31","2027-11-01","2027-12-08","2027-12-25","2028-01-01","2028-04-14","2028-04-15","2028-05-01","2028-05-21","2028-06-20","2028-06-26","2028-07-16","2028-08-15","2028-09-18","2028-09-19","2028-10-09","2028-10-27","2028-11-01","2028-12-08","2028-12-25"]);
   const hab = (y, m, d1, d2) => { let n = 0; for (let d = d1; d <= d2; d++) { const w = new Date(y, m - 1, d).getDay(), k = y + "-" + String(m).padStart(2, "0") + "-" + String(d).padStart(2, "0"); if (w && w < 6 && !FER.has(k)) n++; } return n; };
   function calc() { const B = HB.base() || {}, R = B.rows || [], P = B.productos || [], V = B.vend || [], CL = B.clientes || [], tv = V.indexOf("Tienda Hellywoof"), S = SES && SES.vendedor ? SES.vendedor : {}, yo = S.cartera || S.nombre || "", iy = V.findIndex(v => nr(v) === nr(yo));
     const cy = Number(String(B.corte || "").slice(0, 4)) || B.anio, cm = Number(String(B.corte || "").slice(5, 7)), cd = Number(String(B.corte || "").slice(8, 10)) || 1, dim = new Date(cy, cm, 0).getDate();
