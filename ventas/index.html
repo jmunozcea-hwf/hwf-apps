@@ -7200,7 +7200,7 @@ function confirmarNota() {
   x.onclick = () => cerrarModal(); card.insertBefore(x, card.firstChild); })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261126164827";
+const HWF_VER = "20261126164935";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -11185,5 +11185,14 @@ html,body{max-width:100%;overflow-x:clip}
 .vd-t{min-width:0}.vd-c canvas{max-width:100%!important}
 @media(max-width:700px){#acW .ac-g{grid-template-columns:minmax(0,1fr)}}
 </style>
+<style>/* patch_venbi */
+#biSeg{display:none!important}[data-biu="l"],[data-un="l"]{display:none!important}
+</style>
+<script>/* patch_venbi: BI de Ventas sin Logística */
+(function () {
+  const fija = () => { const v = document.querySelector('#biSeg [data-un="v"]'); if (v && v.getAttribute("aria-pressed") !== "true") v.click(); };
+  new MutationObserver(() => setTimeout(fija, 30)).observe(document.body, { childList: true, subtree: true }); fija();
+})();
+</script>
 </body>
 </html>
