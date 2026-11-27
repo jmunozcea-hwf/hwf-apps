@@ -483,7 +483,7 @@ if (!cfg() || !DATA()) pantallaConexion(); else { arrancar(); bajar(true).then(n
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261127163339";
+const HWF_VER = "20261127182013";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -2527,4 +2527,204 @@ function vmPoner(cont, VM, antes) { try { if (!cont) return; const v = cont.quer
 </script>
 <script>/* patch_grafventas: LOGÍSTICA */ { const _pd = pintarDash; pintarDash = function () { const r = _pd.apply(this, arguments); try { const D = DATA(); vmPoner(document.getElementById("s-dash"), D && D.vmes); } catch (e) {} return r; };
   try { if (typeof SEC !== "undefined" && SEC === "dash" && DATA()) pintarDash(); } catch (e) {} }</script>
+<style>/* patch_traza */
+.tz-w{min-width:0}.tz-w h2 .muted{color:var(--muted,#5B6874);font-weight:400;font-size:.78rem}.tz-h{font-size:.8rem;color:var(--muted,#5B6874);margin:4px 0 8px}
+.tz-k{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.tz-k button{border:1.5px solid var(--line,#D5DEE5);background:var(--surface,#fff);color:inherit;border-radius:999px;padding:6px 11px;font:inherit;font-size:.78rem;font-weight:700;cursor:pointer;display:inline-flex;gap:6px;align-items:center;min-height:36px}
+.tz-k button b{font-variant-numeric:tabular-nums;background:var(--sunk,#EEF2F5);border-radius:999px;padding:0 7px;min-width:22px;text-align:center}
+.tz-k button[aria-pressed="true"]{background:#0B3146;border-color:#0B3146;color:#fff}.tz-k button[aria-pressed="true"] b{background:rgba(255,255,255,.2);color:#fff}
+.tz-k button.alerta b{background:#FDECEA;color:#B42318}.tz-k button.alerta[aria-pressed="true"] b{background:#B42318;color:#fff}
+.tz-bar{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:6px 0}
+.tz-b{border:1.5px solid var(--line,#D5DEE5);background:var(--surface,#fff);color:inherit;border-radius:10px;padding:7px 12px;font:inherit;font-size:.8rem;font-weight:700;cursor:pointer;min-height:36px}
+.tz-b:disabled{opacity:.6;cursor:default}.tz-b.p{background:#0B3146;border-color:#0B3146;color:#fff}.tz-b.m{border-color:#F1B8B3;background:#FDECEA;color:#B3261E}.tz-b.w{border-color:#F0C36B;background:#FFF7E6;color:#8A5300}
+.tz-q,.tz-in{width:100%;box-sizing:border-box;font:inherit;border:1px solid var(--line,#D5DEE5);border-radius:12px;padding:10px;background:var(--surface,#fff);color:inherit;margin:4px 0}
+.tz-av{font-size:.82rem;border-radius:10px;padding:8px 10px;margin:6px 0;background:#FFF7E6;color:#8A5300}.tz-av.e{background:#FDECEA;color:#B42318}.tz-av.o{background:#E3F4EA;color:#1C7A4E}
+.tz-l{display:grid;gap:6px;margin-top:6px}
+.tz-i{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 10px;text-align:left;width:100%;font:inherit;color:inherit;background:var(--surface,#fff);border:1px solid var(--line,#E3E9EE);border-left:5px solid var(--tzc,#9AA7B2);border-radius:14px;padding:10px 12px;cursor:pointer}
+.tz-i:focus-visible,.tz-b:focus-visible,.tz-k button:focus-visible{outline:3px solid #F0A818;outline-offset:2px}
+.tz-i .c{font-weight:800;overflow-wrap:anywhere}.tz-i .c small{font-weight:700;color:var(--muted,#5B6874);margin-right:4px}.tz-i small{color:var(--muted,#5B6874);font-size:.76rem}.tz-i .s{grid-column:1/-1;overflow-wrap:anywhere}
+.tz-e{display:inline-block;font-size:.68rem;font-weight:900;border-radius:999px;padding:3px 9px;white-space:nowrap;align-self:start;background:var(--tzb,#ECEFF1);color:var(--tzf,#5B6874)}
+.tz-i.atr .at,.tz-at{color:#B42318;font-weight:800}
+.e-recibido{--tzc:#7C93A5;--tzb:#E6EEF3;--tzf:#0B3146}.e-validado{--tzc:#3B82C4;--tzb:#DCEBFA;--tzf:#174A7C}.e-en_preparacion{--tzc:#E0A030;--tzb:#FFF1DC;--tzf:#8A5300}
+.e-despachado{--tzc:#7C6AD0;--tzb:#E8E3F8;--tzf:#4B3A99}.e-en_ruta{--tzc:#26A69A;--tzb:#D8F2EF;--tzf:#0F6E73}.e-entregado{--tzc:#1C7A4E;--tzb:#E3F4EA;--tzf:#1C7A4E}
+.e-incidencia{--tzc:#B42318;--tzb:#FDECEA;--tzf:#B42318}.e-anulado{--tzc:#9AA7B2;--tzb:#ECEFF1;--tzf:#5B6874}
+#tzDlg{position:fixed;inset:0;z-index:9999;background:rgba(11,49,70,.55);display:grid;place-items:end center}
+#tzDlg .tz-d{background:var(--surface,#fff);color:var(--ink,#0F1E29);width:100%;max-width:620px;max-height:94vh;overflow:auto;border-radius:18px 18px 0 0;padding:14px 14px calc(14px + env(safe-area-inset-bottom));box-sizing:border-box}
+@media(min-width:700px){#tzDlg{place-items:center;padding:16px}#tzDlg .tz-d{border-radius:18px}}
+.tz-d h3{margin:0;font-size:1.05rem;overflow-wrap:anywhere}.tz-d .tz-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.tz-d .tz-x{border:0;background:var(--sunk,#EEF2F5);border-radius:10px;width:40px;height:40px;font-size:1.1rem;cursor:pointer;flex:none;color:inherit}
+.tz-g{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:6px 12px;margin:10px 0;font-size:.82rem}.tz-g div{min-width:0;overflow-wrap:anywhere}.tz-g span{display:block;font-size:.68rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted,#5B6874);font-weight:800}
+.tz-t{list-style:none;margin:8px 0;padding:0 0 0 14px;border-left:3px solid var(--line,#D5DEE5)}.tz-t li{position:relative;margin:0 0 12px;padding-left:10px;font-size:.84rem;overflow-wrap:anywhere}
+.tz-t li::before{content:"";position:absolute;left:-23px;top:3px;width:12px;height:12px;border-radius:50%;background:var(--tzc,#9AA7B2);border:2px solid var(--surface,#fff)}
+.tz-t li small{display:block;color:var(--muted,#5B6874);font-size:.74rem}.tz-t li a{color:#0F6E73;font-weight:700}
+.tz-t .nota{white-space:pre-line;margin-top:2px}
+.tz-d h4{margin:14px 0 6px;font-size:.9rem;border-bottom:2px solid #80C6C9;padding-bottom:3px}
+.tz-f label{display:block;font-size:.78rem;font-weight:700;margin:8px 0 0}.tz-f .req{color:#B42318}
+.tz-f textarea.tz-in{min-height:76px;resize:vertical}
+.tz-ac{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.tz-rep .tz-in{margin:6px 0}
+@media(max-width:420px){.tz-k button{padding:6px 9px}.tz-i{padding:9px 10px}}
+</style>
+<script>/* patch_traza: trazabilidad de pedidos (Admin y Logística) */
+(function () {
+  const LOG = !!document.querySelector('#nav [data-s="rutas"]') && typeof pintar === "function";
+  const ADM = !LOG && typeof pintarMas === "function" && !!document.getElementById("masSeg");
+  if (!LOG && !ADM) return;
+  const APP = LOG ? "logistica" : "admin";
+  const es = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const nrm = s => String(s == null ? "" : s).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
+  const TZ = "America/Santiago", FF = new Intl.DateTimeFormat("es-CL", { timeZone: TZ, year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
+  const FD = new Intl.DateTimeFormat("es-CL", { timeZone: TZ, year: "numeric", month: "2-digit", day: "2-digit" });
+  const partes = (f, d) => { const o = {}; f.formatToParts(d).forEach(x => o[x.type] = x.value); return o; };
+  const fh = iso => { const d = new Date(iso); if (!iso || isNaN(d)) return ""; const o = partes(FF, d); return o.day + "-" + o.month + "-" + o.year + " " + o.hour + ":" + o.minute; };
+  const fd = s => { const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(s || ""); return m ? m[3] + "-" + m[2] + "-" + m[1] : ""; };
+  const hoyCL = () => { const o = partes(FD, new Date()); return o.year + "-" + o.month + "-" + o.day; };
+  const ms = s => { const t = Date.parse(s || ""); return isNaN(t) ? 0 : t; };
+  const conf = () => { try { if (typeof SYC === "function") { const c = SYC(); if (c && c.url) return c; } } catch (e) {} try { if (typeof syCfg === "function") { const c = syCfg(); if (c && c.url) return c; } } catch (e) {} try { if (typeof cfg === "function") { const c = cfg(); if (c && c.url) return c; } } catch (e) {} return null; };
+  async function llamar(d) { const c = conf(); if (!c) return { ok: false, red: true, error: "Esta app no está conectada al script de Google." };
+    try { if (typeof syCall === "function") return await syCall(c, d); if (typeof syLlamar === "function") return await syLlamar(c, d);
+      const r = await fetch(c.url, { method: "POST", body: JSON.stringify(Object.assign({ clave: c.clave }, d)) }), t = await r.text(); try { return JSON.parse(t); } catch (e) { return { ok: false, error: "El script de Google no respondió bien." }; } }
+    catch (e) { return { ok: false, red: true, error: "Sin conexión a internet." }; } }
+  const lsG = (k, d) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } };
+  const lsS = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
+  const CK = "hwf-traza-cache", PK = "hwf-traza-por";
+  const EST0 = { recibido: "Recibido", validado: "Validado", en_preparacion: "En preparación", despachado: "Despachado", en_ruta: "En ruta", entregado: "Entregado", incidencia: "Con incidencia", anulado: "Anulado" };
+  const ST = { L: null, estados: EST0, trans: {}, para: "", f: "todos", q: "", dias: 45, cargando: false, err: "", red: false, tc: 0, t: 0 };
+  { const c = lsG(CK, null); if (c && Array.isArray(c.L)) { ST.L = c.L; ST.estados = c.estados || EST0; ST.trans = c.trans || {}; ST.para = c.para || ""; ST.tc = c.t || 0; if (c.dias) ST.dias = c.dias; } }
+  const lab = k => ST.estados[k] || EST0[k] || String(k || "—");
+  const cls = k => "e-" + String(k || "").replace(/[^a-z_]/g, "");
+  const cerrado = p => p.estado === "entregado" || p.estado === "anulado";
+  const atrasado = p => !!p.compromiso && !cerrado(p) && p.compromiso < hoyCL();
+  const base = p => ms(p.recibido) || ms(p.actualizado) || ((p.eventos && p.eventos[0] && ms(p.eventos[0].fecha)) || 0);
+  const dias = p => { const a = base(p); if (!a) return ""; const b = p.estado === "entregado" && ms(p.entregado) ? ms(p.entregado) : Date.now(); return Math.max(0, Math.floor((b - a) / 864e5)); };
+  const nro = p => p.num || p.pedido || "";
+  const rutaTxt = p => { const t = String(p.ruta || "").split("|"), r = t[0] ? fd(t[0]) + (t[2] || t[1] ? " · " + (t[2] || t[1]) : "") : ""; return [r, p.transportista].filter(Boolean).join(" · "); };
+  let caja = null, dlg = null, DET = null, prevFoco = null;
+
+  /* ---------- lista ---------- */
+  function filtrar() { const q = nrm(ST.q), L = (ST.L || []).slice().sort((a, b) => base(b) - base(a));
+    return L.filter(p => (ST.f === "todos" || (ST.f === "atras" ? atrasado(p) : p.estado === ST.f)) && (!q || nrm([p.num, p.pedido, p.cliente, p.guia, p.vendedor, p.rut].join(" ")).includes(q))); }
+  function pintarKpi() { const el = caja && caja.querySelector("#tzKpi"); if (!el) return; const L = ST.L || [], n = k => L.filter(p => p.estado === k).length, at = L.filter(atrasado).length;
+    const ord = Object.keys(ST.estados).filter(k => k !== "incidencia" && k !== "anulado").concat(["incidencia", "anulado"].filter(k => ST.estados[k]));
+    const pil = (k, t, c, extra) => `<button type="button" data-tzf="${es(k)}" class="${extra || ""}" aria-pressed="${ST.f === k}">${es(t)} <b>${c}</b></button>`;
+    el.innerHTML = pil("todos", "Todos", L.length) + ord.map(k => pil(k, k === "incidencia" ? "Incidencias abiertas" : lab(k), n(k), k === "incidencia" && n(k) ? "alerta" : "")).join("") + pil("atras", "Atrasados", at, at ? "alerta" : ""); }
+  function pintarLista() { const el = caja && caja.querySelector("#tzLista"); if (!el) return; pintarKpi(); const F = filtrar(), hoy = hoyCL();
+    const xb = caja.querySelector("[data-tzx]"); if (xb) xb.disabled = !F.length;
+    if (!ST.L) { el.innerHTML = `<p class="tz-h">${ST.cargando ? "Cargando pedidos…" : "Aún no hay datos. Toca «Actualizar»."}</p>`; return; }
+    if (!F.length) { el.innerHTML = `<p class="tz-h">No hay pedidos con ese filtro.</p>`; return; }
+    el.innerHTML = F.map(p => { const d = dias(p), at = atrasado(p), ru = rutaTxt(p);
+      return `<button type="button" class="tz-i ${cls(p.estado)}${at ? " atr" : ""}" data-tzp="${es(p.pedido)}"><span class="c"><small>N° ${es(nro(p))}</small>${es(p.cliente || "Sin cliente")}</span><span class="tz-e">${es(lab(p.estado))}</span>
+        <small class="s">${[p.vendedor ? es(p.vendedor) : "", p.compromiso ? `<span class="${at ? "at" : ""}">${at ? "Atrasado · " : ""}compromiso ${fd(p.compromiso)}</span>` : "", ru ? es(ru) : "", p.guia ? "guía " + es(p.guia) : "", d !== "" ? d + " d desde recibido" : ""].filter(Boolean).join(" · ")}</small></button>`; }).join(""); }
+  function pintarAviso() { const el = caja && caja.querySelector("#tzAviso"); if (!el) return; let h = "";
+    if (ST.err) h = `<div class="tz-av e" role="alert">${es(ST.err)}${ST.L ? " Se muestra la última lista guardada" + (ST.tc ? " (" + es(fh(new Date(ST.tc).toISOString())) + ")" : "") + "." : ""}</div>`;
+    else if (ST.red && ST.L) h = `<div class="tz-av">Sin conexión: se muestra la última lista guardada.</div>`;
+    else if (ST.tc) h = `<p class="tz-h" style="margin:2px 0">Actualizado ${es(fh(new Date(ST.tc).toISOString()))}</p>`;
+    el.innerHTML = h; const a = caja.querySelector("[data-tza]"); if (a) { a.disabled = ST.cargando; a.textContent = ST.cargando ? "Cargando…" : "↻ Actualizar"; } }
+  function pintarRep() { const el = caja && caja.querySelector("#tzRep"); if (!el) return; const inp = el.querySelector("#tzPara");
+    if (inp && inp.dataset.sucio === "1") return;
+    el.innerHTML = `<h2>Reportes por correo</h2><p class="tz-h">El reporte diario sale desde las 18:00 y el semanal los lunes desde las 08:00. Escribe los correos separados por coma.</p>
+      <label for="tzPara" style="font-size:.78rem;font-weight:700">Destinatarios</label><input class="tz-in" id="tzPara" type="text" inputmode="email" autocomplete="off" value="${es(ST.para)}" placeholder="correo1@…, correo2@…">
+      <div class="tz-av${ST.para ? " o" : ""}" id="tzParaAv" ${ST.para ? "hidden" : ""}>Aún no hay destinatarios: los reportes no se envían.</div>
+      <div class="tz-ac"><button type="button" class="tz-b p" data-tzg="1">Guardar</button><button type="button" class="tz-b" data-tzpr="diario">Enviar prueba diario</button><button type="button" class="tz-b" data-tzpr="semanal">Enviar prueba semanal</button></div>
+      <div id="tzRes" role="status" aria-live="polite"></div>`;
+    const i2 = el.querySelector("#tzPara"); i2.oninput = () => { i2.dataset.sucio = "1"; }; }
+  function pintar0(box) { caja = box;
+    box.innerHTML = `<div class="card tz-w"><h2>Trazabilidad <span class="muted">seguimiento de pedidos · últimos ${ST.dias} días</span></h2>
+      <p class="tz-h">Todo lo que va pasando con cada pedido, de la nota al reparto. Toca un pedido para ver su historia y moverlo a mano si falta algo.</p>
+      <div class="tz-bar"><button type="button" class="tz-b" data-tza="1">↻ Actualizar</button>${[15, 45, 90].map(d => `<button type="button" class="tz-b${ST.dias === d ? " p" : ""}" data-tzd="${d}" aria-pressed="${ST.dias === d}">${d} días</button>`).join("")}${typeof window.hwfXlsx === "function" ? `<button type="button" class="tz-b" data-tzx="1">Excel</button>` : ""}</div>
+      <div id="tzAviso" aria-live="polite"></div><div class="tz-k" id="tzKpi" role="group" aria-label="Filtrar por estado"></div>
+      <label for="tzQ" class="tz-h" style="display:block;margin:6px 0 0">Buscar por cliente, N° o guía</label><input class="tz-q" id="tzQ" type="search" placeholder="Buscar cliente, N° o guía" value="${es(ST.q)}">
+      <div class="tz-l" id="tzLista"></div></div>
+      <div class="card tz-w tz-rep" id="tzRep"></div>`;
+    pintarAviso(); pintarLista(); pintarRep();
+    const q = box.querySelector("#tzQ"); q.oninput = () => { ST.q = q.value; clearTimeout(pintar0.t); pintar0.t = setTimeout(pintarLista, 200); };
+    box.onclick = ev => { const t = ev.target.closest("button"); if (!t || !box.contains(t)) return;
+      if (t.dataset.tzf !== undefined) { ST.f = ST.f === t.dataset.tzf ? "todos" : t.dataset.tzf; pintarLista(); }
+      else if (t.dataset.tzp) abrirDet(t.dataset.tzp, t);
+      else if (t.dataset.tza) cargar(box);
+      else if (t.dataset.tzd) { ST.dias = +t.dataset.tzd; pintar0(box); cargar(box); }
+      else if (t.dataset.tzx) excel();
+      else if (t.dataset.tzg) guardarPara();
+      else if (t.dataset.tzpr) prueba(t.dataset.tzpr, t); }; }
+
+  /* ---------- carga ---------- */
+  async function cargar(box, callado) { if (box) caja = box; if (ST.cargando) { ST.otra = true; return; } ST.cargando = true; ST.err = ""; pintarAviso();
+    const r = await llamar({ accion: "trazaVer", dias: ST.dias }); ST.cargando = false; ST.t = Date.now();
+    if (r && r.ok) { ST.L = r.pedidos || []; if (r.estados && typeof r.estados === "object") ST.estados = r.estados; ST.trans = r.transiciones || {}; if (typeof r.para === "string") ST.para = r.para; ST.tc = Date.now(); ST.red = false;
+      lsS(CK, { t: ST.tc, dias: ST.dias, L: ST.L, estados: ST.estados, trans: ST.trans, para: ST.para }); }
+    else { ST.red = !!(r && r.red); ST.err = (r && r.error) || "No se pudo leer la trazabilidad."; if (ST.red) ST.err = "Sin conexión: no se pudo actualizar."; }
+    if (caja && caja.isConnected && caja.querySelector("#tzLista")) { pintarAviso(); pintarLista(); pintarRep(); } if (DET && dlg) pintarDet();
+    if (ST.otra) { ST.otra = false; cargar(null, true); } }
+
+  /* ---------- detalle ---------- */
+  const pedido = id => (ST.L || []).find(p => p.pedido === id);
+  function cerrarDet() { if (dlg) { dlg.remove(); dlg = null; } document.removeEventListener("keydown", tecla, true); DET = null; if (prevFoco && prevFoco.isConnected) try { prevFoco.focus(); } catch (e) {} }
+  function tecla(e) { if (e.key === "Escape" && dlg) { e.stopPropagation(); cerrarDet(); } }
+  function abrirDet(id, origen) { if (!pedido(id)) return; prevFoco = origen || document.activeElement; DET = { id, est: null, msg: "", err: "", ocup: false };
+    if (dlg) dlg.remove(); dlg = document.createElement("div"); dlg.id = "tzDlg"; dlg.onclick = e => { if (e.target === dlg) cerrarDet(); }; document.body.appendChild(dlg); document.addEventListener("keydown", tecla, true); pintarDet(true); }
+  function pintarDet(foco) { if (!dlg || !DET) return; const p = pedido(DET.id); if (!p) { cerrarDet(); return; }
+    const ev = (p.eventos || []).slice().sort((a, b) => ms(a.fecha) - ms(b.fecha)), tr = (ST.trans[p.estado] || []).filter(k => k !== p.estado);
+    const enl = u => /^https:\/\//i.test(u || "") ? `<a href="${es(u)}" target="_blank" rel="noopener noreferrer">Ver guía (PDF)</a>` : "";
+    const campo = (t, v) => v ? `<div><span>${t}</span>${v}</div>` : "";
+    dlg.innerHTML = `<div class="tz-d ${cls(p.estado)}" role="dialog" aria-modal="true" aria-labelledby="tzDt"><div class="tz-top"><div><h3 id="tzDt">Pedido ${es(nro(p))} · ${es(p.cliente || "Sin cliente")}</h3><span class="tz-e" style="margin-top:6px">${es(lab(p.estado))}</span></div><button type="button" class="tz-x" data-tzc="1" aria-label="Cerrar">✕</button></div>
+      <div class="tz-g">${campo("Vendedor", es(p.vendedor))}${campo("RUT", es(p.rut))}${campo("Compromiso", p.compromiso ? `<span class="${atrasado(p) ? "tz-at" : ""}">${fd(p.compromiso)}${atrasado(p) ? " (atrasado)" : ""}</span>` : "")}${campo("Ruta", es(rutaTxt(p)))}${campo("Guía", es(p.guia) + (p.guiaUrl ? " " + enl(p.guiaUrl) : ""))}${campo("Transportista", es(p.transportista))}${campo("NP Defontana", es(p.np))}${campo("Incidencias", p.incidencias ? String(p.incidencias) : "")}${campo("Recibido", fh(p.recibido))}${campo("Días", dias(p) !== "" ? dias(p) + " d" : "")}</div>
+      <h4>Línea de tiempo</h4>${ev.length ? `<ol class="tz-t">${ev.map(e => `<li class="${cls(e.estado)}"><b>${es(lab(e.estado))}</b> <small style="display:inline">${es(fh(e.fecha))}</small><small>${[e.por ? "por " + es(e.por) : "", e.origen ? "origen " + es(e.origen) : ""].filter(Boolean).join(" · ")}</small>${e.nota ? `<div class="nota">${es(e.nota)}</div>` : ""}${[e.guia ? "Guía " + es(e.guia) : "", e.transportista ? es(e.transportista) : "", enl(e.guiaUrl), e.np ? "NP " + es(e.np) : ""].filter(Boolean).length ? `<small>${[e.guia ? "Guía " + es(e.guia) : "", e.transportista ? es(e.transportista) : "", enl(e.guiaUrl), e.np ? "NP " + es(e.np) : ""].filter(Boolean).join(" · ")}</small>` : ""}</li>`).join("")}</ol>` : `<p class="tz-h">Sin eventos registrados.</p>`}
+      <div role="status" aria-live="polite">${DET.msg ? `<div class="tz-av o">${es(DET.msg)}</div>` : ""}${DET.err ? `<div class="tz-av e">${es(DET.err)}</div>` : ""}</div>
+      <h4>Mover pedido</h4>${DET.est ? formulario(p) : (tr.length ? `<div class="tz-ac">${tr.map(k => `<button type="button" class="tz-b ${k === "anulado" ? "m" : k === "incidencia" ? "w" : "p"}" data-tze="${es(k)}">${es(lab(k))}</button>`).join("")}</div>` : `<p class="tz-h">Este pedido ya no tiene cambios posibles.</p>`)}</div>`;
+    dlg.onclick = e => { if (e.target === dlg) return cerrarDet(); const t = e.target.closest("button"); if (!t) return;
+      if (t.dataset.tzc) cerrarDet(); else if (t.dataset.tze) { DET.est = t.dataset.tze; DET.v = null; DET.err = ""; DET.msg = ""; pintarDet(); const f = dlg.querySelector("#tzNota"); if (f) f.focus(); }
+      else if (t.dataset.tzv) { DET.est = null; DET.err = ""; pintarDet(); } else if (t.dataset.tzs) guardarEv(p); };
+    if (foco) { const x = dlg.querySelector(".tz-x"); if (x) x.focus(); } }
+  function formulario(p) { const k = DET.est, V = DET.v || {}, obl = k === "incidencia" || k === "anulado", pide = k === "despachado", fec = ["validado", "en_preparacion", "despachado", "en_ruta"].includes(k);
+    return `<div class="tz-f"><p style="margin:0;font-weight:700">Pasar a «${es(lab(k))}»</p>
+      <label for="tzNota">Nota${obl ? ' <span class="req">(obligatoria)</span>' : " (opcional)"}</label><textarea class="tz-in" id="tzNota" maxlength="500">${es(V.nota || "")}</textarea>
+      ${pide ? `<label for="tzGuia">N° de guía (opcional)</label><input class="tz-in" id="tzGuia" type="text" autocomplete="off" value="${es(V.guia || "")}"><label for="tzTrans">Transportista (opcional)</label><input class="tz-in" id="tzTrans" type="text" autocomplete="off" value="${es(V.trans || "")}"><label for="tzUrl">Enlace al PDF de la guía (opcional, https)</label><input class="tz-in" id="tzUrl" type="url" inputmode="url" placeholder="https://…" value="${es(V.url || "")}">` : ""}
+      ${fec ? `<label for="tzComp">Fecha comprometida (opcional)</label><input class="tz-in" id="tzComp" type="date" value="${es(V.comp !== undefined ? V.comp : (p.compromiso || ""))}">` : ""}
+      <label for="tzPor">Responsable</label><input class="tz-in" id="tzPor" type="text" autocomplete="off" value="${es(V.por !== undefined ? V.por : (lsG(PK, "") || (LOG ? "Logística" : "Administración")))}">
+      <div class="tz-ac"><button type="button" class="tz-b ${k === "anulado" ? "m" : "p"}" data-tzs="1"${DET.ocup ? " disabled" : ""}>${DET.ocup ? "Guardando…" : "Guardar"}</button><button type="button" class="tz-b" data-tzv="1">Volver</button></div></div>`; }
+  async function guardarEv(p) { if (!DET || DET.ocup) return; const k = DET.est, v = id => ((dlg.querySelector("#" + id) || {}).value || "").trim();
+    const nota = v("tzNota"), por = v("tzPor"), url = v("tzUrl"); DET.v = { nota, por, url, guia: v("tzGuia"), trans: v("tzTrans"), comp: v("tzComp") };   /* se conservan los datos si hay un error */
+    if ((k === "incidencia" || k === "anulado") && !nota) { DET.err = "Escribe una nota: es obligatoria para " + (k === "anulado" ? "anular" : "registrar una incidencia") + "."; pintarDet(); const f = dlg.querySelector("#tzNota"); if (f) f.focus(); return; }
+    if (!por) { DET.err = "Escribe quién hace el cambio (Responsable)."; pintarDet(); return; }
+    if (url && !/^https:\/\//i.test(url)) { DET.err = "El enlace de la guía debe empezar con https://"; pintarDet(); return; }
+    if (k === "anulado" && !confirm("¿Anular el pedido " + nro(p) + " de " + (p.cliente || "") + "? Esto queda registrado en la línea de tiempo.")) return;
+    const d = { accion: "trazaEvento", pedido: p.pedido, estado: k, por, app: APP }; if (nota) d.nota = nota; if (k === "despachado") { if (v("tzGuia")) d.guia = v("tzGuia"); if (v("tzTrans")) d.transportista = v("tzTrans"); if (url) d.guiaUrl = url; } if (v("tzComp") && v("tzComp") !== (p.compromiso || "")) d.compromiso = v("tzComp");
+    lsS(PK, por); DET.ocup = true; DET.err = ""; pintarDet(); const r = await llamar(d); if (!DET || !dlg) return; DET.ocup = false;
+    if (r && r.ok) { const i = (ST.L || []).findIndex(x => x.pedido === p.pedido); if (i >= 0 && r.pedido) ST.L[i] = Object.assign({}, ST.L[i], r.pedido); DET.est = null; DET.v = null; DET.msg = "Listo: el pedido pasó a «" + lab(k) + "»."; ST.tc = Date.now(); lsS(CK, { t: ST.tc, dias: ST.dias, L: ST.L, estados: ST.estados, trans: ST.trans, para: ST.para });
+      pintarLista(); pintarDet(); cargar(null, true); }
+    else { DET.err = (r && r.error) || "No se pudo guardar."; pintarDet(); } }
+
+  /* ---------- reportes por correo ---------- */
+  async function guardarPara() { const inp = caja.querySelector("#tzPara"), res = caja.querySelector("#tzRes"), v = inp.value.trim(), lista = v.split(",").map(x => x.trim()).filter(Boolean);
+    if (lista.some(x => !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(x))) { res.innerHTML = `<div class="tz-av e">Revisa los correos: deben tener forma nombre@dominio.cl y separarse con coma.</div>`; return; }
+    res.innerHTML = `<div class="tz-av">Guardando…</div>`; const r = await llamar({ accion: "trazaConfig", para: lista.join(",") });
+    if (r && r.ok) { ST.para = typeof r.para === "string" ? r.para : lista.join(","); inp.dataset.sucio = ""; const c = lsG(CK, null); if (c) { c.para = ST.para; lsS(CK, c); } pintarRep(); const rs = caja.querySelector("#tzRes"); if (rs) rs.innerHTML = `<div class="tz-av o">${ST.para ? "Destinatarios guardados." : "Destinatarios borrados: los reportes no se envían."}</div>`; }
+    else res.innerHTML = `<div class="tz-av e">${es((r && r.error) || "No se pudo guardar.")}</div>`; }
+  async function prueba(tipo, b) { const inp = caja.querySelector("#tzPara"), res = caja.querySelector("#tzRes");
+    if (inp.value.trim() !== (ST.para || "")) { res.innerHTML = `<div class="tz-av">Guarda primero los destinatarios: la prueba se envía a los que están guardados.</div>`; return; }
+    if (!ST.para) { res.innerHTML = `<div class="tz-av">Aún no hay destinatarios: los reportes no se envían.</div>`; return; }
+    b.disabled = true; res.innerHTML = `<div class="tz-av">Enviando prueba ${tipo}…</div>`; const r = await llamar({ accion: "trazaConfig", probar: tipo }); b.disabled = false; const pr = r && r.prueba;
+    if (r && r.ok && pr && pr.ok) res.innerHTML = `<div class="tz-av o">Prueba ${tipo} enviada${pr.enviado ? ": " + es(typeof pr.enviado === "string" ? pr.enviado : "revisa tu correo") : " a " + es(r.para || ST.para)}.</div>`;
+    else res.innerHTML = `<div class="tz-av e">${es((pr && pr.error) || (r && r.error) || "No se pudo enviar la prueba.")}</div>`; }
+
+  /* ---------- Excel ---------- */
+  function excel() { const F = filtrar(); if (!F.length || typeof window.hwfXlsx !== "function") return;
+    const filas = [["N°", "Cliente", "RUT", "Vendedor", "Estado", "Compromiso", "Guía", "Transportista", "Ruta", "Recibido", "Entregado", "Días", "Incidencias"]]
+      .concat(F.map(p => [nro(p), p.cliente || "", p.rut || "", p.vendedor || "", lab(p.estado), fd(p.compromiso), p.guia || "", p.transportista || "", rutaTxt(p), fh(p.recibido), fh(p.entregado), dias(p) === "" ? "" : dias(p), p.incidencias || 0]));
+    try { const bl = window.hwfXlsx(filas, "Trazabilidad"), u = URL.createObjectURL(bl), a = document.createElement("a"); a.href = u; a.download = "trazabilidad-" + hoyCL() + ".xlsx"; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(u), 60000); }
+    catch (e) { ST.err = "No se pudo generar el Excel."; pintarAviso(); } }
+
+  /* ---------- entrada ---------- */
+  const abrir = box => { pintar0(box); if (!ST.t || Date.now() - ST.t > 60000) cargar(box); };
+  if (ADM) { try { if (typeof NAV_MNOM !== "undefined") NAV_MNOM.traza = "Trazabilidad"; } catch (e) {}
+    const _pm = pintarMas; pintarMas = function () { if (typeof vistaMas !== "undefined" && vistaMas === "traza") return abrir(document.getElementById("masBody")); return _pm.apply(this, arguments); }; return; }
+  const nav = document.getElementById("nav");
+  if (!nav.querySelector('[data-s="traza"]')) { const b = document.createElement("button"); b.type = "button"; b.dataset.s = "traza";
+    b.innerHTML = '<span class="ic"><svg viewBox="0 0 32 32" aria-hidden="true" class="hic"><rect width="32" height="32" rx="9" fill="#7C6AD0"/><g fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="9" r="2.4"/><circle cx="23" cy="16" r="2.4"/><circle cx="9" cy="23" r="2.4"/><path d="M11 10l10 5M11 22l10-5"/></g></svg></span>Trazabilidad';
+    const ped = nav.querySelector('[data-s="ped"]'), r = nav.querySelector('[data-s="rutas"]'); if (ped) ped.after(b); else nav.insertBefore(b, r); }
+  if (!document.getElementById("s-traza")) { const s = document.createElement("section"); s.id = "s-traza"; s.hidden = true; document.querySelector("main").appendChild(s); }
+  const _p = pintar; pintar = function (s) { if (s === "traza") return abrir(document.getElementById("s-traza")); return _p.apply(this, arguments); };
+  try { if (typeof SEC !== "undefined" && SEC === "traza") ir("traza"); } catch (e) {}
+})();
+</script>
 </body></html>
