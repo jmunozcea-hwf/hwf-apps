@@ -5290,7 +5290,7 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261127140835";
+const HWF_VER = "20261127163339";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -10424,8 +10424,7 @@ html,body{max-width:100%;overflow-x:clip}
   function metaHtml() { const L = (E && E.meta) || []; if (!L.length) return "";
     return `<details class="da-m"${L.some(x => !x.fecha) ? " open" : ""}><summary>Últimos informes en META</summary><table>${L.map(x => { const v = x.fecha ? (Date.now() - new Date(x.fecha)) / 864e5 : 99;
       return `<tr><td>${es(x.tipo)}</td><td class="${v > 3 ? "vj" : ""}">${fcorta(x.fecha)}</td></tr>`; }).join("")}</table></details>`; }
-  /* 27-11-2026 (pedido de la sesión del PC, Jorge): el Libro Mayor (~10 MB) se descarga 1 vez al día; con la casilla marcada se pide igual */
-  let incLM = false;
+  /* 27-11-2026 (sesión del PC, Jorge): el Libro Mayor es la única fuente de la cobranza y se descarga en CADA actualización (sin casilla) */
   const lmFecha = () => { const x = ((E && E.meta) || []).find(m => m.tipo === "Libro Mayor"); return x && x.fecha ? " Vigente: " + fcorta(x.fecha) + "." : ""; };
   function pintar() { const old = document.getElementById("defAct"); if (!enDatos()) { if (old) old.remove(); return; }
     const s = document.getElementById("masBody"); if (!s) return; let b = old;
@@ -10438,9 +10437,9 @@ html,body{max-width:100%;overflow-x:clip}
       if (lst) { lst.before(tit("3 · Estado de los datos")); const m = document.createElement("div"); m.id = "dfMeta"; lst.after(m); } }
     if (!b || b.parentNode !== host) { if (b) b.remove(); b = document.createElement("section"); b.id = "defAct"; if (dc) { const h2 = dc.querySelector("h2"); h2 ? h2.after(b) : dc.prepend(b); } else s.prepend(b);
       b.onclick = ev => { if (ev.target.closest("#dfBtn")) pedir(); };
-      b.onchange = ev => { if (ev.target.id === "dfLM") incLM = ev.target.checked; }; }
+}
     const [t, c] = texto(), act = E && E.ok && (E.estado === "pendiente" || E.estado === "en_curso");
-    const html = `<div class="da-h"><b>1 · Descargar los informes de Defontana</b><button type="button" id="dfBtn"${ocupado || act ? " disabled" : ""}>${act ? "Actualizando…" : "Actualizar datos de Defontana"}</button></div>${act ? (E.progreso && E.progreso.total ? `<div class="da-p"><b style="width:${Math.max(4, Math.min(100, Math.round(100 * (E.progreso.hechos || 0) / E.progreso.total)))}%"></b></div>` : '<div class="da-p"><i></i></div>') : ""}<label class="da-lm"><input type="checkbox" id="dfLM"${incLM ? " checked" : ""}${ocupado || act ? " disabled" : ""}> Incluir Libro Mayor</label><div class="da-lmx">El Libro Mayor se actualiza automáticamente 1 vez al día; márcala solo si necesitas los pagos más recientes.${lmFecha()}</div><div class="da-e ${c}">${es(t)}</div>${metaHtml()}`;
+    const html = `<div class="da-h"><b>1 · Descargar los informes de Defontana</b><button type="button" id="dfBtn"${ocupado || act ? " disabled" : ""}>${act ? "Actualizando…" : "Actualizar datos de Defontana"}</button></div>${act ? (E.progreso && E.progreso.total ? `<div class="da-p"><b style="width:${Math.max(4, Math.min(100, Math.round(100 * (E.progreso.hechos || 0) / E.progreso.total)))}%"></b></div>` : '<div class="da-p"><i></i></div>') : ""}<div class="da-lmx">La cobranza sale del Libro Mayor, que se baja en cada actualización.${lmFecha()}</div><div class="da-e ${c}">${es(t)}</div>${metaHtml()}`;
     const mH = metaHtml(), mBox = document.getElementById("dfMeta");
     const html2 = mBox ? html.replace(mH, "") : html; if (b.innerHTML !== html2) b.innerHTML = html2;
     if (mBox && mBox.innerHTML !== mH) mBox.innerHTML = mH; }
@@ -10448,7 +10447,7 @@ html,body{max-width:100%;overflow-x:clip}
   function programar() { clearTimeout(tPoll); const act = E && E.ok && (E.estado === "pendiente" || E.estado === "en_curso" || (E.estado === "listo" && !E.procesado_en));
     tPoll = setTimeout(() => { if (!document.hidden) estado(); else programar(); }, act ? 60000 : 10 * 60000); }
   async function pedir() { if (ocupado) return; if (!confirm("¿Pedir al PC de la oficina que descargue ahora los informes de Defontana?\n\nEl PC debe estar encendido, con Claude abierto y la sesión de Defontana iniciada en Chrome.")) return;
-    ocupado = true; pintar(); const r = await llamar({ accion: "defSolicitar", por: "HWF Admin", incluir_libro_mayor: incLM }); ocupado = false; incLM = false; E = r; pintar(); programar(); }
+    ocupado = true; pintar(); const r = await llamar({ accion: "defSolicitar", por: "HWF Admin" }); ocupado = false; E = r; pintar(); programar(); }
   let visto = false; setInterval(() => { pintar(); if (enDatos() && !visto) { visto = true; estado(); } if (!enDatos()) visto = false; }, 600);
   document.addEventListener("visibilitychange", () => { if (!document.hidden) estado(); });
 })();
