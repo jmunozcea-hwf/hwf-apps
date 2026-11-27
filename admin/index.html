@@ -5290,7 +5290,7 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261127114413";
+const HWF_VER = "20261127131458";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -10739,6 +10739,30 @@ function vmPoner(cont, VM, antes) { try { if (!cont) return; const v = cont.quer
   const ICO = '<svg viewBox="0 0 32 32" aria-hidden="true" class="hic"><defs><linearGradient id="hic-intel" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5EC8F2"/><stop offset="1" stop-color="#2B6CB0"/></linearGradient></defs><rect width="32" height="32" rx="9" fill="url(#hic-intel)"/><path d="M4 4h24v10C20 9 11 9 4 13z" fill="#fff" opacity=".12"/><g transform="translate(5.5 5.5) scale(.875)" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18"/><path d="M5 16l4-5 3 3 6-8"/><circle cx="18" cy="6" r="1.8"/></g></svg>';
   const pan = document.getElementById("snPanel"); if (pan) new MutationObserver(() => { const e = pan.querySelector('[data-m="intel"] .sn-e'); if (e && !e.querySelector("svg")) e.innerHTML = ICO; }).observe(pan, { childList: true, subtree: true });
   window.hwfIntel = { calc: calcular };
+})();
+</script>
+<script>/* patch_sintienda_clientes: Admin sin los clientes de la tienda con factura en el dashboard y los informes de clientes (27-11-2026, Jorge: «Quita del dashboard y de los informes de cliente de la distribuidora los clientes de la tienda con factura») */
+(function () {
+  if (typeof calcular !== "function") return;
+  const N = s => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toUpperCase().replace(/[^A-Z0-9]+/g, " ").trim();
+  let memo = null, memoD = null, memoN = -1;
+  /* última factura (venta > 0) de cada cliente: si es de «Tienda Hellywoof» y no es CLIENTE BOLETA, es cliente de la tienda con factura */
+  if (typeof window.tiendaFac !== "function") window.tiendaFac = function () {
+    const B = (typeof D !== "undefined" && D) || null; if (!B || !B.rows || !B.clientes || !B.vend) return new Set();
+    if (memo && memoD === B && memoN === B.rows.length) return memo;
+    const tv = B.vend.indexOf("Tienda Hellywoof"), ult = {};
+    B.rows.forEach(r => { if (!(r[5] > 0)) return; const f = ((r[8] || B.anio) * 100 + r[2]) * 100 + r[3], u = ult[r[0]], t = r[7] === tv;
+      if (!u || f > u.f || (f === u.f && t)) ult[r[0]] = { f, t }; });
+    const s = new Set(); Object.keys(ult).forEach(ci => { if (!ult[ci].t) return; const c = B.clientes[ci]; if (!c) return; const n = N(c[0]); if (n && !/CLIENTE BOLETA/.test(n)) s.add(n); });
+    memo = s; memoD = B; memoN = B.rows.length; return s; };
+  if (typeof window.esClienteTienda !== "function") window.esClienteTienda = n => !!n && window.tiendaFac().has(N(n));
+  const es = n => { try { return window.esClienteTienda(n); } catch (e) { return false; } };
+  /* A.clientes sin ellos, después de cada cálculo; las ventas (A.pm, A.porMes, A.vend…) quedan intactas */
+  const _calc = calcular;
+  calcular = function () {
+    const r = _calc.apply(this, arguments);
+    try { if (typeof A === "object" && A && Array.isArray(A.clientes) && window.tiendaFac().size) A.clientes = A.clientes.filter(c => !es(c && c.nombre)); } catch (e) { console.error(e); }
+    return r; };
 })();
 </script>
 </body>

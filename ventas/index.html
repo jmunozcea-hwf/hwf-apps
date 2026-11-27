@@ -7202,7 +7202,7 @@ function confirmarNota() {
   x.onclick = () => cerrarModal(); card.insertBefore(x, card.firstChild); })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261127114413";
+const HWF_VER = "20261127131458";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -11264,6 +11264,16 @@ function vmPoner(cont, VM, antes) { try { if (!cont) return; const v = cont.quer
   if (typeof prTodos === "function") { const _p = prTodos; prTodos = function () { return _p.apply(this, arguments).filter(o => !(es(o.cliente) || es(o.nombre))); }; }
   const limpiarBase = () => { try { if (typeof CRM_BASE !== "undefined" && tiendaFac().size) CRM_BASE.clientes = CRM_BASE.clientes.filter(c => !es(c.nombre)); } catch (e) {} };
   limpiarBase(); let vB = null; setInterval(() => { const B = typeof DB !== "undefined" && DB ? DB.d : null; if (B && B !== vB) { vB = B; limpiarBase(); } }, 3000);
+})();
+</script>
+<script>/* patch_sintienda_clientes: Ventas, Dashboard sin los clientes de la tienda con factura (27-11-2026, Jorge: «Quita del dashboard y de los informes de cliente de la distribuidora los clientes de la tienda con factura») */
+(function () {
+  if (typeof dbCalc !== "function" || typeof window.esClienteTienda !== "function") return;
+  const _db = dbCalc;
+  dbCalc = function () {
+    const X = _db.apply(this, arguments);
+    try { if (X && Array.isArray(X.clientes)) X.clientes = X.clientes.filter(c => !window.esClienteTienda(c && c.nombre)); } catch (e) { console.error(e); }
+    return X; };
 })();
 </script>
 </body>
