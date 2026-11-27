@@ -7202,7 +7202,7 @@ function confirmarNota() {
   x.onclick = () => cerrarModal(); card.insertBefore(x, card.firstChild); })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261127131458";
+const HWF_VER = "20261127140835";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -11274,6 +11274,48 @@ function vmPoner(cont, VM, antes) { try { if (!cont) return; const v = cont.quer
     const X = _db.apply(this, arguments);
     try { if (X && Array.isArray(X.clientes)) X.clientes = X.clientes.filter(c => !window.esClienteTienda(c && c.nombre)); } catch (e) { console.error(e); }
     return X; };
+})();
+</script>
+<style>/* patch_siirut */
+.sii-h{display:block;font-size:12px;margin-top:3px;color:#5b6b70}.sii-h.ok{color:#1E7F88}.sii-h.no{color:#8A5300}
+input.sii-auto{background:#EEF8F7}
+</style>
+<script>/* patch_siirut: datos del SII por RUT */
+(function () {
+  const G = { c_rut: { razon: "c_razon", giro: "c_giro", dir: "c_dir", comuna: "c_comuna" },
+              nc_rut: { razon: "nc_nombre", giro: "nc_giro", dir: "nc_dir", comuna: "nc_comuna" },
+              n_rut: { razon: "n_nombre", dir: "n_dir", comuna: "n_comuna" } };
+  const llamar = d => { try { if (typeof syCall === "function" && typeof SYC === "function") { const c = SYC(); if (c && c.url) return syCall(c, d); }
+      if (typeof syLlamar === "function" && typeof syCfg === "function") { const c = syCfg(); if (c && c.url) return syLlamar(c, d); } } catch (e) {}
+    return Promise.resolve({ ok: false, error: "sin conexión" }); };
+  const limpio = v => String(v || "").toUpperCase().replace(/[^0-9K]/g, "");
+  const dv = n => { let s = 0, m = 2; for (let x = n; x > 0; x = Math.floor(x / 10)) { s += (x % 10) * m; m = m === 7 ? 2 : m + 1; } const r = 11 - s % 11; return r === 11 ? "0" : r === 10 ? "K" : String(r); };
+  const nota = (inp, txt, cls) => { let h = inp.parentNode.querySelector(".sii-h"); if (!h) { h = document.createElement("span"); h.className = "sii-h"; inp.parentNode.appendChild(h); }
+    h.textContent = txt; h.className = "sii-h" + (cls ? " " + cls : ""); };
+  const tc = s => String(s || "").toLowerCase().replace(/(^|[\s\-.,/(])([a-záéíóúñü])/g, (a, b, c) => b + c.toUpperCase());
+  const poner = (id, v, mayus) => { const e = document.getElementById(id); if (!e || !v) return 0;
+    if (e.value.trim() && !e.classList.contains("sii-auto")) return 0;
+    e.value = mayus ? v : tc(v); e.classList.add("sii-auto"); e.dispatchEvent(new Event("input", { bubbles: true })); e.dispatchEvent(new Event("change", { bubbles: true })); return 1; };
+  const ultimo = {};
+  async function buscar(inp) {
+    const g = G[inp.id], t = limpio(inp.value); if (!g || t.length < 2) return;
+    const num = Number(t.slice(0, -1)); if (!num || dv(num) !== t.slice(-1)) return;
+    if (ultimo[inp.id] === t) return; ultimo[inp.id] = t;
+    nota(inp, "Buscando en el SII…");
+    let r; try { r = await llamar({ accion: "siiRut", rut: t }); } catch (e) { r = null; }
+    if (limpio(inp.value) !== t) return;
+    if (!r || !r.ok) { nota(inp, ""); ultimo[inp.id] = ""; return; }
+    if (!r.encontrado) { Object.keys(g).forEach(k => { const e = document.getElementById(g[k]); if (e && e.classList.contains("sii-auto")) { e.value = ""; e.classList.remove("sii-auto"); } });
+      nota(inp, r.sinDatos ? "" : r.natural ? "Persona natural: el SII no publica sus datos; complétalos a mano." : "No aparece como empresa vigente en el SII.", r.sinDatos ? "" : "no"); return; }
+    const n = poner(g.razon, r.razon, true) + poner(g.giro, r.giro) + poner(g.dir, r.direccion) + poner(g.comuna, r.comuna);
+    const gi = g.giro && document.getElementById(g.giro);
+    if (gi && (r.giros || []).length > 1) { let dl = document.getElementById(g.giro + "_sii"); if (!dl) { dl = document.createElement("datalist"); dl.id = g.giro + "_sii"; document.body.appendChild(dl); }
+      dl.innerHTML = r.giros.map(x => '<option value="' + tc(x).replace(/"/g, "&quot;") + '">').join(""); gi.setAttribute("list", dl.id); }
+    nota(inp, n ? "✓ Datos del SII: " + r.razon + " (revísalos; el correo va a mano)" : "✓ Empresa vigente en el SII: " + r.razon, "ok");
+  }
+  document.addEventListener("change", ev => { const t = ev.target; if (t && G[t.id]) buscar(t); }, true);
+  document.addEventListener("focusout", ev => { const t = ev.target; if (t && G[t.id]) buscar(t); }, true);
+  document.addEventListener("input", ev => { const t = ev.target; if (t && t.classList && t.classList.contains("sii-auto") && ev.isTrusted) t.classList.remove("sii-auto"); }, true);
 })();
 </script>
 </body>
