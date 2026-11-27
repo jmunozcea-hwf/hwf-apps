@@ -4835,7 +4835,7 @@ function lcCard() {
 const _pintarDatosLC = pintarDatos;
 pintarDatos = function () {
   const r = _pintarDatosLC.apply(this, arguments);
-  try { const b = $("masBody"); if (b) { const o = $("lcCard"); if (o) o.remove(); b.insertAdjacentHTML("afterbegin", lcCard());
+  try { const b = $("masBody"); if (b) { const o = $("lcCard"); if (o) o.remove(); b.insertAdjacentHTML("beforeend", lcCard()); setTimeout(() => { const c = $("lcCard"); if (c && c.parentNode === b) b.appendChild(c); }, 0);   /* 27-11-2026 (Jorge): al final de Datos */
     $("lcCard").onclick = e => { const c = e.target.closest("[data-lc-cp]"); if (!c) return;
       (navigator.clipboard ? navigator.clipboard.writeText(c.dataset.lcCp) : Promise.reject()).then(() => toast("Link copiado."), () => { prompt("Copia el link:", c.dataset.lcCp); }); }; } } catch (e) { console.error(e); }
   return r;
@@ -5289,7 +5289,7 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261127001622";
+const HWF_VER = "20261127013852";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
