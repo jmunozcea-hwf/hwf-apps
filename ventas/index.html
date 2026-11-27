@@ -7202,7 +7202,7 @@ function confirmarNota() {
   x.onclick = () => cerrarModal(); card.insertBefore(x, card.firstChild); })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261127000607";
+const HWF_VER = "20261127001622";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -10849,9 +10849,18 @@ body.m-b2b #crmMeta{display:none!important}
     try { const r = await fetch(c.url, { method: "POST", body: JSON.stringify(Object.assign({ clave: c.clave }, d)) }), t = await r.text(); try { return JSON.parse(t); } catch (e) { return { ok: false, error: "El script de Google aún no tiene esta función: espera unos minutos y vuelve a intentar." }; } }
     catch (e) { return { ok: false, error: "Sin conexión a internet." }; } }
   const ST = { L: null, dias: 30, o: "todos", v: "", q: "", cargando: false, err: "", t: 0 };
-  async function cargar(box) { if (ST.cargando) return; ST.cargando = true; ST.err = ""; pintarP(box);
+  /* 27-11-2026 (Jorge: «carga de pedidos muy lenta»): la última lista queda guardada en el equipo y se muestra al instante;
+     la consulta al script (varios segundos) corre de fondo y además se adelanta unos segundos después de abrir la app. */
+  const CK = () => "hwf-pd-cache|" + (VEN ? yo() : "todos") + "|" + ST.dias;
+  try { const c = JSON.parse(localStorage.getItem(CK()) || "null"); if (c && Array.isArray(c.L)) { ST.L = c.L; ST.tc = c.t; } } catch (e) {}
+  let caja = null;
+  async function cargar(box) { if (box) caja = box; if (ST.cargando) return; ST.cargando = true; ST.err = ""; if (caja) pintarP(caja);
     const r = await llamar(Object.assign({ accion: "pedidosVer", dias: ST.dias }, VEN ? { vend: yo() } : {})); ST.cargando = false; ST.t = Date.now();
-    if (r && r.ok) ST.L = r.pedidos || []; else ST.err = (r && r.error) || "No se pudieron leer los pedidos."; pintarP(box); }
+    if (r && r.ok) { ST.L = r.pedidos || []; ST.tc = Date.now(); try { localStorage.setItem(CK(), JSON.stringify({ t: ST.tc, L: ST.L })); } catch (e) {} }
+    else ST.err = (r && r.error) || "No se pudieron leer los pedidos.";
+    const vis = caja && caja.isConnected && caja.querySelector(".pd-w"); if (vis) pintarP(caja); }
+  const precarga = () => { try { if (!conf() || !conf().url || (VEN && !yo())) return; if (!ST.t) cargar(null); } catch (e) {} };
+  setTimeout(precarga, 6000);
   const fch = s => { const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(s || ""); return m ? m[3] + "-" + m[2] : ""; };
   function pintarP(box) { if (!box) return; const L = ST.L || [], hoy = new Date().toISOString().slice(0, 10);
     const q = ST.q.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
@@ -10872,7 +10881,7 @@ body.m-b2b #crmMeta{display:none!important}
         <table class="pd-t">${(p.items || []).map(x => `<tr><td>${es(x[1])} <small>${es(x[0])}</small></td><td>${Number(x[2]).toLocaleString("es-CL")} u.</td><td>${nf(x[3])}</td></tr>`).join("")}</table>
         ${p.obs ? `<div class="pd-ob">${es(p.obs)}</div>` : ""}<small>Total con IVA ${nf(p.total)}${p.despacho ? " · " + es(p.despacho) : ""}${p.rut ? " · RUT " + es(p.rut) : ""}</small><div class="pd-del"><button type="button" class="pd-wa" data-pdw="${es(p.id)}">📲 Imagen para WhatsApp</button>${puede(p) ? `<button type="button" data-pdx="${es(p.id)}">🗑 Eliminar pedido</button>` : ""}</div></details>`).join("")}</div>`).join("")
         || `<p class="muted">${ST.cargando || !ST.L ? "Cargando pedidos…" : "No hay pedidos con ese filtro."}</p>`}</div>`;
-    box.querySelectorAll("[data-pdd]").forEach(b => b.onclick = () => { ST.dias = +b.dataset.pdd; cargar(box); });
+    box.querySelectorAll("[data-pdd]").forEach(b => b.onclick = () => { ST.dias = +b.dataset.pdd; ST.L = null; try { const c = JSON.parse(localStorage.getItem(CK()) || "null"); if (c && Array.isArray(c.L)) ST.L = c.L; } catch (e) {} cargar(box); });
     box.querySelectorAll("[data-pdo]").forEach(b => b.onclick = () => { ST.o = b.dataset.pdo; pintarP(box); });
     box.querySelectorAll("[data-pdv]").forEach(b => b.onclick = () => { ST.v = b.dataset.pdv; pintarP(box); });
     const a = box.querySelector("[data-pda]"); if (a) a.onclick = () => cargar(box);
@@ -10925,7 +10934,7 @@ body.m-b2b #crmMeta{display:none!important}
     ov.querySelector('[data-k="w"]').onclick = () => cv.toBlob(async bl => { const f = new File([bl], nombre, { type: "image/png" });
       try { if (navigator.canShare && navigator.canShare({ files: [f] })) { await navigator.share({ files: [f], text: msg }); return; } } catch (e) { if (e && e.name === "AbortError") return; }
       bajar(bl); window.open((t ? "https://wa.me/" + t : "https://wa.me/") + "?text=" + encodeURIComponent(msg), "_blank", "noopener"); }, "image/png"); }
-  const abrir = box => { pintarP(box); if (!ST.L || Date.now() - ST.t > 120000) cargar(box); };
+  const abrir = box => { caja = box; if (!ST.L) { try { const c = JSON.parse(localStorage.getItem(CK()) || "null"); if (c && Array.isArray(c.L)) ST.L = c.L; } catch (e) {} } pintarP(box); if (!ST.t || Date.now() - ST.t > 120000) cargar(box); };
   if (ADM) { try { if (typeof NAV_MNOM !== "undefined") NAV_MNOM.pedidos = "Pedidos"; } catch (e) {}
     const _pm = pintarMas; pintarMas = function () { if (typeof vistaMas !== "undefined" && vistaMas === "pedidos") return abrir(document.getElementById("masBody")); return _pm.apply(this, arguments); }; return; }
   if (LOG) { const nav = document.getElementById("nav"); if (!nav.querySelector('[data-s="ped"]')) { const b = document.createElement("button"); b.type = "button"; b.dataset.s = "ped";
