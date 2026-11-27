@@ -410,9 +410,11 @@ function pintarResultado() { const box = $("rRes"); if (!RT || !RT.res) { box.in
       <ol>${r.map(x => { const s = RT.S[x]; return `<li><b>${esc(s.cli)}</b> <small>${esc(s.comuna)}${s.dir ? " · " + esc(s.dir) : ""} · ${nf(s.kg)} kg${s.monto ? " · " + mm(s.monto) : ""}${s.num ? " · NP " + esc(s.num) : ""}${s.fuente === "comuna" ? " · ubicación aprox." : ""}</small></li>`; }).join("")}</ol>
       <div class="row np" style="margin-top:8px">${link(r).map((l, i) => `<a class="btn ver" target="_blank" rel="noopener" href="${esc(l)}">🧭 Navegar${link(r).length > 1 ? " " + (i + 1) : ""}</a>`).join("")}
         <a class="btn" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(txt)}">WhatsApp al chofer</a></div></div>`; }).join(""); }).join("")}`;
-  $("rEnv").onclick = async () => { const b = $("rEnv"), P2 = par(), rutas = [];
-    R.usos.forEach(u => u.viajes.forEach((r, vi) => rutas.push({ veh: u.v.id, vehNombre: rtAsig(u.v.id + "|" + (vi + 1)).trans || u.v.nombre, chofer: rtAsig(u.v.id + "|" + (vi + 1)).chofer || "", transporte: rtAsig(u.v.id + "|" + (vi + 1)).trans || u.v.nombre, horario: rtHor() ? "con" : "sin", jornada: rtHor() ? par().jornada : null, vuelta: vi + 1, km: Math.round(RT.len(r)), horas: +RT.horas(r, u.v).toFixed(1), costo: Math.round(RT.costo(r, u.v) + (vi ? 0 : u.v.fijo)), origen: P2.origen,
+  window.rtArmaRutas = () => { const P2 = par(), rutas = [];   /* patch_rutachofer */
+    R.usos.forEach(u => u.viajes.forEach((r, vi) => rutas.push({ veh: u.v.id, vehNombre: rtAsig(u.v.id + "|" + (vi + 1)).trans || u.v.nombre, chofer: rtAsig(u.v.id + "|" + (vi + 1)).chofer || "", transporte: rtAsig(u.v.id + "|" + (vi + 1)).trans || u.v.nombre, horario: rtHor() ? "con" : "sin", jornada: rtHor() ? par().jornada : null, vuelta: vi + 1, km: Math.round(RT.len(r)), horas: +RT.horas(r, u.v).toFixed(1), costo: Math.round(RT.costo(r, u.v) + (vi ? 0 : u.v.fijo)), origen: P2.origen, sale: P2.salida || "08:30",
       paradas: r.map(x => { const s = RT.S[x]; return { id: s.id, cli: s.cli, dir: s.dir || "", comuna: s.comuna || "", tel: s.tel || "", lat: s.lat, lng: s.lng, kg: Math.round(s.kg), monto: s.monto || 0, num: s.num || "", vend: s.vend || "", items: s.items || [], ...(typeof ruEnv === "function" ? ruEnv(x) : {}) }; }) })));
+    return rutas; };
+  $("rEnv").onclick = async () => { const b = $("rEnv"), rutas = window.rtArmaRutas();
     b.disabled = true; b.textContent = "Enviando…"; const res = await syLlamar(cfg(), { accion: "rutaGuardar", fecha: lsGet("fecha", ""), rutas, por: "Logística" });
     b.disabled = false; b.textContent = "📤 Enviar rutas a choferes"; if (res.ok) rtProgGuardar(rtFecha(), rutas); toast(res.ok ? `Rutas enviadas: ${res.rutas} ${res.rutas === 1 ? "ruta" : "rutas"}, ${res.paradas} paradas para el ${res.fecha}.` : "No se pudo enviar: " + (res.error || "error")); };
   try { if (window.L) { mapa && mapa.remove(); mapa = L.map("mapa"); L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 18, attribution: "© OpenStreetMap" }).addTo(mapa); const bb = [[RT.O.lat, RT.O.lng]];
@@ -483,7 +485,7 @@ if (!cfg() || !DATA()) pantallaConexion(); else { arrancar(); bajar(true).then(n
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261127192518";
+const HWF_VER = "20261127195606";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -2880,5 +2882,49 @@ document.addEventListener("click", e => { const b = e.target.closest && e.target
       if (document.getElementById("rLista")) ruVenSync(); } catch (e) { console.error(e); } };
   const _pi = pintarRutas; pintarRutas = function () { const r = _pi.apply(this, arguments); lista(); return r; };
   lista(); })();   /* la app ya pudo dibujar «Rutas» antes de este bloque */
+</script>
+<style>/* patch_rutachofer */
+.rc-env{margin-top:8px;padding:10px;border:1px dashed var(--line,#C9D3DB);border-radius:12px;display:grid;gap:8px}
+.rc-env label{display:grid;gap:3px;font-size:.78rem;font-weight:700;color:var(--muted,#5B6874)}
+.rc-env input{font:inherit;border:1px solid var(--line,#C9D3DB);border-radius:10px;padding:8px 10px;background:var(--surface,#fff);color:inherit;min-height:40px}
+.rc-env .row{display:flex;gap:8px;flex-wrap:wrap}.rc-env .row .btn{flex:1 1 150px}
+.rc-env .rc-est{color:var(--muted,#5B6874);font-size:.78rem}.rc-env .rc-est b{color:#1C7A4E}
+</style>
+<script>/* patch_rutachofer: enviar la ruta al chofer asignado */
+(function () {
+  const nk = s => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim().replace(/\s+/g, " ");
+  const dd = f => String(f || "").split("-").reverse().join("-"), hm = () => new Date().toTimeString().slice(0, 5);
+  /* selector «Chofer»: la lista de la app + los nombres usados antes + «+ Otro chofer…» (se recuerdan en el equipo) */
+  const _a = rtAsigHtml;
+  rtAsigHtml = function (k, v) { const h = _a(k, v), A = rtAsig(k), ex = (lsGet("choferes", []) || []).concat(A.chofer ? [A.chofer] : []).filter((c, i, a) => c && !LOG_CHOFERES.includes(c) && a.indexOf(c) === i);
+    return h.replace("</select>", ex.map(c => `<option${c === A.chofer ? " selected" : ""}>${esc(c)}</option>`).join("") + '<option value="+">+ Otro chofer…</option></select>'); };
+  const caja = k => `<div class="rc-env np" data-rk="${esc(k)}"><label>WhatsApp del chofer (opcional)<input type="tel" inputmode="tel" class="rc-tel" placeholder="9 1234 5678" autocomplete="off"></label>
+    <div class="row"><button type="button" class="btn pri" data-rc="env">📲 Enviar ruta al chofer</button><button type="button" class="btn" data-rc="cop">🔗 Copiar enlace</button></div><small class="rc-est"></small></div>`;
+  function refrescar(b) { const A = rtAsig(b.dataset.rk), T = lsGet("rcTel", {}), E = (lsGet("rcEnv", {})[rtFecha()] || {})[b.dataset.rk], i = b.querySelector(".rc-tel");
+    if (i.dataset.ch !== nk(A.chofer)) { i.dataset.ch = nk(A.chofer); i.value = (A.chofer && T[nk(A.chofer)]) || ""; }
+    b.querySelector(".rc-est").innerHTML = !A.chofer ? "Elige el chofer de esta ruta para enviársela." : E ? `<b>Enviada ${esc(E.t)}</b> a ${esc(E.ch)}` : `Se enviará a ${esc(A.chofer)}.`; }
+  function poner() { document.querySelectorAll(".card.rt").forEach(c => { const as = c.querySelector(".rt-asig"); if (!as) return; let b = c.querySelector(".rc-env");
+      if (!b) { const f = c.querySelectorAll(".row.np"); (f[f.length - 1] || as).insertAdjacentHTML("afterend", caja(as.dataset.rk)); b = c.querySelector(".rc-env"); }
+      refrescar(b); }); }
+  setInterval(() => { try { poner(); } catch (e) {} }, 700);
+  document.addEventListener("change", e => { const b = e.target.closest(".card.rt") && e.target.closest(".card.rt").querySelector(".rc-env"); if (b) refrescar(b); });
+  document.addEventListener("click", async e => { const bt = e.target.closest("[data-rc]"); if (!bt) return; const blk = bt.closest(".rc-env"), k = blk.dataset.rk, fecha = rtFecha(), A = rtAsig(k), modo = bt.dataset.rc;
+    if (!A.chofer) { toast("Elige primero el chofer de esta ruta."); const s = blk.closest(".card").querySelector(".rt-asig select"); if (s) s.focus(); return; }
+    const c = cfg(); if (!c || !c.url) { toast("Conecta la app al script de Google primero."); return; }
+    const base = (typeof choLink === "function" ? choLink() : "").trim().split("\n").pop(); if (!/instalar-chofer\/#HWF1:/.test(base)) { toast("No se pudo armar el enlace de la app Chofer."); return; }
+    let w = null; if (modo === "env") { try { w = window.open("about:blank", "_blank"); } catch (x) {} }   /* se abre antes de esperar al script (los teléfonos bloquean ventanas tardías) */
+    const t0 = bt.textContent; bt.disabled = true; bt.textContent = "Guardando…"; let res, rutas = [];
+    try { rutas = window.rtArmaRutas(); res = await syLlamar(c, { accion: "rutaGuardar", fecha, rutas, por: "Logística" }); if (res && res.ok) rtProgGuardar(fecha, rutas); } catch (x) { res = { ok: false, error: "Sin conexión." }; }
+    bt.disabled = false; bt.textContent = t0;
+    if (!res || !res.ok) { try { if (w) w.close(); } catch (x) {} toast("No se pudo guardar la ruta: " + ((res && res.error) || "error")); return; }
+    const [veh, vu] = k.split("|"), r = rutas.find(x => x.veh === veh && String(x.vuelta) === vu) || {}, n = (r.paradas || []).length;
+    const link = base + "&fecha=" + fecha + "&ruta=" + encodeURIComponent(veh + "-" + vu);
+    if (modo === "cop") { let ok = false; try { await navigator.clipboard.writeText(link); ok = true; } catch (x) {} if (!ok) prompt("Copia el enlace:", link); toast("Ruta guardada. Enlace copiado."); return; }
+    const msg = `Hola ${A.chofer}, tu ruta del ${dd(fecha)} (${r.vehNombre || veh}, ${n} ${n === 1 ? "entrega" : "entregas"}${r.sale ? ", sale " + r.sale : ""}) ya está en la app Chofer HWF: ${link}`;
+    const tel = String(blk.querySelector(".rc-tel").value || "").replace(/\D/g, ""), T = lsGet("rcTel", {}); if (tel) T[nk(A.chofer)] = tel; else delete T[nk(A.chofer)]; lsSet("rcTel", T);
+    const url = "https://wa.me/" + (tel ? (tel.length === 9 ? "56" + tel : tel) : "") + "?text=" + encodeURIComponent(msg);
+    if (w) { try { w.location.href = url; } catch (x) { w = null; } } if (!w) { try { w = window.open(url, "_blank"); } catch (x) {} if (!w) location.href = url; }
+    const E = lsGet("rcEnv", {}); (E[fecha] = E[fecha] || {})[k] = { t: hm(), ch: A.chofer }; Object.keys(E).sort().slice(0, -10).forEach(f => delete E[f]); lsSet("rcEnv", E); refrescar(blk); toast("Ruta guardada. WhatsApp listo para enviar."); });
+})();
 </script>
 </body></html>

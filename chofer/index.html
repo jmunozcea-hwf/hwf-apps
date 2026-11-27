@@ -33,10 +33,15 @@ label.f{display:grid;gap:4px;font-size:.8rem;font-weight:700;color:var(--muted);
 .gate h1{margin:0;font-size:1.2rem}.gate .e{color:var(--rojo);font-size:.85rem;min-height:1em}
 .toast{position:fixed;left:50%;bottom:calc(88px + env(safe-area-inset-bottom));transform:translateX(-50%);background:#0F1E29;color:#fff;padding:10px 16px;border-radius:12px;z-index:200;max-width:90vw}
 [hidden]{display:none!important}
-</style></head><body>
+</style><script>/* patch_rutachofer: lee fecha y ruta del enlace antes de que la app limpie el # */
+try { const h = String(location.hash), f = (h.match(/[&#]fecha=(\d{4}-\d{2}-\d{2})/) || [])[1], r = (h.match(/[&#]ruta=([\w.-]+)/) || [])[1];
+  if (f && r) localStorage.setItem("hwf-cho:enlace", JSON.stringify({ fecha: f, ruta: r, t: Date.now() }));
+  const m = h.match(/HWF1:([A-Za-z0-9+\/=_-]+)/); if (m && !localStorage.getItem("hwf-cho:cfg")) { const o = JSON.parse(decodeURIComponent(escape(atob(m[1].replace(/-/g, "+").replace(/_/g, "/"))))); if (o.u && o.c) localStorage.setItem("hwf-cho:cfg", JSON.stringify({ url: o.u, clave: o.c })); } } catch (e) {}
+</script>
+</head><body>
 <div class="top"><div><h1>🚚 Chofer HWF</h1><small id="tSub">—</small></div><span class="gp" id="gps">GPS…</span></div>
-<main><section id="s-ruta"></section><section id="s-mapa" hidden><div class="card" style="padding:8px"><div id="mapa"></div></div></section><section id="s-resumen" hidden></section></main>
-<nav class="bn" id="nav"><button type="button" data-s="ruta"><span class="ic"><svg viewBox="0 0 32 32" aria-hidden="true" class="hic"><defs><linearGradient id="hic-cruta" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1F5673"/><stop offset="1" stop-color="#0B3146"/></linearGradient></defs><rect width="32" height="32" rx="9" fill="url(#hic-cruta)"/><path d="M4 4h24v10C20 9 11 9 4 13z" fill="#fff" opacity=".12"/><g transform="translate(5.5 5.5) scale(.875)" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 6h10M10 12h10M10 18h10"/><path d="M3.5 6l1.5 1.5L7.5 5M3.5 12l1.5 1.5L7.5 11M3.5 18l1.5 1.5L7.5 17"/></g></svg></span>Ruta</button><button type="button" data-s="mapa"><span class="ic"><svg viewBox="0 0 32 32" aria-hidden="true" class="hic"><defs><linearGradient id="hic-cmapa" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FF8A6B"/><stop offset="1" stop-color="#D9483B"/></linearGradient></defs><rect width="32" height="32" rx="9" fill="url(#hic-cmapa)"/><path d="M4 4h24v10C20 9 11 9 4 13z" fill="#fff" opacity=".12"/><g transform="translate(5.5 5.5) scale(.875)" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3z"/><path d="M9 3v15M15 6v15"/></g></svg></span>Mapa</button><button type="button" data-s="resumen"><span class="ic"><svg viewBox="0 0 32 32" aria-hidden="true" class="hic"><defs><linearGradient id="hic-cresumen" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3FBF7F"/><stop offset="1" stop-color="#1C7A4E"/></linearGradient></defs><rect width="32" height="32" rx="9" fill="url(#hic-cresumen)"/><path d="M4 4h24v10C20 9 11 9 4 13z" fill="#fff" opacity=".12"/><g transform="translate(5.5 5.5) scale(.875)" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M15 9.5c-.5-1-1.6-1.5-3-1.5-1.7 0-3 .8-3 2s1.3 1.7 3 2 3 .8 3 2-1.3 2-3 2c-1.4 0-2.5-.5-3-1.5M12 6.5v1.5M12 16v1.5"/></g></svg></span>Resumen</button></nav><div class="toast" id="toast" hidden></div>
+<main><section id="s-ruta"></section><section id="s-mapa" hidden><div class="card" style="padding:8px"><div id="mapa"></div></div></section><section id="s-resumen" hidden></section><section id="s-misrutas" hidden></section></main>
+<nav class="bn" id="nav"><button type="button" data-s="ruta"><span class="ic"><svg viewBox="0 0 32 32" aria-hidden="true" class="hic"><defs><linearGradient id="hic-cruta" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1F5673"/><stop offset="1" stop-color="#0B3146"/></linearGradient></defs><rect width="32" height="32" rx="9" fill="url(#hic-cruta)"/><path d="M4 4h24v10C20 9 11 9 4 13z" fill="#fff" opacity=".12"/><g transform="translate(5.5 5.5) scale(.875)" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 6h10M10 12h10M10 18h10"/><path d="M3.5 6l1.5 1.5L7.5 5M3.5 12l1.5 1.5L7.5 11M3.5 18l1.5 1.5L7.5 17"/></g></svg></span>Ruta</button><button type="button" data-s="mapa"><span class="ic"><svg viewBox="0 0 32 32" aria-hidden="true" class="hic"><defs><linearGradient id="hic-cmapa" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FF8A6B"/><stop offset="1" stop-color="#D9483B"/></linearGradient></defs><rect width="32" height="32" rx="9" fill="url(#hic-cmapa)"/><path d="M4 4h24v10C20 9 11 9 4 13z" fill="#fff" opacity=".12"/><g transform="translate(5.5 5.5) scale(.875)" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3z"/><path d="M9 3v15M15 6v15"/></g></svg></span>Mapa</button><button type="button" data-s="resumen"><span class="ic"><svg viewBox="0 0 32 32" aria-hidden="true" class="hic"><defs><linearGradient id="hic-cresumen" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3FBF7F"/><stop offset="1" stop-color="#1C7A4E"/></linearGradient></defs><rect width="32" height="32" rx="9" fill="url(#hic-cresumen)"/><path d="M4 4h24v10C20 9 11 9 4 13z" fill="#fff" opacity=".12"/><g transform="translate(5.5 5.5) scale(.875)" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M15 9.5c-.5-1-1.6-1.5-3-1.5-1.7 0-3 .8-3 2s1.3 1.7 3 2 3 .8 3 2-1.3 2-3 2c-1.4 0-2.5-.5-3-1.5M12 6.5v1.5M12 16v1.5"/></g></svg></span>Resumen</button><button type="button" data-s="misrutas"><span class="ic"><svg viewBox="0 0 32 32" aria-hidden="true" class="hic"><rect width="32" height="32" rx="9" fill="#C8820A"/><path d="M8 10h11M8 16h8M8 22h6" stroke="#fff" stroke-width="2.4" stroke-linecap="round" fill="none"/><path d="M23.5 13v9m-3.5-3.5 3.5 3.5 3.5-3.5" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg></span>Mis rutas</button></nav><div class="toast" id="toast" hidden></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <script>
 const $ = id => document.getElementById(id);
@@ -229,7 +234,7 @@ function arrancar() { const P = perfil(); if (!P || !cfg()) return puerta(); if 
 if (!cfg() || !perfil()) puerta(); else arrancar();
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 </script><script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261127192518";
+const HWF_VER = "20261127195606";
 (function () {
   const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
@@ -617,6 +622,72 @@ html,body{max-width:100%;overflow-x:clip}
       while (x && !x.classList.contains("sn-g")) { if (getComputedStyle(x).display !== "none" && (x.matches(".sn-i,a,button") || x.querySelector(".sn-i,a,button"))) { hay = true; break; } x = x.nextElementSibling; }
       const v = hay && h.textContent.trim() ? "" : "none"; if (h.style.display !== v) h.style.display = v; }); }   /* sin título: oculto como antes */
   setInterval(revisar, 1000); revisar();
+})();
+</script>
+<style>/* patch_rutachofer */
+nav.bn{grid-template-columns:repeat(4,1fr)}
+.mr{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}.mr:last-child{border-bottom:0}
+.mr small{display:block;color:var(--muted);font-size:.78rem}.mr .bs{display:grid;gap:4px}.mr .btn{min-height:36px;padding:6px 10px;font-size:.85rem}
+.mr.hoy{background:#FFFBF0;border-radius:10px;padding-left:8px}.mr h4,.mrh{margin:10px 0 2px;font-size:.78rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+</style>
+<script>/* patch_rutachofer: «Mis rutas» (todas las rutas asignadas al chofer, de cualquier fecha; descargables para usar sin señal) */
+(function () {
+  const K = "hwf-cho:", dd = f => String(f || "").split("-").reverse().join("-"), DIA = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
+  const dia = f => { const d = new Date(f + "T12:00:00"); return isNaN(d) ? "" : DIA[d.getDay()]; };
+  const key = r => r.fecha + "|" + r.veh + "|" + (r.vuelta || 1), desc = () => lsGet("rutasDesc", {}), lis = () => lsGet("misRutas", { ts: 0, lista: [] });
+  const res = r => ({ fecha: r.fecha, veh: r.veh, vehNombre: r.vehNombre, vuelta: r.vuelta || 1, n: r.n != null ? r.n : (r.paradas || []).length, km: r.km, sale: r.sale || "" });
+  let MEM = {}, VER = null, OCUP = false, MSG = "";
+  const nombre = () => (perfil() && perfil().chofer) || "";
+  /* la ruta de hoy descargada queda como ruta del día aunque no haya señal */
+  function sembrar() { try { const h = hoy(), hs = Object.values(desc()).filter(r => r.fecha === h), R = lsGet("ruta", null); if (!hs.length || (R && R.fecha === h)) return false; lsSet("ruta", { fecha: h, ruta: { fecha: h, rutas: hs } }); return true; } catch (e) { return false; } }
+  function activar(r) { const R = rutaHoy(), otras = R ? (R.ruta.rutas || []) : [], rs = otras.some(x => x.veh === r.veh && (x.vuelta || 1) === (r.vuelta || 1)) ? otras : otras.concat([r]);
+    lsSet("ruta", { fecha: hoy(), ruta: Object.assign({}, R ? R.ruta : {}, { fecha: hoy(), rutas: rs }) }); lsSet("perfil", Object.assign({}, perfil() || {}, { veh: r.veh, fecha: hoy() }));
+    VER = null; ir("ruta"); toast("Ruta abierta: " + (r.vehNombre || vehNom(r.veh)) + (r.vuelta > 1 ? " · vuelta " + r.vuelta : "") + "."); }
+  async function bajar() { const r = await api({ accion: "rutasChofer", chofer: nombre() });
+    if (r && r.ok && Array.isArray(r.rutas)) { MEM = {}; r.rutas.forEach(x => MEM[key(x)] = x); lsSet("misRutas", { ts: Date.now(), chofer: nombre(), lista: r.rutas.map(res) });
+      const D = desc(), N = {}; Object.keys(D).forEach(k => { if (MEM[k]) N[k] = MEM[k]; }); lsSet("rutasDesc", N); MSG = ""; return true; }
+    MSG = /desconoc/i.test(String(r && r.error)) ? "El script de Google aún no está actualizado: se muestran las rutas guardadas en el teléfono." : r && r.red ? "Sin señal: se muestran las rutas guardadas en el teléfono." : "No se pudo actualizar: " + ((r && r.error) || "error") + ".";
+    return false; }
+  const completa = k => MEM[k] || desc()[k];
+  function detalle(r) { const nav = p => (typeof navUrl === "function" ? navUrl(p) : "#");
+    return `<div class="card"><button type="button" class="btn" data-mr="volver">← Mis rutas</button><h2 style="margin-top:10px">${dd(r.fecha)} · ${esc(r.vehNombre || vehNom(r.veh))}${r.vuelta > 1 ? " · vuelta " + r.vuelta : ""}</h2>
+      <p class="nota" style="margin:0 0 6px">${(r.paradas || []).length} paradas · ${nf(r.km)} km${r.sale ? " · sale " + esc(r.sale) : ""}. Solo lectura: las entregas se registran el día de la ruta.</p>
+      ${(r.paradas || []).map((p, i) => `<div class="pd"><span class="n">${i + 1}</span><div><b>${esc(p.cli)}</b><small>${esc(p.dir || "")}${p.dir ? ", " : ""}${esc(p.comuna || "")} · ${nf(p.kg)} kg${p.eta ? " · " + esc(p.eta) : ""}</small></div>
+        ${p.lat ? `<a class="btn" style="min-height:36px;padding:6px 10px" target="_blank" rel="noopener" href="${esc(nav(p))}">🧭</a>` : "<span></span>"}</div>`).join("")}</div>`; }
+  function fila(r, h) { const k = key(r), D = desc(), g = !!D[k];
+    return `<div class="mr${r.fecha === h ? " hoy" : ""}" data-k="${esc(k)}"><div><b>${dd(r.fecha)} <small style="display:inline">${r.fecha === h ? "hoy" : dia(r.fecha)}</small></b><small>${esc(r.vehNombre || vehNom(r.veh))}${r.vuelta > 1 ? " · vuelta " + r.vuelta : ""} · ${r.n} paradas · ${nf(r.km)} km${r.sale ? " · sale " + esc(r.sale) : ""}</small>${g ? '<span class="pill p-ok">en el teléfono</span>' : ""}</div>
+      <div class="bs"><button type="button" class="btn pri" data-mr="abrir">Abrir</button><button type="button" class="btn" data-mr="desc">${g ? "✓ Guardada" : "⬇ Descargar"}</button></div></div>`; }
+  function pintarMis() { const box = $("s-misrutas"), h = hoy(), L = lis().lista, D = desc(); if (VER && completa(VER)) { box.innerHTML = detalle(completa(VER)); return; } VER = null;
+    const prox = L.filter(r => r.fecha >= h).sort((a, b) => a.fecha < b.fecha ? -1 : a.fecha > b.fecha ? 1 : a.vuelta - b.vuelta), pas = L.filter(r => r.fecha < h).sort((a, b) => a.fecha < b.fecha ? 1 : a.fecha > b.fecha ? -1 : a.vuelta - b.vuelta);
+    const t = lis().ts, ng = L.filter(r => D[key(r)]).length;
+    box.innerHTML = `<div class="card"><h2>Mis rutas <small class="muted">${esc(nombre())}</small></h2><p class="nota" style="margin:0 0 8px">Todas las rutas que logística te asignó, de cualquier fecha${t ? " · actualizado " + new Date(t).toTimeString().slice(0, 5) : ""}. ${L.length ? L.length + " en total, " + ng + " descargadas." : ""}</p>
+      ${MSG ? `<p class="nota" style="color:#9A5B00;font-weight:700">${esc(MSG)}</p>` : ""}
+      <div class="g2"><button type="button" class="btn" data-mr="act"${OCUP ? " disabled" : ""}>${OCUP ? "Actualizando…" : "⟳ Actualizar"}</button><button type="button" class="btn ver" data-mr="todas"${OCUP || !L.length ? " disabled" : ""}>⬇ Descargar todas</button></div></div>
+      ${L.length ? "" : `<div class="card"><p class="muted" style="margin:0">${t ? "No tienes rutas asignadas por ahora." : "Toca «Actualizar» para ver tus rutas."}</p></div>`}
+      ${prox.length ? `<div class="card"><h2>Hoy y próximas</h2>${prox.map(r => fila(r, h)).join("")}</div>` : ""}
+      ${pas.length ? `<div class="card"><h2>Pasadas</h2>${pas.map(r => fila(r, h)).join("")}</div>` : ""}`; }
+  document.addEventListener("click", async e => { const b = e.target.closest("[data-mr]"); if (!b || !$("s-misrutas").contains(b)) return; const a = b.dataset.mr, fl = b.closest("[data-k]"), k = fl && fl.dataset.k;
+    if (a === "volver") { VER = null; return pintarMis(); }
+    if (a === "act") { OCUP = true; pintarMis(); await bajar(); OCUP = false; return pintarMis(); }
+    if (a === "todas") { OCUP = true; pintarMis(); const ok = navigator.onLine ? await bajar() : false; OCUP = false; const T = {}; Object.keys(MEM).forEach(x => T[x] = MEM[x]);
+      if (Object.keys(T).length) { lsSet("rutasDesc", T); sembrar(); toast(Object.keys(T).length + (Object.keys(T).length === 1 ? " ruta guardada" : " rutas guardadas") + " en el teléfono: puedes usarlas sin señal."); } else toast("Sin señal: no se pudo descargar."); return pintarMis(); }
+    const r = completa(k);
+    if (a === "desc") { if (!r) return toast("Sin señal: descarga la ruta cuando tengas conexión."); const D = desc(); if (D[k]) delete D[k]; else D[k] = r; lsSet("rutasDesc", D); if (D[k]) sembrar(); return pintarMis(); }
+    if (a === "abrir") { if (!r) return toast("Sin señal: descarga la ruta cuando tengas conexión."); if (r.fecha === hoy()) { const D = desc(); D[k] = r; lsSet("rutasDesc", D); return activar(r); } VER = k; pintarMis(); window.scrollTo({ top: 0 }); } });
+  /* enlace del WhatsApp: …#HWF1:…&fecha=AAAA-MM-DD&ruta=veh-vuelta */
+  async function enlace() { const E = lsGet("enlace", null); if (!E) return; if (Date.now() - (E.t || 0) > 2 * 864e5) { try { localStorage.removeItem(K + "enlace"); } catch (x) {} return; } if (!perfil() || !cfg() || document.querySelector(".gate")) return;
+    try { localStorage.removeItem(K + "enlace"); } catch (x) {}
+    const i = E.ruta.lastIndexOf("-"), veh = E.ruta.slice(0, i), vu = E.ruta.slice(i + 1), de = rs => (rs || []).find(x => x.veh === veh && String(x.vuelta || 1) === vu);
+    let r = null; const x = await api({ accion: "rutaLeer", fecha: E.fecha }); if (x && x.ok && x.ruta) { r = de(x.ruta.rutas); if (r) r = Object.assign({ fecha: E.fecha }, r); }
+    if (!r) r = Object.values(desc()).find(y => y.fecha === E.fecha && y.veh === veh && String(y.vuelta || 1) === vu) || null;
+    if (!r) { toast("No se encontró esa ruta: pide a logística que la reenvíe."); return; }
+    const D = desc(); D[key(r)] = r; lsSet("rutasDesc", D); MEM[key(r)] = r;
+    if (E.fecha === hoy()) activar(r); else { VER = key(r); ir("misrutas"); } }
+  const _pi = pintar; pintar = function (s) { if (s === "misrutas") return pintarMis(); return _pi.apply(this, arguments); };
+  const _ar = arrancar; arrancar = function () { sembrar(); const x = _ar.apply(this, arguments); setTimeout(enlace, 0); setTimeout(() => { if (SEC === "misrutas") pintarMis(); }, 0); return x; };
+  if (perfil() && cfg() && !document.querySelector(".gate")) { if (sembrar() && SEC === "ruta") pintar("ruta"); enlace(); }
+  if (navigator.onLine && perfil() && !lis().ts) setTimeout(() => { if (perfil() && cfg()) bajar().then(() => { if (SEC === "misrutas") pintarMis(); }); }, 1500);
+  window.addEventListener("online", () => { if (perfil() && cfg()) bajar().then(() => { if (SEC === "misrutas") pintarMis(); }); });
 })();
 </script>
 </body></html>
