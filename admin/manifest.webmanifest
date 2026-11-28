@@ -1,7 +1,7 @@
 {
  "id": "/hwf-apps/admin/",
- "name": "HWF",
- "short_name": "HWF",
+ "name": "HWF Gerencia",
+ "short_name": "Gerencia",
  "start_url": "./",
  "scope": "./",
  "display": "standalone",

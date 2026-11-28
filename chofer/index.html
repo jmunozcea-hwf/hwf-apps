@@ -51,7 +51,7 @@ const lsGet = (k, d) => { try { const v = JSON.parse(localStorage.getItem("hwf-c
 const lsSet = (k, v) => { try { localStorage.setItem("hwf-cho:" + k, JSON.stringify(v)); return true; } catch (e) { toast("Memoria del teléfono llena: envía las entregas pendientes con señal."); return false; } };
 let tT; function toast(m) { const t = $("toast"); t.textContent = m; t.hidden = false; clearTimeout(tT); tT = setTimeout(() => t.hidden = true, 3500); }
 const hoy = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; };
-const CHOFERES = ["Víctor", "Matías", "Jorge", "Cristóbal", "Claudia", "Diego"];
+const CHOFERES = []; /* sin lista en el código: cada chofer escribe su nombre */
 const VEH = [["hd65", "Hyundai HD65 MAX"], ["boxer", "Peugeot Boxer L2H2"], ["g10", "Maxus G10 Cargo"], ["partner", "Peugeot Partner L2"]];
 const PAGOS = ["Efectivo", "Transferencia", "Cheque", "Tarjeta (POS)", "Crédito / factura a plazo", "Sin cobro (ya pagado)"];
 const ESTADOS = [["ok", "✅ Entregado conforme"], ["parcial", "🟡 Entrega parcial"], ["rech", "❌ Rechazado"], ["aus", "🚪 No estaba / cerrado"]];
@@ -67,8 +67,8 @@ function dec(t) { t = String(t || "").replace(/\s+/g, ""); try { t = decodeURICo
   try { const o = JSON.parse(decodeURIComponent(escape(atob(m[1].replace(/-/g, "+").replace(/_/g, "/"))))); return o.u && o.c ? { url: o.u, clave: o.c } : null; } catch (e) { return null; } }
 function puerta() { const o = document.createElement("div"); o.className = "gate"; const p = lsGet("perfil", {});
   o.innerHTML = `<div class="c"><h1>🚚 Chofer HWF</h1>${cfg() ? "" : `<p class="muted" style="margin:0">Pega el link o el código de conexión (empieza con <b>HWF1:</b>) que te entrega logística.</p>
-    <textarea id="gC" rows="3" placeholder="Link o código HWF1:…"></textarea><details><summary style="cursor:pointer;font-weight:600">Conectar con URL y clave</summary><div style="display:grid;gap:8px;margin-top:8px"><input id="gU" type="url" placeholder="https://script.google.com/macros/s/…/exec"><input id="gK" placeholder="Clave"></div></details>`}
-    <label class="f">Chofer<select id="gN"><option value="">Elige tu nombre…</option>${CHOFERES.map(n => `<option${p.chofer === n ? " selected" : ""}>${n}</option>`).join("")}</select></label>
+    <textarea id="gC" rows="3" placeholder="Link o código HWF1:…"></textarea><details><summary style="cursor:pointer;font-weight:600">Conectar con URL y clave</summary><div style="display:grid;gap:8px;margin-top:8px"><input id="gU" type="url" PLACEHOLDER="URL del script (…/exec)"><input id="gK" placeholder="Clave"></div></details>`}
+    <label class="f">Chofer${CHOFERES.length ? `<select id="gN"><option value="">Elige tu nombre…</option>${CHOFERES.map(n => `<option${p.chofer === n ? " selected" : ""}>${n}</option>`).join("")}</select>` : `<input id="gN" autocomplete="name" placeholder="Escribe tu nombre" value="${esc(p.chofer || "")}">`}</label>
     <label class="f">Vehículo de hoy<select id="gV">${VEH.map(([k, n]) => `<option value="${k}"${p.veh === k ? " selected" : ""}>${n}</option>`).join("")}</select></label>
     <label class="f">Kilometraje del odómetro al salir (opcional)<input id="gO" type="number" inputmode="numeric" placeholder="Ej.: 125430"></label>
     <div class="e" id="gE"></div><button type="button" class="btn pri" id="gB">Comenzar jornada</button><p class="muted" style="margin:0;font-size:.8rem">Queda en el registro diario de conducción: chofer, vehículo, hora de inicio y término, kilómetros y entregas.</p></div>`;
@@ -234,9 +234,9 @@ function arrancar() { const P = perfil(); if (!P || !cfg()) return puerta(); if 
 if (!cfg() || !perfil()) puerta(); else arrancar();
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 </script><script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261128111827";
+const HWF_VER = "20261128115018";
 (function () {
-  const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
+  const raiz = location.pathname.replace(/\/(ventas|administracion|admin|tienda|logistica|chofer)\/[^/]*$/, "/");
   let avisado = false;
   async function revisar() {
     if (avisado || !navigator.onLine) return;

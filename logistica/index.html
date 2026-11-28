@@ -158,7 +158,7 @@ const DATA = () => { const d = lsGet("datos", null); if (d && d.bodegas) delete 
 function pantallaConexion(msg) { const o = document.createElement("div"); o.className = "ov"; o.id = "gate";
   o.innerHTML = `<div class="c"><h1>🚚 LOGÍSTICA HWF</h1><p>Abre el <b>link de conexión</b> que entrega HWF, o pega aquí el link o el código (empieza con <b>HWF1:</b>). Se pide una sola vez en este equipo.</p>
     <textarea id="gC" rows="3" placeholder="Pega el link o el código HWF1:…"></textarea>
-    <details><summary style="cursor:pointer;font-weight:600">¿No tienes link ni código? Conectar con URL y clave</summary><div style="display:grid;gap:8px;margin-top:8px"><input id="gU" type="url" placeholder="https://script.google.com/macros/s/…/exec"><input id="gK" placeholder="Clave (la de Config.gs)"></div></details>
+    <details><summary style="cursor:pointer;font-weight:600">¿No tienes link ni código? Conectar con URL y clave</summary><div style="display:grid;gap:8px;margin-top:8px"><input id="gU" type="url" PLACEHOLDER="URL del script (…/exec)"><input id="gK" placeholder="Clave (la de Config.gs)"></div></details>
     <div class="e" id="gE">${esc(msg || "")}</div><button type="button" class="btn pri" id="gB">Conectar</button></div>`;
   document.body.appendChild(o);
   $("gB").onclick = async () => { let c = dec($("gC").value); const u = $("gU").value.trim(), k = $("gK").value.trim();
@@ -485,9 +485,9 @@ if (!cfg() || !DATA()) pantallaConexion(); else { arrancar(); bajar(true).then(n
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261128111827";
+const HWF_VER = "20261128115018";
 (function () {
-  const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
+  const raiz = location.pathname.replace(/\/(ventas|administracion|admin|tienda|logistica|chofer)\/[^/]*$/, "/");
   let avisado = false;
   async function revisar() {
     if (avisado || !navigator.onLine) return;
@@ -573,7 +573,7 @@ const HWF_VER = "20261128111827";
   function aviso(acc) { try { if (document.getElementById("hwfAvisoScript") || localStorage.getItem(K) === hoy()) return; } catch (e) {}
     const d = document.createElement("div"); d.id = "hwfAvisoScript"; d.setAttribute("role", "alert");
     d.style.cssText = "position:fixed;left:10px;right:10px;top:calc(8px + env(safe-area-inset-top));z-index:100000;background:#B42318;color:#fff;border-radius:14px;padding:12px 14px;font:14px/1.4 system-ui,sans-serif;box-shadow:0 8px 24px rgba(0,0,0,.3);max-width:620px;margin:0 auto";
-    d.innerHTML = '<b>El script de Google no está actualizado</b><br>No reconoce «' + String(acc || "") + '»: el GPS, las entregas, las rutas y el seguimiento no se guardan. Avísale a Jorge: en Apps Script hay que ejecutar <b>instalarAutoActualizacion</b>. Mientras tanto, las entregas quedan guardadas en este teléfono.'
+    d.innerHTML = '<b>El script de Google no está actualizado</b><br>No reconoce «' + String(acc || "") + '»: el GPS, las entregas, las rutas y el seguimiento no se guardan. avísale a gerencia: en Apps Script hay que ejecutar <b>instalarAutoActualizacion</b>. Mientras tanto, las entregas quedan guardadas en este teléfono.'
       + '<div style="text-align:right;margin-top:6px"><button type="button" style="font:inherit;font-weight:700;border:0;border-radius:10px;padding:6px 14px;background:#fff;color:#B42318">Entendido</button></div>';
     d.querySelector("button").onclick = () => { try { localStorage.setItem(K, hoy()); } catch (e) {} d.remove(); };
     (document.body || document.documentElement).appendChild(d); }
@@ -755,10 +755,10 @@ const HWF_VER = "20261128111827";
   } catch (e) {} return null; })();
   if (!HOST) return;
   /* LOGÍSTICA: sin costos (13-11-2026): compras e inventario en unidades y días. VENTAS ve el BI completo de HWF, con costos
-     y márgenes (pedido de Jorge 15-11-2026: «el mismo BI de admin en la app de ventas») */
+     y márgenes (pedido de gerencia 15-11-2026: «el mismo BI de admin en la app de ventas») */
   const RC = !(HOST.t === "admin" || HOST.t === "ventas"), sinC = h => RC ? h.replace(/<t[dh] class="bi-c[^"]*"[^>]*>[\s\S]*?<\/t[dh]>/g, "") : h;
   const LS = HOST.t === "admin" ? "hwf-bi" : "hwf-bi-" + HOST.t; let E = { on: false, un: "", u: "$", prov: "", marca: "", prod: "", fmt: "", canal: "", anio: 0 }; try { E = Object.assign(E, JSON.parse(localStorage.getItem(LS) || "{}")); } catch (e) {}
-  if (HOST.t === "ventas" || HOST.t === "log") E.canal = "d";   /* Ventas y Logística: el BI muestra solo la distribuidora (pedidos de Jorge 22-11-2026) */
+  if (HOST.t === "ventas" || HOST.t === "log") E.canal = "d";   /* Ventas y Logística: el BI muestra solo la distribuidora (pedidos de gerencia 22-11-2026) */
   if (E.marca) E.marca = String(E.marca).toUpperCase();
   /* unidades (13-11-2026): "v" Ventas · "l" Logística · "" = la pantalla propia de la app (solo VENTAS: Panel). En HWF y LOGÍSTICA ya no hay
      pestaña «Stock»: el detalle de stock queda debajo de la unidad Logística */
@@ -794,7 +794,7 @@ const HWF_VER = "20261128111827";
   const F = n => E.u === "$" ? fm(n) : fu(n) + " u";
   function datos() { const B = HOST.base() || {}, P = B.productos || [], cats = B.cats || [];
     const porCod = {}; P.forEach((p, i) => porCod[String(p[2])] = i);
-    const provFijo = (p, r) => { const c = String(p[2]), n = String(p[0] || "");   /* Jorge 16/22-11-2026: todo IKAI y Felicity → Planet Pet */
+    const provFijo = (p, r) => { const c = String(p[2]), n = String(p[0] || "");   /* gerencia 16/22-11-2026: todo IKAI y Felicity → Planet Pet */
     return new Set(["111", "112", "764", "765", "766", "767", "768", "769", "770", "771", "772"]).has(c) || /\bikai\b/i.test(n) ? ["Planet Pet", "IKAI"] : /felicity/i.test(n) ? ["Planet Pet", "Felicity"] : /^49816[5-9]$/.test(c) || /goodwell/i.test(n) ? ["Planet Pet", "Goodwell"] : r; };
     const info = P.map(p => { const [pv, ma] = provFijo(p, provDe(cats[p[1]])); return { n: p[0], cod: String(p[2]), pv, ma: String(ma || "Sin marca").toUpperCase(), ft: fmtDe(p[0]) }; });
     let C = B.compras || HOST.alt().compras || null, demo = false;
@@ -1713,7 +1713,7 @@ body.ia-izq #iaBtn{right:auto;left:14px}
   const tabla = (cab, filas) => filas.length ? "| " + cab.join(" | ") + " |\n|" + cab.map(() => "---").join("|") + "|\n" + filas.map(f => "| " + f.join(" | ") + " |").join("\n") : "";
   const MM = v => "$" + (Math.abs(v) >= 1e6 ? (v / 1e6).toLocaleString("es-CL", { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + " MM" : n0(v));
 
-  /* ===== RUTAS (pedido de Jorge 15-11-2026): ruta del día, clientes por comuna, dirección de un cliente, despachos =====
+  /* ===== RUTAS (pedido de gerencia 15-11-2026): ruta del día, clientes por comuna, dirección de un cliente, despachos =====
      Direcciones: las de las facturas de cada cliente (script 2026-11-15.3) o las corregidas en la app. */
   const mq = u => u.replace(/\(/g, "%28").replace(/\)/g, "%29");
   const mapsDe = (dir, com) => mq("https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent([dir, tc(com), "Chile"].filter(Boolean).join(", ")));
@@ -2174,7 +2174,7 @@ body.ia-izq #iaBtn{right:auto;left:14px}
 .vd-ley{font-size:.74rem;color:var(--muted,#5B6874);margin-top:4px}
 </style>
 <script>/* patch_logvehdisp: choferes de la app Chofer y vehículos por disponibilidad y eficiencia */
-const LOG_CHOFERES = ["Víctor", "Matías", "Jorge", "Cristóbal", "Claudia", "Diego"];
+const LOG_CHOFERES = []; /* sin lista en el código: los choferes se agregan con «+ Otro chofer…» */
 (function () {
   if (typeof flota !== "function" || typeof pintarRutas !== "function") return;
   const efic = (v, P) => (costoKm(v, P) * 100 + v.fijo) / Math.max(1, v.kg);   /* $ por kg a plena carga en 100 km */
@@ -2303,7 +2303,7 @@ const LOG_CHOFERES = ["Víctor", "Matías", "Jorge", "Cristóbal", "Claudia", "D
     try { const r = await fetch(c.url, { method: "POST", body: JSON.stringify(Object.assign({ clave: c.clave }, d)) }), t = await r.text(); try { return JSON.parse(t); } catch (e) { return { ok: false, error: "El script de Google aún no tiene esta función: espera unos minutos y vuelve a intentar." }; } }
     catch (e) { return { ok: false, error: "Sin conexión a internet." }; } }
   const ST = { L: null, dias: 30, o: "todos", v: "", q: "", cargando: false, err: "", t: 0 };
-  /* 27-11-2026 (Jorge: «carga de pedidos muy lenta»): la última lista queda guardada en el equipo y se muestra al instante;
+  /* 27-11-2026 (gerencia: «carga de pedidos muy lenta»): la última lista queda guardada en el equipo y se muestra al instante;
      la consulta al script (varios segundos) corre de fondo y además se adelanta unos segundos después de abrir la app. */
   const CK = () => "hwf-pd-cache|" + (VEN ? yo() : "todos") + "|" + ST.dias;
   try { const c = JSON.parse(localStorage.getItem(CK()) || "null"); if (c && Array.isArray(c.L)) { ST.L = c.L; ST.tc = c.t; } } catch (e) {}
@@ -2322,7 +2322,7 @@ const LOG_CHOFERES = ["Víctor", "Matías", "Jorge", "Cristóbal", "Claudia", "D
     const vends = [...new Set(L.map(p => p.cart || p.vend).filter(Boolean))].sort(), g = {}; F.forEach(p => { const k = p.cart || p.vend || "Sin vendedor"; (g[k] = g[k] || []).push(p); });
     const nB = F.filter(p => p.b2b).length, nHoy = F.filter(p => p.b2b && (p.emision === hoy || String(p.recibido).slice(0, 10) === hoy)).length;
     box.innerHTML = `<div class="card pd-w"><h2>${VEN ? "Mis pedidos" : "Pedidos"} <span class="muted">app de ventas y portal B2B · últimos ${ST.dias} días</span></h2>
-      <p class="muted" style="font-size:.8rem;margin:4px 0 0">${VEN ? "Tus notas de pedido de la app y todos los pedidos del portal B2B (de todos los vendedores, marcados B2B). Los de tus clientes te llegan además por correo en PDF y Excel." : "Todos los pedidos, por vendedor. Los del portal van marcados B2B y llegan por correo (PDF y Excel) al vendedor, a Víctor, a Jorge y a administración."}</p>
+      <p class="muted" style="font-size:.8rem;margin:4px 0 0">${VEN ? "Tus notas de pedido de la app y todos los pedidos del portal B2B (de todos los vendedores, marcados B2B). Los de tus clientes te llegan además por correo en PDF y Excel." : "Todos los pedidos, por vendedor. Los del portal van marcados B2B y llegan por correo (PDF y Excel) al vendedor, a gerencia y a administración."}</p>
       <div class="pd-f">${[7, 30, 90].map(d => `<button type="button" data-pdd="${d}" aria-pressed="${ST.dias === d}">${d} días</button>`).join("")}<button type="button" data-pda="1">${ST.cargando ? "Cargando…" : "↻ Actualizar"}</button></div>
       <div class="pd-f">${[["todos", "Todos"], ["b2b", "Portal B2B"], ["app", "App ventas"]].map(([k, t]) => `<button type="button" data-pdo="${k}" aria-pressed="${ST.o === k}">${t}</button>`).join("")}</div>
       ${vends.length > 1 ? `<div class="pd-f"><button type="button" data-pdv="" aria-pressed="${!ST.v}">Todos</button>${vends.filter(v => String(v || "").trim()).map(v => `<button type="button" data-pdv="${es(v)}" aria-pressed="${ST.v === v}">${es(v)}</button>`).join("")}</div>` : ""}

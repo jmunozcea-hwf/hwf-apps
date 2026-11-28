@@ -145,7 +145,7 @@ function pinta(){
  if(document.getElementById("hwfGate"))return;
  var s=document.createElement("style");s.textContent="#hwfGate{position:fixed;inset:0;z-index:2147483000;background:#0B3146;color:#fff;display:flex;align-items:center;justify-content:center;padding:20px;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}#hwfGate .c{background:#fff;color:#0F1E29;border-radius:18px;padding:22px;max-width:440px;width:100%;display:grid;gap:12px;box-shadow:0 20px 50px rgba(0,0,0,.35)}#hwfGate h1{margin:0;font-size:1.3rem}#hwfGate p{margin:0;color:#5B6874;font-size:.92rem;line-height:1.4}#hwfGate textarea{width:100%;box-sizing:border-box;min-height:96px;border:1px solid #DAE1E7;border-radius:12px;padding:10px;font:inherit;font-size:.9rem}#hwfGate button{border:0;border-radius:12px;padding:13px;font:inherit;font-weight:700;background:#0B3146;color:#fff;cursor:pointer;min-height:48px}#hwfGate button[disabled]{opacity:.6}#hwfGate .e{color:#B42318;font-size:.88rem;min-height:1em}";
  document.head.appendChild(s);
- var g=document.createElement("div");g.id="hwfGate";g.innerHTML='<div class="c"><h1>VENTAS HWF</h1><p>'+(ESADM?'Abre el <b>link de conexión</b> de HWF o pega aquí el link o el código (empieza con <b>HWF1:</b>). Si no lo tienes: en el script de Google ejecuta <b>enviarLinksConexion</b> y te llega por correo.':'Abre el <b>link</b> que te envió HWF y la app se conecta sola. O pega aquí el link o el código (empieza con <b>HWF1:</b>). Se pide una sola vez.')+'</p><textarea id="hwfGc" placeholder="Pega el link o el código HWF1:…" autocomplete="off" autocapitalize="off" spellcheck="false"></textarea><details id="hwfGm" style="font-size:.9rem"><summary style="cursor:pointer;font-weight:600;color:#0B3146">¿No tienes link ni código? Conectar con URL y clave</summary><div style="display:grid;gap:8px;margin-top:8px"><input id="hwfGu" type="url" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off" autocapitalize="off" spellcheck="false" style="border:1px solid #DAE1E7;border-radius:12px;padding:11px;font:inherit;font-size:.9rem"><input id="hwfGk" type="text" placeholder="Clave (la de Config.gs)" autocomplete="off" autocapitalize="off" spellcheck="false" style="border:1px solid #DAE1E7;border-radius:12px;padding:11px;font:inherit;font-size:.9rem"><p style="font-size:.8rem;margin:0">La URL: Apps Script → Implementar → Gestionar implementaciones (termina en /exec). La clave: archivo Config.gs.</p></div></details><div class="e" id="hwfGe"></div><!-- gatemanual --><button type="button" id="hwfGb">Conectar</button></div>';
+ var g=document.createElement("div");g.id="hwfGate";g.innerHTML='<div class="c"><h1>VENTAS HWF</h1><p>'+(ESADM?'Abre el <b>link de conexión</b> de HWF o pega aquí el link o el código (empieza con <b>HWF1:</b>). Si no lo tienes: en el script de Google ejecuta <b>enviarLinksConexion</b> y te llega por correo.':'Abre el <b>link</b> que te envió HWF y la app se conecta sola. O pega aquí el link o el código (empieza con <b>HWF1:</b>). Se pide una sola vez.')+'</p><textarea id="hwfGc" placeholder="Pega el link o el código HWF1:…" autocomplete="off" autocapitalize="off" spellcheck="false"></textarea><details id="hwfGm" style="font-size:.9rem"><summary style="cursor:pointer;font-weight:600;color:#0B3146">¿No tienes link ni código? Conectar con URL y clave</summary><div style="display:grid;gap:8px;margin-top:8px"><input id="hwfGu" type="url" placeholder="URL del script (…/exec)" autocomplete="off" autocapitalize="off" spellcheck="false" style="border:1px solid #DAE1E7;border-radius:12px;padding:11px;font:inherit;font-size:.9rem"><input id="hwfGk" type="text" placeholder="Clave (la de Config.gs)" autocomplete="off" autocapitalize="off" spellcheck="false" style="border:1px solid #DAE1E7;border-radius:12px;padding:11px;font:inherit;font-size:.9rem"><p style="font-size:.8rem;margin:0">La URL: Apps Script → Implementar → Gestionar implementaciones (termina en /exec). La clave: archivo Config.gs.</p></div></details><div class="e" id="hwfGe"></div><!-- gatemanual --><button type="button" id="hwfGb">Conectar</button></div>';
  document.body.appendChild(g);
  document.getElementById("hwfGb").onclick=async function(){
   var b=this,e=document.getElementById("hwfGe"),c=dec(document.getElementById("hwfGc").value);if(!c){var gu=(document.getElementById("hwfGu")||{}).value||"",gk=(document.getElementById("hwfGk")||{}).value||"";gu=gu.trim();gk=gk.trim();if(/^https:\/\/script\.google(usercontent)?\.com\/.+\/exec$/.test(gu)&&gk.length>=4)c={url:gu,clave:gk};else if(gu||gk){e.textContent="Revisa la URL (debe terminar en /exec) y la clave.";return}}
@@ -155,6 +155,7 @@ function pinta(){
    if(!r||!r.ok){throw new Error(r&&r.clave===false?"La clave o el código no coinciden con los del script de HWF.":(r&&r.error)||"El servidor no respondió.")}
    if(!r.paquete){throw new Error("Todavía no hay datos publicados. Intenta en unos minutos.")}
    localStorage.setItem(DVK,JSON.stringify({v:r.version,d:r.paquete}));
+   try { var _vl = ((r.paquete.BASE || r.paquete.base || r.paquete || {}).vend || []).filter(function (v) { return v && !/tienda|gen[eé]rico|hellyw/i.test(v); }); localStorage.setItem("hwf-vend-lista", JSON.stringify(_vl)); } catch (e) {}
    if(!ESADM){try{var a=await pide(c,{accion:"datos",app:"admin",version:""});if(a&&a.ok&&a.paquete&&a.paquete.BASE)localStorage.setItem("hwf-dv-dash",JSON.stringify({v:a.version,d:a.paquete.BASE,act:a.paquete.ACT_INFO||null}))}catch(x){}}
    localStorage.setItem(CFGK,JSON.stringify(ESADM?{url:c.url,clave:c.clave,desde:""}:{url:c.url,clave:c.clave}));
    b.textContent="Listo";location.reload();
@@ -166,7 +167,7 @@ if(document.body)auto();else document.addEventListener("DOMContentLoaded",auto);
 })();</script>
 
 <script>/* carteras: reasignaciones aplicadas a los datos de Drive antes de que la app los lea */
-window.CART_FIJAS = { "Angélica Carvajal": "Claudia Hamame", "Víctor Moreno": "Genérico", "Angélica": "Claudia", "ANGELICA CARVAJAL": "CLAUDIA HAMAME", "ANGELICA CARVAJAL CAMPOS": "CLAUDIA HAMAME VELARDE" };   /* sinangelica */
+window.CART_FIJAS = {};
 window.cartReglas = function () { var R = null; try { R = JSON.parse(localStorage.getItem("hwf-carteras") || "null"); } catch (e) {}
   R = R || {}; var v = {}, k; for (k in CART_FIJAS) v[k] = CART_FIJAS[k]; for (k in (R.vend || {})) v[k] = R.vend[k]; for (k in v) if (!v[k]) delete v[k];
   return { vend: v, cli: R.cli || {} }; };
@@ -2098,7 +2099,7 @@ function validate(t){
 function buildWorkbook(t){
   const c=S.cli, dd=s=>{if(!s)return "";const[y,m,d]=s.split("-");return `${d}-${m}-${y}`};
   const rows=[
-    ["NOTA DE PEDIDO · HWF MASCOTAS"],["Distribuidora HWF · +56 952914022 · diego@hwf.cl"],
+    ["NOTA DE PEDIDO · HWF MASCOTAS"],["Distribuidora HWF"],
     ["N° pedido",S.num,"","Fecha emisión",dd(S.emision)],
     ["Cliente",c.razon||"","","RUT",c.rut||""],
     ["Giro",c.giro||"","","Contacto",c.contacto||""],
@@ -3907,7 +3908,7 @@ setQty = function (c, q) {
   const antes = line(c).q || 0; _setQtyS(c, q);
   const s = stockDe(c); if (s == null || q <= antes) return;
   const L = line(c), g = typeof gratisDe === "function" ? gratisDe(L, byCode[c]) : 0, total = (L.q || 0) + g;
-  /* sin aviso cuando no hay stock (pedido de Jorge 22-11-2026); solo si pide más de lo que hay */
+  /* sin aviso cuando no hay stock (pedido de gerencia 22-11-2026); solo si pide más de lo que hay */
   if (s > 0 && total > s) toast(`Ojo: pides ${fmtN(total)}${g ? ` (${fmtN(g)} gratis)` : ""} y hay ${fmtN(s)} en stock.`);
 };
 $("fStock").onclick = () => { conStock = !conStock; $("fStock").setAttribute("aria-pressed", conStock); applyFilter(); };
@@ -3927,10 +3928,11 @@ applyFilter();
    CUENTAS POR COBRAR (Informe de Cobranza Detallado de Defontana)
    Los días de atraso se calculan con la fecha del equipo: el estado cambia solo cada día.
    ================================================================ */
-const CXC_VEND = ["Claudia Hamame", "Diego Muñoz Cea", "Matías Espinoza", "Genérico"];
+const CXC_VEND_BASE = ["Genérico"];
+function cxcVendLista() { return [...new Set([...(D.vend || []).filter(v => v && !/tienda|hellyw/i.test(v)), ...CXC_VEND_BASE])]; }
 const cxNorm = s => String(s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase().replace(/[^A-Z0-9]+/g, " ").trim();
 const cx2 = s => cxNorm(s).split(" ").slice(0, 2).join(" ");
-function cxCart(cob) { const v = CXC_VEND.find(v => cx2(v) === cx2(cob)); return v || (cob ? String(cob).toLowerCase().replace(/(^|\s)\S/g, m => m.toUpperCase()) : "Sin cobrador"); }
+function cxCart(cob) { const v = cxcVendLista().find(v => cx2(v) === cx2(cob)); return v || (cob ? String(cob).toLowerCase().replace(/(^|\s)\S/g, m => m.toUpperCase()) : "Sin cobrador"); }
 function cxDias(fv) { const [y, m, d] = String(fv).split("-").map(Number), h = new Date(); if (!y) return 0; return Math.round((new Date(h.getFullYear(), h.getMonth(), h.getDate()) - new Date(y, m - 1, d)) / 864e5); }
 const cxEst = d => d > 30 ? "v30" : d > 0 ? "v" : d === 0 ? "hoy" : d >= -7 ? "sem" : "ok";
 const CXC_EST = { v30: "Vencido +30 días", v: "Vencido", hoy: "Vence hoy", sem: "Vence en 7 días", ok: "Al día" };
@@ -4349,7 +4351,7 @@ syEstados = async function () { await _syEstadosPr(); await prSync(); };
 /* ================================================================
    EMBUDO: CREAR PROSPECTO · VINCULAR CON CLIENTE · PROSPECTOS EN LA RUTA
    ================================================================ */
-const PR_MAIL = { DIEGO: "diego@hwf.cl", CLAUDIA: "claudia@hwf.cl", MATIAS: "matias@hwf.cl", VICTOR: "victor@hwf.cl", JORGE: "jorge@hwf.cl" };
+const PR_MAIL = {};
 const PR_SEG = ["Pet shop", "Veterinaria", "Farmacia veterinaria", "Pet shop + veterinaria", "Peluquería canina", "Tienda de alimentos", "Agrícola / forrajería", "Distribuidora", "Otro"];
 const PR_OHIG = new Set(["RANCAGUA", "MACHALI", "GRANEROS", "CODEGUA", "MOSTAZAL", "SAN FRANCISCO DE MOSTAZAL", "DONIHUE", "COLTAUCO", "COINCO", "OLIVAR", "REQUINOA", "RENGO", "MALLOA",
   "QUINTA DE TILCOCO", "SAN VICENTE", "SAN VICENTE DE TAGUA TAGUA", "PICHIDEGUA", "PEUMO", "LAS CABRAS", "SAN FERNANDO", "CHIMBARONGO", "PLACILLA", "NANCAGUA", "CHEPICA", "SANTA CRUZ",
@@ -5894,7 +5896,7 @@ function cxImagen(c) {
 <script>
 /* Plan de crecimiento HWF sin presupuesto de marketing (presentación del 02-11-2026): de 65 a 80 MM mensuales.
    Cálculo común para HWF y app Ventas a partir de las ventas (D.rows: [cliente, producto, mes, día, cant, neto, costo, vendedor, año?]). */
-const PLAN = { meta: 80000000, base: 65000000, cuotaMin: 4, cuotaMax: 6, excluir: [/\bpro ?pets?\b/, /\byanez\b/],  /* clientes fuera del plan (pedido de Jorge 03-11): Propets y Yañez */
+const PLAN = { meta: 80000000, base: 65000000, cuotaMin: 4, cuotaMax: 6, excluir: [/\bpro ?pets?\b/, /\byanez\b/],  /* clientes fuera del plan (pedido de gerencia 03-11): Propets y Yañez */
   pasos: [["1–30", "Ordenar la base", ["Lista de dormidos desde Defontana", "Clasificación A, B y C", "WhatsApp Business y catálogo", "Reunión con 2 marcas principales"]],
           ["31–60", "Activar la venta", ["Oferta de surtido en cada visita", "Cuotas de prospección por vendedor", "Programa de referidos", "Calendario fijo de rutas"]],
           ["61–90", "Consolidar", ["Capacitación en nutrición", "Hellywoof como laboratorio", "Revisión de días calle", "Ajustar según resultados"]]],
@@ -6211,7 +6213,7 @@ function dcCalc(o) {
     add(T); add(V[d.cart] = V[d.cart] || nuevo()); add(cli(k, d.cli, d.cart, d.rut));
   });
   /* pagos detectados por el script */
-  const CXV = typeof CXC_VEND !== "undefined" ? CXC_VEND : [];
+  const CXV = cxcVendLista();
   (o.pagos || []).forEach(p => {
     const [rut, nom, cob, fi, fp, monto, tipo] = p, f1 = dcD(fi), f2 = dcD(fp); if (!f1 || !f2 || f2 < desdeP || tipo === "Cheque" || !(monto > 0)) return;
     const cart = (CXV.find(v => dcK2(v) === dcK2(cob))) || (cob ? String(cob).toLowerCase().replace(/(^|\s)\S/g, m => m.toUpperCase()) : "Sin cobrador");
@@ -6710,7 +6712,7 @@ function calForm(o, alGuardar) {
     else { const p = w.querySelector(".cal-err"); p.hidden = false; p.textContent = "No se pudo guardar: " + ((r && r.error) || "sin conexión"); b.disabled = false; b.textContent = "Guardar"; } };
   if (!nuevo) w.querySelector(".cal-del").onclick = () => { if (confirm("¿Eliminar esta actividad del calendario del equipo?")) enviar(Object.assign({}, o, { borrado: true })); };
   f.onsubmit = e => { e.preventDefault(); const v = Object.fromEntries(new FormData(f).entries());
-    if (!v.fecha) return; const tit = [v.tipo, v.cliente.trim() || v.lugar.trim()].filter(Boolean).join(" · ");   /* sin campo «Título» (pedido de Jorge 08-11-2026) */
+    if (!v.fecha) return; const tit = [v.tipo, v.cliente.trim() || v.lugar.trim()].filter(Boolean).join(" · ");   /* sin campo «Título» (pedido de gerencia 08-11-2026) */
     enviar(Object.assign({}, o, { tipo: v.tipo, titulo: tit, fecha: v.fecha, hora: v.hora, lugar: v.lugar.trim(), cliente: v.cliente.trim(), nota: v.nota.trim(), borrado: false })); };
   setTimeout(() => f.fecha.focus(), 50);
 }
@@ -6821,18 +6823,17 @@ syLlamar = async function (cfg, d) { const r = await _syLlamarCart.apply(this, a
   if (d && d.accion === "clientesCambios" && r && Array.isArray(r.cambios)) { r.__todos = r.cambios; r.cambios = r.cambios.filter(c => c && c.codigo !== "CARTERA"); } return r; };
 document.addEventListener("visibilitychange", () => { if (!document.hidden) cartBajar(); });
 setTimeout(cartBajar, 4000);
-/* vendedores eliminados: una sesión abierta como «Jorge» pasa a «Genérico» */
-try { if (SES && SES.vendedor && SES.vendedor.nombre === "Jorge") { SES.vendedor = Object.assign({}, SES.vendedor, { nombre: "Genérico", usuario: "genérico", cartera: "Genérico" }); guardarSesion(SES); location.reload(); } } catch (e) {}
 </script>
 
-<script>/* sinangelica: cada respuesta del script pasa por las reglas de cartera (cobranza, prospectos, notas…) */
+<script>/* carteras: cada respuesta del script pasa por las reglas de cartera (cobranza, prospectos, notas…) */
 { const _f = syLlamar; syLlamar = async function (cfg, d) { const r = await _f.apply(this, arguments);
     try { if (r && r.ok && d && !/^(clienteCambios|clientesCambios|ranking|puntaje|chatLeer)$/.test(d.accion) && typeof cartAplicar === "function") cartAplicar(r); } catch (e) {} return r; }; }
 </script>
 
-<script>/* sinangelica: fuera del ranking los vendedores eliminados */
-const RK_FUERA = /^(ang[eé]lica|v[ií]ctor|jorge)\b|^gen[eé]rico$|\(tienda\)\s*$/i;   /* fuera: vendedores eliminados y los de la Tienda Hellywoof (tienen su propio ranking) */
-{ const _ptFilasSA = ptFilas; ptFilas = function () { return _ptFilasSA.apply(this, arguments).filter(r => !RK_FUERA.test(String(r.v || ""))); }; }
+<script>/* carteras: fuera del ranking los vendedores eliminados */
+const RK_FUERA_BASE = /^gen[eé]rico$|\(tienda\)\s*$/i;
+function rkFueraTest(s) { const p = String(s || "").toLowerCase().split(/\s+/)[0]; return RK_FUERA_BASE.test(String(s || "")) || (D.rkFuera || []).some(n => String(n).toLowerCase() === p); }   /* fuera: vendedores eliminados y los de la Tienda Hellywoof (tienen su propio ranking) */
+{ const _ptFilasSA = ptFilas; ptFilas = function () { return _ptFilasSA.apply(this, arguments).filter(r => !rkFueraTest(String(r.v || ""))); }; }
 </script>
 
 <script>/* avance2: el avance de ventas al comienzo del Panel */
@@ -6883,7 +6884,7 @@ const ptLimpiaFilas = L => Array.isArray(L) ? L.filter(r => !ptBorrado(Array.isA
 <script>/* geoauto: pedir la ubicación al abrir y mantenerla al día */
 (function () {
   let ult = 0, aviso = false;
-  const bloqueado = () => { return; /* sin aviso en pantalla (pedido de Jorge 08-11-2026) */ if (aviso || document.getElementById("geoAv")) return; aviso = true;
+  const bloqueado = () => { return; /* sin aviso en pantalla (pedido de gerencia 08-11-2026) */ if (aviso || document.getElementById("geoAv")) return; aviso = true;
     const ios = /iPhone|iPad/i.test(navigator.userAgent);
     const d = document.createElement("div"); d.id = "geoAv";
     d.style.cssText = "position:fixed;left:12px;right:12px;bottom:calc(76px + env(safe-area-inset-bottom));z-index:9000;background:#0B3146;color:#fff;border-radius:14px;padding:12px 14px;font:500 13.5px/1.4 system-ui;box-shadow:0 10px 30px rgba(0,0,0,.3);display:flex;gap:10px;align-items:flex-start";
@@ -6975,7 +6976,7 @@ function rkdCalc(B, y, m) {
   const [cy, cm, cd] = String(B.corte || "").split("-").map(Number), enCurso = cy === y && cm === m, ultDia = enCurso ? cd : new Date(y, m, 0).getDate();
   let hTot = 0, hPas = 0, wPas = 0; const nDias = new Date(y, m, 0).getDate(); for (let d = 1; d <= nDias; d++) { if (!rkdHabil(new Date(y, m - 1, d))) continue; hTot++; if (d <= ultDia) { hPas++; wPas += rkdPesoDia(d, nDias); } }
   const prog = hTot ? hPas / hTot : 1, anio = r => r[8] || B.anio, ym = r => anio(r) * 100 + r[2];
-  const fuera = v => !v || /tienda|hellywoof/i.test(v) || (typeof RK_FUERA !== "undefined" && RK_FUERA.test(v));
+  const fuera = v => !v || /tienda|hellywoof/i.test(v) || (typeof RK_FUERA !== "undefined" && rkFueraTest(v));
   const prev = []; for (let k = 1; k <= 3; k++) { let yy = y, mm2 = m - k; if (mm2 < 1) { mm2 += 12; yy--; } prev.push(yy * 100 + mm2); }
   const YM = y * 100 + m, prim = {}, V = {}, base = { venta: 0, costo: 0, cli: {}, docs: 0, cont: 0 };
   B.rows.forEach(r => { const k = ym(r), f = k * 100 + r[3]; if (r[5] > 0 && (prim[r[0]] == null || f < prim[r[0]].f)) prim[r[0]] = { f, v: r[7] }; });
@@ -7202,9 +7203,9 @@ function confirmarNota() {
   x.onclick = () => cerrarModal(); card.insertBefore(x, card.firstChild); })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261128111827";
+const HWF_VER = "20261128115018";
 (function () {
-  const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
+  const raiz = location.pathname.replace(/\/(ventas|administracion|admin|tienda|logistica|chofer)\/[^/]*$/, "/");
   let avisado = false;
   async function revisar() {
     if (avisado || !navigator.onLine) return;
@@ -7651,7 +7652,7 @@ rutaElegirPr = function () { return rutaSoloPr(); };
   const pesos = v => "$" + Math.round(v).toLocaleString("es-CL"), limpio = s => String(s || "").replace(/[\\/:*?"<>|]/g, "").trim();
 
   /* ---------- nota de pedido ---------- */
-  function pdfPedido(t) { const d = Pdf(), c = S.cli, PIE = "Distribuidora HWF · +56 952914022 · diego@hwf.cl";
+  function pdfPedido(t) { const d = Pdf(), c = S.cli, PIE = "Distribuidora HWF";
     const vend = (typeof SES !== "undefined" && SES && SES.vendedor && SES.vendedor.nombre) || "";
     cabecera(d, "Nota de pedido", "N° " + (S.num || ""), "Emisión " + dd(S.emision));
     const campos = [["Cliente", c.razon], ["RUT", c.rut], ["Giro", c.giro], ["Contacto", c.contacto], ["Teléfono", c.fono], ["Correo", c.mail], ["Dirección facturación", c.dir], ["Comuna / Ciudad", c.comuna],
@@ -7827,10 +7828,10 @@ rutaElegirPr = function () { return rutaSoloPr(); };
   } catch (e) {} return null; })();
   if (!HOST) return;
   /* LOGÍSTICA: sin costos (13-11-2026): compras e inventario en unidades y días. VENTAS ve el BI completo de HWF, con costos
-     y márgenes (pedido de Jorge 15-11-2026: «el mismo BI de admin en la app de ventas») */
+     y márgenes (pedido de gerencia 15-11-2026: «el mismo BI de admin en la app de ventas») */
   const RC = !(HOST.t === "admin" || HOST.t === "ventas"), sinC = h => RC ? h.replace(/<t[dh] class="bi-c[^"]*"[^>]*>[\s\S]*?<\/t[dh]>/g, "") : h;
   const LS = HOST.t === "admin" ? "hwf-bi" : "hwf-bi-" + HOST.t; let E = { on: false, un: "", u: "$", prov: "", marca: "", prod: "", fmt: "", canal: "", anio: 0 }; try { E = Object.assign(E, JSON.parse(localStorage.getItem(LS) || "{}")); } catch (e) {}
-  if (HOST.t === "ventas" || HOST.t === "log") E.canal = "d";   /* Ventas y Logística: el BI muestra solo la distribuidora (pedidos de Jorge 22-11-2026) */
+  if (HOST.t === "ventas" || HOST.t === "log") E.canal = "d";   /* Ventas y Logística: el BI muestra solo la distribuidora (pedidos de gerencia 22-11-2026) */
   if (E.marca) E.marca = String(E.marca).toUpperCase();
   /* unidades (13-11-2026): "v" Ventas · "l" Logística · "" = la pantalla propia de la app (solo VENTAS: Panel). En HWF y LOGÍSTICA ya no hay
      pestaña «Stock»: el detalle de stock queda debajo de la unidad Logística */
@@ -7866,7 +7867,7 @@ rutaElegirPr = function () { return rutaSoloPr(); };
   const F = n => E.u === "$" ? fm(n) : fu(n) + " u";
   function datos() { const B = HOST.base() || {}, P = B.productos || [], cats = B.cats || [];
     const porCod = {}; P.forEach((p, i) => porCod[String(p[2])] = i);
-    const provFijo = (p, r) => { const c = String(p[2]), n = String(p[0] || "");   /* Jorge 16/22-11-2026: todo IKAI y Felicity → Planet Pet */
+    const provFijo = (p, r) => { const c = String(p[2]), n = String(p[0] || "");   /* gerencia 16/22-11-2026: todo IKAI y Felicity → Planet Pet */
     return new Set(["111", "112", "764", "765", "766", "767", "768", "769", "770", "771", "772"]).has(c) || /\bikai\b/i.test(n) ? ["Planet Pet", "IKAI"] : /felicity/i.test(n) ? ["Planet Pet", "Felicity"] : /^49816[5-9]$/.test(c) || /goodwell/i.test(n) ? ["Planet Pet", "Goodwell"] : r; };
     const info = P.map(p => { const [pv, ma] = provFijo(p, provDe(cats[p[1]])); return { n: p[0], cod: String(p[2]), pv, ma: String(ma || "Sin marca").toUpperCase(), ft: fmtDe(p[0]) }; });
     let C = B.compras || HOST.alt().compras || null, demo = false;
@@ -8303,7 +8304,7 @@ function prUnifV(l) {
   const VENDS = () => (CRM_BASE.metas || []).map(m => m.vendedor).filter(v => v && !/tienda|gen[eé]rico/i.test(v));
   const esAdmin = () => !!(SES && SES.vendedor && SES.vendedor.admin);
   const ULT = "hwf-pv-ultimo";
-  const MENU = ["Claudia", "Diego", "Matias"];   /* sin «Invitado» (16-11-2026): Admin entra eligiendo el vendedor */
+  const MENU = (() => { try { return JSON.parse(localStorage.getItem("hwf-vend-lista") || "[]"); } catch (e) { return []; } })();   /* sin «Invitado» (16-11-2026): Admin entra eligiendo el vendedor */
   let pvVisor = null; /* null = todos; nombre = filtrar por ese vendedor */
 
   mostrarAcceso = function () {
@@ -8312,7 +8313,7 @@ function prUnifV(l) {
     const opts = MENU.map(n => `<option value="${n}"${n === ult ? " selected" : ""}>${n}</option>`).join("");
     const q = $("quien");
     q.innerHTML = `<div class="pv-in"><label for="pvNom">¿Quién eres?</label>
-      <select id="pvNom"><option value="">— elige tu nombre —</option>${opts}</select>
+      ${MENU.length ? `<select id="pvNom"><option value="">— elige tu nombre —</option>${opts}</select>` : `<input id="pvNom" autocomplete="name" placeholder="Escribe tu nombre">`}
       <div class="pv-e" id="pvE"></div><button type="button" class="pv-ok" id="pvB">Entrar</button>
       <small>Verás el resumen de la empresa y luego solo tus clientes, tus metas y tus notas.</small></div>`;
     q.hidden = false; window.scrollTo(0, 0);
@@ -8440,9 +8441,6 @@ function prUnifV(l) {
 
   const _pvNrm = s => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
   const _pvN1  = s => _pvNrm(s).split(/\s+/)[0]; /* solo primer nombre, compatible con cualquier apellido */
-  const _pvActivos1 = new Set(["claudia", "diego", "matias"]); /* primer nombre de cada vendedor activo */
-  const _pvAngelica1 = "angelica";
-  const _pvSinCartera1 = new Set(["generico", "leslie"]); /* sin cartera propia → Claudia */
   function _pvBuildMap(D) {
     /* 1. última factura por cliente */
     const m = {};
@@ -8452,27 +8450,7 @@ function prUnifV(l) {
       const f = (r[8] || D.anio) * 10000 + r[2] * 100 + r[3];
       if (!m[r[0]] || f > m[r[0]].f) m[r[0]] = { f, v };
     });
-    /* 2. índice nombre-normalizado → ci (para cruzar con cotizaciones) */
-    const nomCi = {};
-    (D.clientes || []).forEach((c, ci) => { nomCi[_pvNrm(c[0])] = ci; });
-    /* 3. cotizaciones de vendedores activos → ci → vendedor (compara por primer nombre) */
-    const cotVend = {};
-    (D.cots || []).forEach(c => {
-      const vn1 = _pvN1(c[3]); if (!_pvActivos1.has(vn1)) return;
-      const ci = nomCi[_pvNrm(c[2])]; if (ci == null) return;
-      cotVend[ci] = c[3]; /* última cotización activa gana */
-    });
-    /* 4. redistribuir clientes de Angélica (compara por primer nombre) */
-    Object.keys(m).forEach(k => {
-      const ci = Number(k);
-      const vn = _pvN1(m[ci].v);
-      /* buscar la forma "Claudia ..." que ya aparece en D.vend para ser consistente */
-      const claudiaVend = (D.vend || []).find(v => _pvN1(v) === "claudia") || "Claudia";
-      if (_pvSinCartera1.has(vn)) { m[ci].v = claudiaVend; return; }   /* Genérico y Leslie ya no llevan cartera: pasan a Claudia */
-      if (vn !== _pvAngelica1) return;
-      m[ci].v = cotVend[ci] || claudiaVend;
-    });
-    /* 5. carteras fijas (24-11-2026, pedido de Jorge): mandan sobre la última factura */
+    /* 5. carteras fijas (24-11-2026, pedido de gerencia): mandan sobre la última factura */
     const _pvK = s => _pvNrm(s).replace(/[^a-z0-9]+/g, " ").trim(), _pvFija = {}; Object.keys(D.cartFija || {}).forEach(k => _pvFija[_pvK(k)] = _pvN1(D.cartFija[k]));   /* viene en los datos privados (hoja «Carteras fijas»), nunca en el código */
     (D.clientes || []).forEach((c, ci) => { const fx = _pvFija[_pvK(c[0])]; if (!fx) return; const vv = (D.vend || []).find(v => _pvN1(v) === fx); if (vv) m[ci] = { f: (m[ci] && m[ci].f) || 0, v: vv }; });
     return m;
@@ -8524,7 +8502,7 @@ function prUnifV(l) {
 <script>/* patch_rutapropia: el vendedor arma su propia ruta por región y comuna */
 (function () {
   if (typeof pintarRuta !== "function" || typeof candidatos !== "function" || typeof COM === "undefined") return;
-  /* sin topes horarios (pedido de Jorge 15-11-2026): la ruta parte ahora, sin límite de 9:00–18:30 ni paso al día siguiente */
+  /* sin topes horarios (pedido de gerencia 15-11-2026): la ruta parte ahora, sin límite de 9:00–18:30 ni paso al día siguiente */
   jornada = function () { return { ini: new Date(), manana: false, budget: 1e9 }; };
   /* región de cada comuna conocida (las que tienen coordenadas en COM) */
   const REG = {}; const R = (r, l) => l.split(",").forEach(c => REG[c.trim()] = r);
@@ -8934,7 +8912,7 @@ body.ia-izq #iaBtn{right:auto;left:14px}
   const tabla = (cab, filas) => filas.length ? "| " + cab.join(" | ") + " |\n|" + cab.map(() => "---").join("|") + "|\n" + filas.map(f => "| " + f.join(" | ") + " |").join("\n") : "";
   const MM = v => "$" + (Math.abs(v) >= 1e6 ? (v / 1e6).toLocaleString("es-CL", { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + " MM" : n0(v));
 
-  /* ===== RUTAS (pedido de Jorge 15-11-2026): ruta del día, clientes por comuna, dirección de un cliente, despachos =====
+  /* ===== RUTAS (pedido de gerencia 15-11-2026): ruta del día, clientes por comuna, dirección de un cliente, despachos =====
      Direcciones: las de las facturas de cada cliente (script 2026-11-15.3) o las corregidas en la app. */
   const mq = u => u.replace(/\(/g, "%28").replace(/\)/g, "%29");
   const mapsDe = (dir, com) => mq("https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent([dir, tc(com), "Chile"].filter(Boolean).join(", ")));
@@ -9204,7 +9182,7 @@ body.cl2-on #crmMeta,body.cl2-on #crmLista>.crm-tools,body.cl2-on #crmEstado,bod
     aldia: ["Al día", "#1C7A4E", "#E3F4EA", "#2E9E63"], sin: ["Sin compras este año", "#5B6874", "#EEF2F5", "#C9D3DB"] };
   function datos() {
     const cart = typeof SES !== "undefined" && SES && SES.vendedor ? SES.vendedor.cartera : "", todos = typeof sinCartera === "function" && sinCartera(cart);
-    const L = clientesLocal().filter(c => (!cart || todos || c.vendedor === cart) && !/ANGELICA CAROLINA CARVAJAL/i.test(nz(c.nombre).toUpperCase()));
+    const L = clientesLocal().filter(c => (!cart || todos || c.vendedor === cart) );
     const cx = {}; try { cxClientes(cxMios()).forEach(c => { cx["n:" + cxNorm(c.cli)] = c; if (c.rut) cx["r:" + String(c.rut).replace(/\./g, "").toUpperCase()] = c; }); } catch (e) {}
     return L.map(c => { const hab = Number(c.compra_habitual) || 0, app = typeof ventaApp === "function" ? (ventaApp(cart, c.codigo) || 0) : 0, mes = (Number(c.octubre) || 0) + app, falta = Math.max(0, hab - mes), d = dias(c.ultima_compra);
       let abc = ""; try { abc = typeof plAbcDe === "function" ? plAbcDe(c) : ""; } catch (e) {}
@@ -9750,7 +9728,7 @@ try { if (document.getElementById("crmInicio") && SES) pintarInicio(); } catch (
       <div class="ml-ck" style="margin-top:8px">${TIPOS.map(([k, t]) => `<label><input type="checkbox" data-bt="${k}" ${(B.tipos || []).includes(k) ? "checked" : ""}> ${t}</label>`).join("")}</div>
       <small>Se arma solo con las promociones, ofertas y novedades vigentes y queda programado 24 h antes; te llega un aviso por correo para revisarlo o cancelarlo aquí.</small>
       <div class="ml-bt" style="margin-top:10px"><button type="button" class="ml-b ok" data-a="guardarAj" ${ST.ocup ? "disabled" : ""}>Guardar ajustes</button></div></div>
-    <div class="ml-c"><h3>Conexión con hwf.cl</h3><small>El envío usa un secreto compartido entre el script y hwf.cl. Al generarlo, te llega SOLO a jorge@hwf.cl para pegarlo en <b>public_html/b2b/config.php</b> (línea 'mail_secreto').</small>
+    <div class="ml-c"><h3>Conexión con hwf.cl</h3><small>El envío usa un secreto compartido entre el script y hwf.cl. Al generarlo, te llega SOLO al correo de gerencia para pegarlo en <b>public_html/b2b/config.php</b> (línea 'mail_secreto').</small>
       <div class="ml-bt" style="margin-top:10px"><button type="button" class="ml-b" data-a="secreto" ${ST.ocup ? "disabled" : ""}>Generar secreto y enviármelo por correo</button></div></div>`; }
   function vBajas() { const L = ST.bajas || [];
     return `<div class="ml-c"><div class="ml-bt"><button type="button" class="ml-b" data-a="volver">← Campañas</button><h3 style="margin:0">Bajas (${nf(L.length)})</h3></div><small>Nunca se les vuelve a enviar mailing. Los documentos de compra siguen llegando.</small></div>
@@ -9989,7 +9967,7 @@ try { if (document.getElementById("crmInicio") && SES) pintarInicio(); } catch (
   const tipo = i => { let T = {}; try { T = JSON.parse(localStorage.getItem("hwf-prod-tipo") || "{}") || {}; } catch (e) {} return T[i] || BASE[String(i)] || ""; };
   const g = document.getElementById("fGrupo"), s = document.createElement("select"); s.id = "fTipo"; s.setAttribute("aria-label", "Tipo de producto"); s.className = g.className; s.style.cssText = g.style.cssText;
   g.after(s);
-  /* siempre se muestran todos los tipos de la categoría, aunque aún no haya productos marcados (p. ej. Low grain) — pedido de Jorge 22-11-2026 */
+  /* siempre se muestran todos los tipos de la categoría, aunque aún no haya productos marcados (p. ej. Low grain) — pedido de gerencia 22-11-2026 */
   const AL = ["Grain free", "Low grain", "Funcional", "Tradicional"], HU = ["Funcional", "No funcional"];
   const opciones = () => { const gr = g.value, v = s.value, lista = !gr ? ORD : /alimento/i.test(gr) ? AL : /h[uú]med|lata/i.test(gr) ? HU : [];
     s.innerHTML = '<option value="">Todos los tipos</option>' + lista.map(t => `<option${t === v ? " selected" : ""}>${t}</option>`).join("");
@@ -10429,11 +10407,11 @@ try { if (document.getElementById("crmInicio") && SES) pintarInicio(); } catch (
 </style>
 <script>/* patch_metricasweb: visitas de hwf.cl y del portal */
 (function () {
-  /* 23-11-2026: también en la app Ventas, solo para Diego y Jorge (o un vendedor con permiso de Admin) */
+  /* 23-11-2026: también en la app Ventas, solo para gerencia (o un vendedor con permiso de Admin) */
   const VEN = typeof setModo === "function" && typeof NAV_ORDEN !== "undefined" && !!document.getElementById("mInicio");
   if (!VEN && typeof pintarMas !== "function") return;
   try { if (typeof NAV_MNOM !== "undefined") NAV_MNOM.metricas = "Métricas web y B2B"; } catch (e) {}
-  const yoV = () => (typeof SES !== "undefined" && SES && SES.vendedor) || null, puedeV = () => { const v = yoV(); return !!v && (/^(diego|jorge)/i.test(String(v.nombre || "")) || !!v.admin); };
+  const yoV = () => (typeof SES !== "undefined" && SES && SES.vendedor) || null, puedeV = () => { const v = yoV(); return !!v && !!v.admin; };
   let VBOX = null, VTAB = null;
   let DAT = null, DIAS = 30, EST = "";
   const nf = n => Math.round(Number(n) || 0).toLocaleString("es-CL"), mm = n => { n = Number(n) || 0; return "$" + (n >= 1e6 ? (n / 1e6).toLocaleString("es-CL", { maximumFractionDigits: 1 }) + " MM" : Math.round(n).toLocaleString("es-CL")); };
@@ -10852,7 +10830,7 @@ body.m-b2b #crmMeta{display:none!important}
     try { const r = await fetch(c.url, { method: "POST", body: JSON.stringify(Object.assign({ clave: c.clave }, d)) }), t = await r.text(); try { return JSON.parse(t); } catch (e) { return { ok: false, error: "El script de Google aún no tiene esta función: espera unos minutos y vuelve a intentar." }; } }
     catch (e) { return { ok: false, error: "Sin conexión a internet." }; } }
   const ST = { L: null, dias: 30, o: "todos", v: "", q: "", cargando: false, err: "", t: 0 };
-  /* 27-11-2026 (Jorge: «carga de pedidos muy lenta»): la última lista queda guardada en el equipo y se muestra al instante;
+  /* 27-11-2026 (gerencia: «carga de pedidos muy lenta»): la última lista queda guardada en el equipo y se muestra al instante;
      la consulta al script (varios segundos) corre de fondo y además se adelanta unos segundos después de abrir la app. */
   const CK = () => "hwf-pd-cache|" + (VEN ? yo() : "todos") + "|" + ST.dias;
   try { const c = JSON.parse(localStorage.getItem(CK()) || "null"); if (c && Array.isArray(c.L)) { ST.L = c.L; ST.tc = c.t; } } catch (e) {}
@@ -10871,7 +10849,7 @@ body.m-b2b #crmMeta{display:none!important}
     const vends = [...new Set(L.map(p => p.cart || p.vend).filter(Boolean))].sort(), g = {}; F.forEach(p => { const k = p.cart || p.vend || "Sin vendedor"; (g[k] = g[k] || []).push(p); });
     const nB = F.filter(p => p.b2b).length, nHoy = F.filter(p => p.b2b && (p.emision === hoy || String(p.recibido).slice(0, 10) === hoy)).length;
     box.innerHTML = `<div class="card pd-w"><h2>${VEN ? "Mis pedidos" : "Pedidos"} <span class="muted">app de ventas y portal B2B · últimos ${ST.dias} días</span></h2>
-      <p class="muted" style="font-size:.8rem;margin:4px 0 0">${VEN ? "Tus notas de pedido de la app y todos los pedidos del portal B2B (de todos los vendedores, marcados B2B). Los de tus clientes te llegan además por correo en PDF y Excel." : "Todos los pedidos, por vendedor. Los del portal van marcados B2B y llegan por correo (PDF y Excel) al vendedor, a Víctor, a Jorge y a administración."}</p>
+      <p class="muted" style="font-size:.8rem;margin:4px 0 0">${VEN ? "Tus notas de pedido de la app y todos los pedidos del portal B2B (de todos los vendedores, marcados B2B). Los de tus clientes te llegan además por correo en PDF y Excel." : "Todos los pedidos, por vendedor. Los del portal van marcados B2B y llegan por correo (PDF y Excel) al vendedor, a gerencia y a administración."}</p>
       <div class="pd-f">${[7, 30, 90].map(d => `<button type="button" data-pdd="${d}" aria-pressed="${ST.dias === d}">${d} días</button>`).join("")}<button type="button" data-pda="1">${ST.cargando ? "Cargando…" : "↻ Actualizar"}</button></div>
       <div class="pd-f">${[["todos", "Todos"], ["b2b", "Portal B2B"], ["app", "App ventas"]].map(([k, t]) => `<button type="button" data-pdo="${k}" aria-pressed="${ST.o === k}">${t}</button>`).join("")}</div>
       ${vends.length > 1 ? `<div class="pd-f"><button type="button" data-pdv="" aria-pressed="${!ST.v}">Todos</button>${vends.filter(v => String(v || "").trim()).map(v => `<button type="button" data-pdv="${es(v)}" aria-pressed="${ST.v === v}">${es(v)}</button>`).join("")}</div>` : ""}
@@ -10997,7 +10975,7 @@ body:has(#rdOv) #snBtn,body:has(#rdOv) #iaBtn,body:has(#rdOv) #navBotones{displa
     let mD = 0; try { mD = HB.meta(cy, cm) || 0; } catch (x) {} const mY = Number(B.metaMes) === cm ? Number((B.metas || {})[V[iy]]) || 0 : 0;
     const pend = (B.cots || []).filter(c => nr(c[3]) === nr(yo) || nr(c[4]) === nr(yo)), pendD = (B.cots || []).reduce((t, c) => t + (Number(c[7]) || 0), 0), pendY = pend.reduce((t, c) => t + (Number(c[7]) || 0), 0), nPend = new Set(pend.map(c => c[0])).size;
     const hoyD = new Date(), dd = f => Math.round((hoyD - new Date(Math.floor(f / 10000), Math.floor(f / 100) % 100 - 1, f % 100)) / 864e5);
-    const recup = Object.keys(ult).map(Number).filter(c => dd(ult[c]) >= 45 && dd(ult[c]) <= 365 && !/ANGELICA CAROLINA CARVAJAL/i.test(String((CL[c] || [])[0] || "").normalize("NFD").replace(/[\u0300-\u036f]/g, ""))).sort((a, b) => (cliY[b] || 0) - (cliY[a] || 0)).slice(0, 5).map(c => ({ n: (CL[c] || [])[0] || "?", com: (CL[c] || [])[1] || "", d: dd(ult[c]), v: cliY[c] || 0 }));
+    const recup = Object.keys(ult).map(Number).filter(c => dd(ult[c]) >= 45 && dd(ult[c]) <= 365 ).sort((a, b) => (cliY[b] || 0) - (cliY[a] || 0)).slice(0, 5).map(c => ({ n: (CL[c] || [])[0] || "?", com: (CL[c] || [])[1] || "", d: dd(ult[c]), v: cliY[c] || 0 }));
     /* productos sin stock que compran mis clientes */
     const mis = new Set(Object.keys(ult).map(Number)), q = {}; R.forEach(r => { if (!mis.has(r[0])) return; const y = r[8] || B.anio; if ((cy * 12 + cm) - (y * 12 + r[2]) > 3) return; q[r[1]] = (q[r[1]] || 0) + (Number(r[4]) || 0); });
     const sinSt = Object.keys(q).map(Number).filter(i => { const p = P[i]; if (!p) return false; let s = null; try { s = HB.stock(String(p[2])); } catch (x) {} return s === 0 && q[i] > 0; }).sort((a, b) => q[b] - q[a]).slice(0, 5).map(i => P[i][0]);
@@ -11033,7 +11011,7 @@ body:has(#rdOv) #snBtn,body:has(#rdOv) #iaBtn,body:has(#rdOv) #navBotones{displa
     const cerrar = () => { try { localStorage.setItem(clave(), "1"); } catch (x) {} o.remove(); }; o.querySelector("#rdX").onclick = cerrar; }
   window.hwfResumenDia = mostrar;
   window.hwfResumenHtml = () => html(true);   /* Inicio → «Mi día» (patch_inicio_unico) lo muestra dentro de la pestaña */
-  /* ya no se abre solo al entrar (16-11-2026, pedido de Jorge): solo desde el menú lateral */
+  /* ya no se abre solo al entrar (16-11-2026, pedido de gerencia): solo desde el menú lateral */
   /* acceso desde el menú lateral ☰ (grupo «Mi día», después de Inicio); ya no hay botón en Inicio */
   document.querySelectorAll("#rdAbrir").forEach(x => x.remove());
   /* sin entrada en el menú lateral (16-11-2026, «redunda»): lo mismo está en Inicio → «Mi día» */
@@ -11234,7 +11212,7 @@ function vmPoner(cont, VM, antes) { try { if (!cont) return; const v = cont.quer
   limpiarBase(); let vB = null; setInterval(() => { const B = typeof DB !== "undefined" && DB ? DB.d : null; if (B && B !== vB) { vB = B; limpiarBase(); } }, 3000);
 })();
 </script>
-<script>/* patch_sintienda_clientes: Ventas, Dashboard sin los clientes de la tienda con factura (27-11-2026, Jorge: «Quita del dashboard y de los informes de cliente de la distribuidora los clientes de la tienda con factura») */
+<script>/* patch_sintienda_clientes: Ventas, Dashboard sin los clientes de la tienda con factura (27-11-2026, gerencia: «Quita del dashboard y de los informes de cliente de la distribuidora los clientes de la tienda con factura») */
 (function () {
   if (typeof dbCalc !== "function" || typeof window.esClienteTienda !== "function") return;
   const _db = dbCalc;

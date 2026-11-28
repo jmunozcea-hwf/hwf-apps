@@ -1630,7 +1630,7 @@ function pantallaConexion(msg) {
   o.innerHTML = `<div class="c"><h1>TIENDA HWF</h1><p>Abre el <b>link de conexión</b> que entrega HWF, o pega aquí el link o el código (empieza con <b>HWF1:</b>). Se pide una sola vez en este computador.</p>
     <textarea id="gC" rows="3" placeholder="Pega el link o el código HWF1:…"></textarea>
     <details><summary style="cursor:pointer;font-weight:600">¿No tienes link ni código? Conectar con URL y clave</summary><div style="display:grid;gap:8px;margin-top:8px">
-      <input id="gU" type="url" placeholder="https://script.google.com/macros/s/…/exec"><input id="gK" placeholder="Clave (la de Config.gs)"></div></details>
+      <input id="gU" type="url" PLACEHOLDER="URL del script (…/exec)"><input id="gK" placeholder="Clave (la de Config.gs)"></div></details>
     <div class="e" id="gE">${esc(msg || "")}</div><button type="button" class="pri" id="gB">Conectar</button></div>`;
   document.body.appendChild(o);
   $("gB").onclick = async () => { let c = dec($("gC").value); const u = $("gU").value.trim(), k = $("gK").value.trim();
@@ -1861,13 +1861,13 @@ function esperadoDia(P, f) { const [y, m] = f.split("-").map(Number); let tot = 
 function puntajeDia(P, f, mis) {
   const o = P.G[f] || { venta: 0, sacos: 0, tickets: 0 }, esp = esperadoDia(P, f), r = esp ? o.venta / esp : 0, sEsp = P.sacosDia * pesoDe(P, f);
   const c = { f, quien: quienDia(f), venta: o.venta, esp, cumpl: r, sacos: o.sacos, tickets: o.tickets, ticket: o.ticket || 0, sku: o.sku || 0 };
-  /* solo venta diaria ponderada (50%), ticket promedio (25%) y SKU por ticket (25%); sin misiones ni sacos (pedido de Jorge 08-11-2026) */
+  /* solo venta diaria ponderada (50%), ticket promedio (25%) y SKU por ticket (25%); sin misiones ni sacos (pedido de gerencia 08-11-2026) */
   let pts = 50 * Math.min(1.2, r), max = 50;
   if (P.conTickets && o.tickets) { pts += 25 * Math.min(1.2, P.ticketBase ? o.ticket / P.ticketBase : 0) + 25 * Math.min(1.2, P.skuBase ? o.sku / P.skuBase : 0); max += 50; }
   c.mis = 0; c.misMax = 0;
   c.score = Math.round(pts / max * 100 * 10) / 10; return c;
 }
-const RANK_DESDE = "2026-11-09";   /* puntaje reiniciado: cuenta desde el 9-11-2026 y cada mes parte de cero (pedido de Jorge) */
+const RANK_DESDE = "2026-11-09";   /* puntaje reiniciado: cuenta desde el 9-11-2026 y cada mes parte de cero (pedido de gerencia) */
 function rankCalc(ini, fin) {
   if (ini < RANK_DESDE) ini = RANK_DESDE;
   const P = diasMetricas(); if (!P) return { L: [], dias: [] };
@@ -2350,9 +2350,9 @@ const stAbrev = n => ST_ABR.reduce((s, [r, t]) => s.replace(r, t), String(n || "
 try { if ($("sStock") && !$("sStock").hidden) pintarStock(); } catch (e) {}
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261128111827";
+const HWF_VER = "20261128115018";
 (function () {
-  const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
+  const raiz = location.pathname.replace(/\/(ventas|administracion|admin|tienda|logistica|chofer)\/[^/]*$/, "/");
   let avisado = false;
   async function revisar() {
     if (avisado || !navigator.onLine) return;
@@ -2772,7 +2772,7 @@ body.ia-izq #iaBtn{right:auto;left:14px}
   const tabla = (cab, filas) => filas.length ? "| " + cab.join(" | ") + " |\n|" + cab.map(() => "---").join("|") + "|\n" + filas.map(f => "| " + f.join(" | ") + " |").join("\n") : "";
   const MM = v => "$" + (Math.abs(v) >= 1e6 ? (v / 1e6).toLocaleString("es-CL", { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + " MM" : n0(v));
 
-  /* ===== RUTAS (pedido de Jorge 15-11-2026): ruta del día, clientes por comuna, dirección de un cliente, despachos =====
+  /* ===== RUTAS (pedido de gerencia 15-11-2026): ruta del día, clientes por comuna, dirección de un cliente, despachos =====
      Direcciones: las de las facturas de cada cliente (script 2026-11-15.3) o las corregidas en la app. */
   const mq = u => u.replace(/\(/g, "%28").replace(/\)/g, "%29");
   const mapsDe = (dir, com) => mq("https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent([dir, tc(com), "Chile"].filter(Boolean).join(", ")));
