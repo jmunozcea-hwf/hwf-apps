@@ -485,9 +485,9 @@ if (!cfg() || !DATA()) pantallaConexion(); else { arrancar(); bajar(true).then(n
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261128111407";
+const HWF_VER = "20261128111827";
 (function () {
-  const raiz = location.pathname.replace(/\/(ventas|administracion|admin|tienda|logistica|chofer)\/[^/]*$/, "/");
+  const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
   let avisado = false;
   async function revisar() {
     if (avisado || !navigator.onLine) return;
@@ -2877,19 +2877,23 @@ document.addEventListener("click", e => { const b = e.target.closest && e.target
     if (!A.chofer) { toast("Elige primero el chofer de esta ruta."); const s = blk.closest(".card").querySelector(".rt-asig select"); if (s) s.focus(); return; }
     const c = cfg(); if (!c || !c.url) { toast("Conecta la app al script de Google primero."); return; }
     const base = (typeof choLink === "function" ? choLink() : "").trim().split("\n").pop(); if (!/instalar-chofer\/#HWF1:/.test(base)) { toast("No se pudo armar el enlace de la app Chofer."); return; }
-    let w = null; if (modo === "env") { try { w = window.open("about:blank", "_blank"); } catch (x) {} }   /* se abre antes de esperar al script (los teléfonos bloquean ventanas tardías) */
+    /* 28-11-2026: sin ventana previa (en la app instalada quedaba en about:blank); al guardar aparece el botón «Abrir WhatsApp» */
     const t0 = bt.textContent; bt.disabled = true; bt.textContent = "Guardando…"; let res, rutas = [];
     try { rutas = window.rtArmaRutas(); res = await syLlamar(c, { accion: "rutaGuardar", fecha, rutas, por: "Logística" }); if (res && res.ok) rtProgGuardar(fecha, rutas); } catch (x) { res = { ok: false, error: "Sin conexión." }; }
     bt.disabled = false; bt.textContent = t0;
-    if (!res || !res.ok) { try { if (w) w.close(); } catch (x) {} toast("No se pudo guardar la ruta: " + ((res && res.error) || "error")); return; }
+    if (!res || !res.ok) { toast("No se pudo guardar la ruta: " + ((res && res.error) || "error")); return; }
     const [veh, vu] = k.split("|"), r = rutas.find(x => x.veh === veh && String(x.vuelta) === vu) || {}, n = (r.paradas || []).length;
     const link = base + "&fecha=" + fecha + "&ruta=" + encodeURIComponent(veh + "-" + vu);
     if (modo === "cop") { let ok = false; try { await navigator.clipboard.writeText(link); ok = true; } catch (x) {} if (!ok) prompt("Copia el enlace:", link); toast("Ruta guardada. Enlace copiado."); return; }
     const msg = `Hola ${A.chofer}, tu ruta del ${dd(fecha)} (${r.vehNombre || veh}, ${n} ${n === 1 ? "entrega" : "entregas"}${r.sale ? ", sale " + r.sale : ""}) ya está en la app Chofer HWF: ${link}`;
     const tel = String(blk.querySelector(".rc-tel").value || "").replace(/\D/g, ""), T = lsGet("rcTel", {}); if (tel) T[nk(A.chofer)] = tel; else delete T[nk(A.chofer)]; lsSet("rcTel", T);
     const url = "https://wa.me/" + (tel ? (tel.length === 9 ? "56" + tel : tel) : "") + "?text=" + encodeURIComponent(msg);
-    if (w) { try { w.location.href = url; } catch (x) { w = null; } } if (!w) { try { w = window.open(url, "_blank"); } catch (x) {} if (!w) location.href = url; }
-    const E = lsGet("rcEnv", {}); (E[fecha] = E[fecha] || {})[k] = { t: hm(), ch: A.chofer }; Object.keys(E).sort().slice(0, -10).forEach(f => delete E[f]); lsSet("rcEnv", E); refrescar(blk); toast("Ruta guardada. WhatsApp listo para enviar."); });
+    let wa = blk.querySelector(".rc-wa"); if (!wa) { wa = document.createElement("a"); wa.className = "btn rc-wa"; wa.target = "_blank"; wa.rel = "noopener";
+      wa.style.cssText = "display:block;margin-top:8px;text-align:center;background:#25D366;color:#fff;border-color:#25D366;font-weight:700"; blk.appendChild(wa); }
+    wa.href = url; wa.textContent = "📲 Abrir WhatsApp y enviar a " + A.chofer;
+    wa.onclick = () => setTimeout(() => wa.remove(), 400);
+    const E = lsGet("rcEnv", {}); (E[fecha] = E[fecha] || {})[k] = { t: hm(), ch: A.chofer }; Object.keys(E).sort().slice(0, -10).forEach(f => delete E[f]); lsSet("rcEnv", E); refrescar(blk); toast("Ruta guardada. Toca «Abrir WhatsApp y enviar».");
+    try { wa.scrollIntoView({ block: "nearest", behavior: "smooth" }); } catch (x) {} });
 })();
 </script>
 <style>/* patch_menuorden */
