@@ -485,7 +485,7 @@ if (!cfg() || !DATA()) pantallaConexion(); else { arrancar(); bajar(true).then(n
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261128115018";
+const HWF_VER = "20261128122438";
 (function () {
   const raiz = location.pathname.replace(/\/(ventas|administracion|admin|tienda|logistica|chofer)\/[^/]*$/, "/");
   let avisado = false;
@@ -747,11 +747,11 @@ const HWF_VER = "20261128115018";
     try { if (typeof NAV_ORDEN !== "undefined" && !NAV_ORDEN.some(x => x[0] === "bi")) NAV_ORDEN.splice(Math.max(0, NAV_ORDEN.findIndex(x => x[0] === "dash")) + 1, 0, ["bi", "mBi"]); } catch (e) {} }
   const HOST = (() => { try {
     if (typeof pintarInventario === "function" && document.getElementById("s-inv")) return { t: "admin", et: "Stock", cont: () => document.getElementById("s-inv"), base: () => (typeof D !== "undefined" && D && D.rows && D.rows.length) ? D : BASE, alt: () => (typeof BASE !== "undefined" ? BASE : {}),
-      stock: c => stockDe(c), meta: (y, m) => metaPlan14(y, m), demo: () => typeof RK_DEMO !== "undefined" && RK_DEMO, engancha: f => envuelve("pintarInventario", f) };
+      stock: c => stockDe(c), meta: (y, m) => metaPlan14(y, m), engancha: f => envuelve("pintarInventario", f) };
     if (typeof pintarInv === "function" && typeof DATA === "function" && document.getElementById("s-inv")) return { t: "log", et: "Stock", cont: () => document.getElementById("s-inv"), base: baseLog, alt: () => ({}),
-      stock: c => { const B = baseLog(); return tiene(B.stock, c) ? B.stock[c] : null; }, meta: (y, m) => metaD(y * 100 + m), demo: () => /DEMO/.test(document.title), engancha: f => envuelve("pintarInv", f) };
+      stock: c => { const B = baseLog(); return tiene(B.stock, c) ? B.stock[c] : null; }, meta: (y, m) => metaD(y * 100 + m), engancha: f => envuelve("pintarInv", f) };
     if (typeof pintarDash === "function" && document.getElementById("crmDash") && typeof DB !== "undefined") return { t: "ventas", et: "Panel", cont: () => document.getElementById("crmBi"), base: () => (DB && DB.d) || {}, alt: () => ({}),
-      stock: c => { const st = DB && DB.d && DB.d.stock; return tiene(st, c) ? st[c] : null; }, meta: (y, m) => metaPlan14(y, m), demo: () => /DEMO/.test(document.title), engancha: f => montarVentas(f) };
+      stock: c => { const st = DB && DB.d && DB.d.stock; return tiene(st, c) ? st[c] : null; }, meta: (y, m) => metaPlan14(y, m), engancha: f => montarVentas(f) };
   } catch (e) {} return null; })();
   if (!HOST) return;
   /* LOGÍSTICA: sin costos (13-11-2026): compras e inventario en unidades y días. VENTAS ve el BI completo de HWF, con costos
@@ -797,11 +797,8 @@ const HWF_VER = "20261128115018";
     const provFijo = (p, r) => { const c = String(p[2]), n = String(p[0] || "");   /* gerencia 16/22-11-2026: todo IKAI y Felicity → Planet Pet */
     return new Set(["111", "112", "764", "765", "766", "767", "768", "769", "770", "771", "772"]).has(c) || /\bikai\b/i.test(n) ? ["Planet Pet", "IKAI"] : /felicity/i.test(n) ? ["Planet Pet", "Felicity"] : /^49816[5-9]$/.test(c) || /goodwell/i.test(n) ? ["Planet Pet", "Goodwell"] : r; };
     const info = P.map(p => { const [pv, ma] = provFijo(p, provDe(cats[p[1]])); return { n: p[0], cod: String(p[2]), pv, ma: String(ma || "Sin marca").toUpperCase(), ft: fmtDe(p[0]) }; });
-    let C = B.compras || HOST.alt().compras || null, demo = false;
-    if (!C && HOST.demo()) { demo = true;   /* demo: compras ficticias a partir del costo vendido */
-      const tvD = (B.vend || []).indexOf("Tienda Hellywoof"), m = {}; (B.rows || []).forEach(r => { const y = r[8] || B.anio, t = r[7] === tvD ? 1 : 0, k = r[1] + "|" + (y * 100 + r[2]) + "|" + t; const o = m[k] = m[k] || [String(P[r[1]][2]), y * 100 + r[2], 0, 0, t]; o[2] += r[4] || 0; o[3] += (r[4] || 0) * (r[6] || 0); });
-      C = { fecha: "ficticias (demo)", nom: {}, rows: Object.values(m).map((o, i) => { const f = 0.8 + ((i * 37) % 41) / 100; return [o[0], o[1], Math.max(0, Math.round(o[2] * f)), Math.max(0, Math.round(o[3] * f)), o[4], 0, 0]; }) }; }
-    return { B, P, info, porCod, C, demo, extra: {} }; }
+    let C = B.compras || HOST.alt().compras || null;
+    return { B, P, info, porCod, C, extra: {} }; }
   function calc() { const X = datos(), B = X.B, anios = new Set();
     (B.rows || []).forEach(r => anios.add(r[8] || B.anio)); if (X.C) X.C.rows.forEach(r => anios.add(Math.floor(r[1] / 100)));
     const AN = [...anios].sort((a, b) => b - a); if (!AN.includes(E.anio)) E.anio = AN.includes(B.anio) ? B.anio : AN[0];
@@ -890,7 +887,7 @@ const HWF_VER = "20261128115018";
           return `<div class="bi-mr" role="listitem"${clic ? ` data-bp="${esc(o.cod != null ? o.cod : o.n)}" tabindex="0"` : ""}><span class="bi-gn">${esc(o.n)}${o.cod != null ? `<small>${esc(o.cod)}${st != null ? " · stock " + fu(st) : ""}</small>` : ""}</span><b>${F(vv)}</b>
             <span class="bi-mb"><i style="width:${Math.max(vv > 0 ? 3 : 0, Math.round(vv / mx * 100))}%"></i></span><em>${v ? Math.round(vv / v * 100) + "% de la venta" : ""}${hay ? `<span class="bi-l"> · compras ${Fc(cc)}</span>` : ""}</em>${clic ? '<span class="bi-go" aria-hidden="true">›</span>' : ""}</div>`; }).join("") || '<p class="muted">Sin movimientos.</p>'}</div>`; })()}
       ${hayF ? '<button type="button" class="btn" id="biTodos" style="margin-top:10px">‹ Volver un nivel</button>' : ""}
-      <p class="bi-nota">Ventas: facturas − notas de crédito, neto sin IVA (${CAN[E.canal]}).${E.canal ? " En «" + CAN[E.canal] + "» las compras son las ingresadas a su bodega más los traspasos netos recibidos de la otra bodega (la distribuidora los entrega, la tienda los recibe): distribuidora + tienda = total comprado." : ""} Compras: ingresos de mercadería («Parte de entrada») del Mayor Auxiliar de inventario${R.X.C ? ", informe del " + esc(String(R.X.C.fecha || "")) : ""}, ${RC ? "aquí en unidades" : "a costo sin IVA"}; no incluye devoluciones de clientes ni traspasos entre bodegas.${R.X.demo ? " Demo: compras ficticias." : ""}${R.X.C ? (hay ? "" : " <b>No hay compras de " + E.anio + " en el informe</b>: para verlas, sube a META un Mayor Auxiliar que incluya ese año.") : " <b>Las compras aparecerán con la próxima actualización de datos</b> (necesita el informe Mayor Auxiliar en la carpeta META)."} Marca = categoría Defontana del producto; formato = tamaño del envase tomado del nombre. Rojo = se compró más de lo que salió; verde = menos.</p></div>`; }
+      <p class="bi-nota">Ventas: facturas − notas de crédito, neto sin IVA (${CAN[E.canal]}).${E.canal ? " En «" + CAN[E.canal] + "» las compras son las ingresadas a su bodega más los traspasos netos recibidos de la otra bodega (la distribuidora los entrega, la tienda los recibe): distribuidora + tienda = total comprado." : ""} Compras: ingresos de mercadería («Parte de entrada») del Mayor Auxiliar de inventario${R.X.C ? ", informe del " + esc(String(R.X.C.fecha || "")) : ""}, ${RC ? "aquí en unidades" : "a costo sin IVA"}; no incluye devoluciones de clientes ni traspasos entre bodegas.${R.X.C ? (hay ? "" : " <b>No hay compras de " + E.anio + " en el informe</b>: para verlas, sube a META un Mayor Auxiliar que incluya ese año.") : " <b>Las compras aparecerán con la próxima actualización de datos</b> (necesita el informe Mayor Auxiliar en la carpeta META)."} Marca = categoría Defontana del producto; formato = tamaño del envase tomado del nombre. Rojo = se compró más de lo que salió; verde = menos.</p></div>`; }
   function csvRC(R) { const f = [["Año", E.anio, "Proveedor", E.prov || "Todos", "Marca", E.marca || "Todas", "Formato", E.fmt || "Todos", "Producto", E.prod || "Todos", "Negocio", CAN[E.canal]], [], ["Mes", "Ventas unidades", "Ventas $ neto", "Compras unidades"]];
     R.mes.slice(0, R.ult + 1).forEach((o, i) => f.push([R.lab[i], Math.round(o.vq), Math.round(o.vv), Math.round(o.cq)]));
     f.push([], ["Producto", "Código", "Marca", "Formato", "Ventas unidades", "Ventas $ neto", "Compras unidades"]);
@@ -1085,7 +1082,7 @@ const HWF_VER = "20261128115018";
 <script>/* patch_chofernombre: link de instalación de Chofer HWF con la conexión (solo en el teléfono, nunca en el repo) */
 function choLink() { try { const c = typeof cfg === "function" ? cfg() : null; if (!c || !c.url || !c.clave) return "";
     const b = btoa(unescape(encodeURIComponent(JSON.stringify({ u: c.url, c: c.clave })))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-    return "\n\nApp Chofer HWF (si aún no la tienes, ábrela desde aquí: se conecta sola y solo pide tu nombre):\n" + location.origin + location.pathname.replace(/\/(demo\/)?logistica\/[^/]*$/, "/") + "instalar-chofer/#HWF1:" + b; } catch (e) { return ""; } }
+    return "\n\nApp Chofer HWF (si aún no la tienes, ábrela desde aquí: se conecta sola y solo pide tu nombre):\n" + location.origin + location.pathname.replace(/\/logistica\/[^/]*$/, "/") + "instalar-chofer/#HWF1:" + b; } catch (e) { return ""; } }
 </script>
 <style>/* patch_kpipares2: último item solo en su fila siempre ocupa el ancho completo */
 /* .db-k: 2 col en móvil, 3 en tablet, 4 en desktop */
@@ -1563,7 +1560,7 @@ body.ia-izq #iaBtn{right:auto;left:14px}
 (function () {
   const HB = window.hwfBi, TND = !HB && /TIENDA/.test(document.title) && typeof DATA === "function"; if ((!HB && !TND) || document.getElementById("iaBtn")) return;
   /* VENTAS y TIENDA (12-11-2026): el asistente solo revisa ventas, stock de su bodega, prospectos y cobranza (sin costos ni compras) */
-  const T = HB ? HB.tipo : "tienda", RC = !(T === "admin" || T === "ventas"), DEMO = /DEMO/.test(document.title);
+  const T = HB ? HB.tipo : "tienda", RC = !(T === "admin" || T === "ventas");
   const NOM = { admin: "HWF (administración)", ventas: "VENTAS (app de los vendedores)", log: "LOGÍSTICA", tienda: "TIENDA (Tienda Hellywoof)" }[T] || T;
   const ALC = {
     ventas: "App de los vendedores de HWF. Secciones: Inicio (avance del mes, buenas noticias), Pedido (crear notas de pedido, se envían al script y llegan por correo con PDF y Excel; botones para PDF, enviar e imprimir), Clientes (cartera, ficha, última compra, sugerencias de productos), Ruta (planificar visitas del día, PDF), Cobranza (documentos por cobrar), Prospectos (clientes potenciales), Panel, BI (apartado propio: venta de la distribuidora por marca, formato y producto; exportar a PDF, Excel, correo e imprimir), Documentos (catálogo, listas de precio y manuales; descargar en PDF para enviar por WhatsApp o imprimir). ESTE ASISTENTE SOLO REVISA: ventas, stock de la bodega distribuidora, prospectos y cobranza. No tiene costos, márgenes ni compras: si preguntan otra cosa, dilo.",
@@ -1911,7 +1908,7 @@ body.ia-izq #iaBtn{right:auto;left:14px}
     /* 12-11-2026: primero el asistente local (sin costo); si no entiende la pregunta, la IA gratis del script (Gemini) */
     const r0 = loc(), entiende = !/^Puedo responderte sin costo sobre/.test(r0.respuesta);
     /* 15-11-2026: sin IA externa (se quitó Gemini): siempre responde con los datos de la app */
-    if (true || entiende || DEMO || !conn() || (cl && cl.no && Date.now() - cl.t < 36e5)) res = r0;
+    if (true || entiende || !conn() || (cl && cl.no && Date.now() - cl.t < 36e5)) res = r0;
     else { const c = conn();
       { try { if (CTX == null) CTX = contexto(); } catch (e) { CTX = "No se pudo resumir los datos de la app (" + (e && e.message) + ")."; }
         const ctrl = new AbortController(), tm = setTimeout(() => ctrl.abort(), 120000);

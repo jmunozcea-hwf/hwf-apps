@@ -2350,7 +2350,7 @@ const stAbrev = n => ST_ABR.reduce((s, [r, t]) => s.replace(r, t), String(n || "
 try { if ($("sStock") && !$("sStock").hidden) pintarStock(); } catch (e) {}
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261128115018";
+const HWF_VER = "20261128122438";
 (function () {
   const raiz = location.pathname.replace(/\/(ventas|administracion|admin|tienda|logistica|chofer)\/[^/]*$/, "/");
   let avisado = false;
@@ -2622,7 +2622,7 @@ body.ia-izq #iaBtn{right:auto;left:14px}
 (function () {
   const HB = window.hwfBi, TND = !HB && /TIENDA/.test(document.title) && typeof DATA === "function"; if ((!HB && !TND) || document.getElementById("iaBtn")) return;
   /* VENTAS y TIENDA (12-11-2026): el asistente solo revisa ventas, stock de su bodega, prospectos y cobranza (sin costos ni compras) */
-  const T = HB ? HB.tipo : "tienda", RC = !(T === "admin" || T === "ventas"), DEMO = /DEMO/.test(document.title);
+  const T = HB ? HB.tipo : "tienda", RC = !(T === "admin" || T === "ventas");
   const NOM = { admin: "HWF (administración)", ventas: "VENTAS (app de los vendedores)", log: "LOGÍSTICA", tienda: "TIENDA (Tienda Hellywoof)" }[T] || T;
   const ALC = {
     ventas: "App de los vendedores de HWF. Secciones: Inicio (avance del mes, buenas noticias), Pedido (crear notas de pedido, se envían al script y llegan por correo con PDF y Excel; botones para PDF, enviar e imprimir), Clientes (cartera, ficha, última compra, sugerencias de productos), Ruta (planificar visitas del día, PDF), Cobranza (documentos por cobrar), Prospectos (clientes potenciales), Panel, BI (apartado propio: venta de la distribuidora por marca, formato y producto; exportar a PDF, Excel, correo e imprimir), Documentos (catálogo, listas de precio y manuales; descargar en PDF para enviar por WhatsApp o imprimir). ESTE ASISTENTE SOLO REVISA: ventas, stock de la bodega distribuidora, prospectos y cobranza. No tiene costos, márgenes ni compras: si preguntan otra cosa, dilo.",
@@ -2970,7 +2970,7 @@ body.ia-izq #iaBtn{right:auto;left:14px}
     /* 12-11-2026: primero el asistente local (sin costo); si no entiende la pregunta, la IA gratis del script (Gemini) */
     const r0 = loc(), entiende = !/^Puedo responderte sin costo sobre/.test(r0.respuesta);
     /* 15-11-2026: sin IA externa (se quitó Gemini): siempre responde con los datos de la app */
-    if (true || entiende || DEMO || !conn() || (cl && cl.no && Date.now() - cl.t < 36e5)) res = r0;
+    if (true || entiende || !conn() || (cl && cl.no && Date.now() - cl.t < 36e5)) res = r0;
     else { const c = conn();
       { try { if (CTX == null) CTX = contexto(); } catch (e) { CTX = "No se pudo resumir los datos de la app (" + (e && e.message) + ")."; }
         const ctrl = new AbortController(), tm = setTimeout(() => ctrl.abort(), 120000);
@@ -3407,7 +3407,7 @@ window.hwfContCambio = function () { try { const b = document.getElementById("sS
 (function () {
   const VEN = typeof NAV_ORDEN !== "undefined" && typeof setModo === "function" && !!document.getElementById("mInicio");
   const TND = !VEN && document.getElementById("tNav") && typeof ir === "function"; if (!VEN && !TND) return;
-  const DEMO = /DEMO/.test(document.title), esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   const conn = () => { try { if (typeof syCfg === "function") { const c = syCfg(); if (c && c.url) return c; } } catch (e) {} try { if (typeof cfg === "function") { const c = cfg(); if (c && c.url) return c; } } catch (e) {} return null; };
   const llamar = async (d, seg) => { const c = conn(); if (!c) return { ok: false, error: "Esta app no está conectada al script de Google." }; const ctrl = new AbortController(), tm = setTimeout(() => ctrl.abort(), (seg || 60) * 1000);
     try { const r = await fetch(c.url, { method: "POST", body: JSON.stringify(Object.assign({ clave: c.clave }, d)), signal: ctrl.signal }), t = await r.text(); try { return JSON.parse(t); } catch (e) { return { ok: false, error: "El script de Google aún no tiene esta función. Espera unos minutos y vuelve a intentar." }; } }
@@ -3416,7 +3416,7 @@ window.hwfContCambio = function () { try { const b = document.getElementById("sS
   const tam = n => n >= 1048576 ? (n / 1048576).toLocaleString("es-CL", { maximumFractionDigits: 1 }) + " MB" : Math.max(1, Math.round(n / 1024)) + " KB";
   let DAT = null, EST = "", ESTC = "", OCUP = false; const PDF = {};
   const estado = (t, c) => { EST = t; ESTC = c || ""; const e = document.getElementById("cvEst"); if (e) { e.textContent = t; e.className = "cv-est " + ESTC; } };
-  async function cargar() { if (DEMO) { DAT = { archivos: [] }; return; } estado("Leyendo los archivos…"); const r = await llamar({ accion: "catListar", app: "ventas" }); if (r && r.ok) { DAT = r; estado(""); } else { DAT = DAT || { archivos: [] }; estado((r && r.error) || "No se pudo leer la carpeta.", "mal"); } }
+  async function cargar() { estado("Leyendo los archivos…"); const r = await llamar({ accion: "catListar", app: "ventas" }); if (r && r.ok) { DAT = r; estado(""); } else { DAT = DAT || { archivos: [] }; estado((r && r.error) || "No se pudo leer la carpeta.", "mal"); } }
   async function pdfDe(id) { if (PDF[id]) return PDF[id]; estado("Preparando el PDF… (la primera vez puede tardar unos segundos)"); const r = await llamar({ accion: "catPdf", id }, 150);
     if (!r || !r.ok) { estado((r && r.error) || "No se pudo preparar el PDF.", "mal"); return null; }
     const bin = atob(r.b64), u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); estado(""); return PDF[id] = { blob: new Blob([u], { type: "application/pdf" }), nombre: r.nombre }; }
@@ -3437,7 +3437,7 @@ window.hwfContCambio = function () { try { const b = document.getElementById("sS
     box.innerHTML = `<div class="cv-box"><div class="cv-card"><h2>Documentos <span>siempre en PDF</span></h2>
         <p class="cv-est" style="margin:0">Envía el catálogo, la lista de precio o un documento (como el manual del portal) por WhatsApp con el PDF adjunto, imprímelo o descárgalo. Siempre está la última versión que subió HWF.</p>
         <div style="display:flex;gap:8px;margin-top:10px"><button type="button" class="btn" id="cvAct" style="min-height:40px">↻ Actualizar</button></div>
-        <div id="cvEst" class="cv-est ${ESTC}" role="status" style="margin-top:8px">${esc(EST)}</div>${DEMO ? '<p class="cv-est">Demo: aquí no hay archivos reales.</p>' : ""}</div>
+        <div id="cvEst" class="cv-est ${ESTC}" role="status" style="margin-top:8px">${esc(EST)}</div></div>
       <div class="cv-g">${waHtml(A)}<div class="cv-card"><h2>Catálogo</h2>${lista("catalogo")}</div><div class="cv-card"><h2>Listas de precio</h2>${lista("precios")}</div><div class="cv-card"><h2>Documentos</h2>${lista("documentos")}</div><div class="cv-card"><h2>Info ventas</h2>${lista("info")}</div></div></div>`;
     box.querySelector("#cvAct").onclick = async () => { await cargar(); pintaCat(box); };
     box.querySelectorAll("[data-cv]").forEach(b => b.onclick = () => accion(b.dataset.id, b.dataset.cv, b));

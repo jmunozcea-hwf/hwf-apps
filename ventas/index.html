@@ -116,8 +116,8 @@ function npDeVend(B, v) { return (B && B.cots || []).filter(c => npNorm(c[4]) ==
       if (!(e && (e.name === "QuotaExceededError" || e.code === 22 || e.code === 1014))) throw e;
       var self = this, borrados = 0;
       for (var i = 0; i < self.length; i++) { var key = self.key(i); if (key === k) continue;
-        for (var j = 0; j < PRESC.length; j++) if (key === PRESC[j] || key === "hwf-demo:" + PRESC[j]) { rem.call(self, key); borrados++; i--; break; } }
-      try { return set.call(this, k, v); } catch (e2) { if (/^(hwf-demo:)?hwf-dv-/.test(String(k))) avisar(k); throw e2; }
+        for (var j = 0; j < PRESC.length; j++) if (key === PRESC[j]) { rem.call(self, key); borrados++; i--; break; } }
+      try { return set.call(this, k, v); } catch (e2) { if (/^hwf-dv-/.test(String(k))) avisar(k); throw e2; }
     }
   };
 })();</script>
@@ -231,7 +231,7 @@ function npRitmo(cots, Y, M, n, real, lim, ant) {
   return { np, tot };
 }
 </script>
-<script>/* hwfAutoAct (liviano): revisa version.json y recarga sola al volver a la app si hay versión nueva */(function(){var t0=0,oc=0;function raiz(){return location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/,"/")}function ocupado(){var a=document.activeElement;return !!(a&&/INPUT|TEXTAREA|SELECT/.test(a.tagName))}function chk(){if(Date.now()-t0<60000||!navigator.onLine)return;t0=Date.now();fetch(raiz()+"version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.json():null}).then(function(j){var v=typeof HWF_VER!=="undefined"?String(HWF_VER):"";if(!j||!j.v||!v||String(j.v)<=v||ocupado())return;var k="hwf-autoact-"+j.v;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,"1")}catch(e){return}location.reload()}).catch(function(){})}document.addEventListener("visibilitychange",function(){if(document.visibilityState==="hidden"){oc=Date.now();return}if(oc&&Date.now()-oc>=600000)chk();oc=0})})();</script>
+<script>/* hwfAutoAct (liviano): revisa version.json y recarga sola al volver a la app si hay versión nueva */(function(){var t0=0,oc=0;function raiz(){return location.pathname.replace(/\/(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/,"/")}function ocupado(){var a=document.activeElement;return !!(a&&/INPUT|TEXTAREA|SELECT/.test(a.tagName))}function chk(){if(Date.now()-t0<60000||!navigator.onLine)return;t0=Date.now();fetch(raiz()+"version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.json():null}).then(function(j){var v=typeof HWF_VER!=="undefined"?String(HWF_VER):"";if(!j||!j.v||!v||String(j.v)<=v||ocupado())return;var k="hwf-autoact-"+j.v;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,"1")}catch(e){return}location.reload()}).catch(function(){})}document.addEventListener("visibilitychange",function(){if(document.visibilityState==="hidden"){oc=Date.now();return}if(oc&&Date.now()-oc>=600000)chk();oc=0})})();</script>
 <style>.cli-fant{display:block;font-weight:600;color:var(--muted,#5B6874);font-size:.86em;margin-top:2px}.cli-top .cli-fant{display:inline;font-size:.82em}</style><style>.p14t td,.p14t th{white-space:nowrap;padding:6px 8px}.p14t td:first-child{white-space:normal;min-width:110px}</style><style>/* patch_cardvar */:root{--card:var(--surface)}</style>
 </head>
 <body>
@@ -6348,7 +6348,6 @@ if (typeof APP_NOVEDADES !== "undefined" && Array.isArray(APP_NOVEDADES)) APP_NO
 /* ===== Puntaje y ranking del equipo (misiones del día) ===== */
 const PT_KEY = "hwf-puntos", PT_RK = "hwf-ranking", PT_ENV = "hwf-puntos-env";
 let ptVista = (() => { try { return localStorage.getItem("hwf-pt-vista") || "dia"; } catch (e) { return "dia"; } })(), ptBajando = false;
-const ptDemo = /DEMO/.test(document.title);
 document.head.insertAdjacentHTML("beforeend", `<style>
 .pt-card{border-radius:16px;padding:14px;background:linear-gradient(135deg,#FFF8E6,#FFFFFF);border:1px solid #F3D58A;display:grid;gap:10px}
 .pt-top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
@@ -6387,7 +6386,7 @@ function ptGuardarHoy() {
 }
 async function ptSincronizar(forzar) {
   if (ptBajando || !SES) return; const cfg = typeof syCfg === "function" ? syCfg() : null;
-  if (!cfg || !cfg.url || ptDemo) return;
+  if (!cfg || !cfg.url) return;
   ptBajando = true;
   try {
     const yo = SES.vendedor.nombre, hoy = today(), P = lsGet(PT_KEY, {}), E = lsGet(PT_ENV, {});
@@ -6408,13 +6407,6 @@ function ptEquipo() { return (CRM_BASE.metas || []).map(m => m.vendedor).filter(
 function ptFilas() {
   const filas = ((lsGet(PT_RK, null) || {}).filas || []).filter(r => String(r && r[1] || "").charAt(0) !== "~").map(r => ({ f: r[0], v: r[1], pts: r[2] }));
   const P = lsGet(PT_KEY, {}); Object.values(P).forEach(x => { const i = filas.findIndex(r => r.f === x.f && r.v === x.v); if (i < 0) filas.push({ f: x.f, v: x.v, pts: x.pts }); else filas[i].pts = Math.max(filas[i].pts, x.pts); });
-  if (ptDemo) {   /* demo: el resto del equipo se simula */
-    const hoy = today(), d0 = new Date(ptMesIni(hoy) + "T12:00:00");
-    ptEquipo().filter(v => !SES || v !== SES.vendedor.nombre).forEach((v, i) => {
-      for (const d = new Date(d0); isoD(d) <= hoy; d.setDate(d.getDate() + 1)) { if (d.getDay() === 0) continue;
-        const f = isoD(d), s = [...(v + f)].reduce((a, c) => (a * 31 + c.charCodeAt(0)) % 9973, 7), base = 35 + i * 6;
-        filas.push({ f, v, pts: Math.max(0, Math.round(base + (s % 40) - (f === hoy ? 25 : 0))) }); } });
-  }
   return filas;
 }
 function ptRanking(vista) {
@@ -6439,7 +6431,7 @@ function ptPintarRanking() {
     <ol class="pt-l">${l.map(x => `<li class="${x.v === yo ? "yo" : ""}"><span class="pos">${med(x.pos)}</span><span class="nom">${esc(x.v)}${x.v === yo ? " · tú" : ""}</span><span class="pts">${x.pts.toLocaleString("es-CL")} pts</span>
       <span class="bar"><i style="width:${Math.round(x.pts / mx * 100)}%"></i></span>${ptVista !== "dia" ? `<small>${x.dias} ${x.dias === 1 ? "día" : "días"} con puntos</small>` : ""}</li>`).join("")}</ol>
     <details class="pt-reg"><summary>¿Cómo se ganan puntos?</summary>Cada misión del día da hasta 10 puntos según tu avance, más 5 de bono al completarla (máximo 15 por misión).
-      Vale el mejor puntaje que alcances en el día; la semana (lunes a domingo) y el mes suman los días. El ranking se actualiza cada 5 minutos con conexión.${ptDemo ? " En la demo el resto del equipo es simulado." : ""}</details>
+      Vale el mejor puntaje que alcances en el día; la semana (lunes a domingo) y el mes suman los días. El ranking se actualiza cada 5 minutos con conexión.</details>
   </section>`;
   box.insertAdjacentHTML("afterbegin", html);
   box.querySelectorAll("[data-pt]").forEach(b => b.onclick = () => { ptVista = b.dataset.pt; try { localStorage.setItem("hwf-pt-vista", ptVista); } catch (e) {} ptPintarRanking(); });
@@ -6626,12 +6618,10 @@ api = async function (accion, datos) {
 
 <script>
 /* ================= Calendario del equipo ================= */
-const CAL_DEMO = /DEMO/.test(document.title);
-const calDemoCall = async d => { if (d.accion === "clienteCambios") return { ok: true }; return { ok: true, igual: true }; };
 const _syLlamarCal = syLlamar;
 syLlamar = async function (cfg, d) { const r = await _syLlamarCal.apply(this, arguments);
   if (d && d.accion === "clientesCambios" && r && Array.isArray(r.cambios)) r.cambios = r.cambios.filter(c => c && c.codigo !== "EVENTO"); return r; };
-const CAL_call = d => CAL_DEMO ? calDemoCall(d) : (syCfg() && syCfg().url ? _syLlamarCal(syCfg(), d) : Promise.resolve({ ok: false, error: "La app no está conectada con HWF." }));
+const CAL_call = d => (syCfg() && syCfg().url ? _syLlamarCal(syCfg(), d) : Promise.resolve({ ok: false, error: "La app no está conectada con HWF." }));
 const CAL_get = (k, d) => lsGet(k, d), CAL_set = (k, v) => lsSet(k, v), CAL_quien = () => (SES && SES.vendedor ? SES.vendedor.nombre : ""), CAL_toast = m => toast(m);
 const CAL_clientes = () => clientesLocal().map(c => tc(c.nombre)).sort(), CAL_admin = false;
 /* ===== Calendario del equipo (común a app Ventas y HWF) =====
@@ -6758,9 +6748,9 @@ function calPintarV() {
 }
 { const _piCal = pintarInicio; pintarInicio = function () { const r = _piCal.apply(this, arguments); try { calPintarV(); } catch (e) { console.error(e); } return r; }; }
 const calSync = () => calBajar().then(ok => { if (ok && typeof MODO !== "undefined" && MODO === "inicio") calPintarV(); });
-document.addEventListener("visibilitychange", () => { if (!document.hidden && !CAL_DEMO) calSync(); });
-setInterval(() => { if (!document.hidden && !CAL_DEMO) calSync(); }, 10 * 60 * 1000);
-if (!CAL_DEMO) setTimeout(calSync, 3000);
+document.addEventListener("visibilitychange", () => { if (!document.hidden) calSync(); });
+setInterval(() => { if (!document.hidden) calSync(); }, 10 * 60 * 1000);
+setTimeout(calSync, 3000);
 try { if (typeof MODO !== "undefined" && MODO === "inicio") calPintarV(); } catch (e) {}
 document.head.insertAdjacentHTML("beforeend", "<style>" + CAL_CSS + "</style>");
 </script>
@@ -6809,7 +6799,7 @@ function cartLeer(cambios) {
 
 let cartOcup = false;
 async function cartBajar() {
-  const cfg = typeof syCfg === "function" ? syCfg() : null; if (!cfg || !cfg.url || cartOcup || /DEMO/.test(document.title)) return; cartOcup = true;
+  const cfg = typeof syCfg === "function" ? syCfg() : null; if (!cfg || !cfg.url || cartOcup) return; cartOcup = true;
   try { const r = await syLlamar(cfg, { accion: "clientesCambios", version: lsGet("hwf-carteras-ver", "") || "" });
     if (!r || !r.ok || r.igual || !Array.isArray(r.__todos || r.cambios)) return;
     const R = cartLeer(r.__todos || r.cambios), antes = JSON.stringify(lsGet("hwf-carteras", null) || {});
@@ -6855,7 +6845,7 @@ document.head.insertAdjacentHTML("beforeend", "<style>#crmAvance.av2{display:gri
 <script>/* clavevieja: clave guardada que ya no coincide con la del script → volver a conectar */
 { const _f = syLlamar; let avisado = false;
   syLlamar = async function (cfg, d) { const r = await _f.apply(this, arguments);
-    try { if (r && r.ok === false && (r.clave === false || /clave no coincide/i.test(String(r.error || ""))) && !window.HWF_DEMO && !avisado) { avisado = true;
+    try { if (r && r.ok === false && (r.clave === false || /clave no coincide/i.test(String(r.error || ""))) && !avisado) { avisado = true;
         localStorage.removeItem("hwf-sync-cfg"); localStorage.setItem("hwf-reconectar", "1");
         alert("La clave guardada en esta app ya no es la del script de Google. Vuelve a conectar con el link, el código HWF1 o la URL y la clave.");
         location.reload(); } } catch (e) {}
@@ -6891,7 +6881,7 @@ const ptLimpiaFilas = L => Array.isArray(L) ? L.filter(r => !ptBorrado(Array.isA
     d.innerHTML = `<span style="font-size:20px">📍</span><span style="flex:1"><b>Activa la ubicación para HWF.</b> ${ios ? "Ajustes → Privacidad → Localización → Safari (o la app HWF) → «Al usar la app»." : "Toca el candado o ⓘ junto a la dirección → Permisos → Ubicación → Permitir. Revisa también que el GPS del teléfono esté encendido."} Sirve para «cerca de mí», la ruta del día y ubicar clientes.</span><button type="button" style="background:none;border:0;color:#fff;font-size:20px;line-height:1;cursor:pointer" aria-label="Cerrar">×</button>`;
     d.querySelector("button").onclick = () => d.remove(); document.body.appendChild(d); };
   const pedir = (forzar) => {
-    if (window.HWF_DEMO || !navigator.geolocation && !(window.NATIVO && NATIVO.ubicacion)) return;
+    if (!navigator.geolocation && !(window.NATIVO && NATIVO.ubicacion)) return;
     if (!forzar && Date.now() - ult < 10 * 60 * 1000) return; ult = Date.now();
     try { ubicar().then(() => { const a = document.getElementById("geoAv"); if (a) a.remove(); }).catch(e => { if (e && (e.code === 1 || /deneg|denied|permis/i.test(String(e.message || e)))) bloqueado(); }); } catch (e) {}
   };
@@ -7203,7 +7193,7 @@ function confirmarNota() {
   x.onclick = () => cerrarModal(); card.insertBefore(x, card.firstChild); })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261128115018";
+const HWF_VER = "20261128122438";
 (function () {
   const raiz = location.pathname.replace(/\/(ventas|administracion|admin|tienda|logistica|chofer)\/[^/]*$/, "/");
   let avisado = false;
@@ -7820,11 +7810,11 @@ rutaElegirPr = function () { return rutaSoloPr(); };
     try { if (typeof NAV_ORDEN !== "undefined" && !NAV_ORDEN.some(x => x[0] === "bi")) NAV_ORDEN.splice(Math.max(0, NAV_ORDEN.findIndex(x => x[0] === "dash")) + 1, 0, ["bi", "mBi"]); } catch (e) {} }
   const HOST = (() => { try {
     if (typeof pintarInventario === "function" && document.getElementById("s-inv")) return { t: "admin", et: "Stock", cont: () => document.getElementById("s-inv"), base: () => (typeof D !== "undefined" && D && D.rows && D.rows.length) ? D : BASE, alt: () => (typeof BASE !== "undefined" ? BASE : {}),
-      stock: c => stockDe(c), meta: (y, m) => metaPlan14(y, m), demo: () => typeof RK_DEMO !== "undefined" && RK_DEMO, engancha: f => envuelve("pintarInventario", f) };
+      stock: c => stockDe(c), meta: (y, m) => metaPlan14(y, m), engancha: f => envuelve("pintarInventario", f) };
     if (typeof pintarInv === "function" && typeof DATA === "function" && document.getElementById("s-inv")) return { t: "log", et: "Stock", cont: () => document.getElementById("s-inv"), base: baseLog, alt: () => ({}),
-      stock: c => { const B = baseLog(); return tiene(B.stock, c) ? B.stock[c] : null; }, meta: (y, m) => metaD(y * 100 + m), demo: () => /DEMO/.test(document.title), engancha: f => envuelve("pintarInv", f) };
+      stock: c => { const B = baseLog(); return tiene(B.stock, c) ? B.stock[c] : null; }, meta: (y, m) => metaD(y * 100 + m), engancha: f => envuelve("pintarInv", f) };
     if (typeof pintarDash === "function" && document.getElementById("crmDash") && typeof DB !== "undefined") return { t: "ventas", et: "Panel", cont: () => document.getElementById("crmBi"), base: () => (DB && DB.d) || {}, alt: () => ({}),
-      stock: c => { const st = DB && DB.d && DB.d.stock; return tiene(st, c) ? st[c] : null; }, meta: (y, m) => metaPlan14(y, m), demo: () => /DEMO/.test(document.title), engancha: f => montarVentas(f) };
+      stock: c => { const st = DB && DB.d && DB.d.stock; return tiene(st, c) ? st[c] : null; }, meta: (y, m) => metaPlan14(y, m), engancha: f => montarVentas(f) };
   } catch (e) {} return null; })();
   if (!HOST) return;
   /* LOGÍSTICA: sin costos (13-11-2026): compras e inventario en unidades y días. VENTAS ve el BI completo de HWF, con costos
@@ -7870,11 +7860,8 @@ rutaElegirPr = function () { return rutaSoloPr(); };
     const provFijo = (p, r) => { const c = String(p[2]), n = String(p[0] || "");   /* gerencia 16/22-11-2026: todo IKAI y Felicity → Planet Pet */
     return new Set(["111", "112", "764", "765", "766", "767", "768", "769", "770", "771", "772"]).has(c) || /\bikai\b/i.test(n) ? ["Planet Pet", "IKAI"] : /felicity/i.test(n) ? ["Planet Pet", "Felicity"] : /^49816[5-9]$/.test(c) || /goodwell/i.test(n) ? ["Planet Pet", "Goodwell"] : r; };
     const info = P.map(p => { const [pv, ma] = provFijo(p, provDe(cats[p[1]])); return { n: p[0], cod: String(p[2]), pv, ma: String(ma || "Sin marca").toUpperCase(), ft: fmtDe(p[0]) }; });
-    let C = B.compras || HOST.alt().compras || null, demo = false;
-    if (!C && HOST.demo()) { demo = true;   /* demo: compras ficticias a partir del costo vendido */
-      const tvD = (B.vend || []).indexOf("Tienda Hellywoof"), m = {}; (B.rows || []).forEach(r => { const y = r[8] || B.anio, t = r[7] === tvD ? 1 : 0, k = r[1] + "|" + (y * 100 + r[2]) + "|" + t; const o = m[k] = m[k] || [String(P[r[1]][2]), y * 100 + r[2], 0, 0, t]; o[2] += r[4] || 0; o[3] += (r[4] || 0) * (r[6] || 0); });
-      C = { fecha: "ficticias (demo)", nom: {}, rows: Object.values(m).map((o, i) => { const f = 0.8 + ((i * 37) % 41) / 100; return [o[0], o[1], Math.max(0, Math.round(o[2] * f)), Math.max(0, Math.round(o[3] * f)), o[4], 0, 0]; }) }; }
-    return { B, P, info, porCod, C, demo, extra: {} }; }
+    let C = B.compras || HOST.alt().compras || null;
+    return { B, P, info, porCod, C, extra: {} }; }
   function calc() { const X = datos(), B = X.B, anios = new Set();
     (B.rows || []).forEach(r => anios.add(r[8] || B.anio)); if (X.C) X.C.rows.forEach(r => anios.add(Math.floor(r[1] / 100)));
     const AN = [...anios].sort((a, b) => b - a); if (!AN.includes(E.anio)) E.anio = AN.includes(B.anio) ? B.anio : AN[0];
@@ -7963,7 +7950,7 @@ rutaElegirPr = function () { return rutaSoloPr(); };
           return `<div class="bi-mr" role="listitem"${clic ? ` data-bp="${esc(o.cod != null ? o.cod : o.n)}" tabindex="0"` : ""}><span class="bi-gn">${esc(o.n)}${o.cod != null ? `<small>${esc(o.cod)}${st != null ? " · stock " + fu(st) : ""}</small>` : ""}</span><b>${F(vv)}</b>
             <span class="bi-mb"><i style="width:${Math.max(vv > 0 ? 3 : 0, Math.round(vv / mx * 100))}%"></i></span><em>${v ? Math.round(vv / v * 100) + "% de la venta" : ""}${hay ? `<span class="bi-l"> · compras ${Fc(cc)}</span>` : ""}</em>${clic ? '<span class="bi-go" aria-hidden="true">›</span>' : ""}</div>`; }).join("") || '<p class="muted">Sin movimientos.</p>'}</div>`; })()}
       ${hayF ? '<button type="button" class="btn" id="biTodos" style="margin-top:10px">‹ Volver un nivel</button>' : ""}
-      <p class="bi-nota">Ventas: facturas − notas de crédito, neto sin IVA (${CAN[E.canal]}).${E.canal ? " En «" + CAN[E.canal] + "» las compras son las ingresadas a su bodega más los traspasos netos recibidos de la otra bodega (la distribuidora los entrega, la tienda los recibe): distribuidora + tienda = total comprado." : ""} Compras: ingresos de mercadería («Parte de entrada») del Mayor Auxiliar de inventario${R.X.C ? ", informe del " + esc(String(R.X.C.fecha || "")) : ""}, ${RC ? "aquí en unidades" : "a costo sin IVA"}; no incluye devoluciones de clientes ni traspasos entre bodegas.${R.X.demo ? " Demo: compras ficticias." : ""}${R.X.C ? (hay ? "" : " <b>No hay compras de " + E.anio + " en el informe</b>: para verlas, sube a META un Mayor Auxiliar que incluya ese año.") : " <b>Las compras aparecerán con la próxima actualización de datos</b> (necesita el informe Mayor Auxiliar en la carpeta META)."} Marca = categoría Defontana del producto; formato = tamaño del envase tomado del nombre. Rojo = se compró más de lo que salió; verde = menos.</p></div>`; }
+      <p class="bi-nota">Ventas: facturas − notas de crédito, neto sin IVA (${CAN[E.canal]}).${E.canal ? " En «" + CAN[E.canal] + "» las compras son las ingresadas a su bodega más los traspasos netos recibidos de la otra bodega (la distribuidora los entrega, la tienda los recibe): distribuidora + tienda = total comprado." : ""} Compras: ingresos de mercadería («Parte de entrada») del Mayor Auxiliar de inventario${R.X.C ? ", informe del " + esc(String(R.X.C.fecha || "")) : ""}, ${RC ? "aquí en unidades" : "a costo sin IVA"}; no incluye devoluciones de clientes ni traspasos entre bodegas.${R.X.C ? (hay ? "" : " <b>No hay compras de " + E.anio + " en el informe</b>: para verlas, sube a META un Mayor Auxiliar que incluya ese año.") : " <b>Las compras aparecerán con la próxima actualización de datos</b> (necesita el informe Mayor Auxiliar en la carpeta META)."} Marca = categoría Defontana del producto; formato = tamaño del envase tomado del nombre. Rojo = se compró más de lo que salió; verde = menos.</p></div>`; }
   function csvRC(R) { const f = [["Año", E.anio, "Proveedor", E.prov || "Todos", "Marca", E.marca || "Todas", "Formato", E.fmt || "Todos", "Producto", E.prod || "Todos", "Negocio", CAN[E.canal]], [], ["Mes", "Ventas unidades", "Ventas $ neto", "Compras unidades"]];
     R.mes.slice(0, R.ult + 1).forEach((o, i) => f.push([R.lab[i], Math.round(o.vq), Math.round(o.vv), Math.round(o.cq)]));
     f.push([], ["Producto", "Código", "Marca", "Formato", "Ventas unidades", "Ventas $ neto", "Compras unidades"]);
@@ -8762,7 +8749,7 @@ body.ia-izq #iaBtn{right:auto;left:14px}
 (function () {
   const HB = window.hwfBi, TND = !HB && /TIENDA/.test(document.title) && typeof DATA === "function"; if ((!HB && !TND) || document.getElementById("iaBtn")) return;
   /* VENTAS y TIENDA (12-11-2026): el asistente solo revisa ventas, stock de su bodega, prospectos y cobranza (sin costos ni compras) */
-  const T = HB ? HB.tipo : "tienda", RC = !(T === "admin" || T === "ventas"), DEMO = /DEMO/.test(document.title);
+  const T = HB ? HB.tipo : "tienda", RC = !(T === "admin" || T === "ventas");
   const NOM = { admin: "HWF (administración)", ventas: "VENTAS (app de los vendedores)", log: "LOGÍSTICA", tienda: "TIENDA (Tienda Hellywoof)" }[T] || T;
   const ALC = {
     ventas: "App de los vendedores de HWF. Secciones: Inicio (avance del mes, buenas noticias), Pedido (crear notas de pedido, se envían al script y llegan por correo con PDF y Excel; botones para PDF, enviar e imprimir), Clientes (cartera, ficha, última compra, sugerencias de productos), Ruta (planificar visitas del día, PDF), Cobranza (documentos por cobrar), Prospectos (clientes potenciales), Panel, BI (apartado propio: venta de la distribuidora por marca, formato y producto; exportar a PDF, Excel, correo e imprimir), Documentos (catálogo, listas de precio y manuales; descargar en PDF para enviar por WhatsApp o imprimir). ESTE ASISTENTE SOLO REVISA: ventas, stock de la bodega distribuidora, prospectos y cobranza. No tiene costos, márgenes ni compras: si preguntan otra cosa, dilo.",
@@ -9110,7 +9097,7 @@ body.ia-izq #iaBtn{right:auto;left:14px}
     /* 12-11-2026: primero el asistente local (sin costo); si no entiende la pregunta, la IA gratis del script (Gemini) */
     const r0 = loc(), entiende = !/^Puedo responderte sin costo sobre/.test(r0.respuesta);
     /* 15-11-2026: sin IA externa (se quitó Gemini): siempre responde con los datos de la app */
-    if (true || entiende || DEMO || !conn() || (cl && cl.no && Date.now() - cl.t < 36e5)) res = r0;
+    if (true || entiende || !conn() || (cl && cl.no && Date.now() - cl.t < 36e5)) res = r0;
     else { const c = conn();
       { try { if (CTX == null) CTX = contexto(); } catch (e) { CTX = "No se pudo resumir los datos de la app (" + (e && e.message) + ")."; }
         const ctrl = new AbortController(), tm = setTimeout(() => ctrl.abort(), 120000);
@@ -10721,7 +10708,7 @@ body.m-b2b #crmMeta{display:none!important}
 (function () {
   const VEN = typeof NAV_ORDEN !== "undefined" && typeof setModo === "function" && !!document.getElementById("mInicio");
   const TND = !VEN && document.getElementById("tNav") && typeof ir === "function"; if (!VEN && !TND) return;
-  const DEMO = /DEMO/.test(document.title), esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   const conn = () => { try { if (typeof syCfg === "function") { const c = syCfg(); if (c && c.url) return c; } } catch (e) {} try { if (typeof cfg === "function") { const c = cfg(); if (c && c.url) return c; } } catch (e) {} return null; };
   const llamar = async (d, seg) => { const c = conn(); if (!c) return { ok: false, error: "Esta app no está conectada al script de Google." }; const ctrl = new AbortController(), tm = setTimeout(() => ctrl.abort(), (seg || 60) * 1000);
     try { const r = await fetch(c.url, { method: "POST", body: JSON.stringify(Object.assign({ clave: c.clave }, d)), signal: ctrl.signal }), t = await r.text(); try { return JSON.parse(t); } catch (e) { return { ok: false, error: "El script de Google aún no tiene esta función. Espera unos minutos y vuelve a intentar." }; } }
@@ -10730,7 +10717,7 @@ body.m-b2b #crmMeta{display:none!important}
   const tam = n => n >= 1048576 ? (n / 1048576).toLocaleString("es-CL", { maximumFractionDigits: 1 }) + " MB" : Math.max(1, Math.round(n / 1024)) + " KB";
   let DAT = null, EST = "", ESTC = "", OCUP = false; const PDF = {};
   const estado = (t, c) => { EST = t; ESTC = c || ""; const e = document.getElementById("cvEst"); if (e) { e.textContent = t; e.className = "cv-est " + ESTC; } };
-  async function cargar() { if (DEMO) { DAT = { archivos: [] }; return; } estado("Leyendo los archivos…"); const r = await llamar({ accion: "catListar", app: "ventas" }); if (r && r.ok) { DAT = r; estado(""); } else { DAT = DAT || { archivos: [] }; estado((r && r.error) || "No se pudo leer la carpeta.", "mal"); } }
+  async function cargar() { estado("Leyendo los archivos…"); const r = await llamar({ accion: "catListar", app: "ventas" }); if (r && r.ok) { DAT = r; estado(""); } else { DAT = DAT || { archivos: [] }; estado((r && r.error) || "No se pudo leer la carpeta.", "mal"); } }
   async function pdfDe(id) { if (PDF[id]) return PDF[id]; estado("Preparando el PDF… (la primera vez puede tardar unos segundos)"); const r = await llamar({ accion: "catPdf", id }, 150);
     if (!r || !r.ok) { estado((r && r.error) || "No se pudo preparar el PDF.", "mal"); return null; }
     const bin = atob(r.b64), u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); estado(""); return PDF[id] = { blob: new Blob([u], { type: "application/pdf" }), nombre: r.nombre }; }
@@ -10751,7 +10738,7 @@ body.m-b2b #crmMeta{display:none!important}
     box.innerHTML = `<div class="cv-box"><div class="cv-card"><h2>Documentos <span>siempre en PDF</span></h2>
         <p class="cv-est" style="margin:0">Envía el catálogo, la lista de precio o un documento (como el manual del portal) por WhatsApp con el PDF adjunto, imprímelo o descárgalo. Siempre está la última versión que subió HWF.</p>
         <div style="display:flex;gap:8px;margin-top:10px"><button type="button" class="btn" id="cvAct" style="min-height:40px">↻ Actualizar</button></div>
-        <div id="cvEst" class="cv-est ${ESTC}" role="status" style="margin-top:8px">${esc(EST)}</div>${DEMO ? '<p class="cv-est">Demo: aquí no hay archivos reales.</p>' : ""}</div>
+        <div id="cvEst" class="cv-est ${ESTC}" role="status" style="margin-top:8px">${esc(EST)}</div></div>
       <div class="cv-g">${waHtml(A)}<div class="cv-card"><h2>Catálogo</h2>${lista("catalogo")}</div><div class="cv-card"><h2>Listas de precio</h2>${lista("precios")}</div><div class="cv-card"><h2>Documentos</h2>${lista("documentos")}</div><div class="cv-card"><h2>Info ventas</h2>${lista("info")}</div></div></div>`;
     box.querySelector("#cvAct").onclick = async () => { await cargar(); pintaCat(box); };
     box.querySelectorAll("[data-cv]").forEach(b => b.onclick = () => accion(b.dataset.id, b.dataset.cv, b));

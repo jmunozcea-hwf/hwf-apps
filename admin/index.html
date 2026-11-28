@@ -105,8 +105,8 @@ function invDistH(p, m) { if (!__iDH) { __iDH = {}; const tv = D.vend.indexOf("T
       if (!(e && (e.name === "QuotaExceededError" || e.code === 22 || e.code === 1014))) throw e;
       var self = this, borrados = 0;
       for (var i = 0; i < self.length; i++) { var key = self.key(i); if (key === k) continue;
-        for (var j = 0; j < PRESC.length; j++) if (key === PRESC[j] || key === "hwf-demo:" + PRESC[j]) { rem.call(self, key); borrados++; i--; break; } }
-      try { return set.call(this, k, v); } catch (e2) { if (/^(hwf-demo:)?hwf-dv-/.test(String(k))) avisar(k); throw e2; }
+        for (var j = 0; j < PRESC.length; j++) if (key === PRESC[j]) { rem.call(self, key); borrados++; i--; break; } }
+      try { return set.call(this, k, v); } catch (e2) { if (/^hwf-dv-/.test(String(k))) avisar(k); throw e2; }
     }
   };
 })();</script>
@@ -1282,7 +1282,7 @@ function npRitmo(cots, Y, M, n, real, lim, ant) {
   return { np, tot };
 }
 </script>
-<script>/* hwfAutoAct (liviano): revisa version.json y recarga sola al volver a la app si hay versión nueva */(function(){var t0=0,oc=0;function raiz(){return location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/,"/")}function ocupado(){var a=document.activeElement;return !!(a&&/INPUT|TEXTAREA|SELECT/.test(a.tagName))}function chk(){if(Date.now()-t0<60000||!navigator.onLine)return;t0=Date.now();fetch(raiz()+"version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.json():null}).then(function(j){var v=typeof HWF_VER!=="undefined"?String(HWF_VER):"";if(!j||!j.v||!v||String(j.v)<=v||ocupado())return;var k="hwf-autoact-"+j.v;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,"1")}catch(e){return}location.reload()}).catch(function(){})}document.addEventListener("visibilitychange",function(){if(document.visibilityState==="hidden"){oc=Date.now();return}if(oc&&Date.now()-oc>=600000)chk();oc=0})})();</script>
+<script>/* hwfAutoAct (liviano): revisa version.json y recarga sola al volver a la app si hay versión nueva */(function(){var t0=0,oc=0;function raiz(){return location.pathname.replace(/\/(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/,"/")}function ocupado(){var a=document.activeElement;return !!(a&&/INPUT|TEXTAREA|SELECT/.test(a.tagName))}function chk(){if(Date.now()-t0<60000||!navigator.onLine)return;t0=Date.now();fetch(raiz()+"version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.json():null}).then(function(j){var v=typeof HWF_VER!=="undefined"?String(HWF_VER):"";if(!j||!j.v||!v||String(j.v)<=v||ocupado())return;var k="hwf-autoact-"+j.v;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,"1")}catch(e){return}location.reload()}).catch(function(){})}document.addEventListener("visibilitychange",function(){if(document.visibilityState==="hidden"){oc=Date.now();return}if(oc&&Date.now()-oc>=600000)chk();oc=0})})();</script>
 <style>.p14t td,.p14t th{white-space:nowrap;padding:6px 8px}.p14t td:first-child{white-space:normal;min-width:110px}</style><style>/* patch_cardvar */:root{--card:var(--surface)}</style>
 </head>
 <body>
@@ -4287,7 +4287,7 @@ function dcPintarAdmin() {
 
 <script>
 /* ===== Ranking detallado del equipo de ventas (puntaje por misiones del día) ===== */
-const RK_KEY = "adm-ranking", RK_DEMO = /DEMO/.test(document.title);
+const RK_KEY = "adm-ranking";
 let rkPer = "sem", rkSel = { v: "", f: "" }, rkBajando = false;
 document.head.insertAdjacentHTML("beforeend", `<style>
 .rk{display:grid;gap:14px}.rk h2,.rk h3{margin:0;display:flex;justify-content:space-between;gap:8px;align-items:baseline;flex-wrap:wrap}
@@ -4333,18 +4333,10 @@ function rkPeriodo(p) {
 }
 function rkFilas() {
   const s = store.get(RK_KEY, null), filas = ((s && s.filas) || []).filter(r => String(r && r[1] || "").charAt(0) !== "~").map(r => ({ f: r[0], v: r[1], pts: +r[2] || 0, max: +r[3] || 0, ok: +r[4] || 0, n: +r[5] || 0, det: r[6] || "" }));
-  if (RK_DEMO && !filas.length) {   /* demo: puntajes simulados */
-    const hoy = rkHoy(), ini = (() => { const d = rkD(hoy.slice(0, 8) + "01"); d.setMonth(d.getMonth() - 1); return rkIso(d); })();
-    const MIS = ["Toma tus pedidos del día", "Cobra lo vencido o que vence hoy", "Arma tu ruta del día", "Contacta a 3 clientes con compra pendiente", "Cierra 5 notas de pedido Defontana", "Contacta 1 prospecto agendado"];
-    rkEquipo().forEach((v, i) => { for (let f = ini; f <= hoy; f = rkAdd(f, 1)) { if (rkD(f).getDay() === 0) continue;
-      let sd = [...(v + f)].reduce((a, c) => (a * 31 + c.charCodeAt(0)) % 99991, 11 + i); const rnd = () => (sd = (sd * 48271) % 2147483647) / 2147483647;
-      const det = MIS.map(t => { const x = rnd() < 0.55 + i * 0.07 ? 1 : rnd(); const p = Math.round(10 * x) + (x >= 1 ? 5 : 0); return { t, p: f === hoy ? Math.round(p * 0.5) : p }; });
-      filas.push({ f, v, pts: det.reduce((s, x) => s + x.p, 0), max: MIS.length * 15, ok: det.filter(x => x.p >= 15).length, n: MIS.length, det: det.map(x => x.t + ": " + x.p).join(" | ") }); } });
-  }
   return filas;
 }
 async function rkBajar(forzar) {
-  if (rkBajando || RK_DEMO) return false; const cfg = SYC(); if (!cfg || !cfg.url) return false;
+  if (rkBajando) return false; const cfg = SYC(); if (!cfg || !cfg.url) return false;
   const s = store.get(RK_KEY, null); if (!forzar && s && Date.now() - (s.t || 0) < 3 * 60 * 1000) return false;
   rkBajando = true;
   try { const d = rkD(rkHoy().slice(0, 8) + "01"); d.setMonth(d.getMonth() - 1);
@@ -4379,7 +4371,7 @@ function pintarRanking() {
   mb.innerHTML = `<div class="card rk"><h2>Ranking del equipo de ventas <small>puntos por las misiones del día de app Ventas${s && s.t ? ` · actualizado ${new Date(s.t).toLocaleTimeString("es-CL", { hour: "2-digit", minute: "2-digit" })}` : ""}</small></h2>
     <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between">
       <div class="rk-seg" role="group" aria-label="Período">${[["hoy", "Hoy"], ["ayer", "Ayer"], ["sem", "Esta semana"], ["sant", "Semana pasada"], ["mes", "Este mes"], ["mant", "Mes pasado"]].map(([k, t]) => `<button type="button" data-rp="${k}" aria-pressed="${rkPer === k}">${t}</button>`).join("")}</div>
-      ${RK_DEMO ? "" : `<button type="button" class="rk-act" id="rkAct">↻ Actualizar</button>`}</div>
+      <button type="button" class="rk-act" id="rkAct">↻ Actualizar</button></div>
     ${s && s.error && !filas.length && !/clave/i.test(s.error) ? `<p class="rk-n" style="color:var(--bad)">No se pudo leer el ranking (${esc(s.error)}). Toca «Actualizar» en unos minutos.</p>` : ""}
     <div class="rk-k num">
       <div><span>Líder · ${esc(P.t.toLowerCase())}</span><b>${lider && lider.pts ? esc(lider.v.split(" ")[0]) : "—"}</b><small>${lider && lider.pts ? lider.pts.toLocaleString("es-CL") + " puntos" : "sin puntos todavía"}</small></div>
@@ -4404,7 +4396,7 @@ function pintarRanking() {
     <h3>Detalle del día <small>${sel ? `${esc(sel.v)} · ${esc(rkF(sel.f))} · ${sel.pts} de ${sel.max} puntos · ${sel.ok} de ${sel.n} misiones` : "elige un vendedor o un día"}</small></h3>
     ${det.length ? `<div class="rk-det">${det.map(m => `<div class="m"><span>${esc(m.t)}</span><b>${m.p} pts</b><span class="bar"><i style="width:${Math.round(m.p / 15 * 100)}%"></i></span></div>`).join("")}</div>` : `<p class="rk-n">Sin detalle para ese día.</p>`}
     <p class="rk-n">Cada misión del día da hasta 10 puntos según el avance, más 5 de bono al completarla (máx. 15). Vale el mejor puntaje del día de cada vendedor; la semana va de lunes a domingo.
-      «% del máximo» compara con los puntos posibles según las misiones que tuvo cada uno. «vs anterior» compara con el mismo tramo del período anterior. Datos de la hoja «Puntajes»${RK_DEMO ? " (en la demo son simulados)" : ""}.</p>
+      «% del máximo» compara con los puntos posibles según las misiones que tuvo cada uno. «vs anterior» compara con el mismo tramo del período anterior. Datos de la hoja «Puntajes».</p>
   </div>`;
   mb.querySelectorAll("[data-rp]").forEach(b => b.onclick = () => { rkPer = b.dataset.rp; rkSel = { v: "", f: "" }; pintarRanking(); });
   mb.querySelectorAll("tr[data-v]").forEach(tr => tr.onclick = () => { const x = L.find(y => y.v === tr.dataset.v); rkSel = { v: tr.dataset.v, f: x && x.mejor ? x.mejor.f : P.b }; pintarRanking(); });
@@ -4558,12 +4550,10 @@ setTimeout(() => praBajar().then(ok => { if (ok && $("praBox")) praPintar(); }),
 
 <script>
 /* ================= Calendario del equipo ================= */
-const CAL_DEMO = /DEMO/.test(document.title);
-const calDemoCall = async d => { if (d.accion === "clienteCambios") return { ok: true }; return { ok: true, igual: true }; };
 const _syCallCal = syCall;
 syCall = async function (cfg, d) { const r = await _syCallCal.apply(this, arguments);
   if (d && d.accion === "clientesCambios" && r && Array.isArray(r.cambios)) r.cambios = r.cambios.filter(c => c && c.codigo !== "EVENTO"); return r; };
-const CAL_call = d => CAL_DEMO ? calDemoCall(d) : (SYC() && SYC().url ? _syCallCal(SYC(), d) : Promise.resolve({ ok: false, error: "Sin conexión con el script de Google." }));
+const CAL_call = d => (SYC() && SYC().url ? _syCallCal(SYC(), d) : Promise.resolve({ ok: false, error: "Sin conexión con el script de Google." }));
 const CAL_get = (k, d) => store.get(k, d), CAL_set = (k, v) => store.set(k, v), CAL_quien = () => "HWF", CAL_toast = m => toast(m);
 const CAL_clientes = () => ((typeof A !== "undefined" && A && A.clientes) || []).map(c => tc(c.nombre || c.nom || "")).filter(Boolean).sort(), CAL_admin = true;
 /* ===== Calendario del equipo (común a app Ventas y HWF) =====
@@ -4690,8 +4680,8 @@ function calPintarA() {
 }
 { const _pdCal = pintarDashboard; pintarDashboard = function () { const r = _pdCal.apply(this, arguments); try { calPintarA(); } catch (e) { console.error(e); } return r; }; }
 const calSync = () => calBajar().then(ok => { if (ok) calPintarA(); });
-if (typeof sySync === "function") { const _sySyncCal = sySync; sySync = async function () { const r = await _sySyncCal.apply(this, arguments); if (!CAL_DEMO) calSync(); return r; }; }
-if (!CAL_DEMO) setTimeout(calSync, 3000);
+if (typeof sySync === "function") { const _sySyncCal = sySync; sySync = async function () { const r = await _sySyncCal.apply(this, arguments); calSync(); return r; }; }
+setTimeout(calSync, 3000);
 try { calPintarA(); } catch (e) {}
 document.head.insertAdjacentHTML("beforeend", "<style>" + CAL_CSS + "</style>");
 </script>
@@ -4733,12 +4723,11 @@ function cartLeer(cambios) {
   Object.keys(R.cli).forEach(k => { if (!R.cli[k]) delete R.cli[k]; }); return R;
 }
 
-const CART_DEMO = /DEMO/.test(document.title);
 const _syCallCart = syCall;
 syCall = async function (cfg, d) { const r = await _syCallCart.apply(this, arguments);
   if (d && d.accion === "clientesCambios" && r && Array.isArray(r.cambios)) r.cambios = r.cambios.filter(c => c && c.codigo !== "CARTERA"); return r; };
 async function cartBajar() {
-  const cfg = SYC(); if (!cfg || !cfg.url || CART_DEMO) return false;
+  const cfg = SYC(); if (!cfg || !cfg.url) return false;
   const r = await _syCallCart(cfg, { accion: "clientesCambios", version: store.get("hwf-carteras-ver", "") || "" });
   if (!r || !r.ok || r.igual || !Array.isArray(r.cambios)) return false;
   const R = cartLeer(r.cambios), antes = JSON.stringify(store.get("hwf-carteras", null) || {});
@@ -4746,7 +4735,7 @@ async function cartBajar() {
 }
 async function cartGuardar(o) {
   o.cart = 1; o.t = new Date().toISOString();
-  if (!CART_DEMO) {
+  {
     const cfg = SYC(); if (!cfg || !cfg.url) { toast("Sin conexión con el script de Google: no se puede guardar."); return false; }
     const r = await _syCallCart(cfg, { accion: "clienteCambios", cambios: [{ id: "CC-CT-" + Date.now(), fecha: o.t, vendedor: "HWF", cartera: o.a || "", codigo: "CARTERA",
       cliente: o.tipo === "cli" ? o.de : "Cartera de " + o.de, tipo: "Datos", motivo: o.borrado ? "Reasignación anulada" : (o.tipo === "cli" ? "Cliente reasignado a " : "Cartera completa reasignada a ") + (o.a || ""),
@@ -4945,7 +4934,7 @@ function cliContacto(ci) {
 <script>/* clavevieja: clave guardada que ya no coincide con la del script → volver a conectar */
 { const _f = syCall; let avisado = false;
   syCall = async function (cfg, d) { const r = await _f.apply(this, arguments);
-    try { if (r && r.ok === false && (r.clave === false || /clave no coincide/i.test(String(r.error || ""))) && !window.HWF_DEMO && !avisado) { avisado = true;
+    try { if (r && r.ok === false && (r.clave === false || /clave no coincide/i.test(String(r.error || ""))) && !avisado) { avisado = true;
         localStorage.removeItem("adm-sync"); localStorage.setItem("hwf-reconectar", "1");
         alert("La clave guardada en esta app ya no es la del script de Google. Vuelve a conectar con el link, el código HWF1 o la URL y la clave.");
         location.reload(); } } catch (e) {}
@@ -5295,7 +5284,7 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261128115018";
+const HWF_VER = "20261128122438";
 (function () {
   const raiz = location.pathname.replace(/\/(ventas|administracion|admin|tienda|logistica|chofer)\/[^/]*$/, "/");
   let avisado = false;
@@ -5416,7 +5405,7 @@ setTimeout(() => { try { if (D && $("s-res") && !$("s-res").hidden && !$("kpCard
   async function revisar() {
     try {
       const cfg = typeof SYC === "function" ? SYC() : null; if (!cfg || !cfg.url || typeof syCall !== "function") return;
-      const raiz = location.pathname.replace(/\/(demo\/)?(administracion|admin)\/[^/]*$/, "/");   /* 27-11-2026: también la app Administración */
+      const raiz = location.pathname.replace(/\/(administracion|admin)\/[^/]*$/, "/");   /* 27-11-2026: también la app Administración */
       let esperado = ""; try { const j = await (await fetch(raiz + "version.json?t=" + Date.now(), { cache: "no-store" })).json(); esperado = j.script || ""; } catch (e) {}
       const r = await syCall(cfg, { accion: "estadoScript" }); if (!r) return;
       const pasos = "En la planilla: Extensiones → Apps Script. Instrucciones en hwf-fuente/script/INSTALAR_AUTOACTUALIZACION.md.";
@@ -5620,11 +5609,11 @@ setTimeout(() => { try { if (D && $("s-res") && !$("s-res").hidden && !$("kpCard
     try { if (typeof NAV_ORDEN !== "undefined" && !NAV_ORDEN.some(x => x[0] === "bi")) NAV_ORDEN.splice(Math.max(0, NAV_ORDEN.findIndex(x => x[0] === "dash")) + 1, 0, ["bi", "mBi"]); } catch (e) {} }
   const HOST = (() => { try {
     if (typeof pintarInventario === "function" && document.getElementById("s-inv")) return { t: "admin", et: "Stock", cont: () => document.getElementById("s-inv"), base: () => (typeof D !== "undefined" && D && D.rows && D.rows.length) ? D : BASE, alt: () => (typeof BASE !== "undefined" ? BASE : {}),
-      stock: c => stockDe(c), meta: (y, m) => metaPlan14(y, m), demo: () => typeof RK_DEMO !== "undefined" && RK_DEMO, engancha: f => envuelve("pintarInventario", f) };
+      stock: c => stockDe(c), meta: (y, m) => metaPlan14(y, m), engancha: f => envuelve("pintarInventario", f) };
     if (typeof pintarInv === "function" && typeof DATA === "function" && document.getElementById("s-inv")) return { t: "log", et: "Stock", cont: () => document.getElementById("s-inv"), base: baseLog, alt: () => ({}),
-      stock: c => { const B = baseLog(); return tiene(B.stock, c) ? B.stock[c] : null; }, meta: (y, m) => metaD(y * 100 + m), demo: () => /DEMO/.test(document.title), engancha: f => envuelve("pintarInv", f) };
+      stock: c => { const B = baseLog(); return tiene(B.stock, c) ? B.stock[c] : null; }, meta: (y, m) => metaD(y * 100 + m), engancha: f => envuelve("pintarInv", f) };
     if (typeof pintarDash === "function" && document.getElementById("crmDash") && typeof DB !== "undefined") return { t: "ventas", et: "Panel", cont: () => document.getElementById("crmBi"), base: () => (DB && DB.d) || {}, alt: () => ({}),
-      stock: c => { const st = DB && DB.d && DB.d.stock; return tiene(st, c) ? st[c] : null; }, meta: (y, m) => metaPlan14(y, m), demo: () => /DEMO/.test(document.title), engancha: f => montarVentas(f) };
+      stock: c => { const st = DB && DB.d && DB.d.stock; return tiene(st, c) ? st[c] : null; }, meta: (y, m) => metaPlan14(y, m), engancha: f => montarVentas(f) };
   } catch (e) {} return null; })();
   if (!HOST) return;
   /* LOGÍSTICA: sin costos (13-11-2026): compras e inventario en unidades y días. VENTAS ve el BI completo de HWF, con costos
@@ -5670,11 +5659,8 @@ setTimeout(() => { try { if (D && $("s-res") && !$("s-res").hidden && !$("kpCard
     const provFijo = (p, r) => { const c = String(p[2]), n = String(p[0] || "");   /* gerencia 16/22-11-2026: todo IKAI y Felicity → Planet Pet */
     return new Set(["111", "112", "764", "765", "766", "767", "768", "769", "770", "771", "772"]).has(c) || /\bikai\b/i.test(n) ? ["Planet Pet", "IKAI"] : /felicity/i.test(n) ? ["Planet Pet", "Felicity"] : /^49816[5-9]$/.test(c) || /goodwell/i.test(n) ? ["Planet Pet", "Goodwell"] : r; };
     const info = P.map(p => { const [pv, ma] = provFijo(p, provDe(cats[p[1]])); return { n: p[0], cod: String(p[2]), pv, ma: String(ma || "Sin marca").toUpperCase(), ft: fmtDe(p[0]) }; });
-    let C = B.compras || HOST.alt().compras || null, demo = false;
-    if (!C && HOST.demo()) { demo = true;   /* demo: compras ficticias a partir del costo vendido */
-      const tvD = (B.vend || []).indexOf("Tienda Hellywoof"), m = {}; (B.rows || []).forEach(r => { const y = r[8] || B.anio, t = r[7] === tvD ? 1 : 0, k = r[1] + "|" + (y * 100 + r[2]) + "|" + t; const o = m[k] = m[k] || [String(P[r[1]][2]), y * 100 + r[2], 0, 0, t]; o[2] += r[4] || 0; o[3] += (r[4] || 0) * (r[6] || 0); });
-      C = { fecha: "ficticias (demo)", nom: {}, rows: Object.values(m).map((o, i) => { const f = 0.8 + ((i * 37) % 41) / 100; return [o[0], o[1], Math.max(0, Math.round(o[2] * f)), Math.max(0, Math.round(o[3] * f)), o[4], 0, 0]; }) }; }
-    return { B, P, info, porCod, C, demo, extra: {} }; }
+    let C = B.compras || HOST.alt().compras || null;
+    return { B, P, info, porCod, C, extra: {} }; }
   function calc() { const X = datos(), B = X.B, anios = new Set();
     (B.rows || []).forEach(r => anios.add(r[8] || B.anio)); if (X.C) X.C.rows.forEach(r => anios.add(Math.floor(r[1] / 100)));
     const AN = [...anios].sort((a, b) => b - a); if (!AN.includes(E.anio)) E.anio = AN.includes(B.anio) ? B.anio : AN[0];
@@ -5763,7 +5749,7 @@ setTimeout(() => { try { if (D && $("s-res") && !$("s-res").hidden && !$("kpCard
           return `<div class="bi-mr" role="listitem"${clic ? ` data-bp="${esc(o.cod != null ? o.cod : o.n)}" tabindex="0"` : ""}><span class="bi-gn">${esc(o.n)}${o.cod != null ? `<small>${esc(o.cod)}${st != null ? " · stock " + fu(st) : ""}</small>` : ""}</span><b>${F(vv)}</b>
             <span class="bi-mb"><i style="width:${Math.max(vv > 0 ? 3 : 0, Math.round(vv / mx * 100))}%"></i></span><em>${v ? Math.round(vv / v * 100) + "% de la venta" : ""}${hay ? `<span class="bi-l"> · compras ${Fc(cc)}</span>` : ""}</em>${clic ? '<span class="bi-go" aria-hidden="true">›</span>' : ""}</div>`; }).join("") || '<p class="muted">Sin movimientos.</p>'}</div>`; })()}
       ${hayF ? '<button type="button" class="btn" id="biTodos" style="margin-top:10px">‹ Volver un nivel</button>' : ""}
-      <p class="bi-nota">Ventas: facturas − notas de crédito, neto sin IVA (${CAN[E.canal]}).${E.canal ? " En «" + CAN[E.canal] + "» las compras son las ingresadas a su bodega más los traspasos netos recibidos de la otra bodega (la distribuidora los entrega, la tienda los recibe): distribuidora + tienda = total comprado." : ""} Compras: ingresos de mercadería («Parte de entrada») del Mayor Auxiliar de inventario${R.X.C ? ", informe del " + esc(String(R.X.C.fecha || "")) : ""}, ${RC ? "aquí en unidades" : "a costo sin IVA"}; no incluye devoluciones de clientes ni traspasos entre bodegas.${R.X.demo ? " Demo: compras ficticias." : ""}${R.X.C ? (hay ? "" : " <b>No hay compras de " + E.anio + " en el informe</b>: para verlas, sube a META un Mayor Auxiliar que incluya ese año.") : " <b>Las compras aparecerán con la próxima actualización de datos</b> (necesita el informe Mayor Auxiliar en la carpeta META)."} Marca = categoría Defontana del producto; formato = tamaño del envase tomado del nombre. Rojo = se compró más de lo que salió; verde = menos.</p></div>`; }
+      <p class="bi-nota">Ventas: facturas − notas de crédito, neto sin IVA (${CAN[E.canal]}).${E.canal ? " En «" + CAN[E.canal] + "» las compras son las ingresadas a su bodega más los traspasos netos recibidos de la otra bodega (la distribuidora los entrega, la tienda los recibe): distribuidora + tienda = total comprado." : ""} Compras: ingresos de mercadería («Parte de entrada») del Mayor Auxiliar de inventario${R.X.C ? ", informe del " + esc(String(R.X.C.fecha || "")) : ""}, ${RC ? "aquí en unidades" : "a costo sin IVA"}; no incluye devoluciones de clientes ni traspasos entre bodegas.${R.X.C ? (hay ? "" : " <b>No hay compras de " + E.anio + " en el informe</b>: para verlas, sube a META un Mayor Auxiliar que incluya ese año.") : " <b>Las compras aparecerán con la próxima actualización de datos</b> (necesita el informe Mayor Auxiliar en la carpeta META)."} Marca = categoría Defontana del producto; formato = tamaño del envase tomado del nombre. Rojo = se compró más de lo que salió; verde = menos.</p></div>`; }
   function csvRC(R) { const f = [["Año", E.anio, "Proveedor", E.prov || "Todos", "Marca", E.marca || "Todas", "Formato", E.fmt || "Todos", "Producto", E.prod || "Todos", "Negocio", CAN[E.canal]], [], ["Mes", "Ventas unidades", "Ventas $ neto", "Compras unidades"]];
     R.mes.slice(0, R.ult + 1).forEach((o, i) => f.push([R.lab[i], Math.round(o.vq), Math.round(o.vv), Math.round(o.cq)]));
     f.push([], ["Producto", "Código", "Marca", "Formato", "Ventas unidades", "Ventas $ neto", "Compras unidades"]);
@@ -5968,7 +5954,7 @@ setTimeout(() => { try { if (D && $("s-res") && !$("s-res").hidden && !$("kpCard
   if (typeof pintarMas !== "function" || typeof syCall !== "function") return;
   try { if (typeof NAV_MNOM !== "undefined") NAV_MNOM.catalogo = "Documentos"; const sp = document.querySelector('[data-sm="catalogo"] span'); if (sp) sp.textContent = "Documentos"; } catch (e) {}
   const TIPOS = [["catalogo", "Catálogo", "El catálogo de productos (PDF, imágenes o Excel)."], ["precios", "Listas de precio", "Las listas de precio vigentes, por canal o por proveedor."], ["documentos", "Documentos", "Manuales, instructivos y otros documentos para vendedores y clientes (por ejemplo, el manual del portal)."], ["info", "Info ventas", "Presentaciones y guías para el equipo de ventas (las ven Ventas y Admin)."], ["infoadmin", "Info admin", "Presentaciones internas: solo se ven en HWF Admin."], ["whatsapp", "Enviar por WhatsApp", "Posts e imágenes (PNG o JPG) para que los vendedores los envíen a sus clientes por WhatsApp; en Ventas se envían como imagen."]];
-  const MAX = 20 * 1024 * 1024, DEMO = typeof RK_DEMO !== "undefined" && RK_DEMO; let DAT = null, EST = "", ESTC = "", OCUP = false;
+  const MAX = 20 * 1024 * 1024; let DAT = null, EST = "", ESTC = "", OCUP = false;
   const tam = n => n >= 1048576 ? (n / 1048576).toLocaleString("es-CL", { maximumFractionDigits: 1 }) + " MB" : Math.max(1, Math.round(n / 1024)).toLocaleString("es-CL") + " KB";
   const fecha = ms => { const d = new Date(ms); return String(d.getDate()).padStart(2, "0") + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + d.getFullYear() + " " + String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0"); };
   const llamar = async (datos, seg) => { const cfg = typeof SYC === "function" ? SYC() : null; if (!cfg) return { ok: false, error: "Esta app no está conectada al script de Google." };
@@ -5977,8 +5963,8 @@ setTimeout(() => { try { if (D && $("s-res") && !$("s-res").hidden && !$("kpCard
     catch (e) { return { ok: false, error: "Sin conexión a internet o la subida tardó demasiado." }; } finally { clearTimeout(tm); } };
   const aB64 = f => new Promise((ok, mal) => { const r = new FileReader(); r.onload = () => ok(String(r.result).split(",")[1] || ""); r.onerror = () => mal(new Error("No se pudo leer el archivo.")); r.readAsDataURL(f); });
   const estado = (t, c) => { EST = t; ESTC = c || ""; const e = document.getElementById("ctEst"); if (e) { e.textContent = t; e.className = "ct-est " + ESTC; } };
-  async function cargar() { if (DEMO) { DAT = { ok: true, archivos: [] }; return; } const r = await llamar({ accion: "catListar" }); if (r && r.ok) DAT = r; else { DAT = DAT || { archivos: [] }; estado((r && r.error) || "No se pudo leer la carpeta.", "mal"); } }
-  async function subir(tipo, files) { if (OCUP) return; if (DEMO) { estado("En la demo no se suben archivos.", "mal"); return; } OCUP = true; let okN = 0;
+  async function cargar() { const r = await llamar({ accion: "catListar" }); if (r && r.ok) DAT = r; else { DAT = DAT || { archivos: [] }; estado((r && r.error) || "No se pudo leer la carpeta.", "mal"); } }
+  async function subir(tipo, files) { if (OCUP) return; OCUP = true; let okN = 0;
     for (const f of files) { if (f.size > MAX) { estado("«" + f.name + "» pesa " + tam(f.size) + ": el máximo es 20 MB.", "mal"); continue; }
       estado("Subiendo «" + f.name + "» (" + tam(f.size) + ")…"); let b64; try { b64 = await aB64(f); } catch (e) { estado(e.message, "mal"); continue; }
       const r = await llamar({ accion: "catSubir", tipo, nombre: f.name, mime: f.type || "application/octet-stream", b64 }, 180);
@@ -5998,7 +5984,7 @@ setTimeout(() => { try { if (D && $("s-res") && !$("s-res").hidden && !$("kpCard
     box.innerHTML = `<div class="card"><h2>Catálogo y listas de precio <span class="muted">archivos en Google Drive</span></h2>
         <p class="muted" style="margin:0;font-size:.88rem">Archivos de la carpeta «HWF Catálogo y listas de precio» en Google Drive. Para agregar o cambiar archivos, súbelos directamente a esa carpeta en Drive.</p>
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button type="button" class="btn" id="ctAct">↻ Actualizar lista</button>${DAT && DAT.carpeta ? `<a class="btn" target="_blank" rel="noopener" href="${esc(DAT.carpeta)}">Abrir la carpeta en Drive</a>` : ""}</div>
-        <div id="ctEst" class="ct-est ${ESTC}" role="status" style="margin-top:8px">${esc(EST)}</div>${DEMO ? '<p class="muted" style="margin:6px 0 0">Demo: aquí no se suben archivos reales.</p>' : ""}</div>
+        <div id="ctEst" class="ct-est ${ESTC}" role="status" style="margin-top:8px">${esc(EST)}</div></div>
       <div class="ct-g">${TIPOS.map(([t, n, d]) => `<div class="card"><h2>${n} <span class="muted">${A.filter(x => x.tipo === t).length} ${A.filter(x => x.tipo === t).length === 1 ? "archivo" : "archivos"}</span></h2>
                 <div style="margin-top:6px">${lista(t)}</div></div>`).join("")}</div>
       ${otros.length ? `<div class="card"><h2>Otros archivos de la carpeta <span class="muted">dejados a mano en Drive, fuera de las subcarpetas</span></h2>${lista("otros")}</div>` : ""}`;
@@ -7250,7 +7236,7 @@ body.ia-izq #iaBtn{right:auto;left:14px}
 (function () {
   const HB = window.hwfBi, TND = !HB && /TIENDA/.test(document.title) && typeof DATA === "function"; if ((!HB && !TND) || document.getElementById("iaBtn")) return;
   /* VENTAS y TIENDA (12-11-2026): el asistente solo revisa ventas, stock de su bodega, prospectos y cobranza (sin costos ni compras) */
-  const T = HB ? HB.tipo : "tienda", RC = !(T === "admin" || T === "ventas"), DEMO = /DEMO/.test(document.title);
+  const T = HB ? HB.tipo : "tienda", RC = !(T === "admin" || T === "ventas");
   const NOM = { admin: "HWF (administración)", ventas: "VENTAS (app de los vendedores)", log: "LOGÍSTICA", tienda: "TIENDA (Tienda Hellywoof)" }[T] || T;
   const ALC = {
     ventas: "App de los vendedores de HWF. Secciones: Inicio (avance del mes, buenas noticias), Pedido (crear notas de pedido, se envían al script y llegan por correo con PDF y Excel; botones para PDF, enviar e imprimir), Clientes (cartera, ficha, última compra, sugerencias de productos), Ruta (planificar visitas del día, PDF), Cobranza (documentos por cobrar), Prospectos (clientes potenciales), Panel, BI (apartado propio: venta de la distribuidora por marca, formato y producto; exportar a PDF, Excel, correo e imprimir), Documentos (catálogo, listas de precio y manuales; descargar en PDF para enviar por WhatsApp o imprimir). ESTE ASISTENTE SOLO REVISA: ventas, stock de la bodega distribuidora, prospectos y cobranza. No tiene costos, márgenes ni compras: si preguntan otra cosa, dilo.",
@@ -7598,7 +7584,7 @@ body.ia-izq #iaBtn{right:auto;left:14px}
     /* 12-11-2026: primero el asistente local (sin costo); si no entiende la pregunta, la IA gratis del script (Gemini) */
     const r0 = loc(), entiende = !/^Puedo responderte sin costo sobre/.test(r0.respuesta);
     /* 15-11-2026: sin IA externa (se quitó Gemini): siempre responde con los datos de la app */
-    if (true || entiende || DEMO || !conn() || (cl && cl.no && Date.now() - cl.t < 36e5)) res = r0;
+    if (true || entiende || !conn() || (cl && cl.no && Date.now() - cl.t < 36e5)) res = r0;
     else { const c = conn();
       { try { if (CTX == null) CTX = contexto(); } catch (e) { CTX = "No se pudo resumir los datos de la app (" + (e && e.message) + ")."; }
         const ctrl = new AbortController(), tm = setTimeout(() => ctrl.abort(), 120000);
