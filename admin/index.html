@@ -5291,9 +5291,9 @@ function pintarAbast() {
 })();
 </script>
 <script id="hwfVerJs">/* sello_version: aviso de versión nueva */
-const HWF_VER = "20261128104536";
+const HWF_VER = "20261128111407";
 (function () {
-  const raiz = location.pathname.replace(/\/(demo\/)?(ventas|administracion|admin|tienda|logistica|chofer|pronobel)\/[^/]*$/, "/");
+  const raiz = location.pathname.replace(/\/(ventas|administracion|admin|tienda|logistica|chofer)\/[^/]*$/, "/");
   let avisado = false;
   async function revisar() {
     if (avisado || !navigator.onLine) return;
@@ -9865,7 +9865,7 @@ body.m-b2b #crmMeta{display:none!important}
   }
   function vContenido() { return ["promos", "ofertas", "novedades"].map(vSec).join("") + `<div class="b2-bt"><button type="button" class="b2-b ok" id="b2GC" ${ST.ocup ? "disabled" : ""}>Guardar contenido</button></div>`; }
   /* módulos del portal: HWF los activa de a uno para que los clientes se acostumbren */
-  const MODS = [["promos", "Promociones", "Descuentos por producto en el catálogo y la pestaña «Promociones»."]];   /* 23-11-2026: ofertas ocultas */   /* 23-11-2026: programa de puntos (fidelidad) oculto */
+  const MODS = [["promos", "Promociones", "Descuentos por producto en el catálogo y la pestaña «Promociones»."], ["ofertas", "Ofertas especiales", "Liquidaciones, packs y oportunidades en la pestaña «Ofertas»."], ["puntos", "Programa de puntos (fidelidad)", "Puntos por compra, niveles y canje de beneficios en la pestaña «Puntos»."]];
   function vModulos() {
     const m = ST.aj.modulos, n = MODS.filter(x => m[x[0]]).length;
     return `<div class="b2-card"><h3>¿Qué ven los clientes? <small>${n} de ${MODS.length} activos</small></h3><p class="b2-p" style="margin:0 0 8px">Activa de a uno para que los clientes se acostumbren. Apagado = la pestaña no aparece y sus descuentos no se aplican. El catálogo, el carrito, los pedidos, «Mi cuenta» (lo que tienen por pagar según su RUT) y las novedades están siempre activos.</p>

@@ -2,7 +2,6 @@
 
 - Nota de Pedido (vendedores): https://jmunozcea-hwf.github.io/hwf-apps/ventas/
 - HWF Admin: https://jmunozcea-hwf.github.io/hwf-apps/admin/
-- Demos con datos ficticios: /demo/ventas/ y /demo/admin/
 - Instalar o reinstalar todas las apps: https://jmunozcea-hwf.github.io/hwf-apps/ (página de inicio)
 - Instalar solo Nota de Pedido (para vendedores): https://jmunozcea-hwf.github.io/hwf-apps/instalar-ventas/
 - Instalar solo HWF Admin: https://jmunozcea-hwf.github.io/hwf-apps/instalar-admin/
